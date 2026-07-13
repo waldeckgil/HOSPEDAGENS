@@ -21,12 +21,10 @@
             <p class="text-gray-500 text-sm mt-2">Comece a gerenciar sua pousada</p>
         </div>
 
-        <!-- Mensagem de Sucesso Front-end (Escondida por padrão) -->
         <div id="success-message" class="hidden bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl mb-5 text-center font-semibold" role="alert">
-            Cadastro realizado com sucesso! Redirecionando...
+            Cadastro realizado e logado com sucesso! Redirecionando...
         </div>
         
-        <!-- Mensagem de Erro Front-end (Escondida por padrão) -->
         <div id="error-message" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-5 text-center font-semibold" role="alert">
             Erro no cadastro. Tente novamente.
         </div>
@@ -55,7 +53,6 @@
     </div>
 
     <script>
-        // Garante que a instância 'supabase' esteja disponível
         window.onload = function() {
             const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
             const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
@@ -64,38 +61,55 @@
             document.getElementById('signup-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
-                // Esconde mensagens anteriores
                 document.getElementById('success-message').classList.add('hidden');
                 document.getElementById('error-message').classList.add('hidden');
 
                 const email = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
 
-                // Validação de senha mínima
                 if (password.length < 6) {
-                    // Mostra erro no front-end
                     const errorMsg = document.getElementById('error-message');
                     errorMsg.innerText = 'A senha deve ter pelo menos 6 caracteres.';
                     errorMsg.classList.remove('hidden');
                     return;
                 }
 
-                const { data, error } = await window.supabaseClient.auth.signUp({ email, password });
+                // 1. Realiza o Cadastro
+                const { data: signUpData, error: signUpError } = await window.supabaseClient.auth.signUp({ 
+                    email, 
+                    password 
+                });
 
-                if (error) {
-                    // Mostra erro do Supabase no front-end
+                if (signUpError) {
                     const errorMsg = document.getElementById('error-message');
-                    errorMsg.innerText = 'Erro no cadastro: ' + error.message;
+                    errorMsg.innerText = 'Erro no cadastro: ' + signUpError.message;
                     errorMsg.classList.remove('hidden');
-                    console.error('Detalhes do erro:', error);
+                    console.error('Detalhes do erro:', signUpError);
+                    return;
+                }
+
+                // 2. Se o cadastro funcionou, faz o login automático imediatamente
+                const { data: signInData, error: signInError } = await window.supabaseClient.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (signInError) {
+                    // Se o login automático falhar (raro, mas possível se o email não estiver confirmado),
+                    // o usuário pode precisar confirmar manualmente, mas avisamos o erro.
+                    const errorMsg = document.getElementById('error-message');
+                    errorMsg.innerText = 'Cadastro realizado, mas login automático falhou: ' + signInError.message + '. Tente logar manualmente.';
+                    errorMsg.classList.remove('hidden');
+                    console.error('Erro no login automático:', signInError);
                 } else {
-                    // Mostra mensagem de sucesso no front-end
+                    // Login automático funcionou! O Supabase gera a sessão no LocalStorage.
+                    document.getElementById('success-message').innerText = 'Cadastro e login realizados com sucesso! Redirecionando...';
                     document.getElementById('success-message').classList.remove('hidden');
                     
-                    // Aguarda 1.5 segundos antes de redirecionar para o usuário ler a mensagem
+                    // Redireciona para a configuração
                     setTimeout(() => {
                         window.location.href = 'configurar-pousada.html';
-                    }, 1500);
+                    }, 1000);
                 }
             });
         };
