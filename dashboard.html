@@ -1,42 +1,59 @@
-<script>
-    // Inicialização do cliente Supabase
-    const supabase = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Pousadas</title>
+    <!-- SDK do Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
 
-    async function carregarDashboard() {
-        const { data: suites, error } = await supabase.from('suites').select('*');
+    <div id="suites-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
-        if (error) { 
-            console.error("Erro ao carregar dados:", error); 
-            return; 
+    <script>
+        // --- SUAS CONFIGURAÇÕES ---
+        // Copie a URL base do seu script (ex: https://abcde12345.supabase.co)
+        const SUPABASE_URL = 'https://SUA_URL_DO_PROJETO_AQUI.supabase.co';
+        // Copie a chave anon do seu script
+        const SUPABASE_KEY = 'SUA_CHAVE_ANON_DO_SCRIPT_AQUI';
+
+        // Inicialização
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function carregarDashboard() {
+            // Buscando dados da tabela 'suites'
+            const { data: suites, error } = await supabaseClient.from('suites').select('*');
+
+            if (error) { 
+                console.error("Erro ao carregar dados:", error); 
+                return; 
+            }
+
+            const container = document.getElementById('suites-container');
+            container.innerHTML = '';
+
+            suites.forEach(suite => {
+                const classes = {
+                    'Pendente': 'bg-yellow-200 border-yellow-500',
+                    'Ocupada': 'bg-gray-300 border-gray-600',
+                    'Disponível': 'bg-green-200 border-green-500',
+                    'Limpeza': 'bg-red-200 border-red-500'
+                };
+
+                const cor = classes[suite.status] || 'bg-white border-gray-200';
+
+                container.innerHTML += `
+                    <div class="p-6 rounded-lg shadow-md border-l-8 ${cor}">
+                        <h2 class="text-xl font-bold">${suite.nome}</h2>
+                        <p class="text-sm mt-2">Status: <strong>${suite.status}</strong></p>
+                    </div>
+                `;
+            });
         }
 
-        const container = document.getElementById('suites-container');
-        if (!container) return;
-        
-        container.innerHTML = '';
-
-        suites.forEach(suite => {
-            const classes = {
-                'Pendente': 'bg-yellow-200 border-yellow-500',
-                'Ocupada': 'bg-gray-300 border-gray-600',
-                'Disponível': 'bg-green-200 border-green-500',
-                'Limpeza': 'bg-red-200 border-red-500'
-            };
-
-            const cor = classes[suite.status] || 'bg-white border-gray-200';
-
-            const card = `
-                <div class="p-6 rounded-lg shadow-md border-l-8 ${cor}">
-                    <h2 class="text-xl font-bold">${suite.nome}</h2>
-                    <p class="text-sm mt-2">Status: <strong>${suite.status}</strong></p>
-                    <button class="mt-4 px-4 py-2 rounded text-white ${suite.status === 'Ocupada' ? 'bg-gray-600' : 'bg-blue-600'}">
-                        ${suite.status === 'Ocupada' ? 'Indisponível' : 'Gerenciar'}
-                    </button>
-                </div>
-            `;
-            container.innerHTML += card;
-        });
-    }
-
-    carregarDashboard();
-</script>
+        carregarDashboard();
+    </script>
+</body>
+</html>
