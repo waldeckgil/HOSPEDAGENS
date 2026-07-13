@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Carregando a biblioteca (cria a variável global 'supabase') -->
+    <!-- Carrega a biblioteca do Supabase (cria a variável global 'supabase') -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <title>Cadastro - Gestor de Pousadas</title>
     <style>
@@ -46,39 +46,41 @@
     </div>
 
     <script>
-        // REMOVIDO: const supabase = supabase.createClient(...) (Isso causava o erro de redeclaração)
-        
-        // Usamos a variável 'supabase' que já foi carregada no head.
-        const supabaseUrl = 'https://evrkniykafvydnhxycit.supabase.co';
-        const supabaseKey = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
-        
-        // Para evitar erros futuros se o cliente já existir, podemos fazer uma checagem simples
-        // Mas o mais comum é criar o cliente uma única vez no escopo global logo após carregar a lib.
-        // No seu caso, como a lib cria a variável 'supabase' no head, vamos utilizá-la diretamente.
-        // Se o erro persistir, certifique-se que você não colou o script do CDN duas vezes.
-
-        document.getElementById('signup-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        // Aguarda o carregamento completo da página e da biblioteca do Supabase
+        window.onload = function() {
             
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            // Variáveis de ambiente do seu projeto
+            const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
+            const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
+            
+            // Inicializa o cliente explicitamente para garantir que 'supabase' esteja definida
+            // É recomendado usar um nome de variável diferente (ex: supabaseClient) para evitar conflitos globais.
+            // Mas para simplificar e usar o seu nome, faremos assim:
+            window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-            // Validação de senha
-            if (password.length < 6) {
-                alert('A senha deve ter pelo menos 6 caracteres.');
-                return;
-            }
+            document.getElementById('signup-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
 
-            // Usando a instância 'supabase' criada pelo CDN
-            const { data, error } = await supabase.auth.signUp({ email, password });
+                // Validação de senha mínima (opcional mas recomendada)
+                if (password.length < 6) {
+                    alert('A senha deve ter pelo menos 6 caracteres.');
+                    return;
+                }
 
-            if (error) {
-                alert('Erro no cadastro: ' + error.message);
-            } else {
-                alert('Cadastro realizado! Agora vamos configurar sua pousada.');
-                window.location.href = 'configurar-pousada.html';
-            }
-        });
+                // Usa a instância global 'supabase' que acabamos de inicializar
+                const { data, error } = await window.supabase.auth.signUp({ email, password });
+
+                if (error) {
+                    alert('Erro no cadastro: ' + error.message);
+                } else {
+                    alert('Cadastro realizado! Agora vamos configurar sua pousada.');
+                    window.location.href = 'configurar-pousada.html';
+                }
+            });
+        };
     </script>
 </body>
 </html>
