@@ -3,68 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel da Pousada</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Dashboard Pousadas</title>
+    <!-- SDK do Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-8">
 
-    <div class="max-w-6xl mx-auto">
-        <h1 class="text-3xl font-bold text-gray-800 mb-8">Gestão de Suítes</h1>
-        
-        <!-- Container dos Cards -->
-        <div id="suites-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Cards carregados via JS -->
-        </div>
-    </div>
+    <div id="suites-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
     <script>
-        const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
+        // --- SUAS CONFIGURAÇÕES ---
+        // Copie a URL base do seu script (ex: https://abcde12345.supabase.co)
+       const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
+        // Copie a chave anon do seu script
+        
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Inicialização
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function carregarDashboard() {
-            // Busca as suítes da pousada
-            const { data: suites, error } = await supabase.from('suites').select('*');
+            // Buscando dados da tabela 'suites'
+            const { data: suites, error } = await supabaseClient.from('suites').select('*');
 
-            if (error) {
-                console.error("Erro ao carregar suítes:", error);
-                return;
+            if (error) { 
+                console.error("Erro ao carregar dados:", error); 
+                return; 
             }
 
             const container = document.getElementById('suites-container');
             container.innerHTML = '';
 
             suites.forEach(suite => {
-                // Mapeamento de cores conforme documentação
-                const statusConfig = {
-                    'Pendente': { class: 'bg-yellow-200 border-yellow-500', label: 'Solicitação Pendente' },
-                    'Ocupada': { class: 'bg-gray-300 border-gray-600', label: 'Suíte Ocupada' },
-                    'Disponível': { class: 'bg-green-200 border-green-500', label: 'Suíte Disponível' }
+                const classes = {
+                    'Pendente': 'bg-yellow-200 border-yellow-500',
+                    'Ocupada': 'bg-gray-300 border-gray-600',
+                    'Disponível': 'bg-green-200 border-green-500',
+                    'Limpeza': 'bg-red-200 border-red-500'
                 };
 
-                const config = statusConfig[suite.status] || { class: 'bg-white border-gray-200', label: suite.status };
+                const cor = classes[suite.status] || 'bg-white border-gray-200';
 
                 container.innerHTML += `
-                    <div class="p-6 rounded-xl shadow-lg border-l-8 ${config.class} bg-white">
-                        <h2 class="text-2xl font-bold text-gray-800">${suite.nome}</h2>
-                        <p class="text-sm text-gray-600 mt-2">Status: <strong class="uppercase">${config.label}</strong></p>
-                        <div class="mt-4 flex gap-2">
-                            ${suite.status === 'Pendente' ? 
-                                `<button onclick="atualizarStatus('${suite.id}', 'Ocupada')" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold">Confirmar</button>` : ''}
-                            ${suite.status === 'Ocupada' ? 
-                                `<button onclick="atualizarStatus('${suite.id}', 'Disponível')" class="bg-green-600 text-white px-4 py-2 rounded-lg font-bold">Liberar</button>` : ''}
-                        </div>
+                    <div class="p-6 rounded-lg shadow-md border-l-8 ${cor}">
+                        <h2 class="text-xl font-bold">${suite.nome}</h2>
+                        <p class="text-sm mt-2">Status: <strong>${suite.status}</strong></p>
                     </div>
                 `;
             });
-        }
-
-        // Função para mudar o status no banco de dados
-        async function atualizarStatus(id, novoStatus) {
-            const { error } = await supabase.from('suites').update({ status: novoStatus }).eq('id', id);
-            if (error) alert("Erro ao atualizar status");
-            else carregarDashboard(); // Recarrega o painel
         }
 
         carregarDashboard();
