@@ -1,4 +1,3 @@
-// Corrigido: Usando 'supabase' como objeto global para chamar createClient
 const supabase = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
 
 async function carregarDashboard() {
@@ -10,12 +9,11 @@ async function carregarDashboard() {
     }
 
     const container = document.getElementById('suites-container');
-    if (!container) return; // Segurança para evitar erro se o ID não existir
+    if (!container) return;
     
-    container.innerHTML = ''; // Limpa o conteúdo atual
+    container.innerHTML = '';
 
     suites.forEach(suite => {
-        // Lógica de cores baseada no status
         const classes = {
             'Pendente': 'bg-yellow-200 border-yellow-500',
             'Ocupada': 'bg-gray-300 border-gray-600',
@@ -23,7 +21,6 @@ async function carregarDashboard() {
             'Limpeza': 'bg-red-200 border-red-500'
         };
 
-        // Usa o status como fallback se não encontrar a chave no objeto 'classes'
         const cor = classes[suite.status] || 'bg-white border-gray-200';
 
         const card = `
