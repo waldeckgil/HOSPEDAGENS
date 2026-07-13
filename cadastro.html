@@ -57,8 +57,9 @@
             if (error) {
                 alert('Erro no cadastro: ' + error.message);
             } else {
-                alert('Cadastro realizado com sucesso! Verifique seu email.');
-                window.location.href = 'index.html';
+                alert('Cadastro realizado! Agora vamos configurar sua pousada.');
+                // Redireciona para o arquivo de configuração de pousada
+                window.location.href = 'configurar-pousada.html';
             }
         });
     </script>

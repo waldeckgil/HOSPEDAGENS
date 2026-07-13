@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Configurar Pousada</title>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white p-8 rounded-2xl shadow-xl">
+        <h2 class="text-2xl font-bold mb-6">Configurar sua Pousada</h2>
+        
+        <div class="mb-6">
+            <label class="block font-semibold mb-2">Nome da Pousada</label>
+            <input type="text" id="nome-pousada" class="w-full p-3 border rounded-xl" placeholder="Ex: Pousada do Sol">
+        </div>
+
+        <div id="suites-container" class="space-y-3 mb-6">
+            <label class="block font-semibold">Suítes</label>
+            <div class="flex gap-2">
+                <input type="text" class="suite-input w-full p-3 border rounded-xl" placeholder="Nome da Suíte (ex: Suíte 01)">
+            </div>
+        </div>
+
+        <button onclick="adicionarCampo()" class="text-blue-600 font-bold mb-6">+ Adicionar outra suíte</button>
+        
+        <button onclick="salvarConfiguracao()" class="w-full bg-blue-600 text-white p-3 rounded-xl font-bold">Salvar Pousada</button>
+    </div>
+
+    <script>
+        const supabase = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
+
+        function adicionarCampo() {
+            const container = document.getElementById('suites-container');
+            const div = document.createElement('div');
+            div.className = 'flex gap-2';
+            div.innerHTML = `<input type="text" class="suite-input w-full p-3 border rounded-xl" placeholder="Nome da Suíte">`;
+            container.appendChild(div);
+        }
+
+        async function salvarConfiguracao() {
+            const nomePousada = document.getElementById('nome-pousada').value;
+            const inputs = document.querySelectorAll('.suite-input');
+            const suites = Array.from(inputs).map(input => ({ nome: input.value, status: 'Disponível' }));
+
+            // 1. Salva a pousada (tabela 'pousadas')
+            const { data: pousada, error: errPousada } = await supabase.from('pousadas').insert([{ nome: nomePousada }]).select();
+            
+            // 2. Salva as suítes (tabela 'suites')
+            const { error: errSuites } = await supabase.from('suites').insert(suites);
+
+            if (errPousada || errSuites) alert('Erro ao salvar');
+            else {
+                alert('Pousada configurada!');
+                window.location.href = 'dashboard.html';
+            }
+        }
+    </script>
+</body>
+</html>
