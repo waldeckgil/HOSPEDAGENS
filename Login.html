@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Login - Gestor de Pousadas</title>
+</head>
+<body class="bg-blue-900 flex items-center justify-center h-screen">
+    <div class="bg-white p-10 rounded-2xl shadow-2xl w-96">
+        <h2 class="text-3xl font-extrabold text-center mb-8">Bem-vindo</h2>
+        <form id="login-form" class="space-y-5">
+            <input id="email" type="email" placeholder="Email" class="w-full p-3 border rounded-xl" required>
+            <input id="password" type="password" placeholder="Senha" class="w-full p-3 border rounded-xl" required>
+            <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-xl font-bold">Entrar</button>
+        </form>
+    </div>
+    <script>
+        const supabase = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const { error } = await supabase.auth.signInWithPassword({
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value
+            });
+            if (error) alert(error.message);
+            else window.location.href = 'dashboard.html';
+        });
+    </script>
+</body>
+</html>

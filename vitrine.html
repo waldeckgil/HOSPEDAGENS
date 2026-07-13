@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Suítes Disponíveis</title>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">Disponibilidade</h1>
+        <div id="vitrine-container" class="grid gap-6"></div>
+    </div>
+    <script>
+        const supabase = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
+        async function carregarVitrine() {
+            const { data } = await supabase.from('suites').select('*').eq('status', 'Disponível');
+            const container = document.getElementById('vitrine-container');
+            data.forEach(suite => {
+                container.innerHTML += `
+                    <div class="bg-white p-6 rounded-lg shadow border-l-8 border-green-500 flex justify-between items-center">
+                        <h2 class="text-xl font-bold">${suite.nome}</h2>
+                        <button class="bg-green-600 text-white px-6 py-2 rounded">Solicitar</button>
+                    </div>
+                `;
+            });
+        }
+        carregarVitrine();
+    </script>
+</body>
+</html>
