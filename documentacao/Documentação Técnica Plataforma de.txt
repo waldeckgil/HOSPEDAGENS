@@ -1,0 +1,72 @@
+Documentação Técnica: Plataforma SaaS de Gestão de Reservas
+1. Visão Geral do Sistema
+Plataforma SaaS para gestão de reservas de pousadas com arquitetura desacoplada. O sistema é operado em dois níveis: Administrador Master (gestão de ativos e mídias) e Gestor da Pousada (operação de reservas).
+
+2. Arquitetura e Ferramentas
+Frontend: HTML5, Tailwind CSS, hospedado no Netlify (via GitHub).
+
+Banco de Dados & Auth: Supabase (PostgreSQL + RLS).
+
+Backend: Render (Node.js/Express) para automação de e-mails e regras de negócio.
+
+Versionamento: GitHub.
+
+3. Estrutura de Dados (Supabase)
+O banco de dados deve utilizar as tabelas com RLS (Row Level Security) ativado:
+
+pousadas: (ID, slug, nome, email_admin, logo_url, fundo_url, senha_gestor).
+
+suites: (ID, pousada_id, nome, valor_diaria, status).
+
+hospedes: (ID, pousada_id, nome, cpf, rg, endereço, email, telefone).
+
+reservas: (ID, pousada_id, suite_id, hospede_id, checkin, checkout, status, valor_total, valor_sinal, documento_url).
+
+galeria: (ID, pousada_id, image_url, categoria [suíte/geral]).
+
+Storage: Buckets documentos_hospedes e assets_pousadas (privados).
+
+4. Funcionalidades e Regras de Negócio
+A. Painel Master (Administrador - Admin)
+Visão global de todas as pousadas cadastradas.
+
+Upload Exclusivo: O Administrador realiza o upload de logo, fundo e galeria (via Painel Master ou diretamente no bucket).
+
+Monitoramento centralizado de todas as reservas e suporte aos gestores.
+
+B. Painel do Gestor (Pousada)
+Login: Acesso via código/slug da pousada + senha.
+
+Dashboard Visual (Cards de Status): O sistema deve renderizar cards para cada suíte com diferenciação visual baseada no status:
+
+Amarelo: Solicitação de reserva pendente.
+
+Cinza: Suíte ocupada (Reserva confirmada).
+
+Verde: Suíte disponível (Checkout realizado).
+
+Notificações: Alerta no painel + e-mail automático com dados e documentos do hóspede.
+
+Ações: "Confirmar" (dispara e-mail de confirmação) ou "Cancelar" (registra justificativa).
+
+Link de Convite: Atalho para o formulário para envio via WhatsApp/E-mail.
+
+C. Acesso do Hóspede
+Reserva via link direto (URL [meusite.com/pousada/](https://meusite.com/pousada/)[slug]) ou via Link de Convite.
+
+Upload de documentos opcional no formulário.
+
+5. Fluxo de Operação (User Journey)
+Solicitação: Hóspede preenche o formulário (status pendente = Card Amarelo).
+
+Notificação: Sistema envia e-mail ao gestor e atualiza o painel.
+
+Gestão: Gestor revisa os dados.
+
+Decisão: Ao confirmar, a suíte altera o status para confirmada = Card Cinza. Após o checkout, o gestor libera a suíte = Card Verde.
+
+Instruções para o Desenvolvedor:
+
+A interface é única. Ao acessar, o front-end deve consultar o slug na URL e injetar dinamicamente a identidade visual (logo/fundo) correspondente.
+
+A lógica de cores (Amarelo/Cinza/Verde) deve ser vinculada à atualização do campo status na tabela reservas e suites no Supabase.
