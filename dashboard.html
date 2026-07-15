@@ -45,23 +45,25 @@
         }
 
         // Nova função para carregar o nome da pousada
-        async function carregarInfoPousada() {
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            
-            const { data: pousada, error } = await supabaseClient
-                .from('pousadas')
-                .select('nome')
-                .eq('id', user.id) // Busca a pousada que tem o ID igual ao UID do usuário
-                .single();
+       async function carregarInfoPousada() {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    
+    // Busca a pousada onde o ID da pousada é o mesmo ID do usuário logado
+    const { data: pousada, error } = await supabaseClient
+        .from('pousadas')
+        .select('nome')
+        .eq('id', user.id) // Isso garante que cada um busque apenas a sua própria pousada
+        .single();
 
-            const titulo = document.getElementById('titulo-pousada');
-            if (pousada) {
-                titulo.innerText = "Pousada: " + pousada.nome;
-            } else {
-                titulo.innerText = "Pousada não encontrada";
-            }
-        }
-
+    const titulo = document.getElementById('titulo-pousada');
+    
+    if (error) {
+        console.error("Erro ao buscar pousada:", error);
+        titulo.innerText = "Pousada não encontrada para este usuário";
+    } else if (pousada) {
+        titulo.innerText = "Pousada: " + pousada.nome;
+    }
+}
         // Função que carrega os dados após o login
         async function carregarDashboard() {
             const { data: suites, error } = await supabaseClient.from('suites').select('*');
