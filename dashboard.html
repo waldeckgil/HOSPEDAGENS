@@ -127,6 +127,12 @@
             
             await supabaseClient.from('suites').update({ status: status }).eq('id', suiteId);
             
+            const { data: reservaExistente } = await supabaseClient
+                .from('reservas')
+                .select('id')
+                .eq('suite_id', suiteId)
+                .single();
+
             const dadosReserva = {
                 suite_id: suiteId,
                 hospede_nome: document.getElementById('edit-hospede').value,
@@ -138,7 +144,11 @@
                 status: 'Aprovada'
             };
 
-            await supabaseClient.from('reservas').upsert(dadosReserva, { onConflict: 'suite_id' });
+            if (reservaExistente) {
+                await supabaseClient.from('reservas').update(dadosReserva).eq('id', reservaExistente.id);
+            } else {
+                await supabaseClient.from('reservas').insert(dadosReserva);
+            }
             
             alert("Suíte e reserva atualizadas!");
             fecharModal();
