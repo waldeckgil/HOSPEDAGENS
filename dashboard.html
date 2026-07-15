@@ -10,6 +10,9 @@
 </head>
 <body class="bg-gray-100 p-8">
 
+    <!-- Título da Pousada -->
+    <h1 id="titulo-pousada" class="text-3xl font-bold mb-6 text-gray-800">Carregando Pousada...</h1>
+
     <div id="suites-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
     <script>
@@ -24,9 +27,10 @@
         async function iniciarApp() {
             console.log("Tentando realizar login...");
             
+            // ATENÇÃO: Ao testar com outro usuário, altere o email e a senha abaixo
             const { data, error: loginError } = await supabaseClient.auth.signInWithPassword({
-                email: 'waldeckgil@gmail.com',
-                password: 'Dibico@20' // <-- SUBSTITUA PELA SENHA REAL
+                email: 'waldeckgil@gmail.com', 
+                password: 'Dibico@20'
             });
 
             if (loginError) {
@@ -36,12 +40,30 @@
             }
 
             console.log("Login realizado com sucesso!");
+            await carregarInfoPousada();
             carregarDashboard();
+        }
+
+        // Nova função para carregar o nome da pousada
+        async function carregarInfoPousada() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            
+            const { data: pousada, error } = await supabaseClient
+                .from('pousadas')
+                .select('nome')
+                .eq('id', user.id) // Busca a pousada que tem o ID igual ao UID do usuário
+                .single();
+
+            const titulo = document.getElementById('titulo-pousada');
+            if (pousada) {
+                titulo.innerText = "Pousada: " + pousada.nome;
+            } else {
+                titulo.innerText = "Pousada não encontrada";
+            }
         }
 
         // Função que carrega os dados após o login
         async function carregarDashboard() {
-            // Agora, com o usuário logado, o RLS validará o acesso baseado no auth.uid()
             const { data: suites, error } = await supabaseClient.from('suites').select('*');
 
             if (error) { 
