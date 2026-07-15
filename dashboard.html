@@ -56,13 +56,13 @@
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // ... [Funções atualizarRelogio e fazerLogout mantidas iguais] ...
         function atualizarRelogio() {
             const agora = new Date();
             document.getElementById('data-atual').innerText = agora.toLocaleString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
         }
         setInterval(atualizarRelogio, 60000);
         atualizarRelogio();
+
         function fecharModal() { document.getElementById('modal-edicao').classList.add('hidden'); }
         async function fazerLogout() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
 
@@ -104,6 +104,13 @@
                 document.getElementById('edit-valor').value = reserva.valor_total || '';
                 document.getElementById('edit-checkin').value = reserva.checkin || '';
                 document.getElementById('edit-checkout').value = reserva.checkout || '';
+            } else {
+                // Limpa os campos se não houver reserva
+                document.getElementById('edit-hospede').value = '';
+                document.getElementById('edit-whatsapp').value = '';
+                document.getElementById('edit-valor').value = '';
+                document.getElementById('edit-checkin').value = '';
+                document.getElementById('edit-checkout').value = '';
             }
             document.getElementById('modal-edicao').classList.remove('hidden');
         }
@@ -126,12 +133,21 @@
                 status: 'Aprovada'
             };
             
-            // Se já existir reserva, precisa do ID para atualizar, ou use .upsert()
-            await supabaseClient.from('reservas').upsert(dadosReserva, { onConflict: 'suite_id' });
+            // Usamos .upsert() com o objeto de configuração contendo onConflict
+            const { error } = await supabaseClient
+                .from('reservas')
+                .upsert(dadosReserva, { 
+                    onConflict: 'suite_id' // Esta linha corrige o erro 400
+                });
             
-            alert("Atualizado com sucesso!");
-            fecharModal();
-            carregarDashboard();
+            if (error) {
+                console.error("Erro ao salvar:", error);
+                alert("Erro ao salvar. Verifique o console.");
+            } else {
+                alert("Atualizado com sucesso!");
+                fecharModal();
+                carregarDashboard();
+            }
         };
 
         (async () => {
