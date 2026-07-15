@@ -58,14 +58,21 @@
         atualizarRelogio();
 
         async function carregarDashboard() {
-            const { data: suites, error } = await supabaseClient.from('suites').select('*, reservas(hospede_nome, checkin, checkout, status, whatsapp_hospede, endereco)');
-            if (error) { console.error(error); return; }
+            // Buscando primeiro apenas as suítes
+            const { data: suites, error: suiteError } = await supabaseClient.from('suites').select('*');
+            
+            // Buscando as reservas aprovadas separadamente para evitar erro de join
+            const { data: reservas, error: resError } = await supabaseClient.from('reservas').select('*').eq('status', 'Aprovada');
+
+            if (suiteError) { console.error("Erro suites:", suiteError); return; }
 
             const container = document.getElementById('suites-container');
             container.innerHTML = '';
 
             suites.forEach(suite => {
-                const reservaAtiva = suite.reservas ? suite.reservas.find(r => r.status === 'Aprovada') : null;
+                // Filtra a reserva desta suíte na lista que buscamos
+                const reservaAtiva = reservas ? reservas.find(r => r.suite_id === suite.id) : null;
+                
                 const cor = suite.status === 'Disponível' ? 'bg-green-200 border-green-500' : 'bg-gray-300 border-gray-600';
                 
                 let infoExtra = reservaAtiva ? `
@@ -83,7 +90,6 @@
                 `;
             });
         }
-
         function abrirModal(id, reservaData) {
             document.getElementById('edit-suite-id').value = id;
             if (reservaData) {
