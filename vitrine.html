@@ -4,28 +4,99 @@
     <meta charset="UTF-8">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <title>Suítes Disponíveis</title>
+    <title>Nossas Suítes</title>
+    <style>
+        /* Fundo profissional com overlay escuro para o texto destacar */
+        .bg-pousada {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80');
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh;
+        }
+    </style>
 </head>
-<body class="bg-gray-50 p-8">
+<body class="bg-pousada text-white p-4 md:p-8">
+
     <div class="max-w-4xl mx-auto">
-        <h1 class="text-3xl font-bold mb-8">Disponibilidade</h1>
+        <h1 id="titulo-pousada" class="text-4xl font-extrabold mb-8 text-center drop-shadow-lg">Carregando Pousada...</h1>
         <div id="vitrine-container" class="grid gap-6"></div>
     </div>
+
+    <!-- Modal de Reserva (Oculto) -->
+    <div id="modal-reserva" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-8 rounded-2xl w-full max-w-lg text-gray-800 shadow-2xl">
+            <h2 class="text-2xl font-bold mb-4 text-center">Solicitar Reserva</h2>
+            <form id="form-reserva" class="space-y-3">
+                <input type="hidden" id="suite-id-reserva">
+                <input type="text" id="nome-hospede" placeholder="Nome Completo" required class="w-full p-3 border rounded-xl">
+                <input type="text" id="whatsapp-hospede" placeholder="WhatsApp (DDD+Número)" required class="w-full p-3 border rounded-xl">
+                <input type="text" id="cpf-hospede" placeholder="CPF" required class="w-full p-3 border rounded-xl">
+                <input type="text" id="rg-hospede" placeholder="RG" required class="w-full p-3 border rounded-xl">
+                <input type="text" id="endereco-hospede" placeholder="Endereço Completo com Bairro" required class="w-full p-3 border rounded-xl">
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="date" id="checkin" required class="w-full p-3 border rounded-xl">
+                    <input type="date" id="checkout" required class="w-full p-3 border rounded-xl">
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="fecharModal()" class="w-full bg-gray-300 p-3 rounded-xl font-bold">Cancelar</button>
+                    <button type="submit" class="w-full bg-green-600 text-white p-3 rounded-xl font-bold">Enviar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         const supabase = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
-        async function carregarVitrine() {
-            const { data } = await supabase.from('suites').select('*').eq('status', 'Disponível');
+
+        async function carregarDados() {
+            // Pega o ID da pousada da URL (ex: vitrine.html?pousada_id=ID) ou o primeiro registro se não houver
+            const params = new URLSearchParams(window.location.search);
+            const pousadaId = params.get('pousada_id') || '2ce55615-0d32-467a-a412-f9868ec8c9cf'; // Default para teste
+
+            // Carrega nome da pousada
+            const { data: pousada } = await supabase.from('pousadas').select('nome').eq('id', pousadaId).single();
+            document.getElementById('titulo-pousada').innerText = pousada?.nome || "Nossa Pousada";
+
+            // Carrega suítes
+            const { data: suites } = await supabase.from('suites').select('*').eq('pousada_id', pousadaId).eq('status', 'Disponível');
             const container = document.getElementById('vitrine-container');
-            data.forEach(suite => {
+            
+            container.innerHTML = suites.length ? '' : '<p class="text-center">Nenhuma suíte disponível no momento.</p>';
+            
+            suites.forEach(suite => {
                 container.innerHTML += `
-                    <div class="bg-white p-6 rounded-lg shadow border-l-8 border-green-500 flex justify-between items-center">
+                    <div class="bg-white p-6 rounded-2xl shadow-lg border-l-8 border-green-500 flex justify-between items-center text-gray-800">
                         <h2 class="text-xl font-bold">${suite.nome}</h2>
-                        <button class="bg-green-600 text-white px-6 py-2 rounded">Solicitar</button>
+                        <button onclick="abrirModal('${suite.id}', '${pousadaId}')" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-xl transition">Solicitar</button>
                     </div>
                 `;
             });
         }
-        carregarVitrine();
+
+        function abrirModal(sId, pId) {
+            document.getElementById('suite-id-reserva').value = sId;
+            document.getElementById('modal-reserva').classList.remove('hidden');
+        }
+        function fecharModal() { document.getElementById('modal-reserva').classList.add('hidden'); }
+
+        document.getElementById('form-reserva').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const { error } = await supabase.from('reservas').insert([{
+                suite_id: document.getElementById('suite-id-reserva').value,
+                hospede_nome: document.getElementById('nome-hospede').value,
+                whatsapp_hospede: document.getElementById('whatsapp-hospede').value,
+                cpf: document.getElementById('cpf-hospede').value,
+                rg: document.getElementById('rg-hospede').value,
+                endereco: document.getElementById('endereco-hospede').value,
+                checkin: document.getElementById('checkin').value,
+                checkout: document.getElementById('checkout').value,
+                status: 'Pendente'
+            }]);
+            if (error) alert("Erro: " + error.message);
+            else { alert("Solicitação enviada com sucesso!"); fecharModal(); }
+        });
+
+        carregarDados();
     </script>
 </body>
 </html>
