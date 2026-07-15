@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -41,20 +42,37 @@
         async function salvarConfiguracao() {
             const nomePousada = document.getElementById('nome-pousada').value;
             const inputs = document.querySelectorAll('.suite-input');
-            const suites = Array.from(inputs).map(input => ({ nome: input.value, status: 'Disponível' }));
-
-            // 1. Salva a pousada (tabela 'pousadas')
-            const { data: pousada, error: errPousada } = await supabase.from('pousadas').insert([{ nome: nomePousada }]).select();
             
-            // 2. Salva as suítes (tabela 'suites')
+            // Pega o usuário que acabou de fazer o cadastro
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                alert('Sessão expirada. Faça login novamente.');
+                return;
+            }
+
+            // 1. Salva a pousada (VINCULANDO O ID DA POUSADA AO UID DO USUÁRIO)
+            const { error: errPousada } = await supabase.from('pousadas').insert([{ 
+                id: user.id, 
+                nome: nomePousada 
+            }]);
+            
+            // 2. Salva as suítes (VINCULANDO O POUSADA_ID AO UID DO USUÁRIO)
+            const suites = Array.from(inputs).map(input => ({ 
+                nome: input.value, 
+                status: 'Disponível',
+                pousada_id: user.id 
+            }));
+
             const { error: errSuites } = await supabase.from('suites').insert(suites);
 
-            if (errPousada || errSuites) alert('Erro ao salvar');
-            else {
-                alert('Pousada configurada!');
+            if (errPousada || errSuites) {
+                console.error(errPousada, errSuites);
+                alert('Erro ao salvar no banco de dados.');
+            } else {
+                alert('Pousada configurada com sucesso!');
                 window.location.href = 'dashboard.html';
             }
-        }
-    </script>
+        
+            </script>
 </body>
 </html>
