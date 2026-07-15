@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Manual Mestre - Gestão de Pousadas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-5xl mx-auto space-y-8">
+        
+        <!-- CABEÇALHO -->
+        <header class="bg-white p-6 rounded-2xl shadow-lg border-l-8 border-blue-600">
+            <h1 class="text-3xl font-bold">Manual Mestre do Desenvolvedor</h1>
+            <p class="text-gray-600">Tudo que você precisa para finalizar o sistema de pousadas.</p>
+        </header>
+
+        <!-- FASE 1: BANCO DE DADOS -->
+        <section class="bg-white p-8 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-bold text-red-600 mb-4">Fase 1: Ajuste do Banco (SQL)</h2>
+            <p class="mb-4 text-sm text-gray-600">Copie e cole este bloco no <b>SQL Editor</b> do seu Supabase:</p>
+            <pre class="bg-gray-900 text-green-400 p-6 rounded-xl font-mono text-sm overflow-x-auto">
+-- 1. Criar Tabela de Hóspedes
+CREATE TABLE hospedes (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  pousada_id UUID REFERENCES pousadas(id),
+  nome TEXT NOT NULL,
+  cpf TEXT,
+  email TEXT,
+  telefone TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 2. Atualizar Tabela Reservas
+ALTER TABLE reservas 
+ADD COLUMN hospede_id UUID REFERENCES hospedes(id),
+ADD COLUMN valor_sinal NUMERIC,
+ADD COLUMN documento_url TEXT;
+
+-- 3. Atualizar Tabela Pousadas
+ALTER TABLE pousadas ADD COLUMN senha_gestor TEXT;</pre>
+        </section>
+
+        <!-- FASE 2: DASHBOARD DINÂMICO -->
+        <section class="bg-white p-8 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-bold text-blue-600 mb-4">Fase 2: Dashboard do Gestor</h2>
+            <p class="mb-4 text-sm text-gray-600">Substitua o conteúdo do seu <code>dashboard.html</code> por este código atualizado:</p>
+            <textarea class="w-full h-64 bg-gray-50 p-4 border rounded-xl font-mono text-xs">
+<div id="suites-container" class="grid gap-6"></div>
+<script>
+async function carregarDashboard() {
+    const { data: suites } = await supabase.from('suites').select('*');
+    const container = document.getElementById('suites-container');
+    container.innerHTML = '';
+    suites.forEach(suite => {
+        const classes = { 'Pendente': 'bg-yellow-200', 'Ocupada': 'bg-gray-300', 'Disponível': 'bg-green-200' };
+        container.innerHTML += `
+            <div class="p-6 rounded-lg ${classes[suite.status]}">
+                <h2 class="font-bold">${suite.nome}</h2>
+                <p>Status: ${suite.status}</p>
+                <button onclick="atualizarStatus('${suite.id}', 'Disponível')" class="bg-blue-600 text-white p-2">Liberar</button>
+            </div>`;
+    });
+}
+carregarDashboard();
+</script></textarea>
+        </section>
+
+        <!-- FASE 3: CHECKLIST DE FINALIZAÇÃO -->
+        <section class="bg-white p-8 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-bold text-green-600 mb-4">Fase 3: Checklist de Finalização</h2>
+            <ul class="space-y-4">
+                <li class="flex items-center"><input type="checkbox" class="w-5 h-5 mr-3"> Executar os comandos SQL da Fase 1 no Supabase.</li>
+                <li class="flex items-center"><input type="checkbox" class="w-5 h-5 mr-3"> Configurar RLS: "Enable RLS" nas tabelas e criar Policy de acesso.</li>
+                <li class="flex items-center"><input type="checkbox" class="w-5 h-5 mr-3"> Atualizar o arquivo <code>dashboard.html</code> com a lógica acima.</li>
+                <li class="flex items-center"><input type="checkbox" class="w-5 h-5 mr-3"> Criar <code>reservar.html</code> (formulário para hóspedes).</li>
+            </ul>
+        </section>
+
+        <button onclick="window.print()" class="w-full bg-black text-white py-4 rounded-xl font-bold text-lg">Imprimir Checklist Completo</button>
+    </div>
+</body>
+</html>

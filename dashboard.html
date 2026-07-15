@@ -14,26 +14,48 @@
 
     <script>
         // --- SUAS CONFIGURAÇÕES ---
-        // Copie a URL base do seu script (ex: https://abcde12345.supabase.co)
-       const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
-        // Copie a chave anon do seu script
-        
+        const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
 
         // Inicialização
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // Função para iniciar o app com login automático
+        async function iniciarApp() {
+            console.log("Tentando realizar login...");
+            
+            const { data, error: loginError } = await supabaseClient.auth.signInWithPassword({
+                email: 'waldeckgil@gmail.com',
+                password: 'Dibico@20' // <-- SUBSTITUA PELA SENHA REAL
+            });
+
+            if (loginError) {
+                console.error("Erro no login:", loginError.message);
+                document.getElementById('suites-container').innerHTML = `<p class="text-red-600">Erro de autenticação: ${loginError.message}</p>`;
+                return;
+            }
+
+            console.log("Login realizado com sucesso!");
+            carregarDashboard();
+        }
+
+        // Função que carrega os dados após o login
         async function carregarDashboard() {
-            // Buscando dados da tabela 'suites'
+            // Agora, com o usuário logado, o RLS validará o acesso baseado no auth.uid()
             const { data: suites, error } = await supabaseClient.from('suites').select('*');
 
             if (error) { 
-                console.error("Erro ao carregar dados:", error); 
+                console.error("Erro ao carregar dados (RLS):", error); 
                 return; 
             }
 
             const container = document.getElementById('suites-container');
             container.innerHTML = '';
+
+            if (suites.length === 0) {
+                container.innerHTML = '<p>Nenhuma suíte encontrada para este gestor.</p>';
+                return;
+            }
 
             suites.forEach(suite => {
                 const classes = {
@@ -54,7 +76,8 @@
             });
         }
 
-        carregarDashboard();
+        // Iniciar o fluxo
+        iniciarApp();
     </script>
 </body>
 </html>

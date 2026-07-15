@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Manual Mestre - Gestão de Pousadas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-5xl mx-auto space-y-8">
+        
+        <header class="bg-white p-6 rounded-2xl shadow-lg border-l-8 border-blue-600">
+            <h1 class="text-3xl font-bold">Manual Mestre do Desenvolvedor</h1>
+            <p class="text-gray-600">Guia definitivo para finalizar o sistema amanhã.</p>
+        </header>
+
+        <!-- FASE 1: BANCO DE DADOS -->
+        <section class="bg-white p-8 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-bold text-red-600 mb-4">Fase 1: Ajuste do Banco (SQL)</h2>
+            <pre class="bg-gray-900 text-green-400 p-6 rounded-xl font-mono text-sm overflow-x-auto">
+CREATE TABLE hospedes (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  pousada_id UUID REFERENCES pousadas(id),
+  nome TEXT NOT NULL,
+  cpf TEXT,
+  email TEXT,
+  telefone TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE reservas 
+ADD COLUMN hospede_id UUID REFERENCES hospedes(id),
+ADD COLUMN valor_sinal NUMERIC,
+ADD COLUMN documento_url TEXT;
+
+ALTER TABLE pousadas ADD COLUMN senha_gestor TEXT;</pre>
+        </section>
+
+        <!-- FASE 2: RLS (SEGURANÇA) -->
+        <section class="bg-white p-8 rounded-2xl shadow-lg border-l-8 border-purple-500">
+            <h2 class="text-2xl font-bold text-purple-600 mb-4">Fase 2: Como configurar o RLS</h2>
+            <p class="text-gray-700 mb-4">Para garantir que uma pousada não veja os dados da outra:</p>
+            <ol class="list-decimal ml-5 space-y-2 text-gray-700">
+                <li>No painel do Supabase, vá em <b>Database</b> > <b>Policies</b>.</li>
+                <li>Selecione a tabela (ex: <code>suites</code>).</li>
+                <li>Clique em <b>Enable RLS</b>.</li>
+                <li>Clique em <b>New Policy</b> > <b>Get Started</b>.</li>
+                <li>Escolha "Allow for all operations" ou crie uma personalizada: <code>auth.uid() = gestor_id</code>.</li>
+                <li>Repita para as tabelas <code>reservas</code> e <code>hospedes</code>.</li>
+            </ol>
+        </section>
+
+        <!-- FASE 3: DASHBOARD & RESERVAS -->
+        <section class="bg-white p-8 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-bold text-blue-600 mb-4">Fase 3: Implementação dos Códigos</h2>
+            <p class="mb-2 font-bold italic">Dashboard (Conteúdo para dashboard.html)</p>
+            <textarea class="w-full h-32 bg-gray-50 p-4 border rounded-xl font-mono text-xs mb-4">
+// Use o código completo de Dashboard que eu enviei anteriormente com os botões de ação.</textarea>
+            <p class="mb-2 font-bold italic">Reserva (Conteúdo para reservar.html)</p>
+            <textarea class="w-full h-32 bg-gray-50 p-4 border rounded-xl font-mono text-xs">
+// Use o código do formulário de hóspede com envio para tabela reservas.</textarea>
+        </section>
+
+        <!-- FASE 4: CHECKLIST FINAL -->
+        <section class="bg-white p-8 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-bold text-green-600 mb-4">Fase 4: Checklist de Finalização</h2>
+            <ul class="space-y-4">
+                <li class="flex items-center"><input type="checkbox" class="w-5 h-5 mr-3"> Executar os comandos SQL no Supabase.</li>
+                <li class="flex items-center"><input type="checkbox" class="w-5 h-5 mr-3"> Ativar RLS e criar Policies (Fase 2).</li>
+                <li class="flex items-center"><input type="checkbox" class="w-5 h-5 mr-3"> Colar o Dashboard atualizado no seu arquivo.</li>
+                <li class="flex items-center"><input type="checkbox" class="w-5 h-5 mr-3"> Criar e testar o arquivo reservar.html.</li>
+            </ul>
+        </section>
+
+        <button onclick="window.print()" class="w-full bg-black text-white py-4 rounded-xl font-bold text-lg">Imprimir Manual</button>
+    </div>
+</body>
+</html>
