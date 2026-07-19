@@ -56,7 +56,6 @@
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // --- Função do Relógio ---
         function atualizarRelogio() {
             const agora = new Date();
             document.getElementById('data-atual').innerText = agora.toLocaleString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -64,74 +63,48 @@
         setInterval(atualizarRelogio, 60000);
         atualizarRelogio();
 
-        // --- Função Principal: Carregar Suites e Reservas ---
         async function carregarDashboard() {
-            // Busca suites e inclui os dados da reserva relacionada
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            
             const { data: suites, error } = await supabaseClient
                 .from('suites')
-                .select(`
-                    id,
-                    nome,
-                    status,
-                    reservas (
-                        hospede_nome,
-                        checkin,
-                        checkout,
-                        valor_total,
-                        whatsapp_hospede,
-                        status
-                    )
-                `);
+                .select(`*, reservas(*)`)
+                .eq('pousada_id', user.id);
 
-            if (error) {
-                console.error("Erro ao buscar suites:", error);
-                document.getElementById('suites-container').innerHTML = '<p class="text-red-500 text-center col-span-3">Erro ao carregar dados. Verifique o console.</p>';
-                return;
-            }
+            if (error) { console.error("Erro ao buscar suites:", error); return; }
 
             const container = document.getElementById('suites-container');
             container.innerHTML = '';
 
+            if (!suites || suites.length === 0) {
+                container.innerHTML = `<div class="col-span-3 p-10 text-center bg-white rounded-xl shadow">
+                    <h2 class="text-xl font-bold text-gray-700">Nenhuma suíte encontrada.</h2></div>`;
+                return;
+            }
+            
             suites.forEach(suite => {
-                // Filtra a reserva 'Aprovada' dentro do array retornado pelo join
-                const reservaAtiva = suite.reservas ? suite.reservas.find(r => r.status === 'Aprovada') : null;
-                
                 const corClasses = {
                     'Disponível': 'bg-green-200 border-green-500',
                     'Ocupada': 'bg-gray-300 border-gray-600',
                     'Limpeza': 'bg-red-200 border-red-500',
                     'Pendente': 'bg-yellow-200 border-yellow-500'
                 };
-                
                 const cor = corClasses[suite.status] || 'bg-white border-gray-200';
-                
-                let infoExtra = reservaAtiva ? `
-                    <div class="mt-3 text-xs bg-black/10 p-2 rounded">
-                        <p><strong>Hóspede:</strong> ${reservaAtiva.hospede_nome}</p>
-                        <p><strong>Saída:</strong> ${new Date(reservaAtiva.checkout + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
-                    </div>` : '';
-
-                // Passa os dados da reserva para o abrirModal como JSON string escapado
-                const reservaJson = reservaAtiva ? JSON.stringify(reservaAtiva).replace(/"/g, '&quot;') : '';
+                const reservaData = suite.reservas && suite.reservas.length > 0 ? JSON.stringify(suite.reservas[0]).replace(/"/g, '&quot;') : '';
 
                 container.innerHTML += `
                     <div class="p-6 rounded-lg shadow-md border-l-8 ${cor} cursor-pointer hover:shadow-xl transition" 
-                         onclick="abrirModal('${suite.id}', '${suite.nome}', '${reservaJson}', '${suite.status}')">
+                         onclick="abrirModal('${suite.id}', '${suite.nome}', '${reservaData}', '${suite.status}')">
                         <h2 class="text-xl font-bold">${suite.nome}</h2>
                         <p class="text-sm mt-2">Status: <strong>${suite.status}</strong></p>
-                        ${infoExtra}
-                    </div>
-                `;
+                    </div>`;
             });
         }
 
-        // --- Funções do Modal ---
         function abrirModal(id, nome, reservaData, status) {
             document.getElementById('modal-titulo').innerText = "Editando: " + nome;
             document.getElementById('edit-suite-id').value = id;
             document.getElementById('edit-status').value = status;
-            
-            // Reseta os campos do formulário primeiro
             document.getElementById('edit-hospede').value = '';
             document.getElementById('edit-whatsapp').value = '';
             document.getElementById('edit-valor').value = '';
@@ -146,90 +119,47 @@
                     document.getElementById('edit-valor').value = res.valor_total || '';
                     document.getElementById('edit-checkin').value = res.checkin || '';
                     document.getElementById('edit-checkout').value = res.checkout || '';
-                } catch (e) {
-                    console.error("Erro ao parsear dados da reserva:", e);
-                }
+                } catch (e) { console.error(e); }
             }
             document.getElementById('modal-edicao').classList.remove('hidden');
         }
 
-        function fecharModal() {
-            document.getElementById('modal-edicao').classList.add('hidden');
-        }
+        function fecharModal() { document.getElementById('modal-edicao').classList.add('hidden'); }
 
-        // --- Função de Salvar (Submit do Form) ---
         document.getElementById('form-edicao').onsubmit = async (e) => {
             e.preventDefault();
+            const { data: { user } } = await supabaseClient.auth.getUser();
             const suiteId = document.getElementById('edit-suite-id').value;
             const novoStatus = document.getElementById('edit-status').value;
             
-            // 1. Atualiza Status da Suíte na tabela 'suites'
-            const { error: errSuite } = await supabaseClient
-                .from('suites')
-                .update({ status: novoStatus })
-                .eq('id', suiteId);
+            await supabaseClient.from('suites').update({ status: novoStatus }).eq('id', suiteId);
 
-            if (errSuite) { console.error("Erro ao atualizar suite:", errSuite); alert("Erro ao atualizar suíte."); return; }
-
-            // 2. Prepara os dados da reserva (para upsert)
             const dadosReserva = {
+                pousada_id: user.id, // Adicionado para satisfazer o RLS
                 suite_id: suiteId,
                 hospede_nome: document.getElementById('edit-hospede').value,
                 whatsapp_hospede: document.getElementById('edit-whatsapp').value,
-                valor_total: document.getElementById('edit-valor').value || null, // Garante null se vazio
+                valor_total: document.getElementById('edit-valor').value || null,
                 checkin: document.getElementById('edit-checkin').value || null,
                 checkout: document.getElementById('edit-checkout').value || null,
-                status: 'Aprovada' // Reserva gerenciada pelo dashboard é sempre 'Aprovada'
+                status: 'Aprovada'
             };
 
-            // 3. Atualiza ou Insere Reserva na tabela 'reservas' (USANDO UPSERT)
-            // O 'onConflict: 'suite_id'' é OBRIGATÓRIO para o upsert funcionar com a nova constraint
-            const { error: errReserva } = await supabaseClient
-                .from('reservas')
-                .upsert(dadosReserva, { onConflict: 'suite_id' });
-            
-            if (errReserva) {
-                console.error("Erro ao salvar reserva:", errReserva);
-                alert("Suíte atualizada, mas erro ao salvar reserva. Verifique se o CPF/RG do hóspede existe.");
-            } else {
-                alert("Suíte e reserva atualizadas com sucesso!");
-            }
-            
-            fecharModal();
-            carregarDashboard(); // Recarrega a tela
+            const { error } = await supabaseClient.from('reservas').upsert(dadosReserva, { onConflict: 'suite_id' });
+            if (error) { alert("Erro ao salvar: " + error.message); } else { alert("Suíte e reserva atualizadas!"); fecharModal(); carregarDashboard(); }
         };
 
-        // --- Logout ---
         async function fazerLogout() {
             await supabaseClient.auth.signOut();
             window.location.href = 'index.html';
         }
 
-        // --- Inicialização: Verificar Sessão e Carregar Nome da Pousada ---
         (async () => {
             const { data: { session } } = await supabaseClient.auth.getSession();
-            
-            if (!session) {
-                // Se não houver sessão, volta para o login
-                window.location.href = 'index.html';
-                return;
-            }
+            if (!session) { window.location.href = 'index.html'; return; }
 
-            // Busca o nome da pousada usando o ID do usuário logado
-            const { data: pousada, error } = await supabaseClient
-                .from('pousadas')
-                .select('nome')
-                .eq('id', session.user.id)
-                .single();
-
-            if (pousada) {
-                document.getElementById('titulo-pousada').innerText = "Pousada: " + pousada.nome;
-            } else {
-                document.getElementById('titulo-pousada').innerText = "Pousada não configurada";
-                console.error("Erro ao buscar nome da pousada:", error);
-            }
-
-            // Carrega os dados das suítes e reservas
+            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', session.user.id).single();
+            if (pousada) document.getElementById('titulo-pousada').innerText = "Pousada: " + pousada.nome;
             carregarDashboard();
         })();
     </script>

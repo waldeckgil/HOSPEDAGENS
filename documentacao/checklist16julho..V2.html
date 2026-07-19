@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist de Ajustes e Finalização - Sistema Pousadas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Função para salvar o estado das checkboxes e notas no LocalStorage
+        function salvarEstado() {
+            const inputs = document.querySelectorAll('input[type="checkbox"], textarea');
+            const estado = {};
+            inputs.forEach(input => {
+                estado[input.id] = input.type === 'checkbox' ? input.checked : input.value;
+            });
+            localStorage.setItem('checklistEstado2', JSON.stringify(estado));
+            document.getElementById('mensagem-salvo').classList.remove('hidden');
+            setTimeout(() => document.getElementById('mensagem-salvo').classList.add('hidden'), 2000);
+        }
+
+        // Função para carregar o estado salvo
+        function carregarEstado() {
+            const estadoSalvo = localStorage.getItem('checklistEstado2');
+            if (estadoSalvo) {
+                const estado = JSON.parse(estadoSalvo);
+                const inputs = document.querySelectorAll('input[type="checkbox"], textarea');
+                inputs.forEach(input => {
+                    if (estado[input.id] !== undefined) {
+                        if (input.type === 'checkbox') input.checked = estado[input.id];
+                        else input.value = estado[input.id];
+                    }
+                });
+            }
+        }
+        window.onload = carregarEstado;
+    </script>
+    <style>
+        /* Estilo para o texto riscado quando o checkbox é marcado */
+        input[type="checkbox"]:checked + label {
+            text-decoration: line-through;
+            color: #6b7280; /* text-gray-500 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+
+    <div class="max-w-5xl mx-auto bg-white p-10 rounded-2xl shadow-xl">
+        <div class="flex justify-between items-center mb-8 border-b pb-6">
+            <div>
+                <h1 class="text-3xl font-extrabold text-gray-900">Checklist de Ajustes e Finalização</h1>
+                <p class="text-gray-600 mt-2">Plano de ação para a estabilização da interface (Dashboard)</p>
+            </div>
+            <button onclick="salvarEstado()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition shadow-md">
+                Salvar Progresso Localmente
+            </button>
+        </div>
+        <div id="mensagem-salvo" class="hidden fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl shadow-lg z-50" role="alert">
+            Progresso salvo com sucesso!
+        </div>
+
+        <!-- Seção 1: Situação Atual -->
+        <section class="mb-10 bg-green-50 p-6 rounded-xl border border-green-200">
+            <h2 class="text-2xl font-bold text-gray-800 mb-5">1. Situação Atual (Vitórias de Hoje)</h2>
+            <div class="space-y-3 text-gray-700">
+                <p><strong class="text-green-900">✔ Banco de Dados:</strong> Tabela `reservas` criada e separada de `hospedes`.</p>
+                <p><strong class="text-green-900">✔ Restrições:</strong> Unique Constraint em `reservas.suite_id` configurada.</p>
+                <p><strong class="text-green-900">✔ Salvamento no Dashboard:</strong> O código HTML/JS agora usa `upsert` e salva o nome do hóspede corretamente no banco[cite: 8].</p>
+                <p><strong class="text-green-900">✔ Nome da Pousada:</strong> Nome da pousada aparece no cabeçalho para o usuário Waldeck.</p>
+                <p class="pt-2 text-gray-900 bg-yellow-100 p-3 rounded border border-yellow-300">
+                    <strong>Próximo Passo Lógico:</strong> Ajustar o dashboard para que o card não desapareça ao mudar o status para "Disponível".
+                </p>
+            </div>
+        </section>
+
+        <!-- Seção 2: Ajustes Visuais no Dashboard.html (Prioridade) -->
+        <section class="mb-10">
+            <h2 class="text-2xl font-bold text-gray-800 mb-5 border-l-8 border-blue-600 pl-4">2. Ajustes Visuais no Dashboard.html</h2>
+            <p class="text-gray-600 mb-5 italic">Estes ajustes garantirão que todas as suítes sejam exibidas, independentemente do status.</p>
+            
+            <div class="space-y-3">
+                <div class="flex items-center gap-3 bg-white p-4 rounded-lg border hover:shadow-sm">
+                    <input type="checkbox" id="ui-1" class="h-5 w-5 text-blue-600 rounded focus:ring-blue-500">
+                    <label for="ui-1" class="font-medium text-gray-800 flex-grow">
+                        <strong>Lógica de Busca (carregarDashboard):</strong> Alterar o SupabaseClient.from('suites').select('*, reservas(*)') para garantir que **todas** as suítes retornem, mesmo que não haja correspondência na tabela de reservas[cite: 7].
+                    </label>
+                </div>
+
+                <div class="flex items-center gap-3 bg-white p-4 rounded-lg border hover:shadow-sm">
+                    <input type="checkbox" id="ui-2" class="h-5 w-5 text-blue-600 rounded focus:ring-blue-500">
+                    <label for="ui-2" class="font-medium text-gray-800 flex-grow">
+                        <strong>Lógica de Exibição do Card:</strong> Ajustar o JavaScript para verificar o status da suíte e exibir o conteúdo apropriado.
+                        <ul class="list-disc list-inside text-sm text-gray-600 mt-2 space-y-1">
+                            <li>Se status for 'Disponível': Exibir card Verde com texto "Disponível" e sem dados de hóspede.</li>
+                            <li>Se status for 'Ocupada' (ou outra): Exibir card Cinza com dados da reserva aprovada.</li>
+                        </ul>
+                    </label>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção 3: Implementação de Fluxos Operacionais -->
+        <section class="mb-10">
+            <h2 class="text-2xl font-bold text-gray-800 mb-5 border-l-8 border-yellow-600 pl-4">3. Implementação de Fluxo de Check-out</h2>
+            <div class="space-y-3">
+                <div class="flex items-center gap-3 bg-white p-4 rounded-lg border">
+                    <input type="checkbox" id="flow-1" class="h-5 w-5 text-yellow-600 rounded focus:ring-yellow-500">
+                    <label for="flow-1" class="font-medium text-gray-800 flex-grow">
+                        <strong>Botão Check-out:</strong> Adicionar um botão "Finalizar Reserva / Check-out" no modal de edição.
+                    </label>
+                </div>
+
+                <div class="flex items-center gap-3 bg-white p-4 rounded-lg border">
+                    <input type="checkbox" id="flow-2" class="h-5 w-5 text-yellow-600 rounded focus:ring-yellow-500">
+                    <label for="flow-2" class="font-medium text-gray-800 flex-grow">
+                        <strong>Lógica do Check-out:</strong> Criar função JS que, ao clicar no botão, execute:
+                        <ol class="list-decimal list-inside text-sm text-gray-600 mt-2 space-y-1">
+                            <li>Busca o ID da reserva ativa da suíte.</li>
+                            <li>Atualiza a tabela `reservas` mudando o status para 'Finalizada'.</li>
+                            <li>Atualiza a tabela `suites` mudando o status para 'Disponível'.</li>
+                            <li>Recarrega o dashboard para refletir a mudança.</li>
+                        </ol>
+                    </label>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção 4: Validação e Testes -->
+        <section>
+            <h2 class="text-2xl font-bold text-gray-800 mb-5 border-l-8 border-green-600 pl-4">4. Validação Final</h2>
+            <div class="space-y-3">
+                <div class="flex items-center gap-3 bg-white p-4 rounded-lg border hover:shadow-sm">
+                    <input type="checkbox" id="val-1" class="h-5 w-5 text-green-600 rounded focus:ring-green-500">
+                    <label for="val-1" class="font-medium text-gray-800 flex-grow">
+                        <strong>Teste de Ciclo Completo:</strong> Realizar check-in (editar suíte), verificar se aparece no dashboard, realizar check-out (botão novo) e verificar se o quarto volta para "Disponível" na cor correta sem desaparecer.
+                    </label>
+                </div>
+            </div>
+        </section>
+
+        <footer class="mt-10 pt-6 border-t text-center text-gray-500 text-sm">
+            Checklist gerado para o Gestor de Pousadas. O progresso é salvo no navegador.
+        </footer>
+    </div>
+
+</body>
+</html>
