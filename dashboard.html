@@ -12,7 +12,10 @@
             <a href="dashboard.html" class="text-blue-600 border-b-2 border-blue-600 pb-1">Gestão de Suítes</a>
             <a href="configurar-pousada.html" class="hover:text-blue-600 transition">Minha Pousada</a>
         </div>
-        <button onclick="fazerLogout()" class="bg-red-600 text-white font-bold py-2 px-4 rounded-xl">Sair</button>
+        <div class="flex items-center gap-4">
+            <span id="titulo-pousada" class="font-bold text-gray-800">Carregando...</span>
+            <button onclick="fazerLogout()" class="bg-red-600 text-white font-bold py-2 px-4 rounded-xl">Sair</button>
+        </div>
     </nav>
 
     <div id="suites-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
@@ -48,7 +51,14 @@
 
         async function carregarDashboard() {
             const { data: { user } } = await supabaseClient.auth.getUser();
-            const { data: suites } = await supabaseClient.from('suites').select(`*, reservas(*)`)
+            if (!user) return;
+
+            // Busca nome da pousada
+            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', user.id).single();
+            if (pousada) document.getElementById('titulo-pousada').innerText = "Pousada: " + pousada.nome;
+
+            // Busca suítes e reservas associadas
+            const { data: suites } = await supabaseClient.from('suites').select(`id, nome, status, reservas(*)`)
                 .eq('pousada_id', user.id);
 
             const container = document.getElementById('suites-container');
@@ -64,7 +74,7 @@
                         <h2 class="text-xl font-bold">${suite.nome}</h2>
                         <p class="text-sm">Status: <strong>${suite.status}</strong></p>
                         ${res && res.hospede_nome ? `<div class="mt-2 text-xs bg-black/10 p-2 rounded">
-                            <p><b>Hóspede:</b> ${res.hospede_nome}</p><p><b>Tel:</b> ${res.whatsapp_hospede}</p>
+                            <p><b>Hóspede:</b> ${res.hospede_nome}</p><p><b>Tel:</b> ${res.whatsapp_hospede || ''}</p>
                             <p><b>CPF:</b> ${res.cpf || 'N/A'}</p><p><b>Datas:</b> ${res.checkin || ''} a ${res.checkout || ''}</p>
                         </div>` : ''}
                     </div>`;
