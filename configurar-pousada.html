@@ -28,7 +28,8 @@
     </div>
 
     <script>
-        const supabase = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
+        // Renomeado para evitar conflito com o objeto global do Supabase
+        const supabaseClient = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
 
         function adicionarCampo() {
             const container = document.getElementById('suites-container');
@@ -42,7 +43,7 @@
             const nomePousada = document.getElementById('nome-pousada').value;
             const inputs = document.querySelectorAll('.suite-input');
             
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) {
                 alert('Sessão expirada. Faça login novamente.');
                 return;
@@ -50,7 +51,7 @@
 
             // 1. Salva/Atualiza a pousada apenas se um nome foi digitado
             if (nomePousada.trim() !== "") {
-                const { error: errPousada } = await supabase.from('pousadas').upsert([{ 
+                const { error: errPousada } = await supabaseClient.from('pousadas').upsert([{ 
                     id: user.id, 
                     nome: nomePousada 
                 }]);
@@ -67,7 +68,7 @@
                 }));
 
             if (novasSuites.length > 0) {
-                const { error: errSuites } = await supabase.from('suites').insert(novasSuites);
+                const { error: errSuites } = await supabaseClient.from('suites').insert(novasSuites);
                 if (errSuites) {
                     console.error(errSuites);
                     alert('Erro ao salvar suítes.');
@@ -81,4 +82,3 @@
         }
     </script>
 </body>
-</html>
