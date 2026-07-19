@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -12,7 +11,7 @@
         <h2 class="text-2xl font-bold mb-6">Configurar sua Pousada</h2>
         
         <div class="mb-6">
-            <label class="block font-semibold mb-2">Nome da Pousada</label>
+            <label class="block font-semibold mb-2">Nome da Pousada (Opcional se já cadastrada)</label>
             <input type="text" id="nome-pousada" class="w-full p-3 border rounded-xl" placeholder="Ex: Pousada do Sol">
         </div>
 
@@ -43,36 +42,43 @@
             const nomePousada = document.getElementById('nome-pousada').value;
             const inputs = document.querySelectorAll('.suite-input');
             
-            // Pega o usuário que acabou de fazer o cadastro
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) {
                 alert('Sessão expirada. Faça login novamente.');
                 return;
             }
 
-            // 1. Salva a pousada (VINCULANDO O ID DA POUSADA AO UID DO USUÁRIO)
-            const { error: errPousada } = await supabase.from('pousadas').insert([{ 
-                id: user.id, 
-                nome: nomePousada 
-            }]);
-            
-            // 2. Salva as suítes (VINCULANDO O POUSADA_ID AO UID DO USUÁRIO)
-            const suites = Array.from(inputs).map(input => ({ 
-                nome: input.value, 
-                status: 'Disponível',
-                pousada_id: user.id 
-            }));
-
-            const { error: errSuites } = await supabase.from('suites').insert(suites);
-
-            if (errPousada || errSuites) {
-                console.error(errPousada, errSuites);
-                alert('Erro ao salvar no banco de dados.');
-            } else {
-                alert('Pousada configurada com sucesso!');
-                window.location.href = 'dashboard.html';
+            // 1. Salva/Atualiza a pousada apenas se um nome foi digitado
+            if (nomePousada.trim() !== "") {
+                const { error: errPousada } = await supabase.from('pousadas').upsert([{ 
+                    id: user.id, 
+                    nome: nomePousada 
+                }]);
+                if (errPousada) { console.error("Erro na pousada:", errPousada); }
             }
-        
-            </script>
+            
+            // 2. Salva as novas suítes
+            const novasSuites = Array.from(inputs)
+                .filter(input => input.value.trim() !== "")
+                .map(input => ({ 
+                    nome: input.value, 
+                    status: 'Disponível',
+                    pousada_id: user.id 
+                }));
+
+            if (novasSuites.length > 0) {
+                const { error: errSuites } = await supabase.from('suites').insert(novasSuites);
+                if (errSuites) {
+                    console.error(errSuites);
+                    alert('Erro ao salvar suítes.');
+                } else {
+                    alert('Configurações salvas com sucesso!');
+                    window.location.href = 'dashboard.html';
+                }
+            } else {
+                alert('Por favor, adicione pelo menos uma suíte.');
+            }
+        }
+    </script>
 </body>
 </html>

@@ -1,0 +1,11 @@
+SELECT 
+    p.nome AS nome_pousada,
+    COUNT(s.id) AS total_suites,
+    COUNT(CASE WHEN s.status = 'Disponível' THEN 1 END) AS disponiveis,
+    COUNT(CASE WHEN s.status = 'Ocupada' THEN 1 END) AS ocupadas,
+    COUNT(CASE WHEN s.status = 'Limpeza' THEN 1 END) AS limpeza,
+    COUNT(CASE WHEN s.status = 'Pendente' THEN 1 END) AS pendentes
+FROM pousadas p
+LEFT JOIN suites s ON p.id = s.pousada_id
+GROUP BY p.id, p.nome
+ORDER BY p.nome;

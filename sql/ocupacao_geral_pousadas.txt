@@ -1,0 +1,12 @@
+SELECT 
+    p.nome AS pousada,
+    s.nome AS suite,
+    r.hospede_nome,
+    r.whatsapp_hospede,
+    r.checkin,
+    r.checkout
+FROM reservas r
+JOIN suites s ON r.suite_id = s.id
+JOIN pousadas p ON s.pousada_id = p.id
+WHERE s.status = 'Ocupada'
+ORDER BY p.nome, s.nome;
