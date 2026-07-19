@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Gestor - Pousadas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">Painel de Gestão de Suítes</h1>
+        
+        <!-- Grid de Cards -->
+        <div id="suites-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <p class="text-gray-500">Carregando suítes...</p>
+        </div>
+    </div>
+
+    <script>
+        // Configuração do Supabase
+        const supabase = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
+
+        async function carregarDashboard() {
+            const { data: suites, error } = await supabase.from('suites').select('*');
+
+            if (error) {
+                console.error("Erro ao buscar:", error);
+                return;
+            }
+
+            const container = document.getElementById('suites-container');
+            container.innerHTML = '';
+
+            suites.forEach(suite => {
+                // Definição visual conforme status
+                const statusConfig = {
+                    'Pendente': { class: 'bg-yellow-200 border-yellow-500', btnText: 'Confirmar', nextStatus: 'Ocupada' },
+                    'Ocupada': { class: 'bg-gray-300 border-gray-600', btnText: 'Liberar', nextStatus: 'Disponível' },
+                    'Disponível': { class: 'bg-green-200 border-green-500', btnText: '', nextStatus: '' }
+                };
+
+                const cfg = statusConfig[suite.status] || { class: 'bg-white border-gray-200', btnText: '', nextStatus: '' };
+
+                container.innerHTML += `
+                    <div class="p-6 rounded-xl shadow-lg border-l-8 ${cfg.class} bg-white transition duration-300">
+                        <h2 class="text-2xl font-bold text-gray-800">${suite.nome}</h2>
+                        <p class="text-sm text-gray-600 mt-2">Status: <strong class="uppercase">${suite.status}</strong></p>
+                        
+                        ${cfg.btnText ? `
+                            <button onclick="atualizarStatus('${suite.id}', '${cfg.nextStatus}')" 
+                                    class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+                                ${cfg.btnText}
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+            });
+        }
+
+        // Função para atualizar status no banco
+        async function atualizarStatus(id, novoStatus) {
+            const { error } = await supabase.from('suites').update({ status: novoStatus }).eq('id', id);
+            if (error) {
+                alert('Erro ao atualizar: ' + error.message);
+            } else {
+                carregarDashboard(); // Recarrega o grid após a ação
+            }
+        }
+
+        carregarDashboard();
+    </script>
+</body>
+</html>
