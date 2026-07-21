@@ -23,8 +23,17 @@
 
     <!-- Modal de Reserva (Oculto) -->
     <div id="modal-reserva" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
-        <div class="bg-white p-8 rounded-2xl w-full max-w-lg text-gray-800 shadow-2xl">
+        <div class="bg-white p-8 rounded-2xl w-full max-w-lg text-gray-800 shadow-2xl relative">
             <h2 class="text-2xl font-bold mb-4 text-center">Solicitar Reserva</h2>
+            
+            <!-- Mensagem de Sucesso Embutida na Tela -->
+            <div id="feedback-sucesso" class="hidden mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-xl text-center font-semibold">
+                🎉 Solicitação enviada com sucesso! O gestor analisará seu pedido em breve.
+            </div>
+
+            <!-- Mensagem de Erro Embutida na Tela -->
+            <div id="feedback-erro" class="hidden mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl text-center font-semibold"></div>
+
             <form id="form-reserva" class="space-y-3">
                 <input type="hidden" id="suite-id-reserva">
                 <input type="text" id="nome-hospede" placeholder="Nome Completo" required class="w-full p-3 border rounded-xl">
@@ -37,26 +46,23 @@
                     <input type="date" id="checkout" required class="w-full p-3 border rounded-xl">
                 </div>
                 <div class="flex gap-2 pt-2">
-                    <button type="button" onclick="fecharModal()" class="w-full bg-gray-300 p-3 rounded-xl font-bold">Cancelar</button>
-                    <button type="submit" class="w-full bg-green-600 text-white p-3 rounded-xl font-bold">Enviar</button>
+                    <button type="button" onclick="fecharModal()" class="w-full bg-gray-300 hover:bg-gray-400 p-3 rounded-xl font-bold transition">Cancelar</button>
+                    <button type="submit" id="btn-enviar" class="w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded-xl font-bold transition">Enviar Solicitação</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        // Nome alterado para 'supabaseClient' para evitar conflito com a global da biblioteca
         const supabaseClient = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
 
         async function carregarDados() {
             const params = new URLSearchParams(window.location.search);
             const pousadaId = params.get('pousada_id') || '2ce55615-0d32-467a-a412-f9868ec8c9cf';
 
-            // Carrega nome da pousada
             const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', pousadaId).single();
             document.getElementById('titulo-pousada').innerText = pousada?.nome || "Nossa Pousada";
 
-            // Carrega suítes disponíveis
             const { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', pousadaId).eq('status', 'Disponível');
             const container = document.getElementById('vitrine-container');
             
@@ -67,29 +73,46 @@
                     container.innerHTML += `
                         <div class="bg-white p-6 rounded-2xl shadow-lg border-l-8 border-green-500 flex justify-between items-center text-gray-800">
                             <h2 class="text-xl font-bold">${suite.nome}</h2>
-                            <button onclick="abrirModal('${suite.id}', '${pousadaId}')" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-xl transition">Solicitar</button>
+                            <button onclick="abrirModal('${suite.id}')" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-xl transition">Solicitar</button>
                         </div>
                     `;
                 });
             }
         }
 
-        function abrirModal(sId, pId) {
+        function abrirModal(sId) {
             document.getElementById('suite-id-reserva').value = sId;
+            document.getElementById('form-reserva').reset();
+            document.getElementById('feedback-sucesso').classList.add('hidden');
+            document.getElementById('feedback-erro').classList.add('hidden');
+            document.getElementById('form-reserva').style.display = 'block';
             document.getElementById('modal-reserva').classList.remove('hidden');
         }
-        function fecharModal() { document.getElementById('modal-reserva').classList.add('hidden'); }
+
+        function fecharModal() { 
+            document.getElementById('modal-reserva').classList.add('hidden'); 
+            carregarDados();
+        }
 
         document.getElementById('form-reserva').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Pega o ID da pousada direto da URL para vincular a reserva corretamente
+            const btnEnviar = document.getElementById('btn-enviar');
+            const msgSucesso = document.getElementById('feedback-sucesso');
+            const msgErro = document.getElementById('feedback-erro');
+            
+            msgErro.classList.add('hidden');
+            btnEnviar.disabled = true;
+            btnEnviar.innerText = "Enviando...";
+
             const params = new URLSearchParams(window.location.search);
             const pousadaId = params.get('pousada_id') || '2ce55615-0d32-467a-a412-f9868ec8c9cf';
+            const suiteId = document.getElementById('suite-id-reserva').value;
 
-            const { error } = await supabaseClient.from('reservas').insert([{
-                pousada_id: pousadaId, // <--- Adicionado para resolver o vínculo com o dashboard
-                suite_id: document.getElementById('suite-id-reserva').value,
+            // 1. Insere a reserva na tabela reservas com o pousada_id correto
+            const { error: errReserva } = await supabaseClient.from('reservas').insert([{
+                pousada_id: pousadaId,
+                suite_id: suiteId,
                 hospede_nome: document.getElementById('nome-hospede').value,
                 whatsapp_hospede: document.getElementById('whatsapp-hospede').value,
                 cpf: document.getElementById('cpf-hospede').value,
@@ -100,12 +123,33 @@
                 status: 'Pendente'
             }]);
             
-            if (error) {
-                alert("Erro ao enviar solicitação: " + error.message);
+            if (errReserva) {
+                btnEnviar.disabled = false;
+                btnEnviar.innerText = "Enviar Solicitação";
+                msgErro.innerText = "Erro ao enviar solicitação: " + errReserva.message;
+                msgErro.classList.remove('hidden');
+                return;
+            }
+
+            // 2. Atualiza o status da suíte para 'Pendente' para o card mudar no dashboard do gestor
+            const { error: errSuite } = await supabaseClient
+                .from('suites')
+                .update({ status: 'Pendente' })
+                .eq('id', suiteId);
+
+            btnEnviar.disabled = false;
+            btnEnviar.innerText = "Enviar Solicitação";
+
+            if (errSuite) {
+                msgErro.innerText = "Erro ao atualizar status da suíte: " + errSuite.message;
+                msgErro.classList.remove('hidden');
             } else { 
-                alert("Solicitação enviada com sucesso!"); 
-                fecharModal(); 
-                carregarDados();
+                document.getElementById('form-reserva').style.display = 'none';
+                msgSucesso.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    fecharModal();
+                }, 2500);
             }
         });
 
