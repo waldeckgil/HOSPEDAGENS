@@ -6,7 +6,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <title>Nossas Suítes</title>
     <style>
-        /* Fundo profissional com overlay escuro para o texto destacar */
         .bg-pousada {
             background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80');
             background-size: cover;
@@ -46,31 +45,33 @@
     </div>
 
     <script>
-        const supabase = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
+        // Nome alterado para 'supabaseClient' para evitar conflito com a global da biblioteca
+        const supabaseClient = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
 
         async function carregarDados() {
-            // Pega o ID da pousada da URL (ex: vitrine.html?pousada_id=ID) ou o primeiro registro se não houver
             const params = new URLSearchParams(window.location.search);
-            const pousadaId = params.get('pousada_id') || '2ce55615-0d32-467a-a412-f9868ec8c9cf'; // Default para teste
+            const pousadaId = params.get('pousada_id') || '2ce55615-0d32-467a-a412-f9868ec8c9cf';
 
             // Carrega nome da pousada
-            const { data: pousada } = await supabase.from('pousadas').select('nome').eq('id', pousadaId).single();
+            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', pousadaId).single();
             document.getElementById('titulo-pousada').innerText = pousada?.nome || "Nossa Pousada";
 
-            // Carrega suítes
-            const { data: suites } = await supabase.from('suites').select('*').eq('pousada_id', pousadaId).eq('status', 'Disponível');
+            // Carrega suítes disponíveis
+            const { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', pousadaId).eq('status', 'Disponível');
             const container = document.getElementById('vitrine-container');
             
-            container.innerHTML = suites.length ? '' : '<p class="text-center">Nenhuma suíte disponível no momento.</p>';
+            container.innerHTML = (suites && suites.length > 0) ? '' : '<p class="text-center">Nenhuma suíte disponível no momento.</p>';
             
-            suites.forEach(suite => {
-                container.innerHTML += `
-                    <div class="bg-white p-6 rounded-2xl shadow-lg border-l-8 border-green-500 flex justify-between items-center text-gray-800">
-                        <h2 class="text-xl font-bold">${suite.nome}</h2>
-                        <button onclick="abrirModal('${suite.id}', '${pousadaId}')" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-xl transition">Solicitar</button>
-                    </div>
-                `;
-            });
+            if (suites) {
+                suites.forEach(suite => {
+                    container.innerHTML += `
+                        <div class="bg-white p-6 rounded-2xl shadow-lg border-l-8 border-green-500 flex justify-between items-center text-gray-800">
+                            <h2 class="text-xl font-bold">${suite.nome}</h2>
+                            <button onclick="abrirModal('${suite.id}', '${pousadaId}')" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-xl transition">Solicitar</button>
+                        </div>
+                    `;
+                });
+            }
         }
 
         function abrirModal(sId, pId) {
@@ -81,7 +82,7 @@
 
         document.getElementById('form-reserva').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const { error } = await supabase.from('reservas').insert([{
+            const { error } = await supabaseClient.from('reservas').insert([{
                 suite_id: document.getElementById('suite-id-reserva').value,
                 hospede_nome: document.getElementById('nome-hospede').value,
                 whatsapp_hospede: document.getElementById('whatsapp-hospede').value,
@@ -92,8 +93,14 @@
                 checkout: document.getElementById('checkout').value,
                 status: 'Pendente'
             }]);
-            if (error) alert("Erro: " + error.message);
-            else { alert("Solicitação enviada com sucesso!"); fecharModal(); }
+            
+            if (error) {
+                alert("Erro ao enviar solicitação: " + error.message);
+            } else { 
+                alert("Solicitação enviada com sucesso!"); 
+                fecharModal(); 
+                carregarDados();
+            }
         });
 
         carregarDados();
