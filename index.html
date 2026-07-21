@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Carregando a biblioteca do Supabase -->
+    <!-- Carregando a biblioteca do Supabase explicitamente -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <title>Login - Gestor de Pousadas</title>
     <style>
@@ -47,25 +47,46 @@
     </div>
 
     <script>
-        const supabaseClient = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
+        // Garante que o objeto global do Supabase está disponível antes de instanciar
+        const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
+        
+        let supabaseClient;
+        try {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        } catch (err) {
+            console.error("Erro ao inicializar o cliente Supabase:", err);
+        }
 
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            if (!supabaseClient) {
+                alert("Erro crítico: Biblioteca do Supabase não foi carregada corretamente.");
+                return;
+            }
+
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            // Primeiro, fazemos logout de qualquer sessão residual para limpar o cache
-            await supabaseClient.auth.signOut();
+            try {
+                // Primeiro, fazemos logout de qualquer sessão residual para limpar o cache
+                await supabaseClient.auth.signOut();
 
-            // Faz o login com as credenciais digitadas[cite: 10]
-            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                // Faz o login com as credenciais digitadas[cite: 11]
+                const response = await supabaseClient.auth.signInWithPassword({ email, password });
+                const data = response.data;
+                const error = response.error;
 
-            if (error) {
-                alert("Erro ao fazer login: " + error.message);
-            } else {
-                console.log("Login efetuado com sucesso para:", data.user.email);[cite: 10]
-                window.location.href = 'dashboard.html';[cite: 10]
+                if (error) {
+                    alert("Erro ao fazer login: " + error.message);
+                } else {
+                    console.log("Login efetuado com sucesso para:", data.user.email);[cite: 11]
+                    window.location.href = 'dashboard.html';[cite: 11]
+                }
+            } catch (err) {
+                console.error("Erro na execução do login:", err);
+                alert("Ocorreu um erro inesperado durante o login.");
             }
         });
     </script>
