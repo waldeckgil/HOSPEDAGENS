@@ -49,6 +49,16 @@
     <script>
         const supabaseClient = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
 
+        // Verifica ao carregar o index se já existe uma sessão ativa de gestor
+        async function verificarSessaoAtiva() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                // Se já estiver logado, redireciona direto para o painel de gestão
+                window.location.href = 'dashboard.html';
+            }
+        }
+        verificarSessaoAtiva();
+
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -58,14 +68,14 @@
             // Primeiro, fazemos logout de qualquer sessão residual para limpar o cache
             await supabaseClient.auth.signOut();
 
-            // Faz o login com as credenciais digitadas
+            // Faz o login com as credenciais digitadas[cite: 10]
             const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
             if (error) {
                 alert("Erro ao fazer login: " + error.message);
             } else {
-                console.log("Login efetuado com sucesso para:", data.user.email);
-                window.location.href = 'dashboard.html';
+                console.log("Login efetuado com sucesso para:", data.user.email);[cite: 10]
+                window.location.href = 'dashboard.html';[cite: 10]
             }
         });
     </script>
