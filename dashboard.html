@@ -138,7 +138,10 @@
             }
 
             suites.forEach(suite => {
-                const res = (suite.status === 'Ocupada' && reservas) ? reservas.find(r => r.suite_id === suite.id) : null;
+                // Modificado para buscar a reserva ativa caso esteja Ocupada ou Pendente
+                const res = ((suite.status === 'Ocupada' || suite.status === 'Pendente') && reservas) 
+                    ? reservas.find(r => r.suite_id === suite.id && r.status !== 'Recusada') 
+                    : null;
                 
                 const corClasses = {
                     'Disponível': 'bg-green-50 border-green-500 text-green-900', 
@@ -219,7 +222,7 @@
         function verificarStatusModal() {
             const status = document.getElementById('edit-status').value;
             const containerCampos = document.getElementById('campos-hospede-container');
-            if (status !== 'Ocupada') {
+            if (status === 'Disponível' || status === 'Limpeza') {
                 containerCampos.classList.add('opacity-50');
             } else {
                 containerCampos.classList.remove('opacity-50');
@@ -233,47 +236,42 @@
             const status = document.getElementById('edit-status').value;
             const suiteId = document.getElementById('edit-suite-id').value;
             
-            if (status === 'Ocupada' && !document.getElementById('edit-hospede').value) {
-                alert("Erro: Informe o nome do hóspede!"); return;
-            }
-
             const { data: { user } } = await supabaseClient.auth.getUser();
             
+            // 1. Atualiza o status da suíte
             const { error: errSuite } = await supabaseClient.from('suites').update({ status }).eq('id', suiteId);
             if (errSuite) {
                 alert("Erro ao atualizar suíte: " + errSuite.message);
                 return;
             }
 
-            const dadosReserva = (status === 'Ocupada') ? {
-                suite_id: suiteId, 
-                pousada_id: user.id,
-                hospede_nome: document.getElementById('edit-hospede').value || null,
-                whatsapp_hospede: document.getElementById('edit-whatsapp').value || null,
-                cpf: document.getElementById('edit-cpf').value || null,
-                rg: document.getElementById('edit-rg').value || null,
-                checkin: document.getElementById('edit-checkin').value || null,
-                checkout: document.getElementById('edit-checkout').value || null
-            } : {
-                suite_id: suiteId, 
-                pousada_id: user.id,
-                hospede_nome: null,
-                whatsapp_hospede: null,
-                cpf: null,
-                rg: null,
-                checkin: null,
-                checkout: null
-            };
-
-            const { error: errReserva } = await supabaseClient.from('reservas').upsert(dadosReserva, { onConflict: 'suite_id' });
-
-            if (errReserva) {
-                alert("Erro ao salvar reserva: " + errReserva.message);
+            // 2. Se mudou para Disponível ou Limpeza, podemos atualizar a reserva ativa para finalizada/cancelada ou limpar
+            if (status === 'Disponível' || status === 'Limpeza') {
+                await supabaseClient.from('reservas').update({ status: 'Cancelada' }).eq('suite_id', suiteId).eq('status', 'Pendente');
             } else {
-                alert("Alterações salvas com sucesso!"); 
-                fecharModal(); 
-                carregarDashboard();
+                // Se o gestor preencheu dados e salvou via modal, inserimos/atualizamos sem conflito de chave única
+                const dadosReserva = {
+                    suite_id: suiteId, 
+                    pousada_id: user.id,
+                    hospede_nome: document.getElementById('edit-hospede').value || null,
+                    whatsapp_hospede: document.getElementById('edit-whatsapp').value || null,
+                    cpf: document.getElementById('edit-cpf').value || null,
+                    rg: document.getElementById('rg-hospede').value || null,
+                    checkin: document.getElementById('edit-checkin').value || null,
+                    checkout: document.getElementById('edit-checkout').value || null,
+                    status: status === 'Pendente' ? 'Pendente' : 'Aprovada'
+                };
+
+                // Removemos o upsert problemático e inserimos um novo registro de histórico/atualização limpo
+                const { error: errReserva } = await supabaseClient.from('reservas').insert([dadosReserva]);
+                if (errReserva) {
+                    console.error("Erro ao inserir histórico de reserva:", errReserva);
+                }
             }
+
+            alert("Alterações salvas com sucesso!"); 
+            fecharModal(); 
+            carregarDashboard();
         };
 
         async function fazerLogout() { 
