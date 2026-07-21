@@ -26,22 +26,40 @@
             <h2 id="modal-titulo" class="text-2xl font-bold mb-4 text-blue-600">Editando Suíte</h2>
             <form id="form-edicao" class="space-y-3">
                 <input type="hidden" id="edit-suite-id">
-                <select id="edit-status" class="w-full p-3 border rounded-xl font-bold bg-gray-50">
-                    <option value="Disponível">Disponível</option>
-                    <option value="Ocupada">Ocupada</option>
-                    <option value="Limpeza">Limpeza</option>
-                    <option value="Pendente">Pendente</option>
-                </select>
-                <div class="grid grid-cols-2 gap-2">
+                
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Status da Suíte</label>
+                    <select id="edit-status" class="w-full p-3 border rounded-xl font-bold bg-gray-50">
+                        <option value="Disponível">Disponível</option>
+                        <option value="Ocupada">Ocupada</option>
+                        <option value="Limpeza">Limpeza</option>
+                        <option value="Pendente">Pendente</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-1 gap-2">
                     <input type="text" id="edit-hospede" placeholder="Nome Hóspede" class="p-3 border rounded-xl">
                     <input type="text" id="edit-whatsapp" placeholder="WhatsApp" class="p-3 border rounded-xl">
-                    <input type="text" id="edit-cpf" placeholder="CPF (Opcional)" class="p-3 border rounded-xl">
-                    <input type="text" id="edit-rg" placeholder="RG (Opcional)" class="p-3 border rounded-xl">
-                    <input type="date" id="edit-checkin" class="p-3 border rounded-xl">
-                    <input type="date" id="edit-checkout" class="p-3 border rounded-xl">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" id="edit-cpf" placeholder="CPF (Opcional)" class="p-3 border rounded-xl">
+                        <input type="text" id="edit-rg" placeholder="RG (Opcional)" class="p-3 border rounded-xl">
+                    </div>
                 </div>
-                <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-xl font-bold mt-4">Confirmar Reserva</button>
-                <button type="button" onclick="fecharModal()" class="w-full bg-gray-300 p-3 rounded-xl font-bold mt-2">Cancelar</button>
+
+                <!-- Campos de Data com Rótulos Claros -->
+                <div class="grid grid-cols-2 gap-3 pt-2">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-in</label>
+                        <input type="date" id="edit-checkin" class="w-full p-3 border rounded-xl bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-out</label>
+                        <input type="date" id="edit-checkout" class="w-full p-3 border rounded-xl bg-white">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold mt-4 transition">Salvar Alterações</button>
+                <button type="button" onclick="fecharModal()" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 p-3 rounded-xl font-bold mt-2 transition">Cancelar</button>
             </form>
         </div>
     </div>
@@ -63,21 +81,27 @@
 
             carregarPousada();
 
-            // Buscando as suítes fazendo join com as reservas para trazer dados detalhados
+            // Busca as suítes da pousada
             const { data: suites, error } = await supabaseClient
                 .from('suites')
-                .select(`id, nome, status, reservas(id, hospede_nome, whatsapp_hospede, cpf, rg, checkin, checkout, status)`)
+                .select('*')
                 .eq('pousada_id', user.id);
 
-            if (error) { console.error("Erro:", error); return; }
+            if (error) { console.error("Erro ao carregar suítes:", error); return; }
+
+            // Busca todas as reservas ativas desta pousada para cruzar em memória e evitar falhas de FK vazias
+            const { data: reservas } = await supabaseClient
+                .from('reservas')
+                .select('*')
+                .eq('pousada_id', user.id);
 
             const container = document.getElementById('suites-container');
             container.innerHTML = '';
 
             suites.forEach(suite => {
-                const res = (suite.reservas && suite.reservas.length > 0) ? suite.reservas[0] : null;
+                // Encontra a reserva correspondente a esta suíte (comparando o suite_id)
+                const res = reservas ? reservas.find(r => r.suite_id === suite.id) : null;
                 
-                // Mapeamento de cores para o semáforo mantendo o padrão visual
                 const corClasses = {
                     'Disponível': 'bg-green-50 border-green-500 text-green-900', 
                     'Ocupada': 'bg-gray-100 border-gray-600 text-gray-900', 
@@ -85,9 +109,9 @@
                     'Pendente': 'bg-yellow-50 border-yellow-500 text-yellow-900'
                 };
                 
-                // Formatação simples de data (AAAA-MM-DD para DD/MM/AAAA)
                 const formatarData = (dataStr) => {
                     if (!dataStr) return 'N/A';
+                    // Se a string vier no formato YYYY-MM-DD
                     const partes = dataStr.split('-');
                     if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
                     return dataStr;
@@ -110,7 +134,7 @@
                                 </span>
                             </div>
 
-                            <!-- Informações detalhadas da reserva diretamente no card -->
+                            <!-- Exibe os dados do hóspede direto no card se houver reserva vinculada -->
                             ${res && res.hospede_nome ? `
                                 <div class="mt-4 pt-3 border-t border-black/10 text-sm space-y-1.5">
                                     <p class="flex items-center gap-1.5">
@@ -166,18 +190,33 @@
             }
 
             const { data: { user } } = await supabaseClient.auth.getUser();
-            await supabaseClient.from('suites').update({ status }).eq('id', suiteId);
-            await supabaseClient.from('reservas').upsert({
-                suite_id: suiteId, pousada_id: user.id,
-                hospede_nome: document.getElementById('edit-hospede').value,
-                whatsapp_hospede: document.getElementById('edit-whatsapp').value,
-                cpf: document.getElementById('edit-cpf').value,
-                rg: document.getElementById('edit-rg').value,
+            
+            // 1. Atualiza o status da suíte
+            const { error: errSuite } = await supabaseClient.from('suites').update({ status }).eq('id', suiteId);
+            if (errSuite) {
+                alert("Erro ao atualizar suíte: " + errSuite.message);
+                return;
+            }
+
+            // 2. Faz o upsert na tabela de reservas usando o suite_id como chave de conflito
+            const { error: errReserva } = await supabaseClient.from('reservas').upsert({
+                suite_id: suiteId, 
+                pousada_id: user.id,
+                hospede_nome: document.getElementById('edit-hospede').value || null,
+                whatsapp_hospede: document.getElementById('edit-whatsapp').value || null,
+                cpf: document.getElementById('edit-cpf').value || null,
+                rg: document.getElementById('edit-rg').value || null,
                 checkin: document.getElementById('edit-checkin').value || null,
                 checkout: document.getElementById('edit-checkout').value || null
             }, { onConflict: 'suite_id' });
 
-            alert("Sucesso!"); fecharModal(); carregarDashboard();
+            if (errReserva) {
+                alert("Erro ao salvar reserva: " + errReserva.message);
+            } else {
+                alert("Alterações salvas com sucesso!"); 
+                fecharModal(); 
+                carregarDashboard();
+            }
         };
 
         async function fazerLogout() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
