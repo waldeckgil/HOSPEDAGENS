@@ -2,108 +2,286 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Gestão de Suítes</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <title>Nossas Suítes</title>
-    <style>
-        .bg-pousada {
-            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80');
-            background-size: cover;
-            background-position: center;
-            min-height: 100vh;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-pousada text-white p-4 md:p-8">
+<body class="bg-gray-100 p-8">
+    <!-- Navegação Superior -->
+    <nav class="bg-white shadow-md p-6 mb-8 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex flex-wrap gap-6 font-bold text-gray-700 items-center">
+            <a href="dashboard.html" class="text-blue-600 border-b-2 border-blue-600 pb-1">Gestão de Suítes</a>
+            <a href="reservas.html" class="hover:text-blue-600 transition">Ver Reservas (Pendentes)</a>
+            <a href="configurar-pousada.html" class="hover:text-blue-600 transition">Minha Pousada</a>
+            <button onclick="copiarLinkVitrine()" class="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 px-3 py-1.5 rounded-xl text-sm transition font-semibold flex items-center gap-1.5">
+                🔗 Copiar Link da Vitrine
+            </button>
+            <a id="link-ver-vitrine" href="#" target="_blank" class="bg-blue-50 text-blue-700 hover:bg-blue-100 px-3 py-1.5 rounded-xl text-sm transition font-semibold flex items-center gap-1.5">
+                👁️ Ver Vitrine (Visão Hóspede)
+            </a>
+        </div>
+        <div class="flex items-center gap-4">
+            <span id="titulo-pousada" class="font-bold text-gray-800">Carregando...</span>
+            <button onclick="fazerLogout()" class="bg-red-600 text-white font-bold py-2 px-4 rounded-xl">Sair</button>
+        </div>
+    </nav>
 
-    <div class="max-w-4xl mx-auto">
-        <h1 id="titulo-pousada" class="text-4xl font-extrabold mb-8 text-center drop-shadow-lg">Carregando Pousada...</h1>
-        <div id="vitrine-container" class="grid gap-6"></div>
-    </div>
+    <div id="suites-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
-    <!-- Modal de Reserva (Oculto) -->
-    <div id="modal-reserva" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
-        <div class="bg-white p-8 rounded-2xl w-full max-w-lg text-gray-800 shadow-2xl">
-            <h2 class="text-2xl font-bold mb-4 text-center">Solicitar Reserva</h2>
-            <form id="form-reserva" class="space-y-3">
-                <input type="hidden" id="suite-id-reserva">
-                <input type="text" id="nome-hospede" placeholder="Nome Completo" required class="w-full p-3 border rounded-xl">
-                <input type="text" id="whatsapp-hospede" placeholder="WhatsApp (DDD+Número)" required class="w-full p-3 border rounded-xl">
-                <input type="text" id="cpf-hospede" placeholder="CPF" required class="w-full p-3 border rounded-xl">
-                <input type="text" id="rg-hospede" placeholder="RG" required class="w-full p-3 border rounded-xl">
-                <input type="text" id="endereco-hospede" placeholder="Endereço Completo com Bairro" required class="w-full p-3 border rounded-xl">
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="date" id="checkin" required class="w-full p-3 border rounded-xl">
-                    <input type="date" id="checkout" required class="w-full p-3 border rounded-xl">
+    <!-- Modal de Edição -->
+    <div id="modal-edicao" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-8 rounded-2xl w-full max-w-lg shadow-2xl">
+            <h2 id="modal-titulo" class="text-2xl font-bold mb-4 text-blue-600">Editando Suíte</h2>
+            <form id="form-edicao" class="space-y-3">
+                <input type="hidden" id="edit-suite-id">
+                
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Status da Suíte</label>
+                    <select id="edit-status" class="w-full p-3 border rounded-xl font-bold bg-gray-50" onchange="verificarStatusModal()">
+                        <option value="Disponível">Disponível</option>
+                        <option value="Ocupada">Ocupada</option>
+                        <option value="Limpeza">Limpeza</option>
+                        <option value="Pendente">Pendente</option>
+                    </select>
                 </div>
-                <div class="flex gap-2 pt-2">
-                    <button type="button" onclick="fecharModal()" class="w-full bg-gray-300 p-3 rounded-xl font-bold">Cancelar</button>
-                    <button type="submit" class="w-full bg-green-600 text-white p-3 rounded-xl font-bold">Enviar</button>
+
+                <div id="campos-hospede-container" class="space-y-3 transition-all">
+                    <div class="grid grid-cols-1 gap-2">
+                        <input type="text" id="edit-hospede" placeholder="Nome Hóspede" class="p-3 border rounded-xl">
+                        <input type="text" id="edit-whatsapp" placeholder="WhatsApp" class="p-3 border rounded-xl">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="edit-cpf" placeholder="CPF (Opcional)" class="p-3 border rounded-xl">
+                            <input type="text" id="edit-rg" placeholder="RG (Opcional)" class="p-3 border rounded-xl">
+                        </div>
+                    </div>
+
+                    <!-- Campos de Data com Rótulos Claros -->
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-in</label>
+                            <input type="date" id="edit-checkin" class="w-full p-3 border rounded-xl bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-out</label>
+                            <input type="date" id="edit-checkout" class="w-full p-3 border rounded-xl bg-white">
+                        </div>
+                    </div>
                 </div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold mt-4 transition">Salvar Alterações</button>
+                <button type="button" onclick="fecharModal()" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 p-3 rounded-xl font-bold mt-2 transition">Cancelar</button>
             </form>
         </div>
     </div>
 
     <script>
-        // Nome alterado para 'supabaseClient' para evitar conflito com a global da biblioteca
-        const supabaseClient = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
+        const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function carregarDados() {
-            const params = new URLSearchParams(window.location.search);
-            const pousadaId = params.get('pousada_id') || '2ce55615-0d32-467a-a412-f9868ec8c9cf';
+        let usuarioIdAtual = null;
 
-            // Carrega nome da pousada
-            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', pousadaId).single();
-            document.getElementById('titulo-pousada').innerText = pousada?.nome || "Nossa Pousada";
+        async function carregarPousada() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) return;
+            usuarioIdAtual = user.id;
 
-            // Carrega suítes disponíveis
-            const { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', pousadaId).eq('status', 'Disponível');
-            const container = document.getElementById('vitrine-container');
-            
-            container.innerHTML = (suites && suites.length > 0) ? '' : '<p class="text-center">Nenhuma suíte disponível no momento.</p>';
-            
-            if (suites) {
-                suites.forEach(suite => {
-                    container.innerHTML += `
-                        <div class="bg-white p-6 rounded-2xl shadow-lg border-l-8 border-green-500 flex justify-between items-center text-gray-800">
-                            <h2 class="text-xl font-bold">${suite.nome}</h2>
-                            <button onclick="abrirModal('${suite.id}', '${pousadaId}')" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-xl transition">Solicitar</button>
+            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', user.id).single();
+            if (pousada) {
+                document.getElementById('titulo-pousada').innerText = "Pousada: " + pousada.nome;
+            } else {
+                document.getElementById('titulo-pousada').innerText = "Minha Pousada";
+            }
+
+            const urlVitrine = window.location.origin + `/vitrine.html?pousada_id=${user.id}`;
+            document.getElementById('link-ver-vitrine').href = urlVitrine;
+        }
+
+        function copiarLinkVitrine() {
+            if (!usuarioIdAtual) {
+                alert("Aguarde o carregamento dos dados da pousada.");
+                return;
+            }
+            const urlVitrine = window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`;
+            navigator.clipboard.writeText(urlVitrine).then(() => {
+                alert("Link da vitrine copiado para a área de transferência!");
+            }).catch(err => {
+                console.error("Erro ao copiar link: ", err);
+                prompt("Copie o link abaixo:", urlVitrine);
+            });
+        }
+
+        async function carregarDashboard() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) { window.location.href = 'index.html'; return; }
+
+            await carregarPousada();
+
+            const { data: suites, error } = await supabaseClient
+                .from('suites')
+                .select('*')
+                .eq('pousada_id', user.id);
+
+            if (error) { console.error("Erro ao carregar suítes:", error); return; }
+
+            const { data: reservas } = await supabaseClient
+                .from('reservas')
+                .select('*')
+                .eq('pousada_id', user.id);
+
+            const container = document.getElementById('suites-container');
+            container.innerHTML = '';
+
+            if (!suites || suites.length === 0) {
+                container.innerHTML = '<p class="text-gray-600 col-span-3 text-center">Nenhuma suíte cadastrada. Vá em "Minha Pousada" para cadastrar.</p>';
+                return;
+            }
+
+            suites.forEach(suite => {
+                const res = (suite.status === 'Ocupada' && reservas) ? reservas.find(r => r.suite_id === suite.id) : null;
+                
+                const corClasses = {
+                    'Disponível': 'bg-green-50 border-green-500 text-green-900', 
+                    'Ocupada': 'bg-gray-100 border-gray-600 text-gray-900', 
+                    'Limpeza': 'bg-red-50 border-red-500 text-red-900', 
+                    'Pendente': 'bg-yellow-50 border-yellow-500 text-yellow-900'
+                };
+                
+                const formatarData = (dataStr) => {
+                    if (!dataStr) return 'N/A';
+                    const partes = dataStr.split('-');
+                    if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
+                    return dataStr;
+                };
+
+                const cardClass = corClasses[suite.status] || 'bg-white border-gray-300';
+                
+                container.innerHTML += `
+                    <div class="p-6 rounded-2xl shadow-md border-l-8 ${cardClass} flex flex-col justify-between transition hover:shadow-lg cursor-pointer bg-white" 
+                         onclick="abrirModal('${suite.id}', '${suite.nome}', ${JSON.stringify(res || {}).replace(/"/g, '&quot;')}, '${suite.status}')">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <h2 class="text-xl font-bold text-gray-800">${suite.nome}</h2>
+                                <span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase shadow-sm ${
+                                    suite.status === 'Disponível' ? 'bg-green-200 text-green-800' :
+                                    suite.status === 'Ocupada' ? 'bg-gray-300 text-gray-800' :
+                                    suite.status === 'Limpeza' ? 'bg-red-200 text-red-800' : 'bg-yellow-200 text-yellow-800'
+                                }">
+                                    ${suite.status}
+                                </span>
+                            </div>
+
+                            ${res && res.hospede_nome ? `
+                                <div class="mt-4 pt-3 border-t border-black/10 text-sm space-y-1.5">
+                                    <p class="flex items-center gap-1.5">
+                                        <span class="font-semibold text-gray-600">Hóspede:</span> 
+                                        <span class="font-bold text-gray-900 truncate">${res.hospede_nome}</span>
+                                    </p>
+                                    <p class="flex items-center gap-1.5">
+                                        <span class="font-semibold text-gray-600">WhatsApp:</span> 
+                                        <span>${res.whatsapp_hospede || 'Não informado'}</span>
+                                    </p>
+                                    <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-black/5 text-xs">
+                                        <p><span class="text-gray-500">Check-in:</span> <strong class="text-gray-800">${formatarData(res.checkin)}</strong></p>
+                                        <p><span class="text-gray-500">Check-out:</span> <strong class="text-gray-800">${formatarData(res.checkout)}</strong></p>
+                                    </div>
+                                </div>
+                            ` : `
+                                <div class="mt-4 pt-3 border-t border-black/10 text-xs text-gray-500 italic">
+                                    Nenhuma reserva ativa vinculada no momento.
+                                </div>
+                            `}
                         </div>
-                    `;
-                });
-            }
-        }
 
-        function abrirModal(sId, pId) {
-            document.getElementById('suite-id-reserva').value = sId;
-            document.getElementById('modal-reserva').classList.remove('hidden');
+                        <div class="mt-5 pt-3 flex justify-end">
+                            <span class="text-xs font-bold text-blue-600 hover:underline">
+                                Gerenciar / Editar &rarr;
+                            </span>
+                        </div>
+                    </div>`;
+            });
         }
-        function fecharModal() { document.getElementById('modal-reserva').classList.add('hidden'); }
-
-        document.getElementById('form-reserva').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const { error } = await supabaseClient.from('reservas').insert([{
-                suite_id: document.getElementById('suite-id-reserva').value,
-                hospede_nome: document.getElementById('nome-hospede').value,
-                whatsapp_hospede: document.getElementById('whatsapp-hospede').value,
-                cpf: document.getElementById('cpf-hospede').value,
-                rg: document.getElementById('rg-hospede').value,
-                endereco: document.getElementById('endereco-hospede').value,
-                checkin: document.getElementById('checkin').value,
-                checkout: document.getElementById('checkout').value,
-                status: 'Pendente'
-            }]);
+        
+        function abrirModal(id, nome, reserva, status) {
+            document.getElementById('edit-suite-id').value = id;
+            document.getElementById('edit-status').value = status;
+            document.getElementById('edit-hospede').value = reserva.hospede_nome || '';
+            document.getElementById('edit-whatsapp').value = reserva.whatsapp_hospede || '';
+            document.getElementById('edit-cpf').value = reserva.cpf || '';
+            document.getElementById('edit-rg').value = reserva.rg || '';
+            document.getElementById('edit-checkin').value = reserva.checkin || '';
+            document.getElementById('edit-checkout').value = reserva.checkout || '';
             
-            if (error) {
-                alert("Erro ao enviar solicitação: " + error.message);
-            } else { 
-                alert("Solicitação enviada com sucesso!"); 
-                fecharModal(); 
-                carregarDados();
-            }
-        });
+            verificarStatusModal();
+            document.getElementById('modal-edicao').classList.remove('hidden');
+        }
 
-        carregarDados();
+        function verificarStatusModal() {
+            const status = document.getElementById('edit-status').value;
+            const containerCampos = document.getElementById('campos-hospede-container');
+            if (status !== 'Ocupada') {
+                containerCampos.classList.add('opacity-50');
+            } else {
+                containerCampos.classList.remove('opacity-50');
+            }
+        }
+
+        function fecharModal() { document.getElementById('modal-edicao').classList.add('hidden'); }
+
+        document.getElementById('form-edicao').onsubmit = async (e) => {
+            e.preventDefault();
+            const status = document.getElementById('edit-status').value;
+            const suiteId = document.getElementById('edit-suite-id').value;
+            
+            if (status === 'Ocupada' && !document.getElementById('edit-hospede').value) {
+                alert("Erro: Informe o nome do hóspede!"); return;
+            }
+
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            
+            const { error: errSuite } = await supabaseClient.from('suites').update({ status }).eq('id', suiteId);
+            if (errSuite) {
+                alert("Erro ao atualizar suíte: " + errSuite.message);
+                return;
+            }
+
+            const dadosReserva = (status === 'Ocupada') ? {
+                suite_id: suiteId, 
+                pousada_id: user.id,
+                hospede_nome: document.getElementById('edit-hospede').value || null,
+                whatsapp_hospede: document.getElementById('edit-whatsapp').value || null,
+                cpf: document.getElementById('edit-cpf').value || null,
+                rg: document.getElementById('edit-rg').value || null,
+                checkin: document.getElementById('edit-checkin').value || null,
+                checkout: document.getElementById('edit-checkout').value || null
+            } : {
+                suite_id: suiteId, 
+                pousada_id: user.id,
+                hospede_nome: null,
+                whatsapp_hospede: null,
+                cpf: null,
+                rg: null,
+                checkin: null,
+                checkout: null
+            };
+
+            const { error: errReserva } = await supabaseClient.from('reservas').upsert(dadosReserva, { onConflict: 'suite_id' });
+
+            if (errReserva) {
+                alert("Erro ao salvar reserva: " + errReserva.message);
+            } else {
+                alert("Alterações salvas com sucesso!"); 
+                fecharModal(); 
+                carregarDashboard();
+            }
+        };
+
+        async function fazerLogout() { 
+            await supabaseClient.auth.signOut(); 
+            window.location.href = 'index.html'; 
+        }
+        
+        carregarDashboard();
     </script>
 </body>
 </html>
