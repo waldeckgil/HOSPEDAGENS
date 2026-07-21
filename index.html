@@ -49,15 +49,6 @@
     <script>
         const supabaseClient = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
 
-        // Verificação segura de sessão sem conflito de dois-pontos
-        async function verificarSessaoAtiva() {
-            const response = await supabaseClient.auth.getSession();
-            if (response && response.data && response.data.session) {
-                window.location.href = 'dashboard.html';
-            }
-        }
-        verificarSessaoAtiva();
-
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
