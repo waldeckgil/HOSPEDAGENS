@@ -82,7 +82,13 @@
 
         document.getElementById('form-reserva').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            // Pega o ID da pousada direto da URL para vincular a reserva corretamente
+            const params = new URLSearchParams(window.location.search);
+            const pousadaId = params.get('pousada_id') || '2ce55615-0d32-467a-a412-f9868ec8c9cf';
+
             const { error } = await supabaseClient.from('reservas').insert([{
+                pousada_id: pousadaId, // <--- Adicionado para resolver o vínculo com o dashboard
                 suite_id: document.getElementById('suite-id-reserva').value,
                 hospede_nome: document.getElementById('nome-hospede').value,
                 whatsapp_hospede: document.getElementById('whatsapp-hospede').value,
