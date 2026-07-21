@@ -7,10 +7,19 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-8">
-    <nav class="bg-white shadow-md p-6 mb-8 rounded-2xl flex justify-between items-center">
-        <div class="flex gap-8 font-bold text-gray-700">
+    <!-- Navegação Superior Aprimorada -->
+    <nav class="bg-white shadow-md p-6 mb-8 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex flex-wrap gap-6 font-bold text-gray-700 items-center">
             <a href="dashboard.html" class="text-blue-600 border-b-2 border-blue-600 pb-1">Gestão de Suítes</a>
+            <a href="reservas.html" class="hover:text-blue-600 transition">Ver Reservas (Pendentes)</a>
             <a href="configurar-pousada.html" class="hover:text-blue-600 transition">Minha Pousada</a>
+            <!-- Atalhos da Vitrine -->
+            <button onclick="copiarLinkVitrine()" class="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 px-3 py-1.5 rounded-xl text-sm transition font-semibold flex items-center gap-1.5">
+                🔗 Copiar Link da Vitrine
+            </button>
+            <a id="link-ver-vitrine" href="#" target="_blank" class="bg-blue-50 text-blue-700 hover:bg-blue-100 px-3 py-1.5 rounded-xl text-sm transition font-semibold flex items-center gap-1.5">
+                👁️ Ver Vitrine (Visão Hóspede)
+            </a>
         </div>
         <div class="flex items-center gap-4">
             <span id="titulo-pousada" class="font-bold text-gray-800">Carregando...</span>
@@ -69,17 +78,42 @@
     <script>
         const supabaseClient = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
 
+        let usuarioIdAtual = null;
+
         async function carregarPousada() {
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) return;
+            usuarioIdAtual = user.id;
+
             const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', user.id).single();
-            if (pousada) document.getElementById('titulo-pousada').innerText = "Pousada: " + pousada.nome;
-            else document.getElementById('titulo-pousada').innerText = "Minha Pousada";
+            if (pousada) {
+                document.getElementById('titulo-pousada').innerText = "Pousada: " + pousada.nome;
+            } else {
+                document.getElementById('titulo-pousada').innerText = "Minha Pousada";
+            }
+
+            // Configura dinamicamente o link da vitrine com o ID da pousada logada
+            const urlVitrine = window.location.origin + `/vitrine.html?pousada_id=${user.id}`;
+            document.getElementById('link-ver-vitrine').href = urlVitrine;
+        }
+
+        function copiarLinkVitrine() {
+            if (!usuarioIdAtual) {
+                alert("Aguarde o carregamento dos dados da pousada.");
+                return;
+            }
+            const urlVitrine = window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`;
+            navigator.clipboard.writeText(urlVitrine).then(() => {
+                alert("Link da vitrine copiado para a área de transferência! Envie para o seu hóspede.");
+            }).catch(err => {
+                console.error("Erro ao copiar link: ", err);
+                prompt("Copie o link abaixo:", urlVitrine);
+            });
         }
 
         async function carregarDashboard() {
             const { data: { user } } = await supabaseClient.auth.getUser();
-            if (!user) return;
+            if (!user) { window.location.href = 'index.html'; return; }
 
             carregarPousada();
 
@@ -99,7 +133,6 @@
             container.innerHTML = '';
 
             suites.forEach(suite => {
-                // Se a suíte não estiver ocupada, ignoramos a reserva para fins visuais no card
                 const res = (suite.status === 'Ocupada' && reservas) ? reservas.find(r => r.suite_id === suite.id) : null;
                 
                 const corClasses = {
@@ -181,9 +214,6 @@
         function verificarStatusModal() {
             const status = document.getElementById('edit-status').value;
             const containerCampos = document.getElementById('campos-hospede-container');
-            
-            // Se não estiver ocupada, podemos opcionalmente atenuar ou avisar, 
-            // mas mantemos visível para edição caso queira limpar ou preparar
             if (status !== 'Ocupada') {
                 containerCampos.classList.add('opacity-50');
             } else {
@@ -204,14 +234,12 @@
 
             const { data: { user } } = await supabaseClient.auth.getUser();
             
-            // 1. Atualiza o status da suíte
             const { error: errSuite } = await supabaseClient.from('suites').update({ status }).eq('id', suiteId);
             if (errSuite) {
                 alert("Erro ao atualizar suíte: " + errSuite.message);
                 return;
             }
 
-            // 2. Se o status NÃO for Ocupada, limpamos/zeramos os dados da reserva associada à suíte
             const dadosReserva = (status === 'Ocupada') ? {
                 suite_id: suiteId, 
                 pousada_id: user.id,
