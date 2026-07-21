@@ -29,7 +29,7 @@
                 
                 <div>
                     <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Status da Suíte</label>
-                    <select id="edit-status" class="w-full p-3 border rounded-xl font-bold bg-gray-50">
+                    <select id="edit-status" class="w-full p-3 border rounded-xl font-bold bg-gray-50" onchange="verificarStatusModal()">
                         <option value="Disponível">Disponível</option>
                         <option value="Ocupada">Ocupada</option>
                         <option value="Limpeza">Limpeza</option>
@@ -37,24 +37,26 @@
                     </select>
                 </div>
 
-                <div class="grid grid-cols-1 gap-2">
-                    <input type="text" id="edit-hospede" placeholder="Nome Hóspede" class="p-3 border rounded-xl">
-                    <input type="text" id="edit-whatsapp" placeholder="WhatsApp" class="p-3 border rounded-xl">
-                    <div class="grid grid-cols-2 gap-2">
-                        <input type="text" id="edit-cpf" placeholder="CPF (Opcional)" class="p-3 border rounded-xl">
-                        <input type="text" id="edit-rg" placeholder="RG (Opcional)" class="p-3 border rounded-xl">
+                <div id="campos-hospede-container" class="space-y-3 transition-all">
+                    <div class="grid grid-cols-1 gap-2">
+                        <input type="text" id="edit-hospede" placeholder="Nome Hóspede" class="p-3 border rounded-xl">
+                        <input type="text" id="edit-whatsapp" placeholder="WhatsApp" class="p-3 border rounded-xl">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="edit-cpf" placeholder="CPF (Opcional)" class="p-3 border rounded-xl">
+                            <input type="text" id="edit-rg" placeholder="RG (Opcional)" class="p-3 border rounded-xl">
+                        </div>
                     </div>
-                </div>
 
-                <!-- Campos de Data com Rótulos Claros -->
-                <div class="grid grid-cols-2 gap-3 pt-2">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-in</label>
-                        <input type="date" id="edit-checkin" class="w-full p-3 border rounded-xl bg-white">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-out</label>
-                        <input type="date" id="edit-checkout" class="w-full p-3 border rounded-xl bg-white">
+                    <!-- Campos de Data com Rótulos Claros -->
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-in</label>
+                            <input type="date" id="edit-checkin" class="w-full p-3 border rounded-xl bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-out</label>
+                            <input type="date" id="edit-checkout" class="w-full p-3 border rounded-xl bg-white">
+                        </div>
                     </div>
                 </div>
 
@@ -81,7 +83,6 @@
 
             carregarPousada();
 
-            // Busca as suítes da pousada
             const { data: suites, error } = await supabaseClient
                 .from('suites')
                 .select('*')
@@ -89,7 +90,6 @@
 
             if (error) { console.error("Erro ao carregar suítes:", error); return; }
 
-            // Busca todas as reservas ativas desta pousada para cruzar em memória e evitar falhas de FK vazias
             const { data: reservas } = await supabaseClient
                 .from('reservas')
                 .select('*')
@@ -99,8 +99,8 @@
             container.innerHTML = '';
 
             suites.forEach(suite => {
-                // Encontra a reserva correspondente a esta suíte (comparando o suite_id)
-                const res = reservas ? reservas.find(r => r.suite_id === suite.id) : null;
+                // Se a suíte não estiver ocupada, ignoramos a reserva para fins visuais no card
+                const res = (suite.status === 'Ocupada' && reservas) ? reservas.find(r => r.suite_id === suite.id) : null;
                 
                 const corClasses = {
                     'Disponível': 'bg-green-50 border-green-500 text-green-900', 
@@ -111,7 +111,6 @@
                 
                 const formatarData = (dataStr) => {
                     if (!dataStr) return 'N/A';
-                    // Se a string vier no formato YYYY-MM-DD
                     const partes = dataStr.split('-');
                     if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
                     return dataStr;
@@ -134,7 +133,6 @@
                                 </span>
                             </div>
 
-                            <!-- Exibe os dados do hóspede direto no card se houver reserva vinculada -->
                             ${res && res.hospede_nome ? `
                                 <div class="mt-4 pt-3 border-t border-black/10 text-sm space-y-1.5">
                                     <p class="flex items-center gap-1.5">
@@ -175,7 +173,22 @@
             document.getElementById('edit-rg').value = reserva.rg || '';
             document.getElementById('edit-checkin').value = reserva.checkin || '';
             document.getElementById('edit-checkout').value = reserva.checkout || '';
+            
+            verificarStatusModal();
             document.getElementById('modal-edicao').classList.remove('hidden');
+        }
+
+        function verificarStatusModal() {
+            const status = document.getElementById('edit-status').value;
+            const containerCampos = document.getElementById('campos-hospede-container');
+            
+            // Se não estiver ocupada, podemos opcionalmente atenuar ou avisar, 
+            // mas mantemos visível para edição caso queira limpar ou preparar
+            if (status !== 'Ocupada') {
+                containerCampos.classList.add('opacity-50');
+            } else {
+                containerCampos.classList.remove('opacity-50');
+            }
         }
 
         function fecharModal() { document.getElementById('modal-edicao').classList.add('hidden'); }
@@ -198,8 +211,8 @@
                 return;
             }
 
-            // 2. Faz o upsert na tabela de reservas usando o suite_id como chave de conflito
-            const { error: errReserva } = await supabaseClient.from('reservas').upsert({
+            // 2. Se o status NÃO for Ocupada, limpamos/zeramos os dados da reserva associada à suíte
+            const dadosReserva = (status === 'Ocupada') ? {
                 suite_id: suiteId, 
                 pousada_id: user.id,
                 hospede_nome: document.getElementById('edit-hospede').value || null,
@@ -208,7 +221,18 @@
                 rg: document.getElementById('edit-rg').value || null,
                 checkin: document.getElementById('edit-checkin').value || null,
                 checkout: document.getElementById('edit-checkout').value || null
-            }, { onConflict: 'suite_id' });
+            } : {
+                suite_id: suiteId, 
+                pousada_id: user.id,
+                hospede_nome: null,
+                whatsapp_hospede: null,
+                cpf: null,
+                rg: null,
+                checkin: null,
+                checkout: null
+            };
+
+            const { error: errReserva } = await supabaseClient.from('reservas').upsert(dadosReserva, { onConflict: 'suite_id' });
 
             if (errReserva) {
                 alert("Erro ao salvar reserva: " + errReserva.message);
