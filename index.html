@@ -53,7 +53,6 @@
         async function verificarSessaoAtiva() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
-                // Se já estiver logado, redireciona direto para o painel de gestão
                 window.location.href = 'dashboard.html';
             }
         }
