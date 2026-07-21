@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Carregando a biblioteca do Supabase explicitamente -->
+    <!-- Carregando a biblioteca do Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <title>Login - Gestor de Pousadas</title>
     <style>
@@ -47,46 +47,36 @@
     </div>
 
     <script>
-        // Garante que o objeto global do Supabase está disponível antes de instanciar
+        // Inicialização padronizada igual ao resto do projeto
         const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
-        
-        let supabaseClient;
-        try {
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        } catch (err) {
-            console.error("Erro ao inicializar o cliente Supabase:", err);
-        }
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            if (!supabaseClient) {
-                alert("Erro crítico: Biblioteca do Supabase não foi carregada corretamente.");
-                return;
-            }
-
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
             try {
-                // Primeiro, fazemos logout de qualquer sessão residual para limpar o cache
+                // Limpa qualquer sessão anterior de forma segura
                 await supabaseClient.auth.signOut();
 
-                // Faz o login com as credenciais digitadas[cite: 11]
-                const response = await supabaseClient.auth.signInWithPassword({ email, password });
-                const data = response.data;
-                const error = response.error;
+                // Executa o login sem usar desestruturação complexa para evitar erros no navegador
+                const resultado = await supabaseClient.auth.signInWithPassword({ 
+                    email: email, 
+                    password: password 
+                });
 
-                if (error) {
-                    alert("Erro ao fazer login: " + error.message);
+                if (resultado.error) {
+                    alert("Erro ao fazer login: " + resultado.error.message);
                 } else {
-                    console.log("Login efetuado com sucesso para:", data.user.email);[cite: 11]
-                    window.location.href = 'dashboard.html';[cite: 11]
+                    console.log("Login efetuado com sucesso para:", resultado.data.user.email);
+                    window.location.href = 'dashboard.html';
                 }
             } catch (err) {
-                console.error("Erro na execução do login:", err);
-                alert("Ocorreu um erro inesperado durante o login.");
+                console.error("Erro inesperado no login:", err);
+                alert("Ocorreu um erro ao tentar realizar o login.");
             }
         });
     </script>
