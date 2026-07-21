@@ -49,10 +49,10 @@
     <script>
         const supabaseClient = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
 
-        // Verifica ao carregar o index se já existe uma sessão ativa de gestor
+        // Verificação segura de sessão sem conflito de dois-pontos
         async function verificarSessaoAtiva() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) {
+            const response = await supabaseClient.auth.getSession();
+            if (response && response.data && response.data.session) {
                 window.location.href = 'dashboard.html';
             }
         }
