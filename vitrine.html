@@ -130,8 +130,12 @@
             const params = new URLSearchParams(window.location.search);
             const pousadaId = params.get('pousada_id') || '2ce55615-0d32-467a-a412-f9868ec8c9cf';
             const suiteId = document.getElementById('suite-id-reserva').value;
+            
+            // Captura os valores preenchidos no formulário
             const nomeHospede = document.getElementById('nome-hospede').value;
             const emailHospede = document.getElementById('email-hospede').value;
+            const checkinVal = document.getElementById('checkin').value;
+            const checkoutVal = document.getElementById('checkout').value;
 
             // 1. Insere os dados da nova reserva na tabela 'reservas' do banco de dados
             const { error: errReserva } = await supabaseClient.from('reservas').insert([{
@@ -143,8 +147,8 @@
                 cpf: document.getElementById('cpf-hospede').value,
                 rg: document.getElementById('rg-hospede').value,
                 endereco: document.getElementById('endereco-hospede').value,
-                checkin: document.getElementById('checkin').value,
-                checkout: document.getElementById('checkout').value,
+                checkin: checkinVal,
+                checkout: checkoutVal,
                 status: 'Pendente'
             }]);
             
@@ -171,17 +175,21 @@
                 return;
             }
 
-            // 3. Disparo direto da Edge Function para envio de e-mail via SendGrid
+            // 3. Disparo estruturado da Edge Function passando o objeto 'record' esperado pelo script do e-mail
             try {
-                await supabaseClient.functions.invoke('enviar-email-reserva', {
+                const responseEmail = await supabaseClient.functions.invoke('enviar-email-reserva', {
                     body: {
-                        hospede_nome: nomeHospede,
-                        email: emailHospede
+                        record: {
+                            hospede_nome: nomeHospede,
+                            email: emailHospede,
+                            checkin: checkinVal,
+                            checkout: checkoutVal
+                        }
                     }
                 });
+                console.log("Retorno do envio de e-mail:", responseEmail);
             } catch (errEmail) {
-                // Caso ocorra falha no e-mail, registramos no console mas mantemos o fluxo de sucesso visível ao cliente
-                console.warn("Aviso: A reserva foi salva, mas houve um erro ao disparar o e-mail:", errEmail);
+                console.warn("Aviso: A reserva foi salva, mas houve uma exceção ao chamar a função de e-mail:", errEmail);
             }
 
             // Restaura o botão e exibe a mensagem de sucesso ao usuário
@@ -190,8 +198,7 @@
             document.getElementById('form-reserva').style.display = 'none';
             msgSucesso.classList.remove('hidden');
             
-            
-            // Fecha automaticamente o modal após 2.5 segundos
+            // Fecha automaticamente o modal após 2.5 segundos e recarrega os dados
             setTimeout(() => {
                 fecharModal();
             }, 2500);
