@@ -2,10 +2,13 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <!-- Importação do Tailwind CSS para estilização rápida e moderna -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Importação do SDK oficial do Supabase para conexão com o banco de dados e funções -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <title>Nossas Suítes</title>
     <style>
+        /* Estilização personalizada para o plano de fundo da página da pousada */
         .bg-pousada {
             background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80');
             background-size: cover;
@@ -16,25 +19,30 @@
 </head>
 <body class="bg-pousada text-white p-4 md:p-8">
 
+    <!-- Container Principal da Vitrine -->
     <div class="max-w-4xl mx-auto">
+        <!-- Título dinâmico da pousada carregado via JavaScript -->
         <h1 id="titulo-pousada" class="text-4xl font-extrabold mb-8 text-center drop-shadow-lg">Carregando Pousada...</h1>
+        <!-- Container onde as suítes disponíveis serão injetadas dinamicamente -->
         <div id="vitrine-container" class="grid gap-6"></div>
     </div>
 
-    <!-- Modal de Reserva (Oculto) -->
+    <!-- Modal de Solicitação de Reserva (Incialmente Oculto) -->
     <div id="modal-reserva" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-8 rounded-2xl w-full max-w-lg text-gray-800 shadow-2xl relative">
             <h2 class="text-2xl font-bold mb-4 text-center">Solicitar Reserva</h2>
             
-            <!-- Mensagem de Sucesso Embutida na Tela -->
+            <!-- Mensagem de Sucesso Embutida na Tela (Oculta por padrão) -->
             <div id="feedback-sucesso" class="hidden mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-xl text-center font-semibold">
                 🎉 Solicitação enviada com sucesso! O gestor analisará seu pedido em breve.
             </div>
 
-            <!-- Mensagem de Erro Embutida na Tela -->
+            <!-- Mensagem de Erro Embutida na Tela (Oculta por padrão) -->
             <div id="feedback-erro" class="hidden mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl text-center font-semibold"></div>
 
+            <!-- Formulário de dados do hóspede -->
             <form id="form-reserva" class="space-y-3">
+                <!-- Campo oculto para armazenar o ID da suíte selecionada -->
                 <input type="hidden" id="suite-id-reserva">
                 <input type="text" id="nome-hospede" placeholder="Nome Completo" required class="w-full p-3 border rounded-xl">
                 <input type="email" id="email-hospede" placeholder="E-mail (ex: seu@email.com)" required class="w-full p-3 border rounded-xl">
@@ -47,7 +55,9 @@
                     <input type="date" id="checkout" required class="w-full p-3 border rounded-xl">
                 </div>
                 <div class="flex gap-2 pt-2">
+                    <!-- Botão para fechar o modal sem salvar -->
                     <button type="button" onclick="fecharModal()" class="w-full bg-gray-300 hover:bg-gray-400 p-3 rounded-xl font-bold transition">Cancelar</button>
+                    <!-- Botão de submissão do formulário -->
                     <button type="submit" id="btn-enviar" class="w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded-xl font-bold transition">Enviar Solicitação</button>
                 </div>
             </form>
@@ -55,18 +65,25 @@
     </div>
 
     <script>
+        // Inicialização do cliente Supabase com as credenciais do projeto
         const supabaseClient = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
 
+        // Função assíncrona responsável por carregar os dados da pousada e suas suítes disponíveis
         async function carregarDados() {
+            // Captura os parâmetros passados na URL (ex: ?pousada_id=...)
             const params = new URLSearchParams(window.location.search);
+            // Define o ID da pousada (usa o parâmetro da URL ou um ID padrão de fallback)
             const pousadaId = params.get('pousada_id') || '2ce55615-0d32-467a-a412-f9868ec8c9cf';
 
+            // Consulta o nome da pousada no banco de dados
             const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', pousadaId).single();
             document.getElementById('titulo-pousada').innerText = pousada?.nome || "Nossa Pousada";
 
+            // Consulta as suítes vinculadas à pousada que estão com o status 'Disponível'
             const { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', pousadaId).eq('status', 'Disponível');
             const container = document.getElementById('vitrine-container');
             
+            // Renderiza mensagem caso não existam suítes ou lista os cards de suítes disponíveis
             container.innerHTML = (suites && suites.length > 0) ? '' : '<p class="text-center">Nenhuma suíte disponível no momento.</p>';
             
             if (suites) {
@@ -81,6 +98,7 @@
             }
         }
 
+        // Função para abrir o modal de reserva populando o ID da suíte e limpando campos anteriores
         function abrirModal(sId) {
             document.getElementById('suite-id-reserva').value = sId;
             document.getElementById('form-reserva').reset();
@@ -90,18 +108,21 @@
             document.getElementById('modal-reserva').classList.remove('hidden');
         }
 
+        // Função para fechar o modal de reserva e atualizar os dados da vitrine
         function fecharModal() { 
             document.getElementById('modal-reserva').classList.add('hidden'); 
             carregarDados();
         }
 
+        // Evento disparado ao enviar o formulário de solicitação de reserva
         document.getElementById('form-reserva').addEventListener('submit', async (e) => {
-            e.preventDefault();
+            e.preventDefault(); // Previne o comportamento padrão de recarregamento da página
             
             const btnEnviar = document.getElementById('btn-enviar');
             const msgSucesso = document.getElementById('feedback-sucesso');
             const msgErro = document.getElementById('feedback-erro');
             
+            // Limpa erros anteriores e bloqueia o botão indicando processamento
             msgErro.classList.add('hidden');
             btnEnviar.disabled = true;
             btnEnviar.innerText = "Enviando...";
@@ -109,13 +130,15 @@
             const params = new URLSearchParams(window.location.search);
             const pousadaId = params.get('pousada_id') || '2ce55615-0d32-467a-a412-f9868ec8c9cf';
             const suiteId = document.getElementById('suite-id-reserva').value;
+            const nomeHospede = document.getElementById('nome-hospede').value;
+            const emailHospede = document.getElementById('email-hospede').value;
 
-            // 1. Insere a reserva na tabela reservas com o pousada_id e o email do hóspede corretos
+            // 1. Insere os dados da nova reserva na tabela 'reservas' do banco de dados
             const { error: errReserva } = await supabaseClient.from('reservas').insert([{
                 pousada_id: pousadaId,
                 suite_id: suiteId,
-                hospede_nome: document.getElementById('nome-hospede').value,
-                email: document.getElementById('email-hospede').value,
+                hospede_nome: nomeHospede,
+                email: emailHospede,
                 whatsapp_hospede: document.getElementById('whatsapp-hospede').value,
                 cpf: document.getElementById('cpf-hospede').value,
                 rg: document.getElementById('rg-hospede').value,
@@ -125,6 +148,7 @@
                 status: 'Pendente'
             }]);
             
+            // Tratamento de erro caso a inserção da reserva falhe
             if (errReserva) {
                 btnEnviar.disabled = false;
                 btnEnviar.innerText = "Enviar Solicitação";
@@ -133,28 +157,47 @@
                 return;
             }
 
-            // 2. Atualiza o status da suíte para 'Pendente' para o card mudar no dashboard do gestor
+            // 2. Atualiza o status da suíte para 'Pendente' para refletir a mudança no painel do gestor
             const { error: errSuite } = await supabaseClient
                 .from('suites')
                 .update({ status: 'Pendente' })
                 .eq('id', suiteId);
 
-            btnEnviar.disabled = false;
-            btnEnviar.innerText = "Enviar Solicitação";
-
             if (errSuite) {
+                btnEnviar.disabled = false;
+                btnEnviar.innerText = "Enviar Solicitação";
                 msgErro.innerText = "Erro ao atualizar status da suíte: " + errSuite.message;
                 msgErro.classList.remove('hidden');
-            } else { 
-                document.getElementById('form-reserva').style.display = 'none';
-                msgSucesso.classList.remove('hidden');
-                
-                setTimeout(() => {
-                    fecharModal();
-                }, 2500);
+                return;
             }
+
+            // 3. Disparo direto da Edge Function para envio de e-mail via SendGrid
+            try {
+                await supabaseClient.functions.invoke('enviar-email-reserva', {
+                    body: {
+                        hospede_nome: nomeHospede,
+                        email: emailHospede
+                    }
+                });
+            } catch (errEmail) {
+                // Caso ocorra falha no e-mail, registramos no console mas mantemos o fluxo de sucesso visível ao cliente
+                console.warn("Aviso: A reserva foi salva, mas houve um erro ao disparar o e-mail:", errEmail);
+            }
+
+            // Restaura o botão e exibe a mensagem de sucesso ao usuário
+            btnEnviar.disabled = false;
+            btnEnviar.innerText = "Enviar Solicitação";
+            document.getElementById('form-reserva').style.display = 'none';
+            msgSucesso.classList.remove('hidden');
+            
+            
+            // Fecha automaticamente o modal após 2.5 segundos
+            setTimeout(() => {
+                fecharModal();
+            }, 2500);
         });
 
+        // Chamada inicial para carregar os dados assim que a página é aberta
         carregarDados();
     </script>
 </body>
