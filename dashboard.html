@@ -124,12 +124,15 @@
 
             if (error) { console.error("Erro ao carregar suítes:", error); return; }
 
-            // CORREÇÃO APLICADA AQUI: Utiliza .order('criado_em.desc') para evitar o erro 400
-            const { data: reservas } = await supabaseClient
+            // Mantém a consulta limpa igual à sua produção, mas ordena no JS para pegar sempre a mais recente
+            let { data: reservas } = await supabaseClient
                 .from('reservas')
                 .select('*')
-                .eq('pousada_id', user.id)
-                .order('criado_em.desc');
+                .eq('pousada_id', user.id);
+
+            if (reservas) {
+                reservas.sort((a, b) => new Date(b.criado_em) - new Date(a.criado_em));
+            }
 
             const container = document.getElementById('suites-container');
             container.innerHTML = '';
