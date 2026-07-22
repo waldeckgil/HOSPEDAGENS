@@ -124,10 +124,12 @@
 
             if (error) { console.error("Erro ao carregar suítes:", error); return; }
 
+            // CORREÇÃO APLICADA AQUI: Ordena da mais recente para a mais antiga para garantir que a reserva correta apareça no card
             const { data: reservas } = await supabaseClient
                 .from('reservas')
                 .select('*')
-                .eq('pousada_id', user.id);
+                .eq('pousada_id', user.id)
+                .order('criado_em', { ascending: false });
 
             const container = document.getElementById('suites-container');
             container.innerHTML = '';
