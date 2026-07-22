@@ -124,7 +124,7 @@
 
             if (error) { console.error("Erro ao carregar suítes:", error); return; }
 
-            // Mantém a consulta limpa igual à sua produção, mas ordena no JS para pegar sempre a mais recente
+            // Busca as reservas da pousada e ordena da mais recente para a mais antiga por segurança
             let { data: reservas } = await supabaseClient
                 .from('reservas')
                 .select('*')
@@ -143,6 +143,7 @@
             }
 
             suites.forEach(suite => {
+                // Filtra estritamente pela suíte atual e garante que pega a reserva ativa/recente válida (ignorando recusadas)[cite: 3]
                 const res = ((suite.status === 'Ocupada' || suite.status === 'Pendente') && reservas) 
                     ? reservas.find(r => r.suite_id === suite.id && r.status !== 'Recusada') 
                     : null;
