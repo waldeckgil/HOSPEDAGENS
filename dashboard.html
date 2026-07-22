@@ -124,14 +124,15 @@
 
             if (error) { console.error("Erro ao carregar suítes:", error); return; }
 
-            // Busca as reservas da pousada e ordena da mais recente para a mais antiga por segurança
-            let { data: reservas } = await supabaseClient
+            // Busca as reservas ordenadas estritamente do mais recente para o mais antigo direto no banco
+            let { data: reservas, error: errReservas } = await supabaseClient
                 .from('reservas')
                 .select('*')
-                .eq('pousada_id', user.id);
+                .eq('pousada_id', user.id)
+                .order('criado_em', { ascending: false });
 
-            if (reservas) {
-                reservas.sort((a, b) => new Date(b.criado_em) - new Date(a.criado_em));
+            if (errReservas) {
+                console.error("Erro ao carregar reservas:", errReservas);
             }
 
             const container = document.getElementById('suites-container');
@@ -143,7 +144,7 @@
             }
 
             suites.forEach(suite => {
-                // Filtra estritamente pela suíte atual e garante que pega a reserva ativa/recente válida (ignorando recusadas)[cite: 3]
+                // Filtra pela suíte e pega rigorosamente a última reserva não recusada
                 const res = ((suite.status === 'Ocupada' || suite.status === 'Pendente') && reservas) 
                     ? reservas.find(r => r.suite_id === suite.id && r.status !== 'Recusada') 
                     : null;
