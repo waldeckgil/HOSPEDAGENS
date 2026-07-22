@@ -124,7 +124,7 @@
 
             if (error) { console.error("Erro ao carregar suítes:", error); return; }
 
-            // Busca as reservas ordenadas estritamente do mais recente para o mais antigo direto no banco
+            // Consulta limpa com ordenação correta via SDK do Supabase
             let { data: reservas, error: errReservas } = await supabaseClient
                 .from('reservas')
                 .select('*')
@@ -144,7 +144,6 @@
             }
 
             suites.forEach(suite => {
-                // Filtra pela suíte e pega rigorosamente a última reserva não recusada
                 const res = ((suite.status === 'Ocupada' || suite.status === 'Pendente') && reservas) 
                     ? reservas.find(r => r.suite_id === suite.id && r.status !== 'Recusada') 
                     : null;
@@ -244,14 +243,12 @@
             
             const { data: { user } } = await supabaseClient.auth.getUser();
             
-            // 1. Atualiza o status da suíte com segurança
             const { error: errSuite } = await supabaseClient.from('suites').update({ status }).eq('id', suiteId);
             if (errSuite) {
                 alert("Erro ao atualizar suíte: " + errSuite.message);
                 return;
             }
 
-            // 2. Tratamento seguro dos campos com verificação prévia de nulidade para evitar erros
             if (status === 'Disponível' || status === 'Limpeza') {
                 await supabaseClient.from('reservas').update({ status: 'Cancelada' }).eq('suite_id', suiteId).eq('status', 'Pendente');
             } else {
