@@ -124,12 +124,11 @@
 
             if (error) { console.error("Erro ao carregar suítes:", error); return; }
 
-            // Consulta limpa com ordenação correta via SDK do Supabase
+            // Consulta limpa sem ordenação por coluna inexistente, evitando o erro 400
             let { data: reservas, error: errReservas } = await supabaseClient
                 .from('reservas')
                 .select('*')
-                .eq('pousada_id', user.id)
-                .order('criado_em', { ascending: false });
+                .eq('pousada_id', user.id);
 
             if (errReservas) {
                 console.error("Erro ao carregar reservas:", errReservas);
@@ -144,9 +143,16 @@
             }
 
             suites.forEach(suite => {
-                const res = ((suite.status === 'Ocupada' || suite.status === 'Pendente') && reservas) 
-                    ? reservas.find(r => r.suite_id === suite.id && r.status !== 'Recusada') 
-                    : null;
+                // Filtra todas as reservas da suíte e pega a última cadastrada na tabela (maior ID)
+                let res = null;
+                if ((suite.status === 'Ocupada' || suite.status === 'Pendente') && reservas) {
+                    const reservasDaSuite = reservas.filter(r => r.suite_id === suite.id && r.status !== 'Recusada');
+                    if (reservasDaSuite.length > 0) {
+                        // Ordena pelo ID de forma decrescente para garantir que pega a inserção mais recente
+                        reservasDaSuite.sort((a, b) => b.id - a.id);
+                        res = reservasDaSuite[0];
+                    }
+                }
                 
                 const corClasses = {
                     'Disponível': 'bg-green-50 border-green-500 text-green-900', 
