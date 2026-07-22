@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Reservas</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+
+    <!-- Navegação Ajustada -->
+    <nav class="bg-white shadow-md p-6 mb-8 rounded-2xl flex justify-between items-center">
+        <div class="flex gap-8 font-bold text-gray-700">
+            <a href="dashboard.html" class="hover:text-blue-600 transition">Minhas Suítes</a>
+            <a href="reservas.html" class="text-blue-600 border-b-2 border-blue-600 pb-1">Ver Reservas</a>
+            <a href="configurar-pousada.html" class="hover:text-blue-600 transition">Minha Pousada</a>
+        </div>
+        <button onclick="fazerLogout()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-xl transition">Sair</button>
+    </nav>
+
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">Solicitações de Reserva</h1>
+        <div id="reservas-container" class="space-y-4"></div>
+    </div>
+
+    <script>
+        // Configuração única (sem repetir a declaração)
+        const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function carregarReservas() {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) { window.location.href = 'index.html'; return; }
+
+            // Buscando as reservas do dono da pousada logado
+            const { data: reservas, error } = await supabase
+                .from('reservas')
+                .select('*')
+                .eq('pousada_id', user.id)
+                .order('criado_em', { ascending: false });
+
+            const container = document.getElementById('reservas-container');
+            container.innerHTML = '';
+
+            if (error) { container.innerHTML = '<p class="text-red-500">Erro ao carregar: ' + error.message + '</p>'; return; }
+            if (!reservas || reservas.length === 0) { container.innerHTML = '<p class="text-gray-600">Nenhuma reserva encontrada.</p>'; return; }
+
+            reservas.forEach(res => {
+                container.innerHTML += `
+                    <div class="bg-white p-6 rounded-xl shadow border-l-8 ${res.status === 'Pendente' ? 'border-yellow-500' : 'border-green-500'}">
+                        <h2 class="text-xl font-bold">${res.hospede_nome}</h2>
+                        <p class="text-sm text-gray-600">Check-in: ${res.checkin} | Check-out: ${res.checkout}</p>
+                        <p class="font-semibold mt-1">Status: ${res.status}</p>
+                        <div class="mt-4 flex gap-2">
+                            ${res.status === 'Pendente' ? `
+                                <button onclick="atualizarStatus('${res.id}', 'Aprovada')" class="bg-green-600 text-white px-4 py-2 rounded-lg">Aprovar</button>
+                                <button onclick="atualizarStatus('${res.id}', 'Recusada')" class="bg-red-600 text-white px-4 py-2 rounded-lg">Recusar</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function atualizarStatus(id, novoStatus) {
+            const { error } = await supabase.from('reservas').update({ status: novoStatus }).eq('id', id);
+            if (error) alert('Erro ao atualizar: ' + error.message);
+            else carregarReservas();
+        }
+
+        function fazerLogout() {
+            supabase.auth.signOut();
+            window.location.href = 'index.html';
+        }
+
+        carregarReservas();
+    </script>
+</body>
+</html>

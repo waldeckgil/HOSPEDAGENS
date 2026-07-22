@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Documentação e Checklist - Gestor de Pousadas</title>
+</head>
+<body class="bg-gray-100 text-gray-800 p-6 md:p-12">
+
+    <div class="max-w-4xl mx-auto bg-white p-8 md:p-12 rounded-3xl shadow-2xl space-y-10">
+        
+        <!-- Cabeçalho -->
+        <header class="border-b pb-6 text-center">
+            <h1 class="text-4xl font-extrabold text-blue-900 mb-2">Gestor de Pousadas</h1>
+            <p class="text-gray-600 font-medium">Documentação Técnica, Funcional e Planejamento de Melhorias</p>
+        </header>
+
+        <!-- Seção 1: Finalidade do Projeto -->
+        <section class="space-y-4">
+            <h2 class="text-2xl font-bold text-blue-800 border-l-4 border-blue-600 pl-3">1. Finalidade do Projeto</h2>
+            <p class="text-gray-700 leading-relaxed">
+                O <strong>Gestor de Pousadas</strong> é um sistema web <em>full-stack</em> desenvolvido para simplificar, automatizar e centralizar as operações de pequenas e médias pousadas. Ele conecta de forma ágil a administração interna da pousada com uma vitrine pública de atendimento aos clientes, permitindo controle de status de suítes em tempo real, fluxo de reservas e gestão de hóspedes.
+            </p>
+        </section>
+
+        <!-- Seção 2: Funcionamento e Arquitetura -->
+        <section class="space-y-4">
+            <h2 class="text-2xl font-bold text-blue-800 border-l-4 border-blue-600 pl-3">2. Como Funciona o Sistema</h2>
+            <p class="text-gray-700 leading-relaxed">
+                A aplicação é dividida em dois grandes ambientes principais integrados ao banco de dados em nuvem (<strong>Supabase</strong>):
+            </p>
+            <ul class="list-disc pl-6 space-y-2 text-gray-700">
+                <li><strong>Ambiente Administrativo (Gestor):</strong> Protegido por autenticação de login. Permite cadastrar a pousada, configurar suítes, monitorar o painel interativo de ocupação em tempo real (com códigos de cores por status), gerenciar solicitações e alterar estados operacionais.</li>
+                <li><strong>Ambiente Público (Vitrine do Hóspede):</strong> Página acessada via link exclusivo da pousada (<code class="bg-gray-100 px-2 py-1 rounded text-sm">?pousada_id=...</code>) onde o cliente visualiza as suítes disponíveis e preenche um formulário estruturado de solicitação de reserva.</li>
+            </ul>
+        </section>
+
+        <!-- Seção 3: Papéis dos Usuários -->
+        <section class="grid md:grid-cols-2 gap-6">
+            <!-- Papel do Gestor -->
+            <div class="bg-blue-50 p-6 rounded-2xl border border-blue-100 space-y-3">
+                <h3 class="text-xl font-bold text-blue-900 flex items-center gap-2">
+                    👨‍💼 Papel do Gestor
+                </h3>
+                <p class="text-sm text-gray-600 leading-relaxed">
+                    É o administrador proprietário da pousada. Suas responsabilidades e acessos incluem:
+                </p>
+                <ul class="list-disc pl-5 space-y-1 text-sm text-gray-700">
+                    <li>Realizar login seguro e gerenciar as configurações da pousada.</li>
+                    <li>Cadastrar, editar e monitorar o status das suítes (<span class="text-green-700 font-semibold">Disponível</span>, <span class="text-yellow-700 font-semibold">Pendente</span>, <span class="text-gray-700 font-semibold">Ocupada</span>, <span class="text-red-700 font-semibold">Limpeza</span>).</li>
+                    <li>Visualizar dados detalhados dos solicitantes diretamente nos cards do painel e na aba dedicada de reservas pendentes.</li>
+                    <li>Aprovar, recusar ou alterar estados operacionais dos quartos.</li>
+                </ul>
+            </div>
+
+            <!-- Papel do Hóspede -->
+            <div class="bg-emerald-50 p-6 rounded-2xl border border-emerald-100 space-y-3">
+                <h3 class="text-xl font-bold text-emerald-900 flex items-center gap-2">
+                    🧑‍💻 Papel do Hóspede
+                </h3>
+                <p class="text-sm text-gray-600 leading-relaxed">
+                    É o cliente final em busca de hospedagem. Suas interações no sistema envolvem:
+                </p>
+                <ul class="list-disc pl-5 space-y-1 text-sm text-gray-700">
+                    <li>Acessar a vitrine pública da pousada através do link personalizado.</li>
+                    <li>Visualizar exclusivamente as suítes que estão disponíveis no momento.</li>
+                    <li>Preencher dados cadastrais e de estada (Nome, E-mail, WhatsApp, CPF, RG, Endereço, Check-in e Check-out).</li>
+                    <li>Enviar a solicitação de reserva com feedback visual imediato na tela.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Seção 4: Estrutura de Arquivos e Banco de Dados -->
+        <section class="space-y-4">
+            <h2 class="text-2xl font-bold text-blue-800 border-l-4 border-blue-600 pl-3">4. Arquivos do Projeto & Tabelas do Banco</h2>
+            
+            <div class="grid md:grid-cols-2 gap-6 text-sm">
+                <div class="bg-gray-50 p-5 rounded-2xl border">
+                    <h4 class="font-bold text-gray-800 mb-2">📁 Arquivos do Sistema</h4>
+                    <ul class="space-y-1.5 text-gray-600">
+                        <li><code>index.html</code> — Tela de login do gestor.</li>
+                        <li><code>cadastro.html</code> — Registro de novas contas.</li>
+                        <li><code>configurar-pousada.html</code> — Cadastro de pousada e suítes.</li>
+                        <li><code>dashboard.html</code> — Painel principal de gestão de suítes.</li>
+                        <li><code>reservas.html</code> — Listagem e moderação de reservas pendentes.</li>
+                        <li><code>vitrine.html</code> — Interface pública de solicitação do hóspede.</li>
+                        <li><code>script.js</code> — Rotinas e lógicas base auxiliares.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-50 p-5 rounded-2xl border">
+                    <h4 class="font-bold text-gray-800 mb-2">🗄️ Tabelas do Supabase</h4>
+                    <ul class="space-y-1.5 text-gray-600">
+                        <li><strong>pousadas:</strong> Guarda o ID e o nome comercial de cada pousada.</li>
+                        <li><strong>suites:</strong> Contém ID, vínculo com pousada, nome e o status atual do quarto.</li>
+                        <li><strong>reservas:</strong> Armazena o histórico e solicitações com dados do hóspede (incluindo e-mail), datas, status e chaves estrangeiras.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção 5: Checklist Estratégico (Próximas Implementações) -->
+        <section class="space-y-4">
+            <h2 class="text-2xl font-bold text-blue-800 border-l-4 border-blue-600 pl-3">5. Checklist Estratégico & Melhorias Futuras</h2>
+            <p class="text-gray-600 text-sm">Itens planejados para a próxima etapa de desenvolvimento:</p>
+            
+            <div class="space-y-3">
+                <!-- Item 1 -->
+                <div class="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border">
+                    <input type="checkbox" class="mt-1 h-5 w-5 rounded text-blue-600 focus:ring-blue-500">
+                    <div>
+                        <h4 class="font-bold text-gray-800">Inclusão do campo de E-mail na Vitrine</h4>
+                        <p class="text-xs text-gray-600">Adicionar o input de e-mail no formulário de reserva do hóspede em <code class="text-blue-600">vitrine.html</code> e atualizar a tabela <code class="text-blue-600">reservas</code>.</p>
+                    </div>
+                </div>
+
+                <!-- Item 2 -->
+                <div class="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border">
+                    <input type="checkbox" class="mt-1 h-5 w-5 rounded text-blue-600 focus:ring-blue-500">
+                    <div>
+                        <h4 class="font-bold text-gray-800">Automação de Envio de E-mail ao Hóspede</h4>
+                        <p class="text-xs text-gray-600">Disparar um e-mail de confirmação contendo os dados e a ficha da solicitação cadastrada para o endereço informado pelo cliente.</p>
+                    </div>
+                </div>
+
+                <!-- Item 3 -->
+                <div class="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border">
+                    <input type="checkbox" class="mt-1 h-5 w-5 rounded text-blue-600 focus:ring-blue-500">
+                    <div>
+                        <h4 class="font-bold text-gray-800">Notificação Automática por E-mail ao Gestor</h4>
+                        <p class="text-xs text-gray-600">Capturar automaticamente o e-mail de login ativo do gestor na sessão do Supabase e enviar um alerta sempre que uma nova reserva for solicitada.</p>
+                    </div>
+                </div>
+
+                <!-- Item 4 -->
+                <div class="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border">
+                    <input type="checkbox" class="mt-1 h-5 w-5 rounded text-blue-600 focus:ring-blue-500">
+                    <div>
+                        <h4 class="font-bold text-gray-800">Indicadores de Contagem Regressiva de Datas (Dashboard)</h4>
+                        <p class="text-xs text-gray-600">Implementar lógica de cálculo de datas no painel de gestão:</p>
+                        <ul class="list-disc pl-5 mt-1 text-xs text-gray-600 space-y-1">
+                            <li><strong>Checkout Expirando:</strong> Exibir no card quantos dias faltam para a saída do hóspede atual.</li>
+                            <li><strong>Próxima Estada (Ocupada/Reservada):</strong> Avisar visualmente no card quantos dias faltam para a chegada do hóspede confirmado.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Item 5 -->
+                <div class="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border">
+                    <input type="checkbox" class="mt-1 h-5 w-5 rounded text-blue-600 focus:ring-blue-500">
+                    <div>
+                        <h4 class="font-bold text-gray-800">Nova Aba de Gestão de Hóspedes (Contatos e Histórico)</h4>
+                        <p class="text-xs text-gray-600">Criar uma nova aba superior na barra de navegação administrativa para o gestor visualizar a base de dados de todos os hóspedes, permitindo buscas rápidas por nome ou telefone para conferir cadastros anteriores e facilitar novas reservas.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Rodapé -->
+        <footer class="text-center pt-6 border-t text-sm text-gray-500">
+            Gerado estruturadamente para acompanhamento técnico do projeto. Pronto para retomada de desenvolvimento!
+        </footer>
+
+    </div>
+
+</body>
+</html>

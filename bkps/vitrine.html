@@ -37,7 +37,6 @@
             <form id="form-reserva" class="space-y-3">
                 <input type="hidden" id="suite-id-reserva">
                 <input type="text" id="nome-hospede" placeholder="Nome Completo" required class="w-full p-3 border rounded-xl">
-                <input type="email" id="email-hospede" placeholder="E-mail (ex: seu@email.com)" required class="w-full p-3 border rounded-xl">
                 <input type="text" id="whatsapp-hospede" placeholder="WhatsApp (DDD+Número)" required class="w-full p-3 border rounded-xl">
                 <input type="text" id="cpf-hospede" placeholder="CPF" required class="w-full p-3 border rounded-xl">
                 <input type="text" id="rg-hospede" placeholder="RG" required class="w-full p-3 border rounded-xl">
@@ -110,12 +109,11 @@
             const pousadaId = params.get('pousada_id') || '2ce55615-0d32-467a-a412-f9868ec8c9cf';
             const suiteId = document.getElementById('suite-id-reserva').value;
 
-            // 1. Insere a reserva na tabela reservas com o pousada_id e o email do hóspede corretos
+            // 1. Insere a reserva na tabela reservas com o pousada_id correto
             const { error: errReserva } = await supabaseClient.from('reservas').insert([{
                 pousada_id: pousadaId,
                 suite_id: suiteId,
                 hospede_nome: document.getElementById('nome-hospede').value,
-                email: document.getElementById('email-hospede').value,
                 whatsapp_hospede: document.getElementById('whatsapp-hospede').value,
                 cpf: document.getElementById('cpf-hospede').value,
                 rg: document.getElementById('rg-hospede').value,
