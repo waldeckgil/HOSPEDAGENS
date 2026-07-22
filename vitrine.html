@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <!-- Importação do Tailwind CSS para estilização rápida e moderna -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Importação do SDK oficial do Supabase para conexão com o banco de dados e funções -->
+    <!-- Importação do SDK oficial do Supabase para conexão com o banco de dados -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <title>Nossas Suítes</title>
     <style>
@@ -130,25 +130,20 @@
             const params = new URLSearchParams(window.location.search);
             const pousadaId = params.get('pousada_id') || '2ce55615-0d32-467a-a412-f9868ec8c9cf';
             const suiteId = document.getElementById('suite-id-reserva').value;
-            
-            // Captura os valores preenchidos no formulário
-            const nomeHospede = document.getElementById('nome-hospede').value;
-            const emailHospede = document.getElementById('email-hospede').value;
-            const checkinVal = document.getElementById('checkin').value;
-            const checkoutVal = document.getElementById('checkout').value;
 
-            // 1. Insere os dados da nova reserva na tabela 'reservas' do banco de dados
+            // 1. Insere os dados da nova reserva na tabela 'reservas'
+            // (O Webhook do Supabase detectará este INSERT e disparará o e-mail automaticamente)[cite: 3]
             const { error: errReserva } = await supabaseClient.from('reservas').insert([{
                 pousada_id: pousadaId,
                 suite_id: suiteId,
-                hospede_nome: nomeHospede,
-                email: emailHospede,
+                hospede_nome: document.getElementById('nome-hospede').value,
+                email: document.getElementById('email-hospede').value,
                 whatsapp_hospede: document.getElementById('whatsapp-hospede').value,
                 cpf: document.getElementById('cpf-hospede').value,
                 rg: document.getElementById('rg-hospede').value,
                 endereco: document.getElementById('endereco-hospede').value,
-                checkin: checkinVal,
-                checkout: checkoutVal,
+                checkin: document.getElementById('checkin').value,
+                checkout: document.getElementById('checkout').value,
                 status: 'Pendente'
             }]);
             
@@ -167,41 +162,21 @@
                 .update({ status: 'Pendente' })
                 .eq('id', suiteId);
 
-            if (errSuite) {
-                btnEnviar.disabled = false;
-                btnEnviar.innerText = "Enviar Solicitação";
-                msgErro.innerText = "Erro ao atualizar status da suíte: " + errSuite.message;
-                msgErro.classList.remove('hidden');
-                return;
-            }
-
-            // 3. Disparo estruturado da Edge Function passando o objeto 'record' esperado pelo script do e-mail
-            try {
-                const responseEmail = await supabaseClient.functions.invoke('enviar-email-reserva', {
-                    body: {
-                        record: {
-                            hospede_nome: nomeHospede,
-                            email: emailHospede,
-                            checkin: checkinVal,
-                            checkout: checkoutVal
-                        }
-                    }
-                });
-                console.log("Retorno do envio de e-mail:", responseEmail);
-            } catch (errEmail) {
-                console.warn("Aviso: A reserva foi salva, mas houve uma exceção ao chamar a função de e-mail:", errEmail);
-            }
-
-            // Restaura o botão e exibe a mensagem de sucesso ao usuário
             btnEnviar.disabled = false;
             btnEnviar.innerText = "Enviar Solicitação";
-            document.getElementById('form-reserva').style.display = 'none';
-            msgSucesso.classList.remove('hidden');
-            
-            // Fecha automaticamente o modal após 2.5 segundos e recarrega os dados
-            setTimeout(() => {
-                fecharModal();
-            }, 2500);
+
+            if (errSuite) {
+                msgErro.innerText = "Erro ao atualizar status da suíte: " + errSuite.message;
+                msgErro.classList.remove('hidden');
+            } else { 
+                document.getElementById('form-reserva').style.display = 'none';
+                msgSucesso.classList.remove('hidden');
+                
+                // Fecha automaticamente o modal após 2.5 segundos
+                setTimeout(() => {
+                    fecharModal();
+                }, 2500);
+            }
         });
 
         // Chamada inicial para carregar os dados assim que a página é aberta
