@@ -3,4 +3,8 @@ Webhooks
 RESEND_API_KEY
 
 
-re_KzyHpNRN_FGiWaLkHJHKH4FPgroKBhFFR
+
+https://resend.com/api-keys
+
+pousada-backend-key
+re_fb6gQXRF_H5HMMniGVcMCFkezbKhm2tuR

@@ -69,7 +69,7 @@
                 </div>
 
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold mt-4 transition">Salvar Alterações</button>
-                <button type="button" onclick="fecharModal()" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 p-3 rounded-xl font-bold mt-2 transition">Cancelar</button>
+                <button type="button" onclick="fecharModal()" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 p-3 rounded-xl font-2 mt-2 transition">Cancelar</button>
             </form>
         </div>
     </div>
@@ -124,7 +124,6 @@
 
             if (error) { console.error("Erro ao carregar suítes:", error); return; }
 
-            // Consulta limpa sem ordenação por coluna inexistente, evitando o erro 400
             let { data: reservas, error: errReservas } = await supabaseClient
                 .from('reservas')
                 .select('*')
@@ -143,13 +142,12 @@
             }
 
             suites.forEach(suite => {
-                // Filtra todas as reservas da suíte e pega a última cadastrada na tabela (maior ID)
+                // Filtra as reservas ativas/pendentes da suíte ignorando registros cancelados e pegando a mais recente com base no ID
                 let res = null;
                 if ((suite.status === 'Ocupada' || suite.status === 'Pendente') && reservas) {
-                    const reservasDaSuite = reservas.filter(r => r.suite_id === suite.id && r.status !== 'Recusada');
+                    const reservasDaSuite = reservas.filter(r => r.suite_id === suite.id && r.status !== 'Cancelada' && r.status !== 'Recusada');
                     if (reservasDaSuite.length > 0) {
-                        // Ordena pelo ID de forma decrescente para garantir que pega a inserção mais recente
-                        reservasDaSuite.sort((a, b) => b.id - a.id);
+                        reservasDaSuite.sort((a, b) => b.id.localeCompare ? b.id.localeCompare(a.id) : b.id - a.id);
                         res = reservasDaSuite[0];
                     }
                 }
