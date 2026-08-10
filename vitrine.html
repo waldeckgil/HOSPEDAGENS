@@ -19,7 +19,7 @@
     <div class="max-w-4xl mx-auto">
         <h1 id="titulo-pousada" class="text-4xl font-extrabold mb-6 text-center drop-shadow-lg">Carregando Pousada...</h1>
         
-        <!-- BARRA DE FILTRO PRÉVIO DE PERÍODO -->
+        <!-- BARRA DE FILTRO PRÉVIO DE PERÍODO (OBRIGATÓRIA PARA EXIBIR SUÍTES) -->
         <div class="bg-white text-gray-800 p-6 rounded-2xl shadow-xl mb-8">
             <h2 class="text-lg font-bold mb-3 text-blue-600 flex items-center gap-2">
                 🔍 Escolha o período da sua estadia
@@ -39,11 +39,17 @@
                     </button>
                 </div>
             </div>
-            <p id="aviso-filtro" class="text-xs text-gray-500 mt-2 italic">Selecione as datas desejadas para filtrar as suítes livres no período.</p>
+            <p id="aviso-filtro" class="text-xs text-gray-500 mt-2 italic">Selecione o período desejado e clique em consultar para visualizar as suítes disponíveis.</p>
         </div>
 
-        <!-- Container onde as suítes disponíveis serão injetadas -->
-        <div id="vitrine-container" class="grid gap-6"></div>
+        <!-- Container onde as suítes disponíveis serão injetadas após a busca -->
+        <div id="vitrine-container" class="grid gap-6">
+            <div class="bg-white/90 backdrop-blur-md text-gray-700 p-8 rounded-2xl text-center shadow-lg">
+                <span class="text-3xl">🗓️</span>
+                <p class="font-bold text-base mt-2 text-gray-800">Selecione as datas de check-in e check-out acima.</p>
+                <p class="text-xs text-gray-500 mt-1">As suítes livres para o período escolhido aparecerão aqui.</p>
+            </div>
+        </div>
     </div>
 
     <!-- Modal de Solicitação de Reserva -->
@@ -125,9 +131,6 @@
 
             const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', pousadaIdGlobal).single();
             document.getElementById('titulo-pousada').innerText = pousada?.nome || "Nossa Pousada";
-
-            // Carrega inicialmente todas as suítes cadastradas na pousada
-            filtrarSuitesDisponiveisPorPeriodo();
         }
 
         async function filtrarSuitesDisponiveisPorPeriodo() {
@@ -135,58 +138,58 @@
             const checkoutFiltro = document.getElementById('filtro-checkout').value;
             const container = document.getElementById('vitrine-container');
 
-            // Busca todas as suítes da pousada
-            const { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', pousadaIdGlobal);
-            if (!suites || suites.length === 0) {
-                container.innerHTML = '<p class="text-center">Nenhuma suíte cadastrada no momento.</p>';
+            // Validação: Exige o preenchimento das datas antes de buscar
+            if (!checkinFiltro || !checkoutFiltro) {
+                alert("Por favor, selecione as datas de Check-in e Check-out para consultar a disponibilidade.");
+                document.getElementById('filtro-checkin').focus();
                 return;
             }
 
-            // Se o usuário informou um período, cruzamos com as reservas Aprovadas para filtrar conflitos
-            let suitesDisponiveis = suites;
-
-            if (checkinFiltro && checkoutFiltro) {
-                if (checkinFiltro >= checkoutFiltro) {
-                    alert("A data de check-out deve ser posterior à data de check-in.");
-                    return;
-                }
-
-                const { data: reservasAprovadas } = await supabaseClient
-                    .from('reservas')
-                    .select('*')
-                    .eq('pousada_id', pousadaIdGlobal)
-                    .eq('status', 'Aprovada');
-
-                const novoInicio = new Date(checkinFiltro);
-                const novoFim = new Date(checkoutFiltro);
-
-                // Descobre quais IDs de suítes possuem conflito de data
-                const suitesOcupadasIds = new Set();
-                if (reservasAprovadas) {
-                    reservasAprovadas.forEach(res => {
-                        const inicioExistente = new Date(res.checkin);
-                        const fimExistente = new Date(res.checkout);
-                        // Verifica intersecção de datas: (StartA < EndB) e (EndA > StartB)
-                        if (novoInicio < fimExistente && novoFim > inicioExistente) {
-                            suitesOcupadasIds.add(res.suite_id);
-                        }
-                    });
-                }
-
-                suitesDisponiveis = suites.filter(s => !suitesOcupadasIds.has(s.id));
-                document.getElementById('aviso-filtro').innerText = `Exibindo suítes livres para o período de ${checkinFiltro.split('-').reverse().join('/')} a ${checkoutFiltro.split('-').reverse().join('/')}.`;
-            } else {
-                document.getElementById('aviso-filtro').innerText = 'Dica: Informe o check-in e check-out acima para verificar a disponibilidade exata.';
+            if (checkinFiltro >= checkoutFiltro) {
+                alert("A data de check-out deve ser posterior à data de check-in.");
+                return;
             }
 
-            container.innerHTML = suitesDisponiveis.length > 0 ? '' : '<p class="text-center text-amber-200 font-semibold bg-black/40 p-4 rounded-xl">⚠️ Nenhuma suíte disponível para o período selecionado. Tente outras datas!</p>';
+            // Busca todas as suítes da pousada
+            const { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', pousadaIdGlobal);
+            if (!suites || suites.length === 0) {
+                container.innerHTML = '<p class="text-center bg-black/40 p-6 rounded-xl">Nenhuma suíte cadastrada nesta pousada no momento.</p>';
+                return;
+            }
+
+            // Busca reservas aprovadas para cruzar as datas
+            const { data: reservasAprovadas } = await supabaseClient
+                .from('reservas')
+                .select('*')
+                .eq('pousada_id', pousadaIdGlobal)
+                .eq('status', 'Aprovada');
+
+            const novoInicio = new Date(checkinFiltro);
+            const novoFim = new Date(checkoutFiltro);
+
+            const suitesOcupadasIds = new Set();
+            if (reservasAprovadas) {
+                reservasAprovadas.forEach(res => {
+                    const inicioExistente = new Date(res.checkin);
+                    const fimExistente = new Date(res.checkout);
+                    if (novoInicio < fimExistente && novoFim > inicioExistente) {
+                        suitesOcupadasIds.add(res.suite_id);
+                    }
+                });
+            }
+
+            const suitesDisponiveis = suites.filter(s => !suitesOcupadasIds.has(s.id));
+            
+            document.getElementById('aviso-filtro').innerText = `Exibindo suítes livres para o período de ${checkinFiltro.split('-').reverse().join('/')} a ${checkoutFiltro.split('-').reverse().join('/')}.`;
+
+            container.innerHTML = suitesDisponiveis.length > 0 ? '' : '<p class="text-center text-amber-200 font-semibold bg-black/40 p-6 rounded-xl">⚠️ Nenhuma suíte disponível para o período selecionado. Tente outras datas!</p>';
 
             suitesDisponiveis.forEach(suite => {
                 container.innerHTML += `
                     <div class="bg-white p-6 rounded-2xl shadow-lg border-l-8 border-green-500 flex justify-between items-center text-gray-800">
                         <div>
                             <h2 class="text-xl font-bold">${suite.nome}</h2>
-                            <p class="text-xs text-gray-500 mt-1">Status atual: <span class="font-semibold text-green-600">${suite.status}</span></p>
+                            <p class="text-xs text-gray-500 mt-1">Status: <span class="font-semibold text-green-600">Disponível no período</span></p>
                         </div>
                         <button onclick="abrirModal('${suite.id}')" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-xl transition shadow">Solicitar Reserva</button>
                     </div>
@@ -199,15 +202,13 @@
             const checkoutFiltro = document.getElementById('filtro-checkout').value;
 
             if (!checkinFiltro || !checkoutFiltro) {
-                alert("Por favor, selecione o período de Check-in e Check-out na barra de pesquisa antes de solicitar a reserva.");
-                document.getElementById('filtro-checkin').focus();
+                alert("Por favor, selecione o período de Check-in e Check-out.");
                 return;
             }
 
             document.getElementById('suite-id-reserva').value = sId;
             document.getElementById('form-reserva').reset();
             
-            // Preenche automaticamente o modal com as datas que o hóspede já havia filtrado
             document.getElementById('checkin').value = checkinFiltro;
             document.getElementById('checkout').value = checkoutFiltro;
 
@@ -237,13 +238,12 @@
             const checkinVal = document.getElementById('checkin').value;
             const checkoutVal = document.getElementById('checkout').value;
 
-            // Insere a nova solicitação de reserva na tabela
             const { error: errReserva } = await supabaseClient.from('reservas').insert([{
                 pousada_id: pousadaIdGlobal,
                 suite_id: suiteId,
                 hospede_nome: document.getElementById('nome-hospede').value,
                 email: document.getElementById('email-hospede').value,
-                whatsapp_hospede: document.getElementById('whatsapp-hospede').value,
+                whatsapp_hospede: document.getElementById('whatsapp-hospede5').value || document.getElementById('whatsapp-hospede').value,
                 cpf: document.getElementById('cpf-hospede').value || null,
                 rg: document.getElementById('rg-hospede').value || null,
                 cep: document.getElementById('cep-hospede').value || null,
