@@ -523,8 +523,10 @@
             const statusOriginal = document.getElementById('edit-status-original').value;
             const suiteId = document.getElementById('edit-suite-id').value;
             
-            // Se estava Ocupada e o gestor mudou para Limpeza ou Disponível, exige confirmação profissional
+            // Se estava Ocupada e o gestor mudou para Limpeza ou Disponível, fecha o modal de edição primeiro e exige confirmação
             if (statusOriginal === 'Ocupada' && (status === 'Limpeza' || status === 'Disponível')) {
+                fecharModal(); // Fecha imediatamente o modal de edição para não sobrepor telas
+
                 const modalConf = document.getElementById('modal-confirmacao');
                 const textoConf = document.getElementById('modal-confirmacao-texto');
                 const btnConfirmar = document.getElementById('btn-confirmar-acao');
@@ -540,7 +542,8 @@
                 return;
             }
 
-            // Caso contrário, salva direto
+            // Caso contrário, fecha o modal e salva direto
+            fecharModal();
             await executarSalvamento(suiteId, status);
         };
 
