@@ -38,8 +38,36 @@
             <div id="lista-resumo-pendentes" class="mt-3 flex flex-wrap gap-2"></div>
         </div>
         <a href="reservas.html" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-3 rounded-xl transition shadow-sm whitespace-nowrap">
-            Gerenciar Todas las Reservas &rarr;
+            Gerenciar Todas as Reservas &rarr;
         </a>
+    </div>
+
+    <!-- 💬 TOAST / NOTIFICAÇÃO INTERNA MODERNA -->
+    <div id="toast-notificacao" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+        <div id="toast-content" class="bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
+            <span id="toast-icone" class="text-xl">✨</span>
+            <div>
+                <h4 id="toast-titulo" class="font-bold text-sm">Sucesso</h4>
+                <p id="toast-mensagem" class="text-xs text-gray-300">Alterações salvas com sucesso!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🛑 MODAL DE CONFIRMAÇÃO DE CHECKOUT/LIMPEZA -->
+    <div id="modal-confirmacao" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-8 rounded-3xl w-full max-w-md shadow-2xl text-center space-y-4">
+            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">
+                ⚠️
+            </div>
+            <h3 class="text-xl font-bold text-gray-900">Confirmar Saída / Limpeza?</h3>
+            <p id="modal-confirmacao-texto" class="text-sm text-gray-600">
+                Esta suíte está ocupada. Ao alterar para limpeza, a estadia atual será encerrada e o hóspede desvinculado. Deseja prosseguir?
+            </p>
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <button type="button" onclick="fecharModalConfirmacao()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-xl transition text-sm">Cancelar</button>
+                <button type="button" id="btn-confirmar-acao" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl transition text-sm shadow-md">Sim, Liberar</button>
+            </div>
+        </div>
     </div>
 
     <div id="suites-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
@@ -51,6 +79,7 @@
             
             <form id="form-edicao" class="space-y-3">
                 <input type="hidden" id="edit-suite-id">
+                <input type="hidden" id="edit-status-original">
                 
                 <div>
                     <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Status Físico da Suíte</label>
@@ -102,6 +131,30 @@
         let reservasGlobaisCache = [];
         let suitesGlobaisCache = [];
 
+        function mostrarToast(titulo, mensagem, tipo = 'sucesso') {
+            const toast = document.getElementById('toast-notificacao');
+            const toastTitulo = document.getElementById('toast-titulo');
+            const toastMsg = document.getElementById('toast-mensagem');
+            const toastIcone = document.getElementById('toast-icone');
+            const toastContent = document.getElementById('toast-content');
+
+            toastTitulo.innerText = titulo;
+            toastMsg.innerText = mensagem;
+
+            if (tipo === 'sucesso') {
+                toastContent.className = "bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800";
+                toastIcone.innerText = "🎉";
+            } else {
+                toastContent.className = "bg-red-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-red-800";
+                toastIcone.innerText = "🚨";
+            }
+
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3500);
+        }
+
         function calcularDiasRestantes(dataAlvo) {
             const hoje = new Date();
             hoje.setHours(0, 0, 0, 0);
@@ -146,12 +199,12 @@
 
         function copiarLinkVitrine() {
             if (!usuarioIdAtual) {
-                alert("Aguarde o carregamento dos dados da pousada.");
+                mostrarToast("Atenção", "Aguarde o carregamento dos dados da pousada.", "erro");
                 return;
             }
             const urlVitrine = window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`;
             navigator.clipboard.writeText(urlVitrine).then(() => {
-                alert("Link da vitrine copiado para a área de transferência!");
+                mostrarToast("Copiado!", "Link da vitrine copiado para a área de transferência!");
             });
         }
 
@@ -254,7 +307,6 @@
 
                 let contadorCardAtual = 1;
 
-                // 1. 🚀 SE HOUVER RESERVAS APROVADAS, RENDERIZA UM CARD PARA CADA UMA DELAS!
                 if (aprovadasDaSuite.length > 0) {
                     aprovadasDaSuite.forEach(aprovada => {
                         const indicador = obterIndicadorCheckout(aprovada.checkout);
@@ -292,7 +344,6 @@
                             </div>`;
                     });
                 } else if (pendentesDaSuite.length === 0) {
-                    // 2. SE NÃO TEM APROVADAS NEM PENDENTES, EXIBE O CARD NORMAL DE DISPONÍVEL/LIMPEZA
                     let statusExibicao = suite.status;
                     let proximaReserva = null;
                     const hojeStr = new Date().toISOString().split('T')[0];
@@ -349,7 +400,6 @@
                         </div>`;
                 }
 
-                // 3. 🚀 CARDS PARA CADA SOLICITAÇÃO PENDENTE (COM NUMERAÇÃO)
                 pendentesDaSuite.forEach((pend, idx) => {
                     const linkZapPend = gerarLinkWhatsApp(pend.whatsapp_hospede, pend.hospede_nome, pend.checkin, pend.checkout);
                     const sufixoTitulo = totalCardsDestaSuite > 1 ? ` (${contadorCardAtual++})` : '';
@@ -372,8 +422,8 @@
                                     <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-800">Hóspede:</span> <span class="font-bold text-gray-900">${pend.hospede_nome}</span></p>
                                     <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-800">WhatsApp:</span> <a href="${linkZapPend}" target="_blank" class="text-emerald-700 font-bold bg-white px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${pend.whatsapp_hospede || 'Não informado'}</a></p>
                                     <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-amber-200 text-xs">
-                                        <p><span class="font-amber-800">Check-in:</span> <strong class="text-gray-900">${formatarDataSimples(pend.checkin)}</strong></p>
-                                        <p><span class="font-amber-800">Check-out:</span> <strong class="text-gray-900">${formatarDataSimples(pend.checkout)}</strong></p>
+                                        <p><span class="text-amber-800">Check-in:</span> <strong class="text-gray-900">${formatarDataSimples(pend.checkin)}</strong></p>
+                                        <p><span class="text-amber-800">Check-out:</span> <strong class="text-gray-900">${formatarDataSimples(pend.checkout)}</strong></p>
                                     </div>
                                 </div>
                             </div>
@@ -391,6 +441,7 @@
         function abrirModal(id, nome, status) {
             document.getElementById('edit-suite-id').value = id;
             document.getElementById('edit-status').value = status;
+            document.getElementById('edit-status-original').value = status;
             document.getElementById('modal-titulo').innerText = "Gerenciar Suíte: " + nome;
 
             const aprovadaDestaSuite = reservasGlobaisCache.find(r => r.suite_id === id && r.status === 'Aprovada');
@@ -425,7 +476,7 @@
                 .eq('id', reservaId);
 
             if (error) {
-                alert("Erro ao atualizar reserva: " + error.message);
+                mostrarToast("Erro", "Erro ao atualizar reserva: " + error.message, "erro");
                 return;
             }
 
@@ -436,7 +487,7 @@
                 }
             }
 
-            alert(`Reserva ${novoStatus.toLowerCase()} com sucesso!`);
+            mostrarToast("Sucesso", `Reserva ${novoStatus.toLowerCase()} com sucesso!`);
             carregarDashboard();
         }
 
@@ -451,24 +502,46 @@
         }
 
         function fecharModal() { document.getElementById('modal-edicao').classList.add('hidden'); }
+        function fecharModalConfirmacao() { document.getElementById('modal-confirmacao').classList.add('hidden'); }
 
-        document.getElementById('form-edicao').onsubmit = async (e) => {
-            e.preventDefault();
-            const status = document.getElementById('edit-status').value;
-            const suiteId = document.getElementById('edit-suite-id').value;
-            
-            // 1. Atualiza o status físico da suíte no banco
+        async function executarSalvamento(suiteId, status) {
             await supabaseClient.from('suites').update({ status }).eq('id', suiteId);
 
-            // 2. Se a suíte foi colocada em Limpeza ou Disponível, cancela/encerra a reserva aprovada anterior daquela suíte
             if (status === 'Disponível' || status === 'Limpeza') {
                 await supabaseClient.from('reservas').update({ status: 'Cancelada' }).eq('suite_id', suiteId).eq('status', 'Aprovada');
                 await supabaseClient.from('reservas').update({ status: 'Cancelada' }).eq('suite_id', suiteId).eq('status', 'Pendente');
             }
 
-            alert("Alterações salvas com sucesso!"); 
-            fecharModal(); 
+            fecharModal();
             carregarDashboard();
+            mostrarToast("Sucesso", "Status atualizado com sucesso!");
+        }
+
+        document.getElementById('form-edicao').onsubmit = async (e) => {
+            e.preventDefault();
+            const status = document.getElementById('edit-status').value;
+            const statusOriginal = document.getElementById('edit-status-original').value;
+            const suiteId = document.getElementById('edit-suite-id').value;
+            
+            // Se estava Ocupada e o gestor mudou para Limpeza ou Disponível, exige confirmação profissional
+            if (statusOriginal === 'Ocupada' && (status === 'Limpeza' || status === 'Disponível')) {
+                const modalConf = document.getElementById('modal-confirmacao');
+                const textoConf = document.getElementById('modal-confirmacao-texto');
+                const btnConfirmar = document.getElementById('btn-confirmar-acao');
+
+                textoConf.innerHTML = `O hóspede atual desta suíte realizou o check-out? Ao mudar para <strong>${status}</strong>, a estada ativa será encerrada e o card liberado.`;
+                modalConf.classList.remove('hidden');
+
+                // Configura o botão de confirmação do modal personalizado
+                btnConfirmar.onclick = async () => {
+                    fecharModalConfirmacao();
+                    await executarSalvamento(suiteId, status);
+                };
+                return;
+            }
+
+            // Caso contrário, salva direto
+            await executarSalvamento(suiteId, status);
         };
 
         async function fazerLogout() { 
