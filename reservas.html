@@ -25,17 +25,17 @@
     </div>
 
     <script>
-        // Configuração única (sem repetir a declaração)
+        // Configuração corrigida usando supabaseClient para evitar conflito de identificador
         const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function carregarReservas() {
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) { window.location.href = 'index.html'; return; }
 
             // Buscando as reservas do dono da pousada logado
-            const { data: reservas, error } = await supabase
+            const { data: reservas, error } = await supabaseClient
                 .from('reservas')
                 .select('*')
                 .eq('pousada_id', user.id)
@@ -48,11 +48,21 @@
             if (!reservas || reservas.length === 0) { container.innerHTML = '<p class="text-gray-600">Nenhuma reserva encontrada.</p>'; return; }
 
             reservas.forEach(res => {
+                // Formatação correta da data de criação (se houver)
+                let dataHoraCriacao = '';
+                if (res.criado_em) {
+                    const dataObj = new Date(res.criado_em);
+                    dataHoraCriacao = `🕒 Solicitado em: ${dataObj.toLocaleDateString('pt-BR')} às ${dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+                }
+
                 container.innerHTML += `
                     <div class="bg-white p-6 rounded-xl shadow border-l-8 ${res.status === 'Pendente' ? 'border-yellow-500' : 'border-green-500'}">
-                        <h2 class="text-xl font-bold text-gray-800">${res.hospede_nome}</h2>
+                        <div class="flex justify-between items-start">
+                            <h2 class="text-xl font-bold text-gray-800">${res.hospede_nome}</h2>
+                            <span class="text-xs text-gray-500 font-semibold">${dataHoraCriacao}</span>
+                        </div>
                         
-                        <!-- Detalhes de Contato e Documentação (Incluindo o novo campo de E-mail) -->
+                        <!-- Detalhes de Contato e Documentação -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
                             <p><strong>E-mail:</strong> ${res.email || 'Não informado'}</p>
                             <p><strong>WhatsApp:</strong> ${res.whatsapp_hospede || 'Não informado'}</p>
@@ -65,8 +75,8 @@
                         
                         <div class="mt-4 flex gap-2">
                             ${res.status === 'Pendente' ? `
-                                <button onclick="atualizarStatus('${res.id}', 'Aprovada')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition">Aprovar</button>
-                                <button onclick="atualizarStatus('${res.id}', 'Recusada')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition">Recusar</button>
+                                <button onclick="atualizarStatus('${res.id}', 'Aprovada')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition font-bold">Aprovar</button>
+                                <button onclick="atualizarStatus('${res.id}', 'Recusada')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition font-bold">Recusar</button>
                             ` : ''}
                         </div>
                     </div>
@@ -75,13 +85,13 @@
         }
 
         async function atualizarStatus(id, novoStatus) {
-            const { error } = await supabase.from('reservas').update({ status: novoStatus }).eq('id', id);
+            const { error } = await supabaseClient.from('reservas').update({ status: novoStatus }).eq('id', id);
             if (error) alert('Erro ao atualizar: ' + error.message);
             else carregarReservas();
         }
 
         function fazerLogout() {
-            supabase.auth.signOut();
+            supabaseClient.auth.signOut();
             window.location.href = 'index.html';
         }
 
