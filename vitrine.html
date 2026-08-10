@@ -131,8 +131,7 @@
             const pousadaId = params.get('pousada_id') || '2ce55615-0d32-467a-a412-f9868ec8c9cf';
             const suiteId = document.getElementById('suite-id-reserva').value;
 
-            // 1. Insere os dados da nova reserva na tabela 'reservas'
-            // (O Webhook do Supabase detectará este INSERT e disparará o e-mail automaticamente)[cite: 3]
+            // 1. Insere os dados da nova reserva na tabela 'reservas' com o carimbo exato de criação (criado_em)
             const { error: errReserva } = await supabaseClient.from('reservas').insert([{
                 pousada_id: pousadaId,
                 suite_id: suiteId,
@@ -144,7 +143,8 @@
                 endereco: document.getElementById('endereco-hospede').value,
                 checkin: document.getElementById('checkin').value,
                 checkout: document.getElementById('checkout').value,
-                status: 'Pendente'
+                status: 'Pendente',
+                criado_em: new Date().toISOString() // <-- Grava o momento exato do clique do hóspede
             }]);
             
             // Tratamento de erro caso a inserção da reserva falhe
