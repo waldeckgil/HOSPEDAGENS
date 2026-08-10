@@ -1,101 +1,153 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão de Reservas</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Painel de Controle - Gestão de Reservas</title>
+    <!-- Importação do Tailwind CSS para estilização limpa e moderna -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Importação do cliente Supabase para comunicação com o banco de dados -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-gray-100 p-8">
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
 
-    <!-- Navegação Ajustada -->
-    <nav class="bg-white shadow-md p-6 mb-8 rounded-2xl flex justify-between items-center">
-        <div class="flex gap-8 font-bold text-gray-700">
-            <a href="dashboard.html" class="hover:text-blue-600 transition">Minhas Suítes</a>
-            <a href="reservas.html" class="text-blue-600 border-b-2 border-blue-600 pb-1">Ver Reservas</a>
-            <a href="configurar-pousada.html" class="hover:text-blue-600 transition">Minha Pousada</a>
-        </div>
-        <button onclick="fazerLogout()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-xl transition">Sair</button>
-    </nav>
+    <div class="flex h-screen">
+        <!-- Menu Lateral -->
+        <aside class="w-64 bg-gray-800 text-white flex flex-col">
+            <div class="p-5 text-2xl font-bold tracking-wider border-b border-gray-700">
+                Painel 360
+            </div>
+            <nav class="flex-1 p-4 space-y-2">
+                <a href="#" class="block py-2.5 px-4 rounded bg-gray-700 text-white font-semibold">Reservas</a>
+                <a href="#" class="block py-2.5 px-4 rounded hover:bg-gray-700 text-gray-300">Suítes</a>
+                <a href="#" class="block py-2.5 px-4 rounded hover:bg-gray-700 text-gray-300">Hóspedes</a>
+            </nav>
+        </aside>
 
-    <div class="max-w-6xl mx-auto">
-        <h1 class="text-3xl font-bold mb-6">Solicitações de Reserva</h1>
-        <div id="reservas-container" class="space-y-4"></div>
+        <!-- Conteúdo Principal -->
+        <main class="flex-1 flex flex-col overflow-y-auto">
+            <header class="bg-white shadow px-6 py-4 flex justify-between items-center">
+                <h1 class="text-xl font-bold text-gray-800">Gerenciamento de Solicitações de Reserva</h1>
+                <span id="user-status" class="text-sm text-green-600 font-medium">Sistema Online</span>
+            </header>
+
+            <div class="p-6">
+                <!-- Seção de Reservas Pendentes -->
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                        <h2 class="text-lg font-semibold text-gray-700">Solicitações Pendentes</h2>
+                        <button onclick="carregarReservas()" class="text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded transition">Atualizar Lista</button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-600 uppercase text-xs tracking-wider">
+                                    <th class="py-3 px-6">Hóspede</th>
+                                    <th class="py-3 px-6">Contato / CPF</th>
+                                    <th class="py-3 px-6">Período</th>
+                                    <th class="py-3 px-6">Status</th>
+                                    <th class="py-3 px-6 text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-reservas" class="divide-y divide-gray-200 text-sm text-gray-700">
+                                <!-- Os dados serão injetados dinamicamente via JavaScript -->
+                                <tr>
+                                    <td colspan="5" class="py-4 text-center text-gray-500">Carregando solicitações...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 
+    <!-- Script de Integração e Lógica -->
     <script>
-        // Configuração corrigida usando supabaseClient para evitar conflito de identificador
-        const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Configuração inicial das credenciais do Supabase (substitua pelas chaves do seu ambiente de produção)
+        const SUPABASE_URL = 'SUA_SUPABASE_URL_AQUI';
+        const SUPABASE_ANON_KEY = 'SUA_SUPABASE_ANON_KEY_AQUI';
+        
+        // Inicialização correta do cliente Supabase
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        /**
+         * Função responsável por buscar as reservas pendentes no banco de dados 
+         * e renderizá-las na tabela HTML de forma dinâmica.
+         */
         async function carregarReservas() {
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (!user) { window.location.href = 'index.html'; return; }
+            const tbody = document.getElementById('tabela-reservas');
+            tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-gray-500">Buscando dados...</td></tr>`;
 
-            // Buscando as reservas do dono da pousada logado
-            const { data: reservas, error } = await supabaseClient
+            // Consulta à tabela 'reservas' filtrando por status pendente ou ordenando por data
+            const { data, error } = await supabaseClient
                 .from('reservas')
                 .select('*')
-                .eq('pousada_id', user.id)
-                .order('criado_em', { ascending: false });
+                .order('id', { ascending: false });
 
-            const container = document.getElementById('reservas-container');
-            container.innerHTML = '';
+            if (error) {
+                console.error('Erro ao carregar reservas:', error.message);
+                tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-red-500">Erro ao carregar dados do servidor.</td></tr>`;
+                return;
+            }
 
-            if (error) { container.innerHTML = '<p class="text-red-500">Erro ao carregar: ' + error.message + '</p>'; return; }
-            if (!reservas || reservas.length === 0) { container.innerHTML = '<p class="text-gray-600">Nenhuma reserva encontrada.</p>'; return; }
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-gray-500">Nenhuma reserva encontrada.</td></tr>`;
+                return;
+            }
 
-            reservas.forEach(res => {
-                // Formatação correta da data de criação (se houver)
-                let dataHoraCriacao = '';
-                if (res.criado_em) {
-                    const dataObj = new Date(res.criado_em);
-                    dataHoraCriacao = `🕒 Solicitado em: ${dataObj.toLocaleDateString('pt-BR')} às ${dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
-                }
-
-                container.innerHTML += `
-                    <div class="bg-white p-6 rounded-xl shadow border-l-8 ${res.status === 'Pendente' ? 'border-yellow-500' : 'border-green-500'}">
-                        <div class="flex justify-between items-start">
-                            <h2 class="text-xl font-bold text-gray-800">${res.hospede_nome}</h2>
-                            <span class="text-xs text-gray-500 font-semibold">${dataHoraCriacao}</span>
-                        </div>
-                        
-                        <!-- Detalhes de Contato e Documentação -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-                            <p><strong>E-mail:</strong> ${res.email || 'Não informado'}</p>
-                            <p><strong>WhatsApp:</strong> ${res.whatsapp_hospede || 'Não informado'}</p>
-                            <p><strong>CPF:</strong> ${res.cpf || 'Não informado'} | <strong>RG:</strong> ${res.rg || 'Não informado'}</p>
-                            <p class="md:col-span-2"><strong>Endereço:</strong> ${res.endereco || 'Não informado'}</p>
-                        </div>
-
-                        <p class="text-sm text-gray-700 mt-3"><strong>Check-in:</strong> ${res.checkin} | <strong>Check-out:</strong> ${res.checkout}</p>
-                        <p class="font-semibold mt-1">Status: <span class="${res.status === 'Pendente' ? 'text-yellow-600' : 'text-green-600'}">${res.status}</span></p>
-                        
-                        <div class="mt-4 flex gap-2">
-                            ${res.status === 'Pendente' ? `
-                                <button onclick="atualizarStatus('${res.id}', 'Aprovada')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition font-bold">Aprovar</button>
-                                <button onclick="atualizarStatus('${res.id}', 'Recusada')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition font-bold">Recusar</button>
-                            ` : ''}
-                        </div>
-                    </div>
+            // Limpa e reconstrói as linhas da tabela com os dados reais
+            tbody.innerHTML = '';
+            data.forEach(reserva => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-4 px-6 font-medium">${reserva.nome_hospede || 'Não informado'}</td>
+                    <td class="py-4 px-6">${reserva.contato || '-'}<br><span class="text-xs text-gray-400">${reserva.cpf_rg || ''}</span></td>
+                    <td class="py-4 px-6">${reserva.checkin || ''} até ${reserva.checkout || ''}</td>
+                    <td class="py-4 px-6">
+                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${
+                            reserva.status === 'Aprovado' ? 'bg-green-100 text-green-800' :
+                            reserva.status === 'Recusado' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
+                        }">
+                            ${reserva.status || 'Pendente'}
+                        </span>
+                    </td>
+                    <td class="py-4 px-6 text-center space-x-2">
+                        <button onclick="atualizarStatus(${reserva.id}, 'Aprovado')" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs transition">Aprovar</button>
+                        <button onclick="atualizarStatus(${reserva.id}, 'Recusado')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs transition">Recusar</button>
+                    </td>
                 `;
+                tbody.appendChild(tr);
             });
         }
 
+        /**
+         * Função responsável por atualizar o status de uma reserva específica no Supabase
+         * @param {number} id - Identificador único da reserva
+         * @param {string} novoStatus - O novo status a ser aplicado ('Aprovado' ou 'Recusado')
+         */
         async function atualizarStatus(id, novoStatus) {
-            const { error } = await supabaseClient.from('reservas').update({ status: novoStatus }).eq('id', id);
-            if (error) alert('Erro ao atualizar: ' + error.message);
-            else carregarReservas();
+            const confirmacao = confirm(`Deseja realmente alterar o status desta reserva para "${novoStatus}"?`);
+            if (!confirmacao) return;
+
+            // Executa o comando de atualização diretamente na tabela 'reservas' do Supabase
+            const { error } = await supabaseClient
+                .from('reservas')
+                .update({ status: novoStatus })
+                .eq('id', id);
+
+            if (error) {
+                alert('Erro ao atualizar o status: ' + error.message);
+            } else {
+                // Recarrega a listagem para refletir a mudança instantaneamente na tela
+                carregarReservas();
+            }
         }
 
-        function fazerLogout() {
-            supabaseClient.auth.signOut();
-            window.location.href = 'index.html';
-        }
-
-        carregarReservas();
+        // Executa a carga inicial assim que a página é totalmente carregada no navegador
+        window.onload = () => {
+            carregarReservas();
+        };
     </script>
 </body>
 </html>
