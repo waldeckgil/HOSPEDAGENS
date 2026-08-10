@@ -86,6 +86,7 @@
                     <select id="edit-status" class="w-full p-3 border rounded-xl font-bold bg-gray-50" onchange="verificarStatusModal()">
                         <option value="Disponível">Disponível</option>
                         <option value="Ocupada">Ocupada</option>
+                        <option value="Reservado">Reservado (Com datas futuras)</option>
                         <option value="Limpeza">Limpeza</option>
                         <option value="Pendente">Pendente</option>
                     </select>
@@ -505,9 +506,75 @@
         function fecharModalConfirmacao() { document.getElementById('modal-confirmacao').classList.add('hidden'); }
 
         async function executarSalvamento(suiteId, status) {
-            await supabaseClient.from('suites').update({ status }).eq('id', suiteId);
+            // Se o status escolhido for "Reservado", mapeamos internamente a suíte como "Disponível" ou mantemos o status base,
+            // mas criamos uma reserva APROVADA com as datas futuras preenchidas.
+            if (status === 'Reservado') {
+                // Atualiza a suíte para Disponível (ou o estado padrão), mas insere a reserva aprovada
+                await supabaseClient.from('suites').update({ status: 'Disponível' }).eq('id', suiteId);
 
-            if (status === 'Disponível' || status === 'Limpeza') {
+                const hospedeNome = document.getElementById('edit-hospede').value;
+                const whatsappHospede = document.getElementById('edit-whatsapp').value;
+                const cpf = document.getElementById('edit-cpf').value;
+                const rg = document.getElementById('edit-rg').value;
+                const endereco = document.getElementById('edit-endereco').value;
+                const email = document.getElementById('edit-email').value;
+                const checkin = document.getElementById('edit-checkin').value;
+                const checkout = document.getElementById('edit-checkout').value;
+
+                const dadosReserva = {
+                    pousada_id: usuarioIdAtual,
+                    suite_id: suiteId,
+                    hospede_nome: hospedeNome || 'Hóspede (Reserva Manual)',
+                    whatsapp_hospede: whatsappHospede,
+                    cpf: cpf,
+                    rg: rg,
+                    endereco: endereco,
+                    email: email,
+                    checkin: checkin || new Date().toISOString().split('T')[0],
+                    checkout: checkout || new Date().toISOString().split('T')[0],
+                    status: 'Aprovada'
+                };
+
+                await supabaseClient.from('reservas').insert([dadosReserva]);
+            } 
+            // Se for Ocupada, atualiza o status físico da suíte e grava a reserva ativa atual
+            else if (status === 'Ocupada') {
+                await supabaseClient.from('suites').update({ status: 'Ocupada' }).eq('id', suiteId);
+
+                const hospedeNome = document.getElementById('edit-hospede').value;
+                const whatsappHospede = document.getElementById('edit-whatsapp').value;
+                const cpf = document.getElementById('edit-cpf').value;
+                const rg = document.getElementById('edit-rg').value;
+                const endereco = document.getElementById('edit-endereco').value;
+                const email = document.getElementById('edit-email').value;
+                const checkin = document.getElementById('edit-checkin').value;
+                const checkout = document.getElementById('edit-checkout').value;
+
+                const reservaExistente = reservasGlobaisCache.find(r => r.suite_id === suiteId && r.status === 'Aprovada');
+
+                const dadosReserva = {
+                    pousada_id: usuarioIdAtual,
+                    suite_id: suiteId,
+                    hospede_nome: hospedeNome || 'Hóspede (Balcão)',
+                    whatsapp_hospede: whatsappHospede,
+                    cpf: cpf,
+                    rg: rg,
+                    endereco: endereco,
+                    email: email,
+                    checkin: checkin || new Date().toISOString().split('T')[0],
+                    checkout: checkout || new Date().toISOString().split('T')[0],
+                    status: 'Aprovada'
+                };
+
+                if (reservaExistente) {
+                    await supabaseClient.from('reservas').update(dadosReserva).eq('id', reservaExistente.id);
+                } else {
+                    await supabaseClient.from('reservas').insert([dadosReserva]);
+                }
+            } 
+            // Se mudou para Disponível ou Limpeza, atualiza a suíte e cancela as reservas ativas
+            else {
+                await supabaseClient.from('suites').update({ status }).eq('id', suiteId);
                 await supabaseClient.from('reservas').update({ status: 'Cancelada' }).eq('suite_id', suiteId).eq('status', 'Aprovada');
                 await supabaseClient.from('reservas').update({ status: 'Cancelada' }).eq('suite_id', suiteId).eq('status', 'Pendente');
             }
@@ -523,9 +590,8 @@
             const statusOriginal = document.getElementById('edit-status-original').value;
             const suiteId = document.getElementById('edit-suite-id').value;
             
-            // Se estava Ocupada e o gestor mudou para Limpeza ou Disponível, fecha o modal de edição primeiro e exige confirmação
             if (statusOriginal === 'Ocupada' && (status === 'Limpeza' || status === 'Disponível')) {
-                fecharModal(); // Fecha imediatamente o modal de edição para não sobrepor telas
+                fecharModal(); 
 
                 const modalConf = document.getElementById('modal-confirmacao');
                 const textoConf = document.getElementById('modal-confirmacao-texto');
@@ -534,7 +600,6 @@
                 textoConf.innerHTML = `O hóspede atual desta suíte realizou o check-out? Ao mudar para <strong>${status}</strong>, a estada ativa será encerrada e o card liberado.`;
                 modalConf.classList.remove('hidden');
 
-                // Configura o botão de confirmação do modal personalizado
                 btnConfirmar.onclick = async () => {
                     fecharModalConfirmacao();
                     await executarSalvamento(suiteId, status);
@@ -542,7 +607,6 @@
                 return;
             }
 
-            // Caso contrário, fecha o modal e salva direto
             fecharModal();
             await executarSalvamento(suiteId, status);
         };
