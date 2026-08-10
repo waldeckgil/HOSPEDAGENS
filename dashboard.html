@@ -33,7 +33,7 @@
                 <span class="text-2xl">🔔</span>
                 <h2 class="text-xl font-bold text-amber-900">Você tem <span id="contador-pendentes">0</span> solicitação(ões) de reserva pendente(s)!</h2>
             </div>
-            <p class="text-sm text-amber-700 mt-1">Há hóspedes aguardando a aprovação. Veja os detalhes e a data/hora da solicitação abaixo:</p>
+            <p class="text-sm text-amber-700 mt-1">Há hóspedes aguardando a aprovação. Veja os detalhes abaixo:</p>
             
             <div id="lista-resumo-pendentes" class="mt-3 flex flex-wrap gap-2"></div>
         </div>
@@ -176,7 +176,7 @@
             contadorEl.innerText = pendentes.length;
             listaResumoEl.innerHTML = '';
 
-            pendentes.slice(0, 3).forEach(res => {
+            pendentes.forEach(res => {
                 let dataHoraFormatada = 'Data não informada';
                 if (res.criado_em) {
                     const dataObj = new Date(res.criado_em);
@@ -234,25 +234,22 @@
             }
 
             suites.forEach(suite => {
-                let res = null;
+                let aprovadaAtiva = null;
+                let pendentesDaSuite = [];
                 let proximaReserva = null;
+                let statusExibicao = suite.status;
 
                 if (reservas) {
                     const reservasDaSuite = reservas.filter(r => r.suite_id === suite.id && r.status !== 'Cancelada' && r.status !== 'Recusada');
                     
-                    // CORREÇÃO DA REGRA DE EXIBIÇÃO: Procura por reserva Aprovada ativa ou Pendente
-                    const aprovadaAtiva = reservasDaSuite.find(r => r.status === 'Aprovada');
-                    const pendenteAtiva = reservasDaSuite.find(r => r.status === 'Pendente');
+                    aprovadaAtiva = reservasDaSuite.find(r => r.status === 'Aprovada');
+                    pendentesDaSuite = reservasDaSuite.filter(r => r.status === 'Pendente');
 
                     if (aprovadaAtiva) {
-                        res = aprovadaAtiva;
-                        // Força visualmente o status como Ocupada/Reservada no dashboard se houver aprovação ativa
-                        suite.status_exibicao = 'Ocupada';
-                    } else if (pendenteAtiva) {
-                        res = pendenteAtiva;
-                        suite.status_exibicao = 'Pendente';
+                        statusExibicao = 'Ocupada';
+                    } else if (pendentesDaSuite.length > 0) {
+                        statusExibicao = 'Pendente';
                     } else {
-                        suite.status_exibicao = suite.status;
                         const hojeStr = new Date().toISOString().split('T')[0];
                         const futuras = reservasDaSuite.filter(r => r.status === 'Aprovada' && r.checkin >= hojeStr);
                         if (futuras.length > 0) {
@@ -260,12 +257,8 @@
                             proximaReserva = futuras[0];
                         }
                     }
-                } else {
-                    suite.status_exibicao = suite.status;
                 }
 
-                const statusAtual = suite.status_exibicao;
-                
                 const corClasses = {
                     'Disponível': 'bg-green-50 border-green-500 text-green-900', 
                     'Ocupada': 'bg-gray-100 border-gray-600 text-gray-900', 
@@ -273,16 +266,14 @@
                     'Pendente': 'bg-yellow-50 border-yellow-500 text-yellow-900'
                 };
                 
-                const linkZap = res && res.whatsapp_hospede ? gerarLinkWhatsApp(res.whatsapp_hospede, res.hospede_nome, res.checkin, res.checkout) : '#';
-
                 let indicadorHtml = '';
-                if (statusAtual === 'Ocupada' && res && res.checkout) {
-                    const indicador = obterIndicadorCheckout(res.checkout);
+                if (statusExibicao === 'Ocupada' && aprovadaAtiva && aprovadaAtiva.checkout) {
+                    const indicador = obterIndicadorCheckout(aprovadaAtiva.checkout);
                     indicadorHtml = `<div class="mt-2 inline-block px-3 py-1 rounded-lg border text-xs font-semibold ${indicador.classe}">${indicador.texto}</div>`;
-                } else if (statusAtual === 'Pendente' && res && res.checkin) {
-                    const indicadorProxima = obterIndicadorProximaEstada(res.checkin);
-                    indicadorHtml = `<div class="mt-2 inline-block px-3 py-1 rounded-lg border text-xs font-semibold ${indicadorProxima.classe}">${indicadorProxima.texto}</div>`;
-                } else if (statusAtual === 'Disponível' && proximaReserva && proximaReserva.checkin) {
+                } else if (statusExibicao === 'Pendente' && pendentesDaSuite.length > 0 && pendentesDaSuite[0].checkin) {
+                    const indicadorProxima = obterIndicadorProximaEstada(pendentesDaSuite[0].checkin);
+                    indicadorHtml = `<div class="mt-2 inline-block px-3 py-1 rounded-lg border text-xs font-semibold ${indicadorProxima.classe}">${indicadorProxima.texto} (${pendentesDaSuite.length} solicitação(ões))</div>`;
+                } else if (statusExibicao === 'Disponível' && proximaReserva && proximaReserva.checkin) {
                     const indicadorProxima = obterIndicadorProximaEstada(proximaReserva.checkin);
                     indicadorHtml = `
                         <div class="mt-3 p-2 bg-indigo-50/70 border border-indigo-200 rounded-xl text-xs space-y-1">
@@ -294,56 +285,65 @@
                     `;
                 }
 
+                // Bloco HTML para renderizar os detalhes (suporta múltiplos pendentes se houver)
+                let detalhesHtml = '';
+                if (statusExibicao === 'Ocupada' && aprovadaAtiva) {
+                    const linkZap = gerarLinkWhatsApp(aprovadaAtiva.whatsapp_hospede, aprovadaAtiva.hospede_nome, aprovadaAtiva.checkin, aprovadaAtiva.checkout);
+                    detalhesHtml = `
+                        <div class="mt-4 pt-3 border-t border-black/10 text-sm space-y-1.5">
+                            <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-600">Hóspede:</span> <span class="font-bold text-gray-900">${aprovadaAtiva.hospede_nome}</span></p>
+                            <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-600">WhatsApp:</span> <a href="${linkZap}" target="_blank" onclick="event.stopPropagation();" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${aprovadaAtiva.whatsapp_hospede || 'Não informado'}</a></p>
+                            <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-black/5 text-xs">
+                                <p><span class="text-gray-500">Check-in:</span> <strong class="text-gray-800">${formatarDataSimples(aprovadaAtiva.checkin)}</strong></p>
+                                <p><span class="text-gray-500">Check-out:</span> <strong class="text-gray-800">${formatarDataSimples(aprovadaAtiva.checkout)}</strong></p>
+                            </div>
+                        </div>
+                    `;
+                } else if (statusExibicao === 'Pendente' && pendentesDaSuite.length > 0) {
+                    // Percorre e lista todas as solicitações pendentes para esta mesma suíte no card
+                    detalhesHtml = `<div class="mt-4 pt-3 border-t border-black/10 space-y-3">`;
+                    pendentesDaSuite.forEach((pend, idx) => {
+                        const linkZapPend = gerarLinkWhatsApp(pend.whatsapp_hospede, pend.hospede_nome, pend.checkin, pend.checkout);
+                        detalhesHtml += `
+                            <div class="bg-yellow-100/70 p-3 rounded-xl border border-yellow-200 text-xs space-y-1">
+                                <p class="font-bold text-yellow-900 border-b border-yellow-200 pb-1 flex justify-between">
+                                    <span>Solicitação #${idx + 1}</span>
+                                    <span>👤 ${pend.hospede_nome}</span>
+                                </p>
+                                <p><strong>WhatsApp:</strong> <a href="${linkZapPend}" target="_blank" onclick="event.stopPropagation();" class="text-emerald-800 underline">${pend.whatsapp_hospede || 'N/A'}</a></p>
+                                <div class="grid grid-cols-2 gap-1 pt-1">
+                                    <p>Início: <strong>${formatarDataSimples(pend.checkin)}</strong></p>
+                                    <p>Fim: <strong>${formatarDataSimples(pend.checkout)}</strong></p>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    detalhesHtml += `</div>`;
+                } else {
+                    detalhesHtml = `
+                        <div class="mt-4 pt-3 border-t border-black/10 text-xs text-gray-500 italic">
+                            ${!proximaReserva ? 'Nenhuma reserva ativa vinculada no momento.' : ''}
+                        </div>
+                    `;
+                }
+
                 container.innerHTML += `
-                    <div class="p-6 rounded-2xl shadow-md border-l-8 ${corClasses[statusAtual] || 'bg-white border-gray-300'} flex flex-col justify-between transition hover:shadow-lg cursor-pointer bg-white" 
-                         onclick="abrirModal('${suite.id}', '${suite.nome}', ${JSON.stringify(res || {}).replace(/"/g, '&quot;')}, '${suite.status}')">
+                    <div class="p-6 rounded-2xl shadow-md border-l-8 ${corClasses[statusExibicao] || 'bg-white border-gray-300'} flex flex-col justify-between transition hover:shadow-lg cursor-pointer bg-white" 
+                         onclick="abrirModal('${suite.id}', '${suite.nome}', ${JSON.stringify(aprovadaAtiva || pendentesDaSuite[0] || {}).replace(/"/g, '&quot;')}, '${suite.status}')">
                         <div>
                             <div class="flex justify-between items-start mb-2">
                                 <h2 class="text-xl font-bold text-gray-800">${suite.nome}</h2>
                                 <span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase shadow-sm ${
-                                    statusAtual === 'Disponível' ? 'bg-green-200 text-green-800' :
-                                    statusAtual === 'Ocupada' ? 'bg-gray-300 text-gray-800' :
-                                    statusAtual === 'Limpeza' ? 'bg-red-200 text-red-800' : 'bg-yellow-200 text-yellow-800'
+                                    statusExibicao === 'Disponível' ? 'bg-green-200 text-green-800' :
+                                    statusExibicao === 'Ocupada' ? 'bg-gray-300 text-gray-800' :
+                                    statusExibicao === 'Limpeza' ? 'bg-red-200 text-red-800' : 'bg-yellow-200 text-yellow-800'
                                 }">
-                                    ${statusAtual === 'Ocupada' ? 'Reservada / Ocupada' : statusAtual}
+                                    ${statusExibicao === 'Ocupada' ? 'Reservada / Ocupada' : statusExibicao}
                                 </span>
                             </div>
 
                             ${indicadorHtml}
-
-                            ${res && res.hospede_nome && statusAtual !== 'Disponível' && statusAtual !== 'Limpeza' ? `
-                                <div class="mt-4 pt-3 border-t border-black/10 text-sm space-y-1.5">
-                                    <p class="flex items-center gap-1.5">
-                                        <span class="font-semibold text-gray-600">Hóspede:</span> 
-                                        <span class="font-bold text-gray-900 truncate">${res.hospede_nome}</span>
-                                    </p>
-                                    
-                                    <p class="flex items-center gap-1.5">
-                                        <span class="font-semibold text-gray-600">WhatsApp:</span> 
-                                        ${res.whatsapp_hospede ? `
-                                            <a href="${linkZap}" target="_blank" onclick="event.stopPropagation();" class="inline-flex items-center gap-1 text-emerald-700 font-bold bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded-lg border border-emerald-200 transition" title="Abrir conversa no WhatsApp">
-                                                💬 ${res.whatsapp_hospede}
-                                            </a>
-                                        ` : '<span>Não informado</span>'}
-                                    </p>
-
-                                    ${statusAtual === 'Pendente' ? `
-                                        <div class="bg-yellow-100/60 p-3 rounded-xl space-y-1 my-2 text-xs border border-yellow-200">
-                                            <p><span class="font-semibold text-gray-700">CPF:</span> ${res.cpf || 'Não informado'}</p>
-                                            <p><span class="font-semibold text-gray-700">E-mail:</span> ${res.email || 'Não informado'}</p>
-                                        </div>
-                                    ` : ''}
-
-                                    <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-black/5 text-xs">
-                                        <p><span class="text-gray-500">Check-in:</span> <strong class="text-gray-800">${formatarDataSimples(res.checkin)}</strong></p>
-                                        <p><span class="text-gray-500">Check-out:</span> <strong class="text-gray-800">${formatarDataSimples(res.checkout)}</strong></p>
-                                    </div>
-                                </div>
-                            ` : `
-                                <div class="mt-4 pt-3 border-t border-black/10 text-xs text-gray-500 italic">
-                                    ${!proximaReserva && statusAtual !== 'Pendente' ? 'Nenhuma reserva ativa vinculada no momento.' : ''}
-                                </div>
-                            `}
+                            ${detalhesHtml}
                         </div>
 
                         <div class="mt-5 pt-3 flex justify-end">
