@@ -17,7 +17,7 @@
                 Painel 360
             </div>
             <nav class="flex-1 p-4 space-y-2">
-                <a href="#" class="block py-2.5 px-4 rounded bg-gray-700 text-white font-semibold">Reservas</a>
+                <a href="reservas.html" class="block py-2.5 px-4 rounded bg-gray-700 text-white font-semibold">Reservas</a>
                 <a href="dashboard.html" class="block py-2.5 px-4 rounded hover:bg-gray-700 text-gray-300">Suítes</a>
                 <a href="configurar-pousada.html" class="block py-2.5 px-4 rounded hover:bg-gray-700 text-gray-300">Minha Pousada</a>
             </nav>
@@ -35,10 +35,10 @@
             </header>
 
             <div class="p-6">
-                <!-- Seção de Reservas Pendentes -->
+                <!-- Seção de Reservas -->
                 <div class="bg-white rounded-lg shadow overflow-hidden">
                     <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                        <h2 class="text-lg font-semibold text-gray-700">Solicitações Pendentes</h2>
+                        <h2 class="text-lg font-semibold text-gray-700">Solicitações e Reservas</h2>
                         <button onclick="carregarDadosPousadaEReservas()" class="text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded transition">Atualizar Lista</button>
                     </div>
 
@@ -67,16 +67,12 @@
 
     <!-- Script de Integração e Lógica Completa -->
     <script>
-        // Credenciais do Supabase integradas corretamente
+        // Credenciais do Supabase
         const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
         
-        // Inicialização do cliente Supabase
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        /**
-         * Busca o nome da pousada correspondente no banco de dados usando o UUID do usuário autenticado.
-         */
         async function carregarNomePousada(userId) {
             const badgePousada = document.getElementById('nome-pousada-header');
             try {
@@ -96,28 +92,20 @@
             }
         }
 
-        /**
-         * Valida a sessão ativa, obtém o UUID do usuário logado e busca as reservas correspondentes.
-         */
         async function carregarDadosPousadaEReservas() {
-            // Verifica se o usuário está autenticado na sessão do Supabase Auth
             const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
             
             if (authError || !user) {
-                // Redireciona para o login caso não haja sessão ativa
                 window.location.href = 'index.html';
                 return;
             }
 
-            const pousadaId = user.id; // Utiliza o UUID real fornecido pelo Auth do Supabase
-            
-            // Atualiza o nome da pousada no topo da tela
+            const pousadaId = user.id; 
             await carregarNomePousada(pousadaId);
 
             const tbody = document.getElementById('tabela-reservas');
             tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-gray-500">Buscando dados...</td></tr>`;
 
-            // Consulta multitenant filtrando estritamente pelo UUID da pousada logada
             const { data, error } = await supabaseClient
                 .from('reservas')
                 .select('*')
@@ -135,27 +123,32 @@
                 return;
             }
 
-            // Renderiza os registros encontrados na tabela
             tbody.innerHTML = '';
             data.forEach(reserva => {
                 const tr = document.createElement('tr');
+                const statusAtual = reserva.status || 'Pendente';
+                
+                // Formatação das cores do status
+                let classeStatus = 'bg-yellow-100 text-yellow-800';
+                if (statusAtual === 'Aprovada' || statusAtual === 'Aprovado') classeStatus = 'bg-green-100 text-green-800';
+                if (statusAtual === 'Recusada' || statusAtual === 'Recusado' || statusAtual === 'Cancelada') classeStatus = 'bg-red-100 text-red-800';
+
                 tr.innerHTML = `
                     <td class="py-4 px-6 font-medium">${reserva.hospede_nome || reserva.nome_hospede || 'Não informado'}</td>
                     <td class="py-4 px-6">${reserva.whatsapp_hospede || reserva.contato || '-'}<br><span class="text-xs text-gray-400">CPF: ${reserva.cpf || reserva.cpf_rg || 'Não informado'}</span></td>
                     <td class="py-4 px-6">${reserva.checkin || ''} até ${reserva.checkout || ''}</td>
                     <td class="py-4 px-6">
-                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${
-                            reserva.status === 'Aprovada' || reserva.status === 'Aprovado' ? 'bg-green-100 text-green-800' :
-                            reserva.status === 'Recusada' || reserva.status === 'Recusado' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
-                        }">
-                            ${reserva.status || 'Pendente'}
+                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${classeStatus}">
+                            ${statusAtual}
                         </span>
                     </td>
                     <td class="py-4 px-6 text-center space-x-2">
-                        ${reserva.status === 'Pendente' ? `
-                            <button onclick="atualizarStatus('${reserva.id}', 'Aprovada')" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs transition">Aprovar</button>
-                            <button onclick="atualizarStatus('${reserva.id}', 'Recusada')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs transition">Recusar</button>
-                        ` : '<span class="text-xs text-gray-400">Finalizado</span>'}
+                        ${statusAtual === 'Pendente' ? `
+                            <button onclick="atualizarStatus('${reserva.id}', 'Aprovada', '${reserva.suite_id || ''}', '${reserva.checkin}', '${reserva.checkout}')" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs transition">Aprovar</button>
+                            <button onclick="atualizarStatus('${reserva.id}', 'Recusada', '${reserva.suite_id || ''}', '${reserva.checkin}', '${reserva.checkout}')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs transition">Recusar</button>
+                        ` : statusAtual === 'Aprovada' ? `
+                            <button onclick="atualizarStatus('${reserva.id}', 'Cancelada', '${reserva.suite_id || ''}', '${reserva.checkin}', '${reserva.checkout}')" class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded text-xs transition">Cancelar</button>
+                        ` : '<span class="text-xs text-gray-400">Encerrado</span>'}
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -163,25 +156,65 @@
         }
 
         /**
-         * Atualiza o status da reserva no Supabase e atualiza a tela
+         * Valida conflito de datas antes de aprovar
          */
-        async function atualizarStatus(id, novoStatus) {
-            const confirmacao = confirm(`Deseja realmente alterar o status desta reserva para "${novoStatus}"?`);
+        async function verificarConflitoDeDatas(suiteId, checkin, checkout, reservaIdAtual) {
+            if (!suiteId) return false; // Se não houver suíte vinculada, não há como cruzar conflito físico
+
+            const { data: reservasExistentes, error } = await supabaseClient
+                .from('reservas')
+                .select('*')
+                .eq('suite_id', suiteId)
+                .eq('status', 'Aprovada')
+                .neq('id', reservaIdAtual);
+
+            if (error || !reservasExistentes) return false;
+
+            const novoInicio = new Date(checkin);
+            const novoFim = new Date(checkout);
+
+            for (let res of reservasExistentes) {
+                const inicioExistente = new Date(res.checkin);
+                const fimExistente = new Date(res.checkout);
+
+                // Regra de interseção de datas: (StartA < EndB) e (EndA > StartB)
+                if (novoInicio < fimExistente && novoFim > inicioExistente) {
+                    return true; // Conflito detectado!
+                }
+            }
+
+            return false;
+        }
+
+        /**
+         * Atualiza o status da reserva e gerencia o controle de conflitos
+         */
+        async function atualizarStatus(id, novoStatus, suiteId, checkin, checkout) {
+            if (novoStatus === 'Aprovada') {
+                const temConflito = await verificarConflitoDeDatas(suiteId, checkin, checkout, id);
+                if (temConflito) {
+                    alert('⚠️ Conflito de Datas: Já existe outra reserva APROVADA para esta mesma suíte neste período!');
+                    return; 
+                }
+            }
+
+            const acaoTexto = novoStatus === 'Aprovada' ? 'aprovar' : novoStatus === 'Recusada' ? 'recusar' : 'cancelar';
+            const confirmacao = confirm(`Deseja realmente ${acaoTexto} esta reserva?`);
             if (!confirmacao) return;
 
-            const { error } = await supabaseClient
+            const { error: erroReserva } = await supabaseClient
                 .from('reservas')
                 .update({ status: novoStatus })
                 .eq('id', id);
 
-            if (error) {
-                alert('Erro ao atualizar o status: ' + error.message);
-            } else {
-                carregarDadosPousadaEReservas();
+            if (erroReserva) {
+                alert('Erro ao atualizar a reserva: ' + erroReserva.message);
+                return;
             }
+
+            carregarDadosPousadaEReservas();
         }
 
-        // Executa a inicialização ao carregar a página
         window.onload = () => {
             carregarDadosPousadaEReservas();
         };
