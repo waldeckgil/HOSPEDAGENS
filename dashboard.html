@@ -97,6 +97,7 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let usuarioIdAtual = null;
+        let nomePousadaAtual = "nossa pousada"; // Variável global para armazenar o nome da pousada
 
         async function carregarPousada() {
             const { data: { user } } = await supabaseClient.auth.getUser();
@@ -104,7 +105,8 @@
             usuarioIdAtual = user.id;
 
             const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', user.id).single();
-            if (pousada) {
+            if (pousada && pousada.nome) {
+                nomePousadaAtual = pousada.nome;
                 document.getElementById('titulo-pousada').innerText = "Pousada: " + pousada.nome;
             } else {
                 document.getElementById('titulo-pousada').innerText = "Minha Pousada";
@@ -171,16 +173,17 @@
             });
         }
 
-        // Função auxiliar para limpar o telefone e gerar o link do WhatsApp
-        function gerarLinkWhatsApp(whats) {
+        // Função ajustada para personalizar o WhatsApp com o nome do hóspede e da pousada
+        function gerarLinkWhatsApp(whats, nomeHospede) {
             if (!whats) return '#';
             const apenasNumeros = whats.replace(/\D/g, '');
-            // Se o número não tiver DDI (ex: 55), adiciona o 55 do Brasil por segurança se tiver 10 ou 11 dígitos
             let numeroFinal = apenasNumeros;
             if (numeroFinal.length <= 11 && !numeroFinal.startsWith('55')) {
                 numeroFinal = '55' + numeroFinal;
             }
-            return `https://wa.me/${numeroFinal}?text=Olá%20${encodeURIComponent(whats)},%20estou%20entrando%20em%20contato%20sobre%20a%20sua%20solicitação%20de%20reserva.`;
+            const nomeCliente = nomeHospede ? nomeHospede.trim() : 'Hóspede';
+            const textoMensagem = `Olá ${nomeCliente}, estou entrando em contato sobre a sua solicitação de reserva na ${nomePousadaAtual}.`;
+            return `https://wa.me/${numeroFinal}?text=${encodeURIComponent(textoMensagem)}`;
         }
 
         async function carregarDashboard() {
@@ -245,7 +248,7 @@
                     return dataObj.toLocaleDateString('pt-BR') + ' às ' + dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
                 };
 
-                const linkZap = res && res.whatsapp_hospede ? gerarLinkWhatsApp(res.whatsapp_hospede) : '#';
+                const linkZap = res && res.whatsapp_hospede ? gerarLinkWhatsApp(res.whatsapp_hospede, res.hospede_nome) : '#';
 
                 container.innerHTML += `
                     <div class="p-6 rounded-2xl shadow-md border-l-8 ${corClasses[suite.status] || 'bg-white border-gray-300'} flex flex-col justify-between transition hover:shadow-lg cursor-pointer bg-white" 
