@@ -99,6 +99,47 @@
         let usuarioIdAtual = null;
         let nomePousadaAtual = "nossa pousada";
 
+        // Funções de Cálculo e Indicadores de Contagem Regressiva de Datas
+        function calcularDiasRestantes(dataAlvo) {
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            
+            const [ano, mes, dia] = dataAlvo.split('-');
+            const alvo = new Date(ano, mes - 1, dia);
+            alvo.setHours(0, 0, 0, 0);
+            
+            const diferencaTempo = alvo.getTime() - hoje.getTime();
+            return Math.round(diferencaTempo / (1000 * 3600 * 24));
+        }
+
+        function obterIndicadorCheckout(checkoutStr) {
+            const dias = calcularDiasRestantes(checkoutStr);
+            
+            if (dias < 0) {
+                return { texto: `⚠️ Checkout vencido há ${Math.abs(dias)} dia(s)`, classe: 'bg-red-100 text-red-700 border-red-300' };
+            } else if (dias === 0) {
+                return { texto: `🔥 Checkout HOJE!`, classe: 'bg-orange-100 text-orange-800 border-orange-300 font-bold' };
+            } else if (dias === 1) {
+                return { texto: `⏳ Checkout amanhã`, classe: 'bg-yellow-100 text-yellow-800 border-yellow-300' };
+            } else {
+                return { texto: `Saída em ${dias} dias`, classe: 'bg-blue-50 text-blue-700 border-blue-200' };
+            }
+        }
+
+        function obterIndicadorProximaEstada(checkinStr) {
+            const dias = calcularDiasRestantes(checkinStr);
+            
+            if (dias < 0) {
+                return { texto: `Data de check-in no passado`, classe: 'bg-gray-100 text-gray-600 border-gray-200' };
+            } else if (dias === 0) {
+                return { texto: `🚀 Chegada HOJE!`, classe: 'bg-green-100 text-green-800 border-green-300 font-bold' };
+            } else if (dias === 1) {
+                return { texto: `🔔 Próxima estada amanhã`, classe: 'bg-indigo-100 text-indigo-800 border-indigo-300' };
+            } else {
+                return { texto: `Chegada em ${dias} dias`, classe: 'bg-purple-50 text-purple-700 border-purple-200' };
+            }
+        }
+
         async function carregarPousada() {
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) return;
@@ -173,7 +214,6 @@
             });
         }
 
-        // Função auxiliar para formatar a data de AAAA-MM-DD para DD/MM/AAAA na mensagem do WhatsApp
         function formatarDataSimples(dataStr) {
             if (!dataStr) return '';
             const partes = dataStr.split('-');
@@ -181,7 +221,6 @@
             return dataStr;
         }
 
-        // Função de WhatsApp atualizada com agradecimento e datas de check-in e check-out
         function gerarLinkWhatsApp(whats, nomeHospede, checkin, checkout) {
             if (!whats) return '#';
             const apenasNumeros = whats.replace(/\D/g, '');
@@ -235,11 +274,31 @@
 
             suites.forEach(suite => {
                 let res = null;
-                if ((suite.status === 'Ocupada' || suite.status === 'Pendente') && reservas) {
+                let proximaReserva = null;
+
+                if (reservas) {
                     const reservasDaSuite = reservas.filter(r => r.suite_id === suite.id && r.status !== 'Cancelada' && r.status !== 'Recusada');
+                    
                     if (reservasDaSuite.length > 0) {
-                        reservasDaSuite.sort((a, b) => b.id.localeCompare ? b.id.localeCompare(a.id) : b.id - a.id);
-                        res = reservasDaSuite[0];
+                        // Se a suíte está Ocupada ou Pendente, busca a reserva correspondente atual
+                        if (suite.status === 'Ocupada' || suite.status === 'Pendente') {
+                            const filtradasAtuais = reservasDaSuite.filter(r => r.status === suite.status || (suite.status === 'Ocupada' && r.status === 'Aprovada'));
+                            if (filtradasAtuais.length > 0) {
+                                filtradasAtuais.sort((a, b) => b.id.localeCompare ? b.id.localeCompare(a.id) : b.id - a.id);
+                                res = filtradasAtuais[0];
+                            } else {
+                                reservasDaSuite.sort((a, b) => b.id.localeCompare ? b.id.localeCompare(a.id) : b.id - a.id);
+                                res = reservasDaSuite[0];
+                            }
+                        } else if (suite.status === 'Disponível' || suite.status === 'Limpeza') {
+                            // Se estiver disponível/limpeza, procura se há alguma próxima reserva futura (Aprovada)
+                            const hojeStr = new Date().toISOString().split('T')[0];
+                            const futuras = reservasDaSuite.filter(r => r.status === 'Aprovada' && r.checkin >= hojeStr);
+                            if (futuras.length > 0) {
+                                futuras.sort((a, b) => a.checkin.localeCompare(b.checkin));
+                                proximaReserva = futuras[0];
+                            }
+                        }
                     }
                 }
                 
@@ -266,6 +325,27 @@
 
                 const linkZap = res && res.whatsapp_hospede ? gerarLinkWhatsApp(res.whatsapp_hospede, res.hospede_nome, res.checkin, res.checkout) : '#';
 
+                // Geração dos indicadores visuais baseados nas datas
+                let indicadorHtml = '';
+                if (suite.status === 'Ocupada' && res && res.checkout) {
+                    const indicador = obterIndicadorCheckout(res.checkout);
+                    indicadorHtml = `
+                        <div class="mt-2 inline-block px-3 py-1 rounded-lg border text-xs font-semibold ${indicador.classe}">
+                            ${indicador.texto}
+                        </div>
+                    `;
+                } else if ((suite.status === 'Disponível' || suite.status === 'Limpeza') && proximaReserva && proximaReserva.checkin) {
+                    const indicadorProxima = obterIndicadorProximaEstada(proximaReserva.checkin);
+                    indicadorHtml = `
+                        <div class="mt-3 p-2 bg-indigo-50/70 border border-indigo-200 rounded-xl text-xs space-y-1">
+                            <p class="font-bold text-indigo-900">📅 Próxima Estada: ${proximaReserva.hospede_nome}</p>
+                            <div class="inline-block px-2.5 py-0.5 rounded-md border text-xs font-semibold ${indicadorProxima.classe}">
+                                ${indicadorProxima.texto} (Check-in: ${formatarData(proximaReserva.checkin)})
+                            </div>
+                        </div>
+                    `;
+                }
+
                 container.innerHTML += `
                     <div class="p-6 rounded-2xl shadow-md border-l-8 ${corClasses[suite.status] || 'bg-white border-gray-300'} flex flex-col justify-between transition hover:shadow-lg cursor-pointer bg-white" 
                          onclick="abrirModal('${suite.id}', '${suite.nome}', ${JSON.stringify(res || {}).replace(/"/g, '&quot;')}, '${suite.status}')">
@@ -281,7 +361,10 @@
                                 </span>
                             </div>
 
-                            ${res && res.hospede_nome ? `
+                            <!-- Exibe indicador de contagem regressiva (Checkout ou Próxima Estada) -->
+                            ${indicadorHtml}
+
+                            ${res && res.hospede_nome && suite.status !== 'Disponível' && suite.status !== 'Limpeza' ? `
                                 <div class="mt-4 pt-3 border-t border-black/10 text-sm space-y-1.5">
                                     <p class="flex items-center gap-1.5">
                                         <span class="font-semibold text-gray-600">Hóspede:</span> 
@@ -302,7 +385,8 @@
                                     ${suite.status === 'Pendente' ? `
                                         <div class="bg-yellow-100/60 p-3 rounded-xl space-y-1 my-2 text-xs border border-yellow-200">
                                             <p><span class="font-semibold text-gray-700">CPF:</span> ${res.cpf || 'Não informado'}</p>
-                                            <p><span class="font-semibold text-gray-700">RG:</span> ${res.rg || 'Not informado'}</p>
+                                            <p><span class="font-semibold text-gray-700">RG:</span> ${res.rg || 'Não informado'}</p>
+                                            <p><span class="font-semibold text-gray-700">CEP:</span> ${res.cep || 'Não informado'}</p>
                                             <p><span class="font-semibold text-gray-700">Endereço:</span> ${res.endereco || 'Não informado'}</p>
                                             <p><span class="font-semibold text-gray-700">E-mail:</span> ${res.email || 'Não informado'}</p>
                                             <p class="pt-1 border-t border-yellow-200 text-amber-900 font-medium">
@@ -318,7 +402,7 @@
                                 </div>
                             ` : `
                                 <div class="mt-4 pt-3 border-t border-black/10 text-xs text-gray-500 italic">
-                                    Nenhuma reserva ativa vinculada no momento.
+                                    ${!proximaReserva ? 'Nenhuma reserva ativa vinculada no momento.' : ''}
                                 </div>
                             `}
                         </div>
