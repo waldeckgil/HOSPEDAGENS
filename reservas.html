@@ -1,223 +1,230 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Painel de Controle - Gestão de Reservas</title>
-    <!-- Importação do Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Importação do cliente Supabase -->
+    <title>Gerenciamento de Reservas</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+<body class="bg-gray-100 min-h-screen flex">
 
-    <div class="flex h-screen">
-        <!-- Menu Lateral -->
-        <aside class="w-64 bg-gray-800 text-white flex flex-col">
-            <div class="p-5 text-2xl font-bold tracking-wider border-b border-gray-700">
-                Painel 360
-            </div>
-            <nav class="flex-1 p-4 space-y-2">
-                <a href="reservas.html" class="block py-2.5 px-4 rounded bg-gray-700 text-white font-semibold">Reservas</a>
-                <a href="dashboard.html" class="block py-2.5 px-4 rounded hover:bg-gray-700 text-gray-300">Suítes</a>
-                <a href="configurar-pousada.html" class="block py-2.5 px-4 rounded hover:bg-gray-700 text-gray-300">Minha Pousada</a>
+    <!-- MENU LATERAL -->
+    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between hidden md:flex shadow-xl">
+        <div class="p-6">
+            <h1 class="text-2xl font-extrabold text-white mb-8 tracking-wider">Painel 360</h1>
+            <nav class="space-y-2">
+                <a href="reservas.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-600 text-white font-semibold shadow-md">
+                    <span>📋</span> Reservas
+                </a>
+                <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition font-medium">
+                    <span>🏠</span> Suítes
+                </a>
+                <a href="configurar-pousada.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition font-medium">
+                    <span>⚙️</span> Minha Pousada
+                </a>
             </nav>
-        </aside>
+        </div>
+        <div class="p-6 border-t border-slate-800">
+            <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-xl transition shadow">Sair</button>
+        </div>
+    </aside>
 
-        <!-- Conteúdo Principal -->
-        <main class="flex-1 flex flex-col overflow-y-auto">
-            <header class="bg-white shadow px-6 py-4 flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <h1 class="text-xl font-bold text-gray-800">Gerenciamento de Solicitações de Reserva</h1>
-                    <!-- Elemento dinâmico que exibe o nome da pousada identificada pelo UUID logado -->
-                    <span id="nome-pousada-header" class="text-xs bg-indigo-100 text-indigo-800 font-semibold px-2.5 py-1 rounded-full">Carregando pousada...</span>
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="flex-1 flex flex-col min-w-0">
+        <!-- CABEÇALHO -->
+        <header class="bg-white shadow-xs border-b border-gray-200 p-6 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <h2 class="text-xl font-bold text-gray-800">Gerenciamento de Solicitações de Reserva</h2>
+                <span id="badge-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold">Carregando...</span>
+            </div>
+            <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">Sistema Online</span>
+        </header>
+
+        <!-- CORPO DA PÁGINA -->
+        <main class="p-6 md:p-8 flex-1 overflow-y-auto">
+            <div class="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
+                <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800">Solicitações e Reservas</h3>
+                        <p class="text-xs text-gray-500 mt-0.5">Aprove, recuse ou cancele as reservas solicitadas pelos hóspedes.</p>
+                    </div>
+                    <button onclick="carregarReservas()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-sm flex items-center gap-2">
+                        🔄 Atualizar Lista
+                    </button>
                 </div>
-                <span id="user-status" class="text-sm text-green-600 font-medium">Sistema Online</span>
-            </header>
 
-            <div class="p-6">
-                <!-- Seção de Reservas -->
-                <div class="bg-white rounded-lg shadow overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                        <h2 class="text-lg font-semibold text-gray-700">Solicitações e Reservas</h2>
-                        <button onclick="carregarDadosPousadaEReservas()" class="text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded transition">Atualizar Lista</button>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-gray-50 text-gray-600 uppercase text-xs tracking-wider">
-                                    <th class="py-3 px-6">Hóspede</th>
-                                    <th class="py-3 px-6">Contato / CPF</th>
-                                    <th class="py-3 px-6">Período</th>
-                                    <th class="py-3 px-6">Status</th>
-                                    <th class="py-3 px-6 text-center">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabela-reservas" class="divide-y divide-gray-200 text-sm text-gray-700">
-                                <tr>
-                                    <td colspan="5" class="py-4 text-center text-gray-500">Carregando solicitações...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-600 uppercase text-[11px] font-extrabold tracking-wider border-b border-gray-200">
+                                <th class="p-4">Hóspede</th>
+                                <th class="p-4">Suíte</th> <!-- Nova coluna para exibir o nome da suíte -->
+                                <th class="p-4">Contato / CPF</th>
+                                <th class="p-4">Período</th>
+                                <th class="p-4">Status</th>
+                                <th class="p-4 text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-reservas" class="divide-y divide-gray-100 text-sm">
+                            <tr>
+                                <td colspan="6" class="p-6 text-center text-gray-500 italic">Carregando solicitações...</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Script de Integração e Lógica Completa -->
+    <!-- SCRIPT DE GERENCIAMENTO -->
     <script>
-        // Credenciais do Supabase
         const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
-        
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function carregarNomePousada(userId) {
-            const badgePousada = document.getElementById('nome-pousada-header');
-            try {
-                const { data, error } = await supabaseClient
-                    .from('pousadas')
-                    .select('nome')
-                    .eq('id', userId)
-                    .single();
+        async function carregarPousadaInfo() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) { window.location.href = 'index.html'; return; }
 
-                if (error || !data) {
-                    badgePousada.textContent = 'Minha Pousada';
-                } else {
-                    badgePousada.textContent = data.nome;
-                }
-            } catch (err) {
-                badgePousada.textContent = 'Painel Pousada';
+            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', user.id).single();
+            if (pousada && pousada.nome) {
+                document.getElementById('badge-pousada').innerText = pousada.nome;
+            } else {
+                document.getElementById('badge-pousada').innerText = "Minha Pousada";
             }
         }
 
-        async function carregarDadosPousadaEReservas() {
-            const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
-            
-            if (authError || !user) {
-                window.location.href = 'index.html';
-                return;
-            }
+        function formatarDataSimples(dataStr) {
+            if (!dataStr) return '';
+            const partes = dataStr.split('-');
+            if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
+            return dataStr;
+        }
 
-            const pousadaId = user.id; 
-            await carregarNomePousada(pousadaId);
+        async function carregarReservas() {
+            await carregarPousadaInfo();
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) return;
 
-            const tbody = document.getElementById('tabela-reservas');
-            tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-gray-500">Buscando dados...</td></tr>`;
-
-            const { data, error } = await supabaseClient
+            // Realiza a consulta trazendo os dados da reserva e fazendo o join com a tabela 'suites' usando o relacionamento
+            const { data: reservas, error } = await supabaseClient
                 .from('reservas')
-                .select('*')
-                .eq('pousada_id', pousadaId)
+                .select(`
+                    *,
+                    suites (
+                        nome
+                    )
+                `)
+                .eq('pousada_id', user.id)
                 .order('criado_em', { ascending: false });
 
-            if (error) {
-                console.error('Erro ao carregar reservas:', error.message);
-                tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-red-500">Erro ao carregar dados do servidor.</td></tr>`;
-                return;
-            }
-
-            if (!data || data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-gray-500">Nenhuma solicitação encontrada para esta pousada.</td></tr>`;
-                return;
-            }
-
+            const tbody = document.getElementById('tabela-reservas');
             tbody.innerHTML = '';
-            data.forEach(reserva => {
-                const tr = document.createElement('tr');
-                const statusAtual = reserva.status || 'Pendente';
-                
-                // Formatação das cores do status
-                let classeStatus = 'bg-yellow-100 text-yellow-800';
-                if (statusAtual === 'Aprovada' || statusAtual === 'Aprovado') classeStatus = 'bg-green-100 text-green-800';
-                if (statusAtual === 'Recusada' || statusAtual === 'Recusado' || statusAtual === 'Cancelada') classeStatus = 'bg-red-100 text-red-800';
 
-                tr.innerHTML = `
-                    <td class="py-4 px-6 font-medium">${reserva.hospede_nome || reserva.nome_hospede || 'Não informado'}</td>
-                    <td class="py-4 px-6">${reserva.whatsapp_hospede || reserva.contato || '-'}<br><span class="text-xs text-gray-400">CPF: ${reserva.cpf || reserva.cpf_rg || 'Não informado'}</span></td>
-                    <td class="py-4 px-6">${reserva.checkin || ''} até ${reserva.checkout || ''}</td>
-                    <td class="py-4 px-6">
-                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${classeStatus}">
-                            ${statusAtual}
-                        </span>
-                    </td>
-                    <td class="py-4 px-6 text-center space-x-2">
-                        ${statusAtual === 'Pendente' ? `
-                            <button onclick="atualizarStatus('${reserva.id}', 'Aprovada', '${reserva.suite_id || ''}', '${reserva.checkin}', '${reserva.checkout}')" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs transition">Aprovar</button>
-                            <button onclick="atualizarStatus('${reserva.id}', 'Recusada', '${reserva.suite_id || ''}', '${reserva.checkin}', '${reserva.checkout}')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs transition">Recusar</button>
-                        ` : statusAtual === 'Aprovada' ? `
-                            <button onclick="atualizarStatus('${reserva.id}', 'Cancelada', '${reserva.suite_id || ''}', '${reserva.checkin}', '${reserva.checkout}')" class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded text-xs transition">Cancelar</button>
-                        ` : '<span class="text-xs text-gray-400">Encerrado</span>'}
-                    </td>
+            if (error) {
+                console.error("Erro ao carregar reservas:", error);
+                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-red-600 font-semibold">Erro ao carregar reservas. Tente atualizar a página.</td></tr>`;
+                return;
+            }
+
+            if (!reservas || reservas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-gray-500 italic">Nenhuma solicitação de reserva encontrada.</td></tr>`;
+                return;
+            }
+
+            reservas.forEach(res => {
+                let badgeStatus = '';
+                if (res.status === 'Pendente') {
+                    badgeStatus = `<span class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-xs font-extrabold uppercase">Pendente</span>`;
+                } else if (res.status === 'Aprovada') {
+                    badgeStatus = `<span class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-xs font-extrabold uppercase">Aprovada</span>`;
+                } else if (res.status === 'Recusada') {
+                    badgeStatus = `<span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-extrabold uppercase">Recusada</span>`;
+                } else if (res.status === 'Cancelada') {
+                    badgeStatus = `<span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs font-extrabold uppercase">Cancelada</span>`;
+                } else {
+                    badgeStatus = `<span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-xs font-extrabold uppercase">${res.status}</span>`;
+                }
+
+                // Extrai o nome da suíte com segurança do objeto retornado pelo join do Supabase
+                const nomeSuite = res.suites && res.suites.nome ? res.suites.nome : 'Suíte não encontrada';
+
+                let botoesAcao = '';
+                if (res.status === 'Pendente') {
+                    botoesAcao = `
+                        <div class="flex justify-end gap-2">
+                            <button onclick="mudarStatusReserva('${res.id}', 'Aprovada', '${res.suite_id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition shadow-xs">Aprovar</button>
+                            <button onclick="mudarStatusReserva('${res.id}', 'Recusada', '${res.suite_id}')" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition shadow-xs">Recusar</button>
+                        </div>
+                    `;
+                } else if (res.status === 'Aprovada') {
+                    botoesAcao = `
+                        <div class="flex justify-end gap-2">
+                            <button onclick="mudarStatusReserva('${res.id}', 'Cancelada', '${res.suite_id}')" class="bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition shadow-xs">Cancelar</button>
+                        </div>
+                    `;
+                } else {
+                    botoesAcao = `<span class="text-xs text-gray-400 italic">Nenhuma ação</span>`;
+                }
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50/80 transition">
+                        <td class="p-4 font-bold text-gray-900">${res.hospede_nome || 'Hóspede'}</td>
+                        <td class="p-4 font-semibold text-blue-700">${nomeSuite}</td>
+                        <td class="p-4 text-xs text-gray-600">
+                            <div class="font-bold text-gray-800">${res.whatsapp_hospede || 'Sem WhatsApp'}</div>
+                            <div class="text-gray-500 mt-0.5">CPF: ${res.cpf || 'Não informado'}</div>
+                        </td>
+                        <td class="p-4 text-xs font-medium text-gray-700">
+                            ${formatarDataSimples(res.checkin)} até ${formatarDataSimples(res.checkout)}
+                        </td>
+                        <td class="p-4">${badgeStatus}</td>
+                        <td class="p-4 text-right">${botoesAcao}</td>
+                    </tr>
                 `;
-                tbody.appendChild(tr);
             });
         }
 
-        /**
-         * Valida conflito de datas antes de aprovar
-         */
-        async function verificarConflitoDeDatas(suiteId, checkin, checkout, reservaIdAtual) {
-            if (!suiteId) return false; // Se não houver suíte vinculada, não há como cruzar conflito físico
-
-            const { data: reservasExistentes, error } = await supabaseClient
-                .from('reservas')
-                .select('*')
-                .eq('suite_id', suiteId)
-                .eq('status', 'Aprovada')
-                .neq('id', reservaIdAtual);
-
-            if (error || !reservasExistentes) return false;
-
-            const novoInicio = new Date(checkin);
-            const novoFim = new Date(checkout);
-
-            for (let res of reservasExistentes) {
-                const inicioExistente = new Date(res.checkin);
-                const fimExistente = new Date(res.checkout);
-
-                // Regra de interseção de datas: (StartA < EndB) e (EndA > StartB)
-                if (novoInicio < fimExistente && novoFim > inicioExistente) {
-                    return true; // Conflito detectado!
-                }
-            }
-
-            return false;
-        }
-
-        /**
-         * Atualiza o status da reserva e gerencia o controle de conflitos
-         */
-        async function atualizarStatus(id, novoStatus, suiteId, checkin, checkout) {
-            if (novoStatus === 'Aprovada') {
-                const temConflito = await verificarConflitoDeDatas(suiteId, checkin, checkout, id);
-                if (temConflito) {
-                    alert('⚠️ Conflito de Datas: Já existe outra reserva APROVADA para esta mesma suíte neste período!');
-                    return; 
-                }
-            }
-
-            const acaoTexto = novoStatus === 'Aprovada' ? 'aprovar' : novoStatus === 'Recusada' ? 'recusar' : 'cancelar';
-            const confirmacao = confirm(`Deseja realmente ${acaoTexto} esta reserva?`);
+        async function mudarStatusReserva(reservaId, novoStatus, suiteId) {
+            const confirmacao = confirm(`Deseja realmente alterar o status desta reserva para "${novoStatus}"?`);
             if (!confirmacao) return;
 
-            const { error: erroReserva } = await supabaseClient
+            const { error } = await supabaseClient
                 .from('reservas')
                 .update({ status: novoStatus })
-                .eq('id', id);
+                .eq('id', reservaId);
 
-            if (erroReserva) {
-                alert('Erro ao atualizar a reserva: ' + erroReserva.message);
+            if (error) {
+                alert("Erro ao atualizar status: " + error.message);
                 return;
             }
 
-            carregarDadosPousadaEReservas();
+            // Se a reserva foi aprovada, atualiza opcionalmente a tabela de suítes para refletir o status
+            if (novoStatus === 'Aprovada' && suiteId) {
+                await supabaseClient.from('suites').update({ status: 'Ocupada' }).eq('id', suiteId);
+            } else if ((novoStatus === 'Cancelada' || novoStatus === 'Recusada') && suiteId) {
+                // Se cancelada/recusada, verifica se não há outras reservas ativas para a suíte antes de liberá-la
+                const { data: outrasAtivas } = await supabaseClient
+                    .from('reservas')
+                    .select('*')
+                    .eq('suite_id', suiteId)
+                    .eq('status', 'Aprovada');
+                
+                if (!outrasAtivas || outrasAtivas.length === 0) {
+                    await supabaseClient.from('suites').update({ status: 'Disponível' }).eq('id', suiteId);
+                }
+            }
+
+            alert(`Reserva alterada para ${novoStatus} com sucesso!`);
+            carregarReservas();
         }
 
-        window.onload = () => {
-            carregarDadosPousadaEReservas();
-        };
+        async function fazerLogout() {
+            await supabaseClient.auth.signOut();
+            window.location.href = 'index.html';
+        }
+
+        carregarReservas();
     </script>
 </body>
 </html>
