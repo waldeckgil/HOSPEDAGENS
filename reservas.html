@@ -58,7 +58,7 @@
                         <thead>
                             <tr class="bg-gray-50 text-gray-600 uppercase text-[11px] font-extrabold tracking-wider border-b border-gray-200">
                                 <th class="p-4">Hóspede</th>
-                                <th class="p-4">Suíte</th> <!-- Nova coluna para exibir o nome da suíte -->
+                                <th class="p-4">Suíte</th>
                                 <th class="p-4">Contato / CPF</th>
                                 <th class="p-4">Período</th>
                                 <th class="p-4">Status</th>
@@ -82,12 +82,15 @@
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        let nomePousadaAtual = "nossa pousada";
+
         async function carregarPousadaInfo() {
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) { window.location.href = 'index.html'; return; }
 
             const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', user.id).single();
             if (pousada && pousada.nome) {
+                nomePousadaAtual = pousada.nome;
                 document.getElementById('badge-pousada').innerText = pousada.nome;
             } else {
                 document.getElementById('badge-pousada').innerText = "Minha Pousada";
@@ -101,12 +104,22 @@
             return dataStr;
         }
 
+        function gerarLinkWhatsApp(whats, nomeHospede, checkin, checkout) {
+            if (!whats) return '#';
+            const apenasNumeros = whats.replace(/\D/g, '');
+            let numeroFinal = apenasNumeros;
+            if (numeroFinal.length <= 11 && !numeroFinal.startsWith('55')) numeroFinal = '55' + numeroFinal;
+            const nomeCliente = nomeHospede ? nomeHospede.trim() : 'Hóspede';
+            let textoMensagem = `Olá ${nomeCliente}, agradecemos o contato! Estamos entrando em contato sobre a sua solicitação de reserva na ${nomePousadaAtual}`;
+            if (checkin && checkout) textoMensagem += `, para o período de ${formatarDataSimples(checkin)} até ${formatarDataSimples(checkout)}.`;
+            return `https://wa.me/${numeroFinal}?text=${encodeURIComponent(textoMensagem)}`;
+        }
+
         async function carregarReservas() {
             await carregarPousadaInfo();
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) return;
 
-            // Realiza a consulta trazendo os dados da reserva e fazendo o join com a tabela 'suites' usando o relacionamento
             const { data: reservas, error } = await supabaseClient
                 .from('reservas')
                 .select(`
@@ -146,8 +159,8 @@
                     badgeStatus = `<span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-xs font-extrabold uppercase">${res.status}</span>`;
                 }
 
-                // Extrai o nome da suíte com segurança do objeto retornado pelo join do Supabase
                 const nomeSuite = res.suites && res.suites.nome ? res.suites.nome : 'Suíte não encontrada';
+                const linkZap = gerarLinkWhatsApp(res.whatsapp_hospede, res.hospede_nome, res.checkin, res.checkout);
 
                 let botoesAcao = '';
                 if (res.status === 'Pendente') {
@@ -172,8 +185,12 @@
                         <td class="p-4 font-bold text-gray-900">${res.hospede_nome || 'Hóspede'}</td>
                         <td class="p-4 font-semibold text-blue-700">${nomeSuite}</td>
                         <td class="p-4 text-xs text-gray-600">
-                            <div class="font-bold text-gray-800">${res.whatsapp_hospede || 'Sem WhatsApp'}</div>
-                            <div class="text-gray-500 mt-0.5">CPF: ${res.cpf || 'Não informado'}</div>
+                            <div class="mb-1">
+                                <a href="${linkZap}" target="_blank" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200 inline-flex items-center gap-1 hover:bg-emerald-100 transition">
+                                    💬 ${res.whatsapp_hospede || 'Sem WhatsApp'}
+                                </a>
+                            </div>
+                            <div class="text-gray-500">CPF: ${res.cpf || 'Não informado'}</div>
                         </td>
                         <td class="p-4 text-xs font-medium text-gray-700">
                             ${formatarDataSimples(res.checkin)} até ${formatarDataSimples(res.checkout)}
@@ -199,11 +216,9 @@
                 return;
             }
 
-            // Se a reserva foi aprovada, atualiza opcionalmente a tabela de suítes para refletir o status
             if (novoStatus === 'Aprovada' && suiteId) {
                 await supabaseClient.from('suites').update({ status: 'Ocupada' }).eq('id', suiteId);
             } else if ((novoStatus === 'Cancelada' || novoStatus === 'Recusada') && suiteId) {
-                // Se cancelada/recusada, verifica se não há outras reservas ativas para a suíte antes de liberá-la
                 const { data: outrasAtivas } = await supabaseClient
                     .from('reservas')
                     .select('*')
