@@ -125,6 +125,11 @@
         const supabaseClient = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
         let pousadaIdGlobal = '';
 
+        // Bloqueia datas retroativas no carregamento da página
+        const hojeISO = new Date().toISOString().split('T')[0];
+        document.getElementById('filtro-checkin').setAttribute('min', hojeISO);
+        document.getElementById('filtro-checkout').setAttribute('min', hojeISO);
+
         async function carregarDados() {
             const params = new URLSearchParams(window.location.search);
             pousadaIdGlobal = params.get('pousada_id') || '2ce55615-0d32-467a-a412-f9868ec8c9cf';
@@ -141,6 +146,13 @@
             if (!checkinFiltro || !checkoutFiltro) {
                 alert("Por favor, selecione as datas de Check-in e Check-out para consultar a disponibilidade.");
                 document.getElementById('filtro-checkin').focus();
+                return;
+            }
+
+            // Validação rigorosa: impede datas passadas na consulta
+            if (checkinFiltro < hojeISO) {
+                alert("A data de check-in não pode ser anterior à data atual.");
+                document.getElementById('filtro-checkin').value = hojeISO;
                 return;
             }
 
@@ -203,6 +215,11 @@
                 return;
             }
 
+            if (checkinFiltro < hojeISO) {
+                alert("A data de check-in não pode ser anterior à data atual.");
+                return;
+            }
+
             document.getElementById('suite-id-reserva').value = sId;
             document.getElementById('form-reserva').reset();
             
@@ -223,6 +240,12 @@
         document.getElementById('form-reserva').addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            const checkinVal = document.getElementById('checkin').value;
+            if (checkinVal < hojeISO) {
+                alert("Erro: Não é permitido fazer reservas com datas retroativas.");
+                return;
+            }
+
             const btnEnviar = document.getElementById('btn-enviar');
             const msgSucesso = document.getElementById('feedback-sucesso');
             const msgErro = document.getElementById('feedback-erro');
@@ -232,7 +255,6 @@
             btnEnviar.innerText = "Enviando...";
 
             const suiteId = document.getElementById('suite-id-reserva').value;
-            const checkinVal = document.getElementById('checkin').value;
             const checkoutVal = document.getElementById('checkout').value;
 
             const { error: errReserva } = await supabaseClient.from('reservas').insert([{
