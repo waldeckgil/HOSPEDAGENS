@@ -19,7 +19,7 @@
     <div class="max-w-4xl mx-auto">
         <h1 id="titulo-pousada" class="text-4xl font-extrabold mb-6 text-center drop-shadow-lg">Carregando Pousada...</h1>
         
-        <!-- BARRA DE FILTRO PRÉVIO DE PERÍODO (OBRIGATÓRIA PARA EXIBIR SUÍTES) -->
+        <!-- BARRA DE FILTRO PRÉVIO DE PERÍODO -->
         <div class="bg-white text-gray-800 p-6 rounded-2xl shadow-xl mb-8">
             <h2 class="text-lg font-bold mb-3 text-blue-600 flex items-center gap-2">
                 🔍 Escolha o período da sua estadia
@@ -138,7 +138,6 @@
             const checkoutFiltro = document.getElementById('filtro-checkout').value;
             const container = document.getElementById('vitrine-container');
 
-            // Validação: Exige o preenchimento das datas antes de buscar
             if (!checkinFiltro || !checkoutFiltro) {
                 alert("Por favor, selecione as datas de Check-in e Check-out para consultar a disponibilidade.");
                 document.getElementById('filtro-checkin').focus();
@@ -150,14 +149,12 @@
                 return;
             }
 
-            // Busca todas as suítes da pousada
             const { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', pousadaIdGlobal);
             if (!suites || suites.length === 0) {
                 container.innerHTML = '<p class="text-center bg-black/40 p-6 rounded-xl">Nenhuma suíte cadastrada nesta pousada no momento.</p>';
                 return;
             }
 
-            // Busca reservas aprovadas para cruzar as datas
             const { data: reservasAprovadas } = await supabaseClient
                 .from('reservas')
                 .select('*')
@@ -243,7 +240,7 @@
                 suite_id: suiteId,
                 hospede_nome: document.getElementById('nome-hospede').value,
                 email: document.getElementById('email-hospede').value,
-                whatsapp_hospede: document.getElementById('whatsapp-hospede5').value || document.getElementById('whatsapp-hospede').value,
+                whatsapp_hospede: document.getElementById('whatsapp-hospede').value,
                 cpf: document.getElementById('cpf-hospede').value || null,
                 rg: document.getElementById('rg-hospede').value || null,
                 cep: document.getElementById('cep-hospede').value || null,
