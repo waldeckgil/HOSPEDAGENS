@@ -97,7 +97,7 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let usuarioIdAtual = null;
-        let nomePousadaAtual = "nossa pousada"; // Variável global para armazenar o nome da pousada
+        let nomePousadaAtual = "nossa pousada";
 
         async function carregarPousada() {
             const { data: { user } } = await supabaseClient.auth.getUser();
@@ -173,8 +173,16 @@
             });
         }
 
-        // Função ajustada para personalizar o WhatsApp com o nome do hóspede e da pousada
-        function gerarLinkWhatsApp(whats, nomeHospede) {
+        // Função auxiliar para formatar a data de AAAA-MM-DD para DD/MM/AAAA na mensagem do WhatsApp
+        function formatarDataSimples(dataStr) {
+            if (!dataStr) return '';
+            const partes = dataStr.split('-');
+            if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
+            return dataStr;
+        }
+
+        // Função de WhatsApp atualizada com agradecimento e datas de check-in e check-out
+        function gerarLinkWhatsApp(whats, nomeHospede, checkin, checkout) {
             if (!whats) return '#';
             const apenasNumeros = whats.replace(/\D/g, '');
             let numeroFinal = apenasNumeros;
@@ -182,7 +190,15 @@
                 numeroFinal = '55' + numeroFinal;
             }
             const nomeCliente = nomeHospede ? nomeHospede.trim() : 'Hóspede';
-            const textoMensagem = `Olá ${nomeCliente}, estou entrando em contato sobre a sua solicitação de reserva na ${nomePousadaAtual}.`;
+            
+            let textoMensagem = `Olá ${nomeCliente}, agradecemos o contato! Estamos entrando em contato sobre a sua solicitação de reserva na ${nomePousadaAtual}`;
+            
+            if (checkin && checkout) {
+                textoMensagem += `, para o período de ${formatarDataSimples(checkin)} até ${formatarDataSimples(checkout)}.`;
+            } else {
+                textoMensagem += `.`;
+            }
+
             return `https://wa.me/${numeroFinal}?text=${encodeURIComponent(textoMensagem)}`;
         }
 
@@ -248,7 +264,7 @@
                     return dataObj.toLocaleDateString('pt-BR') + ' às ' + dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
                 };
 
-                const linkZap = res && res.whatsapp_hospede ? gerarLinkWhatsApp(res.whatsapp_hospede, res.hospede_nome) : '#';
+                const linkZap = res && res.whatsapp_hospede ? gerarLinkWhatsApp(res.whatsapp_hospede, res.hospede_nome, res.checkin, res.checkout) : '#';
 
                 container.innerHTML += `
                     <div class="p-6 rounded-2xl shadow-md border-l-8 ${corClasses[suite.status] || 'bg-white border-gray-300'} flex flex-col justify-between transition hover:shadow-lg cursor-pointer bg-white" 
@@ -286,7 +302,7 @@
                                     ${suite.status === 'Pendente' ? `
                                         <div class="bg-yellow-100/60 p-3 rounded-xl space-y-1 my-2 text-xs border border-yellow-200">
                                             <p><span class="font-semibold text-gray-700">CPF:</span> ${res.cpf || 'Não informado'}</p>
-                                            <p><span class="font-semibold text-gray-700">RG:</span> ${res.rg || 'Não informado'}</p>
+                                            <p><span class="font-semibold text-gray-700">RG:</span> ${res.rg || 'Not informado'}</p>
                                             <p><span class="font-semibold text-gray-700">Endereço:</span> ${res.endereco || 'Não informado'}</p>
                                             <p><span class="font-semibold text-gray-700">E-mail:</span> ${res.email || 'Não informado'}</p>
                                             <p class="pt-1 border-t border-yellow-200 text-amber-900 font-medium">
