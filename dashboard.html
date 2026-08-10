@@ -26,7 +26,7 @@
         </div>
     </nav>
 
-    <!-- 🚨 CARD DE ATENÇÃO: SOLICITAÇÕES PENDENTES -->
+    <!-- 🚨 CARD DE ATENÇÃO: SOLICITAÇÕES PENDENTES COM NOME DA SUÍTE -->
     <div id="card-atencao-pendentes" class="hidden mb-8 bg-amber-50 border-l-8 border-amber-500 p-6 rounded-2xl shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
             <div class="flex items-center gap-2">
@@ -44,16 +44,11 @@
 
     <div id="suites-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
-    <!-- Modal de Gerenciamento / Edição -->
+    <!-- Modal de Edição (Apenas para status físico e reservas aprovadas) -->
     <div id="modal-edicao" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-8 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
             <h2 id="modal-titulo" class="text-2xl font-bold mb-4 text-blue-600">Gerenciar Suíte</h2>
             
-            <!-- Seção dedicada para gerenciar reservas pendentes diretamente -->
-            <div id="container-pendentes-modal" class="mb-6 space-y-3"></div>
-
-            <hr id="separador-modal" class="my-4">
-
             <form id="form-edicao" class="space-y-3">
                 <input type="hidden" id="edit-suite-id">
                 
@@ -92,7 +87,7 @@
                 </div>
 
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold mt-4 transition">Salvar Alterações</button>
-                <button type="button" onclick="fecharModal()" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 p-3 rounded-xl font-bold mt-2 transition">Fechar</button>
+                <button type="button" onclick="fecharModal()" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 p-3 rounded-xl font-bold mt-2 transition">Cancelar</button>
             </form>
         </div>
     </div>
@@ -105,6 +100,7 @@
         let usuarioIdAtual = null;
         let nomePousadaAtual = "nossa pousada";
         let reservasGlobaisCache = [];
+        let suitesGlobaisCache = [];
 
         function calcularDiasRestantes(dataAlvo) {
             const hoje = new Date();
@@ -184,6 +180,10 @@
             listaResumoEl.innerHTML = '';
 
             pendentes.forEach(res => {
+                // Descobre o nome da suíte desta reserva pendente
+                const suiteObj = suitesGlobaisCache.find(s => s.id === res.suite_id);
+                const nomeSuiteStr = suiteObj ? suiteObj.nome : 'Suíte';
+
                 let dataHoraFormatada = 'Data não informada';
                 if (res.criado_em) {
                     const dataObj = new Date(res.criado_em);
@@ -195,6 +195,7 @@
                 listaResumoEl.innerHTML += `
                     <div class="bg-white/90 border border-amber-200 px-3 py-2 rounded-xl text-xs text-amber-900 shadow-xs flex items-center gap-2">
                         <span>👤 <strong>${res.hospede_nome || 'Hóspede'}</strong></span>
+                        <span class="bg-amber-200 text-amber-900 px-2 py-0.5 rounded font-bold">${nomeSuiteStr}</span>
                         <span class="text-amber-600">•</span>
                         <span class="text-gray-600">🕒 ${dataHoraFormatada}</span>
                     </div>
@@ -225,45 +226,42 @@
             if (!user) { window.location.href = 'index.html'; return; }
 
             await carregarPousada();
-            await verificarReservasPendentesDashboard();
 
             const { data: suites, error } = await supabaseClient.from('suites').select('*').eq('pousada_id', user.id);
             if (error) return;
+            suitesGlobaisCache = suites || [];
 
             const { data: reservas } = await supabaseClient.from('reservas').select('*').eq('pousada_id', user.id);
             reservasGlobaisCache = reservas || [];
 
+            await verificarReservasPendentesDashboard();
+
             const container = document.getElementById('suites-container');
             container.innerHTML = '';
 
-            if (!suites || suites.length === 0) {
+            if (!suitesGlobaisCache || suitesGlobaisCache.length === 0) {
                 container.innerHTML = '<p class="text-gray-600 col-span-3 text-center">Nenhuma suíte cadastrada.</p>';
                 return;
             }
 
-            suites.forEach(suite => {
-                let aprovadaAtiva = null;
-                let pendentesDaSuite = [];
-                let proximaReserva = null;
+            suitesGlobaisCache.forEach(suite => {
+                const reservasDaSuite = reservasGlobaisCache.filter(r => r.suite_id === suite.id && r.status !== 'Cancelada' && r.status !== 'Recusada');
+                
+                const aprovadaAtiva = reservasDaSuite.find(r => r.status === 'Aprovada');
+                const pendentesDaSuite = reservasDaSuite.filter(r => r.status === 'Pendente');
+
+                // 1. RENDERIZAR CARD DA ESTADA ATUAL / PRINCIPAL DA SUÍTE
                 let statusExibicao = suite.status;
+                let proximaReserva = null;
 
-                if (reservasGlobaisCache) {
-                    const reservasDaSuite = reservasGlobaisCache.filter(r => r.suite_id === suite.id && r.status !== 'Cancelada' && r.status !== 'Recusada');
-                    
-                    aprovadaAtiva = reservasDaSuite.find(r => r.status === 'Aprovada');
-                    pendentesDaSuite = reservasDaSuite.filter(r => r.status === 'Pendente');
-
-                    if (aprovadaAtiva) {
-                        statusExibicao = 'Ocupada';
-                    } else if (pendentesDaSuite.length > 0) {
-                        statusExibicao = 'Pendente';
-                    } else {
-                        const hojeStr = new Date().toISOString().split('T')[0];
-                        const futuras = reservasDaSuite.filter(r => r.status === 'Aprovada' && r.checkin >= hojeStr);
-                        if (futuras.length > 0) {
-                            futuras.sort((a, b) => a.checkin.localeCompare(b.checkin));
-                            proximaReserva = futuras[0];
-                        }
+                if (aprovadaAtiva) {
+                    statusExibicao = 'Ocupada';
+                } else if (pendentesDaSuite.length === 0) {
+                    const hojeStr = new Date().toISOString().split('T')[0];
+                    const futuras = reservasDaSuite.filter(r => r.status === 'Aprovada' && r.checkin >= hojeStr);
+                    if (futuras.length > 0) {
+                        futuras.sort((a, b) => a.checkin.localeCompare(b.checkin));
+                        proximaReserva = futuras[0];
                     }
                 }
 
@@ -278,9 +276,6 @@
                 if (statusExibicao === 'Ocupada' && aprovadaAtiva && aprovadaAtiva.checkout) {
                     const indicador = obterIndicadorCheckout(aprovadaAtiva.checkout);
                     indicadorHtml = `<div class="mt-2 inline-block px-3 py-1 rounded-lg border text-xs font-semibold ${indicador.classe}">${indicador.texto}</div>`;
-                } else if (statusExibicao === 'Pendente' && pendentesDaSuite.length > 0 && pendentesDaSuite[0].checkin) {
-                    const indicadorProxima = obterIndicadorProximaEstada(pendentesDaSuite[0].checkin);
-                    indicadorHtml = `<div class="mt-2 inline-block px-3 py-1 rounded-lg border text-xs font-semibold ${indicadorProxima.classe}">${indicadorProxima.texto} (${pendentesDaSuite.length} solicitação(ões))</div>`;
                 } else if (statusExibicao === 'Disponível' && proximaReserva && proximaReserva.checkin) {
                     const indicadorProxima = obterIndicadorProximaEstada(proximaReserva.checkin);
                     indicadorHtml = `
@@ -306,25 +301,6 @@
                             </div>
                         </div>
                     `;
-                } else if (statusExibicao === 'Pendente' && pendentesDaSuite.length > 0) {
-                    detalhesHtml = `<div class="mt-4 pt-3 border-t border-black/10 space-y-3">`;
-                    pendentesDaSuite.forEach((pend, idx) => {
-                        const linkZapPend = gerarLinkWhatsApp(pend.whatsapp_hospede, pend.hospede_nome, pend.checkin, pend.checkout);
-                        detalhesHtml += `
-                            <div class="bg-yellow-100/70 p-3 rounded-xl border border-yellow-200 text-xs space-y-1">
-                                <p class="font-bold text-yellow-900 border-b border-yellow-200 pb-1 flex justify-between">
-                                    <span>Solicitação #${idx + 1}</span>
-                                    <span>👤 ${pend.hospede_nome}</span>
-                                </p>
-                                <p><strong>WhatsApp:</strong> <a href="${linkZapPend}" target="_blank" onclick="event.stopPropagation();" class="text-emerald-800 underline">${pend.whatsapp_hospede || 'N/A'}</a></p>
-                                <div class="grid grid-cols-2 gap-1 pt-1">
-                                    <p>Início: <strong>${formatarDataSimples(pend.checkin)}</strong></p>
-                                    <p>Fim: <strong>${formatarDataSimples(pend.checkout)}</strong></p>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    detalhesHtml += `</div>`;
                 } else {
                     detalhesHtml = `
                         <div class="mt-4 pt-3 border-t border-black/10 text-xs text-gray-500 italic">
@@ -333,6 +309,7 @@
                     `;
                 }
 
+                // Renderiza o card normal da suíte
                 container.innerHTML += `
                     <div class="p-6 rounded-2xl shadow-md border-l-8 ${corClasses[statusExibicao] || 'bg-white border-gray-300'} flex flex-col justify-between transition hover:shadow-lg cursor-pointer bg-white" 
                          onclick="abrirModal('${suite.id}', '${suite.nome}', '${suite.status}')">
@@ -354,51 +331,52 @@
 
                         <div class="mt-5 pt-3 flex justify-end">
                             <span class="text-xs font-bold text-blue-600 hover:underline">
-                                Gerenciar / Editar &rarr;
+                                Gerenciar / Editar Suíte &rarr;
                             </span>
                         </div>
+                    </div>`;
+
+                // 2. 🚀 SE HOUVER SOLICITAÇÕES PENDENTES, CRIA UM CARD DUPLICADO AO LADO EXCLUSIVO PARA CADA PENDÊNCIA!
+                pendentesDaSuite.forEach((pend, idx) => {
+                    const linkZapPend = gerarLinkWhatsApp(pend.whatsapp_hospede, pend.hospede_nome, pend.checkin, pend.checkout);
+                    container.innerHTML += `
+                        <div class="p-6 rounded-2xl shadow-md border-l-8 border-amber-500 bg-amber-50 flex flex-col justify-between transition hover:shadow-lg">
+                            <div>
+                                <div class="flex justify-between items-start mb-2">
+                                    <h2 class="text-xl font-bold text-amber-900">${suite.nome}</h2>
+                                    <span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase shadow-sm bg-amber-200 text-amber-900">
+                                        Solicitação Pendente
+                                    </span>
+                                </div>
+
+                                <div class="mt-2 inline-block px-3 py-1 rounded-lg border bg-amber-100 text-amber-800 border-amber-300 text-xs font-semibold">
+                                    ⏳ Aguardando sua aprovação
+                                </div>
+
+                                <div class="mt-4 pt-3 border-t border-amber-200 text-sm space-y-1.5">
+                                    <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-800">Hóspede:</span> <span class="font-bold text-gray-900">${pend.hospede_nome}</span></p>
+                                    <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-800">WhatsApp:</span> <a href="${linkZapPend}" target="_blank" class="text-emerald-700 font-bold bg-white px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${pend.whatsapp_hospede || 'Não informado'}</a></p>
+                                    <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-amber-200 text-xs">
+                                        <p><span class="text-amber-800">Check-in:</span> <strong class="text-gray-900">${formatarDataSimples(pend.checkin)}</strong></p>
+                                        <p><span class="text-amber-800">Check-out:</span> <strong class="text-gray-900">${formatarDataSimples(pend.checkout)}</strong></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-5 pt-3 border-t border-amber-200 flex gap-2">
+                                <button type="button" onclick="mudarStatusReserva('${pend.id}', 'Aprovada')" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm transition text-xs">✔ Aprovar</button>
+                                <button type="button" onclick="mudarStatusReserva('${pend.id}', 'Recusada')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm transition text-xs">✖ Recusar</button>
+                            </div>
+                        </div>
                     `;
+                });
             });
         }
         
         function abrirModal(id, nome, status) {
             document.getElementById('edit-suite-id').value = id;
             document.getElementById('edit-status').value = status;
-            document.getElementById('modal-titulo').innerText = "Gerenciar: " + nome;
-
-            // Filtrar solicitações pendentes para esta suíte específica
-            const pendentesContainer = document.getElementById('container-pendentes-modal');
-            const separador = document.getElementById('separador-modal');
-            const pendentesDestaSuite = reservasGlobaisCache.filter(r => r.suite_id === id && r.status === 'Pendente');
-
-            if (pendentesDestaSuite.length > 0) {
-                separador.classList.remove('hidden');
-                pendentesContainer.classList.remove('hidden');
-                pendentesContainer.innerHTML = `
-                    <h3 class="text-sm font-bold text-amber-800 mb-2">🚨 Solicitações Pendentes (${pendentesDestaSuite.length}):</h3>
-                `;
-                
-                pendentesDestaSuite.forEach((res, i) => {
-                    const linkZap = gerarLinkWhatsApp(res.whatsapp_hospede, res.hospede_nome, res.checkin, res.checkout);
-                    pendentesContainer.innerHTML += `
-                        <div class="bg-amber-50 border border-amber-200 p-3 rounded-xl text-xs space-y-2">
-                            <div class="flex justify-between items-center font-bold text-amber-900">
-                                <span>#${i+1} - ${res.hospede_nome}</span>
-                                <a href="${linkZap}" target="_blank" class="text-emerald-700 bg-white px-2 py-1 rounded border border-emerald-300">💬 WhatsApp</a>
-                            </div>
-                            <p class="text-gray-600">Período: <strong>${formatarDataSimples(res.checkin)}</strong> até <strong>${formatarDataSimples(res.checkout)}</strong></p>
-                            <div class="flex gap-2 pt-1">
-                                <button type="button" onclick="mudarStatusReserva('${res.id}', 'Aprovada')" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-1.5 px-3 rounded-lg shadow-sm transition">✔ Aprovar</button>
-                                <button type="button" onclick="mudarStatusReserva('${res.id}', 'Recusada')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-lg shadow-sm transition">✖ Recusar</button>
-                            </div>
-                        </div>
-                    `;
-                });
-            } else {
-                separador.classList.add('hidden');
-                pendentesContainer.classList.add('hidden');
-                pendentesContainer.innerHTML = '';
-            }
+            document.getElementById('modal-titulo').innerText = "Gerenciar Suíte: " + nome;
 
             // Preenche dados da reserva aprovada caso exista
             const aprovadaDestaSuite = reservasGlobaisCache.find(r => r.suite_id === id && r.status === 'Aprovada');
@@ -438,7 +416,6 @@
             }
 
             if (novoStatus === 'Aprovada') {
-                // Pega a suíte vinculada e atualiza para Ocupada
                 const reservaObj = reservasGlobaisCache.find(r => r.id === reservaId);
                 if (reservaObj) {
                     await supabaseClient.from('suites').update({ status: 'Ocupada' }).eq('id', reservaObj.suite_id);
@@ -446,7 +423,6 @@
             }
 
             alert(`Reserva ${novoStatus.toLowerCase()} com sucesso!`);
-            fecharModal();
             carregarDashboard();
         }
 
