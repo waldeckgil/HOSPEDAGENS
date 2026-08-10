@@ -35,7 +35,6 @@
             </div>
             <p class="text-sm text-amber-700 mt-1">Há hóspedes aguardando a aprovação. Veja os detalhes e a data/hora da solicitação abaixo:</p>
             
-            <!-- Lista resumida das pendentes reais -->
             <div id="lista-resumo-pendentes" class="mt-3 flex flex-wrap gap-2"></div>
         </div>
         <a href="reservas.html" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-3 rounded-xl transition shadow-sm whitespace-nowrap">
@@ -74,7 +73,6 @@
                         <input type="email" id="edit-email" placeholder="E-mail" class="p-3 border rounded-xl">
                     </div>
 
-                    <!-- Campos de Data com Rótulos Claros -->
                     <div class="grid grid-cols-2 gap-3 pt-2">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-in</label>
@@ -173,6 +171,18 @@
             });
         }
 
+        // Função auxiliar para limpar o telefone e gerar o link do WhatsApp
+        function gerarLinkWhatsApp(whats) {
+            if (!whats) return '#';
+            const apenasNumeros = whats.replace(/\D/g, '');
+            // Se o número não tiver DDI (ex: 55), adiciona o 55 do Brasil por segurança se tiver 10 ou 11 dígitos
+            let numeroFinal = apenasNumeros;
+            if (numeroFinal.length <= 11 && !numeroFinal.startsWith('55')) {
+                numeroFinal = '55' + numeroFinal;
+            }
+            return `https://wa.me/${numeroFinal}?text=Olá%20${encodeURIComponent(whats)},%20estou%20entrando%20em%20contato%20sobre%20a%20sua%20solicitação%20de%20reserva.`;
+        }
+
         async function carregarDashboard() {
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) { window.location.href = 'index.html'; return; }
@@ -235,6 +245,8 @@
                     return dataObj.toLocaleDateString('pt-BR') + ' às ' + dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
                 };
 
+                const linkZap = res && res.whatsapp_hospede ? gerarLinkWhatsApp(res.whatsapp_hospede) : '#';
+
                 container.innerHTML += `
                     <div class="p-6 rounded-2xl shadow-md border-l-8 ${corClasses[suite.status] || 'bg-white border-gray-300'} flex flex-col justify-between transition hover:shadow-lg cursor-pointer bg-white" 
                          onclick="abrirModal('${suite.id}', '${suite.nome}', ${JSON.stringify(res || {}).replace(/"/g, '&quot;')}, '${suite.status}')">
@@ -256,9 +268,15 @@
                                         <span class="font-semibold text-gray-600">Hóspede:</span> 
                                         <span class="font-bold text-gray-900 truncate">${res.hospede_nome}</span>
                                     </p>
+                                    
+                                    <!-- WhatsApp com link e ícone clicável -->
                                     <p class="flex items-center gap-1.5">
                                         <span class="font-semibold text-gray-600">WhatsApp:</span> 
-                                        <span>${res.whatsapp_hospede || 'Não informado'}</span>
+                                        ${res.whatsapp_hospede ? `
+                                            <a href="${linkZap}" target="_blank" onclick="event.stopPropagation();" class="inline-flex items-center gap-1 text-emerald-700 font-bold bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded-lg border border-emerald-200 transition" title="Abrir conversa no WhatsApp">
+                                                💬 ${res.whatsapp_hospede}
+                                            </a>
+                                        ` : '<span>Não informado</span>'}
                                     </p>
 
                                     <!-- Exibe dados completos se o status for Pendente -->
