@@ -325,13 +325,20 @@
 
                 const linkZap = res && res.whatsapp_hospede ? gerarLinkWhatsApp(res.whatsapp_hospede, res.hospede_nome, res.checkin, res.checkout) : '#';
 
-                // Geração dos indicadores visuais baseados nas datas
+                // Geração dos indicadores visuais baseados nas datas (Incluindo Pendente com contagem de check-in)
                 let indicadorHtml = '';
                 if (suite.status === 'Ocupada' && res && res.checkout) {
                     const indicador = obterIndicadorCheckout(res.checkout);
                     indicadorHtml = `
                         <div class="mt-2 inline-block px-3 py-1 rounded-lg border text-xs font-semibold ${indicador.classe}">
                             ${indicador.texto}
+                        </div>
+                    `;
+                } else if (suite.status === 'Pendente' && res && res.checkin) {
+                    const indicadorProxima = obterIndicadorProximaEstada(res.checkin);
+                    indicadorHtml = `
+                        <div class="mt-2 inline-block px-3 py-1 rounded-lg border text-xs font-semibold ${indicadorProxima.classe}">
+                            ${indicadorProxima.texto}
                         </div>
                     `;
                 } else if ((suite.status === 'Disponível' || suite.status === 'Limpeza') && proximaReserva && proximaReserva.checkin) {
@@ -361,7 +368,7 @@
                                 </span>
                             </div>
 
-                            <!-- Exibe indicador de contagem regressiva (Checkout ou Próxima Estada) -->
+                            <!-- Exibe indicador de contagem regressiva (Checkout, Pendente ou Próxima Estada) -->
                             ${indicadorHtml}
 
                             ${res && res.hospede_nome && suite.status !== 'Disponível' && suite.status !== 'Limpeza' ? `
@@ -402,7 +409,7 @@
                                 </div>
                             ` : `
                                 <div class="mt-4 pt-3 border-t border-black/10 text-xs text-gray-500 italic">
-                                    ${!proximaReserva ? 'Nenhuma reserva ativa vinculada no momento.' : ''}
+                                    ${!proximaReserva && suite.status !== 'Pendente' ? 'Nenhuma reserva ativa vinculada no momento.' : ''}
                                 </div>
                             `}
                         </div>
