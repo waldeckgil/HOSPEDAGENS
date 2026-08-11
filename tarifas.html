@@ -33,6 +33,21 @@
         </div>
     </div>
 
+    <!-- MODAL DE CONFIRMAÇÃO DE EXCLUSÃO PERSONALIZADO -->
+    <div id="modal-confirmacao" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-8 rounded-3xl max-w-md w-full shadow-2xl space-y-6 text-center">
+            <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto text-xl font-bold">⚠️</div>
+            <div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Excluir Regra de Tarifa</h3>
+                <p id="modal-texto-exclusao" class="text-sm text-gray-600">Deseja realmente remover esta regra do período selecionado?</p>
+            </div>
+            <div class="flex justify-center gap-3 pt-2">
+                <button type="button" onclick="fecharModalExclusao()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-5 py-2.5 rounded-xl text-sm transition">Cancelar</button>
+                <button type="button" id="btn-confirmar-exclusao" class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition shadow-md">Sim, Excluir</button>
+            </div>
+        </div>
+    </div>
+
     <div class="max-w-5xl mx-auto space-y-8">
         
         <!-- SEÇÃO 1: VALOR DA DIÁRIA PADRÃO POR SUÍTE -->
@@ -53,26 +68,26 @@
             </div>
             <p class="text-sm text-gray-600 mb-6">Defina acréscimos percentuais (ex: +20% no sábado/domingo) ou valores fixos para períodos específicos.</p>
             
-            <form id="form-tarifa-especial" class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-6 rounded-2xl border border-gray-200 mb-6">
+            <form id="form-tarifa-especial" class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-6 rounded-2xl border border-gray-200 mb-6 transition-all duration-300">
                 <input type="hidden" id="tarifa-editando-id" value="">
                 <div>
                     <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Aplicar a:</label>
-                    <select id="select-suite-tarifa" class="w-full p-3 border rounded-xl font-medium bg-white text-sm">
+                    <select id="select-suite-tarifa" class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm transition-colors">
                         <option value="">Todas as Suítes da Pousada (Geral)</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Data Início do Período</label>
-                    <input type="date" id="tarifa-inicio" required class="w-full p-3 border rounded-xl font-medium bg-white text-sm">
+                    <input type="date" id="tarifa-inicio" required class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm transition-colors">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Data Fim do Período</label>
-                    <input type="date" id="tarifa-fim" required class="w-full p-3 border rounded-xl font-medium bg-white text-sm">
+                    <input type="date" id="tarifa-fim" required class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm transition-colors">
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tipo de Ajuste</label>
-                    <select id="tipo-ajuste" onchange="alternarTipoAjuste()" class="w-full p-3 border rounded-xl font-medium bg-white text-sm">
+                    <select id="tipo-ajuste" onchange="alternarTipoAjuste()" class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm transition-colors">
                         <option value="percentual">Acréscimo Percentual (%)</option>
                         <option value="fixo">Valor Fixo em Reais (R$)</option>
                     </select>
@@ -80,12 +95,12 @@
 
                 <div>
                     <label id="label-valor-ajuste" class="block text-xs font-bold text-gray-700 uppercase mb-1">Percentual a mais (%)</label>
-                    <input type="number" step="0.01" id="tarifa-valor" placeholder="Ex: 20 (para +20%)" required class="w-full p-3 border rounded-xl font-medium bg-white text-sm">
+                    <input type="number" step="0.01" id="tarifa-valor" placeholder="Ex: 20 (para +20%)" required class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm transition-colors">
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Descrição / Motivo</label>
-                    <input type="text" id="tarifa-descricao" placeholder="Ex: Acréscimo de Fim de Semana" required class="w-full p-3 border rounded-xl font-medium bg-white text-sm">
+                    <input type="text" id="tarifa-descricao" placeholder="Ex: Acréscimo de Fim de Semana" required class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm transition-colors">
                 </div>
 
                 <!-- SELEÇÃO DE DIAS DA SEMANA OPCIONAL -->
@@ -139,6 +154,7 @@
         let usuarioIdAtual = null;
         let suitesCache = [];
         let tarifasCache = [];
+        let idParaExcluir = null;
 
         function mostrarToast(mensagem) {
             const toast = document.getElementById('toast-notificacao');
@@ -267,7 +283,7 @@
                         <td class="p-3 font-bold text-blue-600">${textoRegra}</td>
                         <td class="p-3 text-right space-x-2">
                             <button onclick="prepararEdicaoTarifa('${t.id}')" class="text-blue-600 hover:text-blue-800 font-bold text-xs bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition">Editar</button>
-                            <button onclick="excluirTarifaEspecial('${t.id}')" class="text-red-600 hover:text-red-800 font-bold text-xs bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition">Excluir</button>
+                            <button onclick="abrirModalExclusao('${t.id}')" class="text-red-600 hover:text-red-800 font-bold text-xs bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition">Excluir</button>
                         </td>
                     </tr>
                 `;
@@ -294,9 +310,20 @@
                 cb.checked = tarifa.dias_semana && tarifa.dias_semana.includes(diaNum);
             });
 
-            // Ajustar visual dos botões
+            // Aplicar destaque visual vermelho nos campos em edição
+            const campos = document.querySelectorAll('.campo-editavel');
+            campos.forEach(c => {
+                c.classList.remove('border-gray-200', 'bg-white');
+                c.classList.add('border-red-400', 'bg-red-50/30', 'text-red-900');
+            });
+
+            // Ajustar visual dos botões e título
+            document.getElementById('titulo-form-regra').innerText = "Editando Regra de Tarifa";
+            document.getElementById('titulo-form-regra').className = "text-2xl font-bold text-red-600";
             document.getElementById('btn-submit-regra').innerText = "Atualizar Regra de Tarifa Especial";
+            document.getElementById('btn-submit-regra').className = "bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl transition text-sm shadow-md";
             document.getElementById('btn-cancelar-edicao').classList.remove('hidden');
+            
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -304,9 +331,50 @@
             document.getElementById('form-tarifa-especial').reset();
             document.getElementById('tarifa-editando-id').value = '';
             alternarTipoAjuste();
+
+            // Remover destaque visual vermelho
+            const campos = document.querySelectorAll('.campo-editavel');
+            campos.forEach(c => {
+                c.classList.remove('border-red-400', 'bg-red-50/30', 'text-red-900');
+                c.classList.add('border-gray-200', 'bg-white');
+            });
+
+            document.getElementById('titulo-form-regra').innerText = "2. Regras de Tarifas e Percentuais Especiais";
+            document.getElementById('titulo-form-regra').className = "text-2xl font-bold text-blue-600";
             document.getElementById('btn-submit-regra').innerText = "+ Salvar Regra de Tarifa Especial";
+            document.getElementById('btn-submit-regra').className = "bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition text-sm shadow-md";
             document.getElementById('btn-cancelar-edicao').classList.add('hidden');
         }
+
+        function abrirModalExclusao(id) {
+            idParaExcluir = id;
+            const tarifa = tarifasCache.find(t => t.id === id);
+            if (tarifa) {
+                const dInicio = tarifa.data_inicio.split('-').reverse().join('/');
+                const dFim = tarifa.data_fim.split('-').reverse().join('/');
+                document.getElementById('modal-texto-exclusao').innerHTML = `Deseja realmente remover a regra <strong>"${tarifa.descricao || 'Especial'}"</strong> (${dInicio} até ${dFim})?`;
+            }
+            document.getElementById('modal-confirmacao').classList.remove('hidden');
+        }
+
+        function fecharModalExclusao() {
+            idParaExcluir = null;
+            document.getElementById('modal-confirmacao').classList.add('hidden');
+        }
+
+        document.getElementById('btn-confirmar-exclusao').onclick = async () => {
+            if (!idParaExcluir) return;
+            const { error } = await supabaseClient.from('tarifas_especiais').delete().eq('id', idParaExcluir);
+            
+            fecharModalExclusao();
+            if (error) {
+                alert("Erro ao excluir regra: " + error.message);
+                return;
+            }
+
+            mostrarToast("Regra removida com sucesso!");
+            carregarTabelaTarifasEspeciais();
+        };
 
         document.getElementById('form-tarifa-especial').onsubmit = async (e) => {
             e.preventDefault();
@@ -339,11 +407,9 @@
 
             let error;
             if (idEditando) {
-                // Atualizar regra existente
                 const res = await supabaseClient.from('tarifas_especiais').update(dadosRegra).eq('id', idEditando);
                 error = res.error;
             } else {
-                // Inserir nova regra
                 const res = await supabaseClient.from('tarifas_especiais').insert([dadosRegra]);
                 error = res.error;
             }
@@ -357,13 +423,6 @@
             mostrarToast("Regra de tarifa salva com sucesso!");
             carregarTabelaTarifasEspeciais();
         };
-
-        async function excluirTarifaEspecial(id) {
-            if (!confirm("Deseja realmente remover esta regra?")) return;
-            await supabaseClient.from('tarifas_especiais').delete().eq('id', id);
-            mostrarToast("Regra removida com sucesso!");
-            carregarTabelaTarifasEspeciais();
-        }
 
         async function fazerLogout() { 
             await supabaseClient.auth.signOut(); 
