@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestão de Tarifas e Valores</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <!-- Navegação Superior -->
+    <nav class="bg-white shadow-md p-6 mb-8 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex flex-wrap gap-6 font-bold text-gray-700 items-center">
+            <a href="dashboard.html" class="hover:text-blue-600 transition">Gestão de Suítes</a>
+            <a href="reservas.html" class="hover:text-blue-600 transition">Ver Reservas</a>
+            <a href="hospedes.html" class="hover:text-blue-600 transition">Gestão de Hóspedes</a>
+            <a href="tarifas.html" class="text-blue-600 border-b-2 border-blue-600 pb-1">Gerenciar Tarifas</a>
+            <a href="configurar-pousada.html" class="hover:text-blue-600 transition">Minha Pousada</a>
+        </div>
+        <div class="flex items-center gap-4">
+            <span id="titulo-pousada" class="font-bold text-gray-800">Carregando...</span>
+            <button onclick="fazerLogout()" class="bg-red-600 text-white font-bold py-2 px-4 rounded-xl">Sair</button>
+        </div>
+    </nav>
+
+    <!-- TOAST / NOTIFICAÇÃO -->
+    <div id="toast-notificacao" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
+            <span class="text-xl">✨</span>
+            <div>
+                <h4 class="font-bold text-sm">Sucesso</h4>
+                <p id="toast-mensagem" class="text-xs text-gray-300">Alterações salvas com sucesso!</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-5xl mx-auto space-y-8">
+        
+        <!-- SEÇÃO 1: VALOR DA DIÁRIA PADRÃO POR SUÍTE -->
+        <div class="bg-white p-8 rounded-3xl shadow-md">
+            <h2 class="text-2xl font-bold text-blue-600 mb-2">1. Valor da Diária Padrão por Suíte</h2>
+            <p class="text-sm text-gray-600 mb-6">Defina o valor base cobrado por noite para cada suíte cadastrada na sua pousada.</p>
+            
+            <div id="lista-suites-tarifas" class="space-y-4">
+                <!-- Inserido dinamicamente via JS -->
+                <p class="text-gray-500 text-sm">Carregando suítes...</p>
+            </div>
+        </div>
+
+        <!-- SEÇÃO 2: TARIFAS ESPECIAIS (FERIADOS / FINS DE SEMANA) -->
+        <div class="bg-white p-8 rounded-3xl shadow-md">
+            <h2 class="text-2xl font-bold text-blue-600 mb-2">2. Tarifas Especiais e Períodos Personalizados</h2>
+            <p class="text-sm text-gray-600 mb-6">Cadastre valores diferenciados para fins de semana, feriados ou temporadas específicas.</p>
+            
+            <form id="form-tarifa-especial" class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-6 rounded-2xl border border-gray-200 mb-6">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Aplicar a:</label>
+                    <select id="select-suite-tarifa" class="w-full p-3 border rounded-xl font-medium bg-white text-sm">
+                        <option value="">Todas as Suítes da Pousada</option>
+                        <!-- Preenchido via JS -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Data Início</label>
+                    <input type="date" id="tarifa-inicio" required class="w-full p-3 border rounded-xl font-medium bg-white text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Data Fim</label>
+                    <input type="date" id="tarifa-fim" required class="w-full p-3 border rounded-xl font-medium bg-white text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Valor da Diária Especial (R$)</label>
+                    <input type="number" step="0.01" id="tarifa-valor" placeholder="Ex: 250.00" required class="w-full p-3 border rounded-xl font-medium bg-white text-sm">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Descrição / Motivo (Ex: Feriado de Tiradentes, Fim de Semana)</label>
+                    <input type="text" id="tarifa-descricao" placeholder="Ex: Fim de semana com acréscimo" required class="w-full p-3 border rounded-xl font-medium bg-white text-sm">
+                </div>
+                <div class="md:col-span-3 flex justify-end">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition text-sm shadow-md">
+                        + Adicionar Regra de Tarifa Especial
+                    </button>
+                </div>
+            </form>
+
+            <!-- Lista de Tarifas Especiais Cadastradas -->
+            <h3 class="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wide">Regras Cadastradas Atuais</h3>
+            <div id="lista-tarifas-especiais" class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b text-xs text-gray-500 uppercase">
+                            <th class="p-3">Descrição</th>
+                            <th class="p-3">Aplicável a</th>
+                            <th class="p-3">Período</th>
+                            <th class="p-3">Valor da Diária</th>
+                            <th class="p-3 text-right">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-tarifas-corpo" class="text-sm divide-y text-gray-700">
+                        <tr><td colspan="5" class="p-4 text-center text-gray-500">Nenhuma tarifa especial cadastrada.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let usuarioIdAtual = null;
+        let suitesCache = [];
+
+        function mostrarToast(mensagem) {
+            const toast = document.getElementById('toast-notificacao');
+            document.getElementById('toast-mensagem').innerText = mensagem;
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => { toast.classList.add('translate-y-24', 'opacity-0'); }, 3000);
+        }
+
+        async function inicializarPagina() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) { window.location.href = 'index.html'; return; }
+            usuarioIdAtual = user.id;
+
+            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', user.id).single();
+            if (pousada && pousada.nome) {
+                document.getElementById('titulo-pousada').innerText = "Pousada: " + pousada.nome;
+            }
+
+            await carregarSuitesETarifas();
+        }
+
+        async function carregarSuitesETarifas() {
+            // 1. Carregar Suítes
+            const { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', usuarioIdAtual);
+            suitesCache = suites || [];
+
+            const containerSuites = document.getElementById('lista-suites-tarifas');
+            const selectSuiteTarifa = document.getElementById('select-suite-tarifa');
+            
+            containerSuites.innerHTML = '';
+            selectSuiteTarifa.innerHTML = '<option value="">Todas as Suítes da Pousada (Geral)</option>';
+
+            if (suitesCache.length === 0) {
+                containerSuites.innerHTML = '<p class="text-gray-500 text-sm">Nenhuma suíte cadastrada. Cadastre suítes na aba Gestão de Suítes primeiro.</p>';
+                return;
+            }
+
+            suitesCache.forEach(suite => {
+                // Popular select de tarifas especiais
+                selectSuiteTarifa.innerHTML += `<option value="${suite.id}">${suite.nome}</option>`;
+
+                // Popular card de edição de valor base da suíte
+                containerSuites.innerHTML += `
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center p-4 bg-gray-50 rounded-2xl border border-gray-200 gap-4">
+                        <div>
+                            <h4 class="font-bold text-gray-900 text-base">${suite.nome}</h4>
+                            <p class="text-xs text-gray-500">Status atual: ${suite.status || 'Disponível'}</p>
+                        </div>
+                        <div class="flex items-center gap-3 w-full md:w-auto">
+                            <div class="relative flex-1 md:flex-none">
+                                <span class="absolute left-3 top-3 text-xs font-bold text-gray-500">R$</span>
+                                <input type="number" step="0.01" id="valor-suite-${suite.id}" value="${suite.valor_diaria || ''}" placeholder="0.00" class="pl-9 p-2.5 w-full md:w-40 border rounded-xl font-bold bg-white text-sm">
+                            </div>
+                            <button onclick="salvarValorDiariaSuite('${suite.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-sm transition whitespace-nowrap shadow-sm">
+                                Salvar Valor
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // 2. Carregar Tarifas Especiais cadastradas
+            carregarTabelaTarifasEspeciais();
+        }
+
+        async function salvarValorDiariaSuite(suiteId) {
+            const novoValor = Number(document.getElementById(`valor-suite-${suiteId}`).value) || 0;
+            const { error } = await supabaseClient.from('suites').update({ valor_diaria: novoValor }).eq('id', suiteId);
+            
+            if (error) {
+                alert("Erro ao salvar valor: " + error.message);
+                return;
+            }
+            mostrarToast("Valor da diária atualizado com sucesso!");
+        }
+
+        async function carregarTabelaTarifasEspeciais() {
+            const { data: tarifas } = await supabaseClient.from('tarifas_especiais').select('*').eq('pousada_id', usuarioIdAtual);
+            const tbody = document.getElementById('tabela-tarifas-corpo');
+            tbody.innerHTML = '';
+
+            if (!tarifas || tarifas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">Nenhuma tarifa especial cadastrada.</td></tr>`;
+                return;
+            }
+
+            tarifas.forEach(t => {
+                let nomeSuiteObj = "Todas as Suítes";
+                if (t.suite_id) {
+                    const found = suitesCache.find(s => s.id === t.suite_id);
+                    if (found) nomeSuiteObj = found.nome;
+                }
+
+                const dInicio = t.data_inicio.split('-').reverse().join('/');
+                const dFim = t.data_fim.split('-').reverse().join('/');
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-3 font-semibold text-gray-900">${t.descricao || 'Especial'}</td>
+                        <td class="p-3 text-gray-600">${nomeSuiteObj}</td>
+                        <td class="p-3 text-gray-600">${dInicio} até ${dFim}</td>
+                        <td class="p-3 font-bold text-blue-600">R$ ${Number(t.valor_especial).toFixed(2)}</td>
+                        <td class="p-3 text-right">
+                            <button onclick="excluirTarifaEspecial('${t.id}')" class="text-red-600 hover:text-red-800 font-bold text-xs bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition">Excluir</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        document.getElementById('form-tarifa-especial').onsubmit = async (e) => {
+            e.preventDefault();
+            const suiteIdVal = document.getElementById('select-suite-tarifa').value || null;
+            const dataInicioVal = document.getElementById('tarifa-inicio').value;
+            const dataFimVal = document.getElementById('tarifa-fim').value;
+            const valorVal = Number(document.getElementById('tarifa-valor').value);
+            const descVal = document.getElementById('tarifa-descricao').value;
+
+            if (dataInicioVal > dataFimVal) {
+                alert("A data de início não pode ser posterior à data de fim.");
+                return;
+            }
+
+            const { error } = await supabaseClient.from('tarifas_especiais').insert([{
+                pousada_id: usuarioIdAtual,
+                suite_id: suiteIdVal,
+                data_inicio: dataInicioVal,
+                data_fim: dataFimVal,
+                valor_especial: valorVal,
+                descricao: descVal
+            }]);
+
+            if (error) {
+                alert("Erro ao cadastrar tarifa especial: " + error.message);
+                return;
+            }
+
+            document.getElementById('form-tarifa-especial').reset();
+            mostrarToast("Tarifa especial cadastrada com sucesso!");
+            carregarTabelaTarifasEspeciais();
+        };
+
+        async function excluirTarifaEspecial(id) {
+            if (!confirm("Deseja realmente remover esta regra de tarifa?")) return;
+            await supabaseClient.from('tarifas_especiais').delete().eq('id', id);
+            mostrarToast("Regra removida com sucesso!");
+            carregarTabelaTarifasEspeciais();
+        }
+
+        async function fazerLogout() { 
+            await supabaseClient.auth.signOut(); 
+            window.location.href = 'index.html'; 
+        }
+
+        inicializarPagina();
+    </script>
+</body>
+</html>
