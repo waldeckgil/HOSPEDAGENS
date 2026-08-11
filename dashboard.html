@@ -26,7 +26,7 @@
         </div>
     </nav>
 
-    <!-- 🚨 CARD DE ATENÇÃO: SOLICITAÇÕES PENDENTES -->
+    <!-- 🚨 CARD DE ATENÇÃO: SOLICITAÇÕES PENDENTES COM DETALHES -->
     <div id="card-atencao-pendentes" class="hidden mb-8 bg-amber-50 border-l-8 border-amber-500 p-6 rounded-2xl shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
             <div class="flex items-center gap-2">
@@ -34,7 +34,6 @@
                 <h2 class="text-xl font-bold text-amber-900">Você tem <span id="contador-pendentes">0</span> solicitação(ões) de reserva pendente(s)!</h2>
             </div>
             <p class="text-sm text-amber-700 mt-1">Há hóspedes aguardando a aprovação. Veja os detalhes e a data/hora da solicitação abaixo:</p>
-            
             <div id="lista-resumo-pendentes" class="mt-3 flex flex-wrap gap-2"></div>
         </div>
         <a href="reservas.html" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-3 rounded-xl transition shadow-sm whitespace-nowrap">
@@ -42,20 +41,51 @@
         </a>
     </div>
 
+    <!-- 💬 TOAST / NOTIFICAÇÃO INTERNA MODERNA -->
+    <div id="toast-notificacao" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+        <div id="toast-content" class="bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
+            <span id="toast-icone" class="text-xl">✨</span>
+            <div>
+                <h4 id="toast-titulo" class="font-bold text-sm">Sucesso</h4>
+                <p id="toast-mensagem" class="text-xs text-gray-300">Alterações salvas com sucesso!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🛑 MODAL DE CONFIRMAÇÃO DE CHECKOUT/LIMPEZA -->
+    <div id="modal-confirmacao" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-8 rounded-3xl w-full max-w-md shadow-2xl text-center space-y-4">
+            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">⚠️</div>
+            <h3 class="text-xl font-bold text-gray-900">Confirmar Saída / Limpeza?</h3>
+            <p id="modal-confirmacao-texto" class="text-sm text-gray-600">
+                Esta ação encerrará a estadia atual do hóspede. Deseja prosseguir?
+            </p>
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <button type="button" onclick="fecharModalConfirmacao()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-xl transition text-sm">Cancelar</button>
+                <button type="button" id="btn-confirmar-acao" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl transition text-sm shadow-md">Sim, Liberar</button>
+            </div>
+        </div>
+    </div>
+
     <div id="suites-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
     <!-- Modal de Edição -->
     <div id="modal-edicao" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white p-8 rounded-2xl w-full max-w-lg shadow-2xl">
-            <h2 id="modal-titulo" class="text-2xl font-bold mb-4 text-blue-600">Editando Suíte</h2>
+        <div class="bg-white p-8 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
+            <h2 id="modal-titulo" class="text-2xl font-bold mb-4 text-blue-600">Gerenciar Suíte</h2>
+            
             <form id="form-edicao" class="space-y-3">
                 <input type="hidden" id="edit-suite-id">
+                <input type="hidden" id="edit-status-original">
+                <!-- ID Oculto para vincular exatamente à reserva correta -->
+                <input type="hidden" id="edit-reserva-id">
                 
                 <div>
-                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Status da Suíte</label>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Status Físico da Suíte</label>
                     <select id="edit-status" class="w-full p-3 border rounded-xl font-bold bg-gray-50" onchange="verificarStatusModal()">
                         <option value="Disponível">Disponível</option>
-                        <option value="Ocupada">Ocupada</option>
+                        <option value="Ocupada">Ocupada (Agora)</option>
+                        <option value="Reservado">Reservado (Adicionar/Editar Datas Futuras)</option>
                         <option value="Limpeza">Limpeza</option>
                         <option value="Pendente">Pendente</option>
                     </select>
@@ -86,7 +116,7 @@
                 </div>
 
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold mt-4 transition">Salvar Alterações</button>
-                <button type="button" onclick="fecharModal()" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 p-3 rounded-xl font-2 mt-2 transition">Cancelar</button>
+                <button type="button" onclick="fecharModal()" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 p-3 rounded-xl font-bold mt-2 transition">Cancelar</button>
             </form>
         </div>
     </div>
@@ -98,46 +128,85 @@
 
         let usuarioIdAtual = null;
         let nomePousadaAtual = "nossa pousada";
+        let reservasGlobaisCache = [];
+        let suitesGlobaisCache = [];
+        let camposLimposParaNovaReserva = false;
 
-        // Funções de Cálculo e Indicadores de Contagem Regressiva de Datas
+        function mostrarToast(titulo, mensagem, tipo = 'sucesso') {
+            const toast = document.getElementById('toast-notificacao');
+            const toastTitulo = document.getElementById('toast-titulo');
+            const toastMsg = document.getElementById('toast-mensagem');
+            const toastIcone = document.getElementById('toast-icone');
+            const toastContent = document.getElementById('toast-content');
+
+            toastTitulo.innerText = titulo;
+            toastMsg.innerText = mensagem;
+
+            if (tipo === 'sucesso') {
+                toastContent.className = "bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800";
+                toastIcone.innerText = "🎉";
+            } else {
+                toastContent.className = "bg-red-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-red-800";
+                toastIcone.innerText = "🚨";
+            }
+
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => { toast.classList.add('translate-y-24', 'opacity-0'); }, 3500);
+        }
+
         function calcularDiasRestantes(dataAlvo) {
             const hoje = new Date();
             hoje.setHours(0, 0, 0, 0);
-            
             const [ano, mes, dia] = dataAlvo.split('-');
             const alvo = new Date(ano, mes - 1, dia);
             alvo.setHours(0, 0, 0, 0);
-            
-            const diferencaTempo = alvo.getTime() - hoje.getTime();
-            return Math.round(diferencaTempo / (1000 * 3600 * 24));
+            return Math.round((alvo.getTime() - hoje.getTime()) / (1000 * 3600 * 24));
+        }
+
+        function formatarDataSimples(dataStr) {
+            if (!dataStr) return '';
+            const partes = dataStr.split('-');
+            if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
+            return dataStr;
+        }
+
+        function formatarDataHora(timestampStr) {
+            if (!timestampStr) return '';
+            const dataObj = new Date(timestampStr);
+            if (isNaN(dataObj.getTime())) return timestampStr;
+            const dia = String(dataObj.getDate()).padStart(2, '0');
+            const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
+            const ano = dataObj.getFullYear();
+            const hora = String(dataObj.getHours()).padStart(2, '0');
+            const min = String(dataObj.getMinutes()).padStart(2, '0');
+            return `${dia}/${mes}/${ano} às ${hora}:${min}`;
+        }
+
+        function gerarLinkWhatsApp(whats, nomeHospede, checkin, checkout) {
+            if (!whats) return '#';
+            const apenasNumeros = whats.replace(/\D/g, '');
+            let numeroFinal = apenasNumeros;
+            if (numeroFinal.length <= 11 && !numeroFinal.startsWith('55')) numeroFinal = '55' + numeroFinal;
+            const nomeCliente = nomeHospede ? nomeHospede.trim() : 'Hóspede';
+            let textoMensagem = `Olá ${nomeCliente}, agradecemos o contato! Entrando em contato sobre a sua solicitação na ${nomePousadaAtual}`;
+            if (checkin && checkout) textoMensagem += `, para o período de ${formatarDataSimples(checkin)} até ${formatarDataSimples(checkout)}.`;
+            return `https://wa.me/${numeroFinal}?text=${encodeURIComponent(textoMensagem)}`;
         }
 
         function obterIndicadorCheckout(checkoutStr) {
             const dias = calcularDiasRestantes(checkoutStr);
-            
-            if (dias < 0) {
-                return { texto: `⚠️ Checkout vencido há ${Math.abs(dias)} dia(s)`, classe: 'bg-red-100 text-red-700 border-red-300' };
-            } else if (dias === 0) {
-                return { texto: `🔥 Checkout HOJE!`, classe: 'bg-orange-100 text-orange-800 border-orange-300 font-bold' };
-            } else if (dias === 1) {
-                return { texto: `⏳ Checkout amanhã`, classe: 'bg-yellow-100 text-yellow-800 border-yellow-300' };
-            } else {
-                return { texto: `Saída em ${dias} dias`, classe: 'bg-blue-50 text-blue-700 border-blue-200' };
-            }
+            if (dias < 0) return { texto: `⚠️ Checkout vencido há ${Math.abs(dias)} dia(s)`, classe: 'bg-red-100 text-red-700 border-red-300' };
+            if (dias === 0) return { texto: `🔥 Checkout HOJE!`, classe: 'bg-orange-100 text-orange-800 border-orange-300 font-bold' };
+            if (dias === 1) return { texto: `⏳ Checkout amanhã`, classe: 'bg-yellow-100 text-yellow-800 border-yellow-300' };
+            return { texto: `Saída em ${dias} dias`, classe: 'bg-blue-50 text-blue-700 border-blue-200' };
         }
 
         function obterIndicadorProximaEstada(checkinStr) {
             const dias = calcularDiasRestantes(checkinStr);
-            
-            if (dias < 0) {
-                return { texto: `Data de check-in no passado`, classe: 'bg-gray-100 text-gray-600 border-gray-200' };
-            } else if (dias === 0) {
-                return { texto: `🚀 Chegada HOJE!`, classe: 'bg-green-100 text-green-800 border-green-300 font-bold' };
-            } else if (dias === 1) {
-                return { texto: `🔔 Próxima estada amanhã`, classe: 'bg-indigo-100 text-indigo-800 border-indigo-300' };
-            } else {
-                return { texto: `Chegada em ${dias} dias`, classe: 'bg-purple-50 text-purple-700 border-purple-200' };
-            }
+            if (dias < 0) return { texto: `Em andamento`, classe: 'bg-gray-100 text-gray-600 border-gray-200' };
+            if (dias === 0) return { texto: `🚀 Chegada HOJE!`, classe: 'bg-green-100 text-green-800 border-green-300 font-bold' };
+            if (dias === 1) return { texto: `🔔 Próxima estada amanhã`, classe: 'bg-indigo-100 text-indigo-800 border-indigo-300' };
+            return { texto: `Chegada em ${dias} dias`, classe: 'bg-purple-50 text-purple-700 border-purple-200' };
         }
 
         async function carregarPousada() {
@@ -152,93 +221,40 @@
             } else {
                 document.getElementById('titulo-pousada').innerText = "Minha Pousada";
             }
-
-            const urlVitrine = window.location.origin + `/vitrine.html?pousada_id=${user.id}`;
-            document.getElementById('link-ver-vitrine').href = urlVitrine;
+            document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${user.id}`;
         }
 
         function copiarLinkVitrine() {
-            if (!usuarioIdAtual) {
-                alert("Aguarde o carregamento dos dados da pousada.");
-                return;
-            }
-            const urlVitrine = window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`;
-            navigator.clipboard.writeText(urlVitrine).then(() => {
-                alert("Link da vitrine copiado para a área de transferência!");
-            }).catch(err => {
-                console.error("Erro ao copiar link: ", err);
-                prompt("Copie o link abaixo:", urlVitrine);
+            if (!usuarioIdAtual) return;
+            navigator.clipboard.writeText(window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`).then(() => {
+                mostrarToast("Copiado!", "Link da vitrine copiado para a área de transferência!");
             });
         }
 
         async function verificarReservasPendentesDashboard() {
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (!user) return;
-
-            const { data: pendentes, error } = await supabaseClient
-                .from('reservas')
-                .select('*')
-                .eq('pousada_id', user.id)
-                .eq('status', 'Pendente')
-                .order('criado_em', { ascending: false });
-
+            const { data: pendentes } = await supabaseClient.from('reservas').select('*').eq('pousada_id', usuarioIdAtual).eq('status', 'Pendente').order('created_at', { ascending: false });
             const cardContainer = document.getElementById('card-atencao-pendentes');
-            const contadorEl = document.getElementById('contador-pendentes');
-            const listaResumoEl = document.getElementById('lista-resumo-pendentes');
-
-            if (error || !pendentes || pendentes.length === 0) {
-                cardContainer.classList.add('hidden');
-                return;
+            const listaResumo = document.getElementById('lista-resumo-pendentes');
+            
+            if (!pendentes || pendentes.length === 0) { 
+                cardContainer.classList.add('hidden'); 
+                return; 
             }
-
+            
             cardContainer.classList.remove('hidden');
-            contadorEl.innerText = pendentes.length;
-            listaResumoEl.innerHTML = '';
-
-            pendentes.slice(0, 3).forEach(res => {
-                let dataHoraFormatada = 'Data não informada';
-                if (res.criado_em) {
-                    const dataObj = new Date(res.criado_em);
-                    if (!isNaN(dataObj.getTime())) {
-                        dataHoraFormatada = dataObj.toLocaleDateString('pt-BR') + ' às ' + dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                    }
-                }
-
-                listaResumoEl.innerHTML += `
-                    <div class="bg-white/90 border border-amber-200 px-3 py-2 rounded-xl text-xs text-amber-900 shadow-xs flex items-center gap-2">
-                        <span>👤 <strong>${res.hospede_nome || 'Hóspede'}</strong></span>
-                        <span class="text-amber-600">•</span>
-                        <span class="text-gray-600">🕒 ${dataHoraFormatada}</span>
+            document.getElementById('contador-pendentes').innerText = pendentes.length;
+            
+            listaResumo.innerHTML = '';
+            pendentes.forEach(p => {
+                const dataFormatada = formatarDataHora(p.created_at);
+                listaResumo.innerHTML += `
+                    <div class="bg-white border border-amber-200 px-3 py-1.5 rounded-xl shadow-sm text-xs flex items-center gap-2 text-amber-950 font-medium">
+                        <span>👤 <strong>${p.hospede_nome || 'Hóspede'}</strong></span>
+                        <span class="text-amber-300">•</span>
+                        <span class="text-gray-500">🕒 ${dataFormatada || 'Data não informada'}</span>
                     </div>
                 `;
             });
-        }
-
-        function formatarDataSimples(dataStr) {
-            if (!dataStr) return '';
-            const partes = dataStr.split('-');
-            if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
-            return dataStr;
-        }
-
-        function gerarLinkWhatsApp(whats, nomeHospede, checkin, checkout) {
-            if (!whats) return '#';
-            const apenasNumeros = whats.replace(/\D/g, '');
-            let numeroFinal = apenasNumeros;
-            if (numeroFinal.length <= 11 && !numeroFinal.startsWith('55')) {
-                numeroFinal = '55' + numeroFinal;
-            }
-            const nomeCliente = nomeHospede ? nomeHospede.trim() : 'Hóspede';
-            
-            let textoMensagem = `Olá ${nomeCliente}, agradecemos o contato! Estamos entrando em contato sobre a sua solicitação de reserva na ${nomePousadaAtual}`;
-            
-            if (checkin && checkout) {
-                textoMensagem += `, para o período de ${formatarDataSimples(checkin)} até ${formatarDataSimples(checkout)}.`;
-            } else {
-                textoMensagem += `.`;
-            }
-
-            return `https://wa.me/${numeroFinal}?text=${encodeURIComponent(textoMensagem)}`;
         }
 
         async function carregarDashboard() {
@@ -246,261 +262,288 @@
             if (!user) { window.location.href = 'index.html'; return; }
 
             await carregarPousada();
+
+            const { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', user.id);
+            suitesGlobaisCache = suites || [];
+
+            const { data: reservas } = await supabaseClient.from('reservas').select('*').eq('pousada_id', user.id);
+            reservasGlobaisCache = reservas || [];
+
             await verificarReservasPendentesDashboard();
-
-            const { data: suites, error } = await supabaseClient
-                .from('suites')
-                .select('*')
-                .eq('pousada_id', user.id);
-
-            if (error) { console.error("Erro ao carregar suítes:", error); return; }
-
-            let { data: reservas, error: errReservas } = await supabaseClient
-                .from('reservas')
-                .select('*')
-                .eq('pousada_id', user.id);
-
-            if (errReservas) {
-                console.error("Erro ao carregar reservas:", errReservas);
-            }
 
             const container = document.getElementById('suites-container');
             container.innerHTML = '';
-
-            if (!suites || suites.length === 0) {
-                container.innerHTML = '<p class="text-gray-600 col-span-3 text-center">Nenhuma suíte cadastrada. Vá em "Minha Pousada" para cadastrar.</p>';
+            
+            if (suitesGlobaisCache.length === 0) {
+                container.innerHTML = '<p class="text-gray-600 col-span-3 text-center">Nenhuma suíte cadastrada.</p>';
                 return;
             }
 
-            suites.forEach(suite => {
-                let res = null;
-                let proximaReserva = null;
+            const hojeStr = new Date().toISOString().split('T')[0];
 
-                if (reservas) {
-                    const reservasDaSuite = reservas.filter(r => r.suite_id === suite.id && r.status !== 'Cancelada' && r.status !== 'Recusada');
-                    
-                    if (reservasDaSuite.length > 0) {
-                        // Se a suíte está Ocupada ou Pendente, busca a reserva correspondente atual
-                        if (suite.status === 'Ocupada' || suite.status === 'Pendente') {
-                            const filtradasAtuais = reservasDaSuite.filter(r => r.status === suite.status || (suite.status === 'Ocupada' && r.status === 'Aprovada'));
-                            if (filtradasAtuais.length > 0) {
-                                filtradasAtuais.sort((a, b) => b.id.localeCompare ? b.id.localeCompare(a.id) : b.id - a.id);
-                                res = filtradasAtuais[0];
-                            } else {
-                                reservasDaSuite.sort((a, b) => b.id.localeCompare ? b.id.localeCompare(a.id) : b.id - a.id);
-                                res = reservasDaSuite[0];
-                            }
-                        } else if (suite.status === 'Disponível' || suite.status === 'Limpeza') {
-                            // Se estiver disponível/limpeza, procura se há alguma próxima reserva futura (Aprovada)
-                            const hojeStr = new Date().toISOString().split('T')[0];
-                            const futuras = reservasDaSuite.filter(r => r.status === 'Aprovada' && r.checkin >= hojeStr);
-                            if (futuras.length > 0) {
-                                futuras.sort((a, b) => a.checkin.localeCompare(b.checkin));
-                                proximaReserva = futuras[0];
-                            }
-                        }
-                    }
-                }
-                
-                const corClasses = {
-                    'Disponível': 'bg-green-50 border-green-500 text-green-900', 
-                    'Ocupada': 'bg-gray-100 border-gray-600 text-gray-900', 
-                    'Limpeza': 'bg-red-50 border-red-500 text-red-900', 
-                    'Pendente': 'bg-yellow-50 border-yellow-500 text-yellow-900'
-                };
-                
-                const formatarData = (dataStr) => {
-                    if (!dataStr) return 'N/A';
-                    const partes = dataStr.split('-');
-                    if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
-                    return dataStr;
-                };
+            suitesGlobaisCache.forEach(suite => {
+                const reservasDaSuite = reservasGlobaisCache.filter(r => r.suite_id === suite.id && r.status !== 'Cancelada' && r.status !== 'Recusada' && r.status !== 'Finalizada');
+                const aprovadasDaSuite = reservasDaSuite.filter(r => r.status === 'Aprovada');
+                const pendentesDaSuite = reservasDaSuite.filter(r => r.status === 'Pendente');
 
-                const formatarDataHora = (isoStr) => {
-                    if (!isoStr) return 'N/A';
-                    const dataObj = new Date(isoStr);
-                    if (isNaN(dataObj.getTime())) return 'N/A';
-                    return dataObj.toLocaleDateString('pt-BR') + ' às ' + dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                };
+                let totalCardsDestaSuite = aprovadasDaSuite.length + pendentesDaSuite.length;
+                if (totalCardsDestaSuite === 0) totalCardsDestaSuite = 1;
+                let contadorCardAtual = 1;
 
-                const linkZap = res && res.whatsapp_hospede ? gerarLinkWhatsApp(res.whatsapp_hospede, res.hospede_nome, res.checkin, res.checkout) : '#';
+                if (aprovadasDaSuite.length > 0) {
+                    aprovadasDaSuite.forEach(aprovada => {
+                        const isFutura = aprovada.checkin > hojeStr;
+                        const statusParaModal = isFutura ? 'Reservado' : 'Ocupada';
+                        const badgeText = isFutura ? 'Reserva Futura' : 'Ocupada';
+                        const badgeClasses = isFutura ? 'bg-blue-200 text-blue-900' : 'bg-gray-200 text-gray-800';
+                        const bgCardClasses = isFutura ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50 border border-gray-300';
+                        
+                        const indicador = isFutura ? obterIndicadorProximaEstada(aprovada.checkin) : obterIndicadorCheckout(aprovada.checkout);
+                        const linkZap = gerarLinkWhatsApp(aprovada.whatsapp_hospede, aprovada.hospede_nome, aprovada.checkin, aprovada.checkout);
+                        const sufixoTitulo = totalCardsDestaSuite > 1 ? ` (${contadorCardAtual++})` : '';
 
-                // Geração dos indicadores visuais baseados nas datas (Incluindo Pendente com contagem de check-in)
-                let indicadorHtml = '';
-                if (suite.status === 'Ocupada' && res && res.checkout) {
-                    const indicador = obterIndicadorCheckout(res.checkout);
-                    indicadorHtml = `
-                        <div class="mt-2 inline-block px-3 py-1 rounded-lg border text-xs font-semibold ${indicador.classe}">
-                            ${indicador.texto}
-                        </div>
-                    `;
-                } else if (suite.status === 'Pendente' && res && res.checkin) {
-                    const indicadorProxima = obterIndicadorProximaEstada(res.checkin);
-                    indicadorHtml = `
-                        <div class="mt-2 inline-block px-3 py-1 rounded-lg border text-xs font-semibold ${indicadorProxima.classe}">
-                            ${indicadorProxima.texto}
-                        </div>
-                    `;
-                } else if ((suite.status === 'Disponível' || suite.status === 'Limpeza') && proximaReserva && proximaReserva.checkin) {
-                    const indicadorProxima = obterIndicadorProximaEstada(proximaReserva.checkin);
-                    indicadorHtml = `
-                        <div class="mt-3 p-2 bg-indigo-50/70 border border-indigo-200 rounded-xl text-xs space-y-1">
-                            <p class="font-bold text-indigo-900">📅 Próxima Estada: ${proximaReserva.hospede_nome}</p>
-                            <div class="inline-block px-2.5 py-0.5 rounded-md border text-xs font-semibold ${indicadorProxima.classe}">
-                                ${indicadorProxima.texto} (Check-in: ${formatarData(proximaReserva.checkin)})
-                            </div>
-                        </div>
-                    `;
-                }
-
-                container.innerHTML += `
-                    <div class="p-6 rounded-2xl shadow-md border-l-8 ${corClasses[suite.status] || 'bg-white border-gray-300'} flex flex-col justify-between transition hover:shadow-lg cursor-pointer bg-white" 
-                         onclick="abrirModal('${suite.id}', '${suite.nome}', ${JSON.stringify(res || {}).replace(/"/g, '&quot;')}, '${suite.status}')">
-                        <div>
-                            <div class="flex justify-between items-start mb-2">
-                                <h2 class="text-xl font-bold text-gray-800">${suite.nome}</h2>
-                                <span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase shadow-sm ${
-                                    suite.status === 'Disponível' ? 'bg-green-200 text-green-800' :
-                                    suite.status === 'Ocupada' ? 'bg-gray-300 text-gray-800' :
-                                    suite.status === 'Limpeza' ? 'bg-red-200 text-red-800' : 'bg-yellow-200 text-yellow-800'
-                                }">
-                                    ${suite.status}
-                                </span>
-                            </div>
-
-                            <!-- Exibe indicador de contagem regressiva (Checkout, Pendente ou Próxima Estada) -->
-                            ${indicadorHtml}
-
-                            ${res && res.hospede_nome && suite.status !== 'Disponível' && suite.status !== 'Limpeza' ? `
-                                <div class="mt-4 pt-3 border-t border-black/10 text-sm space-y-1.5">
-                                    <p class="flex items-center gap-1.5">
-                                        <span class="font-semibold text-gray-600">Hóspede:</span> 
-                                        <span class="font-bold text-gray-900 truncate">${res.hospede_nome}</span>
-                                    </p>
-                                    
-                                    <!-- WhatsApp com link e ícone clicável -->
-                                    <p class="flex items-center gap-1.5">
-                                        <span class="font-semibold text-gray-600">WhatsApp:</span> 
-                                        ${res.whatsapp_hospede ? `
-                                            <a href="${linkZap}" target="_blank" onclick="event.stopPropagation();" class="inline-flex items-center gap-1 text-emerald-700 font-bold bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded-lg border border-emerald-200 transition" title="Abrir conversa no WhatsApp">
-                                                💬 ${res.whatsapp_hospede}
-                                            </a>
-                                        ` : '<span>Não informado</span>'}
-                                    </p>
-
-                                    <!-- Exibe dados completos se o status for Pendente -->
-                                    ${suite.status === 'Pendente' ? `
-                                        <div class="bg-yellow-100/60 p-3 rounded-xl space-y-1 my-2 text-xs border border-yellow-200">
-                                            <p><span class="font-semibold text-gray-700">CPF:</span> ${res.cpf || 'Não informado'}</p>
-                                            <p><span class="font-semibold text-gray-700">RG:</span> ${res.rg || 'Não informado'}</p>
-                                            <p><span class="font-semibold text-gray-700">CEP:</span> ${res.cep || 'Não informado'}</p>
-                                            <p><span class="font-semibold text-gray-700">Endereço:</span> ${res.endereco || 'Não informado'}</p>
-                                            <p><span class="font-semibold text-gray-700">E-mail:</span> ${res.email || 'Não informado'}</p>
-                                            <p class="pt-1 border-t border-yellow-200 text-amber-900 font-medium">
-                                                🕒 <strong>Solicitado em:</strong> ${formatarDataHora(res.criado_em)}
-                                            </p>
+                        container.innerHTML += `
+                            <div class="p-6 rounded-2xl shadow-md ${bgCardClasses} text-gray-900 flex flex-col justify-between transition hover:shadow-lg cursor-pointer" 
+                                 onclick="abrirModal('${suite.id}', '${suite.nome}', '${statusParaModal}', '${aprovada.id}')">
+                                <div>
+                                    <div class="flex justify-between items-start mb-2">
+                                        <h2 class="text-xl font-bold text-gray-900">${suite.nome}${sufixoTitulo}</h2>
+                                        <span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase shadow-sm ${badgeClasses}">
+                                            ${badgeText}
+                                        </span>
+                                    </div>
+                                    <div class="mt-2 inline-block px-3 py-1 rounded-lg border text-xs font-semibold ${indicador.classe}">${indicador.texto}</div>
+                                    <div class="mt-4 pt-3 border-t border-black/10 text-sm space-y-1.5">
+                                        <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">Hóspede:</span> <span class="font-bold text-gray-900">${aprovada.hospede_nome}</span></p>
+                                        <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">WhatsApp:</span> <a href="${linkZap}" target="_blank" onclick="event.stopPropagation();" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${aprovada.whatsapp_hospede || 'Não informado'}</a></p>
+                                        <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-black/5 text-xs">
+                                            <p><span class="text-gray-500">Check-in:</span> <strong class="text-gray-900">${formatarDataSimples(aprovada.checkin)}</strong></p>
+                                            <p><span class="text-gray-500">Check-out:</span> <strong class="text-gray-900">${formatarDataSimples(aprovada.checkout)}</strong></p>
                                         </div>
-                                    ` : ''}
-
-                                    <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-black/5 text-xs">
-                                        <p><span class="text-gray-500">Check-in:</span> <strong class="text-gray-800">${formatarData(res.checkin)}</strong></p>
-                                        <p><span class="text-gray-500">Check-out:</span> <strong class="text-gray-800">${formatarData(res.checkout)}</strong></p>
                                     </div>
                                 </div>
-                            ` : `
-                                <div class="mt-4 pt-3 border-t border-black/10 text-xs text-gray-500 italic">
-                                    ${!proximaReserva && suite.status !== 'Pendente' ? 'Nenhuma reserva ativa vinculada no momento.' : ''}
+                                <div class="mt-5 pt-3 flex justify-end">
+                                    <span class="text-xs font-bold text-blue-700 hover:underline">Editar / Adicionar Reserva &rarr;</span>
                                 </div>
-                            `}
-                        </div>
+                            </div>`;
+                    });
+                } else if (pendentesDaSuite.length === 0) {
+                    const corClasses = {
+                        'Disponível': 'bg-green-50 border border-green-200 text-green-900', 
+                        'Limpeza': 'bg-red-50 border border-red-200 text-red-900', 
+                    };
+                    
+                    container.innerHTML += `
+                        <div class="p-6 rounded-2xl shadow-md ${corClasses[suite.status] || 'bg-white border border-gray-200'} flex flex-col justify-between transition hover:shadow-lg cursor-pointer" 
+                             onclick="abrirModal('${suite.id}', '${suite.nome}', '${suite.status}')">
+                            <div>
+                                <div class="flex justify-between items-start mb-2">
+                                    <h2 class="text-xl font-bold text-gray-900">${suite.nome}</h2>
+                                    <span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase shadow-sm ${
+                                        suite.status === 'Disponível' ? 'bg-green-200 text-green-900' : 'bg-red-200 text-red-900'
+                                    }">
+                                        ${suite.status}
+                                    </span>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-black/10 text-xs text-gray-600 italic">
+                                    Nenhuma reserva ativa vinculada.
+                                </div>
+                            </div>
+                            <div class="mt-5 pt-3 flex justify-end">
+                                <span class="text-xs font-bold text-blue-700 hover:underline">Editar / Adicionar Reserva &rarr;</span>
+                            </div>
+                        </div>`;
+                }
 
-                        <div class="mt-5 pt-3 flex justify-end">
-                            <span class="text-xs font-bold text-blue-600 hover:underline">
-                                Gerenciar / Editar &rarr;
-                            </span>
-                        </div>
-                    </div>`;
+                // Renderizar Pendentes com todos os detalhes e data de solicitação preenchidos
+                pendentesDaSuite.forEach((pend) => {
+                    const linkZapPend = gerarLinkWhatsApp(pend.whatsapp_hospede, pend.hospede_nome, pend.checkin, pend.checkout);
+                    const dataSolicitacaoFormatada = formatarDataHora(pend.created_at);
+
+                    container.innerHTML += `
+                        <div class="p-6 rounded-2xl shadow-md bg-amber-50 border border-amber-200 flex flex-col justify-between transition hover:shadow-lg">
+                            <div>
+                                <div class="flex justify-between items-start mb-2">
+                                    <h2 class="text-xl font-bold text-amber-950">${suite.nome}</h2>
+                                    <span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase shadow-sm bg-amber-200 text-amber-900">Pendente</span>
+                                </div>
+                                
+                                <div class="mt-4 pt-3 border-t border-amber-200 text-sm space-y-1.5">
+                                    <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">Hóspede:</span> <span class="font-bold text-gray-900">${pend.hospede_nome || 'Não informado'}</span></p>
+                                    <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">WhatsApp:</span> <a href="${linkZapPend}" target="_blank" onclick="event.stopPropagation();" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${pend.whatsapp_hospede || 'Não informado'}</a></p>
+                                    
+                                    <div class="bg-white/70 border border-amber-200 p-3 rounded-xl mt-3 space-y-1 text-xs text-amber-900 shadow-sm">
+                                        <p><span class="font-semibold text-gray-600">CPF:</span> ${pend.cpf || 'Não informado'}</p>
+                                        <p><span class="font-semibold text-gray-600">RG:</span> ${pend.rg || 'Não informado'}</p>
+                                        <p><span class="font-semibold text-gray-600">CEP/Endereço:</span> ${pend.endereco || 'Não informado'}</p>
+                                        <p><span class="font-semibold text-gray-600">E-mail:</span> ${pend.email || 'Não informado'}</p>
+                                        <div class="pt-1.5 border-t border-amber-100 flex items-center gap-1 text-gray-500 font-medium">
+                                            <span>🕒</span> <span>Solicitado em: <strong>${dataSolicitacaoFormatada || 'Data não informada'}</strong></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-amber-200 text-xs">
+                                        <p><span class="text-amber-800">Check-in:</span> <strong class="text-gray-900">${formatarDataSimples(pend.checkin)}</strong></p>
+                                        <p><span class="text-amber-800">Check-out:</span> <strong class="text-gray-900">${formatarDataSimples(pend.checkout)}</strong></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-5 pt-3 border-t border-amber-200 flex gap-2">
+                                <button onclick="mudarStatusReserva('${pend.id}', 'Aprovada')" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✔ Aprovar</button>
+                                <button onclick="mudarStatusReserva('${pend.id}', 'Recusada')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✖ Recusar</button>
+                            </div>
+                        </div>`;
+                });
             });
         }
         
-        function abrirModal(id, nome, reserva, status) {
+        function abrirModal(id, nome, status, reservaId = null) {
+            camposLimposParaNovaReserva = false;
             document.getElementById('edit-suite-id').value = id;
             document.getElementById('edit-status').value = status;
-            document.getElementById('edit-hospede').value = reserva.hospede_nome || '';
-            document.getElementById('edit-whatsapp').value = reserva.whatsapp_hospede || '';
-            document.getElementById('edit-cpf').value = reserva.cpf || '';
-            document.getElementById('edit-rg').value = reserva.rg || '';
-            document.getElementById('edit-endereco').value = reserva.endereco || '';
-            document.getElementById('edit-email').value = reserva.email || '';
-            document.getElementById('edit-checkin').value = reserva.checkin || '';
-            document.getElementById('edit-checkout').value = reserva.checkout || '';
+            document.getElementById('edit-status-original').value = status;
+            document.getElementById('modal-titulo').innerText = "Gerenciar Suíte: " + nome;
+
+            let reserva = null;
+            if (reservaId) {
+                reserva = reservasGlobaisCache.find(r => r.id === reservaId);
+            } else {
+                const hojeStr = new Date().toISOString().split('T')[0];
+                reserva = reservasGlobaisCache.find(r => r.suite_id === id && r.status === 'Aprovada' && r.checkin <= hojeStr);
+            }
+
+            if (reserva) {
+                document.getElementById('edit-reserva-id').value = reserva.id;
+                document.getElementById('edit-hospede').value = reserva.hospede_nome || '';
+                document.getElementById('edit-whatsapp').value = reserva.whatsapp_hospede || '';
+                document.getElementById('edit-cpf').value = reserva.cpf || '';
+                document.getElementById('edit-rg').value = reserva.rg || '';
+                document.getElementById('edit-endereco').value = reserva.endereco || '';
+                document.getElementById('edit-email').value = reserva.email || '';
+                document.getElementById('edit-checkin').value = reserva.checkin || '';
+                document.getElementById('edit-checkout').value = reserva.checkout || '';
+            } else {
+                document.getElementById('edit-reserva-id').value = '';
+                document.getElementById('edit-hospede').value = '';
+                document.getElementById('edit-whatsapp').value = '';
+                document.getElementById('edit-cpf').value = '';
+                document.getElementById('edit-rg').value = '';
+                document.getElementById('edit-endereco').value = '';
+                document.getElementById('edit-email').value = '';
+                document.getElementById('edit-checkin').value = '';
+                document.getElementById('edit-checkout').value = '';
+            }
             
             verificarStatusModal();
             document.getElementById('modal-edicao').classList.remove('hidden');
         }
 
+        async function mudarStatusReserva(reservaId, novoStatus) {
+            await supabaseClient.from('reservas').update({ status: novoStatus }).eq('id', reservaId);
+            mostrarToast("Sucesso", `Reserva ${novoStatus.toLowerCase()}!`);
+            carregarDashboard();
+        }
+
         function verificarStatusModal() {
             const status = document.getElementById('edit-status').value;
+            const statusOriginal = document.getElementById('edit-status-original').value;
             const containerCampos = document.getElementById('campos-hospede-container');
+            
             if (status === 'Disponível' || status === 'Limpeza') {
                 containerCampos.classList.add('opacity-50');
             } else {
                 containerCampos.classList.remove('opacity-50');
             }
+
+            if (status === 'Reservado' && statusOriginal !== 'Reservado' && !camposLimposParaNovaReserva) {
+                document.getElementById('edit-reserva-id').value = '';
+                document.getElementById('edit-hospede').value = '';
+                document.getElementById('edit-whatsapp').value = '';
+                document.getElementById('edit-cpf').value = '';
+                document.getElementById('edit-rg').value = '';
+                document.getElementById('edit-endereco').value = '';
+                document.getElementById('edit-email').value = '';
+                document.getElementById('edit-checkin').value = '';
+                document.getElementById('edit-checkout').value = '';
+                camposLimposParaNovaReserva = true;
+            }
         }
 
         function fecharModal() { document.getElementById('modal-edicao').classList.add('hidden'); }
+        function fecharModalConfirmacao() { document.getElementById('modal-confirmacao').classList.add('hidden'); }
+
+        async function executarSalvamento(suiteId, status) {
+            const reservaIdEditada = document.getElementById('edit-reserva-id').value;
+            
+            const dadosReserva = {
+                pousada_id: usuarioIdAtual,
+                suite_id: suiteId,
+                hospede_nome: document.getElementById('edit-hospede').value || 'Hóspede',
+                whatsapp_hospede: document.getElementById('edit-whatsapp').value,
+                cpf: document.getElementById('edit-cpf').value,
+                rg: document.getElementById('edit-rg').value,
+                endereco: document.getElementById('edit-endereco').value,
+                email: document.getElementById('edit-email-email')?.value || document.getElementById('edit-email').value,
+                checkin: document.getElementById('edit-checkin').value || new Date().toISOString().split('T')[0],
+                checkout: document.getElementById('edit-checkout').value || new Date().toISOString().split('T')[0],
+                status: 'Aprovada'
+            };
+
+            if (status === 'Reservado') {
+                if (reservaIdEditada) {
+                    await supabaseClient.from('reservas').update(dadosReserva).eq('id', reservaIdEditada);
+                } else {
+                    await supabaseClient.from('reservas').insert([dadosReserva]);
+                }
+            } 
+            else if (status === 'Ocupada') {
+                await supabaseClient.from('suites').update({ status: 'Ocupada' }).eq('id', suiteId);
+                if (reservaIdEditada) {
+                    await supabaseClient.from('reservas').update(dadosReserva).eq('id', reservaIdEditada);
+                } else {
+                    await supabaseClient.from('reservas').insert([dadosReserva]);
+                }
+            } 
+            else {
+                await supabaseClient.from('suites').update({ status }).eq('id', suiteId);
+                
+                if (reservaIdEditada) {
+                    await supabaseClient.from('reservas').update({ status: 'Finalizada' }).eq('id', reservaIdEditada);
+                } else {
+                    const hoje = new Date().toISOString().split('T')[0];
+                    await supabaseClient.from('reservas').update({ status: 'Finalizada' })
+                        .eq('suite_id', suiteId)
+                        .eq('status', 'Aprovada')
+                        .lte('checkin', hoje);
+                }
+            }
+
+            fecharModal();
+            carregarDashboard();
+            mostrarToast("Sucesso", "Dados salvos com sucesso!");
+        }
 
         document.getElementById('form-edicao').onsubmit = async (e) => {
             e.preventDefault();
             const status = document.getElementById('edit-status').value;
+            const statusOriginal = document.getElementById('edit-status-original').value;
             const suiteId = document.getElementById('edit-suite-id').value;
             
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            
-            const { error: errSuite } = await supabaseClient.from('suites').update({ status }).eq('id', suiteId);
-            if (errSuite) {
-                alert("Erro ao atualizar suíte: " + errSuite.message);
+            if (statusOriginal === 'Ocupada' && (status === 'Limpeza' || status === 'Disponível')) {
+                fecharModal(); 
+                document.getElementById('modal-confirmacao').classList.remove('hidden');
+                document.getElementById('btn-confirmar-acao').onclick = async () => {
+                    fecharModalConfirmacao();
+                    await executarSalvamento(suiteId, status);
+                };
                 return;
             }
 
-            if (status === 'Disponível' || status === 'Limpeza') {
-                await supabaseClient.from('reservas').update({ status: 'Cancelada' }).eq('suite_id', suiteId).eq('status', 'Pendente');
-            } else {
-                const getVal = (id) => {
-                    const el = document.getElementById(id);
-                    return el ? el.value : null;
-                };
-
-                const dadosReserva = {
-                    suite_id: suiteId, 
-                    pousada_id: user.id,
-                    hospede_nome: getVal('edit-hospede'),
-                    whatsapp_hospede: getVal('edit-whatsapp'),
-                    cpf: getVal('edit-cpf'),
-                    rg: getVal('edit-rg'),
-                    endereco: getVal('edit-endereco'),
-                    email: getVal('edit-email'),
-                    checkin: getVal('edit-checkin'),
-                    checkout: getVal('edit-checkout'),
-                    status: status === 'Pendente' ? 'Pendente' : 'Aprovada'
-                };
-
-                const { error: errReserva } = await supabaseClient.from('reservas').insert([dadosReserva]);
-                if (errReserva) {
-                    console.error("Erro ao inserir histórico de reserva:", errReserva);
-                }
-            }
-
-            alert("Alterações salvas com sucesso!"); 
-            fecharModal(); 
-            carregarDashboard();
+            fecharModal();
+            await executarSalvamento(suiteId, status);
         };
 
-        async function fazerLogout() { 
-            await supabaseClient.auth.signOut(); 
-            window.location.href = 'index.html'; 
-        }
+        async function fazerLogout() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
         
         carregarDashboard();
     </script>
