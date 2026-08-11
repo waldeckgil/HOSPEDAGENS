@@ -38,7 +38,7 @@
             <div id="lista-resumo-pendentes" class="mt-3 flex flex-wrap gap-2"></div>
         </div>
         <a href="reservas.html" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-3 rounded-xl transition shadow-sm whitespace-nowrap">
-            Gerenciar Todas as Reservas &rarr;
+            Gerenciar Todas las Reservas &rarr;
         </a>
     </div>
 
@@ -232,7 +232,7 @@
         }
 
         async function verificarReservasPendentesDashboard() {
-            // Busca segura de pendentes (ordenando por created_at se existir, ou apenas buscando)
+            // Buscando as reservas pendentes utilizando a coluna correta 'criado_em'
             const { data: pendentes } = await supabaseClient.from('reservas').select('*').eq('pousada_id', usuarioIdAtual).eq('status', 'Pendente');
             const cardContainer = document.getElementById('card-atencao-pendentes');
             const listaResumo = document.getElementById('lista-resumo-pendentes');
@@ -247,7 +247,7 @@
             
             listaResumo.innerHTML = '';
             pendentes.forEach(p => {
-                const dataFormatada = formatarDataHora(p.created_at || p.inserted_at);
+                const dataFormatada = formatarDataHora(p.criado_em);
                 listaResumo.innerHTML += `
                     <div class="bg-white border border-amber-200 px-3.5 py-2 rounded-xl shadow-sm text-xs flex items-center gap-2 text-amber-950 font-medium">
                         <span class="text-base">👤</span>
@@ -361,7 +361,7 @@
                 // Renderizar Pendentes com todos os detalhes e data de solicitação preenchidos
                 pendentesDaSuite.forEach((pend) => {
                     const linkZapPend = gerarLinkWhatsApp(pend.whatsapp_hospede, pend.hospede_nome, pend.checkin, pend.checkout);
-                    const dataSolicitacaoFormatada = formatarDataHora(pend.created_at || pend.inserted_at);
+                    const dataSolicitacaoFormatada = formatarDataHora(pend.criado_em);
 
                     container.innerHTML += `
                         <div class="p-6 rounded-2xl shadow-md bg-amber-50 border border-amber-200 flex flex-col justify-between transition hover:shadow-lg">
