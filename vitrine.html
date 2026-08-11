@@ -2,402 +2,323 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Gestão de Tarifas e Valores</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <title>Nossas Suítes</title>
-    <style>
-        .bg-pousada {
-            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80');
-            background-size: cover;
-            background-position: center;
-            min-height: 100vh;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-pousada text-white p-4 md:p-8">
-
-    <div class="max-w-4xl mx-auto">
-        <h1 id="titulo-pousada" class="text-4xl font-extrabold mb-6 text-center drop-shadow-lg">Carregando Pousada...</h1>
-        
-        <!-- BARRA DE FILTRO PRÉVIO DE PERÍODO -->
-        <div class="bg-white text-gray-800 p-6 rounded-2xl shadow-xl mb-8">
-            <h2 class="text-lg font-bold mb-3 text-blue-600 flex items-center gap-2">
-                🔍 Escolha o período da sua estadia
-            </h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                <div>
-                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Check-in</label>
-                    <input type="date" id="filtro-checkin" class="w-full p-3 border rounded-xl font-bold bg-gray-50">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Check-out</label>
-                    <input type="date" id="filtro-checkout" class="w-full p-3 border rounded-xl font-bold bg-gray-50">
-                </div>
-                <div>
-                    <button onclick="filtrarSuitesDisponiveisPorPeriodo()" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold transition shadow-md">
-                        Consultar Disponibilidade
-                    </button>
-                </div>
-            </div>
-            <p id="aviso-filtro" class="text-xs text-gray-500 mt-2 italic">Selecione o período desejado e clique em consultar para visualizar as suítes disponíveis.</p>
+<body class="bg-gray-100 p-8">
+    <!-- Navegação Superior -->
+    <nav class="bg-white shadow-md p-6 mb-8 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex flex-wrap gap-6 font-bold text-gray-700 items-center">
+            <a href="dashboard.html" class="hover:text-blue-600 transition">Gestão de Suítes</a>
+            <a href="reservas.html" class="hover:text-blue-600 transition">Ver Reservas</a>
+            <a href="hospedes.html" class="hover:text-blue-600 transition">Gestão de Hóspedes</a>
+            <a href="tarifas.html" class="text-blue-600 border-b-2 border-blue-600 pb-1">Gerenciar Tarifas</a>
+            <a href="configurar-pousada.html" class="hover:text-blue-600 transition">Minha Pousada</a>
         </div>
+        <div class="flex items-center gap-4">
+            <span id="titulo-pousada" class="font-bold text-gray-800">Carregando...</span>
+            <button onclick="fazerLogout()" class="bg-red-600 text-white font-bold py-2 px-4 rounded-xl">Sair</button>
+        </div>
+    </nav>
 
-        <!-- Container onde as suítes disponíveis serão injetadas após a busca -->
-        <div id="vitrine-container" class="grid gap-6">
-            <div class="bg-white/90 backdrop-blur-md text-gray-700 p-8 rounded-2xl text-center shadow-lg">
-                <span class="text-3xl">🗓️</span>
-                <p class="font-bold text-base mt-2 text-gray-800">Selecione as datas de check-in e check-out acima.</p>
-                <p class="text-xs text-gray-500 mt-1">As suítes livres para o período escolhido aparecerão aqui com seus respectivos valores.</p>
+    <!-- TOAST / NOTIFICAÇÃO -->
+    <div id="toast-notificacao" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
+            <span class="text-xl">✨</span>
+            <div>
+                <h4 class="font-bold text-sm">Sucesso</h4>
+                <p id="toast-mensagem" class="text-xs text-gray-300">Alterações salvas com sucesso!</p>
             </div>
         </div>
     </div>
 
-    <!-- Modal de Solicitação de Reserva -->
-    <div id="modal-reserva" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
-        <div class="bg-white p-6 md:p-8 rounded-2xl w-full max-w-3xl text-gray-800 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <h2 class="text-2xl font-bold mb-1 text-center text-blue-600">Solicitar Reserva</h2>
-            <p id="detalhes-estadia-modal" class="text-xs text-center text-gray-500 mb-4 font-semibold">Preencha seus dados para enviar o pedido ao gestor.</p>
+    <div class="max-w-5xl mx-auto space-y-8">
+        
+        <!-- SEÇÃO 1: VALOR DA DIÁRIA PADRÃO POR SUÍTE -->
+        <div class="bg-white p-8 rounded-3xl shadow-md">
+            <h2 class="text-2xl font-bold text-blue-600 mb-2">1. Valor da Diária Padrão por Suíte</h2>
+            <p class="text-sm text-gray-600 mb-6">Defina o valor base cobrado por noite para cada suíte cadastrada na sua pousada.</p>
             
-            <div id="aviso-cadastro-encontrado" class="text-xs text-center text-emerald-700 bg-emerald-50 border border-emerald-200 p-2 rounded-xl font-semibold mb-4 hidden">
-                ✨ CPF encontrado! Seus dados foram preenchidos automaticamente.
+            <div id="lista-suites-tarifas" class="space-y-4">
+                <p class="text-gray-500 text-sm">Carregando suítes...</p>
             </div>
+        </div>
+
+        <!-- SEÇÃO 2: TARIFAS ESPECIAIS (PERCENTUAL / DIAS DA SEMANA / PERÍODOS) -->
+        <div class="bg-white p-8 rounded-3xl shadow-md">
+            <h2 class="text-2xl font-bold text-blue-600 mb-2">2. Regras de Tarifas e Percentuais Especiais</h2>
+            <p class="text-sm text-gray-600 mb-6">Defina acréscimos percentuais (ex: +20% no sábado/domingo) ou valores fixos para períodos específicos.</p>
             
-            <div id="feedback-sucesso" class="hidden mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-xl text-center font-semibold">
-                🎉 Solicitação enviada com sucesso! O gestor analisará seu pedido em breve.
-            </div>
-
-            <div id="feedback-erro" class="hidden mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl text-center font-semibold"></div>
-
-            <form id="form-reserva" class="space-y-4">
-                <input type="hidden" id="suite-id-reserva">
-                <input type="hidden" id="valor-total-reserva">
-                
-                <!-- BLOCO DE BUSCA POR CPF -->
-                <div class="bg-blue-50 p-4 rounded-xl border border-blue-200">
-                    <label class="block text-xs font-extrabold text-blue-800 uppercase mb-1">Informe seu CPF para iniciar</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="cpf-hospede" placeholder="Digite apenas números" required 
-                               class="w-full p-2.5 bg-white text-blue-800 font-extrabold border border-blue-300 rounded-xl outline-none">
-                        <button type="button" onclick="buscarHospedePorCpf()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs transition whitespace-nowrap shadow">
-                            🔍 Buscar CPF
-                        </button>
-                    </div>
-                    <p class="text-[11px] text-blue-600 mt-1">Se já se hospedou conosco antes, clique em buscar para preencher automaticamente.</p>
+            <form id="form-tarifa-especial" class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-6 rounded-2xl border border-gray-200 mb-6">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Aplicar a:</label>
+                    <select id="select-suite-tarifa" class="w-full p-3 border rounded-xl font-medium bg-white text-sm">
+                        <option value="">Todas as Suítes da Pousada (Geral)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Data Início do Período</label>
+                    <input type="date" id="tarifa-inicio" required class="w-full p-3 border rounded-xl font-medium bg-white text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Data Fim do Período</label>
+                    <input type="date" id="tarifa-fim" required class="w-full p-3 border rounded-xl font-medium bg-white text-sm">
                 </div>
 
-                <!-- FORMULÁRIO EM GRADE -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Nome Completo</label>
-                        <input type="text" id="nome-hospede" placeholder="Seu nome completo" required class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
-                    </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tipo de Ajuste</label>
+                    <select id="tipo-ajuste" onchange="alternarTipoAjuste()" class="w-full p-3 border rounded-xl font-medium bg-white text-sm">
+                        <option value="percentual">Acréscimo Percentual (%)</option>
+                        <option value="fixo">Valor Fixo em Reais (R$)</option>
+                    </select>
+                </div>
 
-                    <div>
-                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">E-mail</label>
-                        <input type="email" id="email-hospede" placeholder="ex: seu@email.com" required class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
-                    </div>
+                <div>
+                    <label id="label-valor-ajuste" class="block text-xs font-bold text-gray-700 uppercase mb-1">Percentual a mais (%)</label>
+                    <input type="number" step="0.01" id="tarifa-valor" placeholder="Ex: 20 (para +20%)" required class="w-full p-3 border rounded-xl font-medium bg-white text-sm">
+                </div>
 
-                    <div>
-                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">WhatsApp</label>
-                        <input type="text" id="whatsapp-hospede" placeholder="(DDD+Número)" required class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
-                    </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Descrição / Motivo</label>
+                    <input type="text" id="tarifa-descricao" placeholder="Ex: Acréscimo de Fim de Semana" required class="w-full p-3 border rounded-xl font-medium bg-white text-sm">
+                </div>
 
-                    <div>
-                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">RG (Opcional)</label>
-                        <input type="text" id="rg-hospede" placeholder="Documento" class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">CEP</label>
-                        <input type="text" id="cep-hospede" placeholder="00000-000" class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Endereço Completo</label>
-                        <input type="text" id="endereco-hospede" placeholder="Rua, número, bairro, cidade..." required class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-blue-700 uppercase mb-1">📅 Data de Check-in</label>
-                        <input type="date" id="checkin" required class="w-full p-2.5 bg-white text-blue-900 font-extrabold border border-gray-300 rounded-xl outline-none text-sm" readonly>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-blue-700 uppercase mb-1">📅 Data de Check-out</label>
-                        <input type="date" id="checkout" required class="w-full p-2.5 bg-white text-blue-900 font-extrabold border border-gray-300 rounded-xl outline-none text-sm" readonly>
+                <!-- SELEÇÃO DE DIAS DA SEMANA OPCIONAL -->
+                <div class="md:col-span-3 bg-white p-4 rounded-xl border border-gray-200">
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Aplicar regra apenas nos seguintes dias da semana (Opcional - se nenhum for marcado, vale para todos os dias do período):</label>
+                    <div class="flex flex-wrap gap-4 text-sm font-medium text-gray-700">
+                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="0" class="w-4 h-4 text-blue-600 rounded"> Domingo</label>
+                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="1" class="w-4 h-4 text-blue-600 rounded"> Segunda-feira</label>
+                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="2" class="w-4 h-4 text-blue-600 rounded"> Terça-feira</label>
+                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="3" class="w-4 h-4 text-blue-600 rounded"> Quarta-feira</label>
+                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="4" class="w-4 h-4 text-blue-600 rounded"> Quinta-feira</label>
+                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="5" class="w-4 h-4 text-blue-600 rounded"> Sexta-feira</label>
+                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="6" class="w-4 h-4 text-blue-600 rounded"> Sábado</label>
                     </div>
                 </div>
 
-                <!-- BOTÕES DE AÇÃO -->
-                <div class="flex gap-3 pt-2">
-                    <button type="button" onclick="fecharModal()" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 p-3 rounded-xl font-bold transition">Cancelar</button>
-                    <button type="submit" id="btn-enviar" class="w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded-xl font-bold transition shadow-md">Enviar Solicitação</button>
+                <div class="md:col-span-3 flex justify-end">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition text-sm shadow-md">
+                        + Salvar Regra de Tarifa Especial
+                    </button>
                 </div>
             </form>
+
+            <!-- Lista de Tarifas Especiais Cadastradas -->
+            <h3 class="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wide">Regras Cadastradas Atuais</h3>
+            <div id="lista-tarifas-especiais" class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b text-xs text-gray-500 uppercase">
+                            <th class="p-3">Descrição</th>
+                            <th class="p-3">Aplicável a</th>
+                            <th class="p-3">Período / Dias</th>
+                            <th class="p-3">Regra</th>
+                            <th class="p-3 text-right">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-tarifas-corpo" class="text-sm divide-y text-gray-700">
+                        <tr><td colspan="5" class="p-4 text-center text-gray-500">Nenhuma tarifa especial cadastrada.</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
+
     </div>
 
     <script>
-        const supabaseClient = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
-        let pousadaIdGlobal = '';
-        let cacheCalculoValores = {}; // Armazena valores calculados por suíte para envio rápido
+        const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const hojeISO = new Date().toISOString().split('T')[0];
-        document.getElementById('filtro-checkin').setAttribute('min', hojeISO);
-        document.getElementById('filtro-checkout').setAttribute('min', hojeISO);
+        let usuarioIdAtual = null;
+        let suitesCache = [];
 
-        async function carregarDados() {
-            const params = new URLSearchParams(window.location.search);
-            pousadaIdGlobal = params.get('pousada_id') || '2ce55615-0d32-467a-a412-f9868ec8c9cf';
-
-            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', pousadaIdGlobal).single();
-            document.getElementById('titulo-pousada').innerText = pousada?.nome || "Nossa Pousada";
+        function mostrarToast(mensagem) {
+            const toast = document.getElementById('toast-notificacao');
+            document.getElementById('toast-mensagem').innerText = mensagem;
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => { toast.classList.add('translate-y-24', 'opacity-0'); }, 3000);
         }
 
-        // Função inteligente que calcula o valor considerando diária base e regras especiais da tabela tarifas_especiais
-        async function calcularTotalEstadia(suiteId, valorDiariaBase, checkinStr, checkoutStr) {
-            const d1 = new Date(checkinStr + 'T00:00:00');
-            const d2 = new Date(checkoutStr + 'T00:00:00');
-            
-            const { data: tarifas } = await supabaseClient
-                .from('tarifas_especiais')
-                .select('*')
-                .eq('pousada_id', pousadaIdGlobal)
-                .or(`suite_id.eq.${suiteId},suite_id.is.null`);
-
-            let valorTotal = 0;
-            let atual = new Date(d1);
-            let noites = 0;
-
-            while (atual < d2) {
-                noites++;
-                const dataFormatada = atual.toISOString().split('T')[0];
-                let diariaAplicada = Number(valorDiariaBase || 0);
-
-                if (tarifas && tarifas.length > 0) {
-                    const regra = tarifas.find(t => dataFormatada >= t.data_inicio && dataFormatada <= t.data_fim);
-                    if (regra) {
-                        diariaAplicada = Number(regra.valor_especial);
-                    }
-                }
-
-                valorTotal += diariaAplicada;
-                atual.setDate(atual.getDate() + 1);
+        function alternarTipoAjuste() {
+            const tipo = document.getElementById('tipo-ajuste').value;
+            const label = document.getElementById('label-valor-ajuste');
+            const input = document.getElementById('tarifa-valor');
+            if (tipo === 'percentual') {
+                label.innerText = "Percentual a mais (%)";
+                input.placeholder = "Ex: 20 (para +20%)";
+            } else {
+                label.innerText = "Valor Fixo da Diária (R$)";
+                input.placeholder = "Ex: 250.00";
             }
-
-            if (noites === 0) noites = 1;
-            if (valorTotal === 0) valorTotal = Number(valorDiariaBase || 0);
-
-            return { valorTotal, noites };
         }
 
-        async function filtrarSuitesDisponiveisPorPeriodo() {
-            const checkinFiltro = document.getElementById('filtro-checkin').value;
-            const checkoutFiltro = document.getElementById('filtro-checkout').value;
-            const container = document.getElementById('vitrine-container');
+        async function inicializarPagina() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) { window.location.href = 'index.html'; return; }
+            usuarioIdAtual = user.id;
 
-            if (!checkinFiltro || !checkoutFiltro) {
-                alert("Por favor, selecione as datas de Check-in e Check-out para consultar a disponibilidade.");
-                document.getElementById('filtro-checkin').focus();
-                return;
+            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', user.id).single();
+            if (pousada && pousada.nome) {
+                document.getElementById('titulo-pousada').innerText = "Pousada: " + pousada.nome;
             }
 
-            if (checkinFiltro < hojeISO) {
-                alert("A data de check-in não pode ser anterior à data atual.");
-                document.getElementById('filtro-checkin').value = hojeISO;
-                return;
-            }
+            await carregarSuitesETarifas();
+        }
 
-            if (checkinFiltro >= checkoutFiltro) {
-                alert("A data de check-out deve ser posterior à data de check-in.");
-                return;
-            }
+        async function carregarSuitesETarifas() {
+            const { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', usuarioIdAtual);
+            suitesCache = suites || [];
 
-            const { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', pousadaIdGlobal);
-            if (!suites || suites.length === 0) {
-                container.innerHTML = '<p class="text-center bg-black/40 p-6 rounded-xl">Nenhuma suíte cadastrada nesta pousada no momento.</p>';
-                return;
-            }
-
-            const { data: reservasAprovadas } = await supabaseClient
-                .from('reservas')
-                .select('*')
-                .eq('pousada_id', pousadaIdGlobal)
-                .eq('status', 'Aprovada');
-
-            const novoInicio = new Date(checkinFiltro);
-            const novoFim = new Date(checkoutFiltro);
-
-            const suitesOcupadasIds = new Set();
-            if (reservasAprovadas) {
-                reservasAprovadas.forEach(res => {
-                    const inicioExistente = new Date(res.checkin);
-                    const fimExistente = new Date(res.checkout);
-                    if (novoInicio < fimExistente && novoFim > inicioExistente) {
-                        suitesOcupadasIds.add(res.suite_id);
-                    }
-                });
-            }
-
-            const suitesDisponiveis = suites.filter(s => !suitesOcupadasIds.has(s.id));
+            const containerSuites = document.getElementById('lista-suites-tarifas');
+            const selectSuiteTarifa = document.getElementById('select-suite-tarifa');
             
-            document.getElementById('aviso-filtro').innerText = `Exibindo suítes livres para o período de ${checkinFiltro.split('-').reverse().join('/')} a ${checkoutFiltro.split('-').reverse().join('/')}.`;
+            containerSuites.innerHTML = '';
+            selectSuiteTarifa.innerHTML = '<option value="">Todas as Suítes da Pousada (Geral)</option>';
 
-            container.innerHTML = suitesDisponiveis.length > 0 ? '' : '<p class="text-center text-amber-200 font-semibold bg-black/40 p-6 rounded-xl">⚠️ Nenhuma suíte disponível para o período selecionado. Tente outras datas!</p>';
+            if (suitesCache.length === 0) {
+                containerSuites.innerHTML = '<p class="text-gray-500 text-sm">Nenhuma suíte cadastrada. Cadastre suítes na aba Gestão de Suítes primeiro.</p>';
+                return;
+            }
 
-            cacheCalculoValores = {};
+            suitesCache.forEach(suite => {
+                selectSuiteTarifa.innerHTML += `<option value="${suite.id}">${suite.nome} (Base: R$ ${Number(suite.valor_diaria || 0).toFixed(2)})</option>`;
 
-            for (const suite of suitesDisponiveis) {
-                const calculo = await calcularTotalEstadia(suite.id, suite.valor_diaria, checkinFiltro, checkoutFiltro);
-                cacheCalculoValores[suite.id] = calculo.valorTotal;
-
-                container.innerHTML += `
-                    <div class="bg-white p-6 rounded-2xl shadow-lg border-l-8 border-green-500 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-gray-800">
+                containerSuites.innerHTML += `
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center p-4 bg-gray-50 rounded-2xl border border-gray-200 gap-4">
                         <div>
-                            <h2 class="text-xl font-bold">${suite.nome}</h2>
-                            <p class="text-xs text-gray-500 mt-1">Status: <span class="font-semibold text-green-600">Disponível no período</span></p>
-                            <p class="text-xs text-gray-600 mt-0.5">Diária padrão: R$ ${Number(suite.valor_diaria || 0).toFixed(2)}</p>
+                            <h4 class="font-bold text-gray-900 text-base">${suite.nome}</h4>
+                            <p class="text-xs text-gray-500">Status atual: ${suite.status || 'Disponível'}</p>
                         </div>
-                        <div class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
-                            <div class="text-right">
-                                <span class="text-xs text-gray-500 block">${calculo.noites} noite(s)</span>
-                                <span class="text-xl font-extrabold text-blue-600">R$ ${calculo.valorTotal.toFixed(2)}</span>
+                        <div class="flex items-center gap-3 w-full md:w-auto">
+                            <div class="relative flex-1 md:flex-none">
+                                <span class="absolute left-3 top-3 text-xs font-bold text-gray-500">R$</span>
+                                <input type="number" step="0.01" id="valor-suite-${suite.id}" value="${suite.valor_diaria || ''}" placeholder="0.00" class="pl-9 p-2.5 w-full md:w-40 border rounded-xl font-bold bg-white text-sm">
                             </div>
-                            <button onclick="abrirModal('${suite.id}')" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-xl transition shadow font-bold text-sm">Reservar</button>
+                            <button onclick="salvarValorDiariaSuite('${suite.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-sm transition whitespace-nowrap shadow-sm">
+                                Salvar Valor Padrão
+                            </button>
                         </div>
                     </div>
                 `;
-            }
+            });
+
+            carregarTabelaTarifasEspeciais();
         }
 
-        async function buscarHospedePorCpf() {
-            const cpfInput = document.getElementById('cpf-hospede').value.trim();
-            const avisoEncontrado = document.getElementById('aviso-cadastro-encontrado');
+        async function salvarValorDiariaSuite(suiteId) {
+            const novoValor = Number(document.getElementById(`valor-suite-${suiteId}`).value) || 0;
+            const { error } = await supabaseClient.from('suites').update({ valor_diaria: novoValor }).eq('id', suiteId);
             
-            if (!cpfInput) {
-                alert("Por favor, digite o CPF antes de buscar.");
-                document.getElementById('cpf-hospede').focus();
+            if (error) {
+                alert("Erro ao salvar valor: " + error.message);
+                return;
+            }
+            mostrarToast("Valor da diária atualizado com sucesso!");
+        }
+
+        async function carregarTabelaTarifasEspeciais() {
+            const { data: tarifas } = await supabaseClient.from('tarifas_especiais').select('*').eq('pousada_id', usuarioIdAtual);
+            const tbody = document.getElementById('tabela-tarifas-corpo');
+            tbody.innerHTML = '';
+
+            if (!tarifas || tarifas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">Nenhuma regra de tarifa especial cadastrada.</td></tr>`;
                 return;
             }
 
-            const { data: historico, error } = await supabaseClient
-                .from('reservas')
-                .select('hospede_nome, email, whatsapp_hospede, rg, cep, endereco')
-                .eq('pousada_id', pousadaIdGlobal)
-                .eq('cpf', cpfInput)
-                .order('criado_em', { ascending: false })
-                .limit(1);
+            const nomesDias = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
 
-            if (!error && historico && historico.length > 0) {
-                const dados = historico[0];
-                document.getElementById('nome-hospede').value = dados.hospede_nome || '';
-                document.getElementById('email-hospede').value = dados.email || '';
-                document.getElementById('whatsapp-hospede').value = dados.whatsapp_hospede || '';
-                document.getElementById('rg-hospede').value = dados.rg || '';
-                document.getElementById('cep-hospede').value = dados.cep || '';
-                document.getElementById('endereco-hospede').value = dados.endereco || '';
-                
-                avisoEncontrado.classList.remove('hidden');
-            } else {
-                avisoEncontrado.classList.add('hidden');
-                alert("Nenhum cadastro anterior encontrado com este CPF nesta pousada. Prossiga com o preenchimento normal.");
-            }
+            tarifas.forEach(t => {
+                let nomeSuiteObj = "Todas as Suítes";
+                if (t.suite_id) {
+                    const found = suitesCache.find(s => s.id === t.suite_id);
+                    if (found) nomeSuiteObj = found.nome;
+                }
+
+                const dInicio = t.data_inicio.split('-').reverse().join('/');
+                const dFim = t.data_fim.split('-').reverse().join('/');
+
+                let textoRegra = '';
+                if (t.tipo_ajuste === 'percentual') {
+                    textoRegra = `+${t.valor_especial}% sobre a diária`;
+                } else {
+                    textoRegra = `Valor Fixo: R$ ${Number(t.valor_especial).toFixed(2)}`;
+                }
+
+                if (t.dias_semana && t.dias_semana.length > 0) {
+                    const diasStr = t.dias_semana.map(d => nomesDias[d]).join(', ');
+                    textoRegra += `<br><span class="text-xs text-gray-500">Apenas nos dias: ${diasStr}</span>`;
+                }
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-3 font-semibold text-gray-900">${t.descricao || 'Especial'}</td>
+                        <td class="p-3 text-gray-600">${nomeSuiteObj}</td>
+                        <td class="p-3 text-gray-600">${dInicio} até ${dFim}</td>
+                        <td class="p-3 font-bold text-blue-600">${textoRegra}</td>
+                        <td class="p-3 text-right">
+                            <button onclick="excluirTarifaEspecial('${t.id}')" class="text-red-600 hover:text-red-800 font-bold text-xs bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition">Excluir</button>
+                        </td>
+                    </tr>
+                `;
+            });
         }
 
-        function abrirModal(sId) {
-            const checkinFiltro = document.getElementById('filtro-checkin').value;
-            const checkoutFiltro = document.getElementById('filtro-checkout').value;
-
-            if (!checkinFiltro || !checkoutFiltro) {
-                alert("Por favor, selecione o período de Check-in e Check-out.");
-                return;
-            }
-
-            if (checkinFiltro < hojeISO) {
-                alert("A data de check-in não pode ser anterior à data atual.");
-                return;
-            }
-
-            const valorTotalCalculado = cacheCalculoValores[sId] || 0;
-
-            document.getElementById('suite-id-reserva').value = sId;
-            document.getElementById('valor-total-reserva').value = valorTotalCalculado;
-            document.getElementById('detalhes-estadia-modal').innerText = `Valor Total Estimado: R$ ${valorTotalCalculado.toFixed(2)} (${checkinFiltro.split('-').reverse().join('/')} até ${checkoutFiltro.split('-').reverse().join('/')})`;
-            
-            document.getElementById('form-reserva').reset();
-            document.getElementById('checkin').value = checkinFiltro;
-            document.getElementById('checkout').value = checkoutFiltro;
-
-            document.getElementById('feedback-sucesso').classList.add('hidden');
-            document.getElementById('feedback-erro').classList.add('hidden');
-            document.getElementById('aviso-cadastro-encontrado').classList.add('hidden');
-            document.getElementById('form-reserva').style.display = 'block';
-            document.getElementById('modal-reserva').classList.remove('hidden');
-        }
-
-        function fecharModal() { 
-            document.getElementById('modal-reserva').classList.add('hidden'); 
-            filtrarSuitesDisponiveisPorPeriodo();
-        }
-
-        document.getElementById('form-reserva').addEventListener('submit', async (e) => {
+        document.getElementById('form-tarifa-especial').onsubmit = async (e) => {
             e.preventDefault();
-            
-            const checkinVal = document.getElementById('checkin').value;
-            if (checkinVal < hojeISO) {
-                alert("Erro: Não é permitido fazer reservas com datas retroativas.");
+            const suiteIdVal = document.getElementById('select-suite-tarifa').value || null;
+            const dataInicioVal = document.getElementById('tarifa-inicio').value;
+            const dataFimVal = document.getElementById('tarifa-fim').value;
+            const tipoAjusteVal = document.getElementById('tipo-ajuste').value;
+            const valorVal = Number(document.getElementById('tarifa-valor').value);
+            const descVal = document.getElementById('tarifa-descricao').value;
+
+            // Capturar dias da semana selecionados (checkboxes)
+            const checkboxes = document.querySelectorAll('input[name="dias_semana"]:checked');
+            const diasSelecionados = Array.from(checkboxes).map(cb => Number(cb.value));
+
+            if (dataInicioVal > dataFimVal) {
+                alert("A data de início não pode ser posterior à data de fim.");
                 return;
             }
 
-            const btnEnviar = document.getElementById('btn-enviar');
-            const msgSucesso = document.getElementById('feedback-sucesso');
-            const msgErro = document.getElementById('feedback-erro');
-            
-            msgErro.classList.add('hidden');
-            btnEnviar.disabled = true;
-            btnEnviar.innerText = "Enviando...";
-
-            const suiteId = document.getElementById('suite-id-reserva').value;
-            const checkoutVal = document.getElementById('checkout').value;
-            const valorTotalFinal = Number(document.getElementById('valor-total-reserva').value) || 0;
-
-            const { error: errReserva } = await supabaseClient.from('reservas').insert([{
-                pousada_id: pousadaIdGlobal,
-                suite_id: suiteId,
-                hospede_nome: document.getElementById('nome-hospede').value,
-                email: document.getElementById('email-hospede').value,
-                whatsapp_hospede: document.getElementById('whatsapp-hospede').value,
-                cpf: document.getElementById('cpf-hospede').value,
-                rg: document.getElementById('rg-hospede').value || null,
-                cep: document.getElementById('cep-hospede').value || null,
-                endereco: document.getElementById('endereco-hospede').value,
-                checkin: checkinVal,
-                checkout: checkoutVal,
-                valor_total: valorTotalFinal, // <--- Gravando o valor total calculado automaticamente na tabela reservas!
-                status: 'Pendente',
-                criado_em: new Date().toISOString()
+            const { error } = await supabaseClient.from('tarifas_especiais').insert([{
+                pousada_id: usuarioIdAtual,
+                suite_id: suiteIdVal || null,
+                data_inicio: dataInicioVal,
+                data_fim: dataFimVal,
+                tipo_ajuste: tipoAjusteVal,
+                valor_especial: valorVal,
+                dias_semana: diasSelecionados.length > 0 ? diasSelecionados : null,
+                descricao: descVal
             }]);
-            
-            if (errReserva) {
-                btnEnviar.disabled = false;
-                btnEnviar.innerText = "Enviar Solicitação";
-                msgErro.innerText = "Erro ao enviar solicitação: " + errReserva.message;
-                msgErro.classList.remove('hidden');
+
+            if (error) {
+                alert("Erro ao cadastrar regra: " + error.message);
                 return;
             }
 
-            btnEnviar.disabled = false;
-            btnEnviar.innerText = "Enviar Solicitação";
+            document.getElementById('form-tarifa-especial').reset();
+            mostrarToast("Regra de tarifa salva com sucesso!");
+            carregarTabelaTarifasEspeciais();
+        };
 
-            document.getElementById('form-reserva').style.display = 'none';
-            msgSucesso.classList.remove('hidden');
-            
-            setTimeout(() => {
-                fecharModal();
-            }, 2500);
-        });
+        async function excluirTarifaEspecial(id) {
+            if (!confirm("Deseja realmente remover esta regra?")) return;
+            await supabaseClient.from('tarifas_especiais').delete().eq('id', id);
+            mostrarToast("Regra removida com sucesso!");
+            carregarTabelaTarifasEspeciais();
+        }
 
-        carregarDados();
+        async function fazerLogout() { 
+            await supabaseClient.auth.signOut(); 
+            window.location.href = 'index.html'; 
+        }
+
+        inicializarPagina();
     </script>
 </body>
 </html>
