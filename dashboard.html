@@ -12,6 +12,7 @@
         <div class="flex flex-wrap gap-6 font-bold text-gray-700 items-center">
             <a href="dashboard.html" class="text-blue-600 border-b-2 border-blue-600 pb-1">Gestão de Suítes</a>
             <a href="reservas.html" class="hover:text-blue-600 transition">Ver Reservas (Pendentes)</a>
+            <a href="hospedes.html" class="hover:text-blue-600 transition">Gestão de Hóspedes</a>
             <a href="configurar-pousada.html" class="hover:text-blue-600 transition">Minha Pousada</a>
             <button onclick="copiarLinkVitrine()" class="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 px-3 py-1.5 rounded-xl text-sm transition font-semibold flex items-center gap-1.5">
                 🔗 Copiar Link da Vitrine
@@ -232,7 +233,6 @@
         }
 
         async function verificarReservasPendentesDashboard() {
-            // Buscando as reservas pendentes utilizando a coluna correta 'criado_em'
             const { data: pendentes } = await supabaseClient.from('reservas').select('*').eq('pousada_id', usuarioIdAtual).eq('status', 'Pendente');
             const cardContainer = document.getElementById('card-atencao-pendentes');
             const listaResumo = document.getElementById('lista-resumo-pendentes');
@@ -358,7 +358,6 @@
                         </div>`;
                 }
 
-                // Renderizar Pendentes com todos os detalhes e data de solicitação preenchidos
                 pendentesDaSuite.forEach((pend) => {
                     const linkZapPend = gerarLinkWhatsApp(pend.whatsapp_hospede, pend.hospede_nome, pend.checkin, pend.checkout);
                     const dataSolicitacaoFormatada = formatarDataHora(pend.criado_em);

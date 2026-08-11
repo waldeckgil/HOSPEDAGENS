@@ -52,10 +52,15 @@
         </div>
     </div>
 
-    <!-- Modal de Solicitação de Reserva -->
+    <!-- Modal de Solicitação de Reserva (Largo / Duas Colunas) -->
     <div id="modal-reserva" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
-        <div class="bg-white p-8 rounded-2xl w-full max-w-lg text-gray-800 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <h2 class="text-2xl font-bold mb-4 text-center text-blue-600">Solicitar Reserva</h2>
+        <div class="bg-white p-6 md:p-8 rounded-2xl w-full max-w-3xl text-gray-800 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <h2 class="text-2xl font-bold mb-1 text-center text-blue-600">Solicitar Reserva</h2>
+            <p class="text-xs text-center text-gray-500 mb-4">Preencha seus dados para enviar o pedido ao gestor.</p>
+            
+            <div id="aviso-cadastro-encontrado" class="text-xs text-center text-emerald-700 bg-emerald-50 border border-emerald-200 p-2 rounded-xl font-semibold mb-4 hidden">
+                ✨ CPF encontrado! Seus dados foram preenchidos automaticamente.
+            </div>
             
             <div id="feedback-sucesso" class="hidden mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-xl text-center font-semibold">
                 🎉 Solicitação enviada com sucesso! O gestor analisará seu pedido em breve.
@@ -63,57 +68,67 @@
 
             <div id="feedback-erro" class="hidden mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl text-center font-semibold"></div>
 
-            <form id="form-reserva" class="space-y-3">
+            <form id="form-reserva" class="space-y-4">
                 <input type="hidden" id="suite-id-reserva">
                 
-                <div>
-                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Nome Completo</label>
-                    <input type="text" id="nome-hospede" placeholder="Seu nome completo" required class="w-full p-3 bg-white text-gray-900 border border-gray-300 rounded-xl outline-none">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">E-mail</label>
-                    <input type="email" id="email-hospede" placeholder="ex: seu@email.com" required class="w-full p-3 bg-white text-gray-900 border border-gray-300 rounded-xl outline-none">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">WhatsApp</label>
-                    <input type="text" id="whatsapp-hospede" placeholder="(DDD+Número)" required class="w-full p-3 bg-white text-gray-900 border border-gray-300 rounded-xl outline-none">
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">CPF (Opcional)</label>
-                        <input type="text" id="cpf-hospede" placeholder="Apenas números" class="w-full p-3 bg-white text-gray-900 border border-gray-300 rounded-xl outline-none">
+                <!-- BLOCO DE BUSCA POR CPF COM BOTÃO EXPLICITO -->
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-200">
+                    <label class="block text-xs font-extrabold text-blue-800 uppercase mb-1">Informe seu CPF para iniciar</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="cpf-hospede" placeholder="Digite apenas números" required 
+                               class="w-full p-2.5 bg-white text-blue-800 font-extrabold border border-blue-300 rounded-xl outline-none">
+                        <button type="button" onclick="buscarHospedePorCpf()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs transition whitespace-nowrap shadow">
+                            🔍 Buscar CPF
+                        </button>
                     </div>
+                    <p class="text-[11px] text-blue-600 mt-1">Se já se hospedou conosco antes, clique em buscar para preencher automaticamente.</p>
+                </div>
+
+                <!-- FORMULÁRIO EM GRADE (2 COLUNAS) COM FONTES MAIS VIVAS -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Nome Completo</label>
+                        <input type="text" id="nome-hospede" placeholder="Seu nome completo" required class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">E-mail</label>
+                        <input type="email" id="email-hospede" placeholder="ex: seu@email.com" required class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">WhatsApp</label>
+                        <input type="text" id="whatsapp-hospede" placeholder="(DDD+Número)" required class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
+                    </div>
+
                     <div>
                         <label class="block text-xs font-bold text-gray-600 uppercase mb-1">RG (Opcional)</label>
-                        <input type="text" id="rg-hospede" placeholder="Documento" class="w-full p-3 bg-white text-gray-900 border border-gray-300 rounded-xl outline-none">
+                        <input type="text" id="rg-hospede" placeholder="Documento" class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
                     </div>
-                </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">CEP</label>
-                    <input type="text" id="cep-hospede" placeholder="00000-000" class="w-full p-3 bg-white text-gray-900 border border-gray-300 rounded-xl outline-none">
-                </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">CEP</label>
+                        <input type="text" id="cep-hospede" placeholder="00000-000" class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
+                    </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Endereço Completo</label>
-                    <input type="text" id="endereco-hospede" placeholder="Rua, número, bairro, cidade..." required class="w-full p-3 bg-white text-gray-900 border border-gray-300 rounded-xl outline-none">
-                </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Endereço Completo</label>
+                        <input type="text" id="endereco-hospede" placeholder="Rua, número, bairro, cidade..." required class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
+                    </div>
 
-                <div class="grid grid-cols-2 gap-3 pt-2">
                     <div>
                         <label class="block text-xs font-bold text-blue-700 uppercase mb-1">📅 Data de Check-in</label>
-                        <input type="date" id="checkin" required class="w-full p-3 bg-white text-gray-900 border border-gray-300 rounded-xl font-bold outline-none" readonly>
+                        <input type="date" id="checkin" required class="w-full p-2.5 bg-white text-blue-900 font-extrabold border border-gray-300 rounded-xl outline-none text-sm" readonly>
                     </div>
+
                     <div>
                         <label class="block text-xs font-bold text-blue-700 uppercase mb-1">📅 Data de Check-out</label>
-                        <input type="date" id="checkout" required class="w-full p-3 bg-white text-gray-900 border border-gray-300 rounded-xl font-bold outline-none" readonly>
+                        <input type="date" id="checkout" required class="w-full p-2.5 bg-white text-blue-900 font-extrabold border border-gray-300 rounded-xl outline-none text-sm" readonly>
                     </div>
                 </div>
 
-                <div class="flex gap-2 pt-4">
+                <!-- BOTÕES DE AÇÃO FIXOS/VISÍVEIS -->
+                <div class="flex gap-3 pt-2">
                     <button type="button" onclick="fecharModal()" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 p-3 rounded-xl font-bold transition">Cancelar</button>
                     <button type="submit" id="btn-enviar" class="w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded-xl font-bold transition shadow-md">Enviar Solicitação</button>
                 </div>
@@ -125,7 +140,6 @@
         const supabaseClient = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
         let pousadaIdGlobal = '';
 
-        // Bloqueia datas retroativas no carregamento da página
         const hojeISO = new Date().toISOString().split('T')[0];
         document.getElementById('filtro-checkin').setAttribute('min', hojeISO);
         document.getElementById('filtro-checkout').setAttribute('min', hojeISO);
@@ -149,7 +163,6 @@
                 return;
             }
 
-            // Validação rigorosa: impede datas passadas na consulta
             if (checkinFiltro < hojeISO) {
                 alert("A data de check-in não pode ser anterior à data atual.");
                 document.getElementById('filtro-checkin').value = hojeISO;
@@ -206,6 +219,40 @@
             });
         }
 
+        async function buscarHospedePorCpf() {
+            const cpfInput = document.getElementById('cpf-hospede').value.trim();
+            const avisoEncontrado = document.getElementById('aviso-cadastro-encontrado');
+            
+            if (!cpfInput) {
+                alert("Por favor, digite o CPF antes de buscar.");
+                document.getElementById('cpf-hospede').focus();
+                return;
+            }
+
+            const { data: historico, error } = await supabaseClient
+                .from('reservas')
+                .select('hospede_nome, email, whatsapp_hospede, rg, cep, endereco')
+                .eq('pousada_id', pousadaIdGlobal)
+                .eq('cpf', cpfInput)
+                .order('criado_em', { ascending: false })
+                .limit(1);
+
+            if (!error && historico && historico.length > 0) {
+                const dados = historico[0];
+                document.getElementById('nome-hospede').value = dados.hospede_nome || '';
+                document.getElementById('email-hospede').value = dados.email || '';
+                document.getElementById('whatsapp-hospede').value = dados.whatsapp_hospede || '';
+                document.getElementById('rg-hospede').value = dados.rg || '';
+                document.getElementById('cep-hospede').value = dados.cep || '';
+                document.getElementById('endereco-hospede').value = dados.endereco || '';
+                
+                avisoEncontrado.classList.remove('hidden');
+            } else {
+                avisoEncontrado.classList.add('hidden');
+                alert("Nenhum cadastro anterior encontrado com este CPF nesta pousada. Prossiga com o preenchimento normal.");
+            }
+        }
+
         function abrirModal(sId) {
             const checkinFiltro = document.getElementById('filtro-checkin').value;
             const checkoutFiltro = document.getElementById('filtro-checkout').value;
@@ -228,6 +275,7 @@
 
             document.getElementById('feedback-sucesso').classList.add('hidden');
             document.getElementById('feedback-erro').classList.add('hidden');
+            document.getElementById('aviso-cadastro-encontrado').classList.add('hidden');
             document.getElementById('form-reserva').style.display = 'block';
             document.getElementById('modal-reserva').classList.remove('hidden');
         }
@@ -263,7 +311,7 @@
                 hospede_nome: document.getElementById('nome-hospede').value,
                 email: document.getElementById('email-hospede').value,
                 whatsapp_hospede: document.getElementById('whatsapp-hospede').value,
-                cpf: document.getElementById('cpf-hospede').value || null,
+                cpf: document.getElementById('cpf-hospede').value,
                 rg: document.getElementById('rg-hospede').value || null,
                 cep: document.getElementById('cep-hospede').value || null,
                 endereco: document.getElementById('endereco-hospede').value,
