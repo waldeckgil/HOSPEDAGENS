@@ -1,0 +1,4 @@
+# Chaves de API e arquivos de configuracao sensiveis
+*.txt
+*.env
+documentacao/
