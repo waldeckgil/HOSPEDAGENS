@@ -26,7 +26,7 @@
         </div>
     </nav>
 
-    <!-- 🚨 CARD DE ATENÇÃO NO TOPO: LISTA TODAS AS PENDÊNCIAS COM NOME E DATA/HORA -->
+    <!-- 🚨 CARD DE ATENÇÃO NO TOPO: GARANTIDO PARA APARECER QUANDO HOUVER PENDÊNCIAS -->
     <div id="card-atencao-pendentes" class="hidden mb-8 bg-amber-50 border-l-8 border-amber-500 p-6 rounded-2xl shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
             <div class="flex items-center gap-2">
@@ -171,7 +171,7 @@
         }
 
         function formatarDataHora(timestampStr) {
-            if (!timestampStr) return '';
+            if (!timestampStr) return 'Recente';
             const dataObj = new Date(timestampStr);
             if (isNaN(dataObj.getTime())) return timestampStr;
             const dia = String(dataObj.getDate()).padStart(2, '0');
@@ -232,7 +232,8 @@
         }
 
         async function verificarReservasPendentesDashboard() {
-            const { data: pendentes } = await supabaseClient.from('reservas').select('*').eq('pousada_id', usuarioIdAtual).eq('status', 'Pendente').order('created_at', { ascending: false });
+            // Busca segura de pendentes (ordenando por created_at se existir, ou apenas buscando)
+            const { data: pendentes } = await supabaseClient.from('reservas').select('*').eq('pousada_id', usuarioIdAtual).eq('status', 'Pendente');
             const cardContainer = document.getElementById('card-atencao-pendentes');
             const listaResumo = document.getElementById('lista-resumo-pendentes');
             
@@ -246,12 +247,14 @@
             
             listaResumo.innerHTML = '';
             pendentes.forEach(p => {
-                const dataFormatada = formatarDataHora(p.created_at);
+                const dataFormatada = formatarDataHora(p.created_at || p.inserted_at);
                 listaResumo.innerHTML += `
-                    <div class="bg-white border border-amber-200 px-3 py-1.5 rounded-xl shadow-sm text-xs flex items-center gap-2 text-amber-950 font-medium">
-                        <span>👤 <strong>${p.hospede_nome || 'Hóspede'}</strong></span>
-                        <span class="text-amber-300">•</span>
-                        <span class="text-gray-500">🕒 ${dataFormatada || 'Data não informada'}</span>
+                    <div class="bg-white border border-amber-200 px-3.5 py-2 rounded-xl shadow-sm text-xs flex items-center gap-2 text-amber-950 font-medium">
+                        <span class="text-base">👤</span>
+                        <div>
+                            <strong>${p.hospede_nome || 'Hóspede'}</strong>
+                            <div class="text-gray-500 text-[10px]">🕒 ${dataFormatada}</div>
+                        </div>
                     </div>
                 `;
             });
@@ -358,7 +361,7 @@
                 // Renderizar Pendentes com todos os detalhes e data de solicitação preenchidos
                 pendentesDaSuite.forEach((pend) => {
                     const linkZapPend = gerarLinkWhatsApp(pend.whatsapp_hospede, pend.hospede_nome, pend.checkin, pend.checkout);
-                    const dataSolicitacaoFormatada = formatarDataHora(pend.created_at);
+                    const dataSolicitacaoFormatada = formatarDataHora(pend.created_at || pend.inserted_at);
 
                     container.innerHTML += `
                         <div class="p-6 rounded-2xl shadow-md bg-amber-50 border border-amber-200 flex flex-col justify-between transition hover:shadow-lg">
@@ -374,11 +377,11 @@
                                     
                                     <div class="bg-white/70 border border-amber-200 p-3 rounded-xl mt-3 space-y-1 text-xs text-amber-900 shadow-sm">
                                         <p><span class="font-semibold text-gray-600">CPF:</span> ${pend.cpf || 'Não informado'}</p>
-                                        <p><span class="font-semibold text-gray-600">RG:</span> ${pend.rg || 'Not informado'}</p>
+                                        <p><span class="font-semibold text-gray-600">RG:</span> ${pend.rg || 'Não informado'}</p>
                                         <p><span class="font-semibold text-gray-600">CEP/Endereço:</span> ${pend.endereco || 'Não informado'}</p>
                                         <p><span class="font-semibold text-gray-600">E-mail:</span> ${pend.email || 'Não informado'}</p>
                                         <div class="pt-1.5 border-t border-amber-100 flex items-center gap-1 text-gray-500 font-medium">
-                                            <span>🕒</span> <span>Solicitado em: <strong>${dataSolicitacaoFormatada || 'Data não informada'}</strong></span>
+                                            <span>🕒</span> <span>Solicitado em: <strong>${dataSolicitacaoFormatada}</strong></span>
                                         </div>
                                     </div>
 
