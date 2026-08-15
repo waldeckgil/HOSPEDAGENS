@@ -2,298 +2,345 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Vitrine de Reservas - Pousada</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Nossas Suítes</title>
+    <style>
+        .bg-pousada {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80');
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 p-8">
-    <div class="max-w-5xl mx-auto space-y-8">
+<body class="bg-pousada text-white p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <h1 id="titulo-pousada" class="text-4xl font-extrabold mb-6 text-center drop-shadow-lg">Carregando Pousada...</h1>
         
-        <!-- CABEÇALHO DA VITRINE -->
-        <div class="bg-white p-8 rounded-3xl shadow-md text-center">
-            <h1 id="nome-pousada-vitrine" class="text-3xl font-bold text-blue-600 mb-2">Carregando Pousada...</h1>
-            <p class="text-sm text-gray-600">Escolha o período da sua estadia e consulte as suítes disponíveis.</p>
-            
-            <!-- BUSCA DE DISPONIBILIDADE -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 bg-gray-50 p-6 rounded-2xl border border-gray-200">
+        <!-- BARRA DE FILTRO PRÉVIO DE PERÍODO -->
+        <div class="bg-white text-gray-800 p-6 rounded-2xl shadow-xl mb-8">
+            <h2 class="text-lg font-bold mb-3 text-blue-600 flex items-center gap-2">
+                🔍 Escolha o período da sua estadia
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                 <div>
-                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Check-in</label>
-                    <input type="date" id="filtro-checkin" class="w-full p-3 border rounded-xl font-medium bg-white text-sm">
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Check-in</label>
+                    <input type="date" id="filtro-checkin" class="w-full p-3 border rounded-xl font-bold bg-gray-50">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Check-out</label>
-                    <input type="date" id="filtro-checkout" class="w-full p-3 border rounded-xl font-medium bg-white text-sm">
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Check-out</label>
+                    <input type="date" id="filtro-checkout" class="w-full p-3 border rounded-xl font-bold bg-gray-50">
                 </div>
-                <div class="flex items-end">
-                    <button onclick="consultarDisponibilidade()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition text-sm shadow-md">
+                <div>
+                    <button onclick="filtrarSuitesDisponiveisPorPeriodo()" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold transition shadow-md">
                         Consultar Disponibilidade
                     </button>
                 </div>
             </div>
+            <p id="aviso-filtro" class="text-xs text-gray-500 mt-2 italic">Selecione o período desejado e clique em consultar para visualizar as suítes disponíveis.</p>
         </div>
 
-        <!-- LISTAGEM DE SUÍTES DISPONÍVEIS -->
-        <div class="bg-white p-8 rounded-3xl shadow-md">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Suítes Disponíveis para o Período</h2>
-            <div id="lista-suites-vitrine" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <p class="text-gray-500 text-sm">Informe as datas de check-in e check-out acima e clique em consultar.</p>
+        <!-- Container onde as suítes disponíveis serão injetadas após a busca -->
+        <div id="vitrine-container" class="grid gap-6">
+            <div class="bg-white/90 backdrop-blur-md text-gray-700 p-8 rounded-2xl text-center shadow-lg">
+                <span class="text-3xl">🗓️</span>
+                <p class="font-bold text-base mt-2 text-gray-800">Selecione as datas de check-in e check-out acima.</p>
+                <p class="text-xs text-gray-500 mt-1">As suítes livres para o período escolhido aparecerão aqui.</p>
             </div>
         </div>
-
     </div>
 
-    <!-- MODAL DE RESERVA -->
-    <div id="modal-reserva" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white p-8 rounded-3xl max-w-lg w-full shadow-2xl space-y-6">
-            <div class="flex justify-between items-center border-b pb-4">
-                <h3 class="text-xl font-bold text-gray-900" id="modal-titulo-suite">Reservar Suíte</h3>
-                <button onclick="fecharModal()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">✕</button>
+    <!-- Modal de Solicitação de Reserva (Largo / Duas Colunas) -->
+    <div id="modal-reserva" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-6 md:p-8 rounded-2xl w-full max-w-3xl text-gray-800 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <h2 class="text-2xl font-bold mb-1 text-center text-blue-600">Solicitar Reserva</h2>
+            <p class="text-xs text-center text-gray-500 mb-4">Preencha seus dados para enviar o pedido ao gestor.</p>
+            
+            <div id="aviso-cadastro-encontrado" class="text-xs text-center text-emerald-700 bg-emerald-50 border border-emerald-200 p-2 rounded-xl font-semibold mb-4 hidden">
+                ✨ CPF encontrado! Seus dados foram preenchidos automaticamente.
             </div>
             
-            <div id="modal-resumo-estadia" class="bg-blue-50 p-4 rounded-2xl text-sm text-blue-900 space-y-1">
-                <!-- Preenchido via JS -->
+            <div id="feedback-sucesso" class="hidden mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-xl text-center font-semibold">
+                🎉 Solicitação enviada com sucesso! O gestor analisará seu pedido em breve.
             </div>
 
-            <form id="form-fazer-reserva" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Seu Nome Completo</label>
-                    <input type="text" id="hospede-nome" required placeholder="Ex: Maria da Silva" class="w-full p-3 border rounded-xl font-medium text-sm">
+            <div id="feedback-erro" class="hidden mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl text-center font-semibold"></div>
+
+            <form id="form-reserva" class="space-y-4">
+                <input type="hidden" id="suite-id-reserva">
+                
+                <!-- BLOCO DE BUSCA POR CPF COM BOTÃO EXPLICITO -->
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-200">
+                    <label class="block text-xs font-extrabold text-blue-800 uppercase mb-1">Informe seu CPF para iniciar</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="cpf-hospede" placeholder="Digite apenas números" required 
+                               class="w-full p-2.5 bg-white text-blue-800 font-extrabold border border-blue-300 rounded-xl outline-none">
+                        <button type="button" onclick="buscarHospedePorCpf()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs transition whitespace-nowrap shadow">
+                            🔍 Buscar CPF
+                        </button>
+                    </div>
+                    <p class="text-[11px] text-blue-600 mt-1">Se já se hospedou conosco antes, clique em buscar para preencher automaticamente.</p>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Seu E-mail</label>
-                    <input type="email" id="hospede-email" required placeholder="Ex: maria@email.com" class="w-full p-3 border rounded-xl font-medium text-sm">
+
+                <!-- FORMULÁRIO EM GRADE (2 COLUNAS) COM FONTES MAIS VIVAS -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Nome Completo</label>
+                        <input type="text" id="nome-hospede" placeholder="Seu nome completo" required class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">E-mail</label>
+                        <input type="email" id="email-hospede" placeholder="ex: seu@email.com" required class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">WhatsApp</label>
+                        <input type="text" id="whatsapp-hospede" placeholder="(DDD+Número)" required class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">RG (Opcional)</label>
+                        <input type="text" id="rg-hospede" placeholder="Documento" class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">CEP</label>
+                        <input type="text" id="cep-hospede" placeholder="00000-000" class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Endereço Completo</label>
+                        <input type="text" id="endereco-hospede" placeholder="Rua, número, bairro, cidade..." required class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-blue-700 uppercase mb-1">📅 Data de Check-in</label>
+                        <input type="date" id="checkin" required class="w-full p-2.5 bg-white text-blue-900 font-extrabold border border-gray-300 rounded-xl outline-none text-sm" readonly>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-blue-700 uppercase mb-1">📅 Data de Check-out</label>
+                        <input type="date" id="checkout" required class="w-full p-2.5 bg-white text-blue-900 font-extrabold border border-gray-300 rounded-xl outline-none text-sm" readonly>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Seu WhatsApp / Telefone</label>
-                    <input type="text" id="hospede-telefone" required placeholder="Ex: (21) 99999-9999" class="w-full p-3 border rounded-xl font-medium text-sm">
-                </div>
-                <div class="flex justify-end gap-3 pt-2">
-                    <button type="button" onclick="fecharModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-5 py-2.5 rounded-xl text-sm transition">Cancelar</button>
-                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition shadow-md">Confirmar Reserva</button>
+
+                <!-- BOTÕES DE AÇÃO FIXOS/VISÍVEIS -->
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="fecharModal()" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 p-3 rounded-xl font-bold transition">Cancelar</button>
+                    <button type="submit" id="btn-enviar" class="w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded-xl font-bold transition shadow-md">Enviar Solicitação</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabaseClient = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
+        let pousadaIdGlobal = '';
 
-        let pousadaIdGlobal = null;
-        let suiteSelecionadaParaReserva = null;
-        let dadosReservaCalculados = null;
+        const hojeISO = new Date().toISOString().split('T')[0];
+        document.getElementById('filtro-checkin').setAttribute('min', hojeISO);
+        document.getElementById('filtro-checkout').setAttribute('min', hojeISO);
 
-        // Captura o ID da pousada via parâmetro da URL (?pousada_id=...)
-        function obterPousadaIdDaUrl() {
+        async function carregarDados() {
             const params = new URLSearchParams(window.location.search);
-            return params.get('pousada_id');
+            pousadaIdGlobal = params.get('pousada_id') || '2ce55615-0d32-467a-a412-f9868ec8c9cf';
+
+            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', pousadaIdGlobal).single();
+            document.getElementById('titulo-pousada').innerText = pousada?.nome || "Nossa Pousada";
         }
 
-        async function inicializarVitrine() {
-            pousadaIdGlobal = obterPousadaIdDaUrl();
+        async function filtrarSuitesDisponiveisPorPeriodo() {
+            const checkinFiltro = document.getElementById('filtro-checkin').value;
+            const checkoutFiltro = document.getElementById('filtro-checkout').value;
+            const container = document.getElementById('vitrine-container');
 
-            if (!pousadaIdGlobal) {
-                // Se não vier na URL, busca a primeira cadastrada como fallback
-                const { data: pousadas } = await supabaseClient.from('pousadas').select('*').limit(1);
-                if (pousadas && pousadas.length > 0) {
-                    pousadaIdGlobal = pousadas[0].id;
-                }
-            }
-
-            if (pousadaIdGlobal) {
-                const { data: pousada } = await supabaseClient.from('pousadas').select('*').eq('id', pousadaIdGlobal).single();
-                if (pousada) {
-                    // Exibe apenas o nome puro sem duplicar a palavra Pousada
-                    document.getElementById('nome-pousada-vitrine').innerText = pousada.nome;
-                } else {
-                    document.getElementById('nome-pousada-vitrine').innerText = "Pousada não encontrada";
-                }
-            } else {
-                document.getElementById('nome-pousada-vitrine').innerText = "Nenhuma pousada selecionada";
-            }
-        }
-
-        async function calcularTotalEstadia(suiteId, valorDiariaBase, checkinStr, checkoutStr) {
-            const d1 = new Date(checkinStr + 'T00:00:00');
-            const d2 = new Date(checkoutStr + 'T00:00:00');
-            
-            const { data: tarifas } = await supabaseClient
-                .from('tarifas_especiais')
-                .select('*')
-                .eq('pousada_id', pousadaIdGlobal)
-                .or(`suite_id.eq.${suiteId},suite_id.is.null`);
-
-            let valorTotal = 0;
-            let atual = new Date(d1);
-            let noites = 0;
-            const baseDiaria = Number(valorDiariaBase || 0);
-            let detalheDiarias = [];
-
-            const nomesDias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-
-            while (atual < d2) {
-                noites++;
-                const dataFormatada = atual.toISOString().split('T')[0];
-                const diaDaSemana = atual.getDay(); 
-                let diariaAplicada = baseDiaria;
-                let regraAplicadaDescricao = 'Tarifa Padrão';
-
-                if (tarifas && tarifas.length > 0) {
-                    const regra = tarifas.find(t => {
-                        const dentroDoPeriodo = dataFormatada >= t.data_inicio && dataFormatada <= t.data_fim;
-                        if (!dentroDoPeriodo) return false;
-
-                        if (t.dias_semana && t.dias_semana.length > 0) {
-                            return t.dias_semana.includes(diaDaSemana);
-                        }
-                        return true;
-                    });
-
-                    if (regra) {
-                        if (regra.tipo_ajuste === 'percentual') {
-                            diariaAplicada = baseDiaria + (baseDiaria * (Number(regra.valor_especial) / 100));
-                        } else {
-                            diariaAplicada = Number(regra.valor_especial);
-                        }
-                        regraAplicadaDescricao = regra.descricao || 'Tarifa Especial';
-                    }
-                }
-
-                detalheDiarias.push({
-                    data: dataFormatada.split('-').reverse().join('/'),
-                    diaSemana: nomesDias[diaDaSemana],
-                    valor: diariaAplicada,
-                    descricao: regraAplicadaDescricao
-                });
-
-                valorTotal += diariaAplicada;
-                atual.setDate(atual.getDate() + 1);
-            }
-
-            if (noites === 0) noites = 1;
-            if (valorTotal === 0) valorTotal = baseDiaria * noites;
-
-            return { valorTotal, noites, detalheDiarias };
-        }
-
-        async function consultarDisponibilidade() {
-            const checkin = document.getElementById('filtro-checkin').value;
-            const checkout = document.getElementById('filtro-checkout').value;
-
-            if (!checkin || !checkout) {
-                alert("Por favor, preencha as datas de Check-in e Check-out.");
+            if (!checkinFiltro || !checkoutFiltro) {
+                alert("Por favor, selecione as datas de Check-in e Check-out para consultar a disponibilidade.");
+                document.getElementById('filtro-checkin').focus();
                 return;
             }
 
-            if (checkin >= checkout) {
+            if (checkinFiltro < hojeISO) {
+                alert("A data de check-in não pode ser anterior à data atual.");
+                document.getElementById('filtro-checkin').value = hojeISO;
+                return;
+            }
+
+            if (checkinFiltro >= checkoutFiltro) {
                 alert("A data de check-out deve ser posterior à data de check-in.");
                 return;
             }
 
-            const container = document.getElementById('lista-suites-vitrine');
-            container.innerHTML = '<p class="text-gray-500 text-sm col-span-2">Calculando melhores tarifas e verificando disponibilidade...</p>';
-
-            const { data: suites, error } = await supabaseClient
-                .from('suites')
-                .select('*')
-                .eq('pousada_id', pousadaIdGlobal);
-
-            if (error || !suites || suites.length === 0) {
-                container.innerHTML = '<p class="text-gray-500 text-sm col-span-2">Nenhuma suíte encontrada para esta pousada.</p>';
+            const { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', pousadaIdGlobal);
+            if (!suites || suites.length === 0) {
+                container.innerHTML = '<p class="text-center bg-black/40 p-6 rounded-xl">Nenhuma suíte cadastrada nesta pousada no momento.</p>';
                 return;
             }
 
-            container.innerHTML = '';
+            const { data: reservasAprovadas } = await supabaseClient
+                .from('reservas')
+                .select('*')
+                .eq('pousada_id', pousadaIdGlobal)
+                .eq('status', 'Aprovada');
 
-            for (const suite of suites) {
-                const calculo = await calcularTotalEstadia(suite.id, suite.valor_diaria, checkin, checkout);
+            const novoInicio = new Date(checkinFiltro);
+            const novoFim = new Date(checkoutFiltro);
 
-                // Montar o HTML com o detalhamento diário colapsável ou visível no card
-                let htmlDetalhes = '';
-                calculo.detalheDiarias.forEach(d => {
-                    const isEspecial = d.descricao !== 'Tarifa Padrão';
-                    htmlDetalhes += `
-                        <div class="flex justify-between items-center text-xs py-1 border-b border-gray-100 last:border-none">
-                            <span class="text-gray-600">${d.data} (${d.diaSemana}) - <span class="${isEspecial ? 'text-amber-600 font-semibold' : 'text-gray-500'}">${d.descricao}</span></span>
-                            <span class="font-bold ${isEspecial ? 'text-amber-600' : 'text-gray-800'}">R$ ${d.valor.toFixed(2)}</span>
-                        </div>
-                    `;
+            const suitesOcupadasIds = new Set();
+            if (reservasAprovadas) {
+                reservasAprovadas.forEach(res => {
+                    const inicioExistente = new Date(res.checkin);
+                    const fimExistente = new Date(res.checkout);
+                    if (novoInicio < fimExistente && novoFim > inicioExistente) {
+                        suitesOcupadasIds.add(res.suite_id);
+                    }
                 });
+            }
 
+            const suitesDisponiveis = suites.filter(s => !suitesOcupadasIds.has(s.id));
+            
+            document.getElementById('aviso-filtro').innerText = `Exibindo suítes livres para o período de ${checkinFiltro.split('-').reverse().join('/')} a ${checkoutFiltro.split('-').reverse().join('/')}.`;
+
+            container.innerHTML = suitesDisponiveis.length > 0 ? '' : '<p class="text-center text-amber-200 font-semibold bg-black/40 p-6 rounded-xl">⚠️ Nenhuma suíte disponível para o período selecionado. Tente outras datas!</p>';
+
+            suitesDisponiveis.forEach(suite => {
                 container.innerHTML += `
-                    <div class="bg-gray-50 border border-gray-200 p-6 rounded-2xl flex flex-col justify-between gap-4">
+                    <div class="bg-white p-6 rounded-2xl shadow-lg border-l-8 border-green-500 flex justify-between items-center text-gray-800">
                         <div>
-                            <h3 class="text-lg font-bold text-gray-900">${suite.nome}</h3>
-                            <p class="text-xs text-gray-500 mt-1">Status: ${suite.status || 'Disponível'}</p>
-                            <p class="text-sm font-semibold text-blue-600 mt-2">Diária Base: R$ ${Number(suite.valor_diaria || 0).toFixed(2)}</p>
-                            
-                            <!-- DETALHAMENTO DIÁRIO -->
-                            <div class="mt-4 bg-white p-3 rounded-xl border border-gray-200 space-y-1">
-                                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-2">Detalhamento das Diárias:</p>
-                                ${htmlDetalhes}
-                            </div>
+                            <h2 class="text-xl font-bold">${suite.nome}</h2>
+                            <p class="text-xs text-gray-500 mt-1">Status: <span class="font-semibold text-green-600">Disponível no período</span></p>
                         </div>
-
-                        <div class="border-t pt-4 flex items-center justify-between">
-                            <div>
-                                <span class="text-xs text-gray-500 block">Total para ${calculo.noites} noite(s):</span>
-                                <span class="text-xl font-extrabold text-emerald-600">R$ ${calculo.valorTotal.toFixed(2)}</span>
-                            </div>
-                            <button onclick='abrirModalReserva(${JSON.stringify(suite)}, "${checkin}", "${checkout}", ${calculo.valorTotal}, ${calculo.noites})' class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition shadow-sm">
-                                Reservar
-                            </button>
-                        </div>
+                        <button onclick="abrirModal('${suite.id}')" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-xl transition shadow">Solicitar Reserva</button>
                     </div>
                 `;
+            });
+        }
+
+        async function buscarHospedePorCpf() {
+            const cpfInput = document.getElementById('cpf-hospede').value.trim();
+            const avisoEncontrado = document.getElementById('aviso-cadastro-encontrado');
+            
+            if (!cpfInput) {
+                alert("Por favor, digite o CPF antes de buscar.");
+                document.getElementById('cpf-hospede').focus();
+                return;
+            }
+
+            const { data: historico, error } = await supabaseClient
+                .from('reservas')
+                .select('hospede_nome, email, whatsapp_hospede, rg, cep, endereco')
+                .eq('pousada_id', pousadaIdGlobal)
+                .eq('cpf', cpfInput)
+                .order('criado_em', { ascending: false })
+                .limit(1);
+
+            if (!error && historico && historico.length > 0) {
+                const dados = historico[0];
+                document.getElementById('nome-hospede').value = dados.hospede_nome || '';
+                document.getElementById('email-hospede').value = dados.email || '';
+                document.getElementById('whatsapp-hospede').value = dados.whatsapp_hospede || '';
+                document.getElementById('rg-hospede').value = dados.rg || '';
+                document.getElementById('cep-hospede').value = dados.cep || '';
+                document.getElementById('endereco-hospede').value = dados.endereco || '';
+                
+                avisoEncontrado.classList.remove('hidden');
+            } else {
+                avisoEncontrado.classList.add('hidden');
+                alert("Nenhum cadastro anterior encontrado com este CPF nesta pousada. Prossiga com o preenchimento normal.");
             }
         }
 
-        function abrirModalReserva(suite, checkin, checkout, valorTotal, noites) {
-            suiteSelecionadaParaReserva = suite;
-            dadosReservaCalculados = { checkin, checkout, valorTotal, noites };
+        function abrirModal(sId) {
+            const checkinFiltro = document.getElementById('filtro-checkin').value;
+            const checkoutFiltro = document.getElementById('filtro-checkout').value;
 
-            document.getElementById('modal-titulo-suite').innerText = "Reservar: " + suite.nome;
-            document.getElementById('modal-resumo-estadia').innerHTML = `
-                <p><strong>Período:</strong> ${checkin.split('-').reverse().join('/')} até ${checkout.split('-').reverse().join('/')} (${noites} noites)</p>
-                <p><strong>Valor Total da Estadia:</strong> R$ ${valorTotal.toFixed(2)}</p>
-            `;
+            if (!checkinFiltro || !checkoutFiltro) {
+                alert("Por favor, selecione o período de Check-in e Check-out.");
+                return;
+            }
+
+            if (checkinFiltro < hojeISO) {
+                alert("A data de check-in não pode ser anterior à data atual.");
+                return;
+            }
+
+            document.getElementById('suite-id-reserva').value = sId;
+            document.getElementById('form-reserva').reset();
+            
+            document.getElementById('checkin').value = checkinFiltro;
+            document.getElementById('checkout').value = checkoutFiltro;
+
+            document.getElementById('feedback-sucesso').classList.add('hidden');
+            document.getElementById('feedback-erro').classList.add('hidden');
+            document.getElementById('aviso-cadastro-encontrado').classList.add('hidden');
+            document.getElementById('form-reserva').style.display = 'block';
             document.getElementById('modal-reserva').classList.remove('hidden');
         }
 
-        function fecharModal() {
-            document.getElementById('modal-reserva').classList.add('hidden');
-            document.getElementById('form-fazer-reserva').reset();
+        function fecharModal() { 
+            document.getElementById('modal-reserva').classList.add('hidden'); 
+            filtrarSuitesDisponiveisPorPeriodo();
         }
 
-        document.getElementById('form-fazer-reserva').onsubmit = async (e) => {
+        document.getElementById('form-reserva').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const nome = document.getElementById('hospede-nome').value;
-            const email = document.getElementById('hospede-email').value;
-            const telefone = document.getElementById('hospede-telefone').value;
-
-            const { error } = await supabaseClient.from('reservas').insert([{
-                pousada_id: pousadaIdGlobal,
-                suite_id: suiteSelecionadaParaReserva.id,
-                hospede_nome: nome,
-                hospede_email: email,
-                hospede_telefone: telefone,
-                data_checkin: dadosReservaCalculados.checkin,
-                data_checkout: dadosReservaCalculados.checkout,
-                valor_total: dadosReservaCalculados.valorTotal,
-                status: 'Confirmada'
-            }]);
-
-            if (error) {
-                alert("Erro ao realizar reserva: " + error.message);
+            
+            const checkinVal = document.getElementById('checkin').value;
+            if (checkinVal < hojeISO) {
+                alert("Erro: Não é permitido fazer reservas com datas retroativas.");
                 return;
             }
 
-            alert("Reserva realizada com sucesso!");
-            fecharModal();
-        };
+            const btnEnviar = document.getElementById('btn-enviar');
+            const msgSucesso = document.getElementById('feedback-sucesso');
+            const msgErro = document.getElementById('feedback-erro');
+            
+            msgErro.classList.add('hidden');
+            btnEnviar.disabled = true;
+            btnEnviar.innerText = "Enviando...";
 
-        inicializarVitrine();
+            const suiteId = document.getElementById('suite-id-reserva').value;
+            const checkoutVal = document.getElementById('checkout').value;
+
+            const { error: errReserva } = await supabaseClient.from('reservas').insert([{
+                pousada_id: pousadaIdGlobal,
+                suite_id: suiteId,
+                hospede_nome: document.getElementById('nome-hospede').value,
+                email: document.getElementById('email-hospede').value,
+                whatsapp_hospede: document.getElementById('whatsapp-hospede').value,
+                cpf: document.getElementById('cpf-hospede').value,
+                rg: document.getElementById('rg-hospede').value || null,
+                cep: document.getElementById('cep-hospede').value || null,
+                endereco: document.getElementById('endereco-hospede').value,
+                checkin: checkinVal,
+                checkout: checkoutVal,
+                status: 'Pendente',
+                criado_em: new Date().toISOString()
+            }]);
+            
+            if (errReserva) {
+                btnEnviar.disabled = false;
+                btnEnviar.innerText = "Enviar Solicitação";
+                msgErro.innerText = "Erro ao enviar solicitação: " + errReserva.message;
+                msgErro.classList.remove('hidden');
+                return;
+            }
+
+            btnEnviar.disabled = false;
+            btnEnviar.innerText = "Enviar Solicitação";
+
+            document.getElementById('form-reserva').style.display = 'none';
+            msgSucesso.classList.remove('hidden');
+            
+            setTimeout(() => {
+                fecharModal();
+            }, 2500);
+        });
+
+        carregarDados();
     </script>
 </body>
 </html>
