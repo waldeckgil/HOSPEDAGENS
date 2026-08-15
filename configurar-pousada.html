@@ -126,6 +126,7 @@
                 id: user.id, 
                 nome: nomePousada.trim() 
             }, { onConflict: 'id' });
+            
 
             if (errPousada) {
                 console.error("Erro na pousada:", errPousada);
