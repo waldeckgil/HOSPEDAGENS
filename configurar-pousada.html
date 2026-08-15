@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <title>Configuração da Pousada | Painel do Gestor</title>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen font-sans">
+<body class="bg-slate-50 text-slate-800 min-h-screen font-sans" onload="carregarConfiguracao()">
 
     <!-- Top Navigation Bar -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
@@ -94,7 +94,7 @@
 
                     <!-- Container onde as suítes serão injetadas -->
                     <div id="suites-container" class="space-y-3 mb-8">
-                        <!-- Injetado dinamicamente via JS -->
+                        <p class="text-sm text-slate-400 italic">Carregando suítes...</p>
                     </div>
 
                     <div class="pt-4 border-t border-slate-100 flex justify-end">
@@ -112,7 +112,6 @@
         const supabaseClient = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
         let nomePousadaOriginal = '';
 
-        // Sistema de mensagens limpo no front-end
         function mostrarMensagem(texto, tipo = 'erro') {
             const container = document.getElementById('mensagem-container');
             container.className = 'mb-6 p-4 rounded-xl text-sm font-semibold border flex items-center gap-3 shadow-sm transition-all';
@@ -131,7 +130,6 @@
             document.getElementById('mensagem-container').className = 'hidden';
         }
 
-        // Carrega dados da pousada e suítes existentes ao abrir
         async function carregarConfiguracao() {
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) {
@@ -140,7 +138,7 @@
                 return;
             }
 
-            // 1. Busca a pousada vinculada ao ID do usuário logado
+            // 1. Busca os dados da pousada do usuário logado
             const { data: pousada, error: errPousada } = await supabaseClient
                 .from('pousadas')
                 .select('nome')
@@ -154,7 +152,7 @@
                 document.getElementById('nome-pousada').value = '';
             }
 
-            // 2. Busca as suítes cadastradas desta pousada
+            // 2. Busca as suítes cadastradas (garantindo compatibilidade com pousada_id = user.id)
             const { data: suites, error: errSuites } = await supabaseClient
                 .from('suites')
                 .select('id, nome')
@@ -168,14 +166,18 @@
                     adicionarCampo(suite.id, suite.nome);
                 });
             } else {
-                // Se não houver suítes, abre um campo limpo inicial
                 adicionarCampo();
             }
         }
 
-        // Adiciona campo de suíte na tela
         function adicionarCampo(id = '', nome = '') {
             const container = document.getElementById('suites-container');
+            
+            // Remove mensagem de "carregando" se ainda estiver lá
+            if (container.querySelector('p')) {
+                container.innerHTML = '';
+            }
+
             const div = document.createElement('div');
             div.className = 'flex gap-3 items-center bg-slate-50 p-3 rounded-2xl border border-slate-200 transition';
             div.dataset.suiteId = id;
@@ -199,7 +201,6 @@
             container.appendChild(div);
         }
 
-        // Remove campo ou exclui do banco se já possuir ID
         async function removerCampo(botao) {
             const div = botao.closest('div.flex');
             const rowDiv = div.parentElement;
@@ -235,7 +236,6 @@
             }
         }
 
-        // Executa a persistência final no banco
         async function executarSalvamento() {
             const nomePousada = document.getElementById('nome-pousada').value;
             const linhasSuites = document.querySelectorAll('#suites-container > div');
@@ -243,7 +243,6 @@
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) return;
 
-            // Upsert da pousada vinculada ao ID do usuário logado
             const { error: errPousada } = await supabaseClient.from('pousadas').upsert({ 
                 id: user.id, 
                 nome: nomePousada.trim() 
@@ -254,7 +253,6 @@
                 return;
             }
             
-            // Filtra e insere apenas as novas suítes criadas (sem ID pré-existente)
             const novasSuites = [];
             linhasSuites.forEach(div => {
                 const input = div.querySelector('.suite-input');
@@ -282,7 +280,6 @@
             setTimeout(() => window.location.href = 'dashboard.html', 1500);
         }
 
-        // Validação principal e detecção de renomeação
         async function salvarConfiguracao() {
             esconderMensagem();
             const nomePousada = document.getElementById('nome-pousada').value.trim();
@@ -298,7 +295,6 @@
                 return;
             }
 
-            // Se já existia nome anterior e foi alterado, avisa o gestor na interface sem pop-up nativo
             if (nomePousadaOriginal && nomePousadaOriginal !== nomePousada) {
                 const modal = document.getElementById('modal-confirmacao');
                 const titulo = document.getElementById('titulo-modal');
