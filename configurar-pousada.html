@@ -121,11 +121,11 @@
                 return;
             }
 
-            // 1. Atualiza ou insere o nome da pousada (Garante ID único por usuário)
-            const { error: errPousada } = await supabaseClient.from('pousadas').upsert([{ 
+            // 1. Atualiza ou insere o nome da pousada enviando um objeto simples (Corrige o erro 403 e colunas)
+            const { error: errPousada } = await supabaseClient.from('pousadas').upsert({ 
                 id: user.id, 
                 nome: nomePousada.trim() 
-            }]);
+            });
 
             if (errPousada) {
                 console.error("Erro na pousada:", errPousada);
