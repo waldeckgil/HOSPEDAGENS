@@ -121,15 +121,15 @@
                 return;
             }
 
-            // 1. Atualiza ou insere o nome da pousada enviando um objeto simples (Corrige o erro 403 e colunas)
+            // 1. Atualiza ou insere informando explicitamente a chave de conflito (onConflict)
             const { error: errPousada } = await supabaseClient.from('pousadas').upsert({ 
                 id: user.id, 
                 nome: nomePousada.trim() 
-            });
+            }, { onConflict: 'id' });
 
             if (errPousada) {
                 console.error("Erro na pousada:", errPousada);
-                alert('Erro ao salvar os dados da pousada.');
+                alert('Erro ao salvar os dados da pousada: ' + (errPousada.message || JSON.stringify(errPousada)));
                 return;
             }
             
