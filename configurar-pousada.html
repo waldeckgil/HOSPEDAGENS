@@ -223,7 +223,7 @@
 
             document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${user.id}`;
 
-            // 2. Busca as suítes cadastradas (garantindo compatibilidade com pousada_id = user.id)
+            // 2. Busca as suítes cadastradas (incluindo fotos)
             const { data: suites, error: errSuites } = await supabaseClient
                 .from('suites')
                 .select('id, nome, fotos')
@@ -234,7 +234,7 @@
 
             if (suites && suites.length > 0) {
                 suites.forEach(suite => {
-                    adicionarCampo(suite.id, suite.nome);
+                    adicionarCampo(suite.id, suite.nome, suite.fotos);
                 });
             } else {
                 adicionarCampo();
@@ -248,7 +248,7 @@
             });
         }
 
-        function adicionarCampo(id = '', nome = '') {
+        function adicionarCampo(id = '', nome = '', fotos = []) {
             const container = document.getElementById('suites-container');
             
             // Remove mensagem de "carregando" se ainda estiver lá
@@ -261,6 +261,13 @@
             div.dataset.suiteId = id;
             
             const badgeTag = id ? '<span class="text-[10px] bg-slate-200 text-slate-600 px-2 py-1 rounded-md font-bold uppercase">Cadastrada</span>' : '<span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-1 rounded-md font-bold uppercase">Nova</span>';
+            
+            let fotosInfoHtml = '';
+            if (fotos && fotos.length > 0) {
+                fotosInfoHtml = `<span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-1 rounded-md font-bold">${fotos.length} foto(s) salva(s)</span>`;
+            } else {
+                fotosInfoHtml = `<span class="text-[10px] bg-gray-200 text-gray-600 px-2 py-1 rounded-md">Sem fotos</span>`;
+            }
 
             div.innerHTML = `
                 <div class="flex-1 flex items-center gap-3 w-full">
@@ -269,9 +276,12 @@
                         <input type="text" class="suite-input w-full p-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="Nome da Suíte (ex: Suíte Master 01)" value="${nome}">
                     </div>
                 </div>
-                <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+                <div class="flex items-center gap-2 w-full md:w-auto justify-end flex-wrap">
+                    <div class="flex items-center gap-2">
+                        ${fotosInfoHtml}
+                    </div>
                     <div class="flex flex-col">
-                        <label class="text-[10px] font-bold text-slate-500 uppercase">Fotos da Suíte</label>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase">Adicionar Fotos</label>
                         <input type="file" class="upload-fotos text-xs text-slate-600 file:mr-2 file:py-1 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" multiple accept="image/*">
                     </div>
                     ${badgeTag}
@@ -387,7 +397,6 @@
                     
                     const updateData = { nome: valorNome };
                     if (novasFotos && novasFotos.length > 0) {
-                        // Busca fotos anteriores para concatenar
                         const { data: suiteAtual } = await supabaseClient
                             .from('suites')
                             .select('fotos')
