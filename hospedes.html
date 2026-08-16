@@ -5,77 +5,130 @@
     <title>Gestão de Hóspedes</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 p-8">
-    <!-- Navegação Superior Padrão -->
-    <nav class="bg-white shadow-md p-6 mb-8 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4">
-        <div class="flex flex-wrap gap-6 font-bold text-gray-700 items-center">
-            <a href="dashboard.html" class="hover:text-blue-600 transition">Gestão de Suítes</a>
-            <a href="reservas.html" class="hover:text-blue-600 transition">Ver Reservas (Pendentes)</a>
-            <a href="hospedes.html" class="text-blue-600 border-b-2 border-blue-600 pb-1">Gestão de Hóspedes</a>
-            <a href="configurar-pousada.html" class="hover:text-blue-600 transition">Minha Pousada</a>
-        </div>
-        <div class="flex items-center gap-4">
-            <span id="titulo-pousada" class="font-bold text-gray-800">Carregando...</span>
-            <button onclick="fazerLogout()" class="bg-red-600 text-white font-bold py-2 px-4 rounded-xl">Sair</button>
-        </div>
-    </nav>
+<body class="bg-gray-100 min-h-screen flex" onload="inicializarPagina()">
 
-    <!-- ÁREA DE BUSCA INTELIGENTE -->
-    <div class="bg-white p-6 rounded-2xl shadow-md mb-8">
-        <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-            🔍 Consulta Inteligente de Hóspedes
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-            <div>
-                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Buscar por Nome, CPF ou E-mail</label>
-                <input type="text" id="filtro-texto" placeholder="Digite parte do nome, CPF..." class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-medium">
+    <!-- MENU LATERAL -->
+    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between hidden md:flex shadow-xl">
+        <div class="p-6">
+            <h1 class="text-2xl font-extrabold text-white mb-8 tracking-wider">Painel 360</h1>
+            <nav class="space-y-2">
+                <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition font-medium">
+                    <span>🏠</span> Gestão de Suítes
+                </a>
+                <a href="reservas.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition font-medium">
+                    <span>📋</span> Ver Reservas
+                </a>
+                <a href="hospedes.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-600 text-white font-semibold shadow-md">
+                    <span>👥</span> Gestão de Hóspedes
+                </a>
+                <a href="configurar-pousada.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition font-medium">
+                    <span>⚙️</span> Configuração de Suítes
+                </a>
+                <a href="tarifas.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition font-medium">
+                    <span>💰</span> Gerenciar Tarifas
+                </a>
+            </nav>
+        </div>
+        <div class="p-6 border-t border-slate-800 space-y-2">
+            <button onclick="copiarLinkVitrine()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300 text-left">
+                <span>🔗</span> Copiar Vitrine
+            </button>
+            <a id="link-ver-vitrine" href="#" target="_blank" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300">
+                <span>👁️</span> Ver Vitrine
+            </a>
+            <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-xl transition shadow mt-2">Sair</button>
+        </div>
+    </aside>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="flex-1 flex flex-col min-w-0">
+        <!-- CABEÇALHO -->
+        <header class="bg-white shadow-xs border-b border-gray-200 p-6 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <h2 class="text-xl font-bold text-gray-800">Gestão de Hóspedes</h2>
+                <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold">Carregando...</span>
             </div>
-            <div>
-                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Período Inicial (Reserva/Estadia)</label>
-                <input type="date" id="filtro-inicio" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-medium">
-            </div>
-            <div class="flex gap-2">
-                <div class="w-full">
-                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Período Final</label>
-                    <input type="date" id="filtro-fim" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-medium">
+            <a href="dashboard.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2 border border-slate-200">
+                <i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard
+            </a>
+        </header>
+
+        <!-- CORPO DA PÁGINA -->
+        <main class="p-6 md:p-8 flex-1 overflow-y-auto space-y-8">
+            
+            <!-- ÁREA DE BUSCA INTELIGENTE -->
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
+                <h2 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-magnifying-glass text-blue-600"></i> Consulta Inteligente de Hóspedes
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Buscar por Nome, CPF ou E-mail</label>
+                        <input type="text" id="filtro-texto" placeholder="Digite parte do nome, CPF..." class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Período Inicial (Reserva/Estadia)</label>
+                        <input type="date" id="filtro-inicio" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                    </div>
+                    <div class="flex gap-2">
+                        <div class="w-full">
+                            <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Período Final</label>
+                            <input type="date" id="filtro-fim" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-3 mt-4">
+                    <button onclick="carregarHistoricoHospedes()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition shadow-sm text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-search"></i> Pesquisar Histórico
+                    </button>
+                    <button onclick="limparFiltros()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-4 py-3 rounded-xl transition text-sm">
+                        Limpar Filtros
+                    </button>
                 </div>
             </div>
-        </div>
-        <div class="flex gap-3 mt-4">
-            <button onclick="carregarHistoricoHospedes()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition shadow-sm text-sm flex items-center gap-2">
-                🔍 Pesquisar Histórico
-            </button>
-            <button onclick="limparFiltros()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-4 py-3 rounded-xl transition text-sm">
-                Limpar Filtros
-            </button>
-        </div>
+
+            <!-- TABELA DE RESULTADOS DO HISTÓRICO -->
+            <div class="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
+                <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                    <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+                        <i class="fa-solid fa-address-book text-blue-600"></i> Histórico de Hóspedes e Estadias
+                    </h3>
+                    <span id="contador-resultados" class="text-xs bg-blue-50 text-blue-700 font-bold px-3 py-1 rounded-full border border-blue-200">0 registros encontrados</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-600 uppercase text-xs tracking-wider border-b border-gray-200">
+                                <th class="p-4 font-bold">Hóspede / Contato</th>
+                                <th class="p-4 font-bold">Documentos</th>
+                                <th class="p-4 font-bold">Endereço</th>
+                                <th class="p-4 font-bold">Período da Estadia</th>
+                                <th class="p-4 font-bold">Status</th>
+                                <th class="p-4 font-bold">Data da Reserva</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-hospedes-corpo" class="divide-y divide-gray-100 text-sm text-gray-700">
+                            <tr>
+                                <td colspan="6" class="p-8 text-center text-gray-500 italic">Carregando histórico de hóspedes...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
     </div>
 
-    <!-- TABELA DE RESULTADOS DO HISTÓRICO -->
-    <div class="bg-white rounded-2xl shadow-md overflow-hidden">
-        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-            <h3 class="font-bold text-gray-800 text-lg">Histórico de Hóspedes e Estadias</h3>
-            <span id="contador-resultados" class="text-xs bg-blue-50 text-blue-700 font-bold px-3 py-1 rounded-full">0 registros encontrados</span>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-gray-50 text-gray-600 uppercase text-xs tracking-wider border-b border-gray-200">
-                        <th class="p-4 font-bold">Hóspede / Contato</th>
-                        <th class="p-4 font-bold">Documentos</th>
-                        <th class="p-4 font-bold">Endereço</th>
-                        <th class="p-4 font-bold">Período da Estadia</th>
-                        <th class="p-4 font-bold">Status</th>
-                        <th class="p-4 font-bold">Data da Reserva</th>
-                    </tr>
-                </thead>
-                <tbody id="tabela-hospedes-corpo" class="divide-y divide-gray-100 text-sm text-gray-700">
-                    <tr>
-                        <td colspan="6" class="p-8 text-center text-gray-500 italic">Carregando histórico de hóspedes...</td>
-                    </tr>
-                </tbody>
-            </table>
+    <!-- TOAST / NOTIFICAÇÃO -->
+    <div id="toast-notificacao" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+        <div id="toast-content" class="bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
+            <span id="toast-icone" class="text-xl">✨</span>
+            <div>
+                <h4 class="font-bold text-sm">Aviso</h4>
+                <p id="toast-mensagem" class="text-xs text-gray-300">Ação realizada com sucesso!</p>
+            </div>
         </div>
     </div>
 
@@ -86,19 +139,48 @@
 
         let usuarioIdAtual = null;
 
+        function mostrarToast(mensagem, tipo = 'sucesso') {
+            const toast = document.getElementById('toast-notificacao');
+            const toastMsg = document.getElementById('toast-mensagem');
+            const toastIcone = document.getElementById('toast-icone');
+            const toastContent = document.getElementById('toast-content');
+
+            toastMsg.innerText = mensagem;
+
+            if (tipo === 'sucesso') {
+                toastContent.className = "bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800";
+                toastIcone.innerText = "✨";
+            } else {
+                toastContent.className = "bg-red-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-red-800";
+                toastIcone.innerText = "🚨";
+            }
+
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => { toast.classList.add('translate-y-24', 'opacity-0'); }, 3000);
+        }
+
         async function inicializarPagina() {
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) { window.location.href = 'index.html'; return; }
             usuarioIdAtual = user.id;
 
-            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', user.id).single();
+            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', user.id).maybeSingle();
             if (pousada && pousada.nome) {
-                document.getElementById('titulo-pousada').innerText = "Pousada: " + pousada.nome;
+                document.getElementById('titulo-pousada').innerText = pousada.nome;
             } else {
                 document.getElementById('titulo-pousada').innerText = "Minha Pousada";
             }
 
+            document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${user.id}`;
+
             carregarHistoricoHospedes();
+        }
+
+        function copiarLinkVitrine() {
+            if (!usuarioIdAtual) return;
+            navigator.clipboard.writeText(window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`).then(() => {
+                mostrarToast("Link da vitrine copiado para a área de transferência!");
+            });
         }
 
         function formatarDataSimples(dataStr) {
@@ -221,8 +303,6 @@
         document.getElementById('filtro-texto').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') carregarHistoricoHospedes();
         });
-
-        inicializarPagina();
     </script>
 </body>
 </html>
