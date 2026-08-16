@@ -10,35 +10,38 @@
 <body class="bg-gray-100 min-h-screen flex" onload="carregarConfiguracao()">
 
     <!-- MENU LATERAL -->
-    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between hidden md:flex shadow-xl">
+    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col hidden md:flex shadow-xl">
         <div class="p-6">
-            <h1 class="text-2xl font-extrabold text-white mb-8 tracking-wider">Painel 360</h1>
+            <h1 class="text-2xl font-extrabold text-white mb-6 tracking-wider">Painel 360</h1>
             <nav class="space-y-2">
-                <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition font-medium">
+                <a href="dashboard.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
                     <span>🏠</span> Gestão de Suítes
                 </a>
-                <a href="reservas.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition font-medium">
+                <a href="reservas.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
                     <span>📋</span> Ver Reservas
                 </a>
-                <a href="hospedes.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition font-medium">
+                <a href="hospedes.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
                     <span>👥</span> Gestão de Hóspedes
                 </a>
-                <a href="configurar-pousada.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-600 text-white font-semibold shadow-md">
+                <a href="configurar-pousada.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-blue-600 text-white font-semibold shadow-md text-sm">
                     <span>⚙️</span> Configuração de Suítes
                 </a>
-                <a href="tarifas.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition font-medium">
+                <a href="tarifas.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
                     <span>💰</span> Gerenciar Tarifas
                 </a>
+                
+                <div class="pt-4 border-t border-slate-800 space-y-2">
+                    <button onclick="copiarLinkVitrine()" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300 text-left text-sm">
+                        <span>🔗</span> Copiar Vitrine
+                    </button>
+                    <a id="link-ver-vitrine" href="#" target="_blank" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300 text-sm">
+                        <span>👁️</span> Ver Vitrine
+                    </a>
+                    <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-xl transition shadow text-sm flex items-center justify-center gap-2 mt-2">
+                        <i class="fa-solid fa-right-from-bracket"></i> Sair
+                    </button>
+                </div>
             </nav>
-        </div>
-        <div class="p-6 border-t border-slate-800 space-y-2">
-            <button onclick="copiarLinkVitrine()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300 text-left">
-                <span>🔗</span> Copiar Vitrine
-            </button>
-            <a id="link-ver-vitrine" href="#" target="_blank" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300">
-                <span>👁️</span> Ver Vitrine
-            </a>
-            <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-xl transition shadow mt-2">Sair</button>
         </div>
     </aside>
 
