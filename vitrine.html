@@ -52,7 +52,7 @@
         </div>
     </div>
 
-    <!-- Modal de Solicitação de Reserva (Largo / Duas Colunas) -->
+    <!-- Modal de Solicitação de Reserva -->
     <div id="modal-reserva" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-6 md:p-8 rounded-2xl w-full max-w-3xl text-gray-800 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <h2 class="text-2xl font-bold mb-1 text-center text-blue-600">Solicitar Reserva</h2>
@@ -71,7 +71,6 @@
             <form id="form-reserva" class="space-y-4">
                 <input type="hidden" id="suite-id-reserva">
                 
-                <!-- BLOCO DE BUSCA POR CPF COM BOTÃO EXPLICITO -->
                 <div class="bg-blue-50 p-4 rounded-xl border border-blue-200">
                     <label class="block text-xs font-extrabold text-blue-800 uppercase mb-1">Informe seu CPF para iniciar</label>
                     <div class="flex gap-2">
@@ -84,7 +83,6 @@
                     <p class="text-[11px] text-blue-600 mt-1">Se já se hospedou conosco antes, clique em buscar para preencher automaticamente.</p>
                 </div>
 
-                <!-- FORMULÁRIO EM GRADE (2 COLUNAS) COM FONTES MAIS VIVAS -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Nome Completo</label>
@@ -127,7 +125,6 @@
                     </div>
                 </div>
 
-                <!-- BOTÕES DE AÇÃO FIXOS/VISÍVEIS -->
                 <div class="flex gap-3 pt-2">
                     <button type="button" onclick="fecharModal()" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 p-3 rounded-xl font-bold transition">Cancelar</button>
                     <button type="submit" id="btn-enviar" class="w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded-xl font-bold transition shadow-md">Enviar Solicitação</button>
@@ -136,7 +133,7 @@
         </div>
     </div>
 
-    <script[cite: 6]>
+    <script>
         const supabaseClient = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
         let pousadaIdGlobal = '';
 
@@ -152,7 +149,6 @@
             document.getElementById('titulo-pousada').innerText = pousada?.nome || "Nossa Pousada";
         }
 
-        // Função de cálculo de diárias considerando tarifas especiais e padrão
         async function calcularValorTotalEstadia(suiteId, checkinStr, checkoutStr, precoBaseDiaria) {
             const checkin = new Date(checkinStr + 'T00:00:00');
             const checkout = new Date(checkoutStr + 'T00:00:00');
@@ -281,14 +277,12 @@
                     miniaturasHTML += '</div>';
                 }
 
-                // Obtém o preço base da suíte (ajuste o campo se necessário, ex: valor_diaria ou preco)
                 const precoBase = suite.preco || suite.valor_diaria || 150.00;
                 const valorTotalEstadia = await calcularValorTotalEstadia(suite.id, checkinFiltro, checkoutFiltro, precoBase);
 
                 container.innerHTML += `
                     <div class="bg-white rounded-2xl shadow-xl overflow-hidden text-gray-800 border-l-8 border-green-500 p-6">
                         <div class="flex flex-col md:flex-row gap-6">
-                            <!-- Bloco de Imagens -->
                             <div class="flex flex-col md:flex-row gap-3 w-full md:w-2/3">
                                 <div class="relative w-full h-64 md:h-80 bg-gray-100 rounded-xl overflow-hidden shadow-inner flex items-center justify-center">
                                     <img id="img-principal-${suite.id}" src="${fotoPrincipal}" alt="${suite.nome}" class="w-full h-full object-cover">
@@ -299,7 +293,6 @@
                                 ${miniaturasHTML}
                             </div>
 
-                            <!-- Bloco de Informações da Suíte e Ação -->
                             <div class="flex flex-col justify-between w-full md:w-1/3">
                                 <div>
                                     <div class="flex items-center justify-between mb-2">
