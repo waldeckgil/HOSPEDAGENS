@@ -8,37 +8,38 @@
 </head>
 <body class="bg-slate-50 text-slate-800 p-4 md:p-8">
     <!-- Navegação Superior -->
-    <nav class="bg-white border border-slate-200 shadow-sm p-5 mb-8 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4">
-        <div class="flex flex-wrap gap-4 font-semibold text-slate-600 items-center text-sm">
-            <a href="dashboard.html" class="text-blue-700 bg-blue-50 px-4 py-2 rounded-xl">Gestão de Suítes</a>
-            <a href="reservas.html" class="hover:text-blue-600 transition px-2 py-2">Ver Reservas (Pendentes)</a>
-            <a href="hospedes.html" class="hover:text-blue-600 transition px-2 py-2">Gestão de Hóspedes</a>
-            <a href="configurar-pousada.html" class="hover:text-blue-600 transition px-2 py-2">Minha Pousada</a>
-            <a href="tarifas.html" class="hover:text-blue-600 transition px-2 py-2">Gerenciar Tarifas</a>
-            <button onclick="copiarLinkVitrine()" class="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 px-3.5 py-2 rounded-xl text-sm transition font-semibold flex items-center gap-1.5">
+    <nav class="bg-white border border-slate-200/80 shadow-sm p-6 mb-8 rounded-3xl flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex flex-wrap gap-6 font-semibold text-slate-600 items-center text-sm">
+            <a href="dashboard.html" class="text-blue-600 bg-blue-50/80 border border-blue-100 px-4 py-2 rounded-2xl shadow-sm">Gestão de Suítes</a>
+            <a href="reservas.html" class="hover:text-blue-600 transition px-2 py-1">Ver Reservas (Pendentes)</a>
+            <a href="hospedes.html" class="hover:text-blue-600 transition px-2 py-1">Gestão de Hóspedes</a>
+            <a href="configurar-pousada.html" class="hover:text-blue-600 transition px-2 py-1">Minha Pousada</a>
+            <a href="tarifas.html" class="hover:text-blue-600 transition px-2 py-1">Gerenciar Tarifas</a>
+            <button onclick="copiarLinkVitrine()" class="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 px-3.5 py-2 rounded-xl text-xs transition font-bold flex items-center gap-1.5 shadow-sm">
                 🔗 Copiar Link da Vitrine
             </button>
-            <a id="link-ver-vitrine" href="#" target="_blank" class="bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-3.5 py-2 rounded-xl text-sm transition font-semibold flex items-center gap-1.5">
+            <a id="link-ver-vitrine" href="#" target="_blank" class="bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-3.5 py-2 rounded-xl text-xs transition font-bold flex items-center gap-1.5 shadow-sm">
                 👁️ Ver Vitrine (Visão Hóspede)
             </a>
         </div>
         <div class="flex items-center gap-4">
             <span id="titulo-pousada" class="font-bold text-slate-700">Carregando...</span>
-            <button onclick="fazerLogout()" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold py-2 px-4 rounded-xl text-sm transition">Sair</button>
+            <button onclick="fazerLogout()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 px-4 rounded-xl text-sm transition shadow-sm">Sair</button>
         </div>
     </nav>
 
-    <!-- 🚨 CARD DE ATENÇÃO NO TOPO -->
-    <div id="card-atencao-pendentes" class="hidden mb-8 bg-amber-50 border border-amber-200 p-6 rounded-2xl shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <!-- 🚨 CARD DE ATENÇÃO NO TOPO: GARANTIDO PARA APARECER QUANDO HOUVER PENDÊNCIAS -->
+    <div id="card-atencao-pendentes" class="hidden mb-8 bg-amber-50 border border-amber-200 p-6 rounded-3xl shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
             <div class="flex items-center gap-2">
                 <span class="text-2xl">🔔</span>
                 <h2 class="text-xl font-bold text-amber-900">Você tem <span id="contador-pendentes">0</span> solicitação(ões) de reserva pendente(s)!</h2>
             </div>
             <p class="text-sm text-amber-700 mt-1">Há hóspedes aguardando a aprovação. Veja os detalhes e a data/hora da solicitação abaixo:</p>
+            <!-- Container onde os mini cards com nome e data/hora de cada pendência aparecem no topo -->
             <div id="lista-resumo-pendentes" class="mt-3 flex flex-wrap gap-2"></div>
         </div>
-        <a href="reservas.html" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-3 rounded-xl transition shadow-sm text-sm whitespace-nowrap">
+        <a href="reservas.html" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-3 rounded-2xl transition shadow-sm text-sm whitespace-nowrap">
             Gerenciar Todas as Reservas &rarr;
         </a>
     </div>
@@ -55,7 +56,7 @@
     </div>
 
     <!-- 🛑 MODAL DE CONFIRMAÇÃO DE CHECKOUT/LIMPEZA -->
-    <div id="modal-confirmacao" class="hidden fixed inset-0 bg-slate-900 bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div id="modal-confirmacao" class="hidden fixed inset-0 bg-slate-900 bg-opacity-40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
         <div class="bg-white p-8 rounded-3xl w-full max-w-md shadow-2xl text-center space-y-4 border border-slate-100">
             <div class="w-16 h-16 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center mx-auto text-2xl font-bold border border-red-100">⚠️</div>
             <h3 class="text-xl font-bold text-slate-900">Confirmar Saída / Limpeza?</h3>
@@ -72,9 +73,9 @@
     <div id="suites-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
     <!-- Modal de Edição -->
-    <div id="modal-edicao" class="hidden fixed inset-0 bg-slate-900 bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div id="modal-edicao" class="hidden fixed inset-0 bg-slate-900 bg-opacity-40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
         <div class="bg-white p-8 rounded-3xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto border border-slate-100">
-            <h2 id="modal-titulo" class="text-xl font-bold mb-4 text-blue-700">Gerenciar Suíte</h2>
+            <h2 id="modal-titulo" class="text-xl font-bold mb-4 text-blue-600">Gerenciar Suíte</h2>
             
             <form id="form-edicao" class="space-y-4">
                 <input type="hidden" id="edit-suite-id">
@@ -83,7 +84,7 @@
                 
                 <div>
                     <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Status Físico da Suíte</label>
-                    <select id="edit-status" class="w-full p-3 border border-slate-200 rounded-xl font-semibold bg-slate-50 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600" onchange="verificarStatusModal()">
+                    <select id="edit-status" class="w-full p-3 border border-slate-200 rounded-xl font-bold bg-slate-50 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="verificarStatusModal()">
                         <option value="Disponível">Disponível</option>
                         <option value="Ocupada">Ocupada (Agora)</option>
                         <option value="Reservado">Reservado (Adicionar/Editar Datas Futuras)</option>
@@ -94,30 +95,30 @@
 
                 <div id="campos-hospede-container" class="space-y-3 transition-all">
                     <div class="grid grid-cols-1 gap-3">
-                        <input type="text" id="edit-hospede" placeholder="Nome Hóspede" class="p-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-600">
-                        <input type="text" id="edit-whatsapp" placeholder="WhatsApp" class="p-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-600">
+                        <input type="text" id="edit-hospede" placeholder="Nome Hóspede" class="p-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="edit-whatsapp" placeholder="WhatsApp" class="p-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <div class="grid grid-cols-2 gap-2">
-                            <input type="text" id="edit-cpf" placeholder="CPF (Opcional)" class="p-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-600">
-                            <input type="text" id="edit-rg" placeholder="RG (Opcional)" class="p-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-600">
+                            <input type="text" id="edit-cpf" placeholder="CPF (Opcional)" class="p-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="text" id="edit-rg" placeholder="RG (Opcional)" class="p-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
-                        <input type="text" id="edit-endereco" placeholder="Endereço" class="p-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-600">
-                        <input type="email" id="edit-email" placeholder="E-mail" class="p-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-600">
+                        <input type="text" id="edit-endereco" placeholder="Endereço" class="p-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="email" id="edit-email" placeholder="E-mail" class="p-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
 
                     <div class="grid grid-cols-2 gap-3 pt-2">
                         <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">Data de Check-in</label>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Data de Check-in</label>
                             <input type="date" id="edit-checkin" class="w-full p-3 border border-slate-200 rounded-xl bg-white text-sm">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">Data de Check-out</label>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Data de Check-out</label>
                             <input type="date" id="edit-checkout" class="w-full p-3 border border-slate-200 rounded-xl bg-white text-sm">
                         </div>
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3.5 rounded-xl font-bold mt-4 transition shadow-sm text-sm">Salvar Alterações</button>
-                <button type="button" onclick="fecharModal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 p-3.5 rounded-xl font-bold mt-2 transition text-sm">Cancelar</button>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3.5 rounded-2xl font-bold mt-4 transition shadow-sm text-sm">Salvar Alterações</button>
+                <button type="button" onclick="fecharModal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 p-3.5 rounded-2xl font-bold mt-2 transition text-sm">Cancelar</button>
             </form>
         </div>
     </div>
@@ -298,7 +299,7 @@
                         const isFutura = aprovada.checkin > hojeStr;
                         const statusParaModal = isFutura ? 'Reservado' : 'Ocupada';
                         const badgeText = isFutura ? 'Reserva Futura' : 'Ocupada';
-                        const badgeClasses = isFutura ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-700 font-bold';
+                        const badgeClasses = isFutura ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-red-50 text-red-700 border border-red-200 font-bold';
                         const bgCardClasses = isFutura ? 'bg-white border border-blue-100 shadow-sm' : 'bg-white border border-slate-200 shadow-sm';
                         
                         const indicador = isFutura ? obterIndicadorProximaEstada(aprovada.checkin) : obterIndicadorCheckout(aprovada.checkout);
@@ -306,16 +307,16 @@
                         const sufixoTitulo = totalCardsDestaSuite > 1 ? ` (${contadorCardAtual++})` : '';
 
                         container.innerHTML += `
-                            <div class="p-6 rounded-2xl ${bgCardClasses} text-slate-900 flex flex-col justify-between transition hover:shadow-md cursor-pointer" 
+                            <div class="p-6 rounded-3xl shadow-sm ${bgCardClasses} text-slate-900 flex flex-col justify-between transition hover:shadow-md cursor-pointer" 
                                  onclick="abrirModal('${suite.id}', '${suite.nome}', '${statusParaModal}', '${aprovada.id}')">
                                 <div>
                                     <div class="flex justify-between items-start mb-2">
                                         <h2 class="text-xl font-bold text-slate-900">${suite.nome}${sufixoTitulo}</h2>
-                                        <span class="px-3 py-1 rounded-full text-xs font-bold uppercase ${badgeClasses}">
+                                        <span class="px-3 py-1 rounded-full text-xs font-bold uppercase shadow-sm ${badgeClasses}">
                                             ${badgeText}
                                         </span>
                                     </div>
-                                    <div class="mt-2 inline-block px-3 py-1 rounded-xl text-xs font-semibold ${indicador.classe}">${indicador.texto}</div>
+                                    <div class="mt-2 inline-block px-3 py-1 rounded-xl border text-xs font-semibold ${indicador.classe}">${indicador.texto}</div>
                                     <div class="mt-4 pt-3 border-t border-slate-100 text-sm space-y-1.5">
                                         <p class="flex items-center gap-1.5"><span class="font-semibold text-slate-500">Hóspede:</span> <span class="font-bold text-slate-900">${aprovada.hospede_nome}</span></p>
                                         <p class="flex items-center gap-1.5"><span class="font-semibold text-slate-500">WhatsApp:</span> <a href="${linkZap}" target="_blank" onclick="event.stopPropagation();" class="text-emerald-700 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-200 text-xs">💬 ${aprovada.whatsapp_hospede || 'Não informado'}</a></p>
@@ -336,15 +337,15 @@
                         'Limpeza': 'bg-white border border-slate-200 shadow-sm text-slate-900', 
                     };
                     
-                    const badgeStatusClasses = suite.status === 'Disponível' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-700';
+                    const badgeStatusClasses = suite.status === 'Disponível' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200';
 
                     container.innerHTML += `
-                        <div class="p-6 rounded-2xl ${corClasses[suite.status] || 'bg-white border border-slate-200 shadow-sm'} flex flex-col justify-between transition hover:shadow-md cursor-pointer" 
+                        <div class="p-6 rounded-3xl shadow-sm ${corClasses[suite.status] || 'bg-white border border-slate-200 shadow-sm'} flex flex-col justify-between transition hover:shadow-md cursor-pointer" 
                              onclick="abrirModal('${suite.id}', '${suite.nome}', '${suite.status}')">
                             <div>
                                 <div class="flex justify-between items-start mb-2">
                                     <h2 class="text-xl font-bold text-slate-900">${suite.nome}</h2>
-                                    <span class="px-3 py-1 rounded-full text-xs font-bold uppercase ${badgeStatusClasses}">
+                                    <span class="px-3 py-1 rounded-full text-xs font-bold uppercase shadow-sm ${badgeStatusClasses}">
                                         ${suite.status}
                                     </span>
                                 </div>
@@ -363,18 +364,18 @@
                     const dataSolicitacaoFormatada = formatarDataHora(pend.criado_em);
 
                     container.innerHTML += `
-                        <div class="p-6 rounded-2xl shadow-sm bg-amber-50 border border-amber-200 flex flex-col justify-between transition hover:shadow-md">
+                        <div class="p-6 rounded-3xl shadow-sm bg-amber-50 border border-amber-200 flex flex-col justify-between transition hover:shadow-md">
                             <div>
                                 <div class="flex justify-between items-start mb-2">
                                     <h2 class="text-xl font-bold text-amber-950">${suite.nome}</h2>
-                                    <span class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-amber-200 text-amber-900">Pendente</span>
+                                    <span class="px-3 py-1 rounded-full text-xs font-bold uppercase shadow-sm bg-amber-200 text-amber-900">Pendente</span>
                                 </div>
                                 
                                 <div class="mt-4 pt-3 border-t border-amber-200/60 text-sm space-y-1.5">
                                     <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">Hóspede:</span> <span class="font-bold text-slate-900">${pend.hospede_nome || 'Não informado'}</span></p>
                                     <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">WhatsApp:</span> <a href="${linkZapPend}" target="_blank" onclick="event.stopPropagation();" class="text-emerald-700 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-200 text-xs">💬 ${pend.whatsapp_hospede || 'Não informado'}</a></p>
                                     
-                                    <div class="bg-white border border-amber-200/80 p-3.5 rounded-xl mt-3 space-y-1 text-xs text-amber-950 shadow-sm">
+                                    <div class="bg-white border border-amber-200/80 p-3.5 rounded-2xl mt-3 space-y-1 text-xs text-amber-950 shadow-sm">
                                         <p><span class="font-semibold text-slate-500">CPF:</span> ${pend.cpf || 'Não informado'}</p>
                                         <p><span class="font-semibold text-slate-500">RG:</span> ${pend.rg || 'Não informado'}</p>
                                         <p><span class="font-semibold text-slate-500">CEP/Endereço:</span> ${pend.endereco || 'Não informado'}</p>
