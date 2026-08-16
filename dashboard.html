@@ -524,6 +524,19 @@
                 status: 'Aprovada'
             };
 
+            // =========================================================================
+            // >>> CHAMADA DA FUNÇÃO DE CÁLCULO DO TOTAL DA RESERVA CRIADA NO BANCO
+            // Se você criou uma função RPC no Supabase (ex: 'calcular_total_reserva'), 
+            // você pode invocá-la aqui para preencher o campo 'valor_total' na tabela.
+            // Exemplo:
+            // const { data: valorCalculado } = await supabaseClient.rpc('calcular_total_reserva', { 
+            //     p_suite_id: suiteId, 
+            //     p_checkin: dadosReserva.checkin, 
+            //     p_checkout: dadosReserva.checkout 
+            // });
+            // if (valorCalculado) dadosReserva.valor_total = valorCalculado;
+            // =========================================================================
+
             if (status === 'Reservado') {
                 if (reservaIdEditada) {
                     await supabaseClient.from('reservas').update(dadosReserva).eq('id', reservaIdEditada);
