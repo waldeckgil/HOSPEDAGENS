@@ -2,119 +2,185 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Configuração de Suítes</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <title>Configuração da Pousada | Painel do Gestor</title>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen font-sans" onload="carregarConfiguracao()">
+<body class="bg-gray-100 min-h-screen flex" onload="carregarConfiguracao()">
 
-    <!-- Top Navigation Bar -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-        <div class="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="bg-blue-600 text-white p-2.5 rounded-xl shadow-md">
-                    <i class="fa-solid fa-hotel text-lg"></i>
+    <!-- MENU LATERAL -->
+    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col hidden md:flex shadow-xl">
+        <div class="p-6">
+            <h1 class="text-2xl font-extrabold text-white mb-6 tracking-wider">Painel 360</h1>
+            <nav class="space-y-2">
+                <a href="dashboard.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
+                    <span>🏠</span> Gestão de Suítes
+                </a>
+                <a href="reservas.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
+                    <span>📋</span> Ver Reservas
+                </a>
+                <a href="hospedes.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
+                    <span>👥</span> Gestão de Hóspedes
+                </a>
+                <a href="configurar-pousada.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-blue-600 text-white font-semibold shadow-md text-sm">
+                    <span>⚙️</span> Configuração de Suítes
+                </a>
+                <a href="tarifas.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
+                    <span>💰</span> Gerenciar Tarifas
+                </a>
+                
+                <div class="pt-4 border-t border-slate-800 space-y-2">
+                    <button onclick="copiarLinkVitrine()" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300 text-left text-sm">
+                        <span>🔗</span> Copiar Vitrine
+                    </button>
+                    <a id="link-ver-vitrine" href="#" target="_blank" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300 text-sm">
+                        <span>👁️</span> Ver Vitrine
+                    </a>
+                    <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-xl transition shadow text-sm flex items-center justify-center gap-2 mt-2">
+                        <i class="fa-solid fa-right-from-bracket"></i> Sair
+                    </button>
                 </div>
-                <div>
-                    <h1 class="text-lg font-bold text-slate-900">Gestão de Pousadas</h1>
-                    <p class="text-xs text-slate-500">Painel de Configuração e Suítes</p>
-                </div>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="flex-1 flex flex-col min-w-0">
+        <!-- CABEÇALHO -->
+        <header class="bg-white shadow-xs border-b border-gray-200 p-6 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <h2 class="text-xl font-bold text-gray-800">Configuração de Suítes</h2>
+                <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold">Carregando...</span>
             </div>
             <a href="dashboard.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2 border border-slate-200">
                 <i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard
             </a>
-        </div>
-    </header>
+        </header>
 
-    <!-- Main Container -->
-    <main class="max-w-4xl mx-auto px-6 py-8">
-        
-        <!-- Feedback Banner / Alertas no Front-end -->
-        <div id="mensagem-container" class="hidden mb-6 p-4 rounded-xl text-sm font-semibold border flex items-center gap-3 shadow-sm transition-all"></div>
-
-        <!-- Modal de Confirmação Inline para Renomeação -->
-        <div id="modal-confirmacao" class="hidden mb-6 p-5 bg-amber-50 border border-amber-200 rounded-2xl shadow-sm">
-            <div class="flex items-start gap-3">
-                <div class="text-amber-600 mt-0.5"><i class="fa-solid fa-triangle-exclamation text-xl"></i></div>
-                <div class="flex-1">
-                    <h3 id="titulo-modal" class="text-amber-900 font-bold mb-1">Confirmação de Alteração</h3>
-                    <p id="texto-confirmacao" class="text-amber-800 text-sm mb-4"></p>
-                    <div class="flex gap-3">
-                        <button id="btn-confirma-sim" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition">Sim, Continuar</button>
-                        <button id="btn-confirma-nao" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 px-4 py-2 rounded-xl text-sm font-bold transition">Cancelar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- CORPO DA PÁGINA -->
+        <main class="p-6 md:p-8 flex-1 overflow-y-auto">
             
-            <!-- Coluna Esquerda: Dados da Pousada -->
-            <div class="md:col-span-1 space-y-6">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                    <h2 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-building text-blue-600"></i> Dados da Pousada
-                    </h2>
-                    
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Nome da Pousada</label>
-                            <input type="text" id="nome-pousada" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="Carregando...">
-                            <p class="text-xs text-slate-400 mt-1.5">Nome exibido para os clientes no sistema.</p>
-                        </div>
-                    </div>
-                </div>
+            <!-- Feedback Banner / Alertas no Front-end -->
+            <div id="mensagem-container" class="hidden mb-6 p-4 rounded-2xl text-sm font-semibold border flex items-center gap-3 shadow-sm transition-all"></div>
 
-                <div class="bg-blue-50 border border-blue-100 p-5 rounded-2xl">
-                    <div class="flex items-start gap-3">
-                        <div class="text-blue-600"><i class="fa-solid fa-circle-info text-base mt-0.5"></i></div>
-                        <div class="text-xs text-blue-900 leading-relaxed">
-                            <span class="font-bold block mb-1">Dica de Gestão:</span>
-                            Suas suítes cadastradas aparecem ao lado. Você pode adicionar novas unidades ou gerenciar as existentes de forma independente.
+            <!-- Modal de Confirmação Inline para Renomeação / Exclusão -->
+            <div id="modal-confirmacao" class="hidden mb-6 p-5 bg-amber-50 border border-amber-200 rounded-2xl shadow-sm">
+                <div class="flex items-start gap-3">
+                    <div class="text-amber-600 mt-0.5"><i class="fa-solid fa-triangle-exclamation text-xl"></i></div>
+                    <div class="flex-1">
+                        <h3 id="titulo-modal" class="text-amber-900 font-bold mb-1">Confirmação de Alteração</h3>
+                        <p id="texto-confirmacao" class="text-amber-800 text-sm mb-4"></p>
+                        <div class="flex gap-3">
+                            <button id="btn-confirma-sim" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition">Sim, Continuar</button>
+                            <button id="btn-confirma-nao" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 px-4 py-2 rounded-xl text-sm font-bold transition">Cancelar</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Coluna Direita: Gerenciamento de Suítes -->
-            <div class="md:col-span-2">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                    <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
-                        <div>
-                            <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                                <i class="fa-solid fa-door-open text-blue-600"></i> Suítes da Pousada
-                            </h2>
-                            <p class="text-xs text-slate-500">Configure os quartos e unidades disponíveis para reserva.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <!-- Coluna Esquerda: Dados da Pousada -->
+                <div class="md:col-span-1 space-y-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
+                        <h2 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-building text-blue-600"></i> Dados da Pousada
+                        </h2>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Nome da Pousada</label>
+                                <input type="text" id="nome-pousada" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="Carregando...">
+                                <p class="text-xs text-slate-400 mt-1.5">Nome exibido para os clientes no sistema.</p>
+                            </div>
                         </div>
-                        <button onclick="adicionarCampo()" class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-plus"></i> Nova Suíte
-                        </button>
                     </div>
 
-                    <!-- Container onde as suítes serão injetadas -->
-                    <div id="suites-container" class="space-y-3 mb-8">
-                        <p class="text-sm text-slate-400 italic">Carregando suítes...</p>
-                    </div>
-
-                    <div class="pt-4 border-t border-slate-100 flex justify-end">
-                        <button onclick="salvarConfiguracao()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl text-sm font-bold shadow-md shadow-blue-500/20 transition flex items-center gap-2">
-                            <i class="fa-solid fa-floppy-disk"></i> Salvar Alterações
-                        </button>
+                    <div class="bg-blue-50 border border-blue-100 p-5 rounded-2xl">
+                        <div class="flex items-start gap-3">
+                            <div class="text-blue-600"><i class="fa-solid fa-circle-info text-base mt-0.5"></i></div>
+                            <div class="text-xs text-blue-900 leading-relaxed">
+                                <span class="font-bold block mb-1">Dica de Gestão:</span>
+                                Suas suítes cadastradas aparecem ao lado. Você pode adicionar novas unidades ou gerenciar as existentes de forma independente.
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
+                <!-- Coluna Direita: Gerenciamento de Suítes -->
+                <div class="md:col-span-2">
+                    <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
+                        <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
+                            <div>
+                                <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                                    <i class="fa-solid fa-door-open text-blue-600"></i> Suítes da Pousada
+                                </h2>
+                                <p class="text-xs text-slate-500">Configure os quartos e unidades disponíveis para reserva.</p>
+                            </div>
+                            <button onclick="adicionarCampo()" class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-plus"></i> Nova Suíte
+                            </button>
+                        </div>
+
+                        <!-- Container onde as suítes serão injetadas -->
+                        <div id="suites-container" class="space-y-3 mb-8">
+                            <p class="text-sm text-slate-400 italic">Carregando suítes...</p>
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-100 flex justify-end">
+                            <button onclick="salvarConfiguracao()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl text-sm font-bold shadow-md shadow-blue-500/20 transition flex items-center gap-2">
+                                <i class="fa-solid fa-floppy-disk"></i> Salvar Alterações
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- 💬 TOAST / NOTIFICAÇÃO INTERNA MODERNA -->
+    <div id="toast-notificacao" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+        <div id="toast-content" class="bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
+            <span id="toast-icone" class="text-xl">✨</span>
+            <div>
+                <h4 id="toast-titulo" class="font-bold text-sm">Sucesso</h4>
+                <p id="toast-mensagem" class="text-xs text-gray-300">Alterações salvas com sucesso!</p>
+            </div>
         </div>
-    </main>
+    </div>
 
     <script>
         const supabaseClient = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
         let nomePousadaOriginal = '';
+        let usuarioIdAtual = null;
+
+        function mostrarToast(titulo, mensagem, tipo = 'sucesso') {
+            const toast = document.getElementById('toast-notificacao');
+            const toastTitulo = document.getElementById('toast-titulo');
+            const toastMsg = document.getElementById('toast-mensagem');
+            const toastIcone = document.getElementById('toast-icone');
+            const toastContent = document.getElementById('toast-content');
+
+            toastTitulo.innerText = titulo;
+            toastMsg.innerText = mensagem;
+
+            if (tipo === 'sucesso') {
+                toastContent.className = "bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800";
+                toastIcone.innerText = "🎉";
+            } else {
+                toastContent.className = "bg-red-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-red-800";
+                toastIcone.innerText = "🚨";
+            }
+
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => { toast.classList.add('translate-y-24', 'opacity-0'); }, 3500);
+        }
 
         function mostrarMensagem(texto, tipo = 'erro') {
             const container = document.getElementById('mensagem-container');
-            container.className = 'mb-6 p-4 rounded-xl text-sm font-semibold border flex items-center gap-3 shadow-sm transition-all';
+            container.className = 'mb-6 p-4 rounded-2xl text-sm font-semibold border flex items-center gap-3 shadow-sm transition-all';
             
             if (tipo === 'erro') {
                 container.classList.add('bg-red-50', 'border-red-200', 'text-red-700');
@@ -137,6 +203,7 @@
                 setTimeout(() => window.location.href = 'index.html', 2000);
                 return;
             }
+            usuarioIdAtual = user.id;
 
             // 1. Busca os dados da pousada do usuário logado
             const { data: pousada, error: errPousada } = await supabaseClient
@@ -148,9 +215,13 @@
             if (pousada && pousada.nome) {
                 nomePousadaOriginal = pousada.nome;
                 document.getElementById('nome-pousada').value = pousada.nome;
+                document.getElementById('titulo-pousada').innerText = pousada.nome;
             } else {
                 document.getElementById('nome-pousada').value = '';
+                document.getElementById('titulo-pousada').innerText = "Minha Pousada";
             }
+
+            document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${user.id}`;
 
             // 2. Busca as suítes cadastradas (garantindo compatibilidade com pousada_id = user.id)
             const { data: suites, error: errSuites } = await supabaseClient
@@ -168,6 +239,13 @@
             } else {
                 adicionarCampo();
             }
+        }
+
+        function copiarLinkVitrine() {
+            if (!usuarioIdAtual) return;
+            navigator.clipboard.writeText(window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`).then(() => {
+                mostrarToast("Copiado!", "Link da vitrine copiado para a área de transferência!");
+            });
         }
 
         function adicionarCampo(id = '', nome = '') {
@@ -317,6 +395,11 @@
             } else {
                 executarSalvamento();
             }
+        }
+
+        async function fazerLogout() { 
+            await supabaseClient.auth.signOut(); 
+            window.location.href = 'index.html'; 
         }
     </script>
 </body>

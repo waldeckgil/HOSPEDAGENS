@@ -5,27 +5,169 @@
     <title>Gestão de Tarifas e Valores</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 p-8">
-    <!-- Navegação Superior -->
-    <nav class="bg-white shadow-md p-6 mb-8 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4">
-        <div class="flex flex-wrap gap-6 font-bold text-gray-700 items-center">
-            <a href="dashboard.html" class="hover:text-blue-600 transition">Gestão de Suítes</a>
-            <a href="reservas.html" class="hover:text-blue-600 transition">Ver Reservas</a>
-            <a href="hospedes.html" class="hover:text-blue-600 transition">Gestão de Hóspedes</a>
-            <a href="tarifas.html" class="text-blue-600 border-b-2 border-blue-600 pb-1">Gerenciar Tarifas</a>
-            <a href="configurar-pousada.html" class="hover:text-blue-600 transition">Minha Pousada</a>
+<body class="bg-gray-100 min-h-screen flex" onload="inicializarPagina()">
+
+    <!-- MENU LATERAL -->
+    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col hidden md:flex shadow-xl">
+        <div class="p-6">
+            <h1 class="text-2xl font-extrabold text-white mb-6 tracking-wider">Painel 360</h1>
+            <nav class="space-y-2">
+                <a href="dashboard.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
+                    <span>🏠</span> Gestão de Suítes
+                </a>
+                <a href="reservas.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
+                    <span>📋</span> Ver Reservas
+                </a>
+                <a href="hospedes.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
+                    <span>👥</span> Gestão de Hóspedes
+                </a>
+                <a href="configurar-pousada.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
+                    <span>⚙️</span> Configuração de Suítes
+                </a>
+                <a href="tarifas.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-blue-600 text-white font-semibold shadow-md text-sm">
+                    <span>💰</span> Gerenciar Tarifas
+                </a>
+                
+                <div class="pt-4 border-t border-slate-800 space-y-2">
+                    <button onclick="copiarLinkVitrine()" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300 text-left text-sm">
+                        <span>🔗</span> Copiar Vitrine
+                    </button>
+                    <a id="link-ver-vitrine" href="#" target="_blank" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300 text-sm">
+                        <span>👁️</span> Ver Vitrine
+                    </a>
+                    <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-xl transition shadow text-sm flex items-center justify-center gap-2 mt-2">
+                        <i class="fa-solid fa-right-from-bracket"></i> Sair
+                    </button>
+                </div>
+            </nav>
         </div>
-        <div class="flex items-center gap-4">
-            <span id="titulo-pousada" class="font-bold text-gray-800">Carregando...</span>
-            <button onclick="fazerLogout()" class="bg-red-600 text-white font-bold py-2 px-4 rounded-xl">Sair</button>
-        </div>
-    </nav>
+    </aside>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="flex-1 flex flex-col min-w-0">
+        <!-- CABEÇALHO -->
+        <header class="bg-white shadow-xs border-b border-gray-200 p-6 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <h2 class="text-xl font-bold text-gray-800">Gerenciamento de Tarifas</h2>
+                <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold">Carregando...</span>
+            </div>
+            <a href="dashboard.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2 border border-slate-200">
+                <i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard
+            </a>
+        </header>
+
+        <!-- CORPO DA PÁGINA -->
+        <main class="p-6 md:p-8 flex-1 overflow-y-auto">
+            <div class="max-w-5xl mx-auto space-y-8">
+                
+                <!-- SEÇÃO 1: VALOR DA DIÁRIA PADRÃO POR SUÍTE -->
+                <div class="bg-white p-8 rounded-3xl shadow-md border border-gray-200">
+                    <h2 class="text-xl font-bold text-blue-600 mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-tag"></i> 1. Valor da Diária Padrão por Suíte
+                    </h2>
+                    <p class="text-sm text-gray-600 mb-6">Defina o valor base cobrado por noite para cada suíte cadastrada na sua pousada.</p>
+                    
+                    <div id="lista-suites-tarifas" class="space-y-4">
+                        <p class="text-gray-500 text-sm">Carregando suítes...</p>
+                    </div>
+                </div>
+
+                <!-- SEÇÃO 2: TARIFAS ESPECIAIS (PERCENTUAL / DIAS DA SEMANA / PERÍODOS) -->
+                <div class="bg-white p-8 rounded-3xl shadow-md border border-gray-200">
+                    <div class="flex justify-between items-center mb-2">
+                        <h2 id="titulo-form-regra" class="text-xl font-bold text-blue-600 flex items-center gap-2">
+                            <i class="fa-solid fa-sliders"></i> 2. Regras de Tarifas e Percentuais Especiais
+                        </h2>
+                        <button id="btn-cancelar-edicao" onclick="cancelarEdicao()" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1.5 px-4 rounded-xl text-xs transition">Cancelar Edição</button>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-6">Defina acréscimos percentuais (ex: +20% no sábado/domingo) ou valores fixos para períodos específicos.</p>
+                    
+                    <form id="form-tarifa-especial" class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-6 rounded-2xl border border-gray-200 mb-6 transition-all duration-300">
+                        <input type="hidden" id="tarifa-editando-id" value="">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Aplicar a:</label>
+                            <select id="select-suite-tarifa" class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm transition-colors">
+                                <option value="">Todas as Suítes da Pousada (Geral)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Data Início do Período</label>
+                            <input type="date" id="tarifa-inicio" required class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Data Fim do Período</label>
+                            <input type="date" id="tarifa-fim" required class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm transition-colors">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tipo de Ajuste</label>
+                            <select id="tipo-ajuste" onchange="alternarTipoAjuste()" class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm transition-colors">
+                                <option value="percentual">Acréscimo Percentual (%)</option>
+                                <option value="fixo">Valor Fixo em Reais (R$)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label id="label-valor-ajuste" class="block text-xs font-bold text-gray-700 uppercase mb-1">Percentual a mais (%)</label>
+                            <input type="number" step="0.01" id="tarifa-valor" placeholder="Ex: 20 (para +20%)" required class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm transition-colors">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Descrição / Motivo</label>
+                            <input type="text" id="tarifa-descricao" placeholder="Ex: Acréscimo de Fim de Semana" required class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm transition-colors">
+                        </div>
+
+                        <!-- SELEÇÃO DE DIAS DA SEMANA OPCIONAL -->
+                        <div class="md:col-span-3 bg-white p-4 rounded-xl border border-gray-200">
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Aplicar regra apenas nos seguintes dias da semana (Opcional - se nenhum for marcado, vale para todos os dias do período):</label>
+                            <div class="flex flex-wrap gap-4 text-sm font-medium text-gray-700">
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="0" class="w-4 h-4 text-blue-600 rounded"> Domingo</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="1" class="w-4 h-4 text-blue-600 rounded"> Segunda-feira</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="2" class="w-4 h-4 text-blue-600 rounded"> Terça-feira</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="3" class="w-4 h-4 text-blue-600 rounded"> Quarta-feira</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="4" class="w-4 h-4 text-blue-600 rounded"> Quinta-feira</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="5" class="w-4 h-4 text-blue-600 rounded"> Sexta-feira</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="6" class="w-4 h-4 text-blue-600 rounded"> Sábado</label>
+                            </div>
+                        </div>
+
+                        <div class="md:col-span-3 flex justify-end">
+                            <button type="submit" id="btn-submit-regra" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition text-sm shadow-md">
+                                + Salvar Regra de Tarifa Especial
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Lista de Tarifas Especiais Cadastradas -->
+                    <h3 class="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wide">Regras Cadastradas Atuais</h3>
+                    <div id="lista-tarifas-especiais" class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b text-xs text-gray-500 uppercase">
+                                    <th class="p-3">Descrição / Motivo</th>
+                                    <th class="p-3">Aplicável a</th>
+                                    <th class="p-3">Período / Dias</th>
+                                    <th class="p-3">Regra</th>
+                                    <th class="p-3 text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-tarifas-corpo" class="text-sm divide-y text-gray-700">
+                                <tr><td colspan="5" class="p-4 text-center text-gray-500">Nenhuma tarifa especial cadastrada.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
 
     <!-- TOAST / NOTIFICAÇÃO -->
     <div id="toast-notificacao" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
-        <div class="bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
-            <span class="text-xl">✨</span>
+        <div id="toast-content" class="bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
+            <span id="toast-icone" class="text-xl">✨</span>
             <div>
                 <h4 class="font-bold text-sm">Sucesso</h4>
                 <p id="toast-mensagem" class="text-xs text-gray-300">Alterações salvas com sucesso!</p>
@@ -48,104 +190,6 @@
         </div>
     </div>
 
-    <div class="max-w-5xl mx-auto space-y-8">
-        
-        <!-- SEÇÃO 1: VALOR DA DIÁRIA PADRÃO POR SUÍTE -->
-        <div class="bg-white p-8 rounded-3xl shadow-md">
-            <h2 class="text-2xl font-bold text-blue-600 mb-2">1. Valor da Diária Padrão por Suíte</h2>
-            <p class="text-sm text-gray-600 mb-6">Defina o valor base cobrado por noite para cada suíte cadastrada na sua pousada.</p>
-            
-            <div id="lista-suites-tarifas" class="space-y-4">
-                <p class="text-gray-500 text-sm">Carregando suítes...</p>
-            </div>
-        </div>
-
-        <!-- SEÇÃO 2: TARIFAS ESPECIAIS (PERCENTUAL / DIAS DA SEMANA / PERÍODOS) -->
-        <div class="bg-white p-8 rounded-3xl shadow-md">
-            <div class="flex justify-between items-center mb-2">
-                <h2 id="titulo-form-regra" class="text-2xl font-bold text-blue-600">2. Regras de Tarifas e Percentuais Especiais</h2>
-                <button id="btn-cancelar-edicao" onclick="cancelarEdicao()" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1.5 px-4 rounded-xl text-xs transition">Cancelar Edição</button>
-            </div>
-            <p class="text-sm text-gray-600 mb-6">Defina acréscimos percentuais (ex: +20% no sábado/domingo) ou valores fixos para períodos específicos.</p>
-            
-            <form id="form-tarifa-especial" class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-6 rounded-2xl border border-gray-200 mb-6 transition-all duration-300">
-                <input type="hidden" id="tarifa-editando-id" value="">
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Aplicar a:</label>
-                    <select id="select-suite-tarifa" class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm transition-colors">
-                        <option value="">Todas as Suítes da Pousada (Geral)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Data Início do Período</label>
-                    <input type="date" id="tarifa-inicio" required class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm transition-colors">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Data Fim do Período</label>
-                    <input type="date" id="tarifa-fim" required class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm transition-colors">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tipo de Ajuste</label>
-                    <select id="tipo-ajuste" onchange="alternarTipoAjuste()" class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm transition-colors">
-                        <option value="percentual">Acréscimo Percentual (%)</option>
-                        <option value="fixo">Valor Fixo em Reais (R$)</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label id="label-valor-ajuste" class="block text-xs font-bold text-gray-700 uppercase mb-1">Percentual a mais (%)</label>
-                    <input type="number" step="0.01" id="tarifa-valor" placeholder="Ex: 20 (para +20%)" required class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm transition-colors">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Descrição / Motivo</label>
-                    <input type="text" id="tarifa-descricao" placeholder="Ex: Acréscimo de Fim de Semana" required class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm transition-colors">
-                </div>
-
-                <!-- SELEÇÃO DE DIAS DA SEMANA OPCIONAL -->
-                <div class="md:col-span-3 bg-white p-4 rounded-xl border border-gray-200">
-                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Aplicar regra apenas nos seguintes dias da semana (Opcional - se nenhum for marcado, vale para todos os dias do período):</label>
-                    <div class="flex flex-wrap gap-4 text-sm font-medium text-gray-700">
-                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="0" class="w-4 h-4 text-blue-600 rounded"> Domingo</label>
-                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="1" class="w-4 h-4 text-blue-600 rounded"> Segunda-feira</label>
-                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="2" class="w-4 h-4 text-blue-600 rounded"> Terça-feira</label>
-                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="3" class="w-4 h-4 text-blue-600 rounded"> Quarta-feira</label>
-                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="4" class="w-4 h-4 text-blue-600 rounded"> Quinta-feira</label>
-                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="5" class="w-4 h-4 text-blue-600 rounded"> Sexta-feira</label>
-                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="6" class="w-4 h-4 text-blue-600 rounded"> Sábado</label>
-                    </div>
-                </div>
-
-                <div class="md:col-span-3 flex justify-end">
-                    <button type="submit" id="btn-submit-regra" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition text-sm shadow-md">
-                        + Salvar Regra de Tarifa Especial
-                    </button>
-                </div>
-            </form>
-
-            <!-- Lista de Tarifas Especiais Cadastradas -->
-            <h3 class="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wide">Regras Cadastradas Atuais</h3>
-            <div id="lista-tarifas-especiais" class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b text-xs text-gray-500 uppercase">
-                            <th class="p-3">Descrição / Motivo</th>
-                            <th class="p-3">Aplicável a</th>
-                            <th class="p-3">Período / Dias</th>
-                            <th class="p-3">Regra</th>
-                            <th class="p-3 text-right">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabela-tarifas-corpo" class="text-sm divide-y text-gray-700">
-                        <tr><td colspan="5" class="p-4 text-center text-gray-500">Nenhuma tarifa especial cadastrada.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-    </div>
-
     <script>
         const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
@@ -156,9 +200,22 @@
         let tarifasCache = [];
         let idParaExcluir = null;
 
-        function mostrarToast(mensagem) {
+        function mostrarToast(mensagem, tipo = 'sucesso') {
             const toast = document.getElementById('toast-notificacao');
-            document.getElementById('toast-mensagem').innerText = mensagem;
+            const toastMsg = document.getElementById('toast-mensagem');
+            const toastIcone = document.getElementById('toast-icone');
+            const toastContent = document.getElementById('toast-content');
+
+            toastMsg.innerText = mensagem;
+
+            if (tipo === 'sucesso') {
+                toastContent.className = "bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800";
+                toastIcone.innerText = "✨";
+            } else {
+                toastContent.className = "bg-red-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-red-800";
+                toastIcone.innerText = "🚨";
+            }
+
             toast.classList.remove('translate-y-24', 'opacity-0');
             setTimeout(() => { toast.classList.add('translate-y-24', 'opacity-0'); }, 3000);
         }
@@ -181,12 +238,23 @@
             if (!user) { window.location.href = 'index.html'; return; }
             usuarioIdAtual = user.id;
 
-            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', user.id).single();
+            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', user.id).maybeSingle();
             if (pousada && pousada.nome) {
-                document.getElementById('titulo-pousada').innerText = "Pousada: " + pousada.nome;
+                document.getElementById('titulo-pousada').innerText = pousada.nome;
+            } else {
+                document.getElementById('titulo-pousada').innerText = "Minha Pousada";
             }
 
+            document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${user.id}`;
+
             await carregarSuitesETarifas();
+        }
+
+        function copiarLinkVitrine() {
+            if (!usuarioIdAtual) return;
+            navigator.clipboard.writeText(window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`).then(() => {
+                mostrarToast("Link da vitrine copiado para a área de transferência!");
+            });
         }
 
         async function carregarSuitesETarifas() {
@@ -200,7 +268,7 @@
             selectSuiteTarifa.innerHTML = '<option value="">Todas as Suítes da Pousada (Geral)</option>';
 
             if (suitesCache.length === 0) {
-                containerSuites.innerHTML = '<p class="text-gray-500 text-sm">Nenhuma suíte cadastrada. Cadastre suítes na aba Gestão de Suítes primeiro.</p>';
+                containerSuites.innerHTML = '<p class="text-gray-500 text-sm">Nenhuma suíte cadastrada. Cadastre suítes na aba Configuração de Suítes primeiro.</p>';
                 return;
             }
 
@@ -319,7 +387,7 @@
 
             // Ajustar visual dos botões e título
             document.getElementById('titulo-form-regra').innerText = "Editando Regra de Tarifa";
-            document.getElementById('titulo-form-regra').className = "text-2xl font-bold text-red-600";
+            document.getElementById('titulo-form-regra').className = "text-xl font-bold text-red-600 flex items-center gap-2";
             document.getElementById('btn-submit-regra').innerText = "Atualizar Regra de Tarifa Especial";
             document.getElementById('btn-submit-regra').className = "bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl transition text-sm shadow-md";
             document.getElementById('btn-cancelar-edicao').classList.remove('hidden');
@@ -340,7 +408,7 @@
             });
 
             document.getElementById('titulo-form-regra').innerText = "2. Regras de Tarifas e Percentuais Especiais";
-            document.getElementById('titulo-form-regra').className = "text-2xl font-bold text-blue-600";
+            document.getElementById('titulo-form-regra').className = "text-xl font-bold text-blue-600 flex items-center gap-2";
             document.getElementById('btn-submit-regra').innerText = "+ Salvar Regra de Tarifa Especial";
             document.getElementById('btn-submit-regra').className = "bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition text-sm shadow-md";
             document.getElementById('btn-cancelar-edicao').classList.add('hidden');
@@ -428,8 +496,6 @@
             await supabaseClient.auth.signOut(); 
             window.location.href = 'index.html'; 
         }
-
-        inicializarPagina();
     </script>
 </body>
 </html>
