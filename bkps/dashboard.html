@@ -299,7 +299,7 @@
                         const isFutura = aprovada.checkin > hojeStr;
                         const statusParaModal = isFutura ? 'Reservado' : 'Ocupada';
                         const badgeText = isFutura ? 'Reserva Futura' : 'Ocupada';
-                        const badgeClasses = isFutura ? 'bg-blue-200 text-blue-900' : 'bg-gray-200 text-gray-800';
+                        const badgeClasses = isFutura ? 'bg-blue-200 text-blue-900' : 'bg-gray-200 text-red-600 font-bold';
                         const bgCardClasses = isFutura ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50 border border-gray-300';
                         
                         const indicador = isFutura ? obterIndicadorProximaEstada(aprovada.checkin) : obterIndicadorCheckout(aprovada.checkout);
