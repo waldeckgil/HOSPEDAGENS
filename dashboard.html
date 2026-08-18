@@ -379,13 +379,14 @@
                                         <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">Hóspede:</span> <span class="font-bold text-gray-900">${aprovada.hospede_nome}</span></p>
                                         <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">WhatsApp:</span> <a href="${linkZap}" target="_blank" onclick="event.stopPropagation();" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${aprovada.whatsapp_hospede || 'Não informado'}</a></p>
                                         
-                                        <p class="flex items-center justify-between pt-1">
+                                        <!-- ALINHAMENTO CORRIGIDO DO VALOR TOTAL -->
+                                        <div class="flex items-center justify-between pt-1">
                                             <span class="font-semibold text-gray-700">Valor Total:</span> 
-                                            <span class="flex items-center gap-2">
+                                            <div class="flex items-center gap-2">
                                                 <span class="text-xs font-bold text-gray-500 bg-white px-2 py-0.5 rounded-lg border border-gray-200">🗓️ ${totalDiarias} ${totalDiarias === 1 ? 'diária' : 'diárias'}</span>
                                                 <span class="font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">${valorTotalFormatado}</span>
-                                            </span>
-                                        </p>
+                                            </div>
+                                        </div>
 
                                         <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-black/5 text-xs">
                                             <p><span class="text-gray-500">Check-in:</span> <strong class="text-gray-900">${formatarDataSimples(aprovada.checkin)}</strong></p>
@@ -454,13 +455,14 @@
                                     <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">Hóspede:</span> <span class="font-bold text-gray-900">${pend.hospede_nome || 'Não informado'}</span></p>
                                     <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">WhatsApp:</span> <a href="${linkZapPend}" target="_blank" onclick="event.stopPropagation();" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${pend.whatsapp_hospede || 'Não informado'}</a></p>
                                     
-                                    <p class="flex items-center justify-between pt-1">
+                                    <!-- ALINHAMENTO CORRIGIDO DO VALOR TOTAL (PENDENTES) -->
+                                    <div class="flex items-center justify-between pt-1">
                                         <span class="font-semibold text-amber-900">Valor Total:</span> 
-                                        <span class="flex items-center gap-2">
+                                        <div class="flex items-center gap-2">
                                             <span class="text-xs font-bold text-amber-900 bg-white px-2 py-0.5 rounded-lg border border-amber-200">🗓️ ${totalDiariasPend} ${totalDiariasPend === 1 ? 'diária' : 'diárias'}</span>
                                             <span class="font-extrabold text-emerald-700 bg-white px-2 py-0.5 rounded-lg border border-amber-200">${valorTotalPendFormatado}</span>
-                                        </span>
-                                    </p>
+                                        </div>
+                                    </div>
                                     
                                     <div class="bg-white/70 border border-amber-200 p-3 rounded-xl mt-3 space-y-1 text-xs text-amber-900 shadow-sm">
                                         <p><span class="font-semibold text-gray-600">CPF:</span> ${pend.cpf || 'Não informado'}</p>
