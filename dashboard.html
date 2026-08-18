@@ -420,7 +420,6 @@
                             </div>`;
                     });
                 } else if (pendentesDaSuite.length === 0) {
-                    // 🛡️ CARD LIMPO OU DISPONÍVEL: Exibe APENAS o status básico, sem dados financeiros/hóspedes
                     const corClasses = {
                         'Disponível': 'bg-green-50 border border-green-200 text-green-900', 
                         'Limpeza': 'bg-red-50 border border-red-200 text-red-900', 
@@ -659,7 +658,6 @@
                 }
             }
 
-            // Inserção robusta do pagamento garantindo que o registro ocorra
             if (valorSinalInformado > 0 && reservaIdFinal) {
                 const { error: errPag } = await supabaseClient.from('hospede_pagamentos').insert([{
                     pousada_id: usuarioIdAtual,
