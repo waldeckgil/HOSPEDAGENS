@@ -197,7 +197,7 @@
 
             if (tipo === 'sucesso') {
                 toastContent.className = "bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800";
-                toastIcone.innerText = "✨";
+                toastIcone.innerText = "🎉";
             } else {
                 toastContent.className = "bg-red-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-red-800";
                 toastIcone.innerText = "🚨";
@@ -629,7 +629,6 @@
                 status: 'Aprovada'
             };
 
-            let valorTotalCalculado = 0;
             try {
                 const { data: valorCalculado, error: erroRpc } = await supabaseClient.rpc('calcular_total_reserva', { 
                     p_suite_id: suiteId, 
@@ -638,28 +637,10 @@
                 });
                 
                 if (!erroRpc && valorCalculado !== null) {
-                    valorTotalCalculado = Number(valorCalculado);
-                    dadosReserva.valor_total = valorTotalCalculado;
+                    dadosReserva.valor_total = valorCalculado;
                 }
             } catch (err) {
                 console.error("Erro ao invocar a função de cálculo no banco:", err);
-            }
-
-            // 🛑 CRÍTICA: Impedir que o valor do sinal seja maior do que o saldo restante
-            if (valorSinalInformado > 0 && reservaIdEditada) {
-                const pagamentosExistentes = pagamentosGlobaisCache.filter(p => p.reserva_id === reservaIdEditada);
-                const totalJaPago = pagamentosExistentes.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
-                const saldoRestanteAtual = valorTotalCalculado - totalJaPago;
-
-                if (valorSinalInformado > saldoRestanteAtual) {
-                    mostrarToast("Atenção", `O valor do pagamento (${formatarMoeda(valorSinalInformado)}) é maior que o saldo restante (${formatarMoeda(saldoRestanteAtual)}). Corrija o valor.`, 'erro');
-                    return; // Interrompe o salvamento
-                }
-            } else if (valorSinalInformado > 0 && valorTotalCalculado > 0) {
-                if (valorSinalInformado > valorTotalCalculado) {
-                    mostrarToast("Atenção", `O valor do pagamento (${formatarMoeda(valorSinalInformado)}) é maior que o valor total da reserva (${formatarMoeda(valorTotalCalculado)}). Corrija o valor.`, 'erro');
-                    return; // Interrompe o salvamento
-                }
             }
 
             let reservaIdFinal = reservaIdEditada;
@@ -727,6 +708,7 @@
                 return;
             }
 
+            fecharModal();
             await executarSalvamento(suiteId, status);
         };
 
