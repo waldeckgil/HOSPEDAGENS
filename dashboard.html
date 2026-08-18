@@ -341,7 +341,8 @@
                 if (totalCardsDestaSuite === 0) totalCardsDestaSuite = 1;
                 let contadorCardAtual = 1;
 
-                const precoDiariaFormatado = formatarMoeda(suite.preco_diaria);
+                // CORREÇÃO: Buscando o valor da diária da coluna correta 'valor_diaria'
+                const precoDiariaFormatado = formatarMoeda(suite.valor_diaria);
 
                 if (aprovadasDaSuite.length > 0) {
                     aprovadasDaSuite.forEach(aprovada => {
