@@ -196,19 +196,6 @@
             return Math.round((alvo.getTime() - hoje.getTime()) / (1000 * 3600 * 24));
         }
 
-        function calcularTotalDiarias(checkinStr, checkoutStr) {
-            if (!checkinStr || !checkoutStr) return 0;
-            const [anoIn, mesIn, diaIn] = checkinStr.split('-');
-            const [anoOut, mesOut, diaOut] = checkoutStr.split('-');
-            const dIn = new Date(anoIn, mesIn - 1, diaIn);
-            dIn.setHours(0, 0, 0, 0);
-            const dOut = new Date(anoOut, mesOut - 1, diaOut);
-            dOut.setHours(0, 0, 0, 0);
-            const diffTime = dOut.getTime() - dIn.getTime();
-            const diffDays = Math.round(diffTime / (1000 * 3600 * 24));
-            return diffDays > 0 ? diffDays : 1;
-        }
-
         function formatarMoeda(valor) {
             if (valor === null || valor === undefined || isNaN(valor)) return 'R$ 0,00';
             return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -356,37 +343,25 @@
                         const sufixoTitulo = totalCardsDestaSuite > 1 ? ` (${contadorCardAtual++})` : '';
                         
                         const valorTotalFormatado = formatarMoeda(aprovada.valor_total);
-                        const totalDiarias = calcularTotalDiarias(aprovada.checkin, aprovada.checkout);
 
                         container.innerHTML += `
                             <div class="p-6 rounded-2xl shadow-md ${bgCardClasses} text-gray-900 flex flex-col justify-between transition hover:shadow-lg cursor-pointer" 
                                  onclick="abrirModal('${suite.id}', '${suite.nome}', '${statusParaModal}', '${aprovada.id}')">
                                 <div>
                                     <div class="flex justify-between items-start mb-2">
-                                        <h2 class="text-xl font-bold text-gray-900 flex flex-wrap items-baseline justify-between gap-2 w-full">
-                                            <span>${suite.nome}${sufixoTitulo}</span>
-                                            <span class="text-sm font-semibold text-gray-600 bg-white/80 px-2.5 py-0.5 rounded-lg border border-gray-200">
-                                                Diária: <strong class="text-gray-900">${formatarMoeda(suite.valor_diaria)}</strong>
-                                            </span>
-                                        </h2>
+                                        <h2 class="text-xl font-bold text-gray-900">${suite.nome}${sufixoTitulo}</h2>
                                         <span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase shadow-sm ${badgeClasses}">
                                             ${badgeText}
                                         </span>
                                     </div>
                                     <div class="mt-2 inline-block px-3 py-1 rounded-lg border text-xs font-semibold ${indicador.classe}">${indicador.texto}</div>
                                     
-                                    <div class="mt-4 pt-3 border-t border-black/10 text-sm space-y-2">
+                                    <div class="mt-4 pt-3 border-t border-black/10 text-sm space-y-1.5">
                                         <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">Hóspede:</span> <span class="font-bold text-gray-900">${aprovada.hospede_nome}</span></p>
                                         <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">WhatsApp:</span> <a href="${linkZap}" target="_blank" onclick="event.stopPropagation();" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${aprovada.whatsapp_hospede || 'Não informado'}</a></p>
                                         
-                                        <!-- ALINHAMENTO FORÇADO EM LINHA ÚNICA -->
-                                        <div class="flex w-full items-center justify-between pt-1">
-                                            <span class="font-semibold text-gray-700 shrink-0">Valor Total:</span> 
-                                            <div class="flex items-center gap-1.5 shrink-0">
-                                                <span class="text-xs font-bold text-gray-500 bg-white px-2 py-0.5 rounded-lg border border-gray-200">🗓️ ${totalDiarias} ${totalDiarias === 1 ? 'diária' : 'diárias'}</span>
-                                                <span class="font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">${valorTotalFormatado}</span>
-                                            </div>
-                                        </div>
+                                        <!-- EXIBIÇÃO RESTAURADA PADRÃO DA VERSÃO ANTERIOR -->
+                                        <p class="flex items-center gap-1.5 pt-1"><span class="font-semibold text-gray-700">Valor Total:</span> <span class="font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">${valorTotalFormatado}</span></p>
 
                                         <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-black/5 text-xs">
                                             <p><span class="text-gray-500">Check-in:</span> <strong class="text-gray-900">${formatarDataSimples(aprovada.checkin)}</strong></p>
@@ -410,12 +385,7 @@
                              onclick="abrirModal('${suite.id}', '${suite.nome}', '${suite.status}')">
                             <div>
                                 <div class="flex justify-between items-start mb-2">
-                                    <h2 class="text-xl font-bold text-gray-900 flex flex-wrap items-baseline justify-between gap-2 w-full">
-                                        <span>${suite.nome}</span>
-                                        <span class="text-sm font-semibold text-gray-600 bg-white/80 px-2.5 py-0.5 rounded-lg border border-gray-200">
-                                            Diária: <strong class="text-gray-900">${formatarMoeda(suite.valor_diaria)}</strong>
-                                        </span>
-                                    </h2>
+                                    <h2 class="text-xl font-bold text-gray-900">${suite.nome}</h2>
                                     <span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase shadow-sm ${
                                         suite.status === 'Disponível' ? 'bg-green-200 text-green-900' : 'bg-red-200 text-red-900'
                                     }">
@@ -436,33 +406,19 @@
                     const linkZapPend = gerarLinkWhatsApp(pend.whatsapp_hospede, pend.hospede_nome, pend.checkin, pend.checkout);
                     const dataSolicitacaoFormatada = formatarDataHora(pend.criado_em);
                     const valorTotalPendFormatado = formatarMoeda(pend.valor_total);
-                    const totalDiariasPend = calcularTotalDiarias(pend.checkin, pend.checkout);
 
                     container.innerHTML += `
                         <div class="p-6 rounded-2xl shadow-md bg-amber-50 border border-amber-200 flex flex-col justify-between transition hover:shadow-lg">
                             <div>
                                 <div class="flex justify-between items-start mb-2">
-                                    <h2 class="text-xl font-bold text-amber-950 flex flex-wrap items-baseline justify-between gap-2 w-full">
-                                        <span>${suite.nome}</span>
-                                        <span class="text-sm font-semibold text-amber-900 bg-white/80 px-2.5 py-0.5 rounded-lg border border-amber-200">
-                                            Diária: <strong class="text-amber-950">${formatarMoeda(suite.valor_diaria)}</strong>
-                                        </span>
-                                    </h2>
+                                    <h2 class="text-xl font-bold text-amber-950">${suite.nome}</h2>
                                     <span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase shadow-sm bg-amber-200 text-amber-900">Pendente</span>
                                 </div>
                                 
-                                <div class="mt-4 pt-3 border-t border-amber-200 text-sm space-y-2">
+                                <div class="mt-4 pt-3 border-t border-amber-200 text-sm space-y-1.5">
                                     <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">Hóspede:</span> <span class="font-bold text-gray-900">${pend.hospede_nome || 'Não informado'}</span></p>
                                     <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">WhatsApp:</span> <a href="${linkZapPend}" target="_blank" onclick="event.stopPropagation();" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${pend.whatsapp_hospede || 'Não informado'}</a></p>
-                                    
-                                    <!-- ALINHAMENTO FORÇADO EM LINHA ÚNICA (PENDENTES) -->
-                                    <div class="flex w-full items-center justify-between pt-1">
-                                        <span class="font-semibold text-amber-900 shrink-0">Valor Total:</span> 
-                                        <div class="flex items-center gap-1.5 shrink-0">
-                                            <span class="text-xs font-bold text-amber-900 bg-white px-2 py-0.5 rounded-lg border border-amber-200">🗓️ ${totalDiariasPend} ${totalDiariasPend === 1 ? 'diária' : 'diárias'}</span>
-                                            <span class="font-extrabold text-emerald-700 bg-white px-2 py-0.5 rounded-lg border border-amber-200">${valorTotalPendFormatado}</span>
-                                        </div>
-                                    </div>
+                                    <p class="flex items-center gap-1.5 pt-1"><span class="font-semibold text-amber-900">Valor Total:</span> <span class="font-extrabold text-emerald-700 bg-white px-2 py-0.5 rounded-lg border border-amber-200">${valorTotalPendFormatado}</span></p>
                                     
                                     <div class="bg-white/70 border border-amber-200 p-3 rounded-xl mt-3 space-y-1 text-xs text-amber-900 shadow-sm">
                                         <p><span class="font-semibold text-gray-600">CPF:</span> ${pend.cpf || 'Não informado'}</p>
