@@ -342,7 +342,6 @@
                         const linkZap = gerarLinkWhatsApp(aprovada.whatsapp_hospede, aprovada.hospede_nome, aprovada.checkin, aprovada.checkout);
                         const sufixoTitulo = totalCardsDestaSuite > 1 ? ` (${contadorCardAtual++})` : '';
                         
-                        // Exibição formatada do valor total obtido do banco
                         const valorTotalFormatado = formatarMoeda(aprovada.valor_total);
 
                         container.innerHTML += `
@@ -350,7 +349,12 @@
                                  onclick="abrirModal('${suite.id}', '${suite.nome}', '${statusParaModal}', '${aprovada.id}')">
                                 <div>
                                     <div class="flex justify-between items-start mb-2">
-                                        <h2 class="text-xl font-bold text-gray-900">${suite.nome}${sufixoTitulo}</h2>
+                                        <h2 class="text-xl font-bold text-gray-900 flex flex-wrap items-baseline justify-between gap-2 w-full">
+                                            <span>${suite.nome}${sufixoTitulo}</span>
+                                            <span class="text-sm font-semibold text-gray-600 bg-white/80 px-2.5 py-0.5 rounded-lg border border-gray-200">
+                                                Diária: <strong class="text-gray-900">${formatarMoeda(suite.valor_diaria)}</strong>
+                                            </span>
+                                        </h2>
                                         <span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase shadow-sm ${badgeClasses}">
                                             ${badgeText}
                                         </span>
@@ -361,7 +365,6 @@
                                         <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">Hóspede:</span> <span class="font-bold text-gray-900">${aprovada.hospede_nome}</span></p>
                                         <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">WhatsApp:</span> <a href="${linkZap}" target="_blank" onclick="event.stopPropagation();" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${aprovada.whatsapp_hospede || 'Não informado'}</a></p>
                                         
-                                        <!-- >>> EXIBIÇÃO DO VALOR TOTAL DA RESERVA NO CARD <<< -->
                                         <p class="flex items-center gap-1.5 pt-1"><span class="font-semibold text-gray-700">Valor Total:</span> <span class="font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">${valorTotalFormatado}</span></p>
 
                                         <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-black/5 text-xs">
@@ -386,7 +389,12 @@
                              onclick="abrirModal('${suite.id}', '${suite.nome}', '${suite.status}')">
                             <div>
                                 <div class="flex justify-between items-start mb-2">
-                                    <h2 class="text-xl font-bold text-gray-900">${suite.nome}</h2>
+                                    <h2 class="text-xl font-bold text-gray-900 flex flex-wrap items-baseline justify-between gap-2 w-full">
+                                        <span>${suite.nome}</span>
+                                        <span class="text-sm font-semibold text-gray-600 bg-white/80 px-2.5 py-0.5 rounded-lg border border-gray-200">
+                                            Diária: <strong class="text-gray-900">${formatarMoeda(suite.valor_diaria)}</strong>
+                                        </span>
+                                    </h2>
                                     <span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase shadow-sm ${
                                         suite.status === 'Disponível' ? 'bg-green-200 text-green-900' : 'bg-red-200 text-red-900'
                                     }">
@@ -412,7 +420,12 @@
                         <div class="p-6 rounded-2xl shadow-md bg-amber-50 border border-amber-200 flex flex-col justify-between transition hover:shadow-lg">
                             <div>
                                 <div class="flex justify-between items-start mb-2">
-                                    <h2 class="text-xl font-bold text-amber-950">${suite.nome}</h2>
+                                    <h2 class="text-xl font-bold text-amber-950 flex flex-wrap items-baseline justify-between gap-2 w-full">
+                                        <span>${suite.nome}</span>
+                                        <span class="text-sm font-semibold text-amber-900 bg-white/80 px-2.5 py-0.5 rounded-lg border border-amber-200">
+                                            Diária: <strong class="text-amber-950">${formatarMoeda(suite.valor_diaria)}</strong>
+                                        </span>
+                                    </h2>
                                     <span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase shadow-sm bg-amber-200 text-amber-900">Pendente</span>
                                 </div>
                                 
@@ -541,7 +554,6 @@
                 status: 'Aprovada'
             };
 
-            // >>> CHAMADA ATIVA DA FUNÇÃO RPC DO SUPABASE PARA CALCULAR O TOTAL DA RESERVA <<<
             try {
                 const { data: valorCalculado, error: erroRpc } = await supabaseClient.rpc('calcular_total_reserva', { 
                     p_suite_id: suiteId, 
