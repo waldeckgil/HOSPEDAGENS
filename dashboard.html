@@ -594,7 +594,7 @@
         function fecharModal() { document.getElementById('modal-edicao').classList.add('hidden'); }
         function fecharModalConfirmacao() { document.getElementById('modal-confirmacao').classList.add('hidden'); }
 
-        async function executarSalvamento(suiteId, status) {
+       async function executarSalvamento(suiteId, status) {
             const reservaIdEditada = document.getElementById('edit-reserva-id').value;
             const valorSinalInformado = parseFloat(document.getElementById('edit-valor-sinal').value) || 0;
             
@@ -631,18 +631,11 @@
 
             let reservaIdFinal = reservaIdEditada;
 
-            if (status === 'Reservado') {
-                if (reservaIdEditada) {
-                    await supabaseClient.from('reservas').update(dadosReserva).eq('id', reservaIdEditada);
-                } else {
-                    const { data: novaReservaInserida, error: errIns } = await supabaseClient.from('reservas').insert([dadosReserva]).select().single();
-                    if (!errIns && novaReservaInserida) {
-                        reservaIdFinal = novaReservaInserida.id;
-                    }
+            if (status === 'Reservado' || status === 'Ocupada') {
+                if (status === 'Ocupada') {
+                    await supabaseClient.from('suites').update({ status: 'Ocupada' }).eq('id', suiteId);
                 }
-            } 
-            else if (status === 'Ocupada') {
-                await supabaseClient.from('suites').update({ status: 'Ocupada' }).eq('id', suiteId);
+
                 if (reservaIdEditada) {
                     await supabaseClient.from('reservas').update(dadosReserva).eq('id', reservaIdEditada);
                 } else {
@@ -666,18 +659,19 @@
                 }
             }
 
+            // Inserção robusta do pagamento garantindo que o registro ocorra
             if (valorSinalInformado > 0 && reservaIdFinal) {
-                const hospedeNomeInformado = document.getElementById('edit-hospede').value || 'Hóspede';
-                const { data: hospedeEncontrado } = await supabaseClient.from('hospedes').select('id').eq('pousada_id', usuarioIdAtual).ilike('nome', hospedeNomeInformado).maybeSingle();
-
-                await supabaseClient.from('hospede_pagamentos').insert([{
+                const { error: errPag } = await supabaseClient.from('hospede_pagamentos').insert([{
                     pousada_id: usuarioIdAtual,
                     reserva_id: reservaIdFinal,
-                    hospede_id: hospedeEncontrado ? hospedeEncontrado.id : null,
                     valor_pago: valorSinalInformado,
                     forma_pagamento: 'Pix / Sinal',
                     observacao: 'Lançado via painel de gestão'
                 }]);
+
+                if (errPag) {
+                    console.error("Erro ao gravar pagamento:", errPag);
+                }
             }
 
             fecharModal();
