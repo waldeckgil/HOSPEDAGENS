@@ -369,7 +369,7 @@
 
                 if (aprovadasDaSuite.length > 0) {
                     aprovadasDaSuite.forEach(aprovada => {
-                        const isFutura = aprovada.checkin > hojeStr && suite.status !== 'Ocupada';
+                        const isFutura = aprovada.checkin > hojeStr;
                         const statusParaModal = isFutura ? 'Reservado' : 'Ocupada';
                         const badgeText = isFutura ? 'Reserva Futura' : 'Ocupada';
                         const badgeClasses = isFutura ? 'bg-blue-200 text-blue-900' : 'bg-gray-200 text-red-600 font-bold';
