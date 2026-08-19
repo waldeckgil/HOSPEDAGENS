@@ -146,6 +146,25 @@
                             <input type="date" id="edit-checkout" class="w-full p-3 border rounded-xl bg-white">
                         </div>
                     </div>
+
+                    <!-- CAMPO PARA LANÇAR SINAL / PAGAMENTO PARCIAL E FORMA DE PAGAMENTO -->
+                    <div class="pt-2 space-y-2">
+                        <div>
+                            <label class="block text-xs font-bold text-emerald-700 mb-1">Registrar Novo Pagamento / Sinal (R$)</label>
+                            <input type="number" step="0.01" id="edit-valor-sinal" placeholder="0.00" class="w-full p-3 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-emerald-900">
+                            <p class="text-[10px] text-gray-500 mt-1">Insira o valor do Pix ou sinal enviado para somar ao histórico de pagamentos.</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-emerald-700 mb-1">Forma de Pagamento</label>
+                            <select id="edit-forma-pagamento" class="w-full p-3 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-emerald-900 text-sm">
+                                <option value="Pix / Sinal">Pix / Sinal</option>
+                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                                <option value="Cartão de Débito">Cartão de Débito</option>
+                                <option value="Transferência Bancária">Transferência Bancária</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold mt-4 transition">Salvar Alterações</button>
@@ -163,6 +182,7 @@
         let nomePousadaAtual = "nossa pousada";
         let reservasGlobaisCache = [];
         let suitesGlobaisCache = [];
+        let pagamentosGlobaisCache = [];
         let camposLimposParaNovaReserva = false;
 
         function mostrarToast(titulo, mensagem, tipo = 'sucesso') {
@@ -177,7 +197,7 @@
 
             if (tipo === 'sucesso') {
                 toastContent.className = "bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800";
-                toastIcone.innerText = "🎉";
+                toastIcone.innerText = "✨";
             } else {
                 toastContent.className = "bg-red-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-red-800";
                 toastIcone.innerText = "🚨";
@@ -194,6 +214,17 @@
             const alvo = new Date(ano, mes - 1, dia);
             alvo.setHours(0, 0, 0, 0);
             return Math.round((alvo.getTime() - hoje.getTime()) / (1000 * 3600 * 24));
+        }
+
+        function calcularQuantidadeDiarias(checkinStr, checkoutStr) {
+            if (!checkinStr || !checkoutStr) return 1;
+            const [anoIn, mesIn, diaIn] = checkinStr.split('-');
+            const [anoOut, mesOut, diaOut] = checkoutStr.split('-');
+            const d1 = new Date(anoIn, mesIn - 1, diaIn);
+            const d2 = new Date(anoOut, mesOut - 1, diaOut);
+            const diffTime = d2.getTime() - d1.getTime();
+            const diffDays = Math.round(diffTime / (1000 * 3600 * 24));
+            return diffDays > 0 ? diffDays : 1;
         }
 
         function formatarMoeda(valor) {
@@ -309,6 +340,9 @@
             const { data: reservas } = await supabaseClient.from('reservas').select('*').eq('pousada_id', user.id);
             reservasGlobaisCache = reservas || [];
 
+            const { data: pagamentos } = await supabaseClient.from('hospede_pagamentos').select('*').eq('pousada_id', user.id);
+            pagamentosGlobaisCache = pagamentos || [];
+
             await verificarReservasPendentesDashboard();
 
             const container = document.getElementById('suites-container');
@@ -330,6 +364,8 @@
                 if (totalCardsDestaSuite === 0) totalCardsDestaSuite = 1;
                 let contadorCardAtual = 1;
 
+                const precoDiariaFormatado = formatarMoeda(suite.valor_diaria);
+
                 if (aprovadasDaSuite.length > 0) {
                     aprovadasDaSuite.forEach(aprovada => {
                         const isFutura = aprovada.checkin > hojeStr;
@@ -342,15 +378,22 @@
                         const linkZap = gerarLinkWhatsApp(aprovada.whatsapp_hospede, aprovada.hospede_nome, aprovada.checkin, aprovada.checkout);
                         const sufixoTitulo = totalCardsDestaSuite > 1 ? ` (${contadorCardAtual++})` : '';
                         
-                        // Exibição formatada do valor total obtido do banco
-                        const valorTotalFormatado = formatarMoeda(aprovada.valor_total);
+                        const qtdDiarias = calcularQuantidadeDiarias(aprovada.checkin, aprovada.checkout);
+                        const valorTotal = Number(aprovada.valor_total || 0);
+
+                        const pagamentosDestaReserva = pagamentosGlobaisCache.filter(p => p.reserva_id === aprovada.id);
+                        const totalPago = pagamentosDestaReserva.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
+                        const saldoRestante = valorTotal - totalPago;
 
                         container.innerHTML += `
                             <div class="p-6 rounded-2xl shadow-md ${bgCardClasses} text-gray-900 flex flex-col justify-between transition hover:shadow-lg cursor-pointer" 
                                  onclick="abrirModal('${suite.id}', '${suite.nome}', '${statusParaModal}', '${aprovada.id}')">
                                 <div>
                                     <div class="flex justify-between items-start mb-2">
-                                        <h2 class="text-xl font-bold text-gray-900">${suite.nome}${sufixoTitulo}</h2>
+                                        <div>
+                                            <h2 class="text-xl font-bold text-gray-900">${suite.nome}${sufixoTitulo}</h2>
+                                            <span class="text-xs font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md mt-1 inline-block">Diária: ${precoDiariaFormatado}</span>
+                                        </div>
                                         <span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase shadow-sm ${badgeClasses}">
                                             ${badgeText}
                                         </span>
@@ -361,8 +404,21 @@
                                         <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">Hóspede:</span> <span class="font-bold text-gray-900">${aprovada.hospede_nome}</span></p>
                                         <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">WhatsApp:</span> <a href="${linkZap}" target="_blank" onclick="event.stopPropagation();" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${aprovada.whatsapp_hospede || 'Não informado'}</a></p>
                                         
-                                        <!-- >>> EXIBIÇÃO DO VALOR TOTAL DA RESERVA NO CARD <<< -->
-                                        <p class="flex items-center gap-1.5 pt-1"><span class="font-semibold text-gray-700">Valor Total:</span> <span class="font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">${valorTotalFormatado}</span></p>
+                                        <div class="flex items-center justify-between pt-1 border-t border-black/5 mt-2">
+                                            <span class="text-xs font-semibold text-gray-700">Estadia: <strong class="text-gray-900">${qtdDiarias} diária(s)</strong></span>
+                                            <span class="text-xs font-extrabold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">Total: ${formatarMoeda(valorTotal)}</span>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-2 bg-white/80 p-2.5 rounded-xl border border-black/5 text-xs mt-2">
+                                            <div>
+                                                <span class="text-gray-500 block text-[10px] uppercase font-bold">Pago / Sinal</span>
+                                                <strong class="text-emerald-700">${formatarMoeda(totalPago)}</strong>
+                                            </div>
+                                            <div>
+                                                <span class="text-gray-500 block text-[10px] uppercase font-bold">Saldo Restante</span>
+                                                <strong class="${saldoRestante > 0 ? 'text-amber-700' : 'text-emerald-600'}">${formatarMoeda(saldoRestante)}</strong>
+                                            </div>
+                                        </div>
 
                                         <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-black/5 text-xs">
                                             <p><span class="text-gray-500">Check-in:</span> <strong class="text-gray-900">${formatarDataSimples(aprovada.checkin)}</strong></p>
@@ -386,7 +442,10 @@
                              onclick="abrirModal('${suite.id}', '${suite.nome}', '${suite.status}')">
                             <div>
                                 <div class="flex justify-between items-start mb-2">
-                                    <h2 class="text-xl font-bold text-gray-900">${suite.nome}</h2>
+                                    <div>
+                                        <h2 class="text-xl font-bold text-gray-900">${suite.nome}</h2>
+                                        <span class="text-xs font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md mt-1 inline-block">Diária: ${precoDiariaFormatado}</span>
+                                    </div>
                                     <span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase shadow-sm ${
                                         suite.status === 'Disponível' ? 'bg-green-200 text-green-900' : 'bg-red-200 text-red-900'
                                     }">
@@ -406,20 +465,43 @@
                 pendentesDaSuite.forEach((pend) => {
                     const linkZapPend = gerarLinkWhatsApp(pend.whatsapp_hospede, pend.hospede_nome, pend.checkin, pend.checkout);
                     const dataSolicitacaoFormatada = formatarDataHora(pend.criado_em);
-                    const valorTotalPendFormatado = formatarMoeda(pend.valor_total);
+                    const qtdDiariasPend = calcularQuantidadeDiarias(pend.checkin, pend.checkout);
+                    const valorTotalPend = Number(pend.valor_total || 0);
+
+                    const pagamentosPend = pagamentosGlobaisCache.filter(p => p.reserva_id === pend.id);
+                    const totalPagoPend = pagamentosPend.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
+                    const saldoRestantePend = valorTotalPend - totalPagoPend;
 
                     container.innerHTML += `
                         <div class="p-6 rounded-2xl shadow-md bg-amber-50 border border-amber-200 flex flex-col justify-between transition hover:shadow-lg">
                             <div>
                                 <div class="flex justify-between items-start mb-2">
-                                    <h2 class="text-xl font-bold text-amber-950">${suite.nome}</h2>
+                                    <div>
+                                        <h2 class="text-xl font-bold text-amber-950">${suite.nome}</h2>
+                                        <span class="text-xs font-bold text-amber-900/80 bg-amber-200/60 px-2 py-0.5 rounded-md mt-1 inline-block">Diária: ${precoDiariaFormatado}</span>
+                                    </div>
                                     <span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase shadow-sm bg-amber-200 text-amber-900">Pendente</span>
                                 </div>
                                 
                                 <div class="mt-4 pt-3 border-t border-amber-200 text-sm space-y-1.5">
                                     <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">Hóspede:</span> <span class="font-bold text-gray-900">${pend.hospede_nome || 'Não informado'}</span></p>
                                     <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">WhatsApp:</span> <a href="${linkZapPend}" target="_blank" onclick="event.stopPropagation();" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${pend.whatsapp_hospede || 'Não informado'}</a></p>
-                                    <p class="flex items-center gap-1.5 pt-1"><span class="font-semibold text-amber-900">Valor Total:</span> <span class="font-extrabold text-emerald-700 bg-white px-2 py-0.5 rounded-lg border border-amber-200">${valorTotalPendFormatado}</span></p>
+                                    
+                                    <div class="flex items-center justify-between pt-1 border-t border-amber-200 mt-2">
+                                        <span class="text-xs font-semibold text-amber-900">Estadia: <strong class="text-gray-900">${qtdDiariasPend} diária(s)</strong></span>
+                                        <span class="text-xs font-extrabold text-blue-700 bg-white px-2.5 py-1 rounded-lg border border-amber-200">Total: ${formatarMoeda(valorTotalPend)}</span>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-2 bg-white/80 p-2.5 rounded-xl border border-amber-200 text-xs mt-2">
+                                        <div>
+                                            <span class="text-gray-500 block text-[10px] uppercase font-bold">Pago / Sinal</span>
+                                            <strong class="text-emerald-700">${formatarMoeda(totalPagoPend)}</strong>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-500 block text-[10px] uppercase font-bold">Saldo Restante</span>
+                                            <strong class="text-amber-700">${formatarMoeda(saldoRestantePend)}</strong>
+                                        </div>
+                                    </div>
                                     
                                     <div class="bg-white/70 border border-amber-200 p-3 rounded-xl mt-3 space-y-1 text-xs text-amber-900 shadow-sm">
                                         <p><span class="font-semibold text-gray-600">CPF:</span> ${pend.cpf || 'Não informado'}</p>
@@ -451,6 +533,8 @@
             document.getElementById('edit-suite-id').value = id;
             document.getElementById('edit-status').value = status;
             document.getElementById('edit-status-original').value = status;
+            document.getElementById('edit-valor-sinal').value = '';
+            document.getElementById('edit-forma-pagamento').value = 'Pix / Sinal';
             document.getElementById('modal-titulo').innerText = "Gerenciar Suíte: " + nome;
 
             let reserva = null;
@@ -514,6 +598,8 @@
                 document.getElementById('edit-email').value = '';
                 document.getElementById('edit-checkin').value = '';
                 document.getElementById('edit-checkout').value = '';
+                document.getElementById('edit-valor-sinal').value = '';
+                document.getElementById('edit-forma-pagamento').value = 'Pix / Sinal';
                 camposLimposParaNovaReserva = true;
             }
         }
@@ -523,6 +609,8 @@
 
         async function executarSalvamento(suiteId, status) {
             const reservaIdEditada = document.getElementById('edit-reserva-id').value;
+            const valorSinalInformado = parseFloat(document.getElementById('edit-valor-sinal').value) || 0;
+            const formaPagamentoSelecionada = document.getElementById('edit-forma-pagamento').value || 'Pix / Sinal';
             
             const checkinVal = document.getElementById('edit-checkin').value || new Date().toISOString().split('T')[0];
             const checkoutVal = document.getElementById('edit-checkout').value || new Date().toISOString().split('T')[0];
@@ -541,7 +629,7 @@
                 status: 'Aprovada'
             };
 
-            // >>> CHAMADA ATIVA DA FUNÇÃO RPC DO SUPABASE PARA CALCULAR O TOTAL DA RESERVA <<<
+            let valorTotalCalculado = 0;
             try {
                 const { data: valorCalculado, error: erroRpc } = await supabaseClient.rpc('calcular_total_reserva', { 
                     p_suite_id: suiteId, 
@@ -550,25 +638,44 @@
                 });
                 
                 if (!erroRpc && valorCalculado !== null) {
-                    dadosReserva.valor_total = valorCalculado;
+                    valorTotalCalculado = Number(valorCalculado);
+                    dadosReserva.valor_total = valorTotalCalculado;
                 }
             } catch (err) {
                 console.error("Erro ao invocar a função de cálculo no banco:", err);
             }
 
-            if (status === 'Reservado') {
-                if (reservaIdEditada) {
-                    await supabaseClient.from('reservas').update(dadosReserva).eq('id', reservaIdEditada);
-                } else {
-                    await supabaseClient.from('reservas').insert([dadosReserva]);
+            // 🛑 CRÍTICA: Impedir que o valor do sinal seja maior do que o saldo restante
+            if (valorSinalInformado > 0 && reservaIdEditada) {
+                const pagamentosExistentes = pagamentosGlobaisCache.filter(p => p.reserva_id === reservaIdEditada);
+                const totalJaPago = pagamentosExistentes.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
+                const saldoRestanteAtual = valorTotalCalculado - totalJaPago;
+
+                if (valorSinalInformado > saldoRestanteAtual) {
+                    mostrarToast("Atenção", `O valor do pagamento (${formatarMoeda(valorSinalInformado)}) é maior que o saldo restante (${formatarMoeda(saldoRestanteAtual)}). Corrija o valor.`, 'erro');
+                    return; // Interrompe o salvamento
                 }
-            } 
-            else if (status === 'Ocupada') {
-                await supabaseClient.from('suites').update({ status: 'Ocupada' }).eq('id', suiteId);
+            } else if (valorSinalInformado > 0 && valorTotalCalculado > 0) {
+                if (valorSinalInformado > valorTotalCalculado) {
+                    mostrarToast("Atenção", `O valor do pagamento (${formatarMoeda(valorSinalInformado)}) é maior que o valor total da reserva (${formatarMoeda(valorTotalCalculado)}). Corrija o valor.`, 'erro');
+                    return; // Interrompe o salvamento
+                }
+            }
+
+            let reservaIdFinal = reservaIdEditada;
+
+            if (status === 'Reservado' || status === 'Ocupada') {
+                if (status === 'Ocupada') {
+                    await supabaseClient.from('suites').update({ status: 'Ocupada' }).eq('id', suiteId);
+                }
+
                 if (reservaIdEditada) {
                     await supabaseClient.from('reservas').update(dadosReserva).eq('id', reservaIdEditada);
                 } else {
-                    await supabaseClient.from('reservas').insert([dadosReserva]);
+                    const { data: novaReservaInserida, error: errIns } = await supabaseClient.from('reservas').insert([dadosReserva]).select().single();
+                    if (!errIns && novaReservaInserida) {
+                        reservaIdFinal = novaReservaInserida.id;
+                    }
                 }
             } 
             else {
@@ -582,6 +689,20 @@
                         .eq('suite_id', suiteId)
                         .eq('status', 'Aprovada')
                         .lte('checkin', hoje);
+                }
+            }
+
+            if (valorSinalInformado > 0 && reservaIdFinal) {
+                const { error: errPag } = await supabaseClient.from('hospede_pagamentos').insert([{
+                    pousada_id: usuarioIdAtual,
+                    reserva_id: reservaIdFinal,
+                    valor_pago: valorSinalInformado,
+                    forma_pagamento: formaPagamentoSelecionada,
+                    observacao: 'Lançado via painel de gestão'
+                }]);
+
+                if (errPag) {
+                    console.error("Erro ao gravar pagamento:", errPag);
                 }
             }
 
@@ -606,7 +727,6 @@
                 return;
             }
 
-            fecharModal();
             await executarSalvamento(suiteId, status);
         };
 

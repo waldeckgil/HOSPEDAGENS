@@ -103,8 +103,8 @@
                             <tr class="bg-gray-50 text-gray-600 uppercase text-xs tracking-wider border-b border-gray-200">
                                 <th class="p-4 font-bold">Hóspede / Contato</th>
                                 <th class="p-4 font-bold">Documentos</th>
-                                <th class="p-4 font-bold">Endereço</th>
                                 <th class="p-4 font-bold">Período da Estadia</th>
+                                <th class="p-4 font-bold">Resumo Financeiro</th>
                                 <th class="p-4 font-bold">Status</th>
                                 <th class="p-4 font-bold">Data da Reserva</th>
                             </tr>
@@ -202,27 +202,44 @@
             return `${dia}/${mes}/${ano} às ${hora}:${min}`;
         }
 
+        function formatarMoeda(valor) {
+            if (valor === null || valor === undefined || isNaN(valor)) return 'R$ 0,00';
+            return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
         async function carregarHistoricoHospedes() {
             if (!usuarioIdAtual) return;
 
-            let query = supabaseClient
-                .from('reservas')
-                .select('*')
-                .eq('pousada_id', usuarioIdAtual)
-                .order('criado_em', { ascending: false });
+            // 1. Buscar reservas e pagamentos associados à pousada
+            const [resReservas, resPagamentos] = await Promise.all([
+                supabaseClient.from('reservas').select('*').eq('pousada_id', usuarioIdAtual).order('criado_em', { ascending: false }),
+                supabaseClient.from('hospede_pagamentos').select('*').eq('pousada_id', usuarioIdAtual)
+            ]);
+
+            if (resReservas.error) {
+                console.error("Erro ao buscar histórico de reservas:", resReservas.error);
+                return;
+            }
+
+            const reservas = resReservas.data || [];
+            const pagamentos = resPagamentos.data || [];
+
+            // Mapear pagamentos por reserva_id para soma rápida
+            const pagamentosPorReserva = {};
+            pagamentos.forEach(p => {
+                if (p.reserva_id) {
+                    if (!pagamentosPorReserva[p.reserva_id]) {
+                        pagamentosPorReserva[p.reserva_id] = 0;
+                    }
+                    pagamentosPorReserva[p.reserva_id] += Number(p.valor_pago || 0);
+                }
+            });
 
             const textoBusca = document.getElementById('filtro-texto').value.trim();
             const dataInicio = document.getElementById('filtro-inicio').value;
             const dataFim = document.getElementById('filtro-fim').value;
 
-            const { data: reservas, error } = await query;
-            
-            if (error) {
-                console.error("Erro ao buscar histórico:", error);
-                return;
-            }
-
-            let filtrados = reservas || [];
+            let filtrados = reservas;
 
             // Filtro inteligente local por texto (Nome, CPF, E-mail)
             if (textoBusca !== '') {
@@ -258,6 +275,19 @@
                 else if (r.status === 'Finalizada') badgeStatus = 'bg-blue-100 text-blue-800';
                 else if (r.status === 'Recusada' || r.status === 'Cancelada') badgeStatus = 'bg-red-100 text-red-800';
 
+                // Cálculo financeiro
+                const valorTotal = Number(r.valor_total || 0);
+                const valorSinalCadastrado = Number(r.valor_sinal || 0);
+                const totalPagoTabela = pagamentosPorReserva[r.id] || 0;
+                // Considera o maior valor entre a tabela de pagamentos e o sinal registrado na reserva
+                const totalPago = Math.max(totalPagoTabela, valorSinalCadastrado);
+                const quitado = totalPago >= valorTotal && valorTotal > 0;
+
+                let badgeQuitacao = `<span class="px-2 py-0.5 rounded text-[10px] bg-amber-100 text-amber-800 font-bold">Pendente</span>`;
+                if (quitado) {
+                    badgeQuitacao = `<span class="px-2 py-0.5 rounded text-[10px] bg-green-100 text-green-800 font-bold">Quitado</span>`;
+                }
+
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-50 transition">
                         <td class="p-4">
@@ -269,12 +299,14 @@
                             <div><strong class="text-gray-600">CPF:</strong> ${r.cpf || '-'}</div>
                             <div><strong class="text-gray-600">RG:</strong> ${r.rg || '-'}</div>
                         </td>
-                        <td class="p-4 text-xs text-gray-600 max-w-xs truncate">
-                            ${r.endereco || 'Não informado'}
-                        </td>
                         <td class="p-4 text-xs font-semibold">
                             <div>Check-in: <span class="text-gray-900">${formatarDataSimples(r.checkin)}</span></div>
                             <div>Check-out: <span class="text-gray-900">${formatarDataSimples(r.checkout)}</span></div>
+                        </td>
+                        <td class="p-4 text-xs">
+                            <div><strong class="text-gray-600">Total:</strong> ${formatarMoeda(valorTotal)}</div>
+                            <div><strong class="text-gray-600">Pago/Sinal:</strong> ${formatarMoeda(totalPago)}</div>
+                            <div class="mt-1">${badgeQuitacao}</div>
                         </td>
                         <td class="p-4">
                             <span class="px-2.5 py-1 rounded-full text-xs uppercase ${badgeStatus}">${r.status}</span>
