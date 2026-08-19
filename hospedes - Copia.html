@@ -111,6 +111,7 @@
                             <tr class="bg-gray-50 text-gray-600 uppercase text-xs tracking-wider border-b border-gray-200">
                                 <th class="p-4 font-bold">Hóspede / Contato</th>
                                 <th class="p-4 font-bold">Documentos</th>
+                                <th class="p-4 font-bold">Suíte / Acomodação</th>
                                 <th class="p-4 font-bold">Período da Estadia</th>
                                 <th class="p-4 font-bold">Resumo Financeiro</th>
                                 <th class="p-4 font-bold">Status</th>
@@ -119,7 +120,7 @@
                         </thead>
                         <tbody id="tabela-hospedes-corpo" class="divide-y divide-gray-100 text-sm text-gray-700">
                             <tr>
-                                <td colspan="6" class="p-8 text-center text-gray-500 italic">Carregando histórico de hóspedes...</td>
+                                <td colspan="7" class="p-8 text-center text-gray-500 italic">Carregando histórico de hóspedes...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -218,10 +219,11 @@
         async function carregarHistoricoHospedes() {
             if (!usuarioIdAtual) return;
 
-            // 1. Buscar reservas e pagamentos associados à pousada
-            const [resReservas, resPagamentos] = await Promise.all([
+            // 1. Buscar reservas, pagamentos e suítes associados à pousada
+            const [resReservas, resPagamentos, resSuites] = await Promise.all([
                 supabaseClient.from('reservas').select('*').eq('pousada_id', usuarioIdAtual).order('criado_em', { ascending: false }),
-                supabaseClient.from('hospede_pagamentos').select('*').eq('pousada_id', usuarioIdAtual)
+                supabaseClient.from('hospede_pagamentos').select('*').eq('pousada_id', usuarioIdAtual),
+                supabaseClient.from('suites').select('*').eq('pousada_id', usuarioIdAtual)
             ]);
 
             if (resReservas.error) {
@@ -231,6 +233,13 @@
 
             const reservas = resReservas.data || [];
             const pagamentos = resPagamentos.data || [];
+            const suites = resSuites.data || [];
+
+            // Mapear nome das suítes por ID para consulta rápida
+            const mapaSuites = {};
+            suites.forEach(s => {
+                mapaSuites[s.id] = s.nome || s.titulo || 'Suíte sem nome';
+            });
 
             // Mapear pagamentos por reserva_id para soma rápida
             const pagamentosPorReserva = {};
@@ -294,7 +303,7 @@
             document.getElementById('contador-resultados').innerText = `${filtrados.length} registro(s) encontrado(s)`;
 
             if (filtrados.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-500 italic">Nenhum hóspede encontrado com os critérios informados.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-500 italic">Nenhum hóspede encontrado com os critérios informados.</td></tr>`;
                 return;
             }
 
@@ -306,6 +315,9 @@
                 else if (r.status === 'Finalizada') badgeStatus = 'bg-blue-100 text-blue-800';
                 else if (r.status === 'Recusada' || r.status === 'Cancelada') badgeStatus = 'bg-red-100 text-red-800';
 
+                // Obter nome da suíte
+                const nomeSuite = mapaSuites[r.suite_id] || 'Suíte não informada';
+
                 // Cálculo financeiro
                 const valorTotal = Number(r.valor_total || 0);
                 const valorSinalCadastrado = Number(r.valor_sinal || 0);
@@ -313,11 +325,15 @@
                 const totalPago = Math.max(totalPagoTabela, valorSinalCadastrado);
                 const quitado = totalPago >= valorTotal && valorTotal > 0;
 
-                let badgeQuitacao = `<span class="px-2 py-0.5 rounded text-[10px] bg-amber-100 text-amber-800 font-bold">Saldo Pendente</span>`;
-                if (quitado) {
+                let badgeQuitacao = '';
+                if (valorTotal === 0) {
+                    badgeQuitacao = `<span class="px-2 py-0.5 rounded text-[10px] bg-gray-100 text-gray-600 font-bold">Sem Custo</span>`;
+                } else if (quitado) {
                     badgeQuitacao = `<span class="px-2 py-0.5 rounded text-[10px] bg-green-100 text-green-800 font-bold">Quitado</span>`;
                 } else if (totalPago > 0 && totalPago < valorTotal) {
                     badgeQuitacao = `<span class="px-2 py-0.5 rounded text-[10px] bg-blue-100 text-blue-800 font-bold">Parcialmente Pago</span>`;
+                } else {
+                    badgeQuitacao = `<span class="px-2 py-0.5 rounded text-[10px] bg-amber-100 text-amber-800 font-bold">Saldo Pendente</span>`;
                 }
 
                 tbody.innerHTML += `
@@ -330,6 +346,9 @@
                         <td class="p-4 text-xs">
                             <div><strong class="text-gray-600">CPF:</strong> ${r.cpf || '-'}</div>
                             <div><strong class="text-gray-600">RG:</strong> ${r.rg || '-'}</div>
+                        </td>
+                        <td class="p-4 text-xs font-semibold">
+                            <div class="text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg inline-block border border-blue-100">🏨 ${nomeSuite}</div>
                         </td>
                         <td class="p-4 text-xs font-semibold">
                             <div>Check-in: <span class="text-gray-900">${formatarDataSimples(r.checkin)}</span></div>
