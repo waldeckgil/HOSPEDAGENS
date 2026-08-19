@@ -63,20 +63,28 @@
                 <h2 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
                     <i class="fa-solid fa-magnifying-glass text-blue-600"></i> Consulta Inteligente de Hóspedes
                 </h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                     <div>
                         <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Buscar por Nome, CPF ou E-mail</label>
                         <input type="text" id="filtro-texto" placeholder="Digite parte do nome, CPF..." class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Período Inicial (Reserva/Estadia)</label>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Filtrar por Status</label>
+                        <select id="filtro-status" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                            <option value="">Todos os Status</option>
+                            <option value="Aprovada">Aprovada (Ocupada/Ativa)</option>
+                            <option value="Pendente">Pendente</option>
+                            <option value="Finalizada">Finalizada</option>
+                            <option value="Cancelada">Cancelada / Recusada</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Período Inicial (Estadia)</label>
                         <input type="date" id="filtro-inicio" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
                     </div>
-                    <div class="flex gap-2">
-                        <div class="w-full">
-                            <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Período Final</label>
-                            <input type="date" id="filtro-fim" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
-                        </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Período Final</label>
+                        <input type="date" id="filtro-fim" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
                     </div>
                 </div>
                 <div class="flex gap-3 mt-4">
@@ -236,12 +244,13 @@
             });
 
             const textoBusca = document.getElementById('filtro-texto').value.trim();
+            const statusBusca = document.getElementById('filtro-status').value;
             const dataInicio = document.getElementById('filtro-inicio').value;
             const dataFim = document.getElementById('filtro-fim').value;
 
             let filtrados = reservas;
 
-            // Filtro inteligente local por texto (Nome, CPF, E-mail)
+            // Filtro por texto (Nome, CPF, E-mail)
             if (textoBusca !== '') {
                 const buscaLower = textoBusca.toLowerCase();
                 filtrados = filtrados.filter(r => 
@@ -251,13 +260,33 @@
                 );
             }
 
-            // Filtro por período de check-in / check-out
+            // Filtro por Status específico
+            if (statusBusca !== '') {
+                if (statusBusca === 'Cancelada') {
+                    filtrados = filtrados.filter(r => r.status === 'Cancelada' || r.status === 'Recusada');
+                } else {
+                    filtrados = filtrados.filter(r => r.status === statusBusca);
+                }
+            }
+
+            // Filtros por período de check-in / check-out
             if (dataInicio) {
                 filtrados = filtrados.filter(r => r.checkout >= dataInicio);
             }
             if (dataFim) {
                 filtrados = filtrados.filter(r => r.checkin <= dataFim);
             }
+
+            // ORDENAÇÃO INTELIGENTE: Prioriza estadias 'Aprovada' (ocupadas/ativas) no topo
+            filtrados.sort((a, b) => {
+                const aAprovada = a.status === 'Aprovada' ? 1 : 0;
+                const bAprovada = b.status === 'Aprovada' ? 1 : 0;
+                if (aAprovada !== bAprovada) {
+                    return bAprovada - aAprovada; // As 'Aprovadas' vêm primeiro
+                }
+                // Desempate pela data de criação mais recente
+                return new Date(b.criado_em) - new Date(a.criado_em);
+            });
 
             const tbody = document.getElementById('tabela-hospedes-corpo');
             document.getElementById('contador-resultados').innerText = `${filtrados.length} registro(s) encontrado(s)`;
@@ -279,7 +308,6 @@
                 const valorTotal = Number(r.valor_total || 0);
                 const valorSinalCadastrado = Number(r.valor_sinal || 0);
                 const totalPagoTabela = pagamentosPorReserva[r.id] || 0;
-                // Considera o maior valor entre a tabela de pagamentos e o sinal registrado na reserva
                 const totalPago = Math.max(totalPagoTabela, valorSinalCadastrado);
                 const quitado = totalPago >= valorTotal && valorTotal > 0;
 
@@ -321,6 +349,7 @@
 
         function limparFiltros() {
             document.getElementById('filtro-texto').value = '';
+            document.getElementById('filtro-status').value = '';
             document.getElementById('filtro-inicio').value = '';
             document.getElementById('filtro-fim').value = '';
             carregarHistoricoHospedes();
