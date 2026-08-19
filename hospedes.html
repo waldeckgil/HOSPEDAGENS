@@ -313,9 +313,11 @@
                 const totalPago = Math.max(totalPagoTabela, valorSinalCadastrado);
                 const quitado = totalPago >= valorTotal && valorTotal > 0;
 
-                let badgeQuitacao = `<span class="px-2 py-0.5 rounded text-[10px] bg-amber-100 text-amber-800 font-bold">Pendente</span>`;
+                let badgeQuitacao = `<span class="px-2 py-0.5 rounded text-[10px] bg-amber-100 text-amber-800 font-bold">Saldo Pendente</span>`;
                 if (quitado) {
                     badgeQuitacao = `<span class="px-2 py-0.5 rounded text-[10px] bg-green-100 text-green-800 font-bold">Quitado</span>`;
+                } else if (totalPago > 0 && totalPago < valorTotal) {
+                    badgeQuitacao = `<span class="px-2 py-0.5 rounded text-[10px] bg-blue-100 text-blue-800 font-bold">Parcialmente Pago</span>`;
                 }
 
                 tbody.innerHTML += `
