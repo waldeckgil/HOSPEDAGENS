@@ -54,7 +54,6 @@
                 <i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard
             </a>
         </header>
-
         <!-- CORPO DA PÁGINA -->
         <main class="p-6 md:p-8 flex-1 overflow-y-auto space-y-8">
             
@@ -68,17 +67,16 @@
                         <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Buscar por Nome, CPF ou E-mail</label>
                         <input type="text" id="filtro-texto" placeholder="Digite parte do nome, CPF..." class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Filtrar por Status da Suíte</label>
-                        <select id="filtro-status" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
-                            <option value="">Todos os Status</option>
-                            <option value="Disponível">Disponível</option>
-                            <option value="Ocupada (Agora)">Ocupada (Agora)</option>
-                            <option value="Reservado">Reservado</option>
-                            <option value="Limpeza">Limpeza</option>
-                            <option value="Pendente">Pendente</option>
-                        </select>
-                    </div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Filtrar por Status da Suíte</label>
+    <select id="filtro-status" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+        <option value="">Todos os Status</option>
+        <option value="Disponível">Disponível</option>
+        <option value="Ocupada">Ocupada</option>
+        <option value="Reservado">Reservado</option>
+        <option value="Limpeza">Limpeza</option>
+        <option value="Pendente">Pendente</option>
+    </select>
+</div>
                     <div>
                         <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Período Inicial (Estadia)</label>
                         <input type="date" id="filtro-inicio" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
