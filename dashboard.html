@@ -608,131 +608,127 @@
         function fecharModal() { document.getElementById('modal-edicao').classList.add('hidden'); }
         function fecharModalConfirmacao() { document.getElementById('modal-confirmacao').classList.add('hidden'); }
 
-        async function executarSalvamento(suiteId, status) {
-            const reservaIdEditada = document.getElementById('edit-reserva-id').value;
-            const valorSinalInformado = parseFloat(document.getElementById('edit-valor-sinal').value) || 0;
-            const formaPagamentoSelecionada = document.getElementById('edit-forma-pagamento').value || 'Pix / Sinal';
-            
-            const checkinVal = document.getElementById('edit-checkin').value || new Date().toISOString().split('T')[0];
-            const checkoutVal = document.getElementById('edit-checkout').value || new Date().toISOString().split('T')[0];
+    async function executarSalvamento(suiteId, status) {
+    const reservaIdEditada = document.getElementById('edit-reserva-id').value;
+    const valorSinalInformado = parseFloat(document.getElementById('edit-valor-sinal').value) || 0;
+    const formaPagamentoSelecionada = document.getElementById('edit-forma-pagamento').value || 'Pix / Sinal';
+    
+    const checkinVal = document.getElementById('edit-checkin').value || new Date().toISOString().split('T')[0];
+    const checkoutVal = document.getElementById('edit-checkout').value || new Date().toISOString().split('T')[0];
 
-            // 🛑 1. Validar conflito de reservas antes de prosseguir (Passando p_reserva_id para ignorar a própria edição)
-            try {
-                const { data: temConflito, error: erroConflito } = await supabaseClient.rpc('verificar_conflito_reserva', { 
-                    p_suite_id: suiteId, 
-                    p_checkin: checkinVal, 
-                    p_checkout: checkoutVal,
-                    p_reserva_id: reservaIdEditada ? reservaIdEditada : null
-                });
-                
-                if (!erroConflito && temConflito === true) {
-                    mostrarToast("Atenção", "Já existe uma reserva confirmada para esta suíte nestas datas!", "erro");
-                    return; 
-                }
-            } catch (err) {
-                console.error("Erro ao verificar conflito de reservas:", err);
-            }
-
-            const dadosReserva = {
-                pousada_id: usuarioIdAtual,
-                suite_id: suiteId,
-                hospede_nome: document.getElementById('edit-hospede').value || 'Hóspede',
-                whatsapp_hospede: document.getElementById('edit-whatsapp').value,
-                cpf: document.getElementById('edit-cpf').value,
-                rg: document.getElementById('edit-rg').value,
-                endereco: document.getElementById('edit-endereco').value,
-                email: document.getElementById('edit-email').value,
-                checkin: checkinVal,
-                checkout: checkoutVal,
-                status: 'Aprovada'
-            };
-
-            let valorTotalCalculado = 0;
-            try {
-                const { data: valorCalculado, error: erroRpc } = await supabaseClient.rpc('calcular_total_reserva', { 
-                    p_suite_id: suiteId, 
-                    p_checkin: checkinVal, 
-                    p_checkout: checkoutVal 
-                });
-                
-                if (!erroRpc && valorCalculado !== null) {
-                    valorTotalCalculado = Number(valorCalculado);
-                    dadosReserva.valor_total = valorTotalCalculado;
-                }
-            } catch (err) {
-                console.error("Erro ao invocar a função de cálculo no banco:", err);
-            }
-
-            // 🛑 CRÍTICA: Impedir que o valor do sinal seja maior do que o saldo restante ou total
-            if (valorSinalInformado > 0 && reservaIdEditada) {
-                const pagamentosExistentes = pagamentosGlobaisCache.filter(p => p.reserva_id === reservaIdEditada);
-                const totalJaPago = pagamentosExistentes.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
-                const saldoRestanteAtual = valorTotalCalculado - totalJaPago;
-
-                if (valorSinalInformado > saldoRestanteAtual) {
-                    mostrarToast("Atenção", `O valor do pagamento (${formatarMoeda(valorSinalInformado)}) é maior que o saldo restante (${formatarMoeda(saldoRestanteAtual)}). Corrija o valor.`, 'erro');
-                    return; 
-                }
-            } else if (valorSinalInformado > 0 && valorTotalCalculado > 0) {
-                if (valorSinalInformado > valorTotalCalculado) {
-                    mostrarToast("Atenção", `O valor do pagamento (${formatarMoeda(valorSinalInformado)}) é maior que o valor total da reserva (${formatarMoeda(valorTotalCalculado)}). Corrija o valor.`, 'erro');
-                    return; 
-                }
-            }
-
-            let reservaIdFinal = reservaIdEditada;
-
-            let statusDestino = status;
-            if (status === 'Checkout') {
-                statusDestino = 'Limpeza';
-            }
-
-            if (status === 'Reservado' || status === 'Ocupada') {
-                if (status === 'Ocupada') {
-                    await supabaseClient.from('suites').update({ status: 'Ocupada' }).eq('id', suiteId);
-                }
-
-                if (reservaIdEditada) {
-                    await supabaseClient.from('reservas').update(dadosReserva).eq('id', reservaIdEditada);
-                } else {
-                    const { data: novaReservaInserida, error: errIns } = await supabaseClient.from('reservas').insert([dadosReserva]).select().single();
-                    if (!errIns && novaReservaInserida) {
-                        reservaIdFinal = novaReservaInserida.id;
-                    }
-                }
-            } 
-            else {
-                await supabaseClient.from('suites').update({ status: statusDestino }).eq('id', suiteId);
-                
-                if (reservaIdEditada) {
-                    await supabaseClient.from('reservas').update({ status: 'Finalizada' }).eq('id', reservaIdEditada);
-                } else {
-                    const hoje = new Date().toISOString().split('T')[0];
-                    await supabaseClient.from('reservas').update({ status: 'Finalizada' })
-                        .eq('suite_id', suiteId)
-                        .eq('status', 'Aprovada')
-                        .lte('checkin', hoje);
-                }
-            }
-
-            if (valorSinalInformado > 0 && reservaIdFinal) {
-                const { error: errPag } = await supabaseClient.from('hospede_pagamentos').insert([{
-                    pousada_id: usuarioIdAtual,
-                    reserva_id: reservaIdFinal,
-                    valor_pago: valorSinalInformado,
-                    forma_pagamento: formaPagamentoSelecionada,
-                    observacao: 'Lançado via painel de gestão'
-                }]);
-
-                if (errPag) {
-                    console.error("Erro ao gravar pagamento:", errPag);
-                }
-            }
-
-            fecharModal();
-            carregarDashboard();
-            mostrarToast("Sucesso", "Dados salvos com sucesso!");
+    // 🛑 1. Validar conflito de reservas antes de prosseguir
+    try {
+        const { data: temConflito, error: erroConflito } = await supabaseClient.rpc('verificar_conflito_reserva', { 
+            p_suite_id: suiteId, 
+            p_checkin: checkinVal, 
+            p_checkout: checkoutVal,
+            p_reserva_id: reservaIdEditada ? reservaIdEditada : null
+        });
+        
+        if (!erroConflito && temConflito === true) {
+            mostrarToast("Atenção", "Já existe uma reserva confirmada para esta suíte nestas datas!", "erro");
+            return; 
         }
+    } catch (err) {
+        console.error("Erro ao verificar conflito de reservas:", err);
+    }
+
+    const dadosReserva = {
+        pousada_id: usuarioIdAtual,
+        suite_id: suiteId,
+        hospede_nome: document.getElementById('edit-hospede').value || 'Hóspede',
+        whatsapp_hospede: document.getElementById('edit-whatsapp').value,
+        cpf: document.getElementById('edit-cpf').value,
+        rg: document.getElementById('edit-rg').value,
+        endereco: document.getElementById('edit-endereco').value,
+        email: document.getElementById('edit-email').value,
+        checkin: checkinVal,
+        checkout: checkoutVal,
+        status: 'Aprovada'
+    };
+
+    let valorTotalCalculado = 0;
+    try {
+        const { data: valorCalculado, error: erroRpc } = await supabaseClient.rpc('calcular_total_reserva', { 
+            p_suite_id: suiteId, 
+            p_checkin: checkinVal, 
+            p_checkout: checkoutVal 
+        });
+        
+        if (!erroRpc && valorCalculado !== null) {
+            valorTotalCalculado = Number(valorCalculado);
+            dadosReserva.valor_total = valorTotalCalculado;
+        }
+    } catch (err) {
+        console.error("Erro ao invocar a função de cálculo no banco:", err);
+    }
+
+    if (valorSinalInformado > 0 && reservaIdEditada) {
+        const pagamentosExistentes = pagamentosGlobaisCache.filter(p => p.reserva_id === reservaIdEditada);
+        const totalJaPago = pagamentosExistentes.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
+        const saldoRestanteAtual = valorTotalCalculado - totalJaPago;
+
+        if (valorSinalInformado > saldoRestanteAtual) {
+            mostrarToast("Atenção", `O valor do pagamento (${formatarMoeda(valorSinalInformado)}) é maior que o saldo restante (${formatarMoeda(saldoRestanteAtual)}). Corrija o valor.`, 'erro');
+            return; 
+        }
+    } else if (valorSinalInformado > 0 && valorTotalCalculado > 0) {
+        if (valorSinalInformado > valorTotalCalculado) {
+            mostrarToast("Atenção", `O valor do pagamento (${formatarMoeda(valorSinalInformado)}) é maior que o valor total da reserva (${formatarMoeda(valorTotalCalculado)}). Corrija o valor.`, 'erro');
+            return; 
+        }
+    }
+
+    let reservaIdFinal = reservaIdEditada;
+
+    // Tratamento do status de destino para a tabela suites
+    let statusDestino = status;
+    if (status === 'Checkout') {
+        statusDestino = 'Limpeza';
+    }
+
+    // 🛑 CORREÇÃO PRINCIPAL: Atualizar explicitamente o status na tabela suites
+    await supabaseClient.from('suites').update({ status: statusDestino }).eq('id', suiteId);
+
+    if (status === 'Reservado' || status === 'Ocupada' || status === 'Aprovada') {
+        if (reservaIdEditada) {
+            await supabaseClient.from('reservas').update(dadosReserva).eq('id', reservaIdEditada);
+        } else {
+            const { data: novaReservaInserida, error: errIns } = await supabaseClient.from('reservas').insert([dadosReserva]).select().single();
+            if (!errIns && novaReservaInserida) {
+                reservaIdFinal = novaReservaInserida.id;
+            }
+        }
+    } else {
+        if (reservaIdEditada) {
+            await supabaseClient.from('reservas').update({ status: 'Finalizada' }).eq('id', reservaIdEditada);
+        } else {
+            const hoje = new Date().toISOString().split('T')[0];
+            await supabaseClient.from('reservas').update({ status: 'Finalizada' })
+                .eq('suite_id', suiteId)
+                .eq('status', 'Aprovada')
+                .lte('checkin', hoje);
+        }
+    }
+
+    if (valorSinalInformado > 0 && reservaIdFinal) {
+        const { error: errPag } = await supabaseClient.from('hospede_pagamentos').insert([{
+            pousada_id: usuarioIdAtual,
+            reserva_id: reservaIdFinal,
+            valor_pago: valorSinalInformado,
+            forma_pagamento: formaPagamentoSelecionada,
+            observacao: 'Lançado via painel de gestão'
+        }]);
+
+        if (errPag) {
+            console.error("Erro ao gravar pagamento:", errPag);
+        }
+    }
+
+    fecharModal();
+    carregarDashboard();
+    mostrarToast("Sucesso", "Dados salvos com sucesso!");
+}
 
         document.getElementById('form-edicao').onsubmit = async (e) => {
             e.preventDefault();
