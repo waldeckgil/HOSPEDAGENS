@@ -94,7 +94,7 @@
             <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">⚠️</div>
             <h3 class="text-xl font-bold text-gray-900">Confirmar Saída / Limpeza?</h3>
             <p id="modal-confirmacao-texto" class="text-sm text-gray-600">
-                Esta ação encerrará a estadia atual do hóspede. Deseja prosseguir?
+                Esta ação encerrará a estadia atual do hóspede e enviará a suíte para limpeza. Deseja prosseguir?
             </p>
             <div class="grid grid-cols-2 gap-3 pt-2">
                 <button type="button" onclick="fecharModalConfirmacao()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-xl transition text-sm">Cancelar</button>
@@ -121,6 +121,7 @@
                         <option value="Reservado">Reservado (Adicionar/Editar Datas Futuras)</option>
                         <option value="Limpeza">Limpeza</option>
                         <option value="Pendente">Pendente</option>
+                        <option value="Checkout">Checkout (Finalizar Estadia)</option>
                     </select>
                 </div>
 
@@ -664,6 +665,12 @@
 
             let reservaIdFinal = reservaIdEditada;
 
+            // Se a opção selecionada for 'Checkout', tratamos o status real da suíte como 'Limpeza' e finalizamos a reserva atual
+            let statusDestino = status;
+            if (status === 'Checkout') {
+                statusDestino = 'Limpeza';
+            }
+
             if (status === 'Reservado' || status === 'Ocupada') {
                 if (status === 'Ocupada') {
                     await supabaseClient.from('suites').update({ status: 'Ocupada' }).eq('id', suiteId);
@@ -679,7 +686,7 @@
                 }
             } 
             else {
-                await supabaseClient.from('suites').update({ status }).eq('id', suiteId);
+                await supabaseClient.from('suites').update({ status: statusDestino }).eq('id', suiteId);
                 
                 if (reservaIdEditada) {
                     await supabaseClient.from('reservas').update({ status: 'Finalizada' }).eq('id', reservaIdEditada);
@@ -717,7 +724,14 @@
             const statusOriginal = document.getElementById('edit-status-original').value;
             const suiteId = document.getElementById('edit-suite-id').value;
             
-            if (statusOriginal === 'Ocupada' && (status === 'Limpeza' || status === 'Disponível')) {
+            // 🛑 Validação: Se a suíte estava Ocupada, bloqueia a escolha direta para Disponível (forçando Limpeza ou Checkout)
+            if (statusOriginal === 'Ocupada' && status === 'Disponível') {
+                mostrarToast("Atenção", "Uma suíte ocupada não pode ir direto para 'Disponível'. Envie para 'Limpeza' ou faça o 'Checkout'.", 'erro');
+                return;
+            }
+
+            // Validação com confirmação para quando transacionar de Ocupada para Limpeza ou Checkout
+            if (statusOriginal === 'Ocupada' && (status === 'Limpeza' || status === 'Checkout')) {
                 fecharModal(); 
                 document.getElementById('modal-confirmacao').classList.remove('hidden');
                 document.getElementById('btn-confirmar-acao').onclick = async () => {
