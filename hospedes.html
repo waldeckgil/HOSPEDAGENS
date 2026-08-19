@@ -69,13 +69,14 @@
                         <input type="text" id="filtro-texto" placeholder="Digite parte do nome, CPF..." class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Filtrar por Status</label>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Filtrar por Status da Suíte</label>
                         <select id="filtro-status" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
                             <option value="">Todos os Status</option>
-                            <option value="Aprovada">Aprovada (Ocupada/Ativa)</option>
+                            <option value="Disponível">Disponível</option>
+                            <option value="Ocupada (Agora)">Ocupada (Agora)</option>
+                            <option value="Reservado">Reservado</option>
+                            <option value="Limpeza">Limpeza</option>
                             <option value="Pendente">Pendente</option>
-                            <option value="Finalizada">Finalizada</option>
-                            <option value="Cancelada">Cancelada / Recusada</option>
                         </select>
                     </div>
                     <div>
@@ -218,10 +219,11 @@
         async function carregarHistoricoHospedes() {
             if (!usuarioIdAtual) return;
 
-            // 1. Buscar reservas e pagamentos associados à pousada
-            const [resReservas, resPagamentos] = await Promise.all([
+            // 1. Buscar reservas, pagamentos e suítes associadas à pousada
+            const [resReservas, resPagamentos, resSuites] = await Promise.all([
                 supabaseClient.from('reservas').select('*').eq('pousada_id', usuarioIdAtual).order('criado_em', { ascending: false }),
-                supabaseClient.from('hospede_pagamentos').select('*').eq('pousada_id', usuarioIdAtual)
+                supabaseClient.from('hospede_pagamentos').select('*').eq('pousada_id', usuarioIdAtual),
+                supabaseClient.from('suites').select('*').eq('pousada_id', usuarioIdAtual)
             ]);
 
             if (resReservas.error) {
@@ -231,6 +233,14 @@
 
             const reservas = resReservas.data || [];
             const pagamentos = resPagamentos.data || [];
+            const suites = resSuites.data || [];
+
+            // Mapear suítes por ID ou nome para consulta rápida do status do dashboard
+            const suitesMap = {};
+            suites.forEach(s => {
+                suitesMap[s.id] = s;
+                if (s.nome) suitesMap[s.nome.trim().toLowerCase()] = s;
+            });
 
             // Mapear pagamentos por reserva_id para soma rápida
             const pagamentosPorReserva = {};
@@ -260,13 +270,17 @@
                 );
             }
 
-            // Filtro por Status específico
+            // Filtro por Status da Suíte gerado no Dashboard
             if (statusBusca !== '') {
-                if (statusBusca === 'Cancelada') {
-                    filtrados = filtrados.filter(r => r.status === 'Cancelada' || r.status === 'Recusada');
-                } else {
-                    filtrados = filtrados.filter(r => r.status === statusBusca);
-                }
+                filtrados = filtrados.filter(r => {
+                    let suiteDaReserva = null;
+                    if (r.suite_id && suitesMap[r.suite_id]) {
+                        suiteDaReserva = suitesMap[r.suite_id];
+                    } else if (r.suite_nome) {
+                        suiteDaReserva = suitesMap[r.suite_nome.trim().toLowerCase()];
+                    }
+                    return suiteDaReserva && suiteDaReserva.status === statusBusca;
+                });
             }
 
             // Filtros por período de check-in / check-out
@@ -277,15 +291,22 @@
                 filtrados = filtrados.filter(r => r.checkin <= dataFim);
             }
 
-            // ORDENAÇÃO INTELIGENTE: Prioriza estadias 'Aprovada' (ocupadas/ativas) no topo
+            // ORDENAÇÃO INTELIGENTE: Prioriza estadias cuja suíte está 'Ocupada (Agora)' no topo, seguidas por ordem de data ascendente
             filtrados.sort((a, b) => {
-                const aAprovada = a.status === 'Aprovada' ? 1 : 0;
-                const bAprovada = b.status === 'Aprovada' ? 1 : 0;
-                if (aAprovada !== bAprovada) {
-                    return bAprovada - aAprovada; // As 'Aprovadas' vêm primeiro
+                let suiteA = (a.suite_id && suitesMap[a.suite_id]) || (a.suite_nome && suitesMap[a.suite_nome.trim().toLowerCase()]);
+                let suiteB = (b.suite_id && suitesMap[b.suite_id]) || (b.suite_nome && suitesMap[b.suite_nome.trim().toLowerCase()]);
+
+                const aOcupada = (suiteA && suiteA.status === 'Ocupada (Agora)') ? 1 : 0;
+                const bOcupada = (suiteB && suiteB.status === 'Ocupada (Agora)') ? 1 : 0;
+
+                if (aOcupada !== bOcupada) {
+                    return bOcupada - aOcupada; // As 'Ocupada (Agora)' vêm primeiro
                 }
-                // Desempate pela data de criação mais recente
-                return new Date(b.criado_em) - new Date(a.criado_em);
+
+                // Desempate por data de check-in ascendente (mais antiga para mais recente)
+                const dataA = new Date(a.checkin || '1970-01-01');
+                const dataB = new Date(b.checkin || '1970-01-01');
+                return dataA - dataB;
             });
 
             const tbody = document.getElementById('tabela-hospedes-corpo');
