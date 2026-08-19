@@ -616,22 +616,6 @@
             const checkinVal = document.getElementById('edit-checkin').value || new Date().toISOString().split('T')[0];
             const checkoutVal = document.getElementById('edit-checkout').value || new Date().toISOString().split('T')[0];
 
-            // 🛑 1. Validar conflito de reservas antes de prosseguir
-            try {
-                const { data: temConflito, error: erroConflito } = await supabaseClient.rpc('verificar_conflito_reserva', { 
-                    p_suite_id: suiteId, 
-                    p_checkin: checkinVal, 
-                    p_checkout: checkoutVal 
-                });
-                
-                if (!erroConflito && temConflito === true) {
-                    mostrarToast("Atenção", "Já existe uma reserva confirmada para esta suíte nestas datas!", "erro");
-                    return; 
-                }
-            } catch (err) {
-                console.error("Erro ao verificar conflito de reservas:", err);
-            }
-
             const dadosReserva = {
                 pousada_id: usuarioIdAtual,
                 suite_id: suiteId,

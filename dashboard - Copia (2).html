@@ -92,7 +92,7 @@
     <div id="modal-confirmacao" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-8 rounded-3xl w-full max-w-md shadow-2xl text-center space-y-4">
             <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">⚠️</div>
-            <h3 class="text-xl font-bold text-gray-900">Confirmar Saída / Limpeza?</h3>
+            <h3 id="modal-confirmacao-titulo" class="text-xl font-bold text-gray-900">Confirmar Saída / Limpeza?</h3>
             <p id="modal-confirmacao-texto" class="text-sm text-gray-600">
                 Esta ação encerrará a estadia atual do hóspede e enviará a suíte para limpeza. Deseja prosseguir?
             </p>
@@ -112,6 +112,7 @@
                 <input type="hidden" id="edit-suite-id">
                 <input type="hidden" id="edit-status-original">
                 <input type="hidden" id="edit-reserva-id">
+                <input type="hidden" id="edit-checkout-original-salvo">
                 
                 <div>
                     <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Status Físico da Suíte</label>
@@ -556,6 +557,7 @@
                 document.getElementById('edit-email').value = reserva.email || '';
                 document.getElementById('edit-checkin').value = reserva.checkin || '';
                 document.getElementById('edit-checkout').value = reserva.checkout || '';
+                document.getElementById('edit-checkout-original-salvo').value = reserva.checkout || '';
             } else {
                 document.getElementById('edit-reserva-id').value = '';
                 document.getElementById('edit-hospede').value = '';
@@ -566,6 +568,7 @@
                 document.getElementById('edit-email').value = '';
                 document.getElementById('edit-checkin').value = '';
                 document.getElementById('edit-checkout').value = '';
+                document.getElementById('edit-checkout-original-salvo').value = '';
             }
             
             verificarStatusModal();
@@ -601,12 +604,38 @@
                 document.getElementById('edit-checkout').value = '';
                 document.getElementById('edit-valor-sinal').value = '';
                 document.getElementById('edit-forma-pagamento').value = 'Pix / Sinal';
+                document.getElementById('edit-checkout-original-salvo').value = '';
                 camposLimposParaNovaReserva = true;
             }
         }
 
         function fecharModal() { document.getElementById('modal-edicao').classList.add('hidden'); }
         function fecharModalConfirmacao() { document.getElementById('modal-confirmacao').classList.add('hidden'); }
+
+        // Função de verificação de conflito de datas (Situação 2)
+        async function verificarConflitoDatas(suiteId, checkinNovo, checkoutNovo, reservaIdAtual) {
+            const reservasDaSuite = reservasGlobaisCache.filter(r => 
+                r.suite_id === suiteId && 
+                r.status !== 'Cancelada' && 
+                r.status !== 'Recusada' && 
+                r.status !== 'Finalizada'
+            );
+
+            for (let r of reservasDaSuite) {
+                if (reservaIdAtual && r.id === reservaIdAtual) continue;
+
+                // Regra de cruzamento de períodos: checkinNovo <= checkoutExistente E checkoutNovo >= checkinExistente
+                if (checkinNovo <= r.checkout && checkoutNovo >= r.checkin) {
+                    return {
+                        temConflito: true,
+                        hospedeConflito: r.hospede_nome || 'Outro hóspede',
+                        checkinConflito: r.checkin,
+                        checkoutConflito: r.checkout
+                    };
+                }
+            }
+            return { temConflito: false };
+        }
 
         async function executarSalvamento(suiteId, status) {
             const reservaIdEditada = document.getElementById('edit-reserva-id').value;
@@ -616,20 +645,13 @@
             const checkinVal = document.getElementById('edit-checkin').value || new Date().toISOString().split('T')[0];
             const checkoutVal = document.getElementById('edit-checkout').value || new Date().toISOString().split('T')[0];
 
-            // 🛑 1. Validar conflito de reservas antes de prosseguir
-            try {
-                const { data: temConflito, error: erroConflito } = await supabaseClient.rpc('verificar_conflito_reserva', { 
-                    p_suite_id: suiteId, 
-                    p_checkin: checkinVal, 
-                    p_checkout: checkoutVal 
-                });
-                
-                if (!erroConflito && temConflito === true) {
-                    mostrarToast("Atenção", "Já existe uma reserva confirmada para esta suíte nestas datas!", "erro");
-                    return; 
+            // 🛑 Validação da Situação 2: Verificar conflito de datas caso a suíte esteja ocupada/reservada
+            if (status === 'Ocupada' || status === 'Reservado') {
+                const resultadoConflito = await verificarConflitoDatas(suiteId, checkinVal, checkoutVal, reservaIdEditada);
+                if (resultadoConflito.temConflito) {
+                    mostrarToast("Conflito de Agenda", `Esta suíte já está ocupada por ${resultadoConflito.hospedeConflito} (${formatarDataSimples(resultadoConflito.checkinConflito)} a ${formatarDataSimples(resultadoConflito.checkoutConflito)}).`, 'erro');
+                    return; // Interrompe o processo
                 }
-            } catch (err) {
-                console.error("Erro ao verificar conflito de reservas:", err);
             }
 
             const dadosReserva = {
@@ -662,7 +684,7 @@
                 console.error("Erro ao invocar a função de cálculo no banco:", err);
             }
 
-            // 🛑 CRÍTICA: Impedir que o valor do sinal seja maior do que o saldo restante ou total
+            // 🛑 CRÍTICA: Impedir que o valor do sinal seja maior do que o saldo restante
             if (valorSinalInformado > 0 && reservaIdEditada) {
                 const pagamentosExistentes = pagamentosGlobaisCache.filter(p => p.reserva_id === reservaIdEditada);
                 const totalJaPago = pagamentosExistentes.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
@@ -670,17 +692,18 @@
 
                 if (valorSinalInformado > saldoRestanteAtual) {
                     mostrarToast("Atenção", `O valor do pagamento (${formatarMoeda(valorSinalInformado)}) é maior que o saldo restante (${formatarMoeda(saldoRestanteAtual)}). Corrija o valor.`, 'erro');
-                    return; 
+                    return; // Interrompe o salvamento
                 }
             } else if (valorSinalInformado > 0 && valorTotalCalculado > 0) {
                 if (valorSinalInformado > valorTotalCalculado) {
                     mostrarToast("Atenção", `O valor do pagamento (${formatarMoeda(valorSinalInformado)}) é maior que o valor total da reserva (${formatarMoeda(valorTotalCalculado)}). Corrija o valor.`, 'erro');
-                    return; 
+                    return; // Interrompe o salvamento
                 }
             }
 
             let reservaIdFinal = reservaIdEditada;
 
+            // Se a opção selecionada for 'Checkout', tratamos o status real da suíte como 'Limpeza' e finalizamos a reserva atual
             let statusDestino = status;
             if (status === 'Checkout') {
                 statusDestino = 'Limpeza';
@@ -738,14 +761,37 @@
             const status = document.getElementById('edit-status').value;
             const statusOriginal = document.getElementById('edit-status-original').value;
             const suiteId = document.getElementById('edit-suite-id').value;
-            
+            const checkoutOriginalSalvo = document.getElementById('edit-checkout-original-salvo').value;
+            const novoCheckout = document.getElementById('edit-checkout').value;
+            const reservaIdEditada = document.getElementById('edit-reserva-id').value;
+
+            // 🛑 Validação: Se a suíte estava Ocupada, bloqueia a escolha direta para Disponível (forçando Limpeza ou Checkout)
             if (statusOriginal === 'Ocupada' && status === 'Disponível') {
                 mostrarToast("Atenção", "Uma suíte ocupada não pode ir direto para 'Disponível'. Envie para 'Limpeza' ou faça o 'Checkout'.", 'erro');
                 return;
             }
 
+            // 🛑 Validação da Situação 1: Antecipação de Checkout
+            if (reservaIdEditada && checkoutOriginalSalvo && novoCheckout && novoCheckout < checkoutOriginalSalvo) {
+                fecharModal();
+                const novasDiarias = calcularQuantidadeDiarias(document.getElementById('edit-checkin').value, novoCheckout);
+                
+                document.getElementById('modal-confirmacao-titulo').innerText = "Atenção: Checkout Antecipado!";
+                document.getElementById('modal-confirmacao-texto').innerText = `O check-out foi antecipado de ${formatarDataSimples(checkoutOriginalSalvo)} para ${formatarDataSimples(novoCheckout)}. A nova estadia será de ${novasDiarias} diária(s). Deseja prosseguir e recalcular?`;
+                
+                document.getElementById('modal-confirmacao').classList.remove('hidden');
+                document.getElementById('btn-confirmar-acao').onclick = async () => {
+                    fecharModalConfirmacao();
+                    await executarSalvamento(suiteId, status);
+                };
+                return;
+            }
+
+            // Validação com confirmação para quando transacionar de Ocupada para Limpeza ou Checkout
             if (statusOriginal === 'Ocupada' && (status === 'Limpeza' || status === 'Checkout')) {
                 fecharModal(); 
+                document.getElementById('modal-confirmacao-titulo').innerText = "Confirmar Saída / Limpeza?";
+                document.getElementById('modal-confirmacao-texto').innerText = "Esta ação encerrará a estadia atual do hóspede e enviará a suíte para limpeza. Deseja prosseguir?";
                 document.getElementById('modal-confirmacao').classList.remove('hidden');
                 document.getElementById('btn-confirmar-acao').onclick = async () => {
                     fecharModalConfirmacao();
