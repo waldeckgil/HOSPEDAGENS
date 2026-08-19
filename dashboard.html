@@ -616,12 +616,13 @@
             const checkinVal = document.getElementById('edit-checkin').value || new Date().toISOString().split('T')[0];
             const checkoutVal = document.getElementById('edit-checkout').value || new Date().toISOString().split('T')[0];
 
-            // 🛑 1. Validar conflito de reservas antes de prosseguir
+            // 🛑 1. Validar conflito de reservas antes de prosseguir (Passando p_reserva_id para ignorar a própria edição)
             try {
                 const { data: temConflito, error: erroConflito } = await supabaseClient.rpc('verificar_conflito_reserva', { 
                     p_suite_id: suiteId, 
                     p_checkin: checkinVal, 
-                    p_checkout: checkoutVal 
+                    p_checkout: checkoutVal,
+                    p_reserva_id: reservaIdEditada ? reservaIdEditada : null
                 });
                 
                 if (!erroConflito && temConflito === true) {
