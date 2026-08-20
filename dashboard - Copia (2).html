@@ -7,18 +7,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        @keyframes piscarAlerta {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.005); }
-        }
-        .alerta-piscando {
-            animation: piscarAlerta 1.5s infinite ease-in-out;
-        }
-    </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col md:flex-row">
 
+    <!-- MENU LATERAL (Adaptado para mobile e desktop) -->
     <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl">
         <div class="p-4 sm:p-6">
             <div class="flex justify-between items-center md:block">
@@ -59,7 +51,9 @@
         </div>
     </aside>
 
+    <!-- CONTEÚDO PRINCIPAL -->
     <div class="flex-1 flex flex-col min-w-0">
+        <!-- CABEÇALHO -->
         <header class="bg-white shadow-xs border-b border-gray-200 p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                 <h2 class="text-lg sm:text-xl font-bold text-gray-800">Gestão de Suítes</h2>
@@ -68,8 +62,10 @@
             <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200 w-fit">Sistema Online</span>
         </header>
 
+        <!-- CORPO DA PÁGINA -->
         <main class="p-4 sm:p-6 md:p-8 flex-1 overflow-y-auto">
-            <div id="card-atencao-pendentes" class="hidden mb-8 bg-amber-50 border-l-8 border-amber-500 p-4 sm:p-6 rounded-2xl shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-4 alerta-piscando">
+            <!-- 🚨 CARD DE ATENÇÃO NO TOPO -->
+            <div id="card-atencao-pendentes" class="hidden mb-8 bg-amber-50 border-l-8 border-amber-500 p-4 sm:p-6 rounded-2xl shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <div class="flex items-center gap-2">
                         <span class="text-xl sm:text-2xl">🔔</span>
@@ -87,6 +83,7 @@
         </main>
     </div>
 
+    <!-- 💬 TOAST -->
     <div id="toast-notificacao" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
         <div id="toast-content" class="bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
             <span id="toast-icone" class="text-xl">✨</span>
@@ -97,6 +94,7 @@
         </div>
     </div>
 
+    <!-- 🛑 MODAL DE CONFIRMAÇÃO -->
     <div id="modal-confirmacao" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-6 sm:p-8 rounded-3xl w-full max-w-md shadow-2xl text-center space-y-4">
             <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">⚠️</div>
@@ -111,6 +109,7 @@
         </div>
     </div>
 
+    <!-- Modal de Edição -->
     <div id="modal-edicao" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-6 sm:p-8 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
             <h2 id="modal-titulo" class="text-xl sm:text-2xl font-bold mb-4 text-blue-600">Gerenciar Suíte</h2>
@@ -155,6 +154,7 @@
                         </div>
                     </div>
 
+                    <!-- CAMPO PARA LANÇAR SINAL / PAGAMENTO PARCIAL E FORMA DE PAGAMENTO -->
                     <div class="pt-2 space-y-2">
                         <div>
                             <label class="block text-xs font-bold text-emerald-700 mb-1">Registrar Novo Pagamento / Sinal (R$)</label>
