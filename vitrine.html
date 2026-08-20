@@ -256,20 +256,20 @@
                 return;
             }
 
-            // CORREÇÃO APLICADA: Blindagem dupla descartando reservas com checkout vencido na query e no loop
-            const { data: reservasAprovadas } = await supabaseClient
+            // ATUALIZADO: Bloqueia tanto reservas Aprovadas quanto Pendentes para evitar conflitos de período
+            const { data: reservasOcupadasOuPendentes } = await supabaseClient
                 .from('reservas')
                 .select('*')
                 .eq('pousada_id', pousadaIdGlobal)
-                .eq('status', 'Aprovada')
+                .in('status', ['Aprovada', 'Pendente'])
                 .gte('checkout', hojeISO);
 
             const novoInicio = new Date(checkinFiltro);
             const novoFim = new Date(checkoutFiltro);
 
             const suitesOcupadasIds = new Set();
-            if (reservasAprovadas) {
-                reservasAprovadas.forEach(res => {
+            if (reservasOcupadasOuPendentes) {
+                reservasOcupadasOuPendentes.forEach(res => {
                     // Validação de segurança extra contra reservas não baixadas pelo gestor
                     if (res.checkout < hojeISO) return;
 
@@ -470,7 +470,7 @@
                 endereco: document.getElementById('endereco-hospede').value,
                 checkin: checkinVal,
                 checkout: checkoutVal,
-                valor_total: valorTotalCalculado, // Incluído corretamente aqui!
+                valor_total: valorTotalCalculado,
                 status: 'Pendente',
                 criado_em: new Date().toISOString()
             }]);
