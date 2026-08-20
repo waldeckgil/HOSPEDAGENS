@@ -11,85 +11,84 @@
 </head>
 <body class="bg-gray-100 font-sans antialiased">
 
-    <div class="flex h-screen bg-gray-100 overflow-hidden">
+    <div class="flex h-screen bg-gray-100">
         <!-- Conteúdo Principal -->
-        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 sm:p-6">
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
             <div class="max-w-7xl mx-auto">
                 
                 <!-- Cabeçalho Dinâmico -->
-                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
-                    <div class="flex items-center gap-3 w-full lg:w-auto justify-between lg:justify-start">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div class="flex items-center gap-4">
                         <!-- Botão de Voltar para o Dashboard -->
-                        <a href="dashboard.html" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3.5 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 shadow-sm">
+                        <a href="dashboard.html" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 shadow-sm">
                             <span>←</span> Voltar
                         </a>
                         <div>
-                            <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Gestão Financeira</h1>
-                            <p id="nomePousadaLogada" class="text-xs sm:text-sm font-semibold text-blue-600 mt-0.5">Carregando pousada...</p>
+                            <h1 class="text-2xl font-bold text-gray-800">Gestão Financeira</h1>
+                            <p id="nomePousadaLogada" class="text-sm font-semibold text-blue-600 mt-0.5">Carregando pousada...</p>
                         </div>
                     </div>
 
-                    <!-- Filtros (Status, Datas e Botão) - Adaptados para Mobile -->
-                    <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2.5 w-full lg:w-auto bg-white p-3 rounded-xl shadow-sm border border-gray-200 lg:bg-transparent lg:p-0 lg:border-0 lg:shadow-none">
-                        <div class="flex flex-col col-span-2 sm:col-span-1">
-                            <label class="text-[10px] font-bold text-gray-500 uppercase mb-0.5">Status</label>
-                            <select id="filtroStatus" class="border rounded-lg px-3 py-2 text-xs sm:text-sm bg-white font-medium text-gray-700 w-full">
+                    <!-- Filtros (Status, Datas e Botão) -->
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="flex flex-col">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase">Status</label>
+                            <select id="filtroStatus" class="border rounded-lg px-3 py-2 text-sm bg-white font-medium text-gray-700">
                                 <option value="Aprovada" selected>Aprovada</option>
                                 <option value="Finalizada">Finalizada</option>
                                 <option value="TODAS">Todas</option>
                             </select>
                         </div>
                         <div class="flex flex-col">
-                            <label class="text-[10px] font-bold text-gray-500 uppercase mb-0.5">Data Início</label>
-                            <input type="date" id="filtroInicio" class="border rounded-lg px-2.5 py-2 text-xs sm:text-sm bg-white w-full">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase">Data Início</label>
+                            <input type="date" id="filtroInicio" class="border rounded-lg px-3 py-2 text-sm bg-white">
                         </div>
                         <div class="flex flex-col">
-                            <label class="text-[10px] font-bold text-gray-500 uppercase mb-0.5">Data Fim</label>
-                            <input type="date" id="filtroFim" class="border rounded-lg px-2.5 py-2 text-xs sm:text-sm bg-white w-full">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase">Data Fim</label>
+                            <input type="date" id="filtroFim" class="border rounded-lg px-3 py-2 text-sm bg-white">
                         </div>
-                        <div class="flex items-end col-span-2 sm:col-span-1 mt-1 sm:mt-0">
-                            <button onclick="carregarDadosFinanceiros()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold hover:bg-blue-700 transition w-full sm:w-auto h-[38px] shadow-sm">Filtrar</button>
+                        <div class="flex items-end">
+                            <button onclick="carregarDadosFinanceiros()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition h-[38px]">Filtrar</button>
                         </div>
                     </div>
                 </div>
 
                 <!-- Cards de Resumo (KPIs Inteligentes) -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6">
-                    <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
-                        <p class="text-xs sm:text-sm font-medium text-gray-500">Faturamento Bruto (Total)</p>
-                        <p id="kpiFaturamento" class="text-2xl sm:text-3xl font-bold text-gray-800 mt-1.5 sm:mt-2">R$ 0,00</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <p class="text-sm font-medium text-gray-500">Faturamento Bruto (Total)</p>
+                        <p id="kpiFaturamento" class="text-3xl font-bold text-gray-800 mt-2">R$ 0,00</p>
                     </div>
-                    <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
-                        <p class="text-xs sm:text-sm font-medium text-gray-500">Total Recebido (Caixa / Sinal)</p>
-                        <p id="kpiRecebido" class="text-2xl sm:text-3xl font-bold text-green-600 mt-1.5 sm:mt-2">R$ 0,00</p>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <p class="text-sm font-medium text-gray-500">Total Recebido (Caixa / Sinal)</p>
+                        <p id="kpiRecebido" class="text-3xl font-bold text-green-600 mt-2">R$ 0,00</p>
                     </div>
-                    <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
-                        <p class="text-xs sm:text-sm font-medium text-gray-500">Saldo Restante a Receber</p>
-                        <p id="kpiSaldo" class="text-2xl sm:text-3xl font-bold text-amber-600 mt-1.5 sm:mt-2">R$ 0,00</p>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <p class="text-sm font-medium text-gray-500">Saldo Restante a Receber</p>
+                        <p id="kpiSaldo" class="text-3xl font-bold text-amber-600 mt-2">R$ 0,00</p>
                     </div>
                 </div>
 
-                <!-- Tabela de Detalhamento com Rolagem Suave no Celular -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
-                    <div class="px-4 sm:px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                        <h3 class="font-semibold text-sm sm:text-base text-gray-800">Detalhamento Financeiro por Reserva</h3>
-                        <span class="text-[11px] text-gray-400 hidden sm:inline">Deslize para o lado se necessário →</span>
+                <!-- Tabela de Detalhamento com Enriquecimento Financeiro -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                        <h3 class="font-semibold text-gray-800">Detalhamento Financeiro por Reserva</h3>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse min-w-[750px]">
+                        <table class="w-full text-left border-collapse">
                             <thead>
-                                <tr class="bg-gray-50 text-gray-600 text-[11px] sm:text-xs uppercase tracking-wider">
-                                    <th class="py-3 px-4 sm:px-6">Check-in / Out (Diárias)</th>
-                                    <th class="py-3 px-4 sm:px-6">Hóspede</th>
-                                    <th class="py-3 px-4 sm:px-6">Suíte</th>
-                                    <th class="py-3 px-4 sm:px-6">Valor Total</th>
-                                    <th class="py-3 px-4 sm:px-6">Pago (Sinal)</th>
-                                    <th class="py-3 px-4 sm:px-6">Forma Pagto.</th>
-                                    <th class="py-3 px-4 sm:px-6">Saldo Restante</th>
-                                    <th class="py-3 px-4 sm:px-6">Status</th>
+                                <tr class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider">
+                                    <th class="py-3 px-6">Check-in / Out (Diárias)</th>
+                                    <th class="py-3 px-6">Hóspede</th>
+                                    <th class="py-3 px-6">Suíte</th>
+                                    <th class="py-3 px-6">Valor Total</th>
+                                    <th class="py-3 px-6">Pago (Sinal)</th>
+                                    <th class="py-3 px-6">Forma Pagto.</th>
+                                    <th class="py-3 px-6">Saldo Restante</th>
+                                    <th class="py-3 px-6">Status</th>
                                 </tr>
                             </thead>
-                            <tbody id="tabelaFinanceira" class="divide-y divide-gray-200 text-xs sm:text-sm text-gray-700">
+                            <tbody id="tabelaFinanceira" class="divide-y divide-gray-200 text-sm text-gray-700">
                                 <!-- Preenchido via JavaScript -->
                             </tbody>
                         </table>
@@ -136,7 +135,7 @@
             
             if (!user) {
                 labelPousada.textContent = 'Atenção: Usuário não autenticado.';
-                labelPousada.className = 'text-xs sm:text-sm font-semibold text-red-600 mt-0.5';
+                labelPousada.className = 'text-sm font-semibold text-red-600 mt-0.5';
                 setTimeout(() => { window.location.href = 'index.html'; }, 2000);
                 return;
             }
@@ -206,7 +205,7 @@
             let corpoTabela = '';
 
             if (!reservas || reservas.length === 0) {
-                corpoTabela = `<tr><td colspan="8" class="py-6 px-6 text-center text-gray-500">Nenhuma reserva encontrada para este período e status.</td></tr>`;
+                corpoTabela = `<tr><td colspan="8" class="py-4 px-6 text-center text-gray-500">Nenhuma reserva encontrada para este período e status.</td></tr>`;
             } else {
                 reservas.forEach(reserva => {
                     const valorTotal = Number(reserva.valor_total) || 0;
@@ -216,7 +215,7 @@
                     const totalPago = pagamentosDestaReserva.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
                     const saldoRestante = valorTotal - totalPago;
 
-                    // Extrai as formas de pagamento utilizadas
+                    // Extrai as formas de pagamento utilizadas (ex: Pix, Dinheiro, Cartão)
                     let formasPagtoSet = new Set();
                     pagamentosDestaReserva.forEach(p => {
                         if (p.forma_pagamento) {
@@ -238,21 +237,21 @@
 
                     corpoTabela += `
                         <tr class="hover:bg-gray-50">
-                            <td class="py-3.5 px-4 sm:px-6">
-                                <div class="flex items-center justify-between gap-2">
+                            <td class="py-4 px-6 text-xs">
+                                <div class="flex items-center justify-between">
                                     <span class="font-semibold text-gray-900">${formatarDataSimples(reserva.checkin)}</span>
-                                    <span class="bg-blue-50 text-blue-700 font-bold px-1.5 py-0.5 rounded text-[10px]">${totalDiarias} ${totalDiarias === 1 ? 'diária' : 'diárias'}</span>
+                                    <span class="bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded text-[11px]">${totalDiarias} ${totalDiarias === 1 ? 'diária' : 'diárias'}</span>
                                 </div>
-                                <span class="text-gray-500 text-[11px]">até ${formatarDataSimples(reserva.checkout)}</span>
+                                <span class="text-gray-500">até ${formatarDataSimples(reserva.checkout)}</span>
                             </td>
-                            <td class="py-3.5 px-4 sm:px-6 font-medium text-gray-900">${reserva.hospede_nome || 'Hóspede'}</td>
-                            <td class="py-3.5 px-4 sm:px-6 font-semibold text-gray-700">${nomeSuiteAmigavel}</td>
-                            <td class="py-3.5 px-4 sm:px-6 font-semibold text-gray-800">${formatarMoeda(valorTotal)}</td>
-                            <td class="py-3.5 px-4 sm:px-6 font-semibold text-emerald-700">${formatarMoeda(totalPago)}</td>
-                            <td class="py-3.5 px-4 sm:px-6 font-medium text-gray-600">${textoFormaPagto}</td>
-                            <td class="py-3.5 px-4 sm:px-6 font-semibold ${saldoRestante > 0 ? 'text-amber-600' : 'text-emerald-600'}">${formatarMoeda(saldoRestante)}</td>
-                            <td class="py-3.5 px-4 sm:px-6">
-                                <span class="px-2.5 py-1 text-[11px] rounded-full inline-block ${badgeCor}">
+                            <td class="py-4 px-6 font-medium text-gray-900">${reserva.hospede_nome || 'Hóspede'}</td>
+                            <td class="py-4 px-6 text-xs font-semibold text-gray-700">${nomeSuiteAmigavel}</td>
+                            <td class="py-4 px-6 font-semibold text-gray-800">${formatarMoeda(valorTotal)}</td>
+                            <td class="py-4 px-6 font-semibold text-emerald-700">${formatarMoeda(totalPago)}</td>
+                            <td class="py-4 px-6 text-xs font-medium text-gray-600">${textoFormaPagto}</td>
+                            <td class="py-4 px-6 font-semibold ${saldoRestante > 0 ? 'text-amber-600' : 'text-emerald-600'}">${formatarMoeda(saldoRestante)}</td>
+                            <td class="py-4 px-6">
+                                <span class="px-2.5 py-1 text-xs rounded-full ${badgeCor}">
                                     ${reserva.status}
                                 </span>
                             </td>
