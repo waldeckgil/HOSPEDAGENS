@@ -78,12 +78,11 @@
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider">
-                                    <th class="py-3 px-6">Check-in / Out (Diárias)</th>
+                                    <th class="py-3 px-6">Check-in / Out</th>
                                     <th class="py-3 px-6">Hóspede</th>
                                     <th class="py-3 px-6">Suíte</th>
                                     <th class="py-3 px-6">Valor Total</th>
                                     <th class="py-3 px-6">Pago (Sinal)</th>
-                                    <th class="py-3 px-6">Forma Pagto.</th>
                                     <th class="py-3 px-6">Saldo Restante</th>
                                     <th class="py-3 px-6">Status</th>
                                 </tr>
@@ -117,15 +116,6 @@
             const partes = dataStr.split('-');
             if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
             return dataStr;
-        }
-
-        function calcularDiarias(checkin, checkout) {
-            if (!checkin || !checkout) return 1;
-            const d1 = new Date(checkin);
-            const d2 = new Date(checkout);
-            const diffTime = d2 - d1;
-            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-            return diffDays > 0 ? diffDays : 1;
         }
 
         async function identificarPousada() {
@@ -193,7 +183,7 @@
                 return;
             }
 
-            // 2. Busca os pagamentos vinculados para extrair valores e formas de pagamento
+            // 2. Busca os pagamentos vinculados para cruzar com a inteligência de sinais/saldos (igual ao dashboard)
             const { data: pagamentos } = await supabaseClient
                 .from('hospede_pagamentos')
                 .select('*')
@@ -205,31 +195,21 @@
             let corpoTabela = '';
 
             if (!reservas || reservas.length === 0) {
-                corpoTabela = `<tr><td colspan="8" class="py-4 px-6 text-center text-gray-500">Nenhuma reserva encontrada para este período e status.</td></tr>`;
+                corpoTabela = `<tr><td colspan="7" class="py-4 px-6 text-center text-gray-500">Nenhuma reserva encontrada para este período e status.</td></tr>`;
             } else {
                 reservas.forEach(reserva => {
                     const valorTotal = Number(reserva.valor_total) || 0;
                     
-                    // Cruza com pagamentos da reserva
+                    // Calcula o total pago cruzando com a tabela hospede_pagamentos
                     const pagamentosDestaReserva = (pagamentos || []).filter(p => p.reserva_id === reserva.id);
                     const totalPago = pagamentosDestaReserva.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
                     const saldoRestante = valorTotal - totalPago;
-
-                    // Extrai as formas de pagamento utilizadas (ex: Pix, Dinheiro, Cartão)
-                    let formasPagtoSet = new Set();
-                    pagamentosDestaReserva.forEach(p => {
-                        if (p.forma_pagamento) {
-                            formasPagtoSet.add(p.forma_pagamento);
-                        }
-                    });
-                    let textoFormaPagto = formasPagtoSet.size > 0 ? Array.from(formasPagtoSet).join(', ') : '-';
 
                     faturamentoTotal += valorTotal;
                     totalRecebidoGeral += totalPago;
                     totalSaldoGeral += saldoRestante > 0 ? saldoRestante : 0;
 
                     const nomeSuiteAmigavel = mapaSuitesCache[reserva.suite_id] || 'Suíte Padrão';
-                    const totalDiarias = calcularDiarias(reserva.checkin, reserva.checkout);
 
                     let badgeCor = 'bg-green-100 text-green-800';
                     if (reserva.status === 'Finalizada') badgeCor = 'bg-gray-200 text-gray-700';
@@ -238,17 +218,13 @@
                     corpoTabela += `
                         <tr class="hover:bg-gray-50">
                             <td class="py-4 px-6 text-xs">
-                                <div class="flex items-center justify-between">
-                                    <span class="font-semibold text-gray-900">${formatarDataSimples(reserva.checkin)}</span>
-                                    <span class="bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded text-[11px]">${totalDiarias} ${totalDiarias === 1 ? 'diária' : 'diárias'}</span>
-                                </div>
+                                <span class="font-semibold text-gray-900">${formatarDataSimples(reserva.checkin)}</span><br>
                                 <span class="text-gray-500">até ${formatarDataSimples(reserva.checkout)}</span>
                             </td>
                             <td class="py-4 px-6 font-medium text-gray-900">${reserva.hospede_nome || 'Hóspede'}</td>
                             <td class="py-4 px-6 text-xs font-semibold text-gray-700">${nomeSuiteAmigavel}</td>
                             <td class="py-4 px-6 font-semibold text-gray-800">${formatarMoeda(valorTotal)}</td>
                             <td class="py-4 px-6 font-semibold text-emerald-700">${formatarMoeda(totalPago)}</td>
-                            <td class="py-4 px-6 text-xs font-medium text-gray-600">${textoFormaPagto}</td>
                             <td class="py-4 px-6 font-semibold ${saldoRestante > 0 ? 'text-amber-600' : 'text-emerald-600'}">${formatarMoeda(saldoRestante)}</td>
                             <td class="py-4 px-6">
                                 <span class="px-2.5 py-1 text-xs rounded-full ${badgeCor}">
@@ -262,7 +238,7 @@
 
             document.getElementById('tabelaFinanceira').innerHTML = corpoTabela;
 
-            // Atualiza os KPIs
+            // Atualiza os KPIs com os valores reais calculados
             document.getElementById('kpiFaturamento').innerText = formatarMoeda(faturamentoTotal);
             document.getElementById('kpiRecebido').innerText = formatarMoeda(totalRecebidoGeral);
             document.getElementById('kpiSaldo').innerText = formatarMoeda(totalSaldoGeral);
