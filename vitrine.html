@@ -236,7 +236,7 @@
                 return;
             }
 
-            // CORREÇÃO APLICADA: Adicionado .gte('checkout', hojeISO) para desconsiderar reservas com checkout vencido
+            // CORREÇÃO APLICADA: Blindagem dupla descartando reservas com checkout vencido na query e no loop
             const { data: reservasAprovadas } = await supabaseClient
                 .from('reservas')
                 .select('*')
@@ -250,6 +250,9 @@
             const suitesOcupadasIds = new Set();
             if (reservasAprovadas) {
                 reservasAprovadas.forEach(res => {
+                    // Validação de segurança extra contra reservas não baixadas pelo gestor
+                    if (res.checkout < hojeISO) return;
+
                     const inicioExistente = new Date(res.checkin);
                     const fimExistente = new Date(res.checkout);
                     if (novoInicio < fimExistente && novoFim > inicioExistente) {
@@ -309,7 +312,7 @@
                                         <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-green-600 bg-green-50 px-2.5 py-1 rounded-full border border-green-200">Disponível</span>
                                     </div>
                                     
-                                    <!-- CORREÇÃO APLICADA: Nome da suíte e o valor da diária base lado a lado -->
+                                    <!-- Nome da suíte e o valor da diária base lado a lado -->
                                     <div class="flex items-start justify-between gap-2 mb-1 md:mb-2">
                                         <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900">${suite.nome}</h2>
                                         <div class="text-right shrink-0">
