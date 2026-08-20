@@ -236,11 +236,18 @@
                 return;
             }
 
-            // BLINDAGEM DA VITRINE: Remove suítes de teste ou incompletas
+            // BLINDAGEM DA VITRINE: Remove suítes de teste, incompletas ou fisicamente ocupadas
             const suites = suitesBrutas.filter(s => {
                 const nomeLower = (s.nome || '').toLowerCase();
                 if (nomeLower.includes('teste')) return false;
                 if (!s.nome) return false;
+                
+                // Verifica o status físico direto da tabela de suítes
+                const statusFisico = (s.status || '').trim().toLowerCase();
+                if (statusFisico === 'ocupada' || (statusFisico !== '' && statusFisico !== 'disponível')) {
+                    return false;
+                }
+
                 return true;
             });
 
