@@ -344,19 +344,15 @@
             });
         }
 
-        function alternarExpandirCard(btnElement) {
-            const card = btnElement.closest('.card-suite');
-            const detalhes = card.querySelector('.card-detalhes');
-            const iconeSeta = card.querySelector('.icone-seta');
-            
+        function alternarExpandirCard(element) {
+            const detalhes = element.querySelector('.card-detalhes');
+            const iconeSeta = element.querySelector('.icone-seta');
             if (detalhes.classList.contains('hidden')) {
                 detalhes.classList.remove('hidden');
                 if (iconeSeta) iconeSeta.style.transform = 'rotate(180deg)';
-                btnElement.innerText = 'Recolher ▴';
             } else {
                 detalhes.classList.add('hidden');
                 if (iconeSeta) iconeSeta.style.transform = 'rotate(0deg)';
-                btnElement.innerText = 'Expandir Detalhes ▾';
             }
         }
 
@@ -419,7 +415,8 @@
                         const saldoRestante = valorTotal - totalPago;
 
                         container.innerHTML += `
-                            <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md ${bgCardClasses} text-gray-900 flex flex-col justify-between transition hover:shadow-lg">
+                            <div class="p-4 sm:p-5 rounded-2xl shadow-md ${bgCardClasses} text-gray-900 flex flex-col justify-between transition hover:shadow-lg cursor-pointer select-none" 
+                                 onclick="alternarExpandirCard(this)">
                                 <div>
                                     <div class="flex justify-between items-center">
                                         <div>
@@ -439,7 +436,7 @@
                                             <div class="inline-block px-3 py-1 rounded-lg border text-xs font-semibold ${indicador.classe}">${indicador.texto}</div>
                                         </div>
                                         <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">Hóspede:</span> <span class="font-bold text-gray-900">${aprovada.hospede_nome}</span></p>
-                                        <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">WhatsApp:</span> <a href="${linkZap}" target="_blank" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${aprovada.whatsapp_hospede || 'Não informado'}</a></p>
+                                        <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">WhatsApp:</span> <a href="${linkZap}" target="_blank" onclick="event.stopPropagation();" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${aprovada.whatsapp_hospede || 'Não informado'}</a></p>
                                         
                                         <div class="flex items-center justify-between pt-1 border-t border-black/5 mt-2">
                                             <span class="text-xs font-semibold text-gray-700">Estadia: <strong class="text-gray-900">${qtdDiarias} diária(s)</strong></span>
@@ -461,15 +458,13 @@
                                             <p><span class="text-gray-500">Check-in:</span> <strong class="text-gray-900">${formatarDataSimples(aprovada.checkin)}</strong></p>
                                             <p><span class="text-gray-500">Check-out:</span> <strong class="text-gray-900">${formatarDataSimples(aprovada.checkout)}</strong></p>
                                         </div>
-                                    </div>
-                                    
-                                    <div class="mt-4 pt-3 flex justify-between items-center border-t border-black/10">
-                                        <button type="button" onclick="alternarExpandirCard(this)" class="text-xs font-bold text-gray-600 hover:text-gray-900 underline">
-                                            Expandir Detalhes ▾
-                                        </button>
-                                        <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', '${statusParaModal}', '${aprovada.id}')" class="text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 px-3.5 py-2 rounded-xl transition shadow-xs">
-                                            Editar Card &rarr;
-                                        </button>
+                                        
+                                        <div class="mt-4 pt-3 flex justify-between items-center border-t border-black/10">
+                                            <span class="text-[11px] text-gray-500 italic">Clique para recolher</span>
+                                            <button type="button" onclick="event.stopPropagation(); abrirModal('${suite.id}', '${suite.nome}', '${statusParaModal}', '${aprovada.id}')" class="text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 px-3 py-1.5 rounded-lg transition shadow-xs">
+                                                Editar Reserva &rarr;
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>`;
@@ -481,7 +476,8 @@
                     };
                     
                     container.innerHTML += `
-                        <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md ${corClasses[suite.status] || 'bg-white border border-gray-200'} flex flex-col justify-between transition hover:shadow-lg">
+                        <div class="p-4 sm:p-5 rounded-2xl shadow-md ${corClasses[suite.status] || 'bg-white border border-gray-200'} flex flex-col justify-between transition hover:shadow-lg cursor-pointer select-none" 
+                             onclick="alternarExpandirCard(this)">
                             <div>
                                 <div class="flex justify-between items-center">
                                     <div>
@@ -494,13 +490,17 @@
                                         }">
                                             ${suite.status}
                                         </span>
+                                        <span class="icone-seta text-gray-400 text-sm transition-transform duration-300">▼</span>
                                     </div>
                                 </div>
                                 
-                                <div class="mt-4 pt-3 border-t border-black/10 flex justify-end">
-                                    <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', '${suite.status}')" class="text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 px-3.5 py-2 rounded-xl transition shadow-xs">
-                                        Gerenciar / Adicionar &rarr;
-                                    </button>
+                                <div class="card-detalhes hidden mt-3 pt-3 border-t border-black/10">
+                                    <p class="text-xs text-gray-600 italic mb-3">Nenhuma reserva ativa vinculada a esta suíte no momento.</p>
+                                    <div class="pt-2 border-t border-black/5 flex justify-end">
+                                        <button type="button" onclick="event.stopPropagation(); abrirModal('${suite.id}', '${suite.nome}', '${suite.status}')" class="text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 px-3 py-1.5 rounded-lg transition shadow-xs">
+                                            Gerenciar / Adicionar &rarr;
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>`;
@@ -518,7 +518,8 @@
                     const saldoRestantePend = valorTotalPend - totalPagoPend;
 
                     container.innerHTML += `
-                        <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md bg-amber-50 border border-amber-200 flex flex-col justify-between transition hover:shadow-lg">
+                        <div class="p-4 sm:p-5 rounded-2xl shadow-md bg-amber-50 border border-amber-200 flex flex-col justify-between transition hover:shadow-lg cursor-pointer select-none"
+                             onclick="alternarExpandirCard(this)">
                             <div>
                                 <div class="flex justify-between items-center">
                                     <div>
@@ -533,7 +534,7 @@
                                 
                                 <div class="card-detalhes hidden mt-3 pt-3 border-t border-amber-200 text-xs sm:text-sm space-y-1.5">
                                     <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">Hóspede:</span> <span class="font-bold text-gray-900">${pend.hospede_nome || 'Não informado'}</span></p>
-                                    <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">WhatsApp:</span> <a href="${linkZapPend}" target="_blank" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${pend.whatsapp_hospede || 'Não informado'}</a></p>
+                                    <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">WhatsApp:</span> <a href="${linkZapPend}" target="_blank" onclick="event.stopPropagation();" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${pend.whatsapp_hospede || 'Não informado'}</a></p>
                                     
                                     <div class="flex items-center justify-between pt-1 border-t border-amber-200 mt-2">
                                         <span class="text-xs font-semibold text-amber-900">Estadia: <strong class="text-gray-900">${qtdDiariasPend} diária(s)</strong></span>
@@ -567,18 +568,9 @@
                                     </div>
 
                                     <div class="mt-4 pt-3 border-t border-amber-200 flex gap-2">
-                                        <button onclick="mudarStatusReserva('${pend.id}', 'Aprovada')" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✔ Aprovar</button>
-                                        <button onclick="mudarStatusReserva('${pend.id}', 'Recusada')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✖ Recusar</button>
+                                        <button onclick="event.stopPropagation(); mudarStatusReserva('${pend.id}', 'Aprovada')" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✔ Aprovar</button>
+                                        <button onclick="event.stopPropagation(); mudarStatusReserva('${pend.id}', 'Recusada')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✖ Recusar</button>
                                     </div>
-                                </div>
-
-                                <div class="mt-4 pt-3 flex justify-between items-center border-t border-amber-200">
-                                    <button type="button" onclick="alternarExpandirCard(this)" class="text-xs font-bold text-amber-900 hover:text-amber-950 underline">
-                                        Expandir Detalhes ▾
-                                    </button>
-                                    <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', 'Pendente', '${pend.id}')" class="text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 px-3.5 py-2 rounded-xl transition shadow-xs">
-                                        Editar Card &rarr;
-                                    </button>
                                 </div>
                             </div>
                         </div>`;
