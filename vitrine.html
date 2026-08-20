@@ -453,6 +453,11 @@
             const suiteId = document.getElementById('suite-id-reserva').value;
             const checkoutVal = document.getElementById('checkout').value;
 
+            // Recalcula o valor total exato antes de inserir no banco
+            const { data: suiteData } = await supabaseClient.from('suites').select('*').eq('id', suiteId).single();
+            const precoBase = suiteData ? (suiteData.preco || suiteData.valor_diaria || 150.00) : 150.00;
+            const valorTotalCalculado = await calcularValorTotalEstadia(suiteId, checkinVal, checkoutVal, precoBase);
+
             const { error: errReserva } = await supabaseClient.from('reservas').insert([{
                 pousada_id: pousadaIdGlobal,
                 suite_id: suiteId,
@@ -465,6 +470,7 @@
                 endereco: document.getElementById('endereco-hospede').value,
                 checkin: checkinVal,
                 checkout: checkoutVal,
+                valor_total: valorTotalCalculado, // Incluído corretamente aqui!
                 status: 'Pendente',
                 criado_em: new Date().toISOString()
             }]);
