@@ -20,7 +20,7 @@
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <div>
                         <h1 class="text-2xl font-bold text-gray-800">Gestão Financeira</h1>
-                        <p id="nomePousadaLogada" class="text-sm font-medium text-blue-600 mt-1">Carregando pousada...</p>
+                        <p id="nomePousadaLogada" class="text-sm font-semibold text-blue-600 mt-1">Carregando pousada...</p>
                     </div>
                     <div class="flex flex-wrap gap-3">
                         <input type="date" id="filtroInicio" class="border rounded-lg px-3 py-2 text-sm bg-white">
@@ -73,38 +73,43 @@
     </div>
 
     <script>
-        // Configuração do Supabase (insira suas credenciais reais aqui)
-        const SUPABASE_URL = 'SUA_SUPABASE_URL';
-        const SUPABASE_ANON_KEY = 'SUA_SUPABASE_ANON_KEY';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Configuração do Supabase com as credenciais do seu projeto
+        const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';[cite: 11]
+        const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';[cite: 11]
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);[cite: 11]
 
-        // Recupera de forma dinâmica o ID e o nome da pousada ativa armazenados no navegador
-        const pousadaAtivaId = localStorage.getItem('pousada_ativa_id') || localStorage.getItem('pousadaId');
-        const nomePousadaSalva = localStorage.getItem('pousada_nome') || localStorage.getItem('nomePousada');
+        let usuarioIdAtual = null;
 
         async function identificarPousada() {
             const labelPousada = document.getElementById('nomePousadaLogada');
 
-            if (!pousadaAtivaId) {
-                labelPousada.textContent = 'Atenção: Nenhuma pousada selecionada no painel.';
+            // Obtém o usuário logado atualmente no Supabase Auth
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            
+            if (!user) {
+                labelPousada.textContent = 'Atenção: Usuário não autenticado.';
                 labelPousada.className = 'text-sm font-semibold text-red-600 mt-1';
+                setTimeout(() => { window.location.href = 'index.html'; }, 2000);
                 return;
             }
 
-            // Se já tiver o nome salvo no storage, exibe direto. Senão, busca no banco.
-            if (nomePousadaSalva) {
-                labelPousada.textContent = `Pousada: ${nomePousadaSalva} (ID: ${pousadaAtivaId})`;
+            usuarioIdAtual = user.id;
+
+            // Busca o nome da pousada vinculada ao ID do usuário autenticado
+            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', user.id).single();
+            
+            if (pousada && pousada.nome) {
+                labelPousada.textContent = `Pousada: ${pousada.nome}`;
             } else {
-                // Opcional: Busca rápida na tabela de pousadas se o nome não estiver no storage
-                labelPousada.textContent = `Pousada ID: ${pousadaAtivaId}`;
+                labelPousada.textContent = `Pousada ID: ${user.id}`;
             }
+
+            // Após identificar a pousada, carrega os dados financeiros
+            carregarDadosFinanceiros();
         }
 
         async function carregarDadosFinanceiros() {
-            if (!pousadaAtivaId) {
-                alert('ID da pousada não encontrado. Por favor, selecione uma pousada no painel principal.');
-                return;
-            }
+            if (!usuarioIdAtual) return;
 
             const dataInicio = document.getElementById('filtroInicio').value || '2026-08-01';
             const dataFim = document.getElementById('filtroFim').value || '2026-08-31';
@@ -113,7 +118,7 @@
             const { data: reservas, error } = await supabaseClient
                 .from('reservas')
                 .select('*')
-                .eq('pousada_id', pousadaAtivaId)
+                .eq('pousada_id', usuarioIdAtual)
                 .gte('checkin', dataInicio)
                 .lte('checkin', dataFim)
                 .in('status', ['Aprovada', 'Finalizada']);
@@ -127,7 +132,7 @@
             let faturamentoTotal = 0;
             let corpoTabela = '';
 
-            if (reservas.length === 0) {
+            if (!reservas || reservas.length === 0) {
                 corpoTabela = `<tr><td colspan="5" class="py-4 px-6 text-center text-gray-500">Nenhuma reserva encontrada para este período.</td></tr>`;
             } else {
                 reservas.forEach(reserva => {
@@ -160,14 +165,11 @@
 
         // Executa ao carregar a página
         window.onload = () => {
-            identificarPousada();
             // Define datas padrão para o mês atual de referência
             document.getElementById('filtroInicio').value = '2026-08-01';
             document.getElementById('filtroFim').value = '2026-08-31';
             
-            if (pousadaAtivaId) {
-                carregarDadosFinanceiros();
-            }
+            identificarPousada();
         };
     </script>
 </body>
