@@ -14,7 +14,7 @@
     <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl">
         <div class="p-4 sm:p-6">
             <div class="flex justify-between items-center md:block">
-                <h1 class="text-xl sm:text-2xl font-extrabold text-white mb-0 md:mb-6 tracking-wider">Painel 360</h1>
+                <h1 id="titulo-menu-pousada" class="text-xl sm:text-2xl font-extrabold text-white mb-0 md:mb-6 tracking-wider text-center">Painel 360</h1>
             </div>
             <nav class="mt-4 md:mt-0 space-y-1.5 sm:space-y-2 flex flex-wrap md:flex-col gap-1.5 md:gap-0">
                 <a href="dashboard.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold shadow-md text-xs sm:text-sm">
@@ -294,8 +294,10 @@
             if (pousada && pousada.nome) {
                 nomePousadaAtual = pousada.nome;
                 document.getElementById('titulo-pousada').innerText = pousada.nome;
+                document.getElementById('titulo-menu-pousada').innerText = pousada.nome;
             } else {
                 document.getElementById('titulo-pousada').innerText = "Minha Pousada";
+                document.getElementById('titulo-menu-pousada').innerText = "Minha Pousada";
             }
             document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${user.id}`;
         }
