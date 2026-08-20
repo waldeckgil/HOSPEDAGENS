@@ -123,6 +123,12 @@
         <div class="bg-white p-6 sm:p-8 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
             <h2 id="modal-titulo" class="text-xl sm:text-2xl font-bold mb-4 text-blue-600">Gerenciar Suíte</h2>
             
+            <!-- 🚨 ALERTA DE ERRO DENTRO DO MODAL -->
+            <div id="modal-erro-alerta" class="hidden mb-4 bg-red-50 border-l-4 border-red-500 p-3 rounded-xl text-red-900 text-xs sm:text-sm font-bold flex items-center gap-2">
+                <span>⚠️</span>
+                <span id="modal-erro-texto">Mensagem de erro aqui</span>
+            </div>
+
             <form id="form-edicao" class="space-y-3">
                 <input type="hidden" id="edit-suite-id">
                 <input type="hidden" id="edit-status-original">
@@ -223,6 +229,19 @@
 
             toast.classList.remove('translate-y-24', 'opacity-0');
             setTimeout(() => { toast.classList.add('translate-y-24', 'opacity-0'); }, 3500);
+        }
+
+        function mostrarErroModal(mensagem) {
+            const alertaEl = document.getElementById('modal-erro-alerta');
+            const textoEl = document.getElementById('modal-erro-texto');
+            textoEl.innerText = mensagem;
+            alertaEl.classList.remove('hidden');
+            alertaEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function limparErroModal() {
+            const alertaEl = document.getElementById('modal-erro-alerta');
+            alertaEl.classList.add('hidden');
         }
 
         function calcularDiasRestantes(dataAlvo) {
@@ -422,7 +441,6 @@
                         const totalPago = pagamentosDestaReserva.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
                         const saldoRestante = valorTotal - totalPago;
 
-                        // Bloco de alerta em destaque no TOPO do card caso haja observação
                         let htmlAlertaTopo = '';
                         if (aprovada.observacao && aprovada.observacao.trim() !== '') {
                             htmlAlertaTopo = `
@@ -623,6 +641,7 @@
         
         function abrirModal(id, nome, status, reservaId = null) {
             camposLimposParaNovaReserva = false;
+            limparErroModal();
             document.getElementById('edit-suite-id').value = id;
             document.getElementById('edit-status').value = status;
             document.getElementById('edit-status-original').value = status;
@@ -722,7 +741,7 @@
                 });
                 
                 if (!erroConflito && temConflito === true) {
-                    mostrarToast("Atenção", "Já existe uma reserva confirmada para esta suíte nestas datas!", "erro");
+                    mostrarErroModal("Já existe uma reserva confirmada para esta suíte nestas datas!");
                     return; 
                 }
             } catch (err) {
@@ -766,12 +785,12 @@
                 const saldoRestanteAtual = valorTotalCalculado - totalJaPago;
 
                 if (valorSinalInformado > saldoRestanteAtual) {
-                    mostrarToast("Atenção", `O valor do pagamento (${formatarMoeda(valorSinalInformado)}) é maior que o saldo restante (${formatarMoeda(saldoRestanteAtual)}). Corrija o valor.`, 'erro');
+                    mostrarErroModal(`O valor do pagamento (${formatarMoeda(valorSinalInformado)}) é maior que o saldo restante (${formatarMoeda(saldoRestanteAtual)}). Corrija o valor.`);
                     return; 
                 }
             } else if (valorSinalInformado > 0 && valorTotalCalculado > 0) {
                 if (valorSinalInformado > valorTotalCalculado) {
-                    mostrarToast("Atenção", `O valor do pagamento (${formatarMoeda(valorSinalInformado)}) é maior que o valor total da reserva (${formatarMoeda(valorTotalCalculado)}). Corrija o valor.`, 'erro');
+                    mostrarErroModal(`O valor do pagamento (${formatarMoeda(valorSinalInformado)}) é maior que o valor total da reserva (${formatarMoeda(valorTotalCalculado)}). Corrija o valor.`);
                     return; 
                 }
             }
@@ -827,12 +846,14 @@
 
         document.getElementById('form-edicao').onsubmit = async (e) => {
             e.preventDefault();
+            limparErroModal();
+
             const status = document.getElementById('edit-status').value;
             const statusOriginal = document.getElementById('edit-status-original').value;
             const suiteId = document.getElementById('edit-suite-id').value;
             
             if (statusOriginal === 'Ocupada' && status === 'Disponível') {
-                mostrarToast("Atenção", "Uma suíte ocupada não pode ir direto para 'Disponível'. Envie para 'Limpeza' ou faça o 'Checkout'.", 'erro');
+                mostrarErroModal("Uma suíte ocupada não pode ir direto para 'Disponível'. Envie para 'Limpeza' ou faça o 'Checkout'.");
                 return;
             }
 
