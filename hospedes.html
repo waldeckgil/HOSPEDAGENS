@@ -14,7 +14,7 @@
     <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl">
         <div class="p-4 sm:p-6">
             <div class="flex justify-between items-center md:block">
-                <h1 class="text-xl sm:text-2xl font-extrabold text-white mb-0 md:mb-6 tracking-wider">Painel 360</h1>
+                <h1 id="nome-pousada-sidebar" class="text-xl sm:text-2xl font-extrabold text-white mb-0 md:mb-6 tracking-wider">Painel 360</h1>
             </div>
             <nav class="mt-4 md:mt-0 space-y-1.5 sm:space-y-2 flex flex-wrap md:flex-col gap-1.5 md:gap-0">
                 <a href="dashboard.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
@@ -180,11 +180,11 @@
             usuarioIdAtual = user.id;
 
             const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', user.id).maybeSingle();
-            if (pousada && pousada.nome) {
-                document.getElementById('titulo-pousada').innerText = pousada.nome;
-            } else {
-                document.getElementById('titulo-pousada').innerText = "Minha Pousada";
-            }
+            const nomePousada = (pousada && pousada.nome) ? pousada.nome : "Minha Pousada";
+
+            // Atualiza o nome da pousada tanto no topo do menu lateral quanto no cabeçalho
+            document.getElementById('nome-pousada-sidebar').innerText = nomePousada;
+            document.getElementById('titulo-pousada').innerText = nomePousada;
 
             document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${user.id}`;
 
