@@ -19,7 +19,6 @@
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col md:flex-row">
 
-    <!-- MENU LATERAL (Adaptado para mobile e desktop) -->
     <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl">
         <div class="p-4 sm:p-6">
             <div class="flex justify-between items-center md:block">
@@ -60,9 +59,7 @@
         </div>
     </aside>
 
-    <!-- CONTEÚDO PRINCIPAL -->
     <div class="flex-1 flex flex-col min-w-0">
-        <!-- CABEÇALHO -->
         <header class="bg-white shadow-xs border-b border-gray-200 p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                 <h2 class="text-lg sm:text-xl font-bold text-gray-800">Gestão de Suítes</h2>
@@ -71,9 +68,7 @@
             <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200 w-fit">Sistema Online</span>
         </header>
 
-        <!-- CORPO DA PÁGINA -->
         <main class="p-4 sm:p-6 md:p-8 flex-1 overflow-y-auto">
-            <!-- 🚨 CARD DE ATENÇÃO NO TOPO -->
             <div id="card-atencao-pendentes" class="hidden mb-8 bg-amber-50 border-l-8 border-amber-500 p-4 sm:p-6 rounded-2xl shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-4 alerta-piscando">
                 <div>
                     <div class="flex items-center gap-2">
@@ -92,7 +87,6 @@
         </main>
     </div>
 
-    <!-- 💬 TOAST -->
     <div id="toast-notificacao" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
         <div id="toast-content" class="bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
             <span id="toast-icone" class="text-xl">✨</span>
@@ -103,7 +97,6 @@
         </div>
     </div>
 
-    <!-- 🛑 MODAL DE CONFIRMAÇÃO -->
     <div id="modal-confirmacao" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-6 sm:p-8 rounded-3xl w-full max-w-md shadow-2xl text-center space-y-4">
             <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">⚠️</div>
@@ -118,7 +111,6 @@
         </div>
     </div>
 
-    <!-- Modal de Edição -->
     <div id="modal-edicao" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-6 sm:p-8 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
             <h2 id="modal-titulo" class="text-xl sm:text-2xl font-bold mb-4 text-blue-600">Gerenciar Suíte</h2>
@@ -163,7 +155,6 @@
                         </div>
                     </div>
 
-                    <!-- CAMPO PARA LANÇAR SINAL / PAGAMENTO PARCIAL E FORMA DE PAGAMENTO -->
                     <div class="pt-2 space-y-2">
                         <div>
                             <label class="block text-xs font-bold text-emerald-700 mb-1">Registrar Novo Pagamento / Sinal (R$)</label>
@@ -346,19 +337,6 @@
             });
         }
 
-        // Função para alternar a expansão do card de forma limpa e interativa
-        function alternarExpandirCard(element) {
-            const detalhes = element.querySelector('.card-detalhes');
-            const iconeSeta = element.querySelector('.icone-seta');
-            if (detalhes.classList.contains('hidden')) {
-                detalhes.classList.remove('hidden');
-                if (iconeSeta) iconeSeta.style.transform = 'rotate(180deg)';
-            } else {
-                detalhes.classList.add('hidden');
-                if (iconeSeta) iconeSeta.style.transform = 'rotate(0deg)';
-            }
-        }
-
         async function carregarDashboard() {
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) { window.location.href = 'index.html'; return; }
@@ -417,28 +395,21 @@
                         const saldoRestante = valorTotal - totalPago;
 
                         container.innerHTML += `
-                            <div class="p-4 sm:p-5 rounded-2xl shadow-md ${bgCardClasses} text-gray-900 flex flex-col justify-between transition hover:shadow-lg cursor-pointer select-none" 
-                                 onclick="alternarExpandirCard(this)">
+                            <div class="p-5 sm:p-6 rounded-2xl shadow-md ${bgCardClasses} text-gray-900 flex flex-col justify-between transition hover:shadow-lg cursor-pointer" 
+                                 onclick="abrirModal('${suite.id}', '${suite.nome}', '${statusParaModal}', '${aprovada.id}')">
                                 <div>
-                                    <!-- CABEÇALHO DO CARD (Sempre Visível - Compacto) -->
-                                    <div class="flex justify-between items-center">
+                                    <div class="flex justify-between items-start mb-2">
                                         <div>
-                                            <h2 class="text-base sm:text-lg font-bold text-gray-900">${suite.nome}${sufixoTitulo}</h2>
-                                            <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária: ${precoDiariaFormatado}</span>
+                                            <h2 class="text-lg sm:text-xl font-bold text-gray-900">${suite.nome}${sufixoTitulo}</h2>
+                                            <span class="text-xs font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md mt-1 inline-block">Diária: ${precoDiariaFormatado}</span>
                                         </div>
-                                        <div class="flex items-center gap-2">
-                                            <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm ${badgeClasses}">
-                                                ${badgeText}
-                                            </span>
-                                            <span class="icone-seta text-gray-400 text-sm transition-transform duration-300">▼</span>
-                                        </div>
+                                        <span class="px-2.5 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm ${badgeClasses}">
+                                            ${badgeText}
+                                        </span>
                                     </div>
-
-                                    <!-- CORPO DETALHADO DO CARD (Oculto por padrão, expande ao clicar) -->
-                                    <div class="card-detalhes hidden mt-3 pt-3 border-t border-black/10 text-xs sm:text-sm space-y-1.5">
-                                        <div class="mb-2">
-                                            <div class="inline-block px-3 py-1 rounded-lg border text-xs font-semibold ${indicador.classe}">${indicador.texto}</div>
-                                        </div>
+                                    <div class="mt-2 inline-block px-3 py-1 rounded-lg border text-xs font-semibold ${indicador.classe}">${indicador.texto}</div>
+                                    
+                                    <div class="mt-4 pt-3 border-t border-black/10 text-xs sm:text-sm space-y-1.5">
                                         <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">Hóspede:</span> <span class="font-bold text-gray-900">${aprovada.hospede_nome}</span></p>
                                         <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">WhatsApp:</span> <a href="${linkZap}" target="_blank" onclick="event.stopPropagation();" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${aprovada.whatsapp_hospede || 'Não informado'}</a></p>
                                         
@@ -462,14 +433,10 @@
                                             <p><span class="text-gray-500">Check-in:</span> <strong class="text-gray-900">${formatarDataSimples(aprovada.checkin)}</strong></p>
                                             <p><span class="text-gray-500">Check-out:</span> <strong class="text-gray-900">${formatarDataSimples(aprovada.checkout)}</strong></p>
                                         </div>
-                                        
-                                        <div class="mt-4 pt-3 flex justify-between items-center border-t border-black/10">
-                                            <span class="text-[11px] text-gray-500 italic">Clique para recolher</span>
-                                            <button type="button" onclick="event.stopPropagation(); abrirModal('${suite.id}', '${suite.nome}', '${statusParaModal}', '${aprovada.id}')" class="text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 px-3 py-1.5 rounded-lg transition shadow-xs">
-                                                Editar Reserva &rarr;
-                                            </button>
-                                        </div>
                                     </div>
+                                </div>
+                                <div class="mt-5 pt-3 flex justify-end">
+                                    <span class="text-xs font-bold text-blue-700 hover:underline">Editar / Adicionar Reserva &rarr;</span>
                                 </div>
                             </div>`;
                     });
@@ -480,32 +447,26 @@
                     };
                     
                     container.innerHTML += `
-                        <div class="p-4 sm:p-5 rounded-2xl shadow-md ${corClasses[suite.status] || 'bg-white border border-gray-200'} flex flex-col justify-between transition hover:shadow-lg cursor-pointer select-none" 
-                             onclick="alternarExpandirCard(this)">
+                        <div class="p-5 sm:p-6 rounded-2xl shadow-md ${corClasses[suite.status] || 'bg-white border border-gray-200'} flex flex-col justify-between transition hover:shadow-lg cursor-pointer" 
+                             onclick="abrirModal('${suite.id}', '${suite.nome}', '${suite.status}')">
                             <div>
-                                <div class="flex justify-between items-center">
+                                <div class="flex justify-between items-start mb-2">
                                     <div>
-                                        <h2 class="text-base sm:text-lg font-bold text-gray-900">${suite.nome}</h2>
-                                        <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária: ${precoDiariaFormatado}</span>
+                                        <h2 class="text-lg sm:text-xl font-bold text-gray-900">${suite.nome}</h2>
+                                        <span class="text-xs font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md mt-1 inline-block">Diária: ${precoDiariaFormatado}</span>
                                     </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm ${
-                                            suite.status === 'Disponível' ? 'bg-green-200 text-green-900' : 'bg-red-200 text-red-900'
-                                        }">
-                                            ${suite.status}
-                                        </span>
-                                        <span class="icone-seta text-gray-400 text-sm transition-transform duration-300">▼</span>
-                                    </div>
+                                    <span class="px-2.5 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm ${
+                                        suite.status === 'Disponível' ? 'bg-green-200 text-green-900' : 'bg-red-200 text-red-900'
+                                    }">
+                                        ${suite.status}
+                                    </span>
                                 </div>
-                                
-                                <div class="card-detalhes hidden mt-3 pt-3 border-t border-black/10">
-                                    <p class="text-xs text-gray-600 italic mb-3">Nenhuma reserva ativa vinculada a esta suíte no momento.</p>
-                                    <div class="pt-2 border-t border-black/5 flex justify-end">
-                                        <button type="button" onclick="event.stopPropagation(); abrirModal('${suite.id}', '${suite.nome}', '${suite.status}')" class="text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 px-3 py-1.5 rounded-lg transition shadow-xs">
-                                            Gerenciar / Adicionar &rarr;
-                                        </button>
-                                    </div>
+                                <div class="mt-4 pt-3 border-t border-black/10 text-xs text-gray-600 italic">
+                                    Nenhuma reserva ativa vinculada.
                                 </div>
+                            </div>
+                            <div class="mt-5 pt-3 flex justify-end">
+                                <span class="text-xs font-bold text-blue-700 hover:underline">Editar / Adicionar Reserva &rarr;</span>
                             </div>
                         </div>`;
                 }
@@ -521,21 +482,17 @@
                     const saldoRestantePend = valorTotalPend - totalPagoPend;
 
                     container.innerHTML += `
-                        <div class="p-4 sm:p-5 rounded-2xl shadow-md bg-amber-50 border border-amber-200 flex flex-col justify-between transition hover:shadow-lg cursor-pointer select-none"
-                             onclick="alternarExpandirCard(this)">
+                        <div class="p-5 sm:p-6 rounded-2xl shadow-md bg-amber-50 border border-amber-200 flex flex-col justify-between transition hover:shadow-lg">
                             <div>
-                                <div class="flex justify-between items-center">
+                                <div class="flex justify-between items-start mb-2">
                                     <div>
-                                        <h2 class="text-base sm:text-lg font-bold text-amber-950">${suite.nome}</h2>
-                                        <span class="text-[11px] font-bold text-amber-900/80 bg-amber-200/60 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária: ${precoDiariaFormatado}</span>
+                                        <h2 class="text-lg sm:text-xl font-bold text-amber-950">${suite.nome}</h2>
+                                        <span class="text-xs font-bold text-amber-900/80 bg-amber-200/60 px-2 py-0.5 rounded-md mt-1 inline-block">Diária: ${precoDiariaFormatado}</span>
                                     </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm bg-amber-200 text-amber-900">Pendente</span>
-                                        <span class="icone-seta text-amber-700 text-sm transition-transform duration-300">▼</span>
-                                    </div>
+                                    <span class="px-2.5 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm bg-amber-200 text-amber-900">Pendente</span>
                                 </div>
                                 
-                                <div class="card-detalhes hidden mt-3 pt-3 border-t border-amber-200 text-xs sm:text-sm space-y-1.5">
+                                <div class="mt-4 pt-3 border-t border-amber-200 text-xs sm:text-sm space-y-1.5">
                                     <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">Hóspede:</span> <span class="font-bold text-gray-900">${pend.hospede_nome || 'Não informado'}</span></p>
                                     <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">WhatsApp:</span> <a href="${linkZapPend}" target="_blank" onclick="event.stopPropagation();" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${pend.whatsapp_hospede || 'Não informado'}</a></p>
                                     
@@ -569,12 +526,11 @@
                                         <p><span class="text-amber-800">Check-in:</span> <strong class="text-gray-900">${formatarDataSimples(pend.checkin)}</strong></p>
                                         <p><span class="text-amber-800">Check-out:</span> <strong class="text-gray-900">${formatarDataSimples(pend.checkout)}</strong></p>
                                     </div>
-
-                                    <div class="mt-4 pt-3 border-t border-amber-200 flex gap-2">
-                                        <button onclick="event.stopPropagation(); mudarStatusReserva('${pend.id}', 'Aprovada')" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✔ Aprovar</button>
-                                        <button onclick="event.stopPropagation(); mudarStatusReserva('${pend.id}', 'Recusada')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✖ Recusar</button>
-                                    </div>
                                 </div>
+                            </div>
+                            <div class="mt-5 pt-3 border-t border-amber-200 flex gap-2">
+                                <button onclick="mudarStatusReserva('${pend.id}', 'Aprovada')" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✔ Aprovar</button>
+                                <button onclick="mudarStatusReserva('${pend.id}', 'Recusada')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✖ Recusar</button>
                             </div>
                         </div>`;
                 });
