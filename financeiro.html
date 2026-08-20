@@ -18,9 +18,15 @@
                 
                 <!-- Cabeçalho Dinâmico -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                    <div>
-                        <h1 class="text-2xl font-bold text-gray-800">Gestão Financeira</h1>
-                        <p id="nomePousadaLogada" class="text-sm font-semibold text-blue-600 mt-1">Carregando pousada...</p>
+                    <div class="flex items-center gap-4">
+                        <!-- Botão de Voltar para o Dashboard -->
+                        <a href="dashboard.html" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 shadow-sm">
+                            <span>←</span> Voltar
+                        </a>
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">Gestão Financeira</h1>
+                            <p id="nomePousadaLogada" class="text-sm font-semibold text-blue-600 mt-0.5">Carregando pousada...</p>
+                        </div>
                     </div>
                     <div class="flex flex-wrap gap-3">
                         <input type="date" id="filtroInicio" class="border rounded-lg px-3 py-2 text-sm bg-white">
@@ -73,29 +79,27 @@
     </div>
 
     <script>
-        // Configuração do Supabase com as credenciais do seu projeto
-        const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';[cite: 11]
-        const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';[cite: 11]
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);[cite: 11]
+        // Configuração do Supabase
+        const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let usuarioIdAtual = null;
 
         async function identificarPousada() {
             const labelPousada = document.getElementById('nomePousadaLogada');
 
-            // Obtém o usuário logado atualmente no Supabase Auth
             const { data: { user } } = await supabaseClient.auth.getUser();
             
             if (!user) {
                 labelPousada.textContent = 'Atenção: Usuário não autenticado.';
-                labelPousada.className = 'text-sm font-semibold text-red-600 mt-1';
+                labelPousada.className = 'text-sm font-semibold text-red-600 mt-0.5';
                 setTimeout(() => { window.location.href = 'index.html'; }, 2000);
                 return;
             }
 
             usuarioIdAtual = user.id;
 
-            // Busca o nome da pousada vinculada ao ID do usuário autenticado
             const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', user.id).single();
             
             if (pousada && pousada.nome) {
@@ -104,7 +108,6 @@
                 labelPousada.textContent = `Pousada ID: ${user.id}`;
             }
 
-            // Após identificar a pousada, carrega os dados financeiros
             carregarDadosFinanceiros();
         }
 
@@ -114,7 +117,6 @@
             const dataInicio = document.getElementById('filtroInicio').value || '2026-08-01';
             const dataFim = document.getElementById('filtroFim').value || '2026-08-31';
 
-            // 1. Busca os dados da tabela reservas filtrando pela pousada ativa e período
             const { data: reservas, error } = await supabaseClient
                 .from('reservas')
                 .select('*')
@@ -157,18 +159,14 @@
 
             document.getElementById('tabelaFinanceira').innerHTML = corpoTabela;
 
-            // Atualiza os KPIs na tela
             document.getElementById('kpiFaturamento').innerText = `R$ ${faturamentoTotal.toFixed(2)}`;
             document.getElementById('kpiRecebido').innerText = `R$ ${faturamentoTotal.toFixed(2)}`; 
             document.getElementById('kpiSaldo').innerText = `R$ 0,00`;
         }
 
-        // Executa ao carregar a página
         window.onload = () => {
-            // Define datas padrão para o mês atual de referência
             document.getElementById('filtroInicio').value = '2026-08-01';
             document.getElementById('filtroFim').value = '2026-08-31';
-            
             identificarPousada();
         };
     </script>
