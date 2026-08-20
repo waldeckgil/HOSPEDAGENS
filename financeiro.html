@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel 360 - Gestão Financeira</title>
+    <!-- Tailwind CSS para estilização rápida e moderna -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 font-sans antialiased">
+
+    <div class="flex h-screen bg-gray-100">
+        <!-- Conteúdo Principal -->
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
+            <div class="max-w-7xl mx-auto">
+                
+                <!-- Cabeçalho Dinâmico -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">Gestão Financeira</h1>
+                        <p id="nomePousadaLogada" class="text-sm font-medium text-blue-600 mt-1">Carregando pousada...</p>
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        <input type="date" id="filtroInicio" class="border rounded-lg px-3 py-2 text-sm bg-white">
+                        <input type="date" id="filtroFim" class="border rounded-lg px-3 py-2 text-sm bg-white">
+                        <button onclick="carregarDadosFinanceiros()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">Filtrar</button>
+                    </div>
+                </div>
+
+                <!-- Cards de Resumo (KPIs) -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <p class="text-sm font-medium text-gray-500">Faturamento Bruto</p>
+                        <p id="kpiFaturamento" class="text-3xl font-bold text-gray-800 mt-2">R$ 0,00</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <p class="text-sm font-medium text-gray-500">Total Recebido (Caixa)</p>
+                        <p id="kpiRecebido" class="text-3xl font-bold text-green-600 mt-2">R$ 0,00</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <p class="text-sm font-medium text-gray-500">Saldo a Receber</p>
+                        <p id="kpiSaldo" class="text-3xl font-bold text-amber-600 mt-2">R$ 0,00</p>
+                    </div>
+                </div>
+
+                <!-- Tabela de Detalhamento -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                        <h3 class="font-semibold text-gray-800">Detalhamento por Reserva</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider">
+                                    <th class="py-3 px-6">Data Check-in</th>
+                                    <th class="py-3 px-6">Hóspede</th>
+                                    <th class="py-3 px-6">Suíte ID</th>
+                                    <th class="py-3 px-6">Valor Total</th>
+                                    <th class="py-3 px-6">Status Reserva</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaFinanceira" class="divide-y divide-gray-200 text-sm text-gray-700">
+                                <!-- Preenchido via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Configuração do Supabase (insira suas credenciais reais aqui)
+        const SUPABASE_URL = 'SUA_SUPABASE_URL';
+        const SUPABASE_ANON_KEY = 'SUA_SUPABASE_ANON_KEY';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Recupera de forma dinâmica o ID e o nome da pousada ativa armazenados no navegador
+        const pousadaAtivaId = localStorage.getItem('pousada_ativa_id') || localStorage.getItem('pousadaId');
+        const nomePousadaSalva = localStorage.getItem('pousada_nome') || localStorage.getItem('nomePousada');
+
+        async function identificarPousada() {
+            const labelPousada = document.getElementById('nomePousadaLogada');
+
+            if (!pousadaAtivaId) {
+                labelPousada.textContent = 'Atenção: Nenhuma pousada selecionada no painel.';
+                labelPousada.className = 'text-sm font-semibold text-red-600 mt-1';
+                return;
+            }
+
+            // Se já tiver o nome salvo no storage, exibe direto. Senão, busca no banco.
+            if (nomePousadaSalva) {
+                labelPousada.textContent = `Pousada: ${nomePousadaSalva} (ID: ${pousadaAtivaId})`;
+            } else {
+                // Opcional: Busca rápida na tabela de pousadas se o nome não estiver no storage
+                labelPousada.textContent = `Pousada ID: ${pousadaAtivaId}`;
+            }
+        }
+
+        async function carregarDadosFinanceiros() {
+            if (!pousadaAtivaId) {
+                alert('ID da pousada não encontrado. Por favor, selecione uma pousada no painel principal.');
+                return;
+            }
+
+            const dataInicio = document.getElementById('filtroInicio').value || '2026-08-01';
+            const dataFim = document.getElementById('filtroFim').value || '2026-08-31';
+
+            // 1. Busca os dados da tabela reservas filtrando pela pousada ativa e período
+            const { data: reservas, error } = await supabaseClient
+                .from('reservas')
+                .select('*')
+                .eq('pousada_id', pousadaAtivaId)
+                .gte('checkin', dataInicio)
+                .lte('checkin', dataFim)
+                .in('status', ['Aprovada', 'Finalizada']);
+
+            if (error) {
+                console.error('Erro ao buscar reservas:', error);
+                alert('Erro ao carregar dados financeiros.');
+                return;
+            }
+
+            let faturamentoTotal = 0;
+            let corpoTabela = '';
+
+            if (reservas.length === 0) {
+                corpoTabela = `<tr><td colspan="5" class="py-4 px-6 text-center text-gray-500">Nenhuma reserva encontrada para este período.</td></tr>`;
+            } else {
+                reservas.forEach(reserva => {
+                    const valor = Number(reserva.valor_total) || 0;
+                    faturamentoTotal += valor;
+
+                    corpoTabela += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-4 px-6">${reserva.checkin}</td>
+                            <td class="py-4 px-6 font-medium text-gray-900">${reserva.hospede_nome || 'Hóspede'}</td>
+                            <td class="py-4 px-6 text-xs text-gray-500">${reserva.suite_id}</td>
+                            <td class="py-4 px-6 font-semibold text-gray-800">R$ ${valor.toFixed(2)}</td>
+                            <td class="py-4 px-6">
+                                <span class="px-2.5 py-1 text-xs rounded-full ${reserva.status === 'Finalizada' ? 'bg-gray-200 text-gray-700' : 'bg-green-100 text-green-800'}">
+                                    ${reserva.status}
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+
+            document.getElementById('tabelaFinanceira').innerHTML = corpoTabela;
+
+            // Atualiza os KPIs na tela
+            document.getElementById('kpiFaturamento').innerText = `R$ ${faturamentoTotal.toFixed(2)}`;
+            document.getElementById('kpiRecebido').innerText = `R$ ${faturamentoTotal.toFixed(2)}`; 
+            document.getElementById('kpiSaldo').innerText = `R$ 0,00`;
+        }
+
+        // Executa ao carregar a página
+        window.onload = () => {
+            identificarPousada();
+            // Define datas padrão para o mês atual de referência
+            document.getElementById('filtroInicio').value = '2026-08-01';
+            document.getElementById('filtroFim').value = '2026-08-31';
+            
+            if (pousadaAtivaId) {
+                carregarDadosFinanceiros();
+            }
+        };
+    </script>
+</body>
+</html>
