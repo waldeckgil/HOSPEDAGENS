@@ -2,7 +2,6 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestão de Reservas</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -11,9 +10,9 @@
 <body class="bg-gray-100 min-h-screen flex" onload="inicializarPagina()">
 
     <!-- MENU LATERAL -->
-    <aside id="sidebar-menu" class="w-64 bg-slate-900 text-slate-300 flex flex-col hidden md:flex shadow-xl shrink-0">
+    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col hidden md:flex shadow-xl">
         <div class="p-6">
-            <h1 id="nome-pousada-sidebar" class="text-2xl font-extrabold text-white mb-6 tracking-wider">Painel 360</h1>
+            <h1 class="text-2xl font-extrabold text-white mb-6 tracking-wider">Painel 360</h1>
             <nav class="space-y-2">
                 <a href="dashboard.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
                     <span>🏠</span> Gestão de Suítes
@@ -49,27 +48,21 @@
     <!-- CONTEÚDO PRINCIPAL -->
     <div class="flex-1 flex flex-col min-w-0">
         <!-- CABEÇALHO -->
-        <header class="bg-white shadow-xs border-b border-gray-200 p-4 md:p-6 flex flex-wrap justify-between items-center gap-3">
-            <div class="flex items-center gap-3">
-                <!-- Botão de Menu para Smartphone -->
-                <button onclick="toggleMenuMobile()" class="md:hidden bg-slate-100 hover:bg-slate-200 text-slate-800 p-2.5 rounded-xl border border-slate-200 transition focus:outline-none">
-                    <i class="fa-solid fa-bars text-lg"></i>
-                </button>
-                <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
-                    <h2 class="text-lg md:text-xl font-bold text-gray-800">Gestão de Hóspedes</h2>
-                    <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-0.5 rounded-full text-xs font-bold w-fit">Carregando...</span>
-                </div>
+        <header class="bg-white shadow-xs border-b border-gray-200 p-6 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <h2 class="text-xl font-bold text-gray-800">Gestão de Hóspedes</h2>
+                <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold">Carregando...</span>
             </div>
-            <a href="dashboard.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 md:px-4 md:py-2 rounded-xl text-xs md:text-sm font-semibold transition flex items-center gap-2 border border-slate-200">
+            <a href="dashboard.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2 border border-slate-200">
                 <i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard
             </a>
         </header>
 
         <!-- CORPO DA PÁGINA -->
-        <main class="p-4 md:p-8 flex-1 overflow-y-auto space-y-6 md:space-y-8">
+        <main class="p-6 md:p-8 flex-1 overflow-y-auto space-y-8">
             
             <!-- ÁREA DE BUSCA INTELIGENTE -->
-            <div class="bg-white p-4 md:p-6 rounded-2xl shadow-md border border-gray-200">
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
                 <h2 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
                     <i class="fa-solid fa-magnifying-glass text-blue-600"></i> Consulta Inteligente de Hóspedes
                 </h2>
@@ -89,8 +82,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="flex flex-col sm:flex-row gap-3 mt-4">
-                    <button onclick="carregarHistoricoHospedes()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition shadow-sm text-sm flex items-center justify-center gap-2">
+                <div class="flex gap-3 mt-4">
+                    <button onclick="carregarHistoricoHospedes()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition shadow-sm text-sm flex items-center gap-2">
                         <i class="fa-solid fa-search"></i> Pesquisar Histórico
                     </button>
                     <button onclick="limparFiltros()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-4 py-3 rounded-xl transition text-sm">
@@ -101,8 +94,8 @@
 
             <!-- TABELA DE RESULTADOS DO HISTÓRICO -->
             <div class="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
-                <div class="p-4 md:p-6 border-b border-gray-100 flex flex-wrap justify-between items-center gap-2">
-                    <h3 class="font-bold text-gray-800 text-base md:text-lg flex items-center gap-2">
+                <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                    <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
                         <i class="fa-solid fa-address-book text-blue-600"></i> Histórico de Hóspedes e Estadias
                     </h3>
                     <span id="contador-resultados" class="text-xs bg-blue-50 text-blue-700 font-bold px-3 py-1 rounded-full border border-blue-200">0 registros encontrados</span>
@@ -149,16 +142,6 @@
 
         let usuarioIdAtual = null;
 
-        function toggleMenuMobile() {
-            const sidebar = document.getElementById('sidebar-menu');
-            sidebar.classList.toggle('hidden');
-            sidebar.classList.toggle('fixed');
-            sidebar.classList.toggle('inset-y-0');
-            sidebar.classList.toggle('left-0');
-            sidebar.classList.toggle('z-50');
-            sidebar.classList.toggle('h-full');
-        }
-
         function mostrarToast(mensagem, tipo = 'sucesso') {
             const toast = document.getElementById('toast-notificacao');
             const toastMsg = document.getElementById('toast-mensagem');
@@ -185,12 +168,11 @@
             usuarioIdAtual = user.id;
 
             const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', user.id).maybeSingle();
-            const nomePousada = (pousada && pousada.nome) ? pousada.nome : "Minha Pousada";
-
-            // Atualiza título da aba e nomes nos componentes do painel
-            document.title = `${nomePousada} - Gestão de Hóspedes`;
-            document.getElementById('titulo-pousada').innerText = nomePousada;
-            document.getElementById('nome-pousada-sidebar').innerText = nomePousada;
+            if (pousada && pousada.nome) {
+                document.getElementById('titulo-pousada').innerText = pousada.nome;
+            } else {
+                document.getElementById('titulo-pousada').innerText = "Minha Pousada";
+            }
 
             document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${user.id}`;
 
