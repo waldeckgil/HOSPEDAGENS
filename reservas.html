@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-    
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,10 +18,10 @@
                 <a href="dashboard.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
                     <span>🏠</span> Gestão de Suítes
                 </a>
-                <a href="reservas.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
+                <a href="reservas.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-blue-600 text-white font-semibold shadow-md text-sm">
                     <span>📋</span> Ver Reservas
                 </a>
-                <a href="hospedes.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-blue-600 text-white font-semibold shadow-md text-sm">
+                <a href="hospedes.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
                     <span>👥</span> Gestão de Hóspedes
                 </a>
                 <a href="configurar-pousada.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
@@ -57,7 +56,7 @@
                     <i class="fa-solid fa-bars text-lg"></i>
                 </button>
                 <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
-                    <h2 class="text-lg md:text-xl font-bold text-gray-800">Gestão de Hóspedes</h2>
+                    <h2 class="text-lg md:text-xl font-bold text-gray-800">Gestão de Reservas</h2>
                     <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-0.5 rounded-full text-xs font-bold w-fit">Carregando...</span>
                 </div>
             </div>
@@ -189,7 +188,7 @@
             const nomePousada = (pousada && pousada.nome) ? pousada.nome : "Minha Pousada";
 
             // Atualiza título da aba e nomes nos componentes do painel
-            document.title = `${nomePousada} - Gestão de Hóspedes`;
+            document.title = `${nomePousada} - Gestão de Reservas`;
             document.getElementById('titulo-pousada').innerText = nomePousada;
             document.getElementById('nome-pousada-sidebar').innerText = nomePousada;
 
@@ -246,7 +245,6 @@
 
             let filtrados = reservas || [];
 
-            // Filtro inteligente local por texto (Nome, CPF, E-mail)
             if (textoBusca !== '') {
                 const buscaLower = textoBusca.toLowerCase();
                 filtrados = filtrados.filter(r => 
@@ -256,7 +254,6 @@
                 );
             }
 
-            // Filtro por período de check-in / check-out
             if (dataInicio) {
                 filtrados = filtrados.filter(r => r.checkout >= dataInicio);
             }
@@ -321,7 +318,6 @@
             window.location.href = 'index.html'; 
         }
 
-        // Disparar busca ao pressionar Enter no campo de texto
         document.getElementById('filtro-texto').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') carregarHistoricoHospedes();
         });
