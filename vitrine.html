@@ -21,37 +21,37 @@
 <body class="bg-pousada text-white p-3 sm:p-4 md:p-8">
 
     <div class="max-w-5xl mx-auto">
-        <h1 id="titulo-pousada" class="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 sm:mb-6 text-center drop-shadow-lg px-2">Carregando Pousada...</h1>
+        <h1 id="titulo-pousada" class="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 sm:mb-6 text-center drop-shadow-lg px-2">Carregando Pousada...[cite: 14]</h1>
         
         <!-- BARRA DE FILTRO PRÉVIO DE PERÍODO -->
         <div class="bg-white text-gray-800 p-4 sm:p-6 rounded-2xl shadow-xl mb-6 sm:mb-8">
             <h2 class="text-base sm:text-lg font-bold mb-3 text-blue-600 flex items-center gap-2">
-                🔍 Escolha o período da sua estadia
+                🔍 Escolha o período da sua estadia[cite: 14]
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 items-end">
                 <div>
-                    <label class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">Check-in</label>
+                    <label class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">Check-in[cite: 14]</label>
                     <input type="date" id="filtro-checkin" class="w-full p-2.5 sm:p-3 border rounded-xl font-bold bg-gray-50 text-sm sm:text-base">
                 </div>
                 <div>
-                    <label class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">Check-out</label>
+                    <label class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">Check-out[cite: 14]</label>
                     <input type="date" id="filtro-checkout" class="w-full p-2.5 sm:p-3 border rounded-xl font-bold bg-gray-50 text-sm sm:text-base">
                 </div>
                 <div>
                     <button onclick="filtrarSuitesDisponiveisPorPeriodo()" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-2.5 sm:p-3 rounded-xl font-bold transition shadow-md text-sm sm:text-base mt-2 md:mt-0">
-                        Consultar Disponibilidade
+                        Consultar Disponibilidade[cite: 14]
                     </button>
                 </div>
             </div>
-            <p id="aviso-filtro" class="text-[11px] sm:text-xs text-gray-500 mt-2 sm:mt-3 italic">Selecione o período desejado e clique em consultar para visualizar as suítes disponíveis.</p>
+            <p id="aviso-filtro" class="text-[11px] sm:text-xs text-gray-500 mt-2 sm:mt-3 italic">Selecione o período desejado e clique em consultar para visualizar as suítes disponíveis.[cite: 14]</p>
         </div>
 
         <!-- Container onde as suítes disponíveis serão injetadas após a busca -->
         <div id="vitrine-container" class="grid gap-4 sm:gap-6">
             <div class="bg-white/90 backdrop-blur-md text-gray-700 p-6 sm:p-8 rounded-2xl text-center shadow-lg">
                 <span class="text-3xl">🗓️</span>
-                <p class="font-bold text-sm sm:text-base mt-2 text-gray-800">Selecione as datas de check-in e check-out acima.</p>
-                <p class="text-[11px] sm:text-xs text-gray-500 mt-1">As suítes livres para o período escolhido aparecerão aqui.</p>
+                <p class="font-bold text-sm sm:text-base mt-2 text-gray-800">Selecione as datas de check-in e check-out acima.[cite: 14]</p>
+                <p class="text-[11px] sm:text-xs text-gray-500 mt-1">As suítes livres para o período escolhido aparecerão aqui.[cite: 14]</p>
             </div>
         </div>
     </div>
@@ -59,15 +59,15 @@
     <!-- Modal de Solicitação de Reserva -->
     <div id="modal-reserva" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-3 sm:p-4 z-50">
         <div class="bg-white p-5 md:p-8 rounded-2xl w-full max-w-3xl text-gray-800 shadow-2xl relative max-h-[95vh] overflow-y-auto">
-            <h2 class="text-xl sm:text-2xl font-bold mb-1 text-center text-blue-600">Solicitar Reserva</h2>
-            <p class="text-[11px] sm:text-xs text-center text-gray-500 mb-4">Preencha seus dados para enviar o pedido ao gestor.</p>
+            <h2 class="text-xl sm:text-2xl font-bold mb-1 text-center text-blue-600">Solicitar Reserva[cite: 14]</h2>
+            <p class="text-[11px] sm:text-xs text-center text-gray-500 mb-4">Preencha seus dados para enviar o pedido ao gestor.[cite: 14]</p>
             
             <div id="aviso-cadastro-encontrado" class="text-xs text-center text-emerald-700 bg-emerald-50 border border-emerald-200 p-2 rounded-xl font-semibold mb-4 hidden">
-                ✨ CPF encontrado! Seus dados foram preenchidos automaticamente.
+                ✨ CPF encontrado! Seus dados foram preenchidos automaticamente.[cite: 14]
             </div>
             
             <div id="feedback-sucesso" class="hidden mb-4 p-3 sm:p-4 bg-green-100 border border-green-400 text-green-700 rounded-xl text-center font-semibold text-sm">
-                🎉 Solicitação enviada com sucesso! O gestor analisará seu pedido em breve.
+                🎉 Solicitação enviada com sucesso! O gestor analisará seu pedido em breve.[cite: 14]
             </div>
 
             <div id="feedback-erro" class="hidden mb-4 p-3 sm:p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl text-center font-semibold text-sm"></div>
@@ -76,62 +76,62 @@
                 <input type="hidden" id="suite-id-reserva">
                 
                 <div class="bg-blue-50 p-3 sm:p-4 rounded-xl border border-blue-200">
-                    <label class="block text-[11px] sm:text-xs font-extrabold text-blue-800 uppercase mb-1">Informe seu CPF para iniciar</label>
+                    <label class="block text-[11px] sm:text-xs font-extrabold text-blue-800 uppercase mb-1">Informe seu CPF para iniciar[cite: 14]</label>
                     <div class="flex flex-col sm:flex-row gap-2">
                         <input type="text" id="cpf-hospede" placeholder="Digite apenas números" required 
                                class="w-full p-2.5 bg-white text-blue-800 font-extrabold border border-blue-300 rounded-xl outline-none text-sm">
                         <button type="button" onclick="buscarHospedePorCpf()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs transition whitespace-nowrap shadow flex justify-center items-center gap-2">
-                            <span>🔍</span> Buscar CPF
+                            <span>🔍</span> Buscar CPF[cite: 14]
                         </button>
                     </div>
-                    <p class="text-[10px] sm:text-[11px] text-blue-600 mt-1.5">Se já se hospedou conosco antes, clique em buscar para preencher automaticamente.</p>
+                    <p class="text-[10px] sm:text-[11px] text-blue-600 mt-1.5">Se já se hospedou conosco antes, clique em buscar para preencher automaticamente.[cite: 14]</p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                        <label class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">Nome Completo</label>
+                        <label class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">Nome Completo[cite: 14]</label>
                         <input type="text" id="nome-hospede" placeholder="Seu nome completo" required class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
                     </div>
 
                     <div>
-                        <label class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">E-mail</label>
+                        <label class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">E-mail[cite: 14]</label>
                         <input type="email" id="email-hospede" placeholder="ex: seu@email.com" required class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
                     </div>
 
                     <div>
-                        <label class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">WhatsApp</label>
+                        <label class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">WhatsApp[cite: 14]</label>
                         <input type="text" id="whatsapp-hospede" placeholder="(DDD+Número)" required class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
                     </div>
 
                     <div>
-                        <label class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">RG (Opcional)</label>
+                        <label class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">RG (Opcional)[cite: 14]</label>
                         <input type="text" id="rg-hospede" placeholder="Documento" class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
                     </div>
 
                     <div>
-                        <label class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">CEP</label>
+                        <label class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">CEP[cite: 14]</label>
                         <input type="text" id="cep-hospede" placeholder="00000-000" class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
                     </div>
 
                     <div>
-                        <label class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">Endereço Completo</label>
+                        <label class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">Endereço Completo[cite: 14]</label>
                         <input type="text" id="endereco-hospede" placeholder="Rua, número, bairro, cidade..." required class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
                     </div>
 
                     <div>
-                        <label class="block text-[11px] sm:text-xs font-bold text-blue-700 uppercase mb-1">📅 Data de Check-in</label>
+                        <label class="block text-[11px] sm:text-xs font-bold text-blue-700 uppercase mb-1">📅 Data de Check-in[cite: 14]</label>
                         <input type="date" id="checkin" required class="w-full p-2.5 bg-gray-100 text-blue-900 font-extrabold border border-gray-300 rounded-xl outline-none text-sm" readonly>
                     </div>
 
                     <div>
-                        <label class="block text-[11px] sm:text-xs font-bold text-blue-700 uppercase mb-1">📅 Data de Check-out</label>
+                        <label class="block text-[11px] sm:text-xs font-bold text-blue-700 uppercase mb-1">📅 Data de Check-out[cite: 14]</label>
                         <input type="date" id="checkout" required class="w-full p-2.5 bg-gray-100 text-blue-900 font-extrabold border border-gray-300 rounded-xl outline-none text-sm" readonly>
                     </div>
                 </div>
 
                 <div class="flex flex-col-reverse sm:flex-row gap-3 pt-3">
-                    <button type="button" onclick="fecharModal()" class="w-full sm:w-1/3 bg-gray-200 hover:bg-gray-300 text-gray-800 p-3 rounded-xl font-bold transition text-sm">Cancelar</button>
-                    <button type="submit" id="btn-enviar" class="w-full sm:w-2/3 bg-green-600 hover:bg-green-700 text-white p-3 rounded-xl font-bold transition shadow-md text-sm">Enviar Solicitação</button>
+                    <button type="button" onclick="fecharModal()" class="w-full sm:w-1/3 bg-gray-200 hover:bg-gray-300 text-gray-800 p-3 rounded-xl font-bold transition text-sm">Cancelar[cite: 14]</button>
+                    <button type="submit" id="btn-enviar" class="w-full sm:w-2/3 bg-green-600 hover:bg-green-700 text-white p-3 rounded-xl font-bold transition shadow-md text-sm">Enviar Solicitação[cite: 14]</button>
                 </div>
             </form>
         </div>
@@ -236,11 +236,13 @@
                 return;
             }
 
+            // CORREÇÃO APLICADA: Adicionado .gte('checkout', hojeISO) para desconsiderar reservas com checkout vencido
             const { data: reservasAprovadas } = await supabaseClient
                 .from('reservas')
                 .select('*')
                 .eq('pousada_id', pousadaIdGlobal)
-                .eq('status', 'Aprovada');
+                .eq('status', 'Aprovada')
+                .gte('checkout', hojeISO);
 
             const novoInicio = new Date(checkinFiltro);
             const novoFim = new Date(checkoutFiltro);
@@ -306,7 +308,16 @@
                                     <div class="flex items-center justify-between mb-2">
                                         <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-green-600 bg-green-50 px-2.5 py-1 rounded-full border border-green-200">Disponível</span>
                                     </div>
-                                    <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900 mb-1 md:mb-2">${suite.nome}</h2>
+                                    
+                                    <!-- CORREÇÃO APLICADA: Nome da suíte e o valor da diária base lado a lado -->
+                                    <div class="flex items-start justify-between gap-2 mb-1 md:mb-2">
+                                        <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900">${suite.nome}</h2>
+                                        <div class="text-right shrink-0">
+                                            <span class="text-[10px] uppercase text-gray-400 font-bold block">Diária</span>
+                                            <span class="text-sm sm:text-base font-extrabold text-blue-600">R$ ${precoBase.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+                                        </div>
+                                    </div>
+
                                     <p class="text-[11px] sm:text-xs text-gray-500 mb-3 md:mb-4">Veja de forma rápida as vagas disponíveis para esta acomodação.</p>
                                     
                                     <div class="border-t border-gray-100 pt-3 mb-4 md:mb-3">
