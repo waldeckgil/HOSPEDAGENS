@@ -187,8 +187,21 @@
         }
 
         async function inicializarPagina() {
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (!user) { window.location.href = 'index.html'; return; }
+            // Monitoramento em tempo real de autenticação (padrão unificado)
+            supabaseClient.auth.onAuthStateChange((event, session) => {
+                if (event === 'SIGNED_OUT' || !session) {
+                    window.location.href = 'index.html';
+                }
+            });
+
+            // Validação imediata de sessão por getSession()
+            const { data: { session }, error } = await supabaseClient.auth.getSession();
+            if (error || !session) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const user = session.user;
             usuarioIdAtual = user.id;
 
             const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', user.id).maybeSingle();
