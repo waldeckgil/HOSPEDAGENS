@@ -2,42 +2,57 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestão de Suítes</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes piscarAlerta {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(1.002); }
+        }
+        .alerta-piscando {
+            animation: piscarAlerta 1.5s infinite ease-in-out;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex">
+<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row">
 
     <!-- MENU LATERAL -->
-    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col hidden md:flex shadow-xl">
-        <div class="p-6">
-            <h1 class="text-2xl font-extrabold text-white mb-6 tracking-wider">Painel 360</h1>
-            <nav class="space-y-2">
-                <a href="dashboard.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-blue-600 text-white font-semibold shadow-md text-sm">
-                    <span>🏠</span> Gestão de Suítes
+    <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl">
+        <div class="p-4 sm:p-6">
+            <div class="flex justify-between items-center md:block">
+                <h1 id="titulo-menu-pousada" class="text-xl sm:text-2xl font-extrabold text-white mb-0 md:mb-6 tracking-wider text-center">Painel 360</h1>
+            </div>
+            <nav class="mt-4 md:mt-0 space-y-1.5 sm:space-y-2 flex flex-wrap md:flex-col gap-1.5 md:gap-0">
+                <a href="dashboard.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold shadow-md text-xs sm:text-sm">
+                    <span>🏠</span> <span class="hidden sm:inline">Gestão de Suítes</span><span class="sm:hidden">Suítes</span>
                 </a>
-                <a href="reservas.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
-                    <span>📋</span> Ver Reservas
+                <a href="reservas.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
+                    <span>📋</span> <span class="hidden sm:inline">Ver Reservas</span><span class="sm:hidden">Reservas</span>
                 </a>
-                <a href="hospedes.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
-                    <span>👥</span> Gestão de Hóspedes
+                <a href="financeiro.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
+                    <span>📋</span> <span class="hidden sm:inline">Gestão Financeira</span><span class="sm:hidden">Financeiro</span>
                 </a>
-                <a href="configurar-pousada.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
-                    <span>⚙️</span> Configuração de Suítes
+                <a href="hospedes.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
+                    <span>👥</span> <span class="hidden sm:inline">Gestão de Hóspedes</span><span class="sm:hidden">Hóspedes</span>
                 </a>
-                <a href="tarifas.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
-                    <span>💰</span> Gerenciar Tarifas
+                <a href="configurar-pousada.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
+                    <span>⚙️</span> <span class="hidden sm:inline">Configuração de Suítes</span><span class="sm:hidden">Configurações</span>
+                </a>
+                <a href="tarifas.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
+                    <span>💰</span> <span class="hidden sm:inline">Gerenciar Tarifas</span><span class="sm:hidden">Tarifas</span>
                 </a>
                 
-                <div class="pt-4 border-t border-slate-800 space-y-2">
-                    <button onclick="copiarLinkVitrine()" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300 text-left text-sm">
+                <div class="w-full pt-3 mt-2 border-t border-slate-800 flex flex-col md:space-y-2 gap-2">
+                    <button onclick="copiarLinkVitrine()" class="w-full flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300 text-left text-xs sm:text-sm">
                         <span>🔗</span> Copiar Vitrine
                     </button>
-                    <a id="link-ver-vitrine" href="#" target="_blank" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300 text-sm">
+                    <a id="link-ver-vitrine" href="#" target="_blank" class="w-full flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300 text-xs sm:text-sm">
                         <span>👁️</span> Ver Vitrine
                     </a>
-                    <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-xl transition shadow text-sm flex items-center justify-center gap-2 mt-2">
+                    <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl transition shadow text-xs sm:text-sm flex items-center justify-center gap-2 mt-1">
                         <i class="fa-solid fa-right-from-bracket"></i> Sair
                     </button>
                 </div>
@@ -48,27 +63,27 @@
     <!-- CONTEÚDO PRINCIPAL -->
     <div class="flex-1 flex flex-col min-w-0">
         <!-- CABEÇALHO -->
-        <header class="bg-white shadow-xs border-b border-gray-200 p-6 flex justify-between items-center">
-            <div class="flex items-center gap-4">
-                <h2 class="text-xl font-bold text-gray-800">Gestão de Suítes</h2>
-                <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold">Carregando...</span>
+        <header class="bg-white shadow-xs border-b border-gray-200 p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                <h2 class="text-lg sm:text-xl font-bold text-gray-800">Gestão de Suítes</h2>
+                <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold w-fit">Carregando...</span>
             </div>
-            <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">Sistema Online</span>
+            <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200 w-fit">Sistema Online</span>
         </header>
 
         <!-- CORPO DA PÁGINA -->
-        <main class="p-6 md:p-8 flex-1 overflow-y-auto">
+        <main class="p-4 sm:p-6 md:p-8 flex-1 overflow-y-auto">
             <!-- 🚨 CARD DE ATENÇÃO NO TOPO -->
-            <div id="card-atencao-pendentes" class="hidden mb-8 bg-amber-50 border-l-8 border-amber-500 p-6 rounded-2xl shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div id="card-atencao-pendentes" class="hidden mb-8 bg-amber-50 border-l-8 border-amber-500 p-4 sm:p-6 rounded-2xl shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-4 alerta-piscando">
                 <div>
                     <div class="flex items-center gap-2">
-                        <span class="text-2xl">🔔</span>
-                        <h2 class="text-xl font-bold text-amber-900">Você tem <span id="contador-pendentes">0</span> solicitação(ões) de reserva pendente(s)!</h2>
+                        <span class="text-xl sm:text-2xl">🔔</span>
+                        <h2 class="text-base sm:text-xl font-bold text-red-700">Você tem <span id="contador-pendentes">0</span> solicitação(ões) de reserva pendente(s)!</h2>
                     </div>
-                    <p class="text-sm text-amber-700 mt-1">Há hóspedes aguardando a aprovação. Veja os detalhes e a data/hora da solicitação abaixo:</p>
+                    <p class="text-xs sm:text-sm text-amber-700 mt-1">Há hóspedes aguardando a aprovação. Veja os detalhes e a data/hora da solicitação abaixo:</p>
                     <div id="lista-resumo-pendentes" class="mt-3 flex flex-wrap gap-2"></div>
                 </div>
-                <a href="reservas.html" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-3 rounded-xl transition shadow-sm whitespace-nowrap">
+                <a href="reservas.html" class="w-full sm:w-auto text-center bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-3 rounded-xl transition shadow-sm whitespace-nowrap text-xs sm:text-sm">
                     Gerenciar Todas as Reservas &rarr;
                 </a>
             </div>
@@ -90,24 +105,30 @@
 
     <!-- 🛑 MODAL DE CONFIRMAÇÃO -->
     <div id="modal-confirmacao" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
-        <div class="bg-white p-8 rounded-3xl w-full max-w-md shadow-2xl text-center space-y-4">
+        <div class="bg-white p-6 sm:p-8 rounded-3xl w-full max-w-md shadow-2xl text-center space-y-4">
             <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">⚠️</div>
-            <h3 class="text-xl font-bold text-gray-900">Confirmar Saída / Limpeza?</h3>
-            <p id="modal-confirmacao-texto" class="text-sm text-gray-600">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-900">Confirmar Saída / Limpeza?</h3>
+            <p id="modal-confirmacao-texto" class="text-xs sm:text-sm text-gray-600">
                 Esta ação encerrará a estadia atual do hóspede e enviará a suíte para limpeza. Deseja prosseguir?
             </p>
             <div class="grid grid-cols-2 gap-3 pt-2">
-                <button type="button" onclick="fecharModalConfirmacao()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-xl transition text-sm">Cancelar</button>
-                <button type="button" id="btn-confirmar-acao" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl transition text-sm shadow-md">Sim, Liberar</button>
+                <button type="button" onclick="fecharModalConfirmacao()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-xl transition text-xs sm:text-sm">Cancelar</button>
+                <button type="button" id="btn-confirmar-acao" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl transition text-xs sm:text-sm shadow-md">Sim, Liberar</button>
             </div>
         </div>
     </div>
 
     <!-- Modal de Edição -->
     <div id="modal-edicao" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white p-8 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
-            <h2 id="modal-titulo" class="text-2xl font-bold mb-4 text-blue-600">Gerenciar Suíte</h2>
+        <div class="bg-white p-6 sm:p-8 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
+            <h2 id="modal-titulo" class="text-xl sm:text-2xl font-bold mb-4 text-blue-600">Gerenciar Suíte</h2>
             
+            <!-- 🚨 ALERTA DE ERRO DENTRO DO MODAL -->
+            <div id="modal-erro-alerta" class="hidden mb-4 bg-red-50 border-l-4 border-red-500 p-3 rounded-xl text-red-900 text-xs sm:text-sm font-bold flex items-center gap-2">
+                <span>⚠️</span>
+                <span id="modal-erro-texto">Mensagem de erro aqui</span>
+            </div>
+
             <form id="form-edicao" class="space-y-3">
                 <input type="hidden" id="edit-suite-id">
                 <input type="hidden" id="edit-status-original">
@@ -115,7 +136,7 @@
                 
                 <div>
                     <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Status Físico da Suíte</label>
-                    <select id="edit-status" class="w-full p-3 border rounded-xl font-bold bg-gray-50" onchange="verificarStatusModal()">
+                    <select id="edit-status" class="w-full p-3 border rounded-xl font-bold bg-gray-50 text-sm" onchange="verificarStatusModal()">
                         <option value="Disponível">Disponível</option>
                         <option value="Ocupada">Ocupada (Agora)</option>
                         <option value="Reservado">Reservado (Adicionar/Editar Datas Futuras)</option>
@@ -127,33 +148,31 @@
 
                 <div id="campos-hospede-container" class="space-y-3 transition-all">
                     <div class="grid grid-cols-1 gap-2">
-                        <input type="text" id="edit-hospede" placeholder="Nome Hóspede" class="p-3 border rounded-xl">
-                        <input type="text" id="edit-whatsapp" placeholder="WhatsApp" class="p-3 border rounded-xl">
-                        <div class="grid grid-cols-2 gap-2">
-                            <input type="text" id="edit-cpf" placeholder="CPF (Opcional)" class="p-3 border rounded-xl">
-                            <input type="text" id="edit-rg" placeholder="RG (Opcional)" class="p-3 border rounded-xl">
+                        <input type="text" id="edit-hospede" placeholder="Nome Hóspede" class="p-3 border rounded-xl text-sm">
+                        <input type="text" id="edit-whatsapp" placeholder="WhatsApp" class="p-3 border rounded-xl text-sm">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <input type="text" id="edit-cpf" placeholder="CPF (Opcional)" class="p-3 border rounded-xl text-sm">
+                            <input type="text" id="edit-rg" placeholder="RG (Opcional)" class="p-3 border rounded-xl text-sm">
                         </div>
-                        <input type="text" id="edit-endereco" placeholder="Endereço" class="p-3 border rounded-xl">
-                        <input type="email" id="edit-email" placeholder="E-mail" class="p-3 border rounded-xl">
+                        <input type="text" id="edit-endereco" placeholder="Endereço" class="p-3 border rounded-xl text-sm">
+                        <input type="email" id="edit-email" placeholder="E-mail" class="p-3 border rounded-xl text-sm">
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3 pt-2">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-in</label>
-                            <input type="date" id="edit-checkin" class="w-full p-3 border rounded-xl bg-white">
+                            <input type="date" id="edit-checkin" class="w-full p-3 border rounded-xl bg-white text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-out</label>
-                            <input type="date" id="edit-checkout" class="w-full p-3 border rounded-xl bg-white">
+                            <input type="date" id="edit-checkout" class="w-full p-3 border rounded-xl bg-white text-sm">
                         </div>
                     </div>
 
-                    <!-- CAMPO PARA LANÇAR SINAL / PAGAMENTO PARCIAL E FORMA DE PAGAMENTO -->
                     <div class="pt-2 space-y-2">
                         <div>
                             <label class="block text-xs font-bold text-emerald-700 mb-1">Registrar Novo Pagamento / Sinal (R$)</label>
-                            <input type="number" step="0.01" id="edit-valor-sinal" placeholder="0.00" class="w-full p-3 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-emerald-900">
-                            <p class="text-[10px] text-gray-500 mt-1">Insira o valor do Pix ou sinal enviado para somar ao histórico de pagamentos.</p>
+                            <input type="number" step="0.01" id="edit-valor-sinal" placeholder="0.00" class="w-full p-3 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-emerald-900 text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-emerald-700 mb-1">Forma de Pagamento</label>
@@ -165,11 +184,15 @@
                                 <option value="Transferência Bancária">Transferência Bancária</option>
                             </select>
                         </div>
+                        <div>
+                            <label class="block text-xs font-bold text-amber-700 mb-1">⚠️ Observação / Mensagem de Alerta Importante</label>
+                            <textarea id="edit-observacao" rows="2" placeholder="Ex: Hóspede solicitou late checkout, alergia a algo, etc." class="w-full p-3 border border-amber-300 bg-amber-50/40 rounded-xl text-sm font-medium text-amber-950"></textarea>
+                        </div>
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold mt-4 transition">Salvar Alterações</button>
-                <button type="button" onclick="fecharModal()" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 p-3 rounded-xl font-bold mt-2 transition">Cancelar</button>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold mt-4 transition text-sm">Salvar Alterações</button>
+                <button type="button" onclick="fecharModal()" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 p-3 rounded-xl font-bold mt-2 transition text-sm">Cancelar</button>
             </form>
         </div>
     </div>
@@ -206,6 +229,19 @@
 
             toast.classList.remove('translate-y-24', 'opacity-0');
             setTimeout(() => { toast.classList.add('translate-y-24', 'opacity-0'); }, 3500);
+        }
+
+        function mostrarErroModal(mensagem) {
+            const alertaEl = document.getElementById('modal-erro-alerta');
+            const textoEl = document.getElementById('modal-erro-texto');
+            textoEl.innerText = mensagem;
+            alertaEl.classList.remove('hidden');
+            alertaEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function limparErroModal() {
+            const alertaEl = document.getElementById('modal-erro-alerta');
+            alertaEl.classList.add('hidden');
         }
 
         function calcularDiasRestantes(dataAlvo) {
@@ -288,8 +324,10 @@
             if (pousada && pousada.nome) {
                 nomePousadaAtual = pousada.nome;
                 document.getElementById('titulo-pousada').innerText = pousada.nome;
+                document.getElementById('titulo-menu-pousada').innerText = pousada.nome;
             } else {
                 document.getElementById('titulo-pousada').innerText = "Minha Pousada";
+                document.getElementById('titulo-menu-pousada').innerText = "Minha Pousada";
             }
             document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${user.id}`;
         }
@@ -327,6 +365,22 @@
                     </div>
                 `;
             });
+        }
+
+        function alternarExpandirCard(btnElement) {
+            const card = btnElement.closest('.card-suite');
+            const detalhes = card.querySelector('.card-detalhes');
+            const iconeSeta = card.querySelector('.icone-seta');
+            
+            if (detalhes.classList.contains('hidden')) {
+                detalhes.classList.remove('hidden');
+                if (iconeSeta) iconeSeta.style.transform = 'rotate(180deg)';
+                btnElement.innerText = 'Recolher ▴';
+            } else {
+                detalhes.classList.add('hidden');
+                if (iconeSeta) iconeSeta.style.transform = 'rotate(0deg)';
+                btnElement.innerText = 'Expandir Detalhes ▾';
+            }
         }
 
         async function carregarDashboard() {
@@ -378,6 +432,7 @@
                         const indicador = isFutura ? obterIndicadorProximaEstada(aprovada.checkin) : obterIndicadorCheckout(aprovada.checkout);
                         const linkZap = gerarLinkWhatsApp(aprovada.whatsapp_hospede, aprovada.hospede_nome, aprovada.checkin, aprovada.checkout);
                         const sufixoTitulo = totalCardsDestaSuite > 1 ? ` (${contadorCardAtual++})` : '';
+                        const nomeHospedeExibicao = aprovada.hospede_nome ? ` - <span class="font-normal text-gray-700 text-sm sm:text-base">${aprovada.hospede_nome}</span>` : '';
                         
                         const qtdDiarias = calcularQuantidadeDiarias(aprovada.checkin, aprovada.checkout);
                         const valorTotal = Number(aprovada.valor_total || 0);
@@ -386,24 +441,43 @@
                         const totalPago = pagamentosDestaReserva.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
                         const saldoRestante = valorTotal - totalPago;
 
-                        container.innerHTML += `
-                            <div class="p-6 rounded-2xl shadow-md ${bgCardClasses} text-gray-900 flex flex-col justify-between transition hover:shadow-lg cursor-pointer" 
-                                 onclick="abrirModal('${suite.id}', '${suite.nome}', '${statusParaModal}', '${aprovada.id}')">
-                                <div>
-                                    <div class="flex justify-between items-start mb-2">
-                                        <div>
-                                            <h2 class="text-xl font-bold text-gray-900">${suite.nome}${sufixoTitulo}</h2>
-                                            <span class="text-xs font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md mt-1 inline-block">Diária: ${precoDiariaFormatado}</span>
-                                        </div>
-                                        <span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase shadow-sm ${badgeClasses}">
-                                            ${badgeText}
-                                        </span>
+                        let htmlAlertaTopo = '';
+                        if (aprovada.observacao && aprovada.observacao.trim() !== '') {
+                            htmlAlertaTopo = `
+                                <div class="mt-3 bg-amber-100 border-l-4 border-amber-500 p-3 rounded-xl text-amber-950 text-xs sm:text-sm font-semibold flex items-start gap-2 shadow-xs">
+                                    <span class="text-base">⚠️</span>
+                                    <div>
+                                        <strong class="block text-amber-900 uppercase text-[10px] tracking-wide">Aviso Importante:</strong>
+                                        <span>${aprovada.observacao}</span>
                                     </div>
-                                    <div class="mt-2 inline-block px-3 py-1 rounded-lg border text-xs font-semibold ${indicador.classe}">${indicador.texto}</div>
-                                    
-                                    <div class="mt-4 pt-3 border-t border-black/10 text-sm space-y-1.5">
+                                </div>
+                            `;
+                        }
+
+                        container.innerHTML += `
+                            <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md ${bgCardClasses} text-gray-900 flex flex-col justify-between transition hover:shadow-lg">
+                                <div>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <h2 class="text-base sm:text-lg font-bold text-gray-900">${suite.nome}${sufixoTitulo}${nomeHospedeExibicao}</h2>
+                                            <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária: ${precoDiariaFormatado}</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm ${badgeClasses}">
+                                                ${badgeText}
+                                            </span>
+                                            <span class="icone-seta text-gray-400 text-sm transition-transform duration-300">▼</span>
+                                        </div>
+                                    </div>
+
+                                    ${htmlAlertaTopo}
+
+                                    <div class="card-detalhes hidden mt-3 pt-3 border-t border-black/10 text-xs sm:text-sm space-y-1.5">
+                                        <div class="mb-2">
+                                            <div class="inline-block px-3 py-1 rounded-lg border text-xs font-semibold ${indicador.classe}">${indicador.texto}</div>
+                                        </div>
                                         <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">Hóspede:</span> <span class="font-bold text-gray-900">${aprovada.hospede_nome}</span></p>
-                                        <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">WhatsApp:</span> <a href="${linkZap}" target="_blank" onclick="event.stopPropagation();" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${aprovada.whatsapp_hospede || 'Não informado'}</a></p>
+                                        <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">WhatsApp:</span> <a href="${linkZap}" target="_blank" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${aprovada.whatsapp_hospede || 'Não informado'}</a></p>
                                         
                                         <div class="flex items-center justify-between pt-1 border-t border-black/5 mt-2">
                                             <span class="text-xs font-semibold text-gray-700">Estadia: <strong class="text-gray-900">${qtdDiarias} diária(s)</strong></span>
@@ -426,9 +500,15 @@
                                             <p><span class="text-gray-500">Check-out:</span> <strong class="text-gray-900">${formatarDataSimples(aprovada.checkout)}</strong></p>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="mt-5 pt-3 flex justify-end">
-                                    <span class="text-xs font-bold text-blue-700 hover:underline">Editar / Adicionar Reserva &rarr;</span>
+                                    
+                                    <div class="mt-4 pt-3 flex justify-between items-center border-t border-black/10">
+                                        <button type="button" onclick="alternarExpandirCard(this)" class="text-xs font-bold text-gray-600 hover:text-gray-900 underline">
+                                            Expandir Detalhes ▾
+                                        </button>
+                                        <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', '${statusParaModal}', '${aprovada.id}')" class="text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 px-3.5 py-2 rounded-xl transition shadow-xs">
+                                            Editar Card &rarr;
+                                        </button>
+                                    </div>
                                 </div>
                             </div>`;
                     });
@@ -439,26 +519,27 @@
                     };
                     
                     container.innerHTML += `
-                        <div class="p-6 rounded-2xl shadow-md ${corClasses[suite.status] || 'bg-white border border-gray-200'} flex flex-col justify-between transition hover:shadow-lg cursor-pointer" 
-                             onclick="abrirModal('${suite.id}', '${suite.nome}', '${suite.status}')">
+                        <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md ${corClasses[suite.status] || 'bg-white border border-gray-200'} flex flex-col justify-between transition hover:shadow-lg">
                             <div>
-                                <div class="flex justify-between items-start mb-2">
+                                <div class="flex justify-between items-center">
                                     <div>
-                                        <h2 class="text-xl font-bold text-gray-900">${suite.nome}</h2>
-                                        <span class="text-xs font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md mt-1 inline-block">Diária: ${precoDiariaFormatado}</span>
+                                        <h2 class="text-base sm:text-lg font-bold text-gray-900">${suite.nome}</h2>
+                                        <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária: ${precoDiariaFormatado}</span>
                                     </div>
-                                    <span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase shadow-sm ${
-                                        suite.status === 'Disponível' ? 'bg-green-200 text-green-900' : 'bg-red-200 text-red-900'
-                                    }">
-                                        ${suite.status}
-                                    </span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm ${
+                                            suite.status === 'Disponível' ? 'bg-green-200 text-green-900' : 'bg-red-200 text-red-900'
+                                        }">
+                                            ${suite.status}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div class="mt-4 pt-3 border-t border-black/10 text-xs text-gray-600 italic">
-                                    Nenhuma reserva ativa vinculada.
+                                
+                                <div class="mt-4 pt-3 border-t border-black/10 flex justify-end">
+                                    <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', '${suite.status}')" class="text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 px-3.5 py-2 rounded-xl transition shadow-xs">
+                                        Gerenciar / Adicionar &rarr;
+                                    </button>
                                 </div>
-                            </div>
-                            <div class="mt-5 pt-3 flex justify-end">
-                                <span class="text-xs font-bold text-blue-700 hover:underline">Editar / Adicionar Reserva &rarr;</span>
                             </div>
                         </div>`;
                 }
@@ -468,25 +549,44 @@
                     const dataSolicitacaoFormatada = formatarDataHora(pend.criado_em);
                     const qtdDiariasPend = calcularQuantidadeDiarias(pend.checkin, pend.checkout);
                     const valorTotalPend = Number(pend.valor_total || 0);
+                    const nomeHospedePendExibicao = pend.hospede_nome ? ` - <span class="font-normal text-amber-950/80 text-sm sm:text-base">${pend.hospede_nome}</span>` : '';
 
                     const pagamentosPend = pagamentosGlobaisCache.filter(p => p.reserva_id === pend.id);
                     const totalPagoPend = pagamentosPend.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
                     const saldoRestantePend = valorTotalPend - totalPagoPend;
 
+                    let htmlAlertaTopoPend = '';
+                    if (pend.observacao && pend.observacao.trim() !== '') {
+                        htmlAlertaTopoPend = `
+                            <div class="mt-3 bg-amber-200/80 border-l-4 border-amber-600 p-3 rounded-xl text-amber-950 text-xs sm:text-sm font-semibold flex items-start gap-2 shadow-xs">
+                                <span class="text-base">⚠️</span>
+                                <div>
+                                    <strong class="block text-amber-900 uppercase text-[10px] tracking-wide">Aviso Importante:</strong>
+                                    <span>${pend.observacao}</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+
                     container.innerHTML += `
-                        <div class="p-6 rounded-2xl shadow-md bg-amber-50 border border-amber-200 flex flex-col justify-between transition hover:shadow-lg">
+                        <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md bg-amber-50 border border-amber-200 flex flex-col justify-between transition hover:shadow-lg">
                             <div>
-                                <div class="flex justify-between items-start mb-2">
+                                <div class="flex justify-between items-center">
                                     <div>
-                                        <h2 class="text-xl font-bold text-amber-950">${suite.nome}</h2>
-                                        <span class="text-xs font-bold text-amber-900/80 bg-amber-200/60 px-2 py-0.5 rounded-md mt-1 inline-block">Diária: ${precoDiariaFormatado}</span>
+                                        <h2 class="text-base sm:text-lg font-bold text-amber-950">${suite.nome}${nomeHospedePendExibicao}</h2>
+                                        <span class="text-[11px] font-bold text-amber-900/80 bg-amber-200/60 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária: ${precoDiariaFormatado}</span>
                                     </div>
-                                    <span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase shadow-sm bg-amber-200 text-amber-900">Pendente</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm bg-amber-200 text-amber-900">Pendente</span>
+                                        <span class="icone-seta text-amber-700 text-sm transition-transform duration-300">▼</span>
+                                    </div>
                                 </div>
                                 
-                                <div class="mt-4 pt-3 border-t border-amber-200 text-sm space-y-1.5">
+                                ${htmlAlertaTopoPend}
+
+                                <div class="card-detalhes hidden mt-3 pt-3 border-t border-amber-200 text-xs sm:text-sm space-y-1.5">
                                     <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">Hóspede:</span> <span class="font-bold text-gray-900">${pend.hospede_nome || 'Não informado'}</span></p>
-                                    <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">WhatsApp:</span> <a href="${linkZapPend}" target="_blank" onclick="event.stopPropagation();" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${pend.whatsapp_hospede || 'Não informado'}</a></p>
+                                    <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">WhatsApp:</span> <a href="${linkZapPend}" target="_blank" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${pend.whatsapp_hospede || 'Não informado'}</a></p>
                                     
                                     <div class="flex items-center justify-between pt-1 border-t border-amber-200 mt-2">
                                         <span class="text-xs font-semibold text-amber-900">Estadia: <strong class="text-gray-900">${qtdDiariasPend} diária(s)</strong></span>
@@ -518,11 +618,21 @@
                                         <p><span class="text-amber-800">Check-in:</span> <strong class="text-gray-900">${formatarDataSimples(pend.checkin)}</strong></p>
                                         <p><span class="text-amber-800">Check-out:</span> <strong class="text-gray-900">${formatarDataSimples(pend.checkout)}</strong></p>
                                     </div>
+
+                                    <div class="mt-4 pt-3 border-t border-amber-200 flex gap-2">
+                                        <button onclick="mudarStatusReserva('${pend.id}', 'Aprovada')" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✔ Aprovar</button>
+                                        <button onclick="mudarStatusReserva('${pend.id}', 'Recusada')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✖ Recusar</button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="mt-5 pt-3 border-t border-amber-200 flex gap-2">
-                                <button onclick="mudarStatusReserva('${pend.id}', 'Aprovada')" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✔ Aprovar</button>
-                                <button onclick="mudarStatusReserva('${pend.id}', 'Recusada')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✖ Recusar</button>
+
+                                <div class="mt-4 pt-3 flex justify-between items-center border-t border-amber-200">
+                                    <button type="button" onclick="alternarExpandirCard(this)" class="text-xs font-bold text-amber-900 hover:text-amber-950 underline">
+                                        Expandir Detalhes ▾
+                                    </button>
+                                    <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', 'Pendente', '${pend.id}')" class="text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 px-3.5 py-2 rounded-xl transition shadow-xs">
+                                        Editar Card &rarr;
+                                    </button>
+                                </div>
                             </div>
                         </div>`;
                 });
@@ -531,11 +641,13 @@
         
         function abrirModal(id, nome, status, reservaId = null) {
             camposLimposParaNovaReserva = false;
+            limparErroModal();
             document.getElementById('edit-suite-id').value = id;
             document.getElementById('edit-status').value = status;
             document.getElementById('edit-status-original').value = status;
             document.getElementById('edit-valor-sinal').value = '';
             document.getElementById('edit-forma-pagamento').value = 'Pix / Sinal';
+            document.getElementById('edit-observacao').value = '';
             document.getElementById('modal-titulo').innerText = "Gerenciar Suíte: " + nome;
 
             let reserva = null;
@@ -556,6 +668,7 @@
                 document.getElementById('edit-email').value = reserva.email || '';
                 document.getElementById('edit-checkin').value = reserva.checkin || '';
                 document.getElementById('edit-checkout').value = reserva.checkout || '';
+                document.getElementById('edit-observacao').value = reserva.observacao || '';
             } else {
                 document.getElementById('edit-reserva-id').value = '';
                 document.getElementById('edit-hospede').value = '';
@@ -566,6 +679,7 @@
                 document.getElementById('edit-email').value = '';
                 document.getElementById('edit-checkin').value = '';
                 document.getElementById('edit-checkout').value = '';
+                document.getElementById('edit-observacao').value = '';
             }
             
             verificarStatusModal();
@@ -601,6 +715,7 @@
                 document.getElementById('edit-checkout').value = '';
                 document.getElementById('edit-valor-sinal').value = '';
                 document.getElementById('edit-forma-pagamento').value = 'Pix / Sinal';
+                document.getElementById('edit-observacao').value = '';
                 camposLimposParaNovaReserva = true;
             }
         }
@@ -608,136 +723,137 @@
         function fecharModal() { document.getElementById('modal-edicao').classList.add('hidden'); }
         function fecharModalConfirmacao() { document.getElementById('modal-confirmacao').classList.add('hidden'); }
 
-    async function executarSalvamento(suiteId, status) {
-    const reservaIdEditada = document.getElementById('edit-reserva-id').value;
-    const valorSinalInformado = parseFloat(document.getElementById('edit-valor-sinal').value) || 0;
-    const formaPagamentoSelecionada = document.getElementById('edit-forma-pagamento').value || 'Pix / Sinal';
-    
-    const checkinVal = document.getElementById('edit-checkin').value || new Date().toISOString().split('T')[0];
-    const checkoutVal = document.getElementById('edit-checkout').value || new Date().toISOString().split('T')[0];
+        async function executarSalvamento(suiteId, status) {
+            const reservaIdEditada = document.getElementById('edit-reserva-id').value;
+            const valorSinalInformado = parseFloat(document.getElementById('edit-valor-sinal').value) || 0;
+            const formaPagamentoSelecionada = document.getElementById('edit-forma-pagamento').value || 'Pix / Sinal';
+            const observacaoInformada = document.getElementById('edit-observacao').value || '';
+            
+            const checkinVal = document.getElementById('edit-checkin').value || new Date().toISOString().split('T')[0];
+            const checkoutVal = document.getElementById('edit-checkout').value || new Date().toISOString().split('T')[0];
 
-    // 🛑 1. Validar conflito de reservas antes de prosseguir
-    try {
-        const { data: temConflito, error: erroConflito } = await supabaseClient.rpc('verificar_conflito_reserva', { 
-            p_suite_id: suiteId, 
-            p_checkin: checkinVal, 
-            p_checkout: checkoutVal,
-            p_reserva_id: reservaIdEditada ? reservaIdEditada : null
-        });
-        
-        if (!erroConflito && temConflito === true) {
-            mostrarToast("Atenção", "Já existe uma reserva confirmada para esta suíte nestas datas!", "erro");
-            return; 
-        }
-    } catch (err) {
-        console.error("Erro ao verificar conflito de reservas:", err);
-    }
-
-    const dadosReserva = {
-        pousada_id: usuarioIdAtual,
-        suite_id: suiteId,
-        hospede_nome: document.getElementById('edit-hospede').value || 'Hóspede',
-        whatsapp_hospede: document.getElementById('edit-whatsapp').value,
-        cpf: document.getElementById('edit-cpf').value,
-        rg: document.getElementById('edit-rg').value,
-        endereco: document.getElementById('edit-endereco').value,
-        email: document.getElementById('edit-email').value,
-        checkin: checkinVal,
-        checkout: checkoutVal,
-        status: 'Aprovada'
-    };
-
-    let valorTotalCalculado = 0;
-    try {
-        const { data: valorCalculado, error: erroRpc } = await supabaseClient.rpc('calcular_total_reserva', { 
-            p_suite_id: suiteId, 
-            p_checkin: checkinVal, 
-            p_checkout: checkoutVal 
-        });
-        
-        if (!erroRpc && valorCalculado !== null) {
-            valorTotalCalculado = Number(valorCalculado);
-            dadosReserva.valor_total = valorTotalCalculado;
-        }
-    } catch (err) {
-        console.error("Erro ao invocar a função de cálculo no banco:", err);
-    }
-
-    if (valorSinalInformado > 0 && reservaIdEditada) {
-        const pagamentosExistentes = pagamentosGlobaisCache.filter(p => p.reserva_id === reservaIdEditada);
-        const totalJaPago = pagamentosExistentes.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
-        const saldoRestanteAtual = valorTotalCalculado - totalJaPago;
-
-        if (valorSinalInformado > saldoRestanteAtual) {
-            mostrarToast("Atenção", `O valor do pagamento (${formatarMoeda(valorSinalInformado)}) é maior que o saldo restante (${formatarMoeda(saldoRestanteAtual)}). Corrija o valor.`, 'erro');
-            return; 
-        }
-    } else if (valorSinalInformado > 0 && valorTotalCalculado > 0) {
-        if (valorSinalInformado > valorTotalCalculado) {
-            mostrarToast("Atenção", `O valor do pagamento (${formatarMoeda(valorSinalInformado)}) é maior que o valor total da reserva (${formatarMoeda(valorTotalCalculado)}). Corrija o valor.`, 'erro');
-            return; 
-        }
-    }
-
-    let reservaIdFinal = reservaIdEditada;
-
-    // Tratamento do status de destino para a tabela suites
-    let statusDestino = status;
-    if (status === 'Checkout') {
-        statusDestino = 'Limpeza';
-    }
-
-    // 🛑 CORREÇÃO PRINCIPAL: Atualizar explicitamente o status na tabela suites
-    await supabaseClient.from('suites').update({ status: statusDestino }).eq('id', suiteId);
-
-    if (status === 'Reservado' || status === 'Ocupada' || status === 'Aprovada') {
-        if (reservaIdEditada) {
-            await supabaseClient.from('reservas').update(dadosReserva).eq('id', reservaIdEditada);
-        } else {
-            const { data: novaReservaInserida, error: errIns } = await supabaseClient.from('reservas').insert([dadosReserva]).select().single();
-            if (!errIns && novaReservaInserida) {
-                reservaIdFinal = novaReservaInserida.id;
+            try {
+                const { data: temConflito, error: erroConflito } = await supabaseClient.rpc('verificar_conflito_reserva', { 
+                    p_suite_id: suiteId, 
+                    p_checkin: checkinVal, 
+                    p_checkout: checkoutVal,
+                    p_reserva_id: reservaIdEditada ? reservaIdEditada : null
+                });
+                
+                if (!erroConflito && temConflito === true) {
+                    mostrarErroModal("Já existe uma reserva confirmada para esta suíte nestas datas!");
+                    return; 
+                }
+            } catch (err) {
+                console.error("Erro ao verificar conflito de reservas:", err);
             }
-        }
-    } else {
-        if (reservaIdEditada) {
-            await supabaseClient.from('reservas').update({ status: 'Finalizada' }).eq('id', reservaIdEditada);
-        } else {
-            const hoje = new Date().toISOString().split('T')[0];
-            await supabaseClient.from('reservas').update({ status: 'Finalizada' })
-                .eq('suite_id', suiteId)
-                .eq('status', 'Aprovada')
-                .lte('checkin', hoje);
-        }
-    }
 
-    if (valorSinalInformado > 0 && reservaIdFinal) {
-        const { error: errPag } = await supabaseClient.from('hospede_pagamentos').insert([{
-            pousada_id: usuarioIdAtual,
-            reserva_id: reservaIdFinal,
-            valor_pago: valorSinalInformado,
-            forma_pagamento: formaPagamentoSelecionada,
-            observacao: 'Lançado via painel de gestão'
-        }]);
+            const dadosReserva = {
+                pousada_id: usuarioIdAtual,
+                suite_id: suiteId,
+                hospede_nome: document.getElementById('edit-hospede').value || 'Hóspede',
+                whatsapp_hospede: document.getElementById('edit-whatsapp').value,
+                cpf: document.getElementById('edit-cpf').value,
+                rg: document.getElementById('edit-rg').value,
+                endereco: document.getElementById('edit-endereco').value,
+                email: document.getElementById('edit-email').value,
+                checkin: checkinVal,
+                checkout: checkoutVal,
+                observacao: observacaoInformada,
+                status: 'Aprovada'
+            };
 
-        if (errPag) {
-            console.error("Erro ao gravar pagamento:", errPag);
+            let valorTotalCalculado = 0;
+            try {
+                const { data: valorCalculado, error: erroRpc } = await supabaseClient.rpc('calcular_total_reserva', { 
+                    p_suite_id: suiteId, 
+                    p_checkin: checkinVal, 
+                    p_checkout: checkoutVal 
+                });
+                
+                if (!erroRpc && valorCalculado !== null) {
+                    valorTotalCalculado = Number(valorCalculado);
+                    dadosReserva.valor_total = valorTotalCalculado;
+                }
+            } catch (err) {
+                console.error("Erro ao invocar a função de cálculo no banco:", err);
+            }
+
+            if (valorSinalInformado > 0 && reservaIdEditada) {
+                const pagamentosExistentes = pagamentosGlobaisCache.filter(p => p.reserva_id === reservaIdEditada);
+                const totalJaPago = pagamentosExistentes.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
+                const saldoRestanteAtual = valorTotalCalculado - totalJaPago;
+
+                if (valorSinalInformado > saldoRestanteAtual) {
+                    mostrarErroModal(`O valor do pagamento (${formatarMoeda(valorSinalInformado)}) é maior que o saldo restante (${formatarMoeda(saldoRestanteAtual)}). Corrija o valor.`);
+                    return; 
+                }
+            } else if (valorSinalInformado > 0 && valorTotalCalculado > 0) {
+                if (valorSinalInformado > valorTotalCalculado) {
+                    mostrarErroModal(`O valor do pagamento (${formatarMoeda(valorSinalInformado)}) é maior que o valor total da reserva (${formatarMoeda(valorTotalCalculado)}). Corrija o valor.`);
+                    return; 
+                }
+            }
+
+            let reservaIdFinal = reservaIdEditada;
+
+            let statusDestino = status;
+            if (status === 'Checkout') {
+                statusDestino = 'Limpeza';
+            }
+
+            await supabaseClient.from('suites').update({ status: statusDestino }).eq('id', suiteId);
+
+            if (status === 'Reservado' || status === 'Ocupada' || status === 'Aprovada') {
+                if (reservaIdEditada) {
+                    await supabaseClient.from('reservas').update(dadosReserva).eq('id', reservaIdEditada);
+                } else {
+                    const { data: novaReservaInserida, error: errIns } = await supabaseClient.from('reservas').insert([dadosReserva]).select().single();
+                    if (!errIns && novaReservaInserida) {
+                        reservaIdFinal = novaReservaInserida.id;
+                    }
+                }
+            } else {
+                if (reservaIdEditada) {
+                    await supabaseClient.from('reservas').update({ status: 'Finalizada' }).eq('id', reservaIdEditada);
+                } else {
+                    const hoje = new Date().toISOString().split('T')[0];
+                    await supabaseClient.from('reservas').update({ status: 'Finalizada' })
+                        .eq('suite_id', suiteId)
+                        .eq('status', 'Aprovada')
+                        .lte('checkin', hoje);
+                }
+            }
+
+            if (valorSinalInformado > 0 && reservaIdFinal) {
+                const { error: errPag } = await supabaseClient.from('hospede_pagamentos').insert([{
+                    pousada_id: usuarioIdAtual,
+                    reserva_id: reservaIdFinal,
+                    valor_pago: valorSinalInformado,
+                    forma_pagamento: formaPagamentoSelecionada,
+                    observacao: 'Lançado via painel de gestão'
+                }]);
+
+                if (errPag) {
+                    console.error("Erro ao gravar pagamento:", errPag);
+                }
+            }
+
+            fecharModal();
+            carregarDashboard();
+            mostrarToast("Sucesso", "Dados salvos com sucesso!");
         }
-    }
-
-    fecharModal();
-    carregarDashboard();
-    mostrarToast("Sucesso", "Dados salvos com sucesso!");
-}
 
         document.getElementById('form-edicao').onsubmit = async (e) => {
             e.preventDefault();
+            limparErroModal();
+
             const status = document.getElementById('edit-status').value;
             const statusOriginal = document.getElementById('edit-status-original').value;
             const suiteId = document.getElementById('edit-suite-id').value;
             
             if (statusOriginal === 'Ocupada' && status === 'Disponível') {
-                mostrarToast("Atenção", "Uma suíte ocupada não pode ir direto para 'Disponível'. Envie para 'Limpeza' ou faça o 'Checkout'.", 'erro');
+                mostrarErroModal("Uma suíte ocupada não pode ir direto para 'Disponível'. Envie para 'Limpeza' ou faça o 'Checkout'.");
                 return;
             }
 

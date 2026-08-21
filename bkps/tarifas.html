@@ -2,42 +2,45 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestão de Tarifas e Valores</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 min-h-screen flex" onload="inicializarPagina()">
+<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row" onload="inicializarPagina()">
 
-    <!-- MENU LATERAL -->
-    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col hidden md:flex shadow-xl">
-        <div class="p-6">
-            <h1 class="text-2xl font-extrabold text-white mb-6 tracking-wider">Painel 360</h1>
-            <nav class="space-y-2">
-                <a href="dashboard.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
-                    <span>🏠</span> Gestão de Suítes
+    <!-- MENU LATERAL (Adaptado para mobile e desktop) -->
+    <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl">
+        <div class="p-4 sm:p-6">
+            <div class="flex justify-between items-center md:block">
+                <h1 id="nome-pousada-sidebar" class="text-xl sm:text-2xl font-extrabold text-white mb-0 md:mb-6 tracking-wider">Painel 360</h1>
+            </div>
+            <nav class="mt-4 md:mt-0 space-y-1.5 sm:space-y-2 flex flex-wrap md:flex-col gap-1.5 md:gap-0">
+                <a href="dashboard.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
+                    <span>🏠</span> <span class="hidden sm:inline">Gestão de Suítes</span><span class="sm:hidden">Suítes</span>
                 </a>
-                <a href="reservas.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
-                    <span>📋</span> Ver Reservas
+                <a href="reservas.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
+                    <span>📋</span> <span class="hidden sm:inline">Ver Reservas</span><span class="sm:hidden">Reservas</span>
                 </a>
-                <a href="hospedes.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
-                    <span>👥</span> Gestão de Hóspedes
+                <a href="hospedes.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
+                    <span>👥</span> <span class="hidden sm:inline">Gestão de Hóspedes</span><span class="sm:hidden">Hóspedes</span>
                 </a>
-                <a href="configurar-pousada.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
-                    <span>⚙️</span> Configuração de Suítes
+                <a href="configurar-pousada.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
+                    <span>⚙️</span> <span class="hidden sm:inline">Configuração de Suítes</span><span class="sm:hidden">Configurações</span>
                 </a>
-                <a href="tarifas.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-blue-600 text-white font-semibold shadow-md text-sm">
-                    <span>💰</span> Gerenciar Tarifas
+                <a href="tarifas.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold shadow-md text-xs sm:text-sm">
+                    <span>💰</span> <span class="hidden sm:inline">Gerenciar Tarifas</span><span class="sm:hidden">Tarifas</span>
                 </a>
                 
-                <div class="pt-4 border-t border-slate-800 space-y-2">
-                    <button onclick="copiarLinkVitrine()" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300 text-left text-sm">
+                <div class="w-full pt-3 mt-2 border-t border-slate-800 flex flex-col md:space-y-2 gap-2">
+                    <button onclick="copiarLinkVitrine()" class="w-full flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300 text-left text-xs sm:text-sm">
                         <span>🔗</span> Copiar Vitrine
                     </button>
-                    <a id="link-ver-vitrine" href="#" target="_blank" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300 text-sm">
+                    <a id="link-ver-vitrine" href="#" target="_blank" class="w-full flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300 text-xs sm:text-sm">
                         <span>👁️</span> Ver Vitrine
                     </a>
-                    <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-xl transition shadow text-sm flex items-center justify-center gap-2 mt-2">
+                    <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl transition shadow text-xs sm:text-sm flex items-center justify-center gap-2 mt-1">
                         <i class="fa-solid fa-right-from-bracket"></i> Sair
                     </button>
                 </div>
@@ -48,26 +51,26 @@
     <!-- CONTEÚDO PRINCIPAL -->
     <div class="flex-1 flex flex-col min-w-0">
         <!-- CABEÇALHO -->
-        <header class="bg-white shadow-xs border-b border-gray-200 p-6 flex justify-between items-center">
-            <div class="flex items-center gap-4">
-                <h2 class="text-xl font-bold text-gray-800">Gerenciamento de Tarifas</h2>
-                <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold">Carregando...</span>
+        <header class="bg-white shadow-xs border-b border-gray-200 p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                <h2 class="text-lg sm:text-xl font-bold text-gray-800">Gerenciamento de Tarifas</h2>
+                <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold w-fit">Carregando...</span>
             </div>
-            <a href="dashboard.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2 border border-slate-200">
+            <a href="dashboard.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 border border-slate-200 shadow-sm">
                 <i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard
             </a>
         </header>
 
         <!-- CORPO DA PÁGINA -->
-        <main class="p-6 md:p-8 flex-1 overflow-y-auto">
+        <main class="p-4 sm:p-6 md:p-8 flex-1 overflow-y-auto">
             <div class="max-w-5xl mx-auto space-y-8">
                 
                 <!-- SEÇÃO 1: VALOR DA DIÁRIA PADRÃO POR SUÍTE -->
-                <div class="bg-white p-8 rounded-3xl shadow-md border border-gray-200">
-                    <h2 class="text-xl font-bold text-blue-600 mb-2 flex items-center gap-2">
+                <div class="bg-white p-5 sm:p-8 rounded-3xl shadow-md border border-gray-200">
+                    <h2 class="text-base sm:text-xl font-bold text-blue-600 mb-2 flex items-center gap-2">
                         <i class="fa-solid fa-tag"></i> 1. Valor da Diária Padrão por Suíte
                     </h2>
-                    <p class="text-sm text-gray-600 mb-6">Defina o valor base cobrado por noite para cada suíte cadastrada na sua pousada.</p>
+                    <p class="text-xs sm:text-sm text-gray-600 mb-6">Defina o valor base cobrado por noite para cada suíte cadastrada na sua pousada.</p>
                     
                     <div id="lista-suites-tarifas" class="space-y-4">
                         <p class="text-gray-500 text-sm">Carregando suítes...</p>
@@ -75,16 +78,16 @@
                 </div>
 
                 <!-- SEÇÃO 2: TARIFAS ESPECIAIS (PERCENTUAL / DIAS DA SEMANA / PERÍODOS) -->
-                <div class="bg-white p-8 rounded-3xl shadow-md border border-gray-200">
-                    <div class="flex justify-between items-center mb-2">
-                        <h2 id="titulo-form-regra" class="text-xl font-bold text-blue-600 flex items-center gap-2">
+                <div class="bg-white p-5 sm:p-8 rounded-3xl shadow-md border border-gray-200">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2">
+                        <h2 id="titulo-form-regra" class="text-base sm:text-xl font-bold text-blue-600 flex items-center gap-2">
                             <i class="fa-solid fa-sliders"></i> 2. Regras de Tarifas e Percentuais Especiais
                         </h2>
                         <button id="btn-cancelar-edicao" onclick="cancelarEdicao()" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1.5 px-4 rounded-xl text-xs transition">Cancelar Edição</button>
                     </div>
-                    <p class="text-sm text-gray-600 mb-6">Defina acréscimos percentuais (ex: +20% no sábado/domingo) ou valores fixos para períodos específicos.</p>
+                    <p class="text-xs sm:text-sm text-gray-600 mb-6">Defina acréscimos percentuais (ex: +20% no sábado/domingo) ou valores fixos para períodos específicos.</p>
                     
-                    <form id="form-tarifa-especial" class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-6 rounded-2xl border border-gray-200 mb-6 transition-all duration-300">
+                    <form id="form-tarifa-especial" class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-200 mb-6 transition-all duration-300">
                         <input type="hidden" id="tarifa-editando-id" value="">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Aplicar a:</label>
@@ -122,7 +125,7 @@
                         <!-- SELEÇÃO DE DIAS DA SEMANA OPCIONAL -->
                         <div class="md:col-span-3 bg-white p-4 rounded-xl border border-gray-200">
                             <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Aplicar regra apenas nos seguintes dias da semana (Opcional - se nenhum for marcado, vale para todos os dias do período):</label>
-                            <div class="flex flex-wrap gap-4 text-sm font-medium text-gray-700">
+                            <div class="flex flex-wrap gap-4 text-xs sm:text-sm font-medium text-gray-700">
                                 <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="0" class="w-4 h-4 text-blue-600 rounded"> Domingo</label>
                                 <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="1" class="w-4 h-4 text-blue-600 rounded"> Segunda-feira</label>
                                 <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="2" class="w-4 h-4 text-blue-600 rounded"> Terça-feira</label>
@@ -134,7 +137,7 @@
                         </div>
 
                         <div class="md:col-span-3 flex justify-end">
-                            <button type="submit" id="btn-submit-regra" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition text-sm shadow-md">
+                            <button type="submit" id="btn-submit-regra" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition text-sm shadow-md">
                                 + Salvar Regra de Tarifa Especial
                             </button>
                         </div>
@@ -143,7 +146,7 @@
                     <!-- Lista de Tarifas Especiais Cadastradas -->
                     <h3 class="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wide">Regras Cadastradas Atuais</h3>
                     <div id="lista-tarifas-especiais" class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
+                        <table class="w-full text-left border-collapse min-w-[600px]">
                             <thead>
                                 <tr class="border-b text-xs text-gray-500 uppercase">
                                     <th class="p-3">Descrição / Motivo</th>
@@ -239,11 +242,10 @@
             usuarioIdAtual = user.id;
 
             const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', user.id).maybeSingle();
-            if (pousada && pousada.nome) {
-                document.getElementById('titulo-pousada').innerText = pousada.nome;
-            } else {
-                document.getElementById('titulo-pousada').innerText = "Minha Pousada";
-            }
+            const nomePousada = (pousada && pousada.nome) ? pousada.nome : "Minha Pousada";
+
+            document.getElementById('titulo-pousada').innerText = nomePousada;
+            document.getElementById('nome-pousada-sidebar').innerText = nomePousada;
 
             document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${user.id}`;
 
@@ -371,25 +373,22 @@
             document.getElementById('tarifa-valor').value = tarifa.valor_especial;
             document.getElementById('tarifa-descricao').value = tarifa.descricao || '';
 
-            // Marcar dias da semana
             const checkboxes = document.querySelectorAll('input[name="dias_semana"]');
             checkboxes.forEach(cb => {
                 const diaNum = Number(cb.value);
                 cb.checked = tarifa.dias_semana && tarifa.dias_semana.includes(diaNum);
             });
 
-            // Aplicar destaque visual vermelho nos campos em edição
             const campos = document.querySelectorAll('.campo-editavel');
             campos.forEach(c => {
                 c.classList.remove('border-gray-200', 'bg-white');
                 c.classList.add('border-red-400', 'bg-red-50/30', 'text-red-900');
             });
 
-            // Ajustar visual dos botões e título
             document.getElementById('titulo-form-regra').innerText = "Editando Regra de Tarifa";
             document.getElementById('titulo-form-regra').className = "text-xl font-bold text-red-600 flex items-center gap-2";
             document.getElementById('btn-submit-regra').innerText = "Atualizar Regra de Tarifa Especial";
-            document.getElementById('btn-submit-regra').className = "bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl transition text-sm shadow-md";
+            document.getElementById('btn-submit-regra').className = "w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl transition text-sm shadow-md";
             document.getElementById('btn-cancelar-edicao').classList.remove('hidden');
             
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -400,7 +399,6 @@
             document.getElementById('tarifa-editando-id').value = '';
             alternarTipoAjuste();
 
-            // Remover destaque visual vermelho
             const campos = document.querySelectorAll('.campo-editavel');
             campos.forEach(c => {
                 c.classList.remove('border-red-400', 'bg-red-50/30', 'text-red-900');
@@ -410,7 +408,7 @@
             document.getElementById('titulo-form-regra').innerText = "2. Regras de Tarifas e Percentuais Especiais";
             document.getElementById('titulo-form-regra').className = "text-xl font-bold text-blue-600 flex items-center gap-2";
             document.getElementById('btn-submit-regra').innerText = "+ Salvar Regra de Tarifa Especial";
-            document.getElementById('btn-submit-regra').className = "bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition text-sm shadow-md";
+            document.getElementById('btn-submit-regra').className = "w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition text-sm shadow-md";
             document.getElementById('btn-cancelar-edicao').classList.add('hidden');
         }
 

@@ -209,6 +209,30 @@
         let pagamentosGlobaisCache = [];
         let camposLimposParaNovaReserva = false;
 
+        // --- PROTEÇÃO DE SESSÃO UNIFICADA (VALIDAÇÃO IMEDIATA + TEMPO REAL) ---
+        async function protegerPagina() {
+            // 1. Ouve alterações de estado em tempo real (logout, expiração, etc.)
+            supabaseClient.auth.onAuthStateChange((event, session) => {
+                if (event === 'SIGNED_OUT' || !session) {
+                    window.location.href = 'index.html';
+                }
+            });
+
+            // 2. Validação imediata ao carregar a página
+            const { data: { session }, error } = await supabaseClient.auth.getSession();
+            
+            if (error || !session) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Se a sessão for válida, define o ID do usuário atual e inicializa o painel
+            usuarioIdAtual = session.user.id;
+            console.log("Acesso autorizado para a sessão ID:", usuarioIdAtual);
+            
+            carregarDashboard();
+        }
+
         function mostrarToast(titulo, mensagem, tipo = 'sucesso') {
             const toast = document.getElementById('toast-notificacao');
             const toastTitulo = document.getElementById('toast-titulo');
@@ -316,11 +340,8 @@
         }
 
         async function carregarPousada() {
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (!user) return;
-            usuarioIdAtual = user.id;
-
-            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', user.id).single();
+            if (!usuarioIdAtual) return;
+            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', usuarioIdAtual).single();
             if (pousada && pousada.nome) {
                 nomePousadaAtual = pousada.nome;
                 document.getElementById('titulo-pousada').innerText = pousada.nome;
@@ -329,7 +350,7 @@
                 document.getElementById('titulo-pousada').innerText = "Minha Pousada";
                 document.getElementById('titulo-menu-pousada').innerText = "Minha Pousada";
             }
-            document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${user.id}`;
+            document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`;
         }
 
         function copiarLinkVitrine() {
@@ -384,18 +405,15 @@
         }
 
         async function carregarDashboard() {
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (!user) { window.location.href = 'index.html'; return; }
-
             await carregarPousada();
 
-            const { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', user.id);
+            const { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', usuarioIdAtual);
             suitesGlobaisCache = suites || [];
 
-            const { data: reservas } = await supabaseClient.from('reservas').select('*').eq('pousada_id', user.id);
+            const { data: reservas } = await supabaseClient.from('reservas').select('*').eq('pousada_id', usuarioIdAtual);
             reservasGlobaisCache = reservas || [];
 
-            const { data: pagamentos } = await supabaseClient.from('hospede_pagamentos').select('*').eq('pousada_id', user.id);
+            const { data: pagamentos } = await supabaseClient.from('hospede_pagamentos').select('*').eq('pousada_id', usuarioIdAtual);
             pagamentosGlobaisCache = pagamentos || [];
 
             await verificarReservasPendentesDashboard();
@@ -872,7 +890,8 @@
 
         async function fazerLogout() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
         
-        carregarDashboard();
+        // Dispara a proteção de sessão e inicialização da página
+        protegerPagina();
     </script>
 </body>
 </html>
