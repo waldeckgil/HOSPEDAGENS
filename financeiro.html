@@ -129,26 +129,39 @@
             return diffDays > 0 ? diffDays : 1;
         }
 
-        async function identificarPousada() {
-            const labelPousada = document.getElementById('nomePousadaLogada');
+        // --- PROTEÇÃO DE SESSÃO UNIFICADA (VALIDAÇÃO IMEDIATA + TEMPO REAL) ---
+        async function protegerPagina() {
+            // 1. Ouve alterações de estado em tempo real (logout, expiração, etc.)
+            supabaseClient.auth.onAuthStateChange((event, session) => {
+                if (event === 'SIGNED_OUT' || !session) {
+                    window.location.href = 'index.html';
+                }
+            });
 
-            const { data: { user } } = await supabaseClient.auth.getUser();
+            // 2. Validação imediata ao carregar a página
+            const { data: { session }, error } = await supabaseClient.auth.getSession();
             
-            if (!user) {
-                labelPousada.textContent = 'Atenção: Usuário não autenticado.';
-                labelPousada.className = 'text-xs sm:text-sm font-semibold text-red-600 mt-0.5';
-                setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+            if (error || !session) {
+                window.location.href = 'index.html';
                 return;
             }
 
-            usuarioIdAtual = user.id;
+            // Se a sessão for válida, define o ID do usuário atual e inicializa os dados
+            usuarioIdAtual = session.user.id;
+            console.log("Acesso financeiro autorizado para a sessão ID:", usuarioIdAtual);
+            
+            await identificarPousada();
+        }
 
-            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', user.id).single();
+        async function identificarPousada() {
+            const labelPousada = document.getElementById('nomePousadaLogada');
+            
+            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', usuarioIdAtual).single();
             
             if (pousada && pousada.nome) {
                 labelPousada.textContent = `Pousada: ${pousada.nome}`;
             } else {
-                labelPousada.textContent = `Pousada ID: ${user.id}`;
+                labelPousada.textContent = `Pousada ID: ${usuarioIdAtual}`;
             }
 
             await carregarMapaSuites();
@@ -269,10 +282,11 @@
             document.getElementById('kpiSaldo').innerText = formatarMoeda(totalSaldoGeral);
         }
 
+        // Inicialização alinhada com as datas padrão e disparo da proteção de sessão
         window.onload = () => {
             document.getElementById('filtroInicio').value = '2026-08-01';
             document.getElementById('filtroFim').value = '2026-08-31';
-            identificarPousada();
+            protegerPagina();
         };
     </script>
 </body>
