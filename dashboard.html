@@ -893,16 +893,18 @@
 
             await supabaseClient.from('suites').update({ status: statusDestino }).eq('id', suiteId);
 
-            if (status === 'Reservado' || status === 'Ocupada' || status === 'Aprovada') {
+if (status === 'Reservado' || status === 'Ocupada' || status === 'Aprovada') {
                 if (reservaIdEditada) {
                     await supabaseClient.from('reservas').update(dadosReserva).eq('id', reservaIdEditada);
                 } else {
-                    const { data: novaReservaInserida, error: errIns } = await supabaseClient.from('reservas').insert([dadosReserva]).select().single();
-                    if (!errIns && novaReservaInserida) {
-                        reservaIdFinal = novaReservaInserida.id;
+                    // Correção do erro 400: removido o conflito de colunas no select()
+                    const { data: novaReservaInserida, error: errIns } = await supabaseClient.from('reservas').insert([dadosReserva]).select();
+                    if (!errIns && novaReservaInserida && novaReservaInserida.length > 0) {
+                        reservaIdFinal = novaReservaInserida[0].id;
                     }
                 }
             } else {
+
                 if (reservaIdEditada) {
                     await supabaseClient.from('reservas').update({ status: 'Finalizada' }).eq('id', reservaIdEditada);
                 } else {
