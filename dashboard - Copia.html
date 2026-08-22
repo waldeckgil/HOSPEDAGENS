@@ -214,7 +214,7 @@
         </div>
     </div>
 
-    <script[cite: 3]>
+    <script>
         const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -404,6 +404,7 @@
             const hojeStr = new Date().toISOString().split('T')[0];
             const [anoAtual, mesAtual] = hojeStr.split('-');
 
+            // Filtrar reservas aprovadas que ainda vão acontecer ou estão ativas
             const aprovadas = reservasGlobaisCache.filter(r => r.status === 'Aprovada');
 
             // --- KPI MÊS CORRENTE ---
@@ -432,6 +433,7 @@
                 return;
             }
 
+            // Ordenar pela data de check-in mais próxima
             futurasOuHoje.sort((a, b) => a.checkin.localeCompare(b.checkin));
             const proxima = futurasOuHoje[0];
             const diasProxima = calcularDiasRestantes(proxima.checkin);
@@ -877,7 +879,7 @@
 
             let reservaIdFinal = reservaIdEditada;
 
-            // Mapeamento correto para evitar violação da constraint suites_status_check
+            // 1. CORREÇÃO DA CONSTRAINT DO BANCO: Mapeia "Reservado" para "Disponível" fisicamente na tabela suites
             let statusDestino = status;
             if (status === 'Checkout') {
                 statusDestino = 'Limpeza';
@@ -891,17 +893,18 @@
 
             await supabaseClient.from('suites').update({ status: statusDestino }).eq('id', suiteId);
 
-            if (status === 'Reservado' || status === 'Ocupada' || status === 'Aprovada') {
+if (status === 'Reservado' || status === 'Ocupada' || status === 'Aprovada') {
                 if (reservaIdEditada) {
                     await supabaseClient.from('reservas').update(dadosReserva).eq('id', reservaIdEditada);
                 } else {
-                    // Correção do erro 400: removido o conflito de parâmetros de colunas no select()
-                    const { data: novaReservaInserida, error: errIns } = await supabaseClient.from('reservas').insert([dadosReserva]).select();
+                    // Correção do erro 400: removido o conflito de colunas no select()
+const { data: novaReservaInserida, error: errIns } = await supabaseClient.from('reservas').insert([dadosReserva]).select('*');
                     if (!errIns && novaReservaInserida && novaReservaInserida.length > 0) {
                         reservaIdFinal = novaReservaInserida[0].id;
                     }
                 }
             } else {
+
                 if (reservaIdEditada) {
                     await supabaseClient.from('reservas').update({ status: 'Finalizada' }).eq('id', reservaIdEditada);
                 } else {
