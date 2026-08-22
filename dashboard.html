@@ -78,9 +78,9 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <span class="text-xl sm:text-2xl">🔔</span>
-                        <h2 class="text-base sm:text-xl font-bold text-red-700">Você tem <span id="contador-pendentes">0</span> solicitação(ões) de reserva pendente(s)!</h2>
+                        <h2 class="text-base sm:text-xl font-bold text-red-700">Você tem <span id="contador-pendentes">0</span> solicitação(ões) de reserva pendente(s)![cite: 5]</h2>
                     </div>
-                    <p class="text-xs sm:text-sm text-amber-700 mt-1">Há hóspedes aguardando a aprovação. Veja os detalhes e a data/hora da solicitação abaixo:</p>
+                    <p class="text-xs sm:text-sm text-amber-700 mt-1">Há hóspedes aguardando a aprovação. Veja os detalhes e a data/hora da solicitação abaixo:[cite: 5]</p>
                     <div id="lista-resumo-pendentes" class="mt-3 flex flex-wrap gap-2"></div>
                 </div>
                 <a href="reservas.html" class="w-full sm:w-auto text-center bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-3 rounded-xl transition shadow-sm whitespace-nowrap text-xs sm:text-sm">
@@ -225,8 +225,6 @@
             }
 
             usuarioIdAtual = session.user.id;
-            console.log("Acesso autorizado para a sessão ID:", usuarioIdAtual);
-            
             carregarDashboard();
         }
 
@@ -660,7 +658,6 @@
             document.getElementById('edit-suite-id').value = id;
             document.getElementById('edit-status').value = status;
             document.getElementById('edit-status-original').value = status;
-            document.getElementById('edit-reserva-id').value = reservaId || '';
             document.getElementById('edit-valor-sinal').value = '';
             document.getElementById('edit-forma-pagamento').value = 'Pix / Sinal';
             document.getElementById('edit-observacao').value = '';
@@ -672,12 +669,10 @@
             } else {
                 const hojeStr = new Date().toISOString().split('T')[0];
                 reserva = reservasGlobaisCache.find(r => r.suite_id === id && r.status === 'Aprovada' && r.checkin <= hojeStr);
-                if (reserva) {
-                    document.getElementById('edit-reserva-id').value = reserva.id;
-                }
             }
 
             if (reserva) {
+                document.getElementById('edit-reserva-id').value = reserva.id;
                 document.getElementById('edit-hospede').value = reserva.hospede_nome || '';
                 document.getElementById('edit-whatsapp').value = reserva.whatsapp_hospede || '';
                 document.getElementById('edit-cpf').value = reserva.cpf || '';
@@ -688,6 +683,7 @@
                 document.getElementById('edit-checkout').value = reserva.checkout || '';
                 document.getElementById('edit-observacao').value = reserva.observacao || '';
             } else {
+                document.getElementById('edit-reserva-id').value = '';
                 document.getElementById('edit-hospede').value = '';
                 document.getElementById('edit-whatsapp').value = '';
                 document.getElementById('edit-cpf').value = '';
@@ -720,7 +716,7 @@
                 containerCampos.classList.remove('opacity-50');
             }
 
-            if ((status === 'Reservado' || status === 'Ocupada') && statusOriginal !== 'Reservado' && statusOriginal !== 'Ocupada' && !camposLimposParaNovaReserva) {
+            if (status === 'Reservado' && statusOriginal !== 'Reservado' && !camposLimposParaNovaReserva) {
                 document.getElementById('edit-reserva-id').value = '';
                 document.getElementById('edit-hospede').value = '';
                 document.getElementById('edit-whatsapp').value = '';
@@ -819,11 +815,10 @@
                 statusDestino = 'Limpeza';
             }
 
-            // Atualiza o status físico da suíte
             await supabaseClient.from('suites').update({ status: statusDestino }).eq('id', suiteId);
 
             if (status === 'Reservado' || status === 'Ocupada' || status === 'Aprovada') {
-                if (reservaIdEditada && reservaIdEditada.trim() !== '') {
+                if (reservaIdEditada) {
                     await supabaseClient.from('reservas').update(dadosReserva).eq('id', reservaIdEditada);
                 } else {
                     const { data: novaReservaInserida, error: errIns } = await supabaseClient.from('reservas').insert([dadosReserva]).select().single();
@@ -832,7 +827,7 @@
                     }
                 }
             } else {
-                if (reservaIdEditada && reservaIdEditada.trim() !== '') {
+                if (reservaIdEditada) {
                     await supabaseClient.from('reservas').update({ status: 'Finalizada' }).eq('id', reservaIdEditada);
                 } else {
                     const hoje = new Date().toISOString().split('T')[0];
