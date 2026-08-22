@@ -214,7 +214,7 @@
         </div>
     </div>
 
-    <script[cite: 3]>
+    <script>
         const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -399,14 +399,12 @@
             });
         }
 
-        // 2. RADAR DE PRÓXIMAS CHEGADAS & 3. KPI EXECUTIVO
         function atualizarRadarEKPIs() {
             const hojeStr = new Date().toISOString().split('T')[0];
             const [anoAtual, mesAtual] = hojeStr.split('-');
 
             const aprovadas = reservasGlobaisCache.filter(r => r.status === 'Aprovada');
 
-            // --- KPI MÊS CORRENTE ---
             const reservasDoMes = aprovadas.filter(r => {
                 if (!r.checkin) return false;
                 const [anoCheck, mesCheck] = r.checkin.split('-');
@@ -420,7 +418,6 @@
                 kpiTexto.innerText = `Reservas no mês: ${reservasDoMes.length}`;
             }
 
-            // --- RADAR DE CHEGADAS ---
             const radarContainer = document.getElementById('radar-chegadas-container');
             const radarTitulo = document.getElementById('radar-titulo');
             const radarSubtitulo = document.getElementById('radar-subtitulo');
@@ -877,7 +874,6 @@
 
             let reservaIdFinal = reservaIdEditada;
 
-            // Mapeamento correto para evitar violação da constraint suites_status_check
             let statusDestino = status;
             if (status === 'Checkout') {
                 statusDestino = 'Limpeza';
@@ -895,8 +891,7 @@
                 if (reservaIdEditada) {
                     await supabaseClient.from('reservas').update(dadosReserva).eq('id', reservaIdEditada);
                 } else {
-                    // Correção do erro 400: removido o conflito de parâmetros de colunas no select()
-                    const { data: novaReservaInserida, error: errIns } = await supabaseClient.from('reservas').insert([dadosReserva]).select();
+                    const { data: novaReservaInserida, error: errIns } = await supabaseClient.from('reservas').insert([dadosReserva]).select('*');
                     if (!errIns && novaReservaInserida && novaReservaInserida.length > 0) {
                         reservaIdFinal = novaReservaInserida[0].id;
                     }
