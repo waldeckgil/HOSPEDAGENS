@@ -66,25 +66,25 @@
         <header class="bg-white shadow-xs border-b border-gray-200 p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                 <h2 class="text-lg sm:text-xl font-bold text-gray-800">Gestão de Suítes</h2>
-                <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold w-fit">Carregando...[cite: 6]</span>
+                <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold w-fit">Carregando...</span>
             </div>
-            <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200 w-fit">Sistema Online[cite: 6]</span>
+            <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200 w-fit">Sistema Online</span>
         </header>
 
         <!-- CORPO DA PÁGINA -->
         <main class="p-4 sm:p-6 md:p-8 flex-1 overflow-y-auto">
-            <!-- 🚨 CARD DE ATENÇÃO NO TOPO -->
+            <!-- CARD DE ATENÇÃO NO TOPO -->
             <div id="card-atencao-pendentes" class="hidden mb-8 bg-amber-50 border-l-8 border-amber-500 p-4 sm:p-6 rounded-2xl shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-4 alerta-piscando">
                 <div>
                     <div class="flex items-center gap-2">
                         <span class="text-xl sm:text-2xl">🔔</span>
-                        <h2 class="text-base sm:text-xl font-bold text-red-700">Você tem <span id="contador-pendentes">0</span> solicitação(ões) de reserva pendente(s)![cite: 6]</h2>
+                        <h2 class="text-base sm:text-xl font-bold text-red-700">Você tem <span id="contador-pendentes">0</span> solicitação(ões) de reserva pendente(s)!</h2>
                     </div>
-                    <p class="text-xs sm:text-sm text-amber-700 mt-1">Há hóspedes aguardando a aprovação. Veja os detalhes e a data/hora da solicitação abaixo:[cite: 6]</p>
+                    <p class="text-xs sm:text-sm text-amber-700 mt-1">Há hóspedes aguardando a aprovação. Veja os detalhes e a data/hora da solicitação abaixo:</p>
                     <div id="lista-resumo-pendentes" class="mt-3 flex flex-wrap gap-2"></div>
                 </div>
                 <a href="reservas.html" class="w-full sm:w-auto text-center bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-3 rounded-xl transition shadow-sm whitespace-nowrap text-xs sm:text-sm">
-                    Gerenciar Todas as Reservas &rarr;[cite: 6]
+                    Gerenciar Todas as Reservas &rarr;
                 </a>
             </div>
 
@@ -92,28 +92,28 @@
         </main>
     </div>
 
-    <!-- 💬 TOAST -->
+    <!-- TOAST -->
     <div id="toast-notificacao" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
         <div id="toast-content" class="bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
             <span id="toast-icone" class="text-xl">✨</span>
             <div>
-                <h4 id="toast-titulo" class="font-bold text-sm">Sucesso[cite: 6]</h4>
-                <p id="toast-mensagem" class="text-xs text-gray-300">Alterações salvas com sucesso![cite: 6]</p>
+                <h4 id="toast-titulo" class="font-bold text-sm">Sucesso</h4>
+                <p id="toast-mensagem" class="text-xs text-gray-300">Alterações salvas com sucesso!</p>
             </div>
         </div>
     </div>
 
-    <!-- 🛑 MODAL DE CONFIRMAÇÃO -->
+    <!-- MODAL DE CONFIRMAÇÃO -->
     <div id="modal-confirmacao" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-6 sm:p-8 rounded-3xl w-full max-w-md shadow-2xl text-center space-y-4">
             <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">⚠️</div>
-            <h3 class="text-lg sm:text-xl font-bold text-gray-900">Confirmar Saída / Limpeza?[cite: 6]</h3>
+            <h3 class="text-lg sm:text-xl font-bold text-gray-900">Confirmar Saída / Limpeza?</h3>
             <p id="modal-confirmacao-texto" class="text-xs sm:text-sm text-gray-600">
-                Esta ação encerrará a estadia atual do hóspede e enviará a suíte para limpeza. Deseja prosseguir?[cite: 6]
+                Esta ação encerrará a estadia atual do hóspede e enviará a suíte para limpeza. Deseja prosseguir?
             </p>
             <div class="grid grid-cols-2 gap-3 pt-2">
                 <button type="button" onclick="fecharModalConfirmacao()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-xl transition text-xs sm:text-sm">Cancelar</button>
-                <button type="button" id="btn-confirmar-acao" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl transition text-xs sm:text-sm shadow-md">Sim, Liberar[cite: 6]</button>
+                <button type="button" id="btn-confirmar-acao" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl transition text-xs sm:text-sm shadow-md">Sim, Liberar</button>
             </div>
         </div>
     </div>
@@ -121,12 +121,12 @@
     <!-- Modal de Edição -->
     <div id="modal-edicao" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-6 sm:p-8 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
-            <h2 id="modal-titulo" class="text-xl sm:text-2xl font-bold mb-4 text-blue-600">Gerenciar Suíte[cite: 6]</h2>
+            <h2 id="modal-titulo" class="text-xl sm:text-2xl font-bold mb-4 text-blue-600">Gerenciar Suíte</h2>
             
-            <!-- 🚨 ALERTA DE ERRO DENTRO DO MODAL -->
+            <!-- ALERTA DE ERRO DENTRO DO MODAL -->
             <div id="modal-erro-alerta" class="hidden mb-4 bg-red-50 border-l-4 border-red-500 p-3 rounded-xl text-red-900 text-xs sm:text-sm font-bold flex items-center gap-2">
                 <span>⚠️</span>
-                <span id="modal-erro-texto">Mensagem de erro aqui[cite: 6]</span>
+                <span id="modal-erro-texto">Mensagem de erro aqui</span>
             </div>
 
             <form id="form-edicao" class="space-y-3">
@@ -135,14 +135,14 @@
                 <input type="hidden" id="edit-reserva-id">
                 
                 <div>
-                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Status Físico da Suíte[cite: 6]</label>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Status Físico da Suíte</label>
                     <select id="edit-status" class="w-full p-3 border rounded-xl font-bold bg-gray-50 text-sm" onchange="verificarStatusModal()">
-                        <option value="Disponível">Disponível[cite: 6]</option>
-                        <option value="Ocupada">Ocupada (Agora)[cite: 6]</option>
-                        <option value="Reservado">Reservado (Adicionar/Editar Datas Futuras)[cite: 6]</option>
-                        <option value="Limpeza">Limpeza[cite: 6]</option>
-                        <option value="Pendente">Pendente[cite: 6]</option>
-                        <option value="Checkout">Checkout (Finalizar Estadia)[cite: 6]</option>
+                        <option value="Disponível">Disponível</option>
+                        <option value="Ocupada">Ocupada (Agora)</option>
+                        <option value="Reservado">Reservado (Adicionar/Editar Datas Futuras)</option>
+                        <option value="Limpeza">Limpeza</option>
+                        <option value="Pendente">Pendente</option>
+                        <option value="Checkout">Checkout (Finalizar Estadia)</option>
                     </select>
                 </div>
 
@@ -160,38 +160,38 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                         <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-in[cite: 6]</label>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-in</label>
                             <input type="date" id="edit-checkin" class="w-full p-3 border rounded-xl bg-white text-sm">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-out[cite: 6]</label>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-out</label>
                             <input type="date" id="edit-checkout" class="w-full p-3 border rounded-xl bg-white text-sm">
                         </div>
                     </div>
 
                     <div class="pt-2 space-y-2">
                         <div>
-                            <label class="block text-xs font-bold text-emerald-700 mb-1">Registrar Novo Pagamento / Sinal (R$)[cite: 6]</label>
+                            <label class="block text-xs font-bold text-emerald-700 mb-1">Registrar Novo Pagamento / Sinal (R$)</label>
                             <input type="number" step="0.01" id="edit-valor-sinal" placeholder="0.00" class="w-full p-3 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-emerald-900 text-sm">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-emerald-700 mb-1">Forma de Pagamento[cite: 6]</label>
+                            <label class="block text-xs font-bold text-emerald-700 mb-1">Forma de Pagamento</label>
                             <select id="edit-forma-pagamento" class="w-full p-3 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-emerald-900 text-sm">
-                                <option value="Pix / Sinal">Pix / Sinal[cite: 6]</option>
-                                <option value="Dinheiro">Dinheiro[cite: 6]</option>
-                                <option value="Cartão de Crédito">Cartão de Crédito[cite: 6]</option>
-                                <option value="Cartão de Débito">Cartão de Débito[cite: 6]</option>
-                                <option value="Transferência Bancária">Transferência Bancária[cite: 6]</option>
+                                <option value="Pix / Sinal">Pix / Sinal</option>
+                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                                <option value="Cartão de Débito">Cartão de Débito</option>
+                                <option value="Transferência Bancária">Transferência Bancária</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-amber-700 mb-1">⚠️ Observação / Mensagem de Alerta Importante[cite: 6]</label>
+                            <label class="block text-xs font-bold text-amber-700 mb-1">⚠️ Observação / Mensagem de Alerta Importante</label>
                             <textarea id="edit-observacao" rows="2" placeholder="Ex: Hóspede solicitou late checkout, alergia a algo, etc." class="w-full p-3 border border-amber-300 bg-amber-50/40 rounded-xl text-sm font-medium text-amber-950"></textarea>
                         </div>
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold mt-4 transition text-sm">Salvar Alterações[cite: 6]</button>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold mt-4 transition text-sm">Salvar Alterações</button>
                 <button type="button" onclick="fecharModal()" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 p-3 rounded-xl font-bold mt-2 transition text-sm">Cancelar</button>
             </form>
         </div>
@@ -209,7 +209,6 @@
         let pagamentosGlobaisCache = [];
         let camposLimposParaNovaReserva = false;
 
-        // --- PROTEÇÃO DE SESSÃO UNIFICADA (VALIDAÇÃO IMEDIATA + TEMPO REAL) ---
         async function protegerPagina() {
             supabaseClient.auth.onAuthStateChange((event, session) => {
                 if (event === 'SIGNED_OUT' || !session) {
@@ -225,8 +224,6 @@
             }
 
             usuarioIdAtual = session.user.id;
-            console.log("Acesso autorizado para a sessão ID:", usuarioIdAtual);[cite: 6]
-            
             carregarDashboard();
         }
 
@@ -426,12 +423,10 @@
             const hojeStr = new Date().toISOString().split('T')[0];
 
             suitesGlobaisCache.forEach(suite => {
-                // Filtrar todas as reservas ativas (Aprovadas) e Pendentes desta suíte
                 const reservasDaSuite = reservasGlobaisCache.filter(r => r.suite_id === suite.id && r.status !== 'Cancelada' && r.status !== 'Recusada' && r.status !== 'Finalizada');
                 const aprovadasDaSuite = reservasDaSuite.filter(r => r.status === 'Aprovada');
                 const pendentesDaSuite = reservasDaSuite.filter(r => r.status === 'Pendente');
 
-                // Se houver reservas aprovadas, tratamos cada uma individualmente (exibindo ocupada se checkin <= hoje, ou futura se checkin > hoje)
                 if (aprovadasDaSuite.length > 0) {
                     aprovadasDaSuite.forEach((aprovada, index) => {
                         const isFutura = aprovada.checkin > hojeStr;
@@ -443,7 +438,6 @@
                         const indicador = isFutura ? obterIndicadorProximaEstada(aprovada.checkin) : obterIndicadorCheckout(aprovada.checkout);
                         const linkZap = gerarLinkWhatsApp(aprovada.whatsapp_hospede, aprovada.hospede_nome, aprovada.checkin, aprovada.checkout);
                         
-                        // Se houver mais de um card para a suíte, adiciona numeração para facilitar a identificação
                         const sufixoTitulo = aprovadasDaSuite.length > 1 ? ` (${index + 1})` : '';
                         const nomeHospedeExibicao = aprovada.hospede_nome ? ` - <span class="font-normal text-gray-700 text-sm sm:text-base">${aprovada.hospede_nome}</span>` : '';
                         
@@ -527,7 +521,6 @@
                     });
                 } 
                 
-                // Se não houver reservas aprovadas, exibe o status físico padrão da suíte (Disponível ou Limpeza)
                 if (aprovadasDaSuite.length === 0 && pendentesDaSuite.length === 0) {
                     const corClasses = {
                         'Disponível': 'bg-green-50 border border-green-200 text-green-900', 
@@ -560,7 +553,6 @@
                         </div>`;
                 }
 
-                // Renderiza também os cards de reservas Pendentes, se houver
                 pendentesDaSuite.forEach((pend, index) => {
                     const linkZapPend = gerarLinkWhatsApp(pend.whatsapp_hospede, pend.hospede_nome, pend.checkin, pend.checkout);
                     const dataSolicitacaoFormatada = formatarDataHora(pend.criado_em);
@@ -875,7 +867,7 @@
                 return;
             }
 
-            if (statusOriginal === 'Ocupada' && (status ===5 'Limpeza' || status === 'Checkout')) {
+            if (statusOriginal === 'Ocupada' && (status === 'Limpeza' || status === 'Checkout')) {
                 fecharModal(); 
                 document.getElementById('modal-confirmacao').classList.remove('hidden');
                 document.getElementById('btn-confirmar-acao').onclick = async () => {
