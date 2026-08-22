@@ -738,7 +738,19 @@
         function fecharModal() { document.getElementById('modal-edicao').classList.add('hidden'); }
         function fecharModalConfirmacao() { document.getElementById('modal-confirmacao').classList.add('hidden'); }
 
-        async function executarSalvamento(suiteId, status) {
+      
+        document.getElementById('form-edicao').onsubmit = async (e) => {
+            e.preventDefault();
+            limparErroModal();
+
+            const status = document.getElementById('edit-status').value;
+            const statusOriginal = document.getElementById('edit-status-original').value;
+            const suiteId = document.getElementById('edit-suite-id').value;
+            
+            if (statusOriginal === 'Ocupada' && status === 'Disponível') {
+                mostrarErroModal("Uma suíte ocupada não pode ir direto para 'Disponível'. Envie para 'Limpeza' ou faça o 'Checkout'.");
+                return;
+            }async function executarSalvamento(suiteId, status) {
             const reservaIdEditada = document.getElementById('edit-reserva-id').value;
             const valorSinalInformado = parseFloat(document.getElementById('edit-valor-sinal').value) || 0;
             const formaPagamentoSelecionada = document.getElementById('edit-forma-pagamento').value || 'Pix / Sinal';
@@ -746,27 +758,31 @@
             
             const checkinVal = document.getElementById('edit-checkin').value || new Date().toISOString().split('T')[0];
             const checkoutVal = document.getElementById('edit-checkout').value || new Date().toISOString().split('T')[0];
+            const hospedeNomeVal = document.getElementById('edit-hospede').value.trim();
 
-            try {
-                const { data: temConflito, error: erroConflito } = await supabaseClient.rpc('verificar_conflito_reserva', { 
-                    p_suite_id: suiteId, 
-                    p_checkin: checkinVal, 
-                    p_checkout: checkoutVal,
-                    p_reserva_id: reservaIdEditada ? reservaIdEditada : null
-                });
-                
-                if (!erroConflito && temConflito === true) {
-                    mostrarErroModal("Já existe uma reserva confirmada para esta suíte nestas datas!");
-                    return; 
+            // Se preencheu hóspede, valida conflito de datas normalmente
+            if (hospedeNomeVal && status !== 'Checkout' && status !== 'Disponível') {
+                try {
+                    const { data: temConflito, error: erroConflito } = await supabaseClient.rpc('verificar_conflito_reserva', { 
+                        p_suite_id: suiteId, 
+                        p_checkin: checkinVal, 
+                        p_checkout: checkoutVal,
+                        p_reserva_id: reservaIdEditada ? reservaIdEditada : null
+                    });
+                    
+                    if (!erroConflito && temConflito === true) {
+                        mostrarErroModal("Já existe uma reserva confirmada para esta suíte nestas datas!");
+                        return; 
+                    }
+                } catch (err) {
+                    console.error("Erro ao verificar conflito de reservas:", err);
                 }
-            } catch (err) {
-                console.error("Erro ao verificar conflito de reservas:", err);
             }
 
             const dadosReserva = {
                 pousada_id: usuarioIdAtual,
                 suite_id: suiteId,
-                hospede_nome: document.getElementById('edit-hospede').value || 'Hóspede',
+                hospede_nome: hospedeNomeVal || 'Hóspede',
                 whatsapp_hospede: document.getElementById('edit-whatsapp').value,
                 cpf: document.getElementById('edit-cpf').value,
                 rg: document.getElementById('edit-rg').value,
@@ -815,20 +831,16 @@
             let statusDestino = status;
             if (status === 'Checkout') {
                 statusDestino = 'Limpeza';
+            } else if (hospedeNomeVal) {
+                const hojeStr = new Date().toISOString().split('T')[0];
+                statusDestino = checkinVal > hojeStr ? 'Disponível' : 'Ocupada';
             }
 
+            // Atualiza o status físico da suíte
             await supabaseClient.from('suites').update({ status: statusDestino }).eq('id', suiteId);
 
-            if (status === 'Reservado' || status === 'Ocupada' || status === 'Aprovada') {
-                if (reservaIdEditada) {
-                    await supabaseClient.from('reservas').update(dadosReserva).eq('id', reservaIdEditada);
-                } else {
-                    const { data: novaReservaInserida, error: errIns } = await supabaseClient.from('reservas').insert([dadosReserva]).select().single();
-                    if (!errIns && novaReservaInserida) {
-                        reservaIdFinal = novaReservaInserida.id;
-                    }
-                }
-            } else {
+            // Grava ou atualiza a reserva sempre que houver dados de hóspede ou se for uma edição válida
+            if (status === 'Checkout') {
                 if (reservaIdEditada) {
                     await supabaseClient.from('reservas').update({ status: 'Finalizada' }).eq('id', reservaIdEditada);
                 } else {
@@ -837,6 +849,15 @@
                         .eq('suite_id', suiteId)
                         .eq('status', 'Aprovada')
                         .lte('checkin', hoje);
+                }
+            } else {
+                if (reservaIdEditada) {
+                    await supabaseClient.from('reservas').update(dadosReserva).eq('id', reservaIdEditada);
+                } else {
+                    const { data: novaReservaInserida, error: errIns } = await supabaseClient.from('reservas').insert([dadosReserva]).select().single();
+                    if (!errIns && novaReservaInserida) {
+                        reservaIdFinal = novaReservaInserida.id;
+                    }
                 }
             }
 
@@ -858,19 +879,6 @@
             carregarDashboard();
             mostrarToast("Sucesso", "Dados salvos com sucesso!");
         }
-
-        document.getElementById('form-edicao').onsubmit = async (e) => {
-            e.preventDefault();
-            limparErroModal();
-
-            const status = document.getElementById('edit-status').value;
-            const statusOriginal = document.getElementById('edit-status-original').value;
-            const suiteId = document.getElementById('edit-suite-id').value;
-            
-            if (statusOriginal === 'Ocupada' && status === 'Disponível') {
-                mostrarErroModal("Uma suíte ocupada não pode ir direto para 'Disponível'. Envie para 'Limpeza' ou faça o 'Checkout'.");
-                return;
-            }
 
             if (statusOriginal === 'Ocupada' && (status === 'Limpeza' || status === 'Checkout')) {
                 fecharModal(); 
