@@ -209,6 +209,27 @@
         let pagamentosGlobaisCache = [];
         let camposLimposParaNovaReserva = false;
 
+        // --- PROTEÇÃO DE SESSÃO UNIFICADA (VALIDAÇÃO IMEDIATA + TEMPO REAL) ---
+        async function protegerPagina() {
+            supabaseClient.auth.onAuthStateChange((event, session) => {
+                if (event === 'SIGNED_OUT' || !session) {
+                    window.location.href = 'index.html';
+                }
+            });
+
+            const { data: { session }, error } = await supabaseClient.auth.getSession();
+            
+            if (error || !session) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            usuarioIdAtual = session.user.id;
+            console.log("Acesso autorizado para a sessão ID:", usuarioIdAtual);
+            
+            carregarDashboard();
+        }
+
         function mostrarToast(titulo, mensagem, tipo = 'sucesso') {
             const toast = document.getElementById('toast-notificacao');
             const toastTitulo = document.getElementById('toast-titulo');
@@ -316,11 +337,8 @@
         }
 
         async function carregarPousada() {
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (!user) return;
-            usuarioIdAtual = user.id;
-
-            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', user.id).single();
+            if (!usuarioIdAtual) return;
+            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', usuarioIdAtual).single();
             if (pousada && pousada.nome) {
                 nomePousadaAtual = pousada.nome;
                 document.getElementById('titulo-pousada').innerText = pousada.nome;
@@ -329,7 +347,7 @@
                 document.getElementById('titulo-pousada').innerText = "Minha Pousada";
                 document.getElementById('titulo-menu-pousada').innerText = "Minha Pousada";
             }
-            document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${user.id}`;
+            document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`;
         }
 
         function copiarLinkVitrine() {
@@ -384,18 +402,15 @@
         }
 
         async function carregarDashboard() {
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (!user) { window.location.href = 'index.html'; return; }
-
             await carregarPousada();
 
-            const { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', user.id);
+            const { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', usuarioIdAtual);
             suitesGlobaisCache = suites || [];
 
-            const { data: reservas } = await supabaseClient.from('reservas').select('*').eq('pousada_id', user.id);
+            const { data: reservas } = await supabaseClient.from('reservas').select('*').eq('pousada_id', usuarioIdAtual);
             reservasGlobaisCache = reservas || [];
 
-            const { data: pagamentos } = await supabaseClient.from('hospede_pagamentos').select('*').eq('pousada_id', user.id);
+            const { data: pagamentos } = await supabaseClient.from('hospede_pagamentos').select('*').eq('pousada_id', usuarioIdAtual);
             pagamentosGlobaisCache = pagamentos || [];
 
             await verificarReservasPendentesDashboard();
@@ -645,6 +660,7 @@
             document.getElementById('edit-suite-id').value = id;
             document.getElementById('edit-status').value = status;
             document.getElementById('edit-status-original').value = status;
+            document.getElementById('edit-reserva-id').value = reservaId || '';
             document.getElementById('edit-valor-sinal').value = '';
             document.getElementById('edit-forma-pagamento').value = 'Pix / Sinal';
             document.getElementById('edit-observacao').value = '';
@@ -656,10 +672,12 @@
             } else {
                 const hojeStr = new Date().toISOString().split('T')[0];
                 reserva = reservasGlobaisCache.find(r => r.suite_id === id && r.status === 'Aprovada' && r.checkin <= hojeStr);
+                if (reserva) {
+                    document.getElementById('edit-reserva-id').value = reserva.id;
+                }
             }
 
             if (reserva) {
-                document.getElementById('edit-reserva-id').value = reserva.id;
                 document.getElementById('edit-hospede').value = reserva.hospede_nome || '';
                 document.getElementById('edit-whatsapp').value = reserva.whatsapp_hospede || '';
                 document.getElementById('edit-cpf').value = reserva.cpf || '';
@@ -670,7 +688,6 @@
                 document.getElementById('edit-checkout').value = reserva.checkout || '';
                 document.getElementById('edit-observacao').value = reserva.observacao || '';
             } else {
-                document.getElementById('edit-reserva-id').value = '';
                 document.getElementById('edit-hospede').value = '';
                 document.getElementById('edit-whatsapp').value = '';
                 document.getElementById('edit-cpf').value = '';
@@ -703,7 +720,7 @@
                 containerCampos.classList.remove('opacity-50');
             }
 
-            if (status === 'Reservado' && statusOriginal !== 'Reservado' && !camposLimposParaNovaReserva) {
+            if ((status === 'Reservado' || status === 'Ocupada') && statusOriginal !== 'Reservado' && statusOriginal !== 'Ocupada' && !camposLimposParaNovaReserva) {
                 document.getElementById('edit-reserva-id').value = '';
                 document.getElementById('edit-hospede').value = '';
                 document.getElementById('edit-whatsapp').value = '';
@@ -731,30 +748,27 @@
             
             const checkinVal = document.getElementById('edit-checkin').value || new Date().toISOString().split('T')[0];
             const checkoutVal = document.getElementById('edit-checkout').value || new Date().toISOString().split('T')[0];
-            const hospedeNomeVal = document.getElementById('edit-hospede').value.trim();
 
-            if (hospedeNomeVal && status !== 'Checkout' && status !== 'Disponível') {
-                try {
-                    const { data: temConflito, error: erroConflito } = await supabaseClient.rpc('verificar_conflito_reserva', { 
-                        p_suite_id: suiteId, 
-                        p_checkin: checkinVal, 
-                        p_checkout: checkoutVal,
-                        p_reserva_id: reservaIdEditada ? reservaIdEditada : null
-                    });
-                    
-                    if (!erroConflito && temConflito === true) {
-                        mostrarErroModal("Já existe uma reserva confirmada para esta suíte nestas datas!");
-                        return; 
-                    }
-                } catch (err) {
-                    console.error("Erro ao verificar conflito de reservas:", err);
+            try {
+                const { data: temConflito, error: erroConflito } = await supabaseClient.rpc('verificar_conflito_reserva', { 
+                    p_suite_id: suiteId, 
+                    p_checkin: checkinVal, 
+                    p_checkout: checkoutVal,
+                    p_reserva_id: reservaIdEditada ? reservaIdEditada : null
+                });
+                
+                if (!erroConflito && temConflito === true) {
+                    mostrarErroModal("Já existe uma reserva confirmada para esta suíte nestas datas!");
+                    return; 
                 }
+            } catch (err) {
+                console.error("Erro ao verificar conflito de reservas:", err);
             }
 
             const dadosReserva = {
                 pousada_id: usuarioIdAtual,
                 suite_id: suiteId,
-                hospede_nome: hospedeNomeVal || 'Hóspede',
+                hospede_nome: document.getElementById('edit-hospede').value || 'Hóspede',
                 whatsapp_hospede: document.getElementById('edit-whatsapp').value,
                 cpf: document.getElementById('edit-cpf').value,
                 rg: document.getElementById('edit-rg').value,
@@ -799,19 +813,26 @@
             }
 
             let reservaIdFinal = reservaIdEditada;
-            let statusDestino = status;
 
+            let statusDestino = status;
             if (status === 'Checkout') {
                 statusDestino = 'Limpeza';
-            } else if (hospedeNomeVal) {
-                const hojeStr = new Date().toISOString().split('T')[0];
-                statusDestino = checkinVal > hojeStr ? 'Disponível' : 'Ocupada';
             }
 
+            // Atualiza o status físico da suíte
             await supabaseClient.from('suites').update({ status: statusDestino }).eq('id', suiteId);
 
-            if (status === 'Checkout') {
-                if (reservaIdEditada) {
+            if (status === 'Reservado' || status === 'Ocupada' || status === 'Aprovada') {
+                if (reservaIdEditada && reservaIdEditada.trim() !== '') {
+                    await supabaseClient.from('reservas').update(dadosReserva).eq('id', reservaIdEditada);
+                } else {
+                    const { data: novaReservaInserida, error: errIns } = await supabaseClient.from('reservas').insert([dadosReserva]).select().single();
+                    if (!errIns && novaReservaInserida) {
+                        reservaIdFinal = novaReservaInserida.id;
+                    }
+                }
+            } else {
+                if (reservaIdEditada && reservaIdEditada.trim() !== '') {
                     await supabaseClient.from('reservas').update({ status: 'Finalizada' }).eq('id', reservaIdEditada);
                 } else {
                     const hoje = new Date().toISOString().split('T')[0];
@@ -819,17 +840,6 @@
                         .eq('suite_id', suiteId)
                         .eq('status', 'Aprovada')
                         .lte('checkin', hoje);
-                }
-            } else {
-                if (reservaIdEditada) {
-                    await supabaseClient.from('reservas').update(dadosReserva).eq('id', reservaIdEditada);
-                } else if (hospedeNomeVal) {
-                    const { data: novaReservaInserida, error: errIns } = await supabaseClient.from('reservas').insert([dadosReserva]).select().single();
-                    if (!errIns && novaReservaInserida) {
-                        reservaIdFinal = novaReservaInserida.id;
-                    } else if (errIns) {
-                        console.error("Erro ao inserir reserva:", errIns);
-                    }
                 }
             }
 
@@ -880,7 +890,7 @@
 
         async function fazerLogout() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
         
-        carregarDashboard();
+        protegerPagina();
     </script>
 </body>
 </html>
