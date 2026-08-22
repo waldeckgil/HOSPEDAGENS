@@ -170,6 +170,7 @@
                             <input type="text" id="edit-rg" placeholder="RG (Opcional)" class="p-3 border rounded-xl text-sm">
                         </div>
                         <input type="text" id="edit-endereco" placeholder="Endereço" class="p-3 border rounded-xl text-sm">
+                        <input type="text" id="edit-cep" placeholder="CEP" class="p-3 border rounded-xl text-sm">
                         <input type="email" id="edit-email" placeholder="E-mail" class="p-3 border rounded-xl text-sm">
                     </div>
 
@@ -683,6 +684,7 @@
                                         <p><span class="font-semibold text-gray-600">CPF:</span> ${pend.cpf || 'Não informado'}</p>
                                         <p><span class="font-semibold text-gray-600">RG:</span> ${pend.rg || 'Não informado'}</p>
                                         <p><span class="font-semibold text-gray-600">Endereço:</span> ${pend.endereco || 'Não informado'}</p>
+                                        <p><span class="font-semibold text-gray-600">CEP:</span> ${pend.cep || 'Não informado'}</p>
                                         <p><span class="font-semibold text-gray-600">E-mail:</span> ${pend.email || 'Não informado'}</p>
                                         <div class="pt-1.5 border-t border-amber-100 flex items-center gap-1 text-gray-500 font-medium">
                                             <span>🕒</span> <span>Solicitado em: <strong>${dataSolicitacaoFormatada}</strong></span>
@@ -740,6 +742,7 @@
                 document.getElementById('edit-cpf').value = reserva.cpf || '';
                 document.getElementById('edit-rg').value = reserva.rg || '';
                 document.getElementById('edit-endereco').value = reserva.endereco || '';
+                document.getElementById('edit-cep').value = reserva.cep || '';
                 document.getElementById('edit-email').value = reserva.email || '';
                 document.getElementById('edit-checkin').value = reserva.checkin || '';
                 document.getElementById('edit-checkout').value = reserva.checkout || '';
@@ -751,6 +754,7 @@
                 document.getElementById('edit-cpf').value = '';
                 document.getElementById('edit-rg').value = '';
                 document.getElementById('edit-endereco').value = '';
+                document.getElementById('edit-cep').value = '';
                 document.getElementById('edit-email').value = '';
                 document.getElementById('edit-checkin').value = '';
                 document.getElementById('edit-checkout').value = '';
@@ -785,6 +789,7 @@
                 document.getElementById('edit-cpf').value = '';
                 document.getElementById('edit-rg').value = '';
                 document.getElementById('edit-endereco').value = '';
+                document.getElementById('edit-cep').value = '';
                 document.getElementById('edit-email').value = '';
                 document.getElementById('edit-checkin').value = '';
                 document.getElementById('edit-checkout').value = '';
@@ -823,7 +828,6 @@
                 console.error("Erro ao verificar conflito de reservas:", err);
             }
 
-            // Objeto preenchido restrito estritamente às colunas existentes na tabela 'reservas'
             const dadosReserva = {
                 pousada_id: usuarioIdAtual,
                 suite_id: suiteId,
@@ -832,6 +836,7 @@
                 cpf: document.getElementById('edit-cpf').value,
                 rg: document.getElementById('edit-rg').value,
                 endereco: document.getElementById('edit-endereco').value,
+                cep: document.getElementById('edit-cep').value,
                 email: document.getElementById('edit-email').value,
                 checkin: checkinVal,
                 checkout: checkoutVal,
@@ -878,6 +883,8 @@
                 statusDestino = 'Limpeza';
             } else if (status === 'Reservado' || status === 'Ocupada') {
                 statusDestino = 'Ocupada';
+            } else if (status === 'Limpeza') {
+                statusDestino = 'Limpeza';
             } else {
                 statusDestino = 'Disponível';
             }
@@ -898,7 +905,7 @@
                         reservaIdFinal = novaReservaInserida[0].id;
                     }
                 }
-            } else {
+            } else if (status === 'Disponível' || status === 'Limpeza') {
                 if (reservaIdEditada) {
                     await supabaseClient.from('reservas').update({ status: 'Finalizada' }).eq('id', reservaIdEditada);
                 } else {
