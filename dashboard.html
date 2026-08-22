@@ -211,14 +211,12 @@
 
         // --- PROTEÇÃO DE SESSÃO UNIFICADA (VALIDAÇÃO IMEDIATA + TEMPO REAL) ---
         async function protegerPagina() {
-            // 1. Ouve alterações de estado em tempo real (logout, expiração, etc.)
             supabaseClient.auth.onAuthStateChange((event, session) => {
                 if (event === 'SIGNED_OUT' || !session) {
                     window.location.href = 'index.html';
                 }
             });
 
-            // 2. Validação imediata ao carregar a página
             const { data: { session }, error } = await supabaseClient.auth.getSession();
             
             if (error || !session) {
@@ -226,7 +224,6 @@
                 return;
             }
 
-            // Se a sessão for válida, define o ID do usuário atual e inicializa o painel
             usuarioIdAtual = session.user.id;
             console.log("Acesso autorizado para a sessão ID:", usuarioIdAtual);
             
@@ -890,7 +887,6 @@
 
         async function fazerLogout() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
         
-        // Dispara a proteção de sessão e inicialização da página
         protegerPagina();
     </script>
 </body>
