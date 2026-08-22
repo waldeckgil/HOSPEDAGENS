@@ -209,27 +209,6 @@
         let pagamentosGlobaisCache = [];
         let camposLimposParaNovaReserva = false;
 
-        // --- PROTEÇÃO DE SESSÃO UNIFICADA (VALIDAÇÃO IMEDIATA + TEMPO REAL) ---
-        async function protegerPagina() {
-            supabaseClient.auth.onAuthStateChange((event, session) => {
-                if (event === 'SIGNED_OUT' || !session) {
-                    window.location.href = 'index.html';
-                }
-            });
-
-            const { data: { session }, error } = await supabaseClient.auth.getSession();
-            
-            if (error || !session) {
-                window.location.href = 'index.html';
-                return;
-            }
-
-            usuarioIdAtual = session.user.id;
-            console.log("Acesso autorizado para a sessão ID:", usuarioIdAtual);
-            
-            carregarDashboard();
-        }
-
         function mostrarToast(titulo, mensagem, tipo = 'sucesso') {
             const toast = document.getElementById('toast-notificacao');
             const toastTitulo = document.getElementById('toast-titulo');
@@ -337,8 +316,11 @@
         }
 
         async function carregarPousada() {
-            if (!usuarioIdAtual) return;
-            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', usuarioIdAtual).single();
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) return;
+            usuarioIdAtual = user.id;
+
+            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', user.id).single();
             if (pousada && pousada.nome) {
                 nomePousadaAtual = pousada.nome;
                 document.getElementById('titulo-pousada').innerText = pousada.nome;
@@ -347,7 +329,7 @@
                 document.getElementById('titulo-pousada').innerText = "Minha Pousada";
                 document.getElementById('titulo-menu-pousada').innerText = "Minha Pousada";
             }
-            document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`;
+            document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${user.id}`;
         }
 
         function copiarLinkVitrine() {
@@ -402,15 +384,18 @@
         }
 
         async function carregarDashboard() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) { window.location.href = 'index.html'; return; }
+
             await carregarPousada();
 
-            const { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', usuarioIdAtual);
+            const { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', user.id);
             suitesGlobaisCache = suites || [];
 
-            const { data: reservas } = await supabaseClient.from('reservas').select('*').eq('pousada_id', usuarioIdAtual);
+            const { data: reservas } = await supabaseClient.from('reservas').select('*').eq('pousada_id', user.id);
             reservasGlobaisCache = reservas || [];
 
-            const { data: pagamentos } = await supabaseClient.from('hospede_pagamentos').select('*').eq('pousada_id', usuarioIdAtual);
+            const { data: pagamentos } = await supabaseClient.from('hospede_pagamentos').select('*').eq('pousada_id', user.id);
             pagamentosGlobaisCache = pagamentos || [];
 
             await verificarReservasPendentesDashboard();
@@ -738,19 +723,7 @@
         function fecharModal() { document.getElementById('modal-edicao').classList.add('hidden'); }
         function fecharModalConfirmacao() { document.getElementById('modal-confirmacao').classList.add('hidden'); }
 
-      
-        document.getElementById('form-edicao').onsubmit = async (e) => {
-            e.preventDefault();
-            limparErroModal();
-
-            const status = document.getElementById('edit-status').value;
-            const statusOriginal = document.getElementById('edit-status-original').value;
-            const suiteId = document.getElementById('edit-suite-id').value;
-            
-            if (statusOriginal === 'Ocupada' && status === 'Disponível') {
-                mostrarErroModal("Uma suíte ocupada não pode ir direto para 'Disponível'. Envie para 'Limpeza' ou faça o 'Checkout'.");
-                return;
-            }async function executarSalvamento(suiteId, status) {
+        async function executarSalvamento(suiteId, status) {
             const reservaIdEditada = document.getElementById('edit-reserva-id').value;
             const valorSinalInformado = parseFloat(document.getElementById('edit-valor-sinal').value) || 0;
             const formaPagamentoSelecionada = document.getElementById('edit-forma-pagamento').value || 'Pix / Sinal';
@@ -760,7 +733,6 @@
             const checkoutVal = document.getElementById('edit-checkout').value || new Date().toISOString().split('T')[0];
             const hospedeNomeVal = document.getElementById('edit-hospede').value.trim();
 
-            // Se preencheu hóspede, valida conflito de datas normalmente
             if (hospedeNomeVal && status !== 'Checkout' && status !== 'Disponível') {
                 try {
                     const { data: temConflito, error: erroConflito } = await supabaseClient.rpc('verificar_conflito_reserva', { 
@@ -827,8 +799,8 @@
             }
 
             let reservaIdFinal = reservaIdEditada;
-
             let statusDestino = status;
+
             if (status === 'Checkout') {
                 statusDestino = 'Limpeza';
             } else if (hospedeNomeVal) {
@@ -836,10 +808,8 @@
                 statusDestino = checkinVal > hojeStr ? 'Disponível' : 'Ocupada';
             }
 
-            // Atualiza o status físico da suíte
             await supabaseClient.from('suites').update({ status: statusDestino }).eq('id', suiteId);
 
-            // Grava ou atualiza a reserva sempre que houver dados de hóspede ou se for uma edição válida
             if (status === 'Checkout') {
                 if (reservaIdEditada) {
                     await supabaseClient.from('reservas').update({ status: 'Finalizada' }).eq('id', reservaIdEditada);
@@ -853,10 +823,12 @@
             } else {
                 if (reservaIdEditada) {
                     await supabaseClient.from('reservas').update(dadosReserva).eq('id', reservaIdEditada);
-                } else {
+                } else if (hospedeNomeVal) {
                     const { data: novaReservaInserida, error: errIns } = await supabaseClient.from('reservas').insert([dadosReserva]).select().single();
                     if (!errIns && novaReservaInserida) {
                         reservaIdFinal = novaReservaInserida.id;
+                    } else if (errIns) {
+                        console.error("Erro ao inserir reserva:", errIns);
                     }
                 }
             }
@@ -880,6 +852,19 @@
             mostrarToast("Sucesso", "Dados salvos com sucesso!");
         }
 
+        document.getElementById('form-edicao').onsubmit = async (e) => {
+            e.preventDefault();
+            limparErroModal();
+
+            const status = document.getElementById('edit-status').value;
+            const statusOriginal = document.getElementById('edit-status-original').value;
+            const suiteId = document.getElementById('edit-suite-id').value;
+            
+            if (statusOriginal === 'Ocupada' && status === 'Disponível') {
+                mostrarErroModal("Uma suíte ocupada não pode ir direto para 'Disponível'. Envie para 'Limpeza' ou faça o 'Checkout'.");
+                return;
+            }
+
             if (statusOriginal === 'Ocupada' && (status === 'Limpeza' || status === 'Checkout')) {
                 fecharModal(); 
                 document.getElementById('modal-confirmacao').classList.remove('hidden');
@@ -895,7 +880,7 @@
 
         async function fazerLogout() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
         
-        protegerPagina();
+        carregarDashboard();
     </script>
 </body>
 </html>
