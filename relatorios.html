@@ -135,7 +135,7 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let usuarioIdAtual = null;
-        let viewAtualSelecionada = 'vw_gestor_financeiro_resumo';
+        let viewAtualSelecionada = 'vw_gestor_financeiro_resumo_cod';
 
         async function protegerPagina() {
             supabaseClient.auth.onAuthStateChange((event, session) => {
