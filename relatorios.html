@@ -66,8 +66,8 @@
                         </div>
                     </div>
 
-                    <!-- Cards de Seleção de Views -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                    <!-- Cards de Seleção de Views (Atualizado para 4 opções) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                         
                         <!-- Card 1: Financeiro -->
                         <div onclick="selecionarView('vw_gestor_financeiro_resumo_cod', 'Resumo Financeiro Consolidado', this)" 
@@ -97,7 +97,7 @@
 
                         <!-- Card 3: Tarifas Especiais -->
                         <div onclick="selecionarView('vw_gestor_tarifas_suites', 'Auditoria de Tarifas Especiais', this)" 
-                             class="card-view cursor-pointer bg-white p-5 rounded-xl shadow-sm border-2 border-transparent hover:border-gray-300 hover:shadow-md transition group sm:col-span-2 lg:col-span-1">
+                             class="card-view cursor-pointer bg-white p-5 rounded-xl shadow-sm border-2 border-transparent hover:border-gray-300 hover:shadow-md transition group">
                             <div class="flex items-center justify-between mb-3">
                                 <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center text-lg">
                                     <i class="fa-solid fa-tags"></i>
@@ -106,6 +106,19 @@
                             </div>
                             <h3 class="font-bold text-gray-800 text-base group-hover:text-amber-600 transition">Tarifas por Suíte</h3>
                             <p class="text-xs text-gray-500 mt-1">Valores especiais vigentes por período, tipos de ajuste e regras aplicadas.</p>
+                        </div>
+
+                        <!-- Card 4: Reservas do Mês Atual (Novo) -->
+                        <div onclick="selecionarView('vw_gestor_reservas_mes_atual', 'Próximas Reservas do Mês Atual', this)" 
+                             class="card-view cursor-pointer bg-white p-5 rounded-xl shadow-sm border-2 border-transparent hover:border-gray-300 hover:shadow-md transition group">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="w-10 h-10 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center text-lg">
+                                    <i class="fa-solid fa-calendar-check"></i>
+                                </div>
+                                <span class="text-[10px] font-bold uppercase tracking-wider bg-purple-50 text-purple-700 px-2 py-0.5 rounded">vw_gestor_reservas_mes_atual</span>
+                            </div>
+                            <h3 class="font-bold text-gray-800 text-base group-hover:text-purple-600 transition">Reservas do Mês</h3>
+                            <p class="text-xs text-gray-500 mt-1">Check-ins de hoje até o final do mês corrente com dias restantes.</p>
                         </div>
 
                     </div>
@@ -231,7 +244,7 @@
                 }
 
                 // Remove colunas de IDs internos da exibição visual da tabela
-                const colunas = Object.keys(registros[0]).filter(col => col !== 'pousada_id' && col !== 'reserva_id' && col !== 'tarifa_id');
+                const colunas = Object.keys(registros[0]).filter(col => col !== 'pousada_id' && col !== 'reserva_id' && col !== 'tarifa_id' && !col.endsWith('_id'));
                 
                 let htmlCabecalho = '';
                 colunas.forEach(col => {
