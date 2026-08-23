@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel do Gestor - Relatórios e Gestão Financeira</title>
+    <title>Painel 360 - Hub de Consultas do Gestor</title>
     <!-- Tailwind CSS para estilização rápida e moderna -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Supabase JS Client -->
@@ -38,7 +38,7 @@
                     <i class="fa-solid fa-tags w-5"></i> Gerenciar Tarifas
                 </a>
                 <a href="relatorios.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-slate-700 text-white font-medium shadow-inner transition">
-                    <i class="fa-solid fa-chart-line w-5 text-amber-400"></i> Relatórios & Financeiro
+                    <i class="fa-solid fa-layer-group w-5 text-amber-400"></i> Consultas & Views
                 </a>
             </nav>
 
@@ -55,74 +55,69 @@
             <div class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 sm:p-6">
                 <div class="max-w-7xl mx-auto">
                     
-                    <!-- Cabeçalho Dinâmico -->
-                    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
+                    <!-- Cabeçalho -->
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2">
                         <div>
-                            <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Relatórios & Gestão Financeira</h1>
-                            <p id="nomePousadaLogada" class="text-xs sm:text-sm font-semibold text-blue-600 mt-0.5">Carregando dados da pousada...</p>
+                            <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Hub de Consultas por Views</h1>
+                            <p id="nomePousadaLogada" class="text-xs sm:text-sm font-semibold text-blue-600 mt-0.5">Carregando dados...</p>
                         </div>
-
-                        <!-- Filtros (Status, Datas e Botão) - Adaptados para Mobile -->
-                        <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2.5 w-full lg:w-auto bg-white p-3 rounded-xl shadow-sm border border-gray-200 lg:bg-transparent lg:p-0 lg:border-0 lg:shadow-none">
-                            <div class="flex flex-col col-span-2 sm:col-span-1">
-                                <label class="text-[10px] font-bold text-gray-500 uppercase mb-0.5">Status</label>
-                                <select id="filtroStatus" class="border rounded-lg px-3 py-2 text-xs sm:text-sm bg-white font-medium text-gray-700 w-full">
-                                    <option value="Aprovada" selected>Aprovada</option>
-                                    <option value="Finalizada">Finalizada</option>
-                                    <option value="TODAS">Todas</option>
-                                </select>
-                            </div>
-                            <div class="flex flex-col">
-                                <label class="text-[10px] font-bold text-gray-500 uppercase mb-0.5">Data Início</label>
-                                <input type="date" id="filtroInicio" class="border rounded-lg px-2.5 py-2 text-xs sm:text-sm bg-white w-full">
-                            </div>
-                            <div class="flex flex-col">
-                                <label class="text-[10px] font-bold text-gray-500 uppercase mb-0.5">Data Fim</label>
-                                <input type="date" id="filtroFim" class="border rounded-lg px-2.5 py-2 text-xs sm:text-sm bg-white w-full">
-                            </div>
-                            <div class="flex items-end col-span-2 sm:col-span-1 mt-1 sm:mt-0">
-                                <button onclick="carregarDadosFinanceiros()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold hover:bg-blue-700 transition w-full sm:w-auto h-[38px] shadow-sm">Filtrar</button>
-                            </div>
+                        <div class="text-xs text-gray-500 bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm">
+                            Clique em um card para alternar a consulta instantaneamente
                         </div>
                     </div>
 
-                    <!-- Cards de Resumo (KPIs Inteligentes) -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6">
-                        <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
-                            <p class="text-xs sm:text-sm font-medium text-gray-500">Faturamento Bruto (Total)</p>
-                            <p id="kpiFaturamento" class="text-2xl sm:text-3xl font-bold text-gray-800 mt-1.5 sm:mt-2">R$ 0,00</p>
+                    <!-- Cards de Seleção de Views -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mb-6">
+                        
+                        <!-- Card 1: Financeiro -->
+                        <div onclick="selecionarView('vw_gestor_financeiro_resumo_cod', 'Resumo Financeiro Consolidado', this)" 
+                             class="card-view cursor-pointer bg-white p-5 rounded-xl shadow-sm border-2 border-blue-600 hover:shadow-md transition group">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-lg">
+                                    <i class="fa-solid fa-wallet"></i>
+                                </div>
+                                <span class="text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 px-2 py-0.5 rounded">vw_gestor_financeiro_resumo</span>
+                            </div>
+                            <h3 class="font-bold text-gray-800 text-base group-hover:text-blue-600 transition">Visão Financeira</h3>
+                            <p class="text-xs text-gray-500 mt-1">Valores totais, quantitativos pagos e saldos pendentes por reserva[cite: 10].</p>
                         </div>
-                        <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
-                            <p class="text-xs sm:text-sm font-medium text-gray-500">Total Recebido (Caixa / Sinal)</p>
-                            <p id="kpiRecebido" class="text-2xl sm:text-3xl font-bold text-green-600 mt-1.5 sm:mt-2">R$ 0,00</p>
+
+                        <!-- Card 2: Hospedagens -->
+                        <div onclick="selecionarView('vw_gestor_hospedagens_hoje', 'Hospedagens, Suítes e Movimentações', this)" 
+                             class="card-view cursor-pointer bg-white p-5 rounded-xl shadow-sm border-2 border-transparent hover:border-gray-300 hover:shadow-md transition group">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-lg">
+                                    <i class="fa-solid fa-bed"></i>
+                                </div>
+                                <span class="text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded">vw_gestor_hospedagens_hoje</span>
+                            </div>
+                            <h3 class="font-bold text-gray-800 text-base group-hover:text-emerald-600 transition">Hospedagens e Ocupação</h3>
+                            <p class="text-xs text-gray-500 mt-1">Cruzamento de nomes de hóspedes, acomodações e datas de permanência.</p>
                         </div>
-                        <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
-                            <p class="text-xs sm:text-sm font-medium text-gray-500">Saldo Restante a Receber</p>
-                            <p id="kpiSaldo" class="text-2xl sm:text-3xl font-bold text-amber-600 mt-1.5 sm:mt-2">R$ 0,00</p>
-                        </div>
+
                     </div>
 
-                    <!-- Tabela de Detalhamento com Rolagem Suave no Celular -->
+                    <!-- Área de Exibição da Consulta Selecionada -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
-                        <div class="px-4 sm:px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                            <h3 class="font-semibold text-sm sm:text-base text-gray-800">Detalhamento Financeiro por Reserva</h3>
-                            <span class="text-[11px] text-gray-400 hidden sm:inline">Deslize para o lado se necessário →</span>
+                        <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-gray-50/50">
+                            <div>
+                                <span class="text-xs font-bold text-blue-600 uppercase tracking-wide">Visualizando View Ativa</span>
+                                <h3 id="tituloViewAtiva" class="font-bold text-lg text-gray-800">Resumo Financeiro Consolidado</h3>
+                            </div>
+                            <button onclick="carregarDadosView()" class="bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 px-3.5 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-2 shadow-sm">
+                                <i class="fa-solid fa-rotate-right"></i> Atualizar Dados
+                            </button>
                         </div>
+
+                        <!-- Tabela Dinâmica -->
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse min-w-[750px]">
                                 <thead>
-                                    <tr class="bg-gray-50 text-gray-600 text-[11px] sm:text-xs uppercase tracking-wider">
-                                        <th class="py-3 px-4 sm:px-6">Check-in / Out (Diárias)</th>
-                                        <th class="py-3 px-4 sm:px-6">Hóspede</th>
-                                        <th class="py-3 px-4 sm:px-6">Suíte</th>
-                                        <th class="py-3 px-4 sm:px-6">Valor Total</th>
-                                        <th class="py-3 px-4 sm:px-6">Pago (Sinal)</th>
-                                        <th class="py-3 px-4 sm:px-6">Forma Pagto.</th>
-                                        <th class="py-3 px-4 sm:px-6">Saldo Restante</th>
-                                        <th class="py-3 px-4 sm:px-6">Status</th>
+                                    <tr id="tabelaCabecalho" class="bg-gray-50 text-gray-600 text-[11px] sm:text-xs uppercase tracking-wider">
+                                        <!-- Gerado Dinamicamente -->
                                     </tr>
                                 </thead>
-                                <tbody id="tabelaFinanceira" class="divide-y divide-gray-200 text-xs sm:text-sm text-gray-700">
+                                <tbody id="tabelaCorpo" class="divide-y divide-gray-200 text-xs sm:text-sm text-gray-700">
                                     <!-- Preenchido via JavaScript -->
                                 </tbody>
                             </table>
@@ -140,35 +135,8 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let usuarioIdAtual = null;
-        let mapaSuitesCache = {};
+        let viewAtualSelecionada = 'vw_gestor_financeiro_resumo';
 
-        function formatarMoeda(valor) {
-            if (valor === null || valor === undefined || isNaN(valor)) return 'R$ 0,00';
-            return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        }
-
-        function formatarDataSimples(dataStr) {
-            if (!dataStr) return '';
-            const partes = dataStr.split('-');
-            if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
-            return dataStr;
-        }
-
-        function calcularDiarias(checkin, checkout) {
-            if (!checkin || !checkout) return 1;
-            const d1 = new Date(checkin);
-            const d2 = new Date(checkout);
-            const diffTime = d2 - d1;
-            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-            return diffDays > 0 ? diffDays : 1;
-        }
-
-        async function logout() {
-            await supabaseClient.auth.signOut();
-            window.location.href = 'index.html';
-        }
-
-        // --- PROTEÇÃO DE SESSÃO UNIFICADA ---
         async function protegerPagina() {
             supabaseClient.auth.onAuthStateChange((event, session) => {
                 if (event === 'SIGNED_OUT' || !session) {
@@ -177,7 +145,6 @@
             });
 
             const { data: { session }, error } = await supabaseClient.auth.getSession();
-            
             if (error || !session) {
                 window.location.href = 'index.html';
                 return;
@@ -201,122 +168,89 @@
                 labelMenu.textContent = "Painel Administrativo";
             }
 
-            await carregarMapaSuites();
-            carregarDadosFinanceiros();
+            carregarDadosView();
         }
 
-        async function carregarMapaSuites() {
-            const { data: suites } = await supabaseClient.from('suites').select('id, nome').eq('pousada_id', usuarioIdAtual);
-            mapaSuitesCache = {};
-            if (suites) {
-                suites.forEach(s => {
-                    mapaSuitesCache[s.id] = s.nome;
-                });
-            }
+        async function logout() {
+            await supabaseClient.auth.signOut();
+            window.location.href = 'index.html';
         }
 
-        async function carregarDadosFinanceiros() {
+        function selecionarView(nomeView, tituloAmigavel, elementoCard) {
+            viewAtualSelecionada = nomeView;
+            document.getElementById('tituloViewAtiva').textContent = tituloAmigavel;
+
+            document.querySelectorAll('.card-view').forEach(card => {
+                card.classList.remove('border-blue-600', 'shadow-md');
+                card.classList.add('border-transparent');
+            });
+            elementoCard.classList.remove('border-transparent');
+            elementoCard.classList.add('border-blue-600', 'shadow-md');
+
+            carregarDadosView();
+        }
+
+        async function carregarDadosView() {
             if (!usuarioIdAtual) return;
 
-            const dataInicio = document.getElementById('filtroInicio').value || '2026-08-01';
-            const dataFim = document.getElementById('filtroFim').value || '2026-08-31';
-            const statusSelecionado = document.getElementById('filtroStatus').value;
+            const tbody = document.getElementById('tabelaCorpo');
+            const thead = document.getElementById('tabelaCabecalho');
 
-            let query = supabaseClient
-                .from('reservas')
-                .select('*')
-                .eq('pousada_id', usuarioIdAtual)
-                .gte('checkin', dataInicio)
-                .lte('checkin', dataFim);
+            tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Consultando view <b>${viewAtualSelecionada}</b>...</td></tr>`;
 
-            if (statusSelecionado !== 'TODAS') {
-                query = query.eq('status', statusSelecionado);
-            } else {
-                query = query.in('status', ['Aprovada', 'Finalizada']);
-            }
+            try {
+                // Filtra por pousada_id para garantir que o gestor veja apenas os dados da própria pousada
+                const { data: registros, error } = await supabaseClient
+                    .from(viewAtualSelecionada)
+                    .select('*')
+                    .eq('pousada_id', usuarioIdAtual);
 
-            const { data: reservas, error } = await query;
+                if (error) {
+                    console.error("Erro ao consultar view:", error);
+                    tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-red-500 font-medium">A view <b>${viewAtualSelecionada}</b> ainda não foi criada no Supabase ou possui erro de permissão. Certifique-se de criá-la no SQL Editor.</td></tr>`;
+                    thead.innerHTML = `<th class="py-3 px-6">Aviso de Erro</th>`;
+                    return;
+                }
 
-            if (error) {
-                console.error('Erro ao buscar reservas:', error);
-                alert('Erro ao carregar dados financeiros.');
-                return;
-            }
+                if (!registros || registros.length === 0) {
+                    thead.innerHTML = `<th class="py-3 px-6">Informação</th>`;
+                    tbody.innerHTML = `<tr><td class="py-8 text-center text-gray-500">Nenhum registro encontrado nesta view para a sua pousada.</td></tr>`;
+                    return;
+                }
 
-            const { data: pagamentos } = await supabaseClient
-                .from('hospede_pagamentos')
-                .select('*')
-                .eq('pousada_id', usuarioIdAtual);
-
-            let faturamentoTotal = 0;
-            let totalRecebidoGeral = 0;
-            let totalSaldoGeral = 0;
-            let corpoTabela = '';
-
-            if (!reservas || reservas.length === 0) {
-                corpoTabela = `<tr><td colspan="8" class="py-6 px-6 text-center text-gray-500">Nenhuma reserva encontrada para este período e status.</td></tr>`;
-            } else {
-                reservas.forEach(reserva => {
-                    const valorTotal = Number(reserva.valor_total) || 0;
-                    
-                    const pagamentosDestaReserva = (pagamentos || []).filter(p => p.reserva_id === reserva.id);
-                    const totalPago = pagamentosDestaReserva.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
-                    const saldoRestante = valorTotal - totalPago;
-
-                    let formasPagtoSet = new Set();
-                    pagamentosDestaReserva.forEach(p => {
-                        if (p.forma_pagamento) {
-                            formasPagtoSet.add(p.forma_pagamento);
-                        }
-                    });
-                    let textoFormaPagto = formasPagtoSet.size > 0 ? Array.from(formasPagtoSet).join(', ') : '-';
-
-                    faturamentoTotal += valorTotal;
-                    totalRecebidoGeral += totalPago;
-                    totalSaldoGeral += saldoRestante > 0 ? saldoRestante : 0;
-
-                    const nomeSuiteAmigavel = mapaSuitesCache[reserva.suite_id] || 'Suíte Padrão';
-                    const totalDiarias = calcularDiarias(reserva.checkin, reserva.checkout);
-
-                    let badgeCor = 'bg-green-100 text-green-800';
-                    if (reserva.status === 'Finalizada') badgeCor = 'bg-gray-200 text-gray-700';
-                    else if (reserva.status === 'Cancelada' || reserva.status === 'Recusada') badgeCor = 'bg-red-100 text-red-700';
-
-                    corpoTabela += `
-                        <tr class="hover:bg-gray-50">
-                            <td class="py-3.5 px-4 sm:px-6">
-                                <div class="flex items-center justify-between gap-2">
-                                    <span class="font-semibold text-gray-900">${formatarDataSimples(reserva.checkin)}</span>
-                                    <span class="bg-blue-50 text-blue-700 font-bold px-1.5 py-0.5 rounded text-[10px]">${totalDiarias} ${totalDiarias === 1 ? 'diária' : 'diárias'}</span>
-                                </div>
-                                <span class="text-gray-500 text-[11px]">até ${formatarDataSimples(reserva.checkout)}</span>
-                            </td>
-                            <td class="py-3.5 px-4 sm:px-6 font-medium text-gray-900">${reserva.hospede_nome || 'Hóspede'}</td>
-                            <td class="py-3.5 px-4 sm:px-6 font-semibold text-gray-700">${nomeSuiteAmigavel}</td>
-                            <td class="py-3.5 px-4 sm:px-6 font-semibold text-gray-800">${formatarMoeda(valorTotal)}</td>
-                            <td class="py-3.5 px-4 sm:px-6 font-semibold text-emerald-700">${formatarMoeda(totalPago)}</td>
-                            <td class="py-3.5 px-4 sm:px-6 font-medium text-gray-600">${textoFormaPagto}</td>
-                            <td class="py-3.5 px-4 sm:px-6 font-semibold ${saldoRestante > 0 ? 'text-amber-600' : 'text-emerald-600'}">${formatarMoeda(saldoRestante)}</td>
-                            <td class="py-3.5 px-4 sm:px-6">
-                                <span class="px-2.5 py-1 text-[11px] rounded-full inline-block ${badgeCor}">
-                                    ${reserva.status}
-                                </span>
-                            </td>
-                        </tr>
-                    `;
+                // Remove a coluna pousada_id da exibição visual da tabela para ficar mais limpo
+                const colunas = Object.keys(registros[0]).filter(col => col !== 'pousada_id' && col !== 'reserva_id');
+                
+                let htmlCabecalho = '';
+                colunas.forEach(col => {
+                    const nomeFormatado = col.replace(/_/g, ' ').toUpperCase();
+                    htmlCabecalho += `<th class="py-3 px-6">${nomeFormatado}</th>`;
                 });
+                thead.innerHTML = htmlCabecalho;
+
+                let htmlLinhas = '';
+                registros.forEach(row => {
+                    htmlLinhas += `<tr class="hover:bg-gray-50 transition">`;
+                    colunas.forEach(col => {
+                        let valor = row[col];
+                        if (valor === null || valor === undefined) valor = '-';
+                        // Formata valores monetários se a coluna tiver relação com valor
+                        if ((col.includes('valor') || col.includes('saldo') || col.includes('pago')) && !isNaN(valor)) {
+                            valor = Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                        }
+                        htmlLinhas += `<td class="py-3.5 px-6 font-medium text-gray-800">${valor}</td>`;
+                    });
+                    htmlLinhas += `</tr>`;
+                });
+                tbody.innerHTML = htmlLinhas;
+
+            } catch (err) {
+                console.error("Erro geral:", err);
+                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-red-500">Erro de comunicação ao carregar a view.</td></tr>`;
             }
-
-            document.getElementById('tabelaFinanceira').innerHTML = corpoTabela;
-
-            document.getElementById('kpiFaturamento').innerText = formatarMoeda(faturamentoTotal);
-            document.getElementById('kpiRecebido').innerText = formatarMoeda(totalRecebidoGeral);
-            document.getElementById('kpiSaldo').innerText = formatarMoeda(totalSaldoGeral);
         }
 
         window.onload = () => {
-            document.getElementById('filtroInicio').value = '2026-08-01';
-            document.getElementById('filtroFim').value = '2026-08-31';
             protegerPagina();
         };
     </script>
