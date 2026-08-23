@@ -143,7 +143,6 @@
                                         <!-- Gerado Dinamicamente -->
                                     </tr>
                                 </thead>
-                                <!-- Adicionado 'uppercase' para garantir que todo texto dentro do corpo venha em maiúsculo -->
                                 <tbody id="tabelaCorpo" class="divide-y divide-gray-200 text-xs sm:text-sm text-gray-700 uppercase">
                                     <!-- Preenchido via JavaScript -->
                                 </tbody>
@@ -256,7 +255,24 @@
 
                 let htmlLinhas = '';
                 registros.forEach(row => {
-                    htmlLinhas += `<tr class="hover:bg-gray-50 transition">`;
+                    // Identifica se há coluna de dias restantes e obtém o valor numérico dela
+                    let diasRestantes = null;
+                    colunas.forEach(col => {
+                        if (col.toLowerCase().includes('dias_restante')) {
+                            diasRestantes = Number(row[col]);
+                        }
+                    });
+
+                    // Define a cor de destaque da linha inteira conforme as regras solicitadas
+                    let classeLinhaDestaque = "hover:bg-gray-50 transition";
+                    if (diasRestantes === 1) {
+                        classeLinhaDestaque = "bg-amber-100/80 hover:bg-amber-200/80 border-l-4 border-amber-500 transition"; // Amarelo suave para 1 dia
+                    } else if (diasRestantes === 0) {
+                        classeLinhaDestaque = "bg-rose-100/90 hover:bg-rose-200/90 border-l-4 border-rose-600 text-rose-900 transition"; // Rosa forte / avermelhado para hoje (0 dias)
+                    }
+
+                    htmlLinhas += `<tr class="${classeLinhaDestaque}">`;
+                    
                     colunas.forEach(col => {
                         let valorBruto = row[col];
                         let valorExibicao = '-';
@@ -270,22 +286,16 @@
                             valorExibicao = Number(valorBruto).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                         }
 
-                        // Destaca em amarelo se o número de dias restantes for exatamente 1
-                        let estiloCelula = '';
-                        if (col.toLowerCase().includes('dias_restante') && Number(valorBruto) === 1) {
-                            estiloCelula = ' bg-amber-100 text-amber-800 font-bold px-2 py-1 rounded inline-block';
-                        }
-
                         // Transforma em link do WhatsApp preservando o número e forçando maiúsculas se houver texto
                         let colLower = col.toLowerCase();
                         if ((colLower.includes('wats') || colLower.includes('app') || colLower.includes('telefone')) && valorBruto !== null && valorBruto !== undefined) {
                             let numeroLimpo = String(valorBruto).replace(/\D/g, '');
-                            valorExibicao = `<a href="https://wa.me/55${numeroLimpo}" target="_blank" title="Abrir WhatsApp" class="text-emerald-600 hover:text-emerald-800 font-semibold flex items-center gap-1.5 transition">
+                            valorExibicao = `<a href="https://wa.me/55${numeroLimpo}" target="_blank" title="Abrir WhatsApp" class="text-emerald-700 hover:text-emerald-900 font-bold flex items-center gap-1.5 transition">
                                 <i class="fa-brands fa-whatsapp text-lg"></i> ${String(valorBruto).toUpperCase()}
                             </a>`;
                         }
 
-                        htmlLinhas += `<td class="py-3.5 px-6 font-medium text-gray-800"><span class="${estiloCelula}">${valorExibicao}</span></td>`;
+                        htmlLinhas += `<td class="py-3.5 px-6 font-medium">${valorExibicao}</td>`;
                     });
                     htmlLinhas += `</tr>`;
                 });
