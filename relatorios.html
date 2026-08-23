@@ -254,6 +254,17 @@
             carregarDadosView();
         }
 
+        // Função auxiliar para converter datas do formato YYYY-MM-DD para DD/MM/YYYY
+        function formatarDataBr(valor) {
+            if (!valor) return '-';
+            let str = String(valor).trim();
+            if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+                let partes = str.substring(0, 10).split('-');
+                return `${partes[2]}/${partes[1]}/${partes[0]}`;
+            }
+            return str.toUpperCase();
+        }
+
         async function carregarDadosView() {
             if (!usuarioIdAtual) return;
 
@@ -297,7 +308,7 @@
                 let colunaDataEncontrada = null;
                 colunas.forEach(col => {
                     let c = col.toLowerCase();
-                    if ((c.includes('checkin') || c.includes('data') || c.includes('vigencia') || c.includes('criado')) && !colunaDataEncontrada) {
+                    if ((c.includes('checkin') || c.includes('checkout') || c.includes('data') || c.includes('vigencia') || c.includes('criado')) && !colunaDataEncontrada) {
                         colunaDataEncontrada = col;
                     }
                 });
@@ -356,7 +367,13 @@
                         let valorExibicao = '-';
 
                         if (valorBruto !== null && valorBruto !== undefined) {
-                            valorExibicao = String(valorBruto).toUpperCase();
+                            let colLower = col.toLowerCase();
+                            // Aplica a formatação DD/MM/AAAA para colunas de data ou vigência
+                            if (colLower.includes('checkin') || colLower.includes('checkout') || colLower.includes('data') || colLower.includes('vigencia')) {
+                                valorExibicao = formatarDataBr(valorBruto);
+                            } else {
+                                valorExibicao = String(valorBruto).toUpperCase();
+                            }
                         }
                         
                         if (col.includes('valor') && !isNaN(valorBruto)) {
