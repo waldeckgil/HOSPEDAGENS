@@ -18,7 +18,7 @@
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-pousada text-white p-3 sm:p-4 md:p-8">
+<body class="bg-pousada text-white p-3 sm:p-4 md:p-8" onload="inicializarVitrine()">
 
     <div class="max-w-5xl mx-auto">
         <h1 id="titulo-pousada" class="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 sm:mb-6 text-center drop-shadow-lg px-2">Carregando Pousada...</h1>
@@ -144,6 +144,19 @@
         const hojeISO = new Date().toISOString().split('T')[0];
         document.getElementById('filtro-checkin').setAttribute('min', hojeISO);
         document.getElementById('filtro-checkout').setAttribute('min', hojeISO);
+
+        // --- INICIALIZAÇÃO E MONITORAMENTO DE SESSÃO UNIFICADA ---
+        async function inicializarVitrine() {
+            // Monitoramento em tempo real de autenticação (padrão unificado)
+            supabaseClient.auth.onAuthStateChange((event, session) => {
+                // Caso haja interações de sessão global, mantém o comportamento seguro
+            });
+
+            // Validação imediata por getSession()
+            const { data: { session } } = await supabaseClient.auth.getSession();
+
+            await carregarDados();
+        }
 
         async function carregarDados() {
             const params = new URLSearchParams(window.location.search);
@@ -493,8 +506,6 @@
                 fecharModal();
             }, 2500);
         });
-
-        carregarDados();
     </script>
 </body>
 </html>

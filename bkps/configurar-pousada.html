@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row" onload="carregarConfiguracao()">
+<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row" onload="protegerPagina()">
 
     <!-- MENU LATERAL (Adaptado para mobile e desktop) -->
     <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl">
@@ -223,19 +223,33 @@
             document.getElementById('mensagem-container').className = 'hidden';
         }
 
-        async function carregarConfiguracao() {
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (!user) {
+        // --- PROTEÇÃO DE SESSÃO UNIFICADA (VALIDAÇÃO IMEDIATA + TEMPO REAL) ---
+        async function protegerPagina() {
+            // 1. Ouve alterações de estado em tempo real (logout, expiração, etc.)
+            supabaseClient.auth.onAuthStateChange((event, session) => {
+                if (event === 'SIGNED_OUT' || !session) {
+                    window.location.href = 'index.html';
+                }
+            });
+
+            // 2. Validação imediata ao carregar a página
+            const { data: { session }, error } = await supabaseClient.auth.getSession();
+            
+            if (error || !session) {
                 mostrarMensagem('Sessão expirada. Redirecionando para login...', 'erro');
                 setTimeout(() => window.location.href = 'index.html', 2000);
                 return;
             }
-            usuarioIdAtual = user.id;
 
+            usuarioIdAtual = session.user.id;
+            carregarConfiguracao(usuarioIdAtual);
+        }
+
+        async function carregarConfiguracao(userId) {
             const { data: pousada, error: errPousada } = await supabaseClient
                 .from('pousadas')
                 .select('nome')
-                .eq('id', user.id)
+                .eq('id', userId)
                 .maybeSingle();
 
             const nomePousada = (pousada && pousada.nome) ? pousada.nome : "Minha Pousada";
@@ -245,12 +259,12 @@
             document.getElementById('titulo-pousada').innerText = nomePousada;
             document.getElementById('nome-pousada-sidebar').innerText = nomePousada;
 
-            document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${user.id}`;
+            document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${userId}`;
 
             const { data: suites, error: errSuites } = await supabaseClient
                 .from('suites')
                 .select('id, nome, fotos')
-                .eq('pousada_id', user.id);
+                .eq('pousada_id', userId);
 
             const container = document.getElementById('suites-container');
             container.innerHTML = '';
@@ -395,11 +409,12 @@
             const nomePousada = document.getElementById('nome-pousada').value;
             const linhasSuites = document.querySelectorAll('#suites-container > .suite-row');
             
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (!user) return;
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) return;
+            const userId = session.user.id;
 
             const { error: errPousada } = await supabaseClient.from('pousadas').upsert({ 
-                id: user.id, 
+                id: userId, 
                 nome: nomePousada.trim() 
             }, { onConflict: 'id' });
 
@@ -439,7 +454,7 @@
                         .insert({ 
                             nome: valorNome, 
                             status: 'Disponível',
-                            pousada_id: user.id,
+                            pousada_id: userId,
                             fotos: []
                         })
                         .select()
@@ -470,8 +485,8 @@
                 return;
             }
 
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (!user) {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
                 mostrarMensagem('Sessão expirada. Faça login novamente.', 'erro');
                 return;
             }
