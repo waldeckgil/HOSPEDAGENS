@@ -66,7 +66,7 @@
                         </div>
                     </div>
 
-                    <!-- Cards de Seleção de Views (Atualizado para 4 opções) -->
+                    <!-- Cards de Seleção de Views -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                         
                         <!-- Card 1: Financeiro -->
@@ -108,7 +108,7 @@
                             <p class="text-xs text-gray-500 mt-1">Valores especiais vigentes por período, tipos de ajuste e regras aplicadas.</p>
                         </div>
 
-                        <!-- Card 4: Reservas do Mês Atual (Novo) -->
+                        <!-- Card 4: Reservas do Mês Atual -->
                         <div onclick="selecionarView('vw_gestor_reservas_mes_atual', 'Próximas Reservas do Mês Atual', this)" 
                              class="card-view cursor-pointer bg-white p-5 rounded-xl shadow-sm border-2 border-transparent hover:border-gray-300 hover:shadow-md transition group">
                             <div class="flex items-center justify-between mb-3">
@@ -269,6 +269,15 @@
                         let estiloCelula = '';
                         if (col.toLowerCase().includes('dias_restante') && Number(valor) === 1) {
                             estiloCelula = ' bg-amber-100 text-amber-800 font-bold px-2 py-1 rounded inline-block';
+                        }
+
+                        // Se a coluna for o WhatsApp, transforma em link interativo com o ícone do WhatsApp
+                        if (col.toLowerCase().includes('whatsapp') && valor !== '-') {
+                            // Limpa caracteres especiais do telefone, mantendo apenas números
+                            let numeroLimpo = String(valor).replace(/\D/g, '');
+                            valor = `<a href="https://wa.me/55${numeroLimpo}" target="_blank" title="Conversar no WhatsApp" class="text-emerald-600 hover:text-emerald-800 font-semibold flex items-center gap-1.5 transition">
+                                <i class="fa-brands fa-whatsapp text-base"></i> ${valor}
+                            </a>`;
                         }
 
                         htmlLinhas += `<td class="py-3.5 px-6 font-medium text-gray-800"><span class="${estiloCelula}">${valor}</span></td>`;
