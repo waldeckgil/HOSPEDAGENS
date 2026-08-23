@@ -154,13 +154,13 @@
 
                         <!-- Tabela Dinâmica -->
                         <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse min-w-[750px]">
+                            <table class="w-full text-left border-collapse min-w-[900px]">
                                 <thead>
                                     <tr id="tabelaCabecalho" class="bg-gray-50 text-gray-600 text-[11px] sm:text-xs uppercase tracking-wider">
                                         <!-- Gerado Dinamicamente -->
                                     </tr>
                                 </thead>
-                                <tbody id="tabelaCorpo" class="divide-y divide-gray-200 text-xs sm:text-sm text-gray-700 uppercase">
+                                <tbody id="tabelaCorpo" class="divide-y divide-gray-200 text-xs sm:text-sm text-gray-700 uppercase whitespace-nowrap">
                                     <!-- Preenchido via JavaScript -->
                                 </tbody>
                             </table>
@@ -254,13 +254,17 @@
             carregarDadosView();
         }
 
-        // Função auxiliar para converter datas do formato YYYY-MM-DD para DD/MM/YYYY
+        // Função robusta para converter datas (AAAA-MM-DD ou ISO) para DD/MM/AAAA
         function formatarDataBr(valor) {
             if (!valor) return '-';
             let str = String(valor).trim();
-            if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+            
+            // Extrai os primeiros 10 caracteres caso venha com timestamp (ex: 2026-08-23T00:00:00)
+            if (str.length >= 10 && str.includes('-')) {
                 let partes = str.substring(0, 10).split('-');
-                return `${partes[2]}/${partes[1]}/${partes[0]}`;
+                if (partes.length === 3 && partes[0].length === 4) {
+                    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+                }
             }
             return str.toUpperCase();
         }
@@ -338,7 +342,7 @@
                     const nomeFormatado = col.replace(/_/g, ' ').toUpperCase();
                     htmlCabecalho += `<th class="py-3 px-6">${nomeFormatado}</th>`;
                 });
-                thead.innerHTML = htmlCabecalho;
+                thead.innerHTML = htmlCabecos = htmlCabecalho;
 
                 let htmlLinhas = '';
                 registrosFiltrados.forEach(row => {
@@ -368,8 +372,8 @@
 
                         if (valorBruto !== null && valorBruto !== undefined) {
                             let colLower = col.toLowerCase();
-                            // Aplica a formatação DD/MM/AAAA para colunas de data ou vigência
-                            if (colLower.includes('checkin') || colLower.includes('checkout') || colLower.includes('data') || colLower.includes('vigencia')) {
+                            // Identifica colunas de data de forma abrangente e aplica a formatação DD/MM/AAAA
+                            if (colLower.includes('data') || colLower.includes('checkin') || colLower.includes('checkout') || colLower.includes('vigencia') || colLower.includes('criado')) {
                                 valorExibicao = formatarDataBr(valorBruto);
                             } else {
                                 valorExibicao = String(valorBruto).toUpperCase();
