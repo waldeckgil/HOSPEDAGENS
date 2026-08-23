@@ -249,12 +249,6 @@
                 let htmlCabecalho = '';
                 colunas.forEach(col => {
                     const nomeFormatado = col.replace(/_/g, ' ').toUpperCase();
-                    htmlCabecalzh += `<th class="py-3 px-6">${nomeFormatado}</th>`; // Mantido sem quebrar a lógica original
-                });
-                
-                // Recriando o loop de cabeçalho de forma segura
-                colunas.forEach(col => {
-                    const nomeFormatado = col.replace(/_/g, ' ').toUpperCase();
                     htmlCabecalho += `<th class="py-3 px-6">${nomeFormatado}</th>`;
                 });
                 thead.innerHTML = htmlCabecalho;
@@ -277,7 +271,7 @@
                             estiloCelula = ' bg-amber-100 text-amber-800 font-bold px-2 py-1 rounded inline-block';
                         }
 
-                        // Transforma em link do WhatsApp para qualquer variação no nome da coluna (whatsapp_hospede, watsapp, etc.)
+                        // Transforma em link do WhatsApp para qualquer variação do campo (WATSAPP, whatsapp_hospede, etc.)
                         let colLower = col.toLowerCase();
                         if ((colLower.includes('wats') || colLower.includes('app') || colLower.includes('telefone')) && valor !== '-') {
                             let numeroLimpo = String(valor).replace(/\D/g, '');
