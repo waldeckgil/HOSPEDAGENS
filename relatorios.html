@@ -249,6 +249,12 @@
                 let htmlCabecalho = '';
                 colunas.forEach(col => {
                     const nomeFormatado = col.replace(/_/g, ' ').toUpperCase();
+                    htmlCabecalzh += `<th class="py-3 px-6">${nomeFormatado}</th>`; // Mantido sem quebrar a lógica original
+                });
+                
+                // Recriando o loop de cabeçalho de forma segura
+                colunas.forEach(col => {
+                    const nomeFormatado = col.replace(/_/g, ' ').toUpperCase();
                     htmlCabecalho += `<th class="py-3 px-6">${nomeFormatado}</th>`;
                 });
                 thead.innerHTML = htmlCabecalho;
@@ -271,12 +277,12 @@
                             estiloCelula = ' bg-amber-100 text-amber-800 font-bold px-2 py-1 rounded inline-block';
                         }
 
-                        // Se a coluna for o WhatsApp, transforma em link interativo com o ícone do WhatsApp
-                        if (col.toLowerCase().includes('whatsapp') && valor !== '-') {
-                            // Limpa caracteres especiais do telefone, mantendo apenas números
+                        // Transforma em link do WhatsApp para qualquer variação no nome da coluna (whatsapp_hospede, watsapp, etc.)
+                        let colLower = col.toLowerCase();
+                        if ((colLower.includes('wats') || colLower.includes('app') || colLower.includes('telefone')) && valor !== '-') {
                             let numeroLimpo = String(valor).replace(/\D/g, '');
-                            valor = `<a href="https://wa.me/55${numeroLimpo}" target="_blank" title="Conversar no WhatsApp" class="text-emerald-600 hover:text-emerald-800 font-semibold flex items-center gap-1.5 transition">
-                                <i class="fa-brands fa-whatsapp text-base"></i> ${valor}
+                            valor = `<a href="https://wa.me/55${numeroLimpo}" target="_blank" title="Abrir WhatsApp" class="text-emerald-600 hover:text-emerald-800 font-semibold flex items-center gap-1.5 transition">
+                                <i class="fa-brands fa-whatsapp text-lg"></i> ${valor}
                             </a>`;
                         }
 
