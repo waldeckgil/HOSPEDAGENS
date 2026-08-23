@@ -187,11 +187,11 @@
             const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', usuarioIdAtual).single();
             
             if (pousada && pousada.nome) {
-                labelPousada.textContent = `Pousada: ${pousada.nome}`;
-                labelMenu.textContent = pousada.nome;
+                labelPousada.textContent = `Pousada: ${pousada.nome}`.toUpperCase();
+                labelMenu.textContent = pousada.nome.toUpperCase();
             } else {
-                labelPousada.textContent = `Pousada ID: ${usuarioIdAtual}`;
-                labelMenu.textContent = "Painel Administrativo";
+                labelPousada.textContent = `POUSADA ID: ${usuarioIdAtual}`;
+                labelMenu.textContent = "PAINEL ADMINISTRATIVO";
             }
 
             carregarDadosView();
@@ -204,7 +204,7 @@
 
         function selecionarView(nomeView, tituloAmigavel, elementoCard) {
             viewAtualSelecionada = nomeView;
-            document.getElementById('tituloViewAtiva').textContent = tituloAmigavel;
+            document.getElementById('tituloViewAtiva').textContent = tituloAmigavel.toUpperCase();
 
             document.querySelectorAll('.card-view').forEach(card => {
                 card.classList.remove('border-blue-600', 'shadow-md');
@@ -222,7 +222,7 @@
             const tbody = document.getElementById('tabelaCorpo');
             const thead = document.getElementById('tabelaCabecalho');
 
-            tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Consultando view <b>${viewAtualSelecionada}</b>...</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CONSULTANDO VIEW <b>${viewAtualSelecionada.toUpperCase()}</b>...</td></tr>`;
 
             try {
                 const { data: registros, error } = await supabaseClient
@@ -232,14 +232,14 @@
 
                 if (error) {
                     console.error("Erro ao consultar view:", error);
-                    tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-red-500 font-medium">A view <b>${viewAtualSelecionada}</b> ainda não foi criada no Supabase ou possui erro de permissão. Certifique-se de criá-la no SQL Editor.</td></tr>`;
-                    thead.innerHTML = `<th class="py-3 px-6">Aviso de Erro</th>`;
+                    tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-red-500 font-medium">A VIEW <b>${viewAtualSelecionada}</b> AINDA NÃO FOI CRIADA NO SUPABASE OU POSSUI ERRO DE PERMISSÃO.</td></tr>`;
+                    thead.innerHTML = `<th class="py-3 px-6">AVISO DE ERRO</th>`;
                     return;
                 }
 
                 if (!registros || registros.length === 0) {
-                    thead.innerHTML = `<th class="py-3 px-6">Informação</th>`;
-                    tbody.innerHTML = `<tr><td class="py-8 text-center text-gray-500">Nenhum registro encontrado nesta view para a sua pousada.</td></tr>`;
+                    thead.innerHTML = `<th class="py-3 px-6">INFORMAÇÃO</th>`;
+                    tbody.innerHTML = `<tr><td class="py-8 text-center text-gray-500">NENHUM REGISTRO ENCONTRADO NESTA VIEW PARA A SUA POUSADA.</td></tr>`;
                     return;
                 }
 
@@ -258,25 +258,31 @@
                     htmlLinhas += `<tr class="hover:bg-gray-50 transition">`;
                     colunas.forEach(col => {
                         let valor = row[col];
-                        if (valor === null || valor === undefined) valor = '-';
+                        if (valor === null || valor === undefined) {
+                            valor = '-';
+                        } else {
+                            // Converte textos e strings em caixa alta (maiúsculas) automaticamente
+                            valor = String(valor).toUpperCase();
+                        }
                         
                         // Formata automaticamente colunas de valores monetários
-                        if (col.includes('valor') && !isNaN(valor)) {
-                            valor = Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                        if (col.includes('valor') && !isNaN(row[col])) {
+                            valor = Number(row[col]).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                         }
 
                         // Destaca em amarelo se o número de dias restantes for exatamente 1
                         let estiloCelula = '';
-                        if (col.toLowerCase().includes('dias_restante') && Number(valor) === 1) {
+                        if (col.toLowerCase().includes('dias_restante') && Number(row[col]) === 1) {
                             estiloCelula = ' bg-amber-100 text-amber-800 font-bold px-2 py-1 rounded inline-block';
                         }
 
-                        // Transforma em link do WhatsApp para qualquer variação do campo (WATSAPP, whatsapp_hospede, etc.)
+                        // Transforma em link do WhatsApp mantendo o número legível e em maiúsculas se houver texto associado
                         let colLower = col.toLowerCase();
-                        if ((colLower.includes('wats') || colLower.includes('app') || colLower.includes('telefone')) && valor !== '-') {
-                            let numeroLimpo = String(valor).replace(/\D/g, '');
+                        if ((colLower.includes('wats') || colLower.includes('app') || colLower.includes('telefone')) && row[col] !== null && row[col] !== undefined) {
+                            let numeroLimpo = String(row[col]).replace(/\D/g, '');
+                            let valorExibicao = String(row[col]).toUpperCase();
                             valor = `<a href="https://wa.me/55${numeroLimpo}" target="_blank" title="Abrir WhatsApp" class="text-emerald-600 hover:text-emerald-800 font-semibold flex items-center gap-1.5 transition">
-                                <i class="fa-brands fa-whatsapp text-lg"></i> ${valor}
+                                <i class="fa-brands fa-whatsapp text-lg"></i> ${valorExibicao}
                             </a>`;
                         }
 
@@ -288,7 +294,7 @@
 
             } catch (err) {
                 console.error("Erro geral:", err);
-                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-red-500">Erro de comunicação ao carregar a view.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-red-500">ERRO DE COMUNICAÇÃO AO CARREGAR A VIEW.</td></tr>`;
             }
         }
 
