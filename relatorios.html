@@ -15,7 +15,7 @@
 
     <div class="flex h-screen bg-gray-100 overflow-hidden">
         
-        <!-- MENU LATERAL (Padrão Unificado da Pousada) -->
+        <!-- MENU LATERAL (Apenas Dashboard e Sair) -->
         <aside class="w-64 bg-slate-800 text-white flex flex-col shadow-lg">
             <!-- Cabeçalho do Menu com o Nome da Pousada Dinâmico -->
             <div class="p-5 border-b border-slate-700">
@@ -23,13 +23,11 @@
                 <p id="nomePousadaMenu" class="text-xs text-slate-400 mt-1 truncate">Carregando...</p>
             </div>
 
-            <!-- Links de Navegação -->
-             
+            <!-- Links de Navegação Simplificados -->
             <nav class="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
                 <a href="dashboard.html" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition">
-                    <i class="fa-solid fa-chart-pie w-5"></i> Painel Principal
+                    <i class="fa-solid fa-chart-pie w-5"></i> Dashboard
                 </a>
-
             </nav>
 
             <!-- Rodapé do Menu (Sair) -->
@@ -362,7 +360,6 @@
 
                         if (valorBruto !== null && valorBruto !== undefined) {
                             let colLower = col.toLowerCase();
-                            // Identifica colunas de data de forma abrangente e aplica a formatação DD/MM/AAAA
                             if (colLower.includes('data') || colLower.includes('checkin') || colLower.includes('checkout') || colLower.includes('vigencia') || colLower.includes('criado')) {
                                 valorExibicao = formatarDataBr(valorBruto);
                             } else {
