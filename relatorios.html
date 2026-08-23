@@ -67,7 +67,7 @@
                     </div>
 
                     <!-- Cards de Seleção de Views -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mb-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
                         
                         <!-- Card 1: Financeiro -->
                         <div onclick="selecionarView('vw_gestor_financeiro_resumo_cod', 'Resumo Financeiro Consolidado', this)" 
@@ -79,7 +79,7 @@
                                 <span class="text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 px-2 py-0.5 rounded">vw_gestor_financeiro_resumo</span>
                             </div>
                             <h3 class="font-bold text-gray-800 text-base group-hover:text-blue-600 transition">Visão Financeira</h3>
-                            <p class="text-xs text-gray-500 mt-1">Valores totais, quantitativos pagos e saldos pendentes por reserva[cite: 10].</p>
+                            <p class="text-xs text-gray-500 mt-1">Valores totais, quantitativos pagos e saldos pendentes por reserva.</p>
                         </div>
 
                         <!-- Card 2: Hospedagens -->
@@ -93,6 +93,19 @@
                             </div>
                             <h3 class="font-bold text-gray-800 text-base group-hover:text-emerald-600 transition">Hospedagens e Ocupação</h3>
                             <p class="text-xs text-gray-500 mt-1">Cruzamento de nomes de hóspedes, acomodações e datas de permanência.</p>
+                        </div>
+
+                        <!-- Card 3: Tarifas Especiais -->
+                        <div onclick="selecionarView('vw_gestor_tarifas_suites', 'Auditoria de Tarifas Especiais', this)" 
+                             class="card-view cursor-pointer bg-white p-5 rounded-xl shadow-sm border-2 border-transparent hover:border-gray-300 hover:shadow-md transition group sm:col-span-2 lg:col-span-1">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center text-lg">
+                                    <i class="fa-solid fa-tags"></i>
+                                </div>
+                                <span class="text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 px-2 py-0.5 rounded">vw_gestor_tarifas_suites</span>
+                            </div>
+                            <h3 class="font-bold text-gray-800 text-base group-hover:text-amber-600 transition">Tarifas por Suíte</h3>
+                            <p class="text-xs text-gray-500 mt-1">Valores especiais vigentes por período, tipos de ajuste e regras aplicadas.</p>
                         </div>
 
                     </div>
@@ -199,7 +212,6 @@
             tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Consultando view <b>${viewAtualSelecionada}</b>...</td></tr>`;
 
             try {
-                // Filtra por pousada_id para garantir que o gestor veja apenas os dados da própria pousada
                 const { data: registros, error } = await supabaseClient
                     .from(viewAtualSelecionada)
                     .select('*')
@@ -218,8 +230,8 @@
                     return;
                 }
 
-                // Remove a coluna pousada_id da exibição visual da tabela para ficar mais limpo
-                const colunas = Object.keys(registros[0]).filter(col => col !== 'pousada_id' && col !== 'reserva_id');
+                // Remove colunas de IDs internos da exibição visual da tabela
+                const colunas = Object.keys(registros[0]).filter(col => col !== 'pousada_id' && col !== 'reserva_id' && col !== 'tarifa_id');
                 
                 let htmlCabecalho = '';
                 colunas.forEach(col => {
@@ -234,8 +246,8 @@
                     colunas.forEach(col => {
                         let valor = row[col];
                         if (valor === null || valor === undefined) valor = '-';
-                        // Formata valores monetários se a coluna tiver relação com valor
-                        if ((col.includes('valor') || col.includes('saldo') || col.includes('pago')) && !isNaN(valor)) {
+                        // Formata automaticamente colunas de valores monetários
+                        if (col.includes('valor') && !isNaN(valor)) {
                             valor = Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                         }
                         htmlLinhas += `<td class="py-3.5 px-6 font-medium text-gray-800">${valor}</td>`;
