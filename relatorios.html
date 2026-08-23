@@ -259,11 +259,19 @@
                     colunas.forEach(col => {
                         let valor = row[col];
                         if (valor === null || valor === undefined) valor = '-';
+                        
                         // Formata automaticamente colunas de valores monetários
                         if (col.includes('valor') && !isNaN(valor)) {
                             valor = Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                         }
-                        htmlLinhas += `<td class="py-3.5 px-6 font-medium text-gray-800">${valor}</td>`;
+
+                        // Destaca em amarelo se o número de dias restantes for exatamente 1
+                        let estiloCelula = '';
+                        if (col.toLowerCase().includes('dias_restante') && Number(valor) === 1) {
+                            estiloCelula = ' bg-amber-100 text-amber-800 font-bold px-2 py-1 rounded inline-block';
+                        }
+
+                        htmlLinhas += `<td class="py-3.5 px-6 font-medium text-gray-800"><span class="${estiloCelula}">${valor}</span></td>`;
                     });
                     htmlLinhas += `</tr>`;
                 });
