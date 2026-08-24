@@ -103,7 +103,7 @@
                     <div id="lista-resumo-pendentes" class="mt-3 flex flex-wrap gap-2"></div>
                 </div>
                 <a href="reservas.html" class="w-full sm:w-auto text-center bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-3 rounded-xl transition shadow-sm whitespace-nowrap text-xs sm:text-sm">
-                    Gerenciar Todas as Reservas &rarr;
+                    Gerenciar Todas las Reservas &rarr;
                 </a>
             </div>
 
@@ -805,6 +805,14 @@
                 containerCampos.classList.remove('opacity-50');
             }
 
+            // AJUSTE PARA CHECKOUT ANTECIPADO: Se selecionar "Checkout", atualiza o check-out para HOJE para recalcular automaticamente
+            if (status === 'Checkout') {
+                const hojeStr = new Date().toLocaleDateString('sv-SE');
+                const checkinAtual = document.getElementById('edit-checkin').value;
+                // Se o check-in for no passado ou hoje, força o checkout para hoje. Se o check-in for hoje, garante pelo menos 1 diária.
+                document.getElementById('edit-checkout').value = hojeStr;
+            }
+
             if (status === 'Reservado' && statusOriginal !== 'Reservado' && !camposLimposParaNovaReserva) {
                 document.getElementById('edit-reserva-id').value = '';
                 document.getElementById('edit-hospede').value = '';
@@ -833,7 +841,15 @@
             const observacaoInformada = document.getElementById('edit-observacao').value || '';
             
             const checkinVal = document.getElementById('edit-checkin').value || new Date().toLocaleDateString('sv-SE');
-            const checkoutVal = document.getElementById('edit-checkout').value || new Date().toLocaleDateString('sv-SE');
+            let checkoutVal = document.getElementById('edit-checkout').value || new Date().toLocaleDateString('sv-SE');
+
+            // Se for checkout antecipado, garante que se o check-out ficou igual ao check-in, adicionamos 1 dia mínimo para cobrar 1 diária
+            if (status === 'Checkout' && checkinVal === checkoutVal) {
+                const [ano, mes, dia] = checkinVal.split('-');
+                let dataSeguinte = new Date(ano, mes - 1, Number(dia) + 1);
+                checkoutVal = dataSeguinte.toLocaleDateString('sv-SE');
+                document.getElementById('edit-checkout').value = checkoutVal;
+            }
 
             try {
                 const { data: temConflito, error: erroConflito } = await supabaseClient.rpc('verificar_conflito_reserva', { 
@@ -864,7 +880,7 @@
                 checkin: checkinVal,
                 checkout: checkoutVal,
                 observacao: observacaoInformada,
-                status: 'Aprovada'
+                status: status === 'Checkout' ? 'Finalizada' : 'Aprovada'
             };
 
             let valorTotalCalculado = 0;
@@ -914,7 +930,7 @@
 
             await supabaseClient.from('suites').update({ status: statusDestino }).eq('id', suiteId);
 
-            if (status === 'Reservado' || status === 'Ocupada' || status === 'Aprovada') {
+            if (status === 'Reservado' || status === 'Ocupada' || status === 'Aprovada' || status === 'Checkout') {
                 if (reservaIdEditada) {
                     await supabaseClient.from('reservas').update(dadosReserva).eq('id', reservaIdEditada);
                 } else {
