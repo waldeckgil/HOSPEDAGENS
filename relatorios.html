@@ -15,7 +15,7 @@
 
     <div class="flex h-screen bg-gray-100 overflow-hidden">
         
-        <!-- MENU LATERAL COMPACTADO (w-52 em vez de w-64) -->
+        <!-- MENU LATERAL COMPACTADO -->
         <aside class="w-52 bg-slate-800 text-white flex flex-col shadow-lg flex-shrink-0">
             <!-- Cabeçalho do Menu com o Nome da Pousada Dinâmico -->
             <div class="p-4 border-b border-slate-700">
@@ -54,7 +54,7 @@
                         </div>
                     </div>
 
-                    <!-- Cards de Seleção de Views (Mais compactos) -->
+                    <!-- Cards de Seleção de Views -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
                         
                         <!-- Card 1: Financeiro -->
@@ -140,7 +140,7 @@
                             </div>
                         </div>
 
-                        <!-- Tabela Dinâmica (Espaçamentos otimizados com px-3 para caber sem scroll) -->
+                        <!-- Tabela Dinâmica -->
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse">
                                 <thead>
@@ -252,7 +252,6 @@
             return str.toUpperCase();
         }
 
-        // Função auxiliar para aplicar apelidos amigáveis e curtos nos cabeçalhos
         function obterApelidoColuna(col) {
             let c = col.toLowerCase();
             if (c.includes('nº_de_dias_restante') || c.includes('dias_restantes')) return 'DIAS';
@@ -367,18 +366,18 @@
                         if (diasRestantes === 0) {
                             if (statusReserva === 'PENDENTE') {
                                 classeLinhaDestaque = "bg-rose-100 hover:bg-rose-200 border-l-4 border-rose-600 text-rose-950 transition shadow-sm font-semibold";
-                                badgeAcao = `<span class="bg-rose-600 text-white px-2 py-0.5 rounded text-[9px] font-bold uppercase inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-triangle-exclamation"></i> Aprovar</span>`;
+                                badgeAcao = `<span class="bg-rose-600 text-white px-2 py-0.5 rounded text-[9px] font-bold uppercase inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-triangle-exclamation"></i> APROVAR HOJE</span>`;
                             } else if (statusReserva === 'APROVADA' && statusFisico === 'DISPONÍVEL') {
                                 classeLinhaDestaque = "bg-amber-50 hover:bg-amber-100 border-l-4 border-amber-500 transition shadow-sm";
-                                badgeAcao = `<span class="bg-amber-500 text-white px-2 py-0.5 rounded text-[9px] font-bold uppercase inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-key"></i> Check-in</span>`;
+                                badgeAcao = `<span class="bg-amber-500 text-white px-2 py-0.5 rounded text-[9px] font-bold uppercase inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-key"></i> CHECK-IN HOJE</span>`;
                             } else {
-                                badgeAcao = `<span class="bg-emerald-600 text-white px-2 py-0.5 rounded text-[9px] font-bold uppercase inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-check"></i> OK</span>`;
+                                badgeAcao = `<span class="bg-emerald-600 text-white px-2 py-0.5 rounded text-[9px] font-bold uppercase inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-check"></i> CHECK-IN HOJE (OK)</span>`;
                             }
                         } else if (diasRestantes === 1) {
                             classeLinhaDestaque = "bg-blue-50/60 hover:bg-blue-100 transition";
-                            badgeAcao = `<span class="bg-blue-600 text-white px-2 py-0.5 rounded text-[9px] font-bold uppercase inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-clock"></i> Amanhã</span>`;
+                            badgeAcao = `<span class="bg-blue-600 text-white px-2 py-0.5 rounded text-[9px] font-bold uppercase inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-clock"></i> AMANHÃ</span>`;
                         } else if (diasRestantes > 1 && diasRestantes <= 3) {
-                            badgeAcao = `<span class="bg-slate-200 text-slate-700 px-2 py-0.5 rounded text-[9px] font-bold uppercase">Em ${diasRestantes}d</span>`;
+                            badgeAcao = `<span class="bg-slate-200 text-slate-700 px-2 py-0.5 rounded text-[9px] font-bold uppercase">EM ${diasRestantes}D</span>`;
                         } else {
                             badgeAcao = `<span class="text-gray-400 text-[9px]">-</span>`;
                         }
