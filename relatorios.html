@@ -167,8 +167,8 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let usuarioIdAtual = null;
-        let viewAtualSelecionada = 'vw_gestor_hospedagens_relatorio'; // <-- ALTERADO PARA INICIAR DIRETO NA VIEW DE HOSPEDAGENS
-        let tituloBaseAtual = '[TESTE FRONT-END OK] Hospedagens, Suítes e Movimentações'; // <-- MARCADOR VISUAL PARA VALIDAR O DEPLOY
+        let viewAtualSelecionada = 'vw_gestor_hospedagens_relatorio';
+        let tituloBaseAtual = '[TESTE FRONT-END OK] Hospedagens, Suítes e Movimentações';
 
         function inicializarFiltroDatas() {
             const hoje = new Date();
@@ -322,18 +322,31 @@
                     }
                 });
 
+                let ehViewReservas = (viewAtualSelecionada === 'vw_gestor_reservas_relatorio');
+                let ehViewTarifas = (viewAtualSelecionada === 'vw_gestor_tarifas_relatorio');
+
+                // FILTRAGEM ADICIONAL: Se for a view de reservas, remove linhas vazias/sem hóspede ou sem checkin preenchido
                 let registrosFiltrados = registros;
+                if (ehViewReservas) {
+                    registrosFiltrados = registrosFiltrados.filter(row => {
+                        let hospede = String(row['hospede'] || row['hospede_nome'] || '').trim();
+                        let checkin = String(row['checkin'] || '').trim();
+                        // Se o hóspede estiver em branco ou '-', ou o checkin estiver em branco ou '-', a linha é oculta
+                        if (!hospede || hospede === '-' || !checkin || checkin === '-') {
+                            return false;
+                        }
+                        return true;
+                    });
+                }
+
                 if (dataInicio && dataFim && colunaDataEncontrada) {
-                    registrosFiltrados = registros.filter(row => {
+                    registrosFiltrados = registrosFiltrados.filter(row => {
                         let valData = row[colunaDataEncontrada];
                         if (!valData) return true;
                         let dataStr = String(valData).substring(0, 10);
                         return dataStr >= dataInicio && dataStr <= dataFim;
                     });
                 }
-
-                let ehViewReservas = (viewAtualSelecionada === 'vw_gestor_reservas_relatorio');
-                let ehViewTarifas = (viewAtualSelecionada === 'vw_gestor_tarifas_relatorio');
 
                 let htmlCabecalho = '';
                 colunas.forEach(col => {
@@ -346,7 +359,7 @@
                 thead.innerHTML = htmlCabecalho;
 
                 if (registrosFiltrados.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="${colunas.length + 1}" class="py-6 text-center text-gray-500">NENHUM REGISTRO NO PERÍODO SELECIONADO.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="${colunas.length + 1}" class="py-6 text-center text-gray-500">NENHUM REGISTRO VÁLIDO NO PERÍODO SELECIONADO.</td></tr>`;
                     return;
                 }
 
@@ -459,8 +472,6 @@
             }
         }
 
-        
-        
         window.onload = () => {
             protegerPagina();
         };
