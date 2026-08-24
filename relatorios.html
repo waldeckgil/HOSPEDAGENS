@@ -73,7 +73,7 @@
 
                         <!-- Card 2: Hospedagens -->
                         <div onclick="selecionarView('vw_gestor_hospedagens_relatorio', 'Hospedagens, Suítes e Movimentações', this)" 
-                             class="card-view cursor-pointer bg-white p-4 rounded-xl shadow-sm border-2 border-transparent hover:border-gray-300 hover:shadow-md transition group">
+                             class="card-view cursor-pointer bg-white p-4 rounded-xl shadow-sm border-2 border-emerald-600 shadow-md transition group">
                             <div class="flex items-center justify-between mb-2">
                                 <div class="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-sm">
                                     <i class="fa-solid fa-bed"></i>
@@ -86,7 +86,7 @@
 
                         <!-- Card 3: Tarifas Especiais -->
                         <div onclick="selecionarView('vw_gestor_tarifas_relatorio', 'Auditoria de Tarifas Especiais', this)" 
-                             class="card-view cursor-pointer bg-white p-4 rounded-xl shadow-sm border-2 border-amber-500 hover:shadow-md transition group">
+                             class="card-view cursor-pointer bg-white p-4 rounded-xl shadow-sm border-2 border-transparent hover:border-gray-300 hover:shadow-md transition group">
                             <div class="flex items-center justify-between mb-2">
                                 <div class="w-8 h-8 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center text-sm">
                                     <i class="fa-solid fa-tags"></i>
@@ -119,7 +119,7 @@
                         <div class="px-5 py-3.5 border-b border-gray-200 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 bg-gray-50/50">
                             <div>
                                 <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wide">View Ativa</span>
-                                <h3 id="tituloViewAtiva" class="font-bold text-sm sm:text-base text-gray-800">AUDITORIA DE TARIFAS ESPECIAIS</h3>
+                                <h3 id="tituloViewAtiva" class="font-bold text-sm sm:text-base text-gray-800">[TESTE FRONT-END OK] CARREGANDO...</h3>
                             </div>
 
                             <!-- Filtro de Período Compacto -->
@@ -167,8 +167,8 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let usuarioIdAtual = null;
-        let viewAtualSelecionada = 'vw_gestor_tarifas_relatorio'; // Iniciando direto na view de tarifas padronizada
-        let tituloBaseAtual = 'Auditoria de Tarifas Especiais';
+        let viewAtualSelecionada = 'vw_gestor_hospedagens_relatorio'; // <-- ALTERADO PARA INICIAR DIRETO NA VIEW DE HOSPEDAGENS
+        let tituloBaseAtual = '[TESTE FRONT-END OK] Hospedagens, Suítes e Movimentações'; // <-- MARCADOR VISUAL PARA VALIDAR O DEPLOY
 
         function inicializarFiltroDatas() {
             const hoje = new Date();
