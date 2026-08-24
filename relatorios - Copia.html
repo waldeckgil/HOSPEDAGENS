@@ -317,31 +317,12 @@
             tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO DADOS...</td></tr>`;
 
             try {
-                let registros = [];
-                let error = null;
+                let query = supabaseClient
+                    .from(viewAtualSelecionada)
+                    .select('*')
+                    .eq('pousada_id', usuarioIdAtual);
 
-                let ehViewReservas = (viewAtualSelecionada === 'vw_gestor_reservas_relatorio');
-                let ehViewHospedagens = (viewAtualSelecionada === 'vw_gestor_hospedagens_relatorio');
-                let ehViewTarifas = (viewAtualSelecionada === 'vw_gestor_tarifas_relatorio');
-                let ehViewFinanceiro = (viewAtualSelecionada === 'vw_gestor_financeiro_relatorio');
-
-                if (ehViewTarifas) {
-                    const response = await supabaseClient.rpc('fn_gestor_tarifas_relatorio', {
-                        p_data_inicio: dataInicio || '2026-01-01',
-                        p_data_fim: dataFim || '2027-12-31'
-                    });
-                    registros = (response.data || []).filter(row => row.pousada_id === usuarioIdAtual);
-                    error = response.error;
-                } else {
-                    let query = supabaseClient
-                        .from(viewAtualSelecionada)
-                        .select('*')
-                        .eq('pousada_id', usuarioIdAtual);
-
-                    const res = await query;
-                    registros = res.data;
-                    error = res.error;
-                }
+                const { data: registros, error } = await query;
 
                 if (error) {
                     console.error("Erro ao consultar view:", error);
@@ -375,6 +356,11 @@
                     }
                 });
 
+                let ehViewReservas = (viewAtualSelecionada === 'vw_gestor_reservas_relatorio');
+                let ehViewHospedagens = (viewAtualSelecionada === 'vw_gestor_hospedagens_relatorio');
+                let ehViewTarifas = (viewAtualSelecionada === 'vw_gestor_tarifas_relatorio');
+                let ehViewFinanceiro = (viewAtualSelecionada === 'vw_gestor_financeiro_relatorio');
+
                 let registrosFiltrados = registros;
                 if (ehViewReservas) {
                     registrosFiltrados = registrosFiltrados.filter(row => {
@@ -387,7 +373,7 @@
                     });
                 }
 
-                if (dataInicio && dataFim && colunaDataEncontrada && !ehViewTarifas) {
+                if (dataInicio && dataFim && colunaDataEncontrada) {
                     registrosFiltrados = registrosFiltrados.filter(row => {
                         let valData = row[colunaDataEncontrada];
                         if (!valData) return true;
@@ -407,6 +393,10 @@
                     let timeA = new Date(dataA).getTime();
                     let timeB = new Date(dataB).getTime();
 
+                    // Distância absoluta em relação a hoje para jogar o check-in de hoje/próximo para o topo
+                    let diffA = Math.abs(timeA - timestampHoje);
+                    let diffB = Math.abs(timeB - timestampHoje);
+
                     // Se a data de A for futura ou hoje e B for passada, A vem primeiro, etc.
                     if (timeA >= timestampHoje && timeB < timestampHoje) return -1;
                     if (timeB >= timestampHoje && timeA < timestampHoje) return 1;
@@ -420,7 +410,7 @@
                 let somaSaldo = 0;
 
                 registrosFiltrados.forEach(row => {
-                    let vTotal = Number(row['valor_total'] || row['valor'] || row['valor_diaria_calculado'] || 0);
+                    let vTotal = Number(row['valor_total'] || row['valor'] || 0);
                     let tPago = Number(row['total_pago'] || 0);
                     let sRestante = Number(row['saldo_restante'] || (vTotal - tPago));
 
