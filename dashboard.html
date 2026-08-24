@@ -154,7 +154,7 @@
                 
                 <div>
                     <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Status Físico da Suíte</label>
-                    <select id="edit-status" class="w-full p-3 border rounded-xl font-bold bg-gray-50 text-sm" onchange="(async () => { await verificarStatusModal(); })()"></select>
+                    <select id="edit-status" class="w-full p-3 border rounded-xl font-bold bg-gray-50 text-sm" onchange="(async () => { await verificarStatusModal(); })()">
                         <option value="Disponível">Disponível</option>
                         <option value="Ocupada">Ocupada (Agora)</option>
                         <option value="Reservado">Reservado (Adicionar/Editar Datas Futuras)</option>
@@ -839,13 +839,14 @@
         }
 
        async function atualizarSaldoCheckoutModal() {
-    const status = document.getElementById('edit-status').value;
-    if (status === 'Checkout') {
-        const saldo = await calcularSaldoDevedorReservaAtual();
-        document.getElementById('display-saldo-devedor-checkout').innerText = formatarMoeda(saldo);
-        document.getElementById('edit-valor-sinal').value = saldo > 0 ? saldo.toFixed(2) : '0.00';
-    }
-}
+            const status = document.getElementById('edit-status').value;
+            if (status === 'Checkout') {
+                const saldo = await calcularSaldoDevedorReservaAtual();
+                document.getElementById('display-saldo-devedor-checkout').innerText = formatarMoeda(saldo);
+                document.getElementById('edit-valor-sinal').value = saldo > 0 ? saldo.toFixed(2) : '0.00';
+            }
+        }
+
         async function verificarStatusModal() {
             const status = document.getElementById('edit-status').value;
             const statusOriginal = document.getElementById('edit-status-original').value;
@@ -906,7 +907,6 @@
             const checkinVal = document.getElementById('edit-checkin').value || new Date().toLocaleDateString('sv-SE');
             let checkoutVal = document.getElementById('edit-checkout').value || new Date().toLocaleDateString('sv-SE');
 
-            // VALIDAÇÃO RIGOROSA DO CHECKOUT: Não pode informar valor menor que o saldo devedor
             if (status === 'Checkout') {
                 const saldoDevedorMinimo = await calcularSaldoDevedorReservaAtual();
                 if (campoSinalStr === '' || isNaN(valorSinalInformado) || valorSinalInformado < saldoDevedorMinimo) {
