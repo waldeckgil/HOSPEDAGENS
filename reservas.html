@@ -19,10 +19,9 @@
                     <span>🏠</span> Painel Principal
                 </a>
 
-                    <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-xl transition shadow text-sm flex items-center justify-center gap-2 mt-2">
-                        <i class="fa-solid fa-right-from-bracket"></i> Sair
-                    </button>
-                </div>
+                <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-xl transition shadow text-sm flex items-center justify-center gap-2 mt-2">
+                    <i class="fa-solid fa-right-from-bracket"></i> Sair
+                </button>
             </nav>
         </div>
     </aside>
@@ -31,7 +30,6 @@
     <div class="flex-1 flex flex-col min-w-0">
         <!-- CABEÇALHO -->
         <header class="bg-white shadow-xs border-b border-gray-200 p-4 md:p-6 flex flex-col md:flex-row justify-between items-center gap-4">
-            <!-- Botão de Menu Mobile e Espaçamento esquerdo mantidos estruturalmente -->
             <div class="flex items-center w-full md:w-auto justify-between md:justify-start gap-3">
                 <button onclick="toggleMenuMobile()" class="md:hidden bg-slate-100 hover:bg-slate-200 text-slate-800 p-2.5 rounded-xl border border-slate-200 transition focus:outline-none">
                     <i class="fa-solid fa-bars text-lg"></i>
@@ -43,13 +41,11 @@
                 </div>
             </div>
 
-            <!-- TÍTULO CENTRALIZADO E NOME DA POUSADA EM DESTAQUE AO LADO -->
             <div class="flex flex-col sm:flex-row items-center justify-center gap-3 flex-1 text-center">
                 <h2 class="text-2xl md:text-4xl font-extrabold text-slate-900 tracking-tight">Gestão de Reservas</h2>
                 <span id="titulo-pousada" class="bg-blue-600 text-white border border-blue-700 px-4 py-1.5 rounded-full text-sm md:text-base font-extrabold shadow-sm tracking-wide w-fit">Carregando...</span>
             </div>
 
-            <!-- Botão Voltar para Desktop (mantido na direita) -->
             <div class="hidden md:block">
                 <a href="dashboard.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2 border border-slate-200">
                     <i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard
@@ -104,7 +100,8 @@
                         <thead>
                             <tr class="bg-gray-50 text-gray-600 uppercase text-xs tracking-wider border-b border-gray-200">
                                 <th class="p-4 font-bold">Hóspede / Contato</th>
-                                <th class="p-4 font-bold">Documentos</th>
+                                <th class="p-4 font-bold">Suíte</th>
+                                <th class="p-4 font-bold">CPF</th>
                                 <th class="p-4 font-bold">Endereço</th>
                                 <th class="p-4 font-bold">Período da Estadia</th>
                                 <th class="p-4 font-bold">Status</th>
@@ -113,7 +110,7 @@
                         </thead>
                         <tbody id="tabela-hospedes-corpo" class="divide-y divide-gray-100 text-sm text-gray-700">
                             <tr>
-                                <td colspan="6" class="p-8 text-center text-gray-500 italic">Carregando histórico de hóspedes...</td>
+                                <td colspan="7" class="p-8 text-center text-gray-500 italic">Carregando histórico de hóspedes...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -172,14 +169,12 @@
         }
 
         async function inicializarPagina() {
-            // Monitoramento em tempo real de autenticação (padrão unificado)
             supabaseClient.auth.onAuthStateChange((event, session) => {
                 if (event === 'SIGNED_OUT' || !session) {
                     window.location.href = 'index.html';
                 }
             });
 
-            // Validação imediata de sessão por getSession()
             const { data: { session }, error } = await supabaseClient.auth.getSession();
             if (error || !session) {
                 window.location.href = 'index.html';
@@ -192,21 +187,11 @@
             const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', user.id).maybeSingle();
             const nomePousada = (pousada && pousada.nome) ? pousada.nome : "Minha Pousada";
 
-            // Atualiza título da aba e nomes nos componentes do painel[cite: 3]
             document.title = `${nomePousada} - Gestão de Reservas`;
             document.getElementById('titulo-pousada').innerText = nomePousada;
             document.getElementById('nome-pousada-sidebar').innerText = nomePousada;
 
-            document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${user.id}`;
-
             carregarHistoricoHospedes();
-        }
-
-        function copiarLinkVitrine() {
-            if (!usuarioIdAtual) return;
-            navigator.clipboard.writeText(window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`).then(() => {
-                mostrarToast("Link da vitrine copiado para a área de transferência!");
-            });
         }
 
         function formatarDataSimples(dataStr) {
@@ -231,9 +216,10 @@
         async function carregarHistoricoHospedes() {
             if (!usuarioIdAtual) return;
 
+            // Trazendo as reservas e fazendo o join com a tabela de suítes para obter o nome da suíte
             let query = supabaseClient
                 .from('reservas')
-                .select('*')
+                .select('*, suites(nome)')
                 .eq('pousada_id', usuarioIdAtual)
                 .order('criado_em', { ascending: false });
 
@@ -255,7 +241,8 @@
                 filtrados = filtrados.filter(r => 
                     (r.hospede_nome && r.hospede_nome.toLowerCase().includes(buscaLower)) ||
                     (r.cpf && r.cpf.toLowerCase().includes(buscaLower)) ||
-                    (r.email && r.email.toLowerCase().includes(buscaLower))
+                    (r.email && r.email.toLowerCase().includes(buscaLower)) ||
+                    (r.suites && r.suites.nome && r.suites.nome.toLowerCase().includes(buscaLower))
                 );
             }
 
@@ -270,7 +257,7 @@
             document.getElementById('contador-resultados').innerText = `${filtrados.length} registro(s) encontrado(s)`;
 
             if (filtrados.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-500 italic">Nenhum hóspede encontrado com os critérios informados.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-500 italic">Nenhum hóspede encontrado com os critérios informados.</td></tr>`;
                 return;
             }
 
@@ -282,6 +269,9 @@
                 else if (r.status === 'Finalizada') badgeStatus = 'bg-blue-100 text-blue-800';
                 else if (r.status === 'Recusada' || r.status === 'Cancelada') badgeStatus = 'bg-red-100 text-red-800';
 
+                // Nome da suíte obtido do relacionamento
+                const nomeSuite = (r.suites && r.suites.nome) ? r.suites.nome : 'Suíte não informada';
+
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-50 transition">
                         <td class="p-4">
@@ -289,9 +279,11 @@
                             <div class="text-xs text-emerald-700 font-medium">💬 ${r.whatsapp_hospede || 'Sem WhatsApp'}</div>
                             <div class="text-xs text-gray-500">${r.email || 'Sem e-mail'}</div>
                         </td>
-                        <td class="p-4 text-xs">
-                            <div><strong class="text-gray-600">CPF:</strong> ${r.cpf || '-'}</div>
-                            <div><strong class="text-gray-600">RG:</strong> ${r.rg || '-'}</div>
+                        <td class="p-4 font-semibold text-xs text-blue-600">
+                            ${nomeSuite}
+                        </td>
+                        <td class="p-4 text-xs font-mono">
+                            ${r.cpf || '-'}
                         </td>
                         <td class="p-4 text-xs text-gray-600 max-w-xs truncate">
                             ${r.endereco || 'Não informado'}
