@@ -31,7 +31,7 @@
                 </a>
                 <a href="reservas.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
                     <span>📋</span> <span class="hidden sm:inline">Ver Reservas</span><span class="sm:hidden">Reservas</span>
-                                </a>
+                </a>
                 <a href="financeiro.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
                     <span>📋</span> <span class="hidden sm:inline">Gestão Financeira</span><span class="sm:hidden">Financeiro</span>
                 </a>
@@ -170,7 +170,7 @@
                         <span class="font-bold text-red-900 uppercase">Saldo Devedor do Hóspede:</span>
                         <strong id="display-saldo-devedor-checkout" class="text-red-700 font-extrabold text-base">R$ 0,00</strong>
                     </div>
-                    <p class="text-[11px] text-red-700 leading-tight">É obrigatório informar o valor pago pelo hóspede para concluir o checkout. (Informe 0 se nenhum valor for pago).</p>
+                    <p class="text-[11px] text-red-700 leading-tight">O valor do saldo devedor foi preenchido automaticamente no campo de pagamento abaixo como o valor mínimo obrigatório para quitar a estadia.</p>
                 </div>
 
                 <div id="campos-hospede-container" class="space-y-3 transition-all">
@@ -487,7 +487,6 @@
             const { data: pagamentos } = await supabaseClient.from('hospede_pagamentos').select('*').eq('pousada_id', usuarioIdAtual);
             pagamentosGlobaisCache = pagamentos || [];
 
-            // AUTOMAÇÃO INTELIGENTE: Verifica se o check-in de alguma reserva aprovada/reservada já chegou ou passou
             const hojeStr = new Date().toLocaleDateString('sv-SE');
             let houveAtualizacaoAutomatica = false;
 
@@ -844,6 +843,8 @@
             if (status === 'Checkout') {
                 const saldo = await calcularSaldoDevedorReservaAtual();
                 document.getElementById('display-saldo-devedor-checkout').innerText = formatarMoeda(saldo);
+                // Preenche automaticamente o campo de pagamento com o saldo devedor exato
+                document.getElementById('edit-valor-sinal').value = saldo.toFixed(2);
             }
         }
 
@@ -860,14 +861,12 @@
                 containerCampos.classList.remove('opacity-50');
             }
 
-            // AJUSTE PARA CHECKOUT ANTECIPADO: Se selecionar "Checkout", atualiza o check-out para HOJE para recalcular automaticamente
             if (status === 'Checkout') {
                 const hojeStr = new Date().toLocaleDateString('sv-SE');
-                // Se o check-in for no passado ou hoje, força o checkout para hoje. Se o check-in for hoje, garante pelo menos 1 diária.
                 document.getElementById('edit-checkout').value = hojeStr;
                 
                 containerCheckout.classList.remove('hidden');
-                lblValorSinal.innerText = "Valor do Pagamento no Checkout (R$) * Obrigatorio";
+                lblValorSinal.innerText = "Valor do Pagamento no Checkout (R$) * Mínimo Obrigatório";
                 lblValorSinal.classList.add('text-red-700');
                 lblValorSinal.classList.remove('text-emerald-700');
                 await atualizarSaldoCheckoutModal();
@@ -909,15 +908,15 @@
             const checkinVal = document.getElementById('edit-checkin').value || new Date().toLocaleDateString('sv-SE');
             let checkoutVal = document.getElementById('edit-checkout').value || new Date().toLocaleDateString('sv-SE');
 
-            // OBRIGATORIEDADE DO PREENCHIMENTO NO CHECKOUT
+            // VALIDAÇÃO RIGOROSA DO CHECKOUT: Não pode informar valor menor que o saldo devedor
             if (status === 'Checkout') {
-                if (campoSinalStr === '' || isNaN(valorSinalInformado) || valorSinalInformado < 0) {
-                    mostrarErroModal("No Checkout é obrigatório preencher o valor do pagamento efetuado pelo hóspede (digite 0 caso não haja pagamento).");
+                const saldoDevedorMinimo = await calcularSaldoDevedorReservaAtual();
+                if (campoSinalStr === '' || isNaN(valorSinalInformado) || valorSinalInformado < saldoDevedorMinimo) {
+                    mostrarErroModal(`O valor informado (${formatarMoeda(valorSinalInformado)}) é menor que o saldo devedor atual (${formatarMoeda(saldoDevedorMinimo)}). A conta precisa fechar para concluir o checkout!`);
                     return;
                 }
             }
 
-            // Se for checkout antecipado, garante que se o check-out ficou igual ao check-in, adicionamos 1 dia mínimo para cobrar 1 diária
             if (status === 'Checkout' && checkinVal === checkoutVal) {
                 const [ano, mes, dia] = checkinVal.split('-');
                 let dataSeguinte = new Date(ano, mes - 1, Number(dia) + 1);
@@ -973,18 +972,13 @@
                 console.error("Erro ao invocar a função de cálculo no banco:", err);
             }
 
-            if (valorSinalInformado > 0 && reservaIdEditada) {
+            if (valorSinalInformado > 0 && reservaIdEditada && status !== 'Checkout') {
                 const pagamentosExistentes = pagamentosGlobaisCache.filter(p => p.reserva_id === reservaIdEditada);
                 const totalJaPago = pagamentosExistentes.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
                 const saldoRestanteAtual = valorTotalCalculado - totalJaPago;
 
                 if (valorSinalInformado > saldoRestanteAtual) {
                     mostrarErroModal(`O valor do pagamento (${formatarMoeda(valorSinalInformado)}) é maior que o saldo restante (${formatarMoeda(saldoRestanteAtual)}). Corrija o valor.`);
-                    return; 
-                }
-            } else if (valorSinalInformado > 0 && valorTotalCalculado > 0) {
-                if (valorSinalInformado > valorTotalCalculado) {
-                    mostrarErroModal(`O valor do pagamento (${formatarMoeda(valorSinalInformado)}) é maior que o valor total da reserva (${formatarMoeda(valorTotalCalculado)}). Corrija o valor.`);
                     return; 
                 }
             }
@@ -1030,14 +1024,13 @@
                 }
             }
 
-            // REGISTRO DE PAGAMENTO (GARANTE GRAVAÇÃO DO VALOR INFORMADO, INCLUSO SE FOR ZERO NO CHECKOUT OU SUPERIOR A ZERO)
             if ((valorSinalInformado > 0 || status === 'Checkout') && reservaIdFinal) {
                 const { error: errPag } = await supabaseClient.from('hospede_pagamentos').insert([{
                     pousada_id: usuarioIdAtual,
                     reserva_id: reservaIdFinal,
                     valor_pago: valorSinalInformado,
                     forma_pagamento: formaPagamentoSelecionada,
-                    observacao: status === 'Checkout' ? 'Lançado no encerramento (Checkout)' : 'Lançado via painel de gestão'
+                    observacao: status === 'Checkout' ? 'Quitado no encerramento (Checkout)' : 'Lançado via painel de gestão'
                 }]);
 
                 if (errPag) {
@@ -1058,7 +1051,6 @@
             const statusOriginal = document.getElementById('edit-status-original').value;
             const suiteId = document.getElementById('edit-suite-id').value;
             
-            // VALIDAÇÃO DE DATA (REGRA DE NEGÓCIO)
             const checkinInformado = document.getElementById('edit-checkin').value;
             const hojeStr = new Date().toLocaleDateString('sv-SE');
 
@@ -1085,7 +1077,6 @@
             await executarSalvamento(suiteId, status);
         };
 
-        
         async function fazerLogout() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
         
         protegerPagina();
