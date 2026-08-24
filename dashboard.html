@@ -154,7 +154,7 @@
                 
                 <div>
                     <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Status Físico da Suíte</label>
-                    <select id="edit-status" class="w-full p-3 border rounded-xl font-bold bg-gray-50 text-sm" onchange="verificarStatusModal()">
+                    <select id="edit-status" class="w-full p-3 border rounded-xl font-bold bg-gray-50 text-sm" onchange="(async () => { await verificarStatusModal(); })()"></select>
                         <option value="Disponível">Disponível</option>
                         <option value="Ocupada">Ocupada (Agora)</option>
                         <option value="Reservado">Reservado (Adicionar/Editar Datas Futuras)</option>
@@ -838,16 +838,14 @@
             return saldo > 0 ? saldo : 0;
         }
 
-        async function atualizarSaldoCheckoutModal() {
-            const status = document.getElementById('edit-status').value;
-            if (status === 'Checkout') {
-                const saldo = await calcularSaldoDevedorReservaAtual();
-                document.getElementById('display-saldo-devedor-checkout').innerText = formatarMoeda(saldo);
-                // Preenche automaticamente o campo de pagamento com o saldo devedor exato
-                document.getElementById('edit-valor-sinal').value = saldo.toFixed(2);
-            }
-        }
-
+       async function atualizarSaldoCheckoutModal() {
+    const status = document.getElementById('edit-status').value;
+    if (status === 'Checkout') {
+        const saldo = await calcularSaldoDevedorReservaAtual();
+        document.getElementById('display-saldo-devedor-checkout').innerText = formatarMoeda(saldo);
+        document.getElementById('edit-valor-sinal').value = saldo > 0 ? saldo.toFixed(2) : '0.00';
+    }
+}
         async function verificarStatusModal() {
             const status = document.getElementById('edit-status').value;
             const statusOriginal = document.getElementById('edit-status-original').value;
