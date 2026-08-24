@@ -469,12 +469,7 @@
         async function carregarDashboard() {
             await carregarPousada();
 
-            //const { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', usuarioIdAtual);
-           // ATUALIZAÇÃO: Mudança da tabela física 'suites' para a view 'vw_status_suites_dashboard'. 
-// Motivo: A tabela física armazenava o status de forma estática, gerando divergências com as datas reais de reservas.
-// A view calcula dinamicamente o status correto (Ocupada, Reservado ou Disponível) baseado nas datas de check-in/check-out para o painel.
-const { data: suites } = await supabaseClient.from('vw_status_suites_dashboard').select('*').eq('pousada_id', usuarioIdAtual);
-           
+            const { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', usuarioIdAtual);
             suitesGlobaisCache = suites || [];
 
             const { data: reservas } = await supabaseClient.from('reservas').select('*').eq('pousada_id', usuarioIdAtual);
