@@ -164,15 +164,6 @@
                     </select>
                 </div>
 
-                <!-- CARD DE SALDO DEVEDOR / PAGAMENTO DE CHECKOUT -->
-                <div id="container-checkout-financeiro" class="hidden bg-red-50 border border-red-200 p-4 rounded-xl space-y-2">
-                    <div class="flex justify-between items-center text-xs sm:text-sm">
-                        <span class="font-bold text-red-900 uppercase">Saldo Devedor do Hóspede:</span>
-                        <strong id="display-saldo-devedor-checkout" class="text-red-700 font-extrabold text-base">R$ 0,00</strong>
-                    </div>
-                    <p class="text-[11px] text-red-700 leading-tight">É obrigatório informar o valor pago pelo hóspede para concluir o checkout. (Informe 0 se nenhum valor for pago).</p>
-                </div>
-
                 <div id="campos-hospede-container" class="space-y-3 transition-all">
                     <div class="grid grid-cols-1 gap-2">
                         <input type="text" id="edit-hospede" placeholder="Nome Hóspede" class="p-3 border rounded-xl text-sm">
@@ -189,17 +180,17 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-in</label>
-                            <input type="date" id="edit-checkin" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="atualizarSaldoCheckoutModal()">
+                            <input type="date" id="edit-checkin" class="w-full p-3 border rounded-xl bg-white text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-out</label>
-                            <input type="date" id="edit-checkout" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="atualizarSaldoCheckoutModal()">
+                            <input type="date" id="edit-checkout" class="w-full p-3 border rounded-xl bg-white text-sm">
                         </div>
                     </div>
 
                     <div class="pt-2 space-y-2">
                         <div>
-                            <label id="lbl-valor-sinal" class="block text-xs font-bold text-emerald-700 mb-1">Registrar Novo Pagamento / Sinal (R$)</label>
+                            <label class="block text-xs font-bold text-emerald-700 mb-1">Registrar Novo Pagamento / Sinal (R$)</label>
                             <input type="number" step="0.01" id="edit-valor-sinal" placeholder="0.00" class="w-full p-3 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-emerald-900 text-sm">
                         </div>
                         <div>
@@ -803,56 +794,10 @@
             carregarDashboard();
         }
 
-        async function calcularSaldoDevedorReservaAtual() {
-            const suiteId = document.getElementById('edit-suite-id').value;
-            const reservaId = document.getElementById('edit-reserva-id').value;
-            const checkinVal = document.getElementById('edit-checkin').value;
-            const checkoutVal = document.getElementById('edit-checkout').value;
-
-            if (!suiteId || !checkinVal || !checkoutVal) return 0;
-
-            let valorTotalCalculado = 0;
-            try {
-                const { data: valorCalculado, error: erroRpc } = await supabaseClient.rpc('calcular_total_reserva', { 
-                    p_suite_id: suiteId, 
-                    p_checkin: checkinVal, 
-                    p_checkout: checkoutVal 
-                });
-                
-                if (!erroRpc && valorCalculado !== null) {
-                    valorTotalCalculado = Number(valorCalculado);
-                } else if (reservaId) {
-                    const rObj = reservasGlobaisCache.find(r => r.id === reservaId);
-                    if (rObj) valorTotalCalculado = Number(rObj.valor_total || 0);
-                }
-            } catch (err) {
-                console.error("Erro ao calcular total para saldo:", err);
-            }
-
-            let totalPago = 0;
-            if (reservaId) {
-                const pagamentos = pagamentosGlobaisCache.filter(p => p.reserva_id === reservaId);
-                totalPago = pagamentos.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
-            }
-
-            const saldo = valorTotalCalculado - totalPago;
-            return saldo > 0 ? saldo : 0;
-        }
-
-        async function atualizarSaldoCheckoutModal() {
-            const status = document.getElementById('edit-status').value;
-            if (status === 'Checkout') {
-                const saldo = await calcularSaldoDevedorReservaAtual();
-                document.getElementById('display-saldo-devedor-checkout').innerText = formatarMoeda(saldo);
-            }
-        }
-
-        async function verificarStatusModal() {
+        function verificarStatusModal() {
             const status = document.getElementById('edit-status').value;
             const statusOriginal = document.getElementById('edit-status-original').value;
             const containerCampos = document.getElementById('campos-hospede-container');
-            const containerCheckout = document.getElementById('container-checkout-financeiro');
-            const lblValorSinal = document.getElementById('lbl-valor-sinal');
             
             if (status === 'Disponível' || status === 'Limpeza') {
                 containerCampos.classList.add('opacity-50');
@@ -863,19 +808,9 @@
             // AJUSTE PARA CHECKOUT ANTECIPADO: Se selecionar "Checkout", atualiza o check-out para HOJE para recalcular automaticamente
             if (status === 'Checkout') {
                 const hojeStr = new Date().toLocaleDateString('sv-SE');
+                const checkinAtual = document.getElementById('edit-checkin').value;
                 // Se o check-in for no passado ou hoje, força o checkout para hoje. Se o check-in for hoje, garante pelo menos 1 diária.
                 document.getElementById('edit-checkout').value = hojeStr;
-                
-                containerCheckout.classList.remove('hidden');
-                lblValorSinal.innerText = "Valor do Pagamento no Checkout (R$) * Obrigatorio";
-                lblValorSinal.classList.add('text-red-700');
-                lblValorSinal.classList.remove('text-emerald-700');
-                await atualizarSaldoCheckoutModal();
-            } else {
-                containerCheckout.classList.add('hidden');
-                lblValorSinal.innerText = "Registrar Novo Pagamento / Sinal (R$)";
-                lblValorSinal.classList.remove('text-red-700');
-                lblValorSinal.classList.add('text-emerald-700');
             }
 
             if (status === 'Reservado' && statusOriginal !== 'Reservado' && !camposLimposParaNovaReserva) {
@@ -901,21 +836,12 @@
 
         async function executarSalvamento(suiteId, status) {
             const reservaIdEditada = document.getElementById('edit-reserva-id').value;
-            const campoSinalStr = document.getElementById('edit-valor-sinal').value.trim();
-            const valorSinalInformado = parseFloat(campoSinalStr) || 0;
+            const valorSinalInformado = parseFloat(document.getElementById('edit-valor-sinal').value) || 0;
             const formaPagamentoSelecionada = document.getElementById('edit-forma-pagamento').value || 'Pix / Sinal';
             const observacaoInformada = document.getElementById('edit-observacao').value || '';
             
             const checkinVal = document.getElementById('edit-checkin').value || new Date().toLocaleDateString('sv-SE');
             let checkoutVal = document.getElementById('edit-checkout').value || new Date().toLocaleDateString('sv-SE');
-
-            // OBRIGATORIEDADE DO PREENCHIMENTO NO CHECKOUT
-            if (status === 'Checkout') {
-                if (campoSinalStr === '' || isNaN(valorSinalInformado) || valorSinalInformado < 0) {
-                    mostrarErroModal("No Checkout é obrigatório preencher o valor do pagamento efetuado pelo hóspede (digite 0 caso não haja pagamento).");
-                    return;
-                }
-            }
 
             // Se for checkout antecipado, garante que se o check-out ficou igual ao check-in, adicionamos 1 dia mínimo para cobrar 1 diária
             if (status === 'Checkout' && checkinVal === checkoutVal) {
@@ -1030,14 +956,13 @@
                 }
             }
 
-            // REGISTRO DE PAGAMENTO (GARANTE GRAVAÇÃO DO VALOR INFORMADO, INCLUSO SE FOR ZERO NO CHECKOUT OU SUPERIOR A ZERO)
-            if ((valorSinalInformado > 0 || status === 'Checkout') && reservaIdFinal) {
+            if (valorSinalInformado > 0 && reservaIdFinal) {
                 const { error: errPag } = await supabaseClient.from('hospede_pagamentos').insert([{
                     pousada_id: usuarioIdAtual,
                     reserva_id: reservaIdFinal,
                     valor_pago: valorSinalInformado,
                     forma_pagamento: formaPagamentoSelecionada,
-                    observacao: status === 'Checkout' ? 'Lançado no encerramento (Checkout)' : 'Lançado via painel de gestão'
+                    observacao: 'Lançado via painel de gestão'
                 }]);
 
                 if (errPag) {
@@ -1085,7 +1010,6 @@
             await executarSalvamento(suiteId, status);
         };
 
-        
         async function fazerLogout() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
         
         protegerPagina();
