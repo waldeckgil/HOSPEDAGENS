@@ -261,6 +261,11 @@
 
         function obterApelidoColuna(col) {
             let c = col.toLowerCase();
+            if (c === 'suite') return 'SUÍTE';
+            if (c === 'hospede') return 'HÓSPEDE';
+            if (c === 'valor_total') return 'VALOR TOTAL';
+            if (c === 'total_pago') return 'TOTAL PAGO';
+            if (c === 'saldo_restante') return 'SALDO RESTANTE';
             if (c.includes('status_suite')) return 'STATUS SUÍTE';
             if (c.includes('valor_diaria_padrao')) return 'VL. PADRÃO';
             if (c.includes('valor_diaria_calculado')) return 'VL. CALCULADO';
@@ -310,8 +315,7 @@
                     col !== 'reserva_id' && 
                     col !== 'tarifa_id' && 
                     !col.endsWith('_id') &&
-                    !col.toLowerCase().includes('dias') &&
-                    !col.toLowerCase().includes('restante')
+                    !col.toLowerCase().includes('dias')
                 );
                 
                 let colunaDataEncontrada = null;
@@ -349,7 +353,6 @@
 
                 let htmlCabecalho = '';
                 colunas.forEach(col => {
-                    htmlCabecalशुभha = `<th class="py-3 px-4">${obterApelidoColuna(col)}</th>`;
                     htmlCabecalho += `<th class="py-3 px-4">${obterApelidoColuna(col)}</th>`;
                 });
 
@@ -378,7 +381,7 @@
                         let checkin = String(row['checkin'] || '').trim();
                         if (!hospede || hospede === '-' || !checkin || checkin === '-') {
                             isSuiteDisponivel = true;
-classeLinhaDestaque = "bg-slate-200 text-slate-600 hover:bg-slate-300 transition font-medium";// Linha cinza para suíte desocupada
+                            classeLinhaDestaque = "bg-slate-200 text-slate-600 hover:bg-slate-300 transition font-medium"; // Linha cinza para suíte desocupada
                         }
                     }
 
@@ -454,11 +457,10 @@ classeLinhaDestaque = "bg-slate-200 text-slate-600 hover:bg-slate-300 transition
                             }
                         }
                         
-                        if (col.includes('valor') && !isNaN(valorBruto)) {
+                        let colLower = col.toLowerCase();
+                        if ((colLower.includes('valor') || colLower.includes('pago') || colLower.includes('saldo')) && !isNaN(valorBruto)) {
                             valorExibicao = Number(valorBruto).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                         }
-
-                        let colLower = col.toLowerCase();
                         
                         // Tratamento especial para o status físico da suíte receber borda verde se estiver disponível
                         if (colLower.includes('status_fisico') && valorExibicao.includes('DISPONÍVEL')) {
