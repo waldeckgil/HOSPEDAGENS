@@ -469,10 +469,7 @@
         async function carregarDashboard() {
             await carregarPousada();
 
-            // ATUALIZAÇÃO: Mudança da tabela física 'suites' para a view 'vw_status_suites_dashboard'. 
-            // Motivo: A tabela física armazenava o status estático, gerando divergências com as datas reais de reservas ativas.
-            const { data: suites } = await supabaseClient.from('vw_status_suites_dashboard').select('*').eq('pousada_id', usuarioIdAtual);
-           
+            const { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', usuarioIdAtual);
             suitesGlobaisCache = suites || [];
 
             const { data: reservas } = await supabaseClient.from('reservas').select('*').eq('pousada_id', usuarioIdAtual);
@@ -584,8 +581,7 @@
                                         <button type="button" onclick="alternarExpandirCard(this)" class="text-xs font-bold text-gray-600 hover:text-gray-900 underline">
                                             Expandir Detalhes ▾
                                         </button>
-                                        <!-- ATUALIZAÇÃO: Alterado de suite.id para suite.suite_id conforme a estrutura retornada pela View do Supabase para o botão Editar Card -->
-                                        <button type="button" onclick="abrirModal('${suite.suite_id}', '${suite.nome}', '${statusParaModal}', '${aprovada.id}')" class="text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 px-3.5 py-2 rounded-xl transition shadow-xs">
+                                        <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', '${statusParaModal}', '${aprovada.id}')" class="text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 px-3.5 py-2 rounded-xl transition shadow-xs">
                                             Editar Card &rarr;
                                         </button>
                                     </div>
@@ -618,8 +614,7 @@
                                 </div>
                                 
                                 <div class="mt-4 pt-3 border-t border-black/10 flex justify-end">
-                                    <!-- ATUALIZAÇÃO: Alterado de suite.id para suite.suite_id conforme a estrutura retornada pela View do Supabase para o botão Gerenciar / Adicionar -->
-                                    <button type="button" onclick="abrirModal('${suite.suite_id}', '${suite.nome}', '${suite.status}')" class="text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 px-3.5 py-2 rounded-xl transition shadow-xs">
+                                    <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', '${suite.status}')" class="text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 px-3.5 py-2 rounded-xl transition shadow-xs">
                                         Gerenciar / Adicionar &rarr;
                                     </button>
                                 </div>
@@ -714,8 +709,7 @@
                                     <button type="button" onclick="alternarExpandirCard(this)" class="text-xs font-bold text-amber-900 hover:text-amber-950 underline">
                                         Expandir Detalhes ▾
                                     </button>
-                                    <!-- ATUALIZAÇÃO: Alterado de suite.id para suite.suite_id conforme a estrutura retornada pela View do Supabase para o botão Editar Card (Pendentes) -->
-                                    <button type="button" onclick="abrirModal('${suite.suite_id}', '${suite.nome}', 'Pendente', '${pend.id}')" class="text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 px-3.5 py-2 rounded-xl transition shadow-xs">
+                                    <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', 'Pendente', '${pend.id}')" class="text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 px-3.5 py-2 rounded-xl transition shadow-xs">
                                         Editar Card &rarr;
                                     </button>
                                 </div>
