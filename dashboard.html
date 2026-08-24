@@ -402,7 +402,7 @@
         }
 
         function atualizarRadarEKPIs() {
-            const hojeStr = new Date().toISOString().split('T')[0];
+            const hojeStr = new Date().toLocaleDateString('sv-SE');
             const [anoAtual, mesAtual] = hojeStr.split('-');
 
             const aprovadas = reservasGlobaisCache.filter(r => r.status === 'Aprovada');
@@ -478,6 +478,28 @@
             const { data: pagamentos } = await supabaseClient.from('hospede_pagamentos').select('*').eq('pousada_id', usuarioIdAtual);
             pagamentosGlobaisCache = pagamentos || [];
 
+            // AUTOMAÇÃO INTELIGENTE: Verifica se o check-in de alguma reserva aprovada/reservada já chegou ou passou
+            const hojeStr = new Date().toLocaleDateString('sv-SE');
+            let houveAtualizacaoAutomatica = false;
+
+            for (const suite of suitesGlobaisCache) {
+                if (suite.status === 'Disponível' || suite.status === 'Reservado') {
+                    const reservasAtivasDaSuite = reservasGlobaisCache.filter(r => r.suite_id === suite.id && r.status === 'Aprovada');
+                    const reservaParaOcupar = reservasAtivasDaSuite.find(r => r.checkin && r.checkin <= hojeStr && r.checkout > hojeStr);
+                    
+                    if (reservaParaOcupar && suite.status !== 'Ocupada') {
+                        await supabaseClient.from('suites').update({ status: 'Ocupada' }).eq('id', suite.id);
+                        suite.status = 'Ocupada';
+                        houveAtualizacaoAutomatica = true;
+                    }
+                }
+            }
+
+            if (houveAtualizacaoAutomatica) {
+                const { data: suitesAtualizadas } = await supabaseClient.from('suites').select('*').eq('pousada_id', usuarioIdAtual);
+                suitesGlobaisCache = suitesAtualizadas || [];
+            }
+
             await verificarReservasPendentesDashboard();
             atualizarRadarEKPIs();
 
@@ -488,8 +510,6 @@
                 container.innerHTML = '<p class="text-gray-600 col-span-3 text-center">Nenhuma suíte cadastrada.</p>';
                 return;
             }
-
-            const hojeStr = new Date().toISOString().split('T')[0];
 
             suitesGlobaisCache.forEach(suite => {
                 const reservasDaSuite = reservasGlobaisCache.filter(r => r.suite_id === suite.id && r.status !== 'Cancelada' && r.status !== 'Recusada' && r.status !== 'Finalizada');
@@ -734,7 +754,7 @@
             if (reservaId) {
                 reserva = reservasGlobaisCache.find(r => r.id === reservaId);
             } else {
-                const hojeStr = new Date().toISOString().split('T')[0];
+                const hojeStr = new Date().toLocaleDateString('sv-SE');
                 reserva = reservasGlobaisCache.find(r => r.suite_id === id && r.status === 'Aprovada' && r.checkin <= hojeStr);
             }
 
@@ -812,8 +832,8 @@
             const formaPagamentoSelecionada = document.getElementById('edit-forma-pagamento').value || 'Pix / Sinal';
             const observacaoInformada = document.getElementById('edit-observacao').value || '';
             
-            const checkinVal = document.getElementById('edit-checkin').value || new Date().toISOString().split('T')[0];
-            const checkoutVal = document.getElementById('edit-checkout').value || new Date().toISOString().split('T')[0];
+            const checkinVal = document.getElementById('edit-checkin').value || new Date().toLocaleDateString('sv-SE');
+            const checkoutVal = document.getElementById('edit-checkout').value || new Date().toLocaleDateString('sv-SE');
 
             try {
                 const { data: temConflito, error: erroConflito } = await supabaseClient.rpc('verificar_conflito_reserva', { 
@@ -912,7 +932,7 @@
                 if (reservaIdEditada) {
                     await supabaseClient.from('reservas').update({ status: 'Finalizada' }).eq('id', reservaIdEditada);
                 } else {
-                    const hoje = new Date().toISOString().split('T')[0];
+                    const hoje = new Date().toLocaleDateString('sv-SE');
                     await supabaseClient.from('reservas').update({ status: 'Finalizada' })
                         .eq('suite_id', suiteId)
                         .eq('status', 'Aprovada')
@@ -947,6 +967,15 @@
             const statusOriginal = document.getElementById('edit-status-original').value;
             const suiteId = document.getElementById('edit-suite-id').value;
             
+            // VALIDAÇÃO DE DATA (REGRA DE NEGÓCIO)
+            const checkinInformado = document.getElementById('edit-checkin').value;
+            const hojeStr = new Date().toLocaleDateString('sv-SE');
+
+            if (status === 'Ocupada' && checkinInformado > hojeStr) {
+                mostrarErroModal("Para alterar o status para 'Ocupada (Agora)', a data de check-in deve ser hoje ou anterior. Altere a data de check-in para a data de hoje ou mantenha o status como 'Reservado'.");
+                return; 
+            }
+
             if (statusOriginal === 'Ocupada' && status === 'Disponível') {
                 mostrarErroModal("Uma suíte ocupada não pode ir direto para 'Disponível'. Envie para 'Limpeza' ou faça o 'Checkout'.");
                 return;
