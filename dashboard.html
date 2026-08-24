@@ -747,7 +747,7 @@
             });
         }
         
-        function abrirModal(id, nome, status, reservaId = null) {
+        async function abrirModal(id, nome, status, reservaId = null) {
             camposLimposParaNovaReserva = false;
             limparErroModal();
             document.getElementById('edit-suite-id').value = id;
@@ -792,8 +792,8 @@
                 document.getElementById('edit-observacao').value = '';
             }
             
-            verificarStatusModal();
             document.getElementById('modal-edicao').classList.remove('hidden');
+            await verificarStatusModal();
         }
 
         async function mudarStatusReserva(reservaId, novoStatus) {
@@ -838,7 +838,7 @@
             return saldo > 0 ? saldo : 0;
         }
 
-       async function atualizarSaldoCheckoutModal() {
+        async function atualizarSaldoCheckoutModal() {
             const status = document.getElementById('edit-status').value;
             if (status === 'Checkout') {
                 const saldo = await calcularSaldoDevedorReservaAtual();
@@ -861,9 +861,6 @@
             }
 
             if (status === 'Checkout') {
-                const hojeStr = new Date().toLocaleDateString('sv-SE');
-                document.getElementById('edit-checkout').value = hojeStr;
-                
                 containerCheckout.classList.remove('hidden');
                 lblValorSinal.innerText = "Valor do Pagamento no Checkout (R$) * Mínimo Obrigatório";
                 lblValorSinal.classList.add('text-red-700');
