@@ -173,7 +173,7 @@
         </div>
     </div>
 
-    <script[cite: 4]>
+    <script>
         const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -245,10 +245,8 @@
         }
 
         async function carregarSuitesETarifas() {
-            // Tenta buscar as suítes usando o id do pousada_id[cite: 4]
             let { data: suites, error } = await supabaseClient.from('suites').select('*').eq('pousada_id', usuarioIdAtual);
             
-            // Caso venha vazio, tenta buscar diretamente pelo id do usuário dono
             if (!suites || suites.length === 0) {
                 const resAlternativa = await supabaseClient.from('suites').select('*').eq('id', usuarioIdAtual);
                 if (resAlternativa.data && resAlternativa.data.length > 0) {
