@@ -320,8 +320,12 @@
                     colunas.forEach(col => {
                         htmlCabecalho += `<th class="py-3 px-6">${col.replace(/_/g, ' ').toUpperCase()}</th>`;
                     });
+                    // Se for a view de reservas, adiciona a coluna extra de Ação
+                    if (viewAtualSelecionada === 'vw_gestor_reservas_mes_atual') {
+                        htmlCabecalho += `<th class="py-3 px-6">AÇÃO / ALERTA</th>`;
+                    }
                     thead.innerHTML = htmlCabecalho;
-                    tbody.innerHTML = `<tr><td colspan="${colunas.length}" class="py-8 text-center text-gray-500">NENHUM REGISTRO ENCONTRADO NO PERÍODO DE ${dataInicioFormatada} ATÉ ${dataFimFormatada}.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="${colunas.length + (viewAtualSelecionada === 'vw_gestor_reservas_mes_atual' ? 1 : 0)}" class="py-8 text-center text-gray-500">NENHUM REGISTRO ENCONTRADO NO PERÍODO DE ${dataInicioFormatada} ATÉ ${dataFimFormatada}.</td></tr>`;
                     return;
                 }
 
@@ -330,7 +334,13 @@
                     const nomeFormatado = col.replace(/_/g, ' ').toUpperCase();
                     htmlCabecalho += `<th class="py-3 px-6">${nomeFormatado}</th>`;
                 });
-                thead.innerHTML = htmlCabecos = htmlCabecalho;
+
+                // Se estivermos na view de reservas, adiciona o cabeçalho da coluna de Ação Recomendada
+                let ehViewReservas = (viewAtualSelecionada === 'vw_gestor_reservas_mes_atual');
+                if (ehViewReservas) {
+                    htmlCabecalho += `<th class="py-3 px-6 text-center">AÇÃO / ALERTA</th>`;
+                }
+                thead.innerHTML = htmlCabecalho;
 
                 let htmlLinhas = '';
                 registrosFiltrados.forEach(row => {
@@ -345,11 +355,32 @@
                         }
                     });
 
+                    // Lógica inteligente de cores e alertas operacionais para o card de Reservas
                     let classeLinhaDestaque = "hover:bg-gray-50 transition";
-                    if (diasRestantes === 1) {
-                        classeLinhaDestaque = "bg-amber-100 hover:bg-amber-200 border-l-4 border-amber-500 transition shadow-sm";
-                    } else if (diasRestantes === 0) {
-                        classeLinhaDestaque = "bg-rose-100 hover:bg-rose-200 border-l-4 border-rose-600 text-rose-950 transition shadow-sm";
+                    let badgeAcao = "";
+
+                    if (ehViewReservas) {
+                        let statusReserva = String(row['status_reserva'] || '').toUpperCase();
+                        let statusFisico = String(row['status_fisico_suite'] || '').toUpperCase();
+
+                        if (diasRestantes === 0) {
+                            if (statusReserva === 'PENDENTE') {
+                                classeLinhaDestaque = "bg-rose-100 hover:bg-rose-200 border-l-4 border-rose-600 text-rose-950 transition shadow-sm font-semibold";
+                                badgeAcao = `<span class="bg-rose-600 text-white px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-triangle-exclamation"></i> Aprovar Urgente</span>`;
+                            } else if (statusReserva === 'APROVADA' && statusFisico === 'DISPONÍVEL') {
+                                classeLinhaDestaque = "bg-amber-50 hover:bg-amber-100 border-l-4 border-amber-500 transition shadow-sm";
+                                badgeAcao = `<span class="bg-amber-500 text-white px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-key"></i> Aguardando Check-in</span>`;
+                            } else {
+                                badgeAcao = `<span class="bg-emerald-600 text-white px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-check"></i> Hospedado OK</span>`;
+                            }
+                        } else if (diasRestantes === 1) {
+                            classeLinhaDestaque = "bg-blue-50/60 hover:bg-blue-100 transition";
+                            badgeAcao = `<span class="bg-blue-600 text-white px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-clock"></i> Amanhã</span>`;
+                        } else if (diasRestantes > 1 && diasRestantes <= 3) {
+                            badgeAcao = `<span class="bg-slate-200 text-slate-700 px-2 py-1 rounded text-[10px] font-bold uppercase">Em ${diasRestantes} dias</span>`;
+                        } else {
+                            badgeAcao = `<span class="text-gray-400 text-[10px]">-</span>`;
+                        }
                     }
 
                     htmlLinhas += `<tr class="${classeLinhaDestaque}">`;
@@ -381,6 +412,12 @@
 
                         htmlLinhas += `<td class="py-3.5 px-6 font-medium">${valorExibicao}</td>`;
                     });
+
+                    // Insere a célula de Ação Recomendada se estiver na view de reservas
+                    if (ehViewReservas) {
+                        htmlLinhas += `<td class="py-3.5 px-6 text-center">${badgeAcao}</td>`;
+                    }
+
                     htmlLinhas += `</tr>`;
                 });
                 tbody.innerHTML = htmlLinhas;

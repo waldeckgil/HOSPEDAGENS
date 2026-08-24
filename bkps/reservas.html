@@ -16,35 +16,9 @@
             <h1 id="nome-pousada-sidebar" class="text-2xl font-extrabold text-white mb-6 tracking-wider">Painel 360</h1>
             <nav class="space-y-2">
                 <a href="dashboard.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
-                    <span>🏠</span> Gestão de Suítes
+                    <span>🏠</span> Painel Principal
                 </a>
 
-                <a href="reservas.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-blue-600 text-white font-semibold shadow-md text-sm">
-                    <span>📋</span> Ver Reservas
-                </a>
-
-                
-               <a href="financeiro.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-blue-600 text-white font-semibold shadow-md text-sm">
-              <span>💰</span> Gestão Financeira
-               </a>
-
-                <a href="hospedes.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
-                    <span>👥</span> Gestão de Hóspedes
-                </a>
-                <a href="configurar-pousada.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
-                    <span>⚙️</span> Configuração de Suítes
-                </a>
-                <a href="tarifas.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm">
-                    <span>💰</span> Gerenciar Tarifas
-                </a>
-                
-                <div class="pt-4 border-t border-slate-800 space-y-2">
-                    <button onclick="copiarLinkVitrine()" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300 text-left text-sm">
-                        <span>🔗</span> Copiar Vitrine
-                    </button>
-                    <a id="link-ver-vitrine" href="#" target="_blank" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300 text-sm">
-                        <span>👁️</span> Ver Vitrine
-                    </a>
                     <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-xl transition shadow text-sm flex items-center justify-center gap-2 mt-2">
                         <i class="fa-solid fa-right-from-bracket"></i> Sair
                     </button>
@@ -56,20 +30,31 @@
     <!-- CONTEÚDO PRINCIPAL -->
     <div class="flex-1 flex flex-col min-w-0">
         <!-- CABEÇALHO -->
-        <header class="bg-white shadow-xs border-b border-gray-200 p-4 md:p-6 flex flex-wrap justify-between items-center gap-3">
-            <div class="flex items-center gap-3">
-                <!-- Botão de Menu para Smartphone -->
+        <header class="bg-white shadow-xs border-b border-gray-200 p-4 md:p-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <!-- Botão de Menu Mobile e Espaçamento esquerdo mantidos estruturalmente -->
+            <div class="flex items-center w-full md:w-auto justify-between md:justify-start gap-3">
                 <button onclick="toggleMenuMobile()" class="md:hidden bg-slate-100 hover:bg-slate-200 text-slate-800 p-2.5 rounded-xl border border-slate-200 transition focus:outline-none">
                     <i class="fa-solid fa-bars text-lg"></i>
                 </button>
-                <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
-                    <h2 class="text-lg md:text-xl font-bold text-gray-800">Gestão de Reservas</h2>
-                    <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-0.5 rounded-full text-xs font-bold w-fit">Carregando...</span>
+                <div class="md:hidden">
+                    <a href="dashboard.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 border border-slate-200">
+                        <i class="fa-solid fa-arrow-left"></i> Voltar
+                    </a>
                 </div>
             </div>
-            <a href="dashboard.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 md:px-4 md:py-2 rounded-xl text-xs md:text-sm font-semibold transition flex items-center gap-2 border border-slate-200">
-                <i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard
-            </a>
+
+            <!-- TÍTULO CENTRALIZADO E NOME DA POUSADA EM DESTAQUE AO LADO -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 flex-1 text-center">
+                <h2 class="text-2xl md:text-4xl font-extrabold text-slate-900 tracking-tight">Gestão de Reservas</h2>
+                <span id="titulo-pousada" class="bg-blue-600 text-white border border-blue-700 px-4 py-1.5 rounded-full text-sm md:text-base font-extrabold shadow-sm tracking-wide w-fit">Carregando...</span>
+            </div>
+
+            <!-- Botão Voltar para Desktop (mantido na direita) -->
+            <div class="hidden md:block">
+                <a href="dashboard.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2 border border-slate-200">
+                    <i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard
+                </a>
+            </div>
         </header>
 
         <!-- CORPO DA PÁGINA -->
@@ -207,7 +192,7 @@
             const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', user.id).maybeSingle();
             const nomePousada = (pousada && pousada.nome) ? pousada.nome : "Minha Pousada";
 
-            // Atualiza título da aba e nomes nos componentes do painel
+            // Atualiza título da aba e nomes nos componentes do painel[cite: 3]
             document.title = `${nomePousada} - Gestão de Reservas`;
             document.getElementById('titulo-pousada').innerText = nomePousada;
             document.getElementById('nome-pousada-sidebar').innerText = nomePousada;
