@@ -59,7 +59,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
                         
                         <!-- Card 1: Financeiro -->
-                        <div onclick="selecionarView('vw_gestor_financeiro_resumo_cod', 'Resumo Financeiro Consolidado', this)" 
+                        <div onclick="selecionarView('vw_gestor_financeiro_relatorio', 'Resumo Financeiro Consolidado', this)" 
                              class="card-view cursor-pointer bg-white p-4 rounded-xl shadow-sm border-2 border-transparent hover:border-gray-300 hover:shadow-md transition group">
                             <div class="flex items-center justify-between mb-2">
                                 <div class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-sm">
@@ -72,7 +72,7 @@
                         </div>
 
                         <!-- Card 2: Hospedagens -->
-                        <div onclick="selecionarView('vw_gestor_hospedagens_hoje', 'Hospedagens, Suítes e Movimentações', this)" 
+                        <div onclick="selecionarView('vw_gestor_hospedagens_relatorio', 'Hospedagens, Suítes e Movimentações', this)" 
                              class="card-view cursor-pointer bg-white p-4 rounded-xl shadow-sm border-2 border-transparent hover:border-gray-300 hover:shadow-md transition group">
                             <div class="flex items-center justify-between mb-2">
                                 <div class="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-sm">
@@ -85,7 +85,7 @@
                         </div>
 
                         <!-- Card 3: Tarifas Especiais -->
-                        <div onclick="selecionarView('vw_gestor_tarifas_suites', 'Auditoria de Tarifas Especiais', this)" 
+                        <div onclick="selecionarView('vw_gestor_tarifas_relatorio', 'Auditoria de Tarifas Especiais', this)" 
                              class="card-view cursor-pointer bg-white p-4 rounded-xl shadow-sm border-2 border-amber-500 hover:shadow-md transition group">
                             <div class="flex items-center justify-between mb-2">
                                 <div class="w-8 h-8 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center text-sm">
@@ -98,7 +98,7 @@
                         </div>
 
                         <!-- Card 4: Reservas e Futuras -->
-                        <div onclick="selecionarView('vw_gestor_reservas_mes_atual', 'Próximas Reservas do Mês Atual', this)" 
+                        <div onclick="selecionarView('vw_gestor_reservas_relatorio', 'Próximas Reservas do Mês Atual', this)" 
                              class="card-view cursor-pointer bg-white p-4 rounded-xl shadow-sm border-2 border-transparent hover:border-gray-300 hover:shadow-md transition group">
                             <div class="flex items-center justify-between mb-2">
                                 <div class="w-8 h-8 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center text-sm">
@@ -167,14 +167,13 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let usuarioIdAtual = null;
-        let viewAtualSelecionada = 'vw_gestor_tarifas_suites'; // Iniciando direto na view de tarifas a pedido do contexto
+        let viewAtualSelecionada = 'vw_gestor_tarifas_relatorio'; // Iniciando direto na view de tarifas padronizada
         let tituloBaseAtual = 'Auditoria de Tarifas Especiais';
 
         function inicializarFiltroDatas() {
             const hoje = new Date();
             const ano = hoje.getFullYear();
             const mes = hoje.getMonth();
-            const ultimoDiaMes = new Date(ano, mes + 1, 0);
 
             const formatarDataInput = (d) => {
                 let y = d.getFullYear();
@@ -183,7 +182,6 @@
                 return `${y}-${m}-${day}`;
             };
 
-            // Para tarifas, sugerimos um range mais amplo (ex: início do ano até o final do próximo mês) para capturar vigências ativas
             const primeiroDiaAno = new Date(ano, 0, 1);
             const dataFuturaLonga = new Date(ano, mes + 3, 0);
 
@@ -241,7 +239,6 @@
             });
             elementoCard.classList.remove('border-transparent');
             
-            // Atribuir cor da borda com base na view
             if (nomeView.includes('financeiro')) elementoCard.classList.add('border-blue-600', 'shadow-md');
             else if (nomeView.includes('hospedagens')) elementoCard.classList.add('border-emerald-600', 'shadow-md');
             else if (nomeView.includes('tarifas')) elementoCard.classList.add('border-amber-500', 'shadow-md');
@@ -335,8 +332,8 @@
                     });
                 }
 
-                let ehViewReservas = (viewAtualSelecionada === 'vw_gestor_reservas_mes_atual');
-                let ehViewTarifas = (viewAtualSelecionada === 'vw_gestor_tarifas_suites');
+                let ehViewReservas = (viewAtualSelecionada === 'vw_gestor_reservas_relatorio');
+                let ehViewTarifas = (viewAtualSelecionada === 'vw_gestor_tarifas_relatorio');
 
                 let htmlCabecalho = '';
                 colunas.forEach(col => {
@@ -365,12 +362,10 @@
                         let ajuste = String(row['ajuste_aplicado'] || '').trim();
                         let dataFimTarifa = String(row['data_fim'] || '').substring(0, 10);
 
-                        // Lógica para suítes sem tarifa especial (Valor Padrão)
                         if (!ajuste || ajuste === '-' || ajuste === '') {
                             classeLinhaDestaque = "bg-emerald-50/70 hover:bg-emerald-100/80 text-emerald-950 transition font-medium";
                             badgeAcao = `<span class="bg-emerald-600 text-white px-2.5 py-1 rounded text-[10px] font-bold uppercase inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-circle-check"></i> VALOR PADRÃO</span>`;
                         } else if (dataFimTarifa) {
-                            // Cálculo de dias restantes para expirar a tarifa especial
                             let timestampFim = new Date(dataFimTarifa).getTime();
                             let diferencaDias = Math.ceil((timestampFim - timestampHoje) / (1000 * 60 * 60 * 24));
 
@@ -381,7 +376,6 @@
                                 classeLinhaDestaque = "bg-rose-100 hover:bg-rose-200 border-l-4 border-rose-600 text-rose-950 transition font-semibold";
                                 badgeAcao = `<span class="bg-rose-600 text-white px-2.5 py-1 rounded text-[10px] font-bold uppercase inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-triangle-exclamation"></i> EXPIRA HOJE</span>`;
                             } else if (diferencaDias <= 7) {
-                                // Alerta para 7 dias ou menos (ex: seus 5 dias para o dia 29/08)
                                 classeLinhaDestaque = "bg-amber-50 hover:bg-amber-100 border-l-4 border-amber-500 transition shadow-sm";
                                 badgeAcao = `<span class="bg-amber-500 text-white px-2.5 py-1 rounded text-[10px] font-bold uppercase inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-clock"></i> EXPIRA EM ${diferencaDias} DIAS</span>`;
                             } else {
@@ -465,6 +459,7 @@
             }
         }
 
+        
         window.onload = () => {
             protegerPagina();
         };
