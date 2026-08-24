@@ -71,7 +71,7 @@
                             <p class="text-[11px] text-gray-500 mt-0.5 truncate">Valores pagos e saldos pendentes.</p>
                         </div>
 
-                        <!-- Card 2: Hospedagens -->
+                        <!-- Card 2: Hospedagens (Alterado o título para Ocupação das Suítes) -->
                         <div onclick="selecionarView('vw_gestor_hospedagens_relatorio', 'Hospedagens, Suítes e Movimentações', this)" 
                              class="card-view cursor-pointer bg-white p-4 rounded-xl shadow-sm border-2 border-emerald-600 shadow-md transition group">
                             <div class="flex items-center justify-between mb-2">
@@ -80,7 +80,7 @@
                                 </div>
                                 <span class="text-[9px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded">HOSPEDAGENS</span>
                             </div>
-                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-emerald-600 transition">Ocupação e Suítes</h3>
+                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-emerald-600 transition">Ocupação das Suítes</h3>
                             <p class="text-[11px] text-gray-500 mt-0.5 truncate">Cruzamento de nomes e acomodações.</p>
                         </div>
 
@@ -323,15 +323,14 @@
                 });
 
                 let ehViewReservas = (viewAtualSelecionada === 'vw_gestor_reservas_relatorio');
+                let ehViewHospedagens = (viewAtualSelecionada === 'vw_gestor_hospedagens_relatorio');
                 let ehViewTarifas = (viewAtualSelecionada === 'vw_gestor_tarifas_relatorio');
 
-                // FILTRAGEM ADICIONAL: Se for a view de reservas, remove linhas vazias/sem hóspede ou sem checkin preenchido
                 let registrosFiltrados = registros;
                 if (ehViewReservas) {
                     registrosFiltrados = registrosFiltrados.filter(row => {
                         let hospede = String(row['hospede'] || row['hospede_nome'] || '').trim();
                         let checkin = String(row['checkin'] || '').trim();
-                        // Se o hóspede estiver em branco ou '-', ou o checkin estiver em branco ou '-', a linha é oculta
                         if (!hospede || hospede === '-' || !checkin || checkin === '-') {
                             return false;
                         }
@@ -350,6 +349,7 @@
 
                 let htmlCabecalho = '';
                 colunas.forEach(col => {
+                    htmlCabecalशुभha = `<th class="py-3 px-4">${obterApelidoColuna(col)}</th>`;
                     htmlCabecalho += `<th class="py-3 px-4">${obterApelidoColuna(col)}</th>`;
                 });
 
@@ -370,6 +370,17 @@
                 registrosFiltrados.forEach(row => {
                     let classeLinhaDestaque = "hover:bg-gray-50 transition";
                     let badgeAcao = "";
+
+                    // Lógica visual para a view de Ocupação das Suítes (Hospedagens)
+                    let isSuiteDisponivel = false;
+                    if (ehViewHospedagens) {
+                        let hospede = String(row['hospede'] || row['hospede_nome'] || '').trim();
+                        let checkin = String(row['checkin'] || '').trim();
+                        if (!hospede || hospede === '-' || !checkin || checkin === '-') {
+                            isSuiteDisponivel = true;
+                            classeLinhaDestaque = "bg-gray-100 text-gray-400 hover:bg-gray-200/70 transition"; // Linha cinza claro para suíte desocupada
+                        }
+                    }
 
                     if (ehViewTarifas) {
                         let ajuste = String(row['ajuste_aplicado'] || '').trim();
@@ -448,7 +459,13 @@
                         }
 
                         let colLower = col.toLowerCase();
-                        if ((colLower.includes('wats') || colLower.includes('app') || colLower.includes('telefone')) && valorBruto !== null && valorBruto !== undefined) {
+                        
+                        // Tratamento especial para o status físico da suíte receber borda verde se estiver disponível
+                        if (colLower.includes('status_fisico') && valorExibicao.includes('DISPONÍVEL')) {
+                            valorExibicao = `<span class="px-2.5 py-1 rounded-md border border-emerald-500 text-emerald-700 font-bold bg-emerald-50/50">DISPONÍVEL</span>`;
+                        }
+
+                        if ((colLower.includes('wats') || colLower.includes('app') || colLower.includes('telefone')) && valorBruto !== null && valorBruto !== undefined && !isSuiteDisponivel) {
                             let numeroLimpo = String(valorBruto).replace(/\D/g, '');
                             valorExibicao = `<a href="https://wa.me/55${numeroLimpo}" target="_blank" title="Abrir WhatsApp" class="text-emerald-700 hover:text-emerald-900 font-bold flex items-center gap-1.5 transition">
                                 <i class="fa-brands fa-whatsapp text-base"></i> ${String(valorBruto).toUpperCase()}
