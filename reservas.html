@@ -99,13 +99,13 @@
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-gray-50 text-gray-600 uppercase text-xs tracking-wider border-b border-gray-200">
-                                <th class="p-4 font-bold">Hóspede / Contato</th>
+                                <th class="p-4 font-bold">Hóspede</th>
                                 <th class="p-4 font-bold">Suíte</th>
                                 <th class="p-4 font-bold">CPF</th>
-                                <th class="p-4 font-bold">Endereço</th>
-                                <th class="p-4 font-bold">Período da Estadia</th>
+                                <th class="p-4 font-bold">End.</th>
+                                <th class="p-4 font-bold">Período</th>
                                 <th class="p-4 font-bold">Status</th>
-                                <th class="p-4 font-bold">Data da Reserva</th>
+                                <th class="p-4 font-bold">Data</th>
                             </tr>
                         </thead>
                         <tbody id="tabela-hospedes-corpo" class="divide-y divide-gray-100 text-sm text-gray-700">
@@ -216,7 +216,6 @@
         async function carregarHistoricoHospedes() {
             if (!usuarioIdAtual) return;
 
-            // Trazendo as reservas e fazendo o join com a tabela de suítes para obter o nome da suíte
             let query = supabaseClient
                 .from('reservas')
                 .select('*, suites(nome)')
@@ -257,7 +256,7 @@
             document.getElementById('contador-resultados').innerText = `${filtrados.length} registro(s) encontrado(s)`;
 
             if (filtrados.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-500 italic">Nenhum hóspede encontrado com os critérios informados.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-500 italic text-base">Nenhum hóspede encontrado com os critérios informados.</td></tr>`;
                 return;
             }
 
@@ -269,33 +268,32 @@
                 else if (r.status === 'Finalizada') badgeStatus = 'bg-blue-100 text-blue-800';
                 else if (r.status === 'Recusada' || r.status === 'Cancelada') badgeStatus = 'bg-red-100 text-red-800';
 
-                // Nome da suíte obtido do relacionamento
                 const nomeSuite = (r.suites && r.suites.nome) ? r.suites.nome : 'Suíte não informada';
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-50 transition">
                         <td class="p-4">
-                            <div class="font-bold text-gray-900">${r.hospede_nome || 'Não informado'}</div>
-                            <div class="text-xs text-emerald-700 font-medium">💬 ${r.whatsapp_hospede || 'Sem WhatsApp'}</div>
-                            <div class="text-xs text-gray-500">${r.email || 'Sem e-mail'}</div>
+                            <div class="font-bold text-gray-900 text-sm md:text-base">${r.hospede_nome || 'Não informado'}</div>
+                            <div class="text-xs md:text-sm text-emerald-700 font-medium">💬 ${r.whatsapp_hospede || 'Sem WhatsApp'}</div>
+                            <div class="text-xs md:text-sm text-gray-500">${r.email || 'Sem e-mail'}</div>
                         </td>
-                        <td class="p-4 font-semibold text-xs text-blue-600">
+                        <td class="p-4 font-semibold text-sm md:text-base text-blue-600">
                             ${nomeSuite}
                         </td>
-                        <td class="p-4 text-xs font-mono">
+                        <td class="p-4 text-xs md:text-sm font-mono font-medium text-gray-800">
                             ${r.cpf || '-'}
                         </td>
-                        <td class="p-4 text-xs text-gray-600 max-w-xs truncate">
+                        <td class="p-4 text-xs md:text-sm text-gray-600 max-w-xs truncate">
                             ${r.endereco || 'Não informado'}
                         </td>
-                        <td class="p-4 text-xs font-semibold">
-                            <div>Check-in: <span class="text-gray-900">${formatarDataSimples(r.checkin)}</span></div>
-                            <div>Check-out: <span class="text-gray-900">${formatarDataSimples(r.checkout)}</span></div>
+                        <td class="p-4 text-xs md:text-sm font-semibold">
+                            <div>Check-in: <span class="text-gray-900 font-bold">${formatarDataSimples(r.checkin)}</span></div>
+                            <div>Check-out: <span class="text-gray-900 font-bold">${formatarDataSimples(r.checkout)}</span></div>
                         </td>
                         <td class="p-4">
-                            <span class="px-2.5 py-1 rounded-full text-xs uppercase ${badgeStatus}">${r.status}</span>
+                            <span class="px-3 py-1.5 rounded-full text-xs md:text-sm uppercase ${badgeStatus}">${r.status}</span>
                         </td>
-                        <td class="p-4 text-xs text-gray-500">
+                        <td class="p-4 text-xs md:text-sm text-gray-600 font-medium">
                             ${formatarDataHora(r.criado_em)}
                         </td>
                     </tr>
