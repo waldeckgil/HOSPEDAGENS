@@ -103,10 +103,10 @@
                                 <div class="w-8 h-8 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center text-sm">
                                     <i class="fa-solid fa-calendar-check"></i>
                                 </div>
-                                <span class="text-[9px] font-bold uppercase tracking-wider bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded">MÊS ATUAL</span>
+                                <span class="text-[9px] font-bold uppercase tracking-wider bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded">FUTURAS</span>
                             </div>
-                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-purple-600 transition">Reservas do Período</h3>
-                            <p class="text-[11px] text-gray-500 mt-0.5 truncate">Check-ins até o fim do mês.</p>
+                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-purple-600 transition">Reservas e Futuras</h3>
+                            <p class="text-[11px] text-gray-500 mt-0.5 truncate">Todas as reservas futuras.</p>
                         </div>
 
                     </div>
@@ -254,7 +254,6 @@
 
         function obterApelidoColuna(col) {
             let c = col.toLowerCase();
-            if (c.includes('nº_de_dias_restante') || c.includes('dias_restantes')) return 'DIAS';
             if (c.includes('status_fisico_suite')) return 'SUÍTE FÍSICO';
             if (c.includes('status_reserva')) return 'ST. RESERVA';
             if (c.includes('whatsapp') || c.includes('watsapp')) return 'WHATSAPP';
@@ -299,10 +298,18 @@
                     return;
                 }
 
-                const colunas = Object.keys(registros[0]).filter(col => col !== 'pousada_id' && col !== 'reserva_id' && col !== 'tarifa_id' && !col.endsWith('_id'));
+                // Oculta colunas de dias e chaves internas da listagem visual
+                const colunas = Object.keys(registros[0]).filter(col => 
+                    col !== 'pousada_id' && 
+                    col !== 'reserva_id' && 
+                    col !== 'tarifa_id' && 
+                    !col.endsWith('_id') &&
+                    !col.toLowerCase().includes('dias') &&
+                    !col.toLowerCase().includes('restante')
+                );
                 
                 let colunaDataEncontrada = null;
-                colunas.forEach(col => {
+                Object.keys(registros[0]).forEach(col => {
                     let c = col.toLowerCase();
                     if ((c.includes('checkin') || c.includes('checkout') || c.includes('data') || c.includes('vigencia') || c.includes('criado')) && !colunaDataEncontrada) {
                         colunaDataEncontrada = col;
@@ -345,8 +352,9 @@
 
                 let htmlLinhas = '';
                 registrosFiltrados.forEach(row => {
+                    // Descobre os dias restantes buscando em qualquer coluna que tenha relac. a dias
                     let diasRestantes = null;
-                    colunas.forEach(col => {
+                    Object.keys(row).forEach(col => {
                         let colLower = col.toLowerCase();
                         if (colLower.includes('dias') || colLower.includes('restante')) {
                             let val = Number(row[col]);
@@ -375,9 +383,9 @@
                             }
                         } else if (diasRestantes === 1) {
                             classeLinhaDestaque = "bg-blue-50/60 hover:bg-blue-100 transition";
-                            badgeAcao = `<span class="bg-blue-600 text-white px-2 py-0.5 rounded text-[9px] font-bold uppercase inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-clock"></i> AMANHÃ</span>`;
-                        } else if (diasRestantes > 1 && diasRestantes <= 3) {
-                            badgeAcao = `<span class="bg-slate-200 text-slate-700 px-2 py-0.5 rounded text-[9px] font-bold uppercase">EM ${diasRestantes}D</span>`;
+                            badgeAcao = `<span class="bg-blue-600 text-white px-2 py-0.5 rounded text-[9px] font-bold uppercase inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-clock"></i> AMANHÃ (1 DIA)</span>`;
+                        } else if (diasRestantes > 1) {
+                            badgeAcao = `<span class="bg-slate-200 text-slate-700 px-2 py-0.5 rounded text-[9px] font-bold uppercase inline-flex items-center gap-1"><i class="fa-solid fa-calendar-day"></i> FALTAM ${diasRestantes} DIAS</span>`;
                         } else {
                             badgeAcao = `<span class="text-gray-400 text-[9px]">-</span>`;
                         }
