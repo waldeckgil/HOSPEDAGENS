@@ -71,7 +71,7 @@
                             <p class="text-[11px] text-gray-500 mt-0.5 truncate">Valores pagos e saldos pendentes.</p>
                         </div>
 
-                        <!-- Card 2: Hospedagens (Alterado o título para Ocupação das Suítes) -->
+                        <!-- Card 2: Hospedagens -->
                         <div onclick="selecionarView('vw_gestor_hospedagens_relatorio', 'Hospedagens, Suítes e Movimentações', this)" 
                              class="card-view cursor-pointer bg-white p-4 rounded-xl shadow-sm border-2 border-emerald-600 shadow-md transition group">
                             <div class="flex items-center justify-between mb-2">
@@ -110,6 +110,37 @@
                             <p class="text-[11px] text-gray-500 mt-0.5 truncate">Todas as reservas futuras.</p>
                         </div>
 
+                    </div>
+
+                    <!-- Mini-Cards de Resumo Financeiro (Visíveis Especialmente na Visão Financeira ou Geral) -->
+                    <div id="containerKpis" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
+                            <div>
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Faturamento Bruto</p>
+                                <p id="kpiFaturamento" class="text-base sm:text-lg font-bold text-gray-800 mt-0.5">R$ 0,00</p>
+                            </div>
+                            <div class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-sack-dollar"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
+                            <div>
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Total Recebido (Sinal)</p>
+                                <p id="kpiRecebido" class="text-base sm:text-lg font-bold text-emerald-600 mt-0.5">R$ 0,00</p>
+                            </div>
+                            <div class="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-hand-holding-dollar"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
+                            <div>
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Saldo Restante</p>
+                                <p id="kpiSaldo" class="text-base sm:text-lg font-bold text-amber-600 mt-0.5">R$ 0,00</p>
+                            </div>
+                            <div class="w-8 h-8 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-scale-balanced"></i>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Área de Exibição da Consulta Selecionada -->
@@ -183,7 +214,7 @@
             };
 
             const primeiroDiaAno = new Date(ano, 0, 1);
-            const dataFuturaLonga = new Date(ano, mes + 3, 0);
+            const dataFuturaLonga = new Date(ano, mes + 6, 0);
 
             document.getElementById('filtroDataInicio').value = formatarDataInput(primeiroDiaAno);
             document.getElementById('filtroDataFim').value = formatarDataInput(dataFuturaLonga);
@@ -307,6 +338,9 @@
                 if (!registros || registros.length === 0) {
                     thead.innerHTML = `<th class="py-3 px-4">INFORMAÇÃO</th>`;
                     tbody.innerHTML = `<tr><td class="py-6 text-center text-gray-500">NENHUM REGISTRO ENCONTRADO NESTA VIEW.</td></tr>`;
+                    document.getElementById('kpiFaturamento').textContent = 'R$ 0,00';
+                    document.getElementById('kpiRecebido').textContent = 'R$ 0,00';
+                    document.getElementById('kpiSaldo').textContent = 'R$ 0,00';
                     return;
                 }
 
@@ -321,7 +355,7 @@
                 let colunaDataEncontrada = null;
                 Object.keys(registros[0]).forEach(col => {
                     let c = col.toLowerCase();
-                    if ((c.includes('checkin') || c.includes('checkout') || c.includes('data_inicio') || c.includes('vigencia') || c.includes('criado')) && !colunaDataEncontrada) {
+                    if ((c.includes('checkin') || c.includes('data_inicio') || c.includes('vigencia') || c.includes('criado')) && !colunaDataEncontrada) {
                         colunaDataEncontrada = col;
                     }
                 });
@@ -329,6 +363,7 @@
                 let ehViewReservas = (viewAtualSelecionada === 'vw_gestor_reservas_relatorio');
                 let ehViewHospedagens = (viewAtualSelecionada === 'vw_gestor_hospedagens_relatorio');
                 let ehViewTarifas = (viewAtualSelecionada === 'vw_gestor_tarifas_relatorio');
+                let ehViewFinanceiro = (viewAtualSelecionada === 'vw_gestor_financeiro_relatorio');
 
                 let registrosFiltrados = registros;
                 if (ehViewReservas) {
@@ -351,6 +386,47 @@
                     });
                 }
 
+                // --- ORDENAÇÃO POR CHECK-IN (PRIORIZANDO A DATA DE HOJE PARA CIMA) ---
+                const dataHojeStr = new Date().toISOString().split('T')[0];
+                const timestampHoje = new Date(dataHojeStr).getTime();
+
+                registrosFiltrados.sort((a, b) => {
+                    let dataA = String(a['checkin'] || a['data_inicio'] || '9999-12-31').substring(0, 10);
+                    let dataB = String(b['checkin'] || b['data_inicio'] || '9999-12-31').substring(0, 10);
+                    
+                    let timeA = new Date(dataA).getTime();
+                    let timeB = new Date(dataB).getTime();
+
+                    // Distância absoluta em relação a hoje para jogar o check-in de hoje/próximo para o topo
+                    let diffA = Math.abs(timeA - timestampHoje);
+                    let diffB = Math.abs(timeB - timestampHoje);
+
+                    // Se a data de A for futura ou hoje e B for passada, A vem primeiro, etc.
+                    if (timeA >= timestampHoje && timeB < timestampHoje) return -1;
+                    if (timeB >= timestampHoje && timeA < timestampHoje) return 1;
+
+                    return timeA - timeB; // Crescente a partir da data atual
+                });
+
+                // --- CÁLCULO DOS KPIS FINANCEIROS COM BASE NOS REGISTROS FILTRADOS ---
+                let somaBruto = 0;
+                let somaRecebido = 0;
+                let somaSaldo = 0;
+
+                registrosFiltrados.forEach(row => {
+                    let vTotal = Number(row['valor_total'] || row['valor'] || 0);
+                    let tPago = Number(row['total_pago'] || 0);
+                    let sRestante = Number(row['saldo_restante'] || (vTotal - tPago));
+
+                    if (!isNaN(vTotal)) somaBruto += vTotal;
+                    if (!isNaN(tPago)) somaRecebido += tPago;
+                    if (!isNaN(sRestante)) somaSaldo += sRestante > 0 ? sRestante : 0;
+                });
+
+                document.getElementById('kpiFaturamento').textContent = somaBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                document.getElementById('kpiRecebido').textContent = somaRecebido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                document.getElementById('kpiSaldo').textContent = somaSaldo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
                 let htmlCabecalho = '';
                 colunas.forEach(col => {
                     htmlCabecalho += `<th class="py-3 px-4">${obterApelidoColuna(col)}</th>`;
@@ -366,22 +442,18 @@
                     return;
                 }
 
-                const dataHojeStr = new Date().toISOString().split('T')[0];
-                const timestampHoje = new Date(dataHojeStr).getTime();
-
                 let htmlLinhas = '';
                 registrosFiltrados.forEach(row => {
                     let classeLinhaDestaque = "hover:bg-gray-50 transition";
                     let badgeAcao = "";
 
-                    // Lógica visual para a view de Ocupação das Suítes (Hospedagens)
                     let isSuiteDisponivel = false;
                     if (ehViewHospedagens) {
                         let hospede = String(row['hospede'] || row['hospede_nome'] || '').trim();
                         let checkin = String(row['checkin'] || '').trim();
                         if (!hospede || hospede === '-' || !checkin || checkin === '-') {
                             isSuiteDisponivel = true;
-                            classeLinhaDestaque = "bg-slate-200 text-slate-600 hover:bg-slate-300 transition font-medium"; // Linha cinza para suíte desocupada
+                            classeLinhaDestaque = "bg-slate-200 text-slate-600 hover:bg-slate-300 transition font-medium";
                         }
                     }
 
@@ -462,7 +534,6 @@
                             valorExibicao = Number(valorBruto).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                         }
                         
-                        // Tratamento especial para o status físico da suíte receber borda verde se estiver disponível
                         if (colLower.includes('status_fisico') && valorExibicao.includes('DISPONÍVEL')) {
                             valorExibicao = `<span class="px-2.5 py-1 rounded-md border border-emerald-500 text-emerald-700 font-bold bg-emerald-50/50">DISPONÍVEL</span>`;
                         }
