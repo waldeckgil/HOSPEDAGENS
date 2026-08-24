@@ -173,22 +173,6 @@
                     <p class="text-[11px] text-red-700 leading-tight">O valor do saldo devedor foi preenchido automaticamente no campo de pagamento abaixo como o valor mínimo obrigatório para quitar a estadia.</p>
                 </div>
 
-                <!-- RESUMO DINÂMICO DE TARIFA E DIÁRIAS NO MODAL -->
-                <div id="resumo-dinamico-container" class="bg-blue-50 border border-blue-200 p-3 rounded-xl space-y-1 text-xs text-blue-900">
-                    <div class="flex justify-between">
-                        <span>Qtd. Diárias Calculadas:</span>
-                        <strong id="modal-qtd-diarias">1 diária(s)</strong>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Valor Total da Estadia:</span>
-                        <strong id="modal-valor-total">R$ 0,00</strong>
-                    </div>
-                    <div class="flex justify-between border-t border-blue-200 pt-1">
-                        <span>Saldo Restante Atualizado:</span>
-                        <strong id="modal-saldo-restante" class="text-amber-700">R$ 0,00</strong>
-                    </div>
-                </div>
-
                 <div id="campos-hospede-container" class="space-y-3 transition-all">
                     <div class="grid grid-cols-1 gap-2">
                         <input type="text" id="edit-hospede" placeholder="Nome Hóspede" class="p-3 border rounded-xl text-sm">
@@ -205,11 +189,11 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-in</label>
-                            <input type="date" id="edit-checkin" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="recalcularValoresModalEdicao()">
+                            <input type="date" id="edit-checkin" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="atualizarSaldoCheckoutModal()">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-out</label>
-                            <input type="date" id="edit-checkout" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="recalcularValoresModalEdicao()">
+                            <input type="date" id="edit-checkout" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="atualizarSaldoCheckoutModal()">
                         </div>
                     </div>
 
@@ -763,7 +747,7 @@
             });
         }
         
-        async function abrirModal(id, nome, status, reservaId = null) {
+        function abrirModal(id, nome, status, reservaId = null) {
             camposLimposParaNovaReserva = false;
             limparErroModal();
             document.getElementById('edit-suite-id').value = id;
@@ -808,9 +792,8 @@
                 document.getElementById('edit-observacao').value = '';
             }
             
+            verificarStatusModal();
             document.getElementById('modal-edicao').classList.remove('hidden');
-            await verificarStatusModal();
-            await recalcularValoresModalEdicao();
         }
 
         async function mudarStatusReserva(reservaId, novoStatus) {
@@ -855,76 +838,13 @@
             return saldo > 0 ? saldo : 0;
         }
 
-        async function recalcularValoresModalEdicao() {
-            const suiteId = document.getElementById('edit-suite-id').value;
-            const reservaId = document.getElementById('edit-reserva-id').value;
-            let checkinStr = document.getElementById('edit-checkin').value;
-            let checkoutStr = document.getElementById('edit-checkout').value;
-
-            if (!checkinStr || !checkoutStr) return;
-
-            // Regra: Mínimo de 1 diária caso check-in e check-out sejam iguais ou inválidos
-            let d1 = new Date(checkinStr);
-            let d2 = new Date(checkoutStr);
-
-            if (d2 <= d1) {
-                let [ano, mes, dia] = checkinStr.split('-');
-                let dataSeguinte = new Date(ano, mes - 1, Number(dia) + 1);
-                checkoutStr = dataSeguinte.toLocaleDateString('sv-SE');
-                document.getElementById('edit-checkout').value = checkoutStr;
+       async function atualizarSaldoCheckoutModal() {
+            const status = document.getElementById('edit-status').value;
+            if (status === 'Checkout') {
+                const saldo = await calcularSaldoDevedorReservaAtual();
+                document.getElementById('display-saldo-devedor-checkout').innerText = formatarMoeda(saldo);
+                document.getElementById('edit-valor-sinal').value = saldo > 0 ? saldo.toFixed(2) : '0.00';
             }
-
-            // 1. Calcular quantidade de diárias (mínimo 1)[cite: 1]
-            const qtdDiarias = calcularQuantidadeDiarias(checkinStr, checkoutStr);
-            document.getElementById('modal-qtd-diarias').innerText = `${qtdDiarias} diária(s)`;
-
-            // 2. Buscar valor total da estadia (RPC do banco ou cálculo local baseado na suíte)
-            let valorTotal = 0;
-            const suiteObj = suitesGlobaisCache.find(s => s.id === suiteId);
-            const valorDiaria = suiteObj ? Number(suiteObj.valor_diaria || 0) : 0;
-            valorTotal = qtdDiarias * valorDiaria;
-
-            try {
-                const { data: valorCalculado, error: erroRpc } = await supabaseClient.rpc('calcular_total_reserva', { 
-                    p_suite_id: suiteId, 
-                    p_checkin: checkinStr, 
-                    p_checkout: checkoutStr 
-                });
-                if (!erroRpc && valorCalculado !== null) {
-                    valorTotal = Number(valorCalculado);
-                }
-            } catch (err) {
-                console.error("Erro ao recalcular via RPC:", err);
-            }
-
-            document.getElementById('modal-valor-total').innerText = formatarMoeda(valorTotal);
-
-            // 3. Calcular Saldo Restante (Total - Valor já pago)
-            let totalPago = 0;
-            if (reservaId) {
-                const pagamentosDestaReserva = pagamentosGlobaisCache.filter(p => p.reserva_id === reservaId);
-                totalPago = pagamentosDestaReserva.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
-            }
-
-            const saldoRestante = valorTotal - totalPago;
-            const elSaldo = document.getElementById('modal-saldo-restante');
-            elSaldo.innerText = formatarMoeda(saldoRestante);
-            
-            if (saldoRestante > 0) {
-                elSaldo.className = "text-amber-700 font-extrabold";
-            } else {
-                elSaldo.className = "text-emerald-600 font-extrabold";
-            }
-
-            // Se o status for Checkout, atualiza também o saldo devedor de encerramento
-            if (document.getElementById('edit-status').value === 'Checkout') {
-                document.getElementById('display-saldo-devedor-checkout').innerText = formatarMoeda(saldoRestante);
-                document.getElementById('edit-valor-sinal').value = saldoRestante > 0 ? saldoRestante.toFixed(2) : '0.00';
-            }
-        }
-
-        async function atualizarSaldoCheckoutModal() {
-            await recalcularValoresModalEdicao();
         }
 
         async function verificarStatusModal() {
@@ -941,6 +861,9 @@
             }
 
             if (status === 'Checkout') {
+                const hojeStr = new Date().toLocaleDateString('sv-SE');
+                document.getElementById('edit-checkout').value = hojeStr;
+                
                 containerCheckout.classList.remove('hidden');
                 lblValorSinal.innerText = "Valor do Pagamento no Checkout (R$) * Mínimo Obrigatório";
                 lblValorSinal.classList.add('text-red-700');
