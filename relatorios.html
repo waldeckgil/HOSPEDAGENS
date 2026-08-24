@@ -201,10 +201,8 @@
         let viewAtualSelecionada = 'vw_gestor_hospedagens_relatorio';
         let tituloBaseAtual = '[TESTE FRONT-END OK] Hospedagens, Suítes e Movimentações';
 
-        function inicializarFiltroDatas() {
+      function inicializarFiltroDatas() {
             const hoje = new Date();
-            const ano = hoje.getFullYear();
-            const mes = hoje.getMonth();
 
             const formatarDataInput = (d) => {
                 let y = d.getFullYear();
@@ -213,13 +211,11 @@
                 return `${y}-${m}-${day}`;
             };
 
-            const primeiroDiaAno = new Date(ano, 0, 1);
-            const dataFuturaLonga = new Date(ano, mes + 6, 0);
+            const dataHojeFormatada = formatarDataInput(hoje);
 
-            document.getElementById('filtroDataInicio').value = formatarDataInput(primeiroDiaAno);
-            document.getElementById('filtroDataFim').value = formatarDataInput(dataFuturaLonga);
+            document.getElementById('filtroDataInicio').value = dataHojeFormatada;
+            document.getElementById('filtroDataFim').value = dataHojeFormatada;
         }
-
         async function protegerPagina() {
             supabaseClient.auth.onAuthStateChange((event, session) => {
                 if (event === 'SIGNED_OUT' || !session) {
