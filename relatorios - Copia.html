@@ -112,9 +112,35 @@
 
                     </div>
 
-                    <!-- Container Dinâmico de KPIs / Cards Informativos por View -->
+                    <!-- Mini-Cards de Resumo Financeiro (Visíveis Especialmente na Visão Financeira ou Geral) -->
                     <div id="containerKpis" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-                        <!-- Conteúdo injetado dinamicamente via JS dependendo da View Ativa -->
+                        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
+                            <div>
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Faturamento Bruto</p>
+                                <p id="kpiFaturamento" class="text-base sm:text-lg font-bold text-gray-800 mt-0.5">R$ 0,00</p>
+                            </div>
+                            <div class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-sack-dollar"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
+                            <div>
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Total Recebido (Sinal)</p>
+                                <p id="kpiRecebido" class="text-base sm:text-lg font-bold text-emerald-600 mt-0.5">R$ 0,00</p>
+                            </div>
+                            <div class="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-hand-holding-dollar"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
+                            <div>
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Saldo Restante</p>
+                                <p id="kpiSaldo" class="text-base sm:text-lg font-bold text-amber-600 mt-0.5">R$ 0,00</p>
+                            </div>
+                            <div class="w-8 h-8 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-scale-balanced"></i>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Área de Exibição da Consulta Selecionada -->
@@ -175,19 +201,21 @@
         let viewAtualSelecionada = 'vw_gestor_hospedagens_relatorio';
         let tituloBaseAtual = '[TESTE FRONT-END OK] Hospedagens, Suítes e Movimentações';
 
-        function inicializarFiltroDatas() {
+      function inicializarFiltroDatas() {
             const hoje = new Date();
+
             const formatarDataInput = (d) => {
                 let y = d.getFullYear();
                 let m = String(d.getMonth() + 1).padStart(2, '0');
                 let day = String(d.getDate()).padStart(2, '0');
                 return `${y}-${m}-${day}`;
             };
+
             const dataHojeFormatada = formatarDataInput(hoje);
+
             document.getElementById('filtroDataInicio').value = dataHojeFormatada;
             document.getElementById('filtroDataFim').value = dataHojeFormatada;
         }
-
         async function protegerPagina() {
             supabaseClient.auth.onAuthStateChange((event, session) => {
                 if (event === 'SIGNED_OUT' || !session) {
@@ -277,7 +305,6 @@
 
             const tbody = document.getElementById('tabelaCorpo');
             const thead = document.getElementById('tabelaCabecalho');
-            const containerKpis = document.getElementById('containerKpis');
             const dataInicio = document.getElementById('filtroDataInicio').value;
             const dataFim = document.getElementById('filtroDataFim').value;
 
@@ -326,18 +353,9 @@
                 if (!registros || registros.length === 0) {
                     thead.innerHTML = `<th class="py-3 px-4">INFORMAÇÃO</th>`;
                     tbody.innerHTML = `<tr><td class="py-6 text-center text-gray-500">NENHUM REGISTRO ENCONTRADO NESTA VIEW.</td></tr>`;
-                    if (ehViewHospedagens) {
-                        containerKpis.innerHTML = `
-                            <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
-                                <div><p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Total de Reservas</p><p class="text-base font-bold text-gray-800 mt-0.5">0</p></div>
-                                <div class="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-xs"><i class="fa-solid fa-bookmark"></i></div>
-                            </div>
-                            <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
-                                <div><p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Status Físico Suítes</p><p class="text-base font-bold text-blue-600 mt-0.5">0 Disponíveis / 0 Ocupadas</p></div>
-                                <div class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-xs"><i class="fa-solid fa-door-open"></i></div>
-                            </div>
-                        `;
-                    }
+                    document.getElementById('kpiFaturamento').textContent = 'R$ 0,00';
+                    document.getElementById('kpiRecebido').textContent = 'R$ 0,00';
+                    document.getElementById('kpiSaldo').textContent = 'R$ 0,00';
                     return;
                 }
 
@@ -389,104 +407,31 @@
                     let timeA = new Date(dataA).getTime();
                     let timeB = new Date(dataB).getTime();
 
+                    // Se a data de A for futura ou hoje e B for passada, A vem primeiro, etc.
                     if (timeA >= timestampHoje && timeB < timestampHoje) return -1;
                     if (timeB >= timestampHoje && timeA < timestampHoje) return 1;
 
-                    return timeA - timeB;
+                    return timeA - timeB; // Crescente a partir da data atual
                 });
 
-                // --- RENDERIZAÇÃO DOS CARDS (CONDICIONAL POR VIEW) ---
-                if (ehViewHospedagens) {
-                    // Contagem para os novos cards de Hospedagens
-                    let totalReservasValidas = 0;
-                    let qtdPendentes = 0;
-                    let qtdAprovadas = 0;
-                    let qtdDisponiveis = 0;
-                    let qtdOcupadas = 0;
+                // --- CÁLCULO DOS KPIS FINANCEIROS COM BASE NOS REGISTROS FILTRADOS ---
+                let somaBruto = 0;
+                let somaRecebido = 0;
+                let somaSaldo = 0;
 
-                    registrosFiltrados.forEach(row => {
-                        let hospede = String(row['hospede'] || row['hospede_nome'] || '').trim();
-                        let checkin = String(row['checkin'] || '').trim();
-                        let statusReserva = String(row['status_reserva'] || '').toUpperCase();
-                        let statusFisico = String(row['status_fisico_suite'] || '').toUpperCase();
+                registrosFiltrados.forEach(row => {
+                    let vTotal = Number(row['valor_total'] || row['valor'] || row['valor_diaria_calculado'] || 0);
+                    let tPago = Number(row['total_pago'] || 0);
+                    let sRestante = Number(row['saldo_restante'] || (vTotal - tPago));
 
-                        if (!hospede || hospede === '-' || !checkin || checkin === '-') {
-                            qtdDisponiveis++;
-                        } else {
-                            totalReservasValidas++;
-                            qtdOcupadas++;
-                        }
+                    if (!isNaN(vTotal)) somaBruto += vTotal;
+                    if (!isNaN(tPago)) somaRecebido += tPago;
+                    if (!isNaN(sRestante)) somaSaldo += sRestante > 0 ? sRestante : 0;
+                });
 
-                        if (statusReserva.includes('PENDENTE')) qtdPendentes++;
-                        if (statusReserva.includes('APROVADA')) qtdAprovadas++;
-                    });
-
-                    containerKpis.innerHTML = `
-                        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
-                            <div>
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Total de Reservas</p>
-                                <p class="text-base sm:text-lg font-bold text-gray-800 mt-0.5">${totalReservasValidas} <span class="text-xs font-normal text-gray-500">(${qtdPendentes} Pend. / ${qtdAprovadas} Aprov.)</span></p>
-                            </div>
-                            <div class="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-xs">
-                                <i class="fa-solid fa-bookmark"></i>
-                            </div>
-                        </div>
-                        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
-                            <div>
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Status Físico das Suítes</p>
-                                <p class="text-base sm:text-lg font-bold text-blue-600 mt-0.5">${qtdDisponiveis} Disponíveis / ${qtdOcupadas} Ocupadas</p>
-                            </div>
-                            <div class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-xs">
-                                <i class="fa-solid fa-door-open"></i>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    // Mantém os KPIs financeiro padrão para as outras telas se necessário
-                    let somaBruto = 0;
-                    let somaRecebido = 0;
-                    let somaSaldo = 0;
-
-                    registrosFiltrados.forEach(row => {
-                        let vTotal = Number(row['valor_total'] || row['valor'] || row['valor_diaria_calculado'] || 0);
-                        let tPago = Number(row['total_pago'] || 0);
-                        let sRestante = Number(row['saldo_restante'] || (vTotal - tPago));
-
-                        if (!isNaN(vTotal)) somaBruto += vTotal;
-                        if (!isNaN(tPago)) somaRecebido += tPago;
-                        if (!isNaN(sRestante)) somaSaldo += sRestante > 0 ? sRestante : 0;
-                    });
-
-                    containerKpis.innerHTML = `
-                        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
-                            <div>
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Faturamento Bruto</p>
-                                <p class="text-base sm:text-lg font-bold text-gray-800 mt-0.5">${somaBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
-                            </div>
-                            <div class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-xs">
-                                <i class="fa-solid fa-sack-dollar"></i>
-                            </div>
-                        </div>
-                        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
-                            <div>
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Total Recebido (Sinal)</p>
-                                <p class="text-base sm:text-lg font-bold text-emerald-600 mt-0.5">${somaRecebido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
-                            </div>
-                            <div class="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-xs">
-                                <i class="fa-solid fa-hand-holding-dollar"></i>
-                            </div>
-                        </div>
-                        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
-                            <div>
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Saldo Restante</p>
-                                <p class="text-base sm:text-lg font-bold text-amber-600 mt-0.5">${somaSaldo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
-                            </div>
-                            <div class="w-8 h-8 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center text-xs">
-                                <i class="fa-solid fa-scale-balanced"></i>
-                            </div>
-                        </div>
-                    `;
-                }
+                document.getElementById('kpiFaturamento').textContent = somaBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                document.getElementById('kpiRecebido').textContent = somaRecebido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                document.getElementById('kpiSaldo').textContent = somaSaldo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
                 let htmlCabecalho = '';
                 colunas.forEach(col => {
