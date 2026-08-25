@@ -568,8 +568,7 @@
                 const pendentesDaSuite = reservasDaSuite.filter(r => r.status === 'Pendente');
 
                 // Calcula o valor da diária vigente hoje considerando as regras de tarifas especiais do banco
-                const valorDiariaAplicadoHoje = await calcularValorVigenteCard(suite.id, hojeStr, hojeStr);
-
+               const valorDiariaAplicadoHoje = await calcularValorVigenteCard(suite.id, hojeStr, hojeStr);
                 if (aprovadasDaSuite.length > 0) {
                     for (let index = 0; index < aprovadasDaSuite.length; index++) {
                         const aprovada = aprovadasDaSuite[index];
