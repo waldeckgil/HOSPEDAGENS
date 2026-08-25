@@ -163,9 +163,7 @@
                 return `${y}-${m}-${day}`;
             };
             
-            // Data inicial definida como a data atual (hoje)
             document.getElementById('filtroDataInicio').value = formatarDataInput(hoje);
-            // Data final deixada em branco (sem limite)
             document.getElementById('filtroDataFim').value = '';
         }
 
@@ -379,6 +377,20 @@
                 }
 
                 let registrosFiltrados = registros;
+
+                // Regra específica para Reservas Futuras: filtra apenas status_reserva APROVADA e status_fisico OCUPADA ou RESERVA FUTURA
+                if (ehViewReservas) {
+                    registrosFiltrados = registrosFiltrados.filter(row => {
+                        let statusReserva = String(row['status_reserva'] || '').trim().toUpperCase();
+                        let statusFisico = String(row['status_fisico_suite'] || '').trim().toUpperCase();
+                        
+                        let isAprovada = (statusReserva === 'APROVADA');
+                        let isOcupadaOuFutura = (statusFisico === 'OCUPADA' || statusFisico === 'RESERVA FUTURA');
+
+                        return isAprovada && isOcupadaOuFutura;
+                    });
+                }
+
                 if (!ehViewTarifas) {
                     registrosFiltrados = registrosFiltrados.filter(row => {
                         let valData = row['data_pagamento'] || row['checkin'] || '';
