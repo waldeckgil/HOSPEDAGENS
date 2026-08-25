@@ -13,7 +13,6 @@
             background-position: center;
             min-height: 100vh;
         }
-        /* Oculta a barra de rolagem nas miniaturas no mobile, mas permite o scroll */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -145,22 +144,22 @@
         document.getElementById('filtro-checkin').setAttribute('min', hojeISO);
         document.getElementById('filtro-checkout').setAttribute('min', hojeISO);
 
-        // --- INICIALIZAÇÃO E MONITORAMENTO DE SESSÃO UNIFICADA ---
+        // Define datas iniciais padrão no filtro se estiverem vazias (ex: próximos 5 dias)
+        const dHj = new Date();
+        const dFut = new Date();
+        dFut.setDate(dHj.getDate() + 5);
+        document.getElementById('filtro-checkin').value = dHj.toISOString().split('T')[0];
+        document.getElementById('filtro-checkout').value = dFut.toISOString().split('T')[0];
+
         async function inicializarVitrine() {
-            supabaseClient.auth.onAuthStateChange((event, session) => {
-                // Mantém o comportamento seguro de sessão global
-            });
-
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            await carregarDados();
-        }
-
-        async function carregarDados() {
             const params = new URLSearchParams(window.location.search);
             pousadaIdGlobal = params.get('pousada_id') || '2ce55615-0d32-467a-a412-f9868ec8c9cf';
 
             const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', pousadaIdGlobal).single();
             document.getElementById('titulo-pousada').innerText = pousada?.nome || "Nossa Pousada";
+            
+            // Executa a busca inicial automaticamente com as datas padrão
+            filtrarSuitesDisponiveisPorPeriodo();
         }
 
         async function calcularValorTotalEstadia(suiteId, checkinStr, checkoutStr, precoBaseDiaria) {
@@ -225,13 +224,6 @@
 
             if (!checkinFiltro || !checkoutFiltro) {
                 alert("Por favor, selecione as datas de Check-in e Check-out para consultar a disponibilidade.");
-                document.getElementById('filtro-checkin').focus();
-                return;
-            }
-
-            if (checkinFiltro < hojeISO) {
-                alert("A data de check-in não pode ser anterior à data atual.");
-                document.getElementById('filtro-checkin').value = hojeISO;
                 return;
             }
 
@@ -240,49 +232,38 @@
                 return;
             }
 
+            // Busca todas as suítes da pousada (removendo apenas suítes de teste explícitas)
             const { data: suitesBrutas } = await supabaseClient.from('suites').select('*').eq('pousada_id', pousadaIdGlobal);
             if (!suitesBrutas || suitesBrutas.length === 0) {
                 container.innerHTML = '<p class="text-center bg-black/40 p-6 rounded-xl">Nenhuma suíte cadastrada nesta pousada no momento.</p>';
                 return;
             }
 
-            // BLINDAGEM DA VITRINE: Remove suítes de teste, incompletas ou fisicamente ocupadas
             const suites = suitesBrutas.filter(s => {
                 const nomeLower = (s.nome || '').toLowerCase();
                 if (nomeLower.includes('teste')) return false;
                 if (!s.nome) return false;
-                
-                const statusFisico = (s.status || '').trim().toLowerCase();
-                if (statusFisico === 'ocupada' || (statusFisico !== '' && statusFisico !== 'disponível')) {
-                    return false;
-                }
-
                 return true;
             });
 
-            if (suites.length === 0) {
-                container.innerHTML = '<p class="text-center bg-black/40 p-6 rounded-xl">Nenhuma suíte disponível no momento.</p>';
-                return;
-            }
-
-            // Bloqueia tanto reservas Aprovadas quanto Pendentes para evitar conflitos de período
-            const { data: reservasOcupadasOuPendentes } = await supabaseClient
+            // Busca todas as reservas ativas ou pendentes da pousada para cruzar as datas
+            const { data: todasReservas } = await supabaseClient
                 .from('reservas')
                 .select('*')
                 .eq('pousada_id', pousadaIdGlobal)
-                .in('status', ['Aprovada', 'Pendente'])
-                .gte('checkout', hojeISO);
+                .in('status', ['Aprovada', 'Pendente']);
 
-            const novoInicio = new Date(checkinFiltro);
-            const novoFim = new Date(checkoutFiltro);
+            const novoInicio = new Date(checkinFiltro + 'T00:00:00');
+            const novoFim = new Date(checkoutFiltro + 'T00:00:00');
 
             const suitesOcupadasIds = new Set();
-            if (reservasOcupadasOuPendentes) {
-                reservasOcupadasOuPendentes.forEach(res => {
-                    if (res.checkout < hojeISO) return;
 
-                    const inicioExistente = new Date(res.checkin);
-                    const fimExistente = new Date(res.checkout);
+            if (todasReservas) {
+                todasReservas.forEach(res => {
+                    const inicioExistente = new Date(res.checkin + 'T00:00:00');
+                    const fimExistente = new Date(res.checkout + 'T00:00:00');
+                    
+                    // Verifica se há sobreposição exata no período consultado
                     if (novoInicio < fimExistente && novoFim > inicioExistente) {
                         suitesOcupadasIds.add(res.suite_id);
                     }
@@ -317,8 +298,11 @@
                 const precoBase = suite.preco || suite.valor_diaria || 150.00;
                 const valorTotalEstadia = await calcularValorTotalEstadia(suite.id, checkinFiltro, checkoutFiltro, precoBase);
 
+                // GERAÇÃO DO MINI-CALENDÁRIO VISUAL (Próximos 14 dias a partir do check-in escolhido)
+                let calendarioHTML = gerarMiniCalendarioHTML(suite.id, checkinFiltro, todasReservas || []);
+
                 container.innerHTML += `
-                    <div class="bg-white rounded-2xl shadow-xl overflow-hidden text-gray-800 border-l-8 border-green-500 p-4 md:p-6">
+                    <div class="bg-white rounded-2xl shadow-xl overflow-hidden text-gray-800 border-l-8 border-green-500 p-4 md:p-6 mb-4">
                         <div class="flex flex-col md:flex-row gap-4 md:gap-6">
                             
                             <!-- Bloco da Imagem -->
@@ -347,9 +331,21 @@
                                         </div>
                                     </div>
 
-                                    <p class="text-[11px] sm:text-xs text-gray-500 mb-3 md:mb-4">Veja de forma rápida as vagas disponíveis para esta acomodação.</p>
-                                    
-                                    <div class="border-t border-gray-100 pt-3 mb-4 md:mb-3">
+                                    <!-- Mini Calendário de Ocupação da Suíte -->
+                                    <div class="bg-gray-50 p-2.5 rounded-xl border border-gray-200 mb-3">
+                                        <p class="text-[10px] font-bold text-gray-600 uppercase mb-1.5 flex items-center gap-1">
+                                            <span>📅</span> Status Diário (Próx. Dias):
+                                        </p>
+                                        <div class="grid grid-cols-7 gap-1 text-center">
+                                            ${calendarioHTML}
+                                        </div>
+                                        <div class="flex justify-between items-center mt-2 text-[9px] text-gray-500 font-semibold">
+                                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Livre</span>
+                                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-500 inline-block"></span> Ocupada</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="border-t border-gray-100 pt-2 mb-3">
                                         <p class="text-[11px] sm:text-xs text-gray-500">Total para ${qtdNoites} noite(s):</p>
                                         <p class="text-xl sm:text-2xl font-extrabold text-green-600">R$ ${valorTotalEstadia.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
                                     </div>
@@ -363,6 +359,47 @@
                     </div>
                 `;
             }
+        }
+
+        // Função para gerar visualmente os dias livres e ocupados em formato de mini-calendário
+        function gerarMiniCalendarioHTML(suiteId, dataBaseStr, todasReservas) {
+            let html = '';
+            let dataCursor = new Date(dataBaseStr + 'T00:00:00');
+
+            // Filtra as reservas desta suíte específica
+            const reservasDaSuite = todasReservas.filter(r => r.suite_id === suiteId);
+
+            // Mostra os próximos 14 dias a partir da data de check-in selecionada
+            for (let i = 0; i < 14; i++) {
+                const diaIso = dataCursor.toISOString().split('T')[0];
+                const diaNum = dataCursor.getDate();
+                const mesNum = dataCursor.getMonth() + 1;
+
+                // Verifica se este dia específico está ocupado por alguma reserva
+                let ocupado = false;
+                for (let res of reservasDaSuite) {
+                    if (diaIso >= res.checkin && diaIso < res.checkout) {
+                        ocupado = true;
+                        break;
+                    }
+                }
+
+                const corClasse = ocupado 
+                    ? 'bg-rose-500 text-white font-bold' 
+                    : 'bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold';
+
+                const tituloTooltip = `${diaNum}/${mesNum}: ${ocupado ? 'Ocupada' : 'Disponível'}`;
+
+                html += `
+                    <div class="${corClasse} rounded-lg p-1 text-[10px] flex flex-col items-center justify-center shadow-sm" title="${tituloTooltip}">
+                        <span class="text-[8px] opacity-80">${diaNum}/${mesNum}</span>
+                        <span>${ocupado ? '✕' : '✓'}</span>
+                    </div>
+                `;
+
+                dataCursor.setDate(dataCursor.getDate() + 1);
+            }
+            return html;
         }
 
         function trocarFotoPrincipal(elementoMiniatura, novaUrl) {
@@ -416,11 +453,6 @@
                 return;
             }
 
-            if (checkinFiltro < hojeISO) {
-                alert("A data de check-in não pode ser anterior à data atual.");
-                return;
-            }
-
             document.getElementById('suite-id-reserva').value = sId;
             document.getElementById('form-reserva').reset();
             
@@ -442,12 +474,6 @@
         document.getElementById('form-reserva').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const checkinVal = document.getElementById('checkin').value;
-            if (checkinVal < hojeISO) {
-                alert("Erro: Não é permitido fazer reservas com datas retroativas.");
-                return;
-            }
-
             const btnEnviar = document.getElementById('btn-enviar');
             const msgSucesso = document.getElementById('feedback-sucesso');
             const msgErro = document.getElementById('feedback-erro');
@@ -457,6 +483,7 @@
             btnEnviar.innerText = "Enviando...";
 
             const suiteId = document.getElementById('suite-id-reserva').value;
+            const checkinVal = document.getElementById('checkin').value;
             const checkoutVal = document.getElementById('checkout').value;
 
             const { data: suiteData } = await supabaseClient.from('suites').select('*').eq('id', suiteId).single();
