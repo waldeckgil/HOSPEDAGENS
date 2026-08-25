@@ -622,7 +622,27 @@
                 const pendentesDaSuite = reservasDaSuite.filter(r => r.status === 'Pendente');
 
                 // Verifica se há tarifa especial para esta suíte
-                const temTarifaEspecial = tarifasEspeciaisGlobaisCache.some(t => t.suite_id === suite.id || !t.suite_id);
+
+                // CÓDIGO NOVO CORRIGIDO:
+// Pega o checkin e checkout da reserva atual do loop (se houver) para validar o período exato
+const checkinReservaCard = aprovada ? aprovada.checkin : (pend ? pend.checkin : null);
+const checkoutReservaCard = aprovada ? aprovada.checkout : (pend ? pend.checkout : null);
+
+const temTarifaEspecial = tarifasEspeciaisGlobaisCache.some(t => {
+    // 1. Confere se a tarifa pertence à suíte ou é global
+    const pertenceSuite = (t.suite_id === suiteId || !t.suite_id);
+    if (!pertenceSuite) return false;
+
+    // 2. Se a reserva tem datas definidas, valida se há interseção real com o período da tarifa especial
+    if (checkinReservaCard && checkoutReservaCard && t.data_inicio && t.data_fim) {
+        // A reserva intercepta a tarifa se o checkin for anterior/igual ao fim da tarifa 
+        // e o checkout for posterior/igual ao início da tarifa
+        return (checkinReservaCard <= t.data_fim && checkoutReservaCard >= t.data_inicio);
+    }
+    
+    return true;
+});
+                                                
                 const htmlTarifaBadge = temTarifaEspecial 
                     ? `<button onclick="abrirModalTarifaEspecial('${suite.id}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 text-[11px] font-bold px-2 py-0.5 rounded-md transition flex items-center gap-1 cursor-pointer"><span>⚡ Com Tarifa Especial</span></button>` 
                     : '';
