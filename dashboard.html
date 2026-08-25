@@ -541,21 +541,21 @@
                 const pendentesDaSuite = reservasDaSuite.filter(r => r.status === 'Pendente');
 
                 // 🌟 ATUALIZAÇÃO SOLICITADA: Calcula dinamicamente a diária vigente (considerando tarifas especiais para o dia de hoje)
-                let diariaVigenteCard = Number(suite.valor_diaria || 0);
-                try {
-                    const amanhaStr = new Date(Date.now() + 86400000).toLocaleDateString('sv-SE');
-                    const { data: valorCalculadoCard } = await supabaseClient.rpc('calcular_total_reserva', {
-                        p_suite_id: suite.id,
-                        p_checkin: hojeStr,
-                        p_checkout: amanhaStr
-                    });
-                    if (valorCalculadoCard !== null && !isNaN(valorCalculadoCard)) {
-                        diariaVigenteCard = Number(valorCalculadoCard);
-                    }
-                } catch (errCalc) {
-                    console.error("Erro ao calcular diária vigente para o card:", errCalc);
-                }
-
+            // LINHA MODIFICADA:
+let diariaVigenteCard = Number(suite.valor_diaria || 0);
+try {
+    const amanhaStr = new Date(Date.now() + 86400000).toLocaleDateString('sv-SE');
+    const { data: valorCalculadoCard } = await supabaseClient.rpc('calcular_total_reserva', {
+        p_suite_id: suite.id,
+        p_checkin: hojeStr,
+        p_checkout: amanhaStr
+    });
+    if (valorCalculadoCard !== null && !isNaN(valorCalculadoCard)) {
+        diariaVigenteCard = Number(valorCalculadoCard);
+    }
+} catch (errCalc) {
+    console.error("Erro ao calcular diária vigente para o card:", errCalc);
+}
                 if (aprovadasDaSuite.length > 0) {
                     aprovadasDaSuite.forEach((aprovada, index) => {
                         const isFutura = aprovada.checkin > hojeStr;
