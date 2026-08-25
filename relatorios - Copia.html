@@ -162,14 +162,9 @@
                 let day = String(d.getDate()).padStart(2, '0');
                 return `${y}-${m}-${day}`;
             };
-            
-            // Início do mês atual para abranger reservas futuras logo de cara
-            const primeiroDiaMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-            // Fim do mês atual (ou avançado para frente)
-            const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
-
-            document.getElementById('filtroDataInicio').value = formatarDataInput(primeiroDiaMes);
-            document.getElementById('filtroDataFim').value = formatarDataInput(ultimoDiaMes);
+            const dataHojeFormatada = formatarDataInput(hoje);
+            document.getElementById('filtroDataInicio').value = dataHojeFormatada;
+            document.getElementById('filtroDataFim').value = dataHojeFormatada;
         }
 
         async function protegerPagina() {
