@@ -622,11 +622,24 @@
                 const pendentesDaSuite = reservasDaSuite.filter(r => r.status === 'Pendente');
 
                 // Verifica se há tarifa especial ativa hoje (dentro do período de vigência) para esta suíte ou global
-                const temTarifaEspecial = tarifasEspeciaisGlobaisCache.some(t => {
-                    const atendeSuite = (t.suite_id === suite.id || !t.suite_id);
-                    const dentroDaVigencia = t.data_inicio && t.data_fim && hojeStr >= t.data_inicio && hojeStr <= t.data_fim;
-                    return atendeSuite && dentroDaVigencia;
-                });
+               // Substitua a lógica de verificação do selo 'temTarifaEspecial' por esta:
+const temTarifaEspecial = tarifasEspeciaisGlobaisCache.some(t => {
+    const atendeSuite = (t.suite_id === suite.id || !t.suite_id);
+    
+    // Pega as datas da reserva ativa/futura associada a este card (se houver)
+    // Caso esteja checando de forma genérica, valida com base nas reservas da suíte:
+    const reservaDaVez = aprovadasDaSuite.find(r => r.suite_id === suite.id);
+    
+    if (reservaDaVez && reservaDaVez.checkin && reservaDaVez.checkout && t.data_inicio && t.data_fim) {
+        // Regra de sobreposição de períodos: Check-in <= Data Fim E Check-out >= Data Início
+        const temSobreposicao = (reservaDaVez.checkin <= t.data_fim) && (reservaDaVez.checkout >= t.data_inicio);
+        return atendeSuite && temSobreposicao;
+    }
+    
+    // Fallback padrão se não houver reserva específica amarrada no escopo imediato
+    const dentroDaVigenciaGeral = t.data_inicio && t.data_fim && hojeStr >= t.data_inicio && hojeStr <= t.data_fim;
+    return atendeSuite && dentroDaVigenciaGeral;
+});
                 
                 const htmlTarifaBadge = temTarifaEspecial 
                     ? `<button onclick="abrirModalTarifaEspecial('${suite.id}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 text-[11px] font-bold px-2 py-0.5 rounded-md transition flex items-center gap-1 cursor-pointer"><span>⚡ Com Tarifa Especial</span></button>` 
