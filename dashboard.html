@@ -180,7 +180,7 @@
                         <strong id="modal-qtd-diarias">1 diária(s)</strong>
                     </div>
                     <div class="flex justify-between">
-                        <span>Valor Total da Estadia (com Regra de Tarifas):</span>
+                        <span>Valor Total da Estadia:</span>
                         <strong id="modal-valor-total">R$ 0,00</strong>
                     </div>
                     <div class="flex justify-between border-t border-blue-200 pt-1">
@@ -252,6 +252,9 @@
         let suitesGlobaisCache = [];
         let pagamentosGlobaisCache = [];
         let camposLimposParaNovaReserva = false;
+        
+        // Cache auxiliar em memória para guardar valores totais calculados dinamicamente via RPC para cada reserva
+        let valoresCalculadosCache = {};
 
         async function protegerPagina() {
             supabaseClient.auth.onAuthStateChange((event, session) => {
@@ -524,6 +527,28 @@
                 suitesGlobaisCache = suitesAtualizadas || [];
             }
 
+            // PRÉ-CALCULAR VALORES INTELIGENTES VIA RPC PARA CADA RESERVA ATIVA/PENDENTE
+            valoresCalculadosCache = {};
+            const reservasParaCalcular = reservasGlobaisCache.filter(r => r.status === 'Aprovada' || r.status === 'Pendente');
+            for (const r of reservasParaCalcular) {
+                if (r.suite_id && r.checkin && r.checkout) {
+                    try {
+                        const { data: valorCalculado, error: erroRpc } = await supabaseClient.rpc('calcular_total_reserva', { 
+                            p_suite_id: r.suite_id, 
+                            p_checkin: r.checkin, 
+                            p_checkout: r.checkout 
+                        });
+                        if (!erroRpc && valorCalculado !== null) {
+                            valoresCalculadosCache[r.id] = Number(valorCalculado);
+                        } else {
+                            valoresCalculadosCache[r.id] = Number(r.valor_total || 0);
+                        }
+                    } catch (e) {
+                        valoresCalculadosCache[r.id] = Number(r.valor_total || 0);
+                    }
+                }
+            }
+
             await verificarReservasPendentesDashboard();
             atualizarRadarEKPIs();
 
@@ -535,14 +560,13 @@
                 return;
             }
 
-            for (const suite of suitesGlobaisCache) {
+            suitesGlobaisCache.forEach(suite => {
                 const reservasDaSuite = reservasGlobaisCache.filter(r => r.suite_id === suite.id && r.status !== 'Cancelada' && r.status !== 'Recusada' && r.status !== 'Finalizada');
                 const aprovadasDaSuite = reservasDaSuite.filter(r => r.status === 'Aprovada');
                 const pendentesDaSuite = reservasDaSuite.filter(r => r.status === 'Pendente');
 
                 if (aprovadasDaSuite.length > 0) {
-                    for (let index = 0; index < aprovadasDaSuite.length; index++) {
-                        const aprovada = aprovadasDaSuite[index];
+                    aprovadasDaSuite.forEach((aprovada, index) => {
                         const isFutura = aprovada.checkin > hojeStr;
                         const statusParaModal = isFutura ? 'Reservado' : 'Ocupada';
                         const badgeText = isFutura ? 'Reserva Futura' : 'Ocupada';
@@ -557,20 +581,8 @@
                         
                         const qtdDiarias = calcularQuantidadeDiarias(aprovada.checkin, aprovada.checkout);
                         
-                        // Consulta inteligente do banco (RPC) para garantir o valor real aplicando as regras de tarifa do range de dias
-                        let valorTotal = Number(aprovada.valor_total || 0);
-                        try {
-                            const { data: valorCalculado, error: erroRpc } = await supabaseClient.rpc('calcular_total_reserva', { 
-                                p_suite_id: suite.id, 
-                                p_checkin: aprovada.checkin, 
-                                p_checkout: aprovada.checkout 
-                            });
-                            if (!erroRpc && valorCalculado !== null) {
-                                valorTotal = Number(valorCalculado);
-                            }
-                        } catch (err) {
-                            console.error("Erro ao calcular total via RPC no card:", err);
-                        }
+                        // UTILIZANDO O VALOR INTELIGENTE CALCULADO VIA TARIFA OU O SALVO NA RESERVA
+                        const valorTotal = valoresCalculadosCache[aprovada.id] !== undefined ? valoresCalculadosCache[aprovada.id] : Number(aprovada.valor_total || 0);
 
                         const pagamentosDestaReserva = pagamentosGlobaisCache.filter(p => p.reserva_id === aprovada.id);
                         const totalPago = pagamentosDestaReserva.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
@@ -616,7 +628,7 @@
                                         
                                         <div class="flex items-center justify-between pt-1 border-t border-black/5 mt-2">
                                             <span class="text-xs font-semibold text-gray-700">Estadia: <strong class="text-gray-900">${qtdDiarias} diária(s)</strong></span>
-                                            <span class="text-xs font-extrabold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">Total Real (Tarifa Aplicada): ${formatarMoeda(valorTotal)}</span>
+                                            <span class="text-xs font-extrabold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">Total Calculado: ${formatarMoeda(valorTotal)}</span>
                                         </div>
 
                                         <div class="grid grid-cols-2 gap-2 bg-white/80 p-2.5 rounded-xl border border-black/5 text-xs mt-2">
@@ -646,7 +658,7 @@
                                     </div>
                                 </div>
                             </div>`;
-                    }
+                    });
                 } 
                 
                 if (aprovadasDaSuite.length === 0 && pendentesDaSuite.length === 0) {
@@ -681,26 +693,14 @@
                         </div>`;
                 }
 
-                for (let index = 0; index < pendentesDaSuite.length; index++) {
-                    const pend = pendentesDaSuite[index];
+                pendentesDaSuite.forEach((pend, index) => {
                     const linkZapPend = gerarLinkWhatsApp(pend.whatsapp_hospede, pend.hospede_nome, pend.checkin, pend.checkout);
                     const dataSolicitacaoFormatada = formatarDataHora(pend.criado_em);
                     const qtdDiariasPend = calcularQuantidadeDiarias(pend.checkin, pend.checkout);
                     
-                    let valorTotalPend = Number(pend.valor_total || 0);
-                    try {
-                        const { data: valorCalculadoPend, error: erroRpcPend } = await supabaseClient.rpc('calcular_total_reserva', { 
-                            p_suite_id: suite.id, 
-                            p_checkin: pend.checkin, 
-                            p_checkout: pend.checkout 
-                        });
-                        if (!erroRpcPend && valorCalculadoPend !== null) {
-                            valorTotalPend = Number(valorCalculadoPend);
-                        }
-                    } catch (err) {
-                        console.error("Erro ao calcular RPC pendente:", err);
-                    }
-
+                    // UTILIZANDO O VALOR INTELIGENTE CALCULADO VIA TARIFA PARA A PENDÊNCIA
+                    const valorTotalPend = valoresCalculadosCache[pend.id] !== undefined ? valoresCalculadosCache[pend.id] : Number(pend.valor_total || 0);
+                    
                     const sufixoTituloPend = pendentesDaSuite.length > 1 ? ` (${index + 1})` : '';
                     const nomeHospedePendExibicao = pend.hospede_nome ? ` - <span class="font-normal text-amber-950/80 text-sm sm:text-base">${pend.hospede_nome}</span>` : '';
 
@@ -727,7 +727,7 @@
                                 <div class="flex justify-between items-center">
                                     <div>
                                         <h2 class="text-base sm:text-lg font-bold text-amber-950">${suite.nome}${sufixoTituloPend}${nomeHospedePendExibicao}</h2>
-                                        <span class="text-[11px] font-bold text-amber-900/80 bg-amber-200/60 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária: ${formatarMoeda(suite.valor_diaria)}</span>
+                                        <span class="text-[11px] font-bold text-amber-900/80 bg-amber-200/60 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária Padrão: ${formatarMoeda(suite.valor_diaria)}</span>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm bg-amber-200 text-amber-900">Pendente</span>
@@ -743,7 +743,7 @@
                                     
                                     <div class="flex items-center justify-between pt-1 border-t border-amber-200 mt-2">
                                         <span class="text-xs font-semibold text-amber-900">Estadia: <strong class="text-gray-900">${qtdDiariasPend} diária(s)</strong></span>
-                                        <span class="text-xs font-extrabold text-blue-700 bg-white px-2.5 py-1 rounded-lg border border-amber-200">Total Real: ${formatarMoeda(valorTotalPend)}</span>
+                                        <span class="text-xs font-extrabold text-blue-700 bg-white px-2.5 py-1 rounded-lg border border-amber-200">Total Calculado: ${formatarMoeda(valorTotalPend)}</span>
                                     </div>
 
                                     <div class="grid grid-cols-2 gap-2 bg-white/80 p-2.5 rounded-xl border border-amber-200 text-xs mt-2">
@@ -789,8 +789,8 @@
                                 </div>
                             </div>
                         </div>`;
-                }
-            }
+                });
+            });
         }
         
         async function abrirModal(id, nome, status, reservaId = null) {
@@ -840,7 +840,7 @@
             
             document.getElementById('modal-edicao').classList.remove('hidden');
             await verificarStatusModal();
-            await recalcularValoresModalEdicao();
+            await recalcalcularValoresModalEdicao();
         }
 
         async function mudarStatusReserva(reservaId, novoStatus) {
@@ -885,7 +885,7 @@
             return saldo > 0 ? saldo : 0;
         }
 
-        async function recalcularValoresModalEdicao() {
+        async function recalcalcularValoresModalEdicao() {
             const suiteId = document.getElementById('edit-suite-id').value;
             const reservaId = document.getElementById('edit-reserva-id').value;
             let checkinStr = document.getElementById('edit-checkin').value;
@@ -911,7 +911,6 @@
             const valorDiaria = suiteObj ? Number(suiteObj.valor_diaria || 0) : 0;
             valorTotal = qtdDiarias * valorDiaria;
 
-            // Inteligência para consultar o banco utilizando a regra de tarifa para o range de datas aplicado
             try {
                 const { data: valorCalculado, error: erroRpc } = await supabaseClient.rpc('calcular_total_reserva', { 
                     p_suite_id: suiteId, 
@@ -922,7 +921,7 @@
                     valorTotal = Number(valorCalculado);
                 }
             } catch (err) {
-                console.error("Erro ao recalcular via RPC no modal:", err);
+                console.error("Erro ao recalcular via RPC:", err);
             }
 
             document.getElementById('modal-valor-total').innerText = formatarMoeda(valorTotal);
@@ -950,7 +949,7 @@
         }
 
         async function atualizarSaldoCheckoutModal() {
-            await recalcularValoresModalEdicao();
+            await recalcalcularValoresModalEdicao();
         }
 
         async function verificarStatusModal() {
