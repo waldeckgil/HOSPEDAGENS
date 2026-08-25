@@ -551,7 +551,10 @@
                             </div>
                             <div class="text-gray-600 space-y-0.5 pt-1 border-t border-amber-200/60">
                                 <p><strong>Período:</strong> ${formatarDataSimples(t.data_inicio)} até ${formatarDataSimples(t.data_fim)}</p>
-                                <p><strong>Dias aplicados:</strong> ${(() => { try { const d = typeof t.dias_semana === 'string' ? JSON.parse(t.dias_semana) : t.dias_semana; if (Array.isArray(d)) { const map = {1:'Segunda',2:'Terça',3:'Quarta',4:'Quinta',5:'Sexta',6:'Sábado',7:'Domingo'}; return d.map(x => map[x] || x).join(', '); } } catch(e){} return diasArgumento || diasTexto; })()}</p>
+
+
+<p><strong>Dias aplicados:</strong> ${(() => { try { const d = typeof t.dias_semana === 'string' ? JSON.parse(t.dias_semana) : t.dias_semana; if (Array.isArray(d) && d.length > 0) { const map = {1:'Segunda',2:'Terça',3:'Quarta',4:'Quinta',5:'Sexta',6:'Sábado',7:'Domingo'}; return d.map(x => map[x] || x).join(', '); } } catch(e){} return diasTexto || 'Todos os dias'; })()}</p>
+
                                  <p><strong>Tipo de Ajuste:</strong> ${tipoAjuste}</p>
                             </div>
                         </div>
