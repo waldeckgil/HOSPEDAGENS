@@ -55,65 +55,65 @@
                         </div>
                     </div>
 
-                    <!-- Cards de Seleção de Views -->
+                    <!-- Cards de Seleção de Views com Cores Suaves e Bordas Diferenciadas -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
                         
-                        <!-- Card 1: Financeiro -->
+                        <!-- Card 1: Financeiro (Tons de Azul) -->
                         <div onclick="selecionarView('vw_gestor_financeiro_relatorio', 'Resumo Financeiro Consolidado', this)" 
-                             class="card-view cursor-pointer bg-white p-4 rounded-xl shadow-sm border-2 border-transparent hover:border-gray-300 hover:shadow-md transition group">
+                             class="card-view cursor-pointer bg-blue-50/40 p-4 rounded-xl shadow-sm border-2 border-blue-200 hover:border-blue-500 hover:shadow-md transition group">
                             <div class="flex items-center justify-between mb-2">
-                                <div class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-sm">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-700 rounded-lg flex items-center justify-center text-sm shadow-sm">
                                     <i class="fa-solid fa-wallet"></i>
                                 </div>
-                                <span class="text-[9px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded">FINANCEIRO</span>
+                                <span class="text-[9px] font-bold uppercase tracking-wider bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">FINANCEIRO</span>
                             </div>
-                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-blue-600 transition">Visão Financeira</h3>
+                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-blue-700 transition">Visão Financeira</h3>
                             <p class="text-[11px] text-gray-500 mt-0.5 truncate">Valores pagos e saldos pendentes.</p>
                         </div>
 
-                        <!-- Card 2: Hospedagens -->
+                        <!-- Card 2: Hospedagens (Tons de Esmeralda / Verde Claro) -->
                         <div onclick="selecionarView('vw_gestor_hospedagens_relatorio', 'Hospedagens, Suítes e Movimentações', this)" 
-                             class="card-view cursor-pointer bg-white p-4 rounded-xl shadow-sm border-2 border-emerald-600 shadow-md transition group">
+                             class="card-view cursor-pointer bg-emerald-50/40 p-4 rounded-xl shadow-sm border-2 border-emerald-500 shadow-md transition group">
                             <div class="flex items-center justify-between mb-2">
-                                <div class="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-sm">
+                                <div class="w-8 h-8 bg-emerald-100 text-emerald-700 rounded-lg flex items-center justify-center text-sm shadow-sm">
                                     <i class="fa-solid fa-bed"></i>
                                 </div>
-                                <span class="text-[9px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded">HOSPEDAGENS</span>
+                                <span class="text-[9px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">HOSPEDAGENS</span>
                             </div>
-                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-emerald-600 transition">Status Geral de Ocupação das Suites</h3>
+                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-emerald-700 transition">Status Geral de Ocupação das Suites</h3>
                             <p class="text-[11px] text-gray-500 mt-0.5 truncate">Cruzamento de nomes e acomodações.</p>
                         </div>
 
-                        <!-- Card 3: Tarifas Especiais -->
+                        <!-- Card 3: Tarifas Especiais (Tons de Âmbar / Amarelo Suave) -->
                         <div onclick="selecionarView('vw_gestor_tarifas_relatorio', 'Auditoria de Tarifas Especiais', this)" 
-                             class="card-view cursor-pointer bg-white p-4 rounded-xl shadow-sm border-2 border-transparent hover:border-gray-300 hover:shadow-md transition group">
+                             class="card-view cursor-pointer bg-amber-50/40 p-4 rounded-xl shadow-sm border-2 border-amber-200 hover:border-amber-500 hover:shadow-md transition group">
                             <div class="flex items-center justify-between mb-2">
-                                <div class="w-8 h-8 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center text-sm">
+                                <div class="w-8 h-8 bg-amber-100 text-amber-700 rounded-lg flex items-center justify-center text-sm shadow-sm">
                                     <i class="fa-solid fa-tags"></i>
                                 </div>
-                                <span class="text-[9px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded">TARIFAS</span>
+                                <span class="text-[9px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">TARIFAS</span>
                             </div>
-                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-amber-600 transition"> Tarifas Aplicadas por Suíte</h3>
+                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-amber-700 transition">Tarifas Aplicadas por Suíte</h3>
                             <p class="text-[11px] text-gray-500 mt-0.5 truncate">Valores e regras vigentes.</p>
                         </div>
 
-                        <!-- Card 4: Reservas e Futuras -->
+                        <!-- Card 4: Reservas e Futuras (Tons de Roxo / Violeta Claro) -->
                         <div onclick="selecionarView('vw_gestor_reservas_relatorio', 'Próximas Reservas do Mês Atual', this)" 
-                             class="card-view cursor-pointer bg-white p-4 rounded-xl shadow-sm border-2 border-transparent hover:border-gray-300 hover:shadow-md transition group">
+                             class="card-view cursor-pointer bg-purple-50/40 p-4 rounded-xl shadow-sm border-2 border-purple-200 hover:border-purple-500 hover:shadow-md transition group">
                             <div class="flex items-center justify-between mb-2">
-                                <div class="w-8 h-8 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center text-sm">
+                                <div class="w-8 h-8 bg-purple-100 text-purple-700 rounded-lg flex items-center justify-center text-sm shadow-sm">
                                     <i class="fa-solid fa-calendar-check"></i>
                                 </div>
-                                <span class="text-[9px] font-bold uppercase tracking-wider bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded">FUTURAS</span>
+                                <span class="text-[9px] font-bold uppercase tracking-wider bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">FUTURAS</span>
                             </div>
-                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-purple-600 transition">Reservas e Futuras</h3>
+                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-purple-700 transition">Reservas e Futuras</h3>
                             <p class="text-[11px] text-gray-500 mt-0.5 truncate">Todas as reservas futuras.</p>
                         </div>
 
                     </div>
 
-                    <!-- Container Dinâmico de KPIs / Cards Informativos por View -->
-                    <div id="containerKpis" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                    <!-- Container Dinâmico de KPIs / Cards Informativos por View (Ajustado para evitar esprea) -->
+                    <div id="containerKpis" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
                         <!-- Conteúdo injetado dinamicamente via JS dependendo da View Ativa -->
                     </div>
 
@@ -233,15 +233,21 @@
             tituloBaseAtual = tituloAmigavel;
 
             document.querySelectorAll('.card-view').forEach(card => {
-                card.classList.remove('border-blue-600', 'border-amber-500', 'border-purple-600', 'border-emerald-600', 'shadow-md');
-                card.classList.add('border-transparent');
+                card.classList.remove('border-blue-500', 'border-amber-500', 'border-purple-500', 'border-emerald-500', 'shadow-md');
+                // Restaura as bordas suaves padrão para cada um
+                if (card.onclick.toString().includes('financeiro')) card.classList.add('border-blue-200');
+                else if (card.onclick.toString().includes('hospedagens')) card.classList.add('border-emerald-200');
+                else if (card.onclick.toString().includes('tarifas')) card.classList.add('border-amber-200');
+                else card.classList.add('border-purple-200');
             });
-            elementoCard.classList.remove('border-transparent');
+
+            // Aplica a borda forte selecionada
+            if (nomeView.includes('financeiro')) elementoCard.classList.replace('border-blue-200', 'border-blue-500');
+            else if (nomeView.includes('hospedagens')) elementoCard.classList.replace('border-emerald-200', 'border-emerald-500');
+            else if (nomeView.includes('tarifas')) elementoCard.classList.replace('border-amber-200', 'border-amber-500');
+            else elementoCard.classList.replace('border-purple-200', 'border-purple-500');
             
-            if (nomeView.includes('financeiro')) elementoCard.classList.add('border-blue-600', 'shadow-md');
-            else if (nomeView.includes('hospedagens')) elementoCard.classList.add('border-emerald-600', 'shadow-md');
-            else if (nomeView.includes('tarifas')) elementoCard.classList.add('border-amber-500', 'shadow-md');
-            else elementoCard.classList.add('border-purple-600', 'shadow-md');
+            elementoCard.classList.add('shadow-md');
 
             carregarDadosView();
         }
@@ -328,13 +334,13 @@
                     tbody.innerHTML = `<tr><td class="py-6 text-center text-gray-500">NENHUM REGISTRO ENCONTRADO NESTA VIEW.</td></tr>`;
                     if (ehViewHospedagens) {
                         containerKpis.innerHTML = `
-                            <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
-                                <div><p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Total de Reservas</p><p class="text-base font-bold text-gray-800 mt-0.5">0</p></div>
-                                <div class="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-xs"><i class="fa-solid fa-bookmark"></i></div>
+                            <div class="bg-white p-4 rounded-xl shadow-sm border border-emerald-200 flex items-center justify-between">
+                                <div><p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Total de Reservas</p><p class="text-lg font-bold text-gray-800 mt-1">0</p></div>
+                                <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-bookmark"></i></div>
                             </div>
-                            <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
-                                <div><p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Status Físico Suítes</p><p class="text-base font-bold text-blue-600 mt-0.5">0 Disponíveis / 0 Ocupadas</p></div>
-                                <div class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-xs"><i class="fa-solid fa-door-open"></i></div>
+                            <div class="bg-white p-4 rounded-xl shadow-sm border border-blue-200 flex items-center justify-between">
+                                <div><p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Status Físico das Suítes</p><p class="text-lg font-bold text-blue-600 mt-1">0 Disponíveis / 0 Ocupadas</p></div>
+                                <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-door-open"></i></div>
                             </div>
                         `;
                     }
@@ -395,9 +401,8 @@
                     return timeA - timeB;
                 });
 
-                // --- RENDERIZAÇÃO DOS CARDS (CONDICIONAL POR VIEW) ---
+                // --- RENDERIZAÇÃO DOS CARDS (CONDICIONAL POR VIEW COM VISUAL MELHORADO) ---
                 if (ehViewHospedagens) {
-                    // Contagem para os novos cards de Hospedagens
                     let totalReservasValidas = 0;
                     let qtdPendentes = 0;
                     let qtdAprovadas = 0;
@@ -408,7 +413,6 @@
                         let hospede = String(row['hospede'] || row['hospede_nome'] || '').trim();
                         let checkin = String(row['checkin'] || '').trim();
                         let statusReserva = String(row['status_reserva'] || '').toUpperCase();
-                        let statusFisico = String(row['status_fisico_suite'] || '').toUpperCase();
 
                         if (!hospede || hospede === '-' || !checkin || checkin === '-') {
                             qtdDisponiveis++;
@@ -422,27 +426,26 @@
                     });
 
                     containerKpis.innerHTML = `
-                        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-emerald-200 flex items-center justify-between">
                             <div>
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Total de Reservas</p>
-                                <p class="text-base sm:text-lg font-bold text-gray-800 mt-0.5">${totalReservasValidas} <span class="text-xs font-normal text-gray-500">(${qtdPendentes} Pend. / ${qtdAprovadas} Aprov.)</span></p>
+                                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Total de Reservas</p>
+                                <p class="text-lg sm:text-xl font-bold text-gray-800 mt-1">${totalReservasValidas} <span class="text-xs font-normal text-gray-500">(${qtdPendentes} Pend. / ${qtdAprovadas} Aprov.)</span></p>
                             </div>
-                            <div class="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-xs">
+                            <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-sm shadow-sm">
                                 <i class="fa-solid fa-bookmark"></i>
                             </div>
                         </div>
-                        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-blue-200 flex items-center justify-between">
                             <div>
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Status Físico das Suítes</p>
-                                <p class="text-base sm:text-lg font-bold text-blue-600 mt-0.5">${qtdDisponiveis} Disponíveis / ${qtdOcupadas} Ocupadas</p>
+                                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Status Físico das Suítes</p>
+                                <p class="text-lg sm:text-xl font-bold text-blue-600 mt-1">${qtdDisponiveis} Disp. / ${qtdOcupadas} Ocup.</p>
                             </div>
-                            <div class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-xs">
+                            <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-sm shadow-sm">
                                 <i class="fa-solid fa-door-open"></i>
                             </div>
                         </div>
                     `;
                 } else {
-                    // Mantém os KPIs financeiro padrão para as outras telas se necessário
                     let somaBruto = 0;
                     let somaRecebido = 0;
                     let somaSaldo = 0;
@@ -458,31 +461,22 @@
                     });
 
                     containerKpis.innerHTML = `
-                        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-blue-200 flex items-center justify-between">
                             <div>
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Faturamento Bruto</p>
-                                <p class="text-base sm:text-lg font-bold text-gray-800 mt-0.5">${somaBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Faturamento Bruto</p>
+                                <p class="text-lg sm:text-xl font-bold text-gray-800 mt-1">${somaBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                             </div>
-                            <div class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-xs">
+                            <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-sm shadow-sm">
                                 <i class="fa-solid fa-sack-dollar"></i>
                             </div>
                         </div>
-                        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-emerald-200 flex items-center justify-between">
                             <div>
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Total Recebido (Sinal)</p>
-                                <p class="text-base sm:text-lg font-bold text-emerald-600 mt-0.5">${somaRecebido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Total Recebido (Sinal)</p>
+                                <p class="text-lg sm:text-xl font-bold text-emerald-600 mt-1">${somaRecebido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                             </div>
-                            <div class="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-xs">
+                            <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-sm shadow-sm">
                                 <i class="fa-solid fa-hand-holding-dollar"></i>
-                            </div>
-                        </div>
-                        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
-                            <div>
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Saldo Restante</p>
-                                <p class="text-base sm:text-lg font-bold text-amber-600 mt-0.5">${somaSaldo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
-                            </div>
-                            <div class="w-8 h-8 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center text-xs">
-                                <i class="fa-solid fa-scale-balanced"></i>
                             </div>
                         </div>
                     `;
