@@ -56,7 +56,7 @@
                     </div>
 
                     <!-- Cards de Seleção de Views com Cores Suaves e Bordas Diferenciadas -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                         
                         <!-- Card 1: Financeiro (Tons de Azul) -->
                         <div onclick="selecionarView('vw_gestor_financeiro_relatorio', 'Extrato Detalhado de Pagamentos', this)" 
@@ -112,9 +112,9 @@
 
                     </div>
 
-                    <!-- Container Dinâmico de KPIs / Cards Informativos por View -->
-                    <div id="containerKpis" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-5">
-                        <!-- Conteúdo injetado dinamicamente via JS dependendo da View Ativa -->
+                    <!-- 3 Cards de Resumo Financeiro / Informações Globais (Fixos no Topo) -->
+                    <div id="containerKpis" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+                        <!-- Preenchido via JavaScript -->
                     </div>
 
                     <!-- Área de Exibição da Consulta Selecionada -->
@@ -262,18 +262,6 @@
             return `${dia}/${mes}/${ano} ÀS ${hora}:${minuto}`;
         }
 
-        function formatarDataBr(valor) {
-            if (!valor) return '-';
-            let str = String(valor).trim();
-            if (str.length >= 10 && str.includes('-')) {
-                let partes = str.substring(0, 10).split('-');
-                if (partes.length === 3 && partes[0].length === 4) {
-                    return `${partes[2]}/${partes[1]}/${partes[0]}`;
-                }
-            }
-            return str.toUpperCase();
-        }
-
         function obterApelidoColuna(col) {
             let c = col.toLowerCase();
             if (c === 'hospede') return 'HÓSPEDE';
@@ -319,7 +307,6 @@
                     registros = (response.data || []).filter(row => row.pousada_id === usuarioIdAtual);
                     error = response.error;
                 } else if (ehViewFinanceiro) {
-                    // Consulta detalhada na tabela hospede_pagamentos unida com reservas e suites
                     const { data: pagamentosData, error: errPag } = await supabaseClient
                         .from('hospede_pagamentos')
                         .select(`
@@ -366,28 +353,44 @@
                     return;
                 }
 
+                // Buscar dados gerais da view financeira original para calcular o Faturamento Bruto e Saldo Restante para os KPIs
+                let faturamentoBrutoGeral = 0;
+                let totalRecebidoGeral = 0;
+                let valorAReceberGeral = 0;
+
+                if (ehViewFinanceiro) {
+                    const { data: finGeral } = await supabaseClient
+                        .from('vw_gestor_financeiro_relatorio')
+                        .select('*')
+                        .eq('pousada_id', usuarioIdAtual);
+
+                    if (finGeral) {
+                        finGeral.forEach(r => {
+                            faturamentoBrutoGeral += Number(r.valor_total || r.faturamento_bruto || 0);
+                            totalRecebidoGeral += Number(r.total_pago || 0);
+                            valorAReceberGeral += Number(r.saldo_restante || r.valor_a_receber || 0);
+                        });
+                    }
+                }
+
                 if (!registros || registros.length === 0) {
                     thead.innerHTML = `<th class="py-3 px-4">INFORMAÇÃO</th>`;
                     tbody.innerHTML = `<tr><td class="py-6 text-center text-gray-500">NENHUM REGISTRO ENCONTRADO.</td></tr>`;
                     
-                    if (ehViewHospedagens) {
-                        containerKpis.className = "grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5";
+                    if (ehViewFinanceiro) {
+                        containerKpis.className = "grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5";
                         containerKpis.innerHTML = `
+                            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
+                                <div><p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Faturamento Bruto</p><p class="text-lg font-bold text-gray-800 mt-1">R$ 0,00</p></div>
+                                <div class="w-10 h-10 bg-slate-100 text-slate-700 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                            </div>
                             <div class="bg-white p-4 rounded-xl shadow-sm border border-emerald-200 flex items-center justify-between">
-                                <div><p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Total de Reservas</p><p class="text-lg font-bold text-gray-800 mt-1">0</p></div>
-                                <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-bookmark"></i></div>
+                                <div><p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Total Recebido (Sinal)</p><p class="text-lg font-bold text-emerald-600 mt-1">R$ 0,00</p></div>
+                                <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-sack-dollar"></i></div>
                             </div>
-                            <div class="bg-white p-4 rounded-xl shadow-sm border border-blue-200 flex items-center justify-between">
-                                <div><p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Status Físico das Suítes</p><p class="text-lg font-bold text-blue-600 mt-1">0 Disponíveis / 0 Ocupadas</p></div>
-                                <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-door-open"></i></div>
-                            </div>
-                        `;
-                    } else if (ehViewFinanceiro) {
-                        containerKpis.className = "grid grid-cols-1 sm:grid-cols-1 gap-4 mb-5";
-                        containerKpis.innerHTML = `
-                            <div class="bg-white p-4 rounded-xl shadow-sm border border-blue-200 flex items-center justify-between">
-                                <div><p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Total Arrecadado no Período</p><p class="text-lg font-bold text-blue-600 mt-1">R$ 0,00</p></div>
-                                <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-sack-dollar"></i></div>
+                            <div class="bg-white p-4 rounded-xl shadow-sm border border-amber-200 flex items-center justify-between">
+                                <div><p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Valor a Receber</p><p class="text-lg font-bold text-amber-600 mt-1">R$ 0,00</p></div>
+                                <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-clock"></i></div>
                             </div>
                         `;
                     }
@@ -470,25 +473,32 @@
                         </div>
                     `;
                 } else if (ehViewFinanceiro) {
-                    containerKpis.className = "grid grid-cols-1 sm:grid-cols-1 gap-4 mb-5";
-                    let somaTotalPagoPeriodo = 0;
-                    registrosFiltrados.forEach(row => {
-                        let v = Number(row['valor_pago'] || 0);
-                        if (!isNaN(v)) somaTotalPagoPeriodo += v;
-                    });
-
+                    containerKpis.className = "grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5";
                     containerKpis.innerHTML = `
-                        <div class="bg-white p-4 rounded-xl shadow-sm border border-blue-200 flex items-center justify-between">
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
                             <div>
-                                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Total Arrecadado no Período Selecionado</p>
-                                <p class="text-lg sm:text-xl font-bold text-blue-600 mt-1">${somaTotalPagoPeriodo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Faturamento Bruto</p>
+                                <p class="text-lg sm:text-xl font-bold text-gray-800 mt-1">${faturamentoBrutoGeral.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                             </div>
-                            <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-sack-dollar"></i></div>
+                            <div class="w-10 h-10 bg-slate-100 text-slate-700 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-emerald-200 flex items-center justify-between">
+                            <div>
+                                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Total Recebido (Sinal)</p>
+                                <p class="text-lg sm:text-xl font-bold text-emerald-600 mt-1">${totalRecebidoGeral.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                            </div>
+                            <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-sack-dollar"></i></div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-amber-200 flex items-center justify-between">
+                            <div>
+                                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Valor a Receber</p>
+                                <p class="text-lg sm:text-xl font-bold text-amber-600 mt-1">${valorAReceberGeral.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                            </div>
+                            <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-clock"></i></div>
                         </div>
                     `;
                 } else {
-                    containerKpis.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-5";
-                    containerKpis.innerHTML = ``;
+                    containerKpis.className = "hidden";
                 }
 
                 let htmlCabecalho = '';
@@ -498,7 +508,7 @@
                 thead.innerHTML = htmlCabecalho;
 
                 if (registrosFiltrados.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="${colunas.length}" class="py-6 text-center text-gray-500">NENHUM PAGAMENTO ENCONTRADO NESTE PERÍODO.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="${colunas.length}" class="py-6 text-center text-gray-500">NENHUM REGISTRO ENCONTRADO NESTE PERÍODO.</td></tr>`;
                     return;
                 }
 
