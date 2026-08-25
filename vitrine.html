@@ -250,12 +250,43 @@
                 return true;
             });
 
+            // Pré-calcula a disponibilidade de cada suíte para o período filtrado
+            const novoInicio = new Date(checkinFiltro + 'T00:00:00');
+            const novoFim = new Date(checkoutFiltro + 'T00:00:00');
+
+            const suitesComStatus = cacheSuites.map(suite => {
+                const reservasDaSuite = cacheReservas.filter(r => r.suite_id === suite.id);
+                let temConflitoNoPeriodo = false;
+                let cursorChecagem = new Date(novoInicio);
+
+                while (cursorChecagem < novoFim) {
+                    const diaIsoStr = cursorChecagem.toISOString().split('T')[0];
+                    let diaOcupado = false;
+                    for (let res of reservasDaSuite) {
+                        if (diaIsoStr >= res.checkin && diaIsoStr < res.checkout) {
+                            diaOcupado = true;
+                            break;
+                        }
+                    }
+                    if (diaOcupado) {
+                        temConflitoNoPeriodo = true;
+                        break;
+                    }
+                    cursorChecagem.setDate(cursorChecagem.getDate() + 1);
+                }
+
+                return { ...suite, temConflitoNoPeriodo };
+            });
+
+            // ORDENAÇÃO: Suítes disponíveis primeiro (false vem antes de true)
+            suitesComStatus.sort((a, b) => (a.temConflitoNoPeriodo === b.temConflitoNoPeriodo) ? 0 : a.temConflitoNoPeriodo ? 1 : -1);
+
             document.getElementById('aviso-filtro').innerText = `Exibindo suítes para o período de ${checkinFiltro.split('-').reverse().join('/')} a ${checkoutFiltro.split('-').reverse().join('/')}.`;
 
             container.innerHTML = '';
             const qtdNoites = Math.round((new Date(checkoutFiltro) - new Date(checkinFiltro)) / (1000 * 60 * 60 * 24));
 
-            for (let suite of cacheSuites) {
+            for (let suite of suitesComStatus) {
                 const fotos = suite.fotos || [];
                 const fotoPrincipal = fotos.length > 0 ? fotos[0] : 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80';
                 
@@ -274,36 +305,14 @@
 
                 const precoBase = suite.preco || suite.valor_diaria || 150.00;
                 const valorTotalEstadia = await calcularValorTotalEstadia(suite.id, checkinFiltro, checkoutFiltro, precoBase);
-
-                const reservasDaSuite = cacheReservas.filter(r => r.suite_id === suite.id);
-                
-                let temConflitoNoPeriodo = false;
-                const novoInicio = new Date(checkinFiltro + 'T00:00:00');
-                const novoFim = new Date(checkoutFiltro + 'T00:00:00');
-
-                let cursorChecagem = new Date(novoInicio);
-                while (cursorChecagem < novoFim) {
-                    const diaIsoStr = cursorChecagem.toISOString().split('T')[0];
-                    let diaOcupado = false;
-                    for (let res of reservasDaSuite) {
-                        if (diaIsoStr >= res.checkin && diaIsoStr < res.checkout) {
-                            diaOcupado = true;
-                            break;
-                        }
-                    }
-                    if (diaOcupado) {
-                        temConflitoNoPeriodo = true;
-                        break;
-                    }
-                    cursorChecagem.setDate(cursorChecagem.getDate() + 1);
-                }
+                const temConflitoNoPeriodo = suite.temConflitoNoPeriodo;
 
                 let statusBadge = temConflitoNoPeriodo 
                     ? '<span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">⚠️ Indisponível no período exato</span>'
                     : '<span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-green-600 bg-green-50 px-2.5 py-1 rounded-full border border-green-200">Disponível</span>';
 
                 let botaoReservaHTML = temConflitoNoPeriodo
-                    ? `<button onclick="alert('Este período selecionado possui dias ocupados. Consulte o calendário mensal abaixo para escolher um período livre.')" class="w-full bg-gray-400 text-white py-3 md:py-3.5 px-4 rounded-xl font-bold transition shadow-md text-center text-sm md:text-base cursor-not-allowed">Período Escolhido Indisponível </button>`
+                    ? `<button onclick="alert('Este período selecionado possui dias ocupados. Consulte o calendário mensal abaixo para escolher um período livre.')" class="w-full bg-gray-400 text-white py-3 md:py-3.5 px-4 rounded-xl font-bold transition shadow-md text-center text-sm md:text-base cursor-not-allowed">Período Indisponível</button>`
                     : `<button onclick="abrirModal('${suite.id}')" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 md:py-3.5 px-4 rounded-xl font-bold transition shadow-md text-center text-sm md:text-base">Solicitar Reserva</button>`;
 
                 container.innerHTML += `
