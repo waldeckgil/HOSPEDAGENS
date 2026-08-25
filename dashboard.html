@@ -252,9 +252,6 @@
         let suitesGlobaisCache = [];
         let pagamentosGlobaisCache = [];
         let camposLimposParaNovaReserva = false;
-        
-        // Cache auxiliar em memória para guardar valores totais calculados dinamicamente via RPC para cada reserva
-        let valoresCalculadosCache = {};
 
         async function protegerPagina() {
             supabaseClient.auth.onAuthStateChange((event, session) => {
@@ -494,6 +491,33 @@
             }
         }
 
+        // Função auxiliar para calcular o valor vigente da diária (ou total do dia) usando a inteligência do banco
+        async function calcularValorVigenteCard(suiteId, checkinDate, checkoutDate) {
+            const dataConsulta = checkinDate || new Date().toLocaleDateString('sv-SE');
+            const dataFimConsulta = checkoutDate || dataConsulta;
+            
+            try {
+                const { data: valorCalculado, error } = await supabaseClient.rpc('calcular_total_reserva', {
+                    p_suite_id: suiteId,
+                    p_checkin: dataConsulta,
+                    p_checkout: dataFimConsulta
+                });
+
+                if (!error && valorCalculado !== null) {
+                    // Se for para mais de uma diária, retorna a média diária aplicada ou o total calculado dependendo do contexto.
+                    // Aqui dividimos pelo número de diárias para mostrar a diária unitária já com o reajuste aplicado da tarifa especial.
+                    const qtd = calcularQuantidadeDiarias(dataConsulta, dataFimConsulta);
+                    return Number(valorCalculado) / (qtd > 0 ? qtd : 1);
+                }
+            } catch (err) {
+                console.error("Erro ao calcular valor vigente via RPC:", err);
+            }
+            
+            // Fallback para o valor padrão da suíte cadastrada
+            const sObj = suitesGlobaisCache.find(s => s.id === suiteId);
+            return sObj ? Number(sObj.valor_diaria || 0) : 0;
+        }
+
         async function carregarDashboard() {
             await carregarPousada();
 
@@ -527,28 +551,6 @@
                 suitesGlobaisCache = suitesAtualizadas || [];
             }
 
-            // PRÉ-CALCULAR VALORES INTELIGENTES VIA RPC PARA CADA RESERVA ATIVA/PENDENTE
-            valoresCalculadosCache = {};
-            const reservasParaCalcular = reservasGlobaisCache.filter(r => r.status === 'Aprovada' || r.status === 'Pendente');
-            for (const r of reservasParaCalcular) {
-                if (r.suite_id && r.checkin && r.checkout) {
-                    try {
-                        const { data: valorCalculado, error: erroRpc } = await supabaseClient.rpc('calcular_total_reserva', { 
-                            p_suite_id: r.suite_id, 
-                            p_checkin: r.checkin, 
-                            p_checkout: r.checkout 
-                        });
-                        if (!erroRpc && valorCalculado !== null) {
-                            valoresCalculadosCache[r.id] = Number(valorCalculado);
-                        } else {
-                            valoresCalculadosCache[r.id] = Number(r.valor_total || 0);
-                        }
-                    } catch (e) {
-                        valoresCalculadosCache[r.id] = Number(r.valor_total || 0);
-                    }
-                }
-            }
-
             await verificarReservasPendentesDashboard();
             atualizarRadarEKPIs();
 
@@ -560,13 +562,17 @@
                 return;
             }
 
-            suitesGlobaisCache.forEach(suite => {
+            for (const suite of suitesGlobaisCache) {
                 const reservasDaSuite = reservasGlobaisCache.filter(r => r.suite_id === suite.id && r.status !== 'Cancelada' && r.status !== 'Recusada' && r.status !== 'Finalizada');
                 const aprovadasDaSuite = reservasDaSuite.filter(r => r.status === 'Aprovada');
                 const pendentesDaSuite = reservasDaSuite.filter(r => r.status === 'Pendente');
 
+                // Calcula o valor da diária vigente hoje considerando as regras de tarifas especiais do banco
+                const valorDiariaAplicadoHoje = await calcularValorVigenteCard(suite.id, hojeStr, hojeStr);
+
                 if (aprovadasDaSuite.length > 0) {
-                    aprovadasDaSuite.forEach((aprovada, index) => {
+                    for (let index = 0; index < aprovadasDaSuite.length; index++) {
+                        const aprovada = aprovadasDaSuite[index];
                         const isFutura = aprovada.checkin > hojeStr;
                         const statusParaModal = isFutura ? 'Reservado' : 'Ocupada';
                         const badgeText = isFutura ? 'Reserva Futura' : 'Ocupada';
@@ -580,9 +586,10 @@
                         const nomeHospedeExibicao = aprovada.hospede_nome ? ` - <span class="font-normal text-gray-700 text-sm sm:text-base">${aprovada.hospede_nome}</span>` : '';
                         
                         const qtdDiarias = calcularQuantidadeDiarias(aprovada.checkin, aprovada.checkout);
-                        
-                        // UTILIZANDO O VALOR INTELIGENTE CALCULADO VIA TARIFA OU O SALVO NA RESERVA
-                        const valorTotal = valoresCalculadosCache[aprovada.id] !== undefined ? valoresCalculadosCache[aprovada.id] : Number(aprovada.valor_total || 0);
+                        const valorTotal = Number(aprovada.valor_total || 0);
+
+                        // Calcula o valor da diária aplicada para o período específico desta reserva
+                        const valorDiariaAplicadoPeriodo = await calcularValorVigenteCard(suite.id, aprovada.checkin, aprovada.checkout);
 
                         const pagamentosDestaReserva = pagamentosGlobaisCache.filter(p => p.reserva_id === aprovada.id);
                         const totalPago = pagamentosDestaReserva.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
@@ -607,7 +614,7 @@
                                     <div class="flex justify-between items-center">
                                         <div>
                                             <h2 class="text-base sm:text-lg font-bold text-gray-900">${suite.nome}${sufixoTitulo}${nomeHospedeExibicao}</h2>
-                                            <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária Padrão: ${formatarMoeda(suite.valor_diaria)}</span>
+                                            <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md mt-0.5 inline-block" title="Valor calculado com base nas tarifas vigentes">Diária Aplicada: ${formatarMoeda(valorDiariaAplicadoPeriodo)}</span>
                                         </div>
                                         <div class="flex items-center gap-2">
                                             <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm ${badgeClasses}">
@@ -628,7 +635,7 @@
                                         
                                         <div class="flex items-center justify-between pt-1 border-t border-black/5 mt-2">
                                             <span class="text-xs font-semibold text-gray-700">Estadia: <strong class="text-gray-900">${qtdDiarias} diária(s)</strong></span>
-                                            <span class="text-xs font-extrabold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">Total Calculado: ${formatarMoeda(valorTotal)}</span>
+                                            <span class="text-xs font-extrabold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">Total: ${formatarMoeda(valorTotal)}</span>
                                         </div>
 
                                         <div class="grid grid-cols-2 gap-2 bg-white/80 p-2.5 rounded-xl border border-black/5 text-xs mt-2">
@@ -658,7 +665,7 @@
                                     </div>
                                 </div>
                             </div>`;
-                    });
+                    }
                 } 
                 
                 if (aprovadasDaSuite.length === 0 && pendentesDaSuite.length === 0) {
@@ -673,7 +680,7 @@
                                 <div class="flex justify-between items-center">
                                     <div>
                                         <h2 class="text-base sm:text-lg font-bold text-gray-900">${suite.nome}</h2>
-                                        <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária: ${formatarMoeda(suite.valor_diaria)}</span>
+                                        <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md mt-0.5 inline-block" title="Valor calculado com base nas tarifas vigentes hoje">Diária Vigente Hoje: ${formatarMoeda(valorDiariaAplicadoHoje)}</span>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm ${
@@ -693,14 +700,16 @@
                         </div>`;
                 }
 
-                pendentesDaSuite.forEach((pend, index) => {
+                for (let index = 0; index < pendentesDaSuite.length; index++) {
+                    const pend = pendentesDaSuite[index];
                     const linkZapPend = gerarLinkWhatsApp(pend.whatsapp_hospede, pend.hospede_nome, pend.checkin, pend.checkout);
                     const dataSolicitacaoFormatada = formatarDataHora(pend.criado_em);
                     const qtdDiariasPend = calcularQuantidadeDiarias(pend.checkin, pend.checkout);
+                    const valorTotalPend = Number(pend.valor_total || 0);
                     
-                    // UTILIZANDO O VALOR INTELIGENTE CALCULADO VIA TARIFA PARA A PENDÊNCIA
-                    const valorTotalPend = valoresCalculadosCache[pend.id] !== undefined ? valoresCalculadosCache[pend.id] : Number(pend.valor_total || 0);
-                    
+                    // Calcula o valor da diária aplicada para o período da solicitação pendente
+                    const valorDiariaAplicadoPend = await calcularValorVigenteCard(suite.id, pend.checkin, pend.checkout);
+
                     const sufixoTituloPend = pendentesDaSuite.length > 1 ? ` (${index + 1})` : '';
                     const nomeHospedePendExibicao = pend.hospede_nome ? ` - <span class="font-normal text-amber-950/80 text-sm sm:text-base">${pend.hospede_nome}</span>` : '';
 
@@ -727,7 +736,7 @@
                                 <div class="flex justify-between items-center">
                                     <div>
                                         <h2 class="text-base sm:text-lg font-bold text-amber-950">${suite.nome}${sufixoTituloPend}${nomeHospedePendExibicao}</h2>
-                                        <span class="text-[11px] font-bold text-amber-900/80 bg-amber-200/60 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária Padrão: ${formatarMoeda(suite.valor_diaria)}</span>
+                                        <span class="text-[11px] font-bold text-amber-900/80 bg-amber-200/60 px-2 py-0.5 rounded-md mt-0.5 inline-block" title="Valor calculado com base nas tarifas vigentes da solicitação">Diária Aplicada: ${formatarMoeda(valorDiariaAplicadoPend)}</span>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm bg-amber-200 text-amber-900">Pendente</span>
@@ -743,7 +752,7 @@
                                     
                                     <div class="flex items-center justify-between pt-1 border-t border-amber-200 mt-2">
                                         <span class="text-xs font-semibold text-amber-900">Estadia: <strong class="text-gray-900">${qtdDiariasPend} diária(s)</strong></span>
-                                        <span class="text-xs font-extrabold text-blue-700 bg-white px-2.5 py-1 rounded-lg border border-amber-200">Total Calculado: ${formatarMoeda(valorTotalPend)}</span>
+                                        <span class="text-xs font-extrabold text-blue-700 bg-white px-2.5 py-1 rounded-lg border border-amber-200">Total: ${formatarMoeda(valorTotalPend)}</span>
                                     </div>
 
                                     <div class="grid grid-cols-2 gap-2 bg-white/80 p-2.5 rounded-xl border border-amber-200 text-xs mt-2">
@@ -789,8 +798,8 @@
                                 </div>
                             </div>
                         </div>`;
-                });
-            });
+                }
+            }
         }
         
         async function abrirModal(id, nome, status, reservaId = null) {
@@ -840,7 +849,7 @@
             
             document.getElementById('modal-edicao').classList.remove('hidden');
             await verificarStatusModal();
-            await recalcalcularValoresModalEdicao();
+            await recalcularValoresModalEdicao();
         }
 
         async function mudarStatusReserva(reservaId, novoStatus) {
@@ -885,7 +894,7 @@
             return saldo > 0 ? saldo : 0;
         }
 
-        async function recalcalcularValoresModalEdicao() {
+        async function recalcularValoresModalEdicao() {
             const suiteId = document.getElementById('edit-suite-id').value;
             const reservaId = document.getElementById('edit-reserva-id').value;
             let checkinStr = document.getElementById('edit-checkin').value;
@@ -949,7 +958,7 @@
         }
 
         async function atualizarSaldoCheckoutModal() {
-            await recalcalcularValoresModalEdicao();
+            await recalcularValoresModalEdicao();
         }
 
         async function verificarStatusModal() {
