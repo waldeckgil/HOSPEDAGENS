@@ -379,7 +379,6 @@
 
                 let registrosFiltrados = registros;
 
-                // Regra específica para Reservas Futuras: filtra apenas status_reserva APROVADA e status_fisico OCUPADA ou RESERVA FUTURA
                 if (ehViewReservas) {
                     registrosFiltrados = registrosFiltrados.filter(row => {
                         let statusReserva = String(row['status_reserva'] || '').trim().toUpperCase();
@@ -409,7 +408,6 @@
                     });
                 }
 
-                // ORDENAÇÃO: Primeiro por nome da suíte, depois pela data de check-in (ou data de pagamento)
                 registrosFiltrados.sort((a, b) => {
                     let suiteA = String(a['suite'] || '').trim().toUpperCase();
                     let suiteB = String(b['suite'] || '').trim().toUpperCase();
@@ -451,7 +449,6 @@
                     return;
                 }
 
-                // Inserir colunas de alerta dedicadas nas posições corretas sem sobrescrever as originais
                 registrosFiltrados = registrosFiltrados.map(row => {
                     let novoRow = { ...row };
                     const hojeDataObj = new Date();
@@ -498,7 +495,6 @@
                     return novoRow;
                 });
 
-                // Filtrar colunas internas desnecessárias
                 const colunas = Object.keys(registrosFiltrados[0]).filter(col => 
                     col !== 'pousada_id' && 
                     col !== 'reserva_id' && 
@@ -507,7 +503,6 @@
                     !col.toLowerCase().includes('dias')
                 );
 
-                // Renderização dos KPIs
                 if (ehViewHospedagens) {
                     containerKpis.className = "grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5";
                     let totalReservasValidas = registrosFiltrados.filter(r => r.hospede && r.hospede !== '-').length;
@@ -599,9 +594,9 @@
                             } else if (colLower.includes('checkin') || colLower.includes('checkout') || colLower.includes('fim') || colLower.includes('inicio')) {
                                 valorExibicao = formatarDataBr(valorBruto);
                             } else if (colLower === 'whatsapp') {
-                                // Habilita o link do WhatsApp dinamicamente
+                                // Habilita o link do WhatsApp para qualquer número preenchido (mesmo testes curtos)
                                 let numeroLimpo = String(valorBruto).replace(/\D/g, '');
-                                if (numeroLimpo.length >= 8) {
+                                if (numeroLimpo.length > 0) {
                                     valorExibicao = `<a href="https://wa.me/${numeroLimpo}" target="_blank" title="Abrir conversa no WhatsApp" class="inline-flex items-center gap-1.5 text-emerald-700 hover:text-emerald-900 font-bold transition"><i class="fa-brands fa-whatsapp text-sm"></i> ${String(valorBruto).toUpperCase()}</a>`;
                                 } else {
                                     valorExibicao = String(valorBruto).toUpperCase();
