@@ -139,7 +139,6 @@
         let pousadaIdGlobal = '';
         let cacheReservas = [];
         let cacheSuites = [];
-        // Armazena o mês e ano sendo exibido no calendário expandido de cada suíte { [suiteId]: { ano, mes } }
         let estadoMesCalendario = {};
 
         const hojeISO = new Date().toISOString().split('T')[0];
@@ -159,7 +158,6 @@
             const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', pousadaIdGlobal).single();
             document.getElementById('titulo-pousada').innerText = pousada?.nome || "Nossa Pousada";
             
-            // Busca reservas gerais da pousada para cache
             const { data: todasReservas } = await supabaseClient
                 .from('reservas')
                 .select('*')
@@ -237,7 +235,6 @@
                 return;
             }
 
-            // Reseta o estado do calendário ao refazer o filtro para que ele aponte sempre para a nova data de check-in escolhida
             estadoMesCalendario = {};
 
             const { data: suitesBrutas } = await supabaseClient.from('suites').select('*').eq('pousada_id', pousadaIdGlobal);
@@ -365,13 +362,11 @@
             }
         }
 
-        // FUNÇÃO DE TOGGLE DO CALENDÁRIO MENSAL EXPANSÍVEL (Posicionado no mês do Check-in escolhido)
         function toggleCalendarioMensal(suiteId) {
             const containerCal = document.getElementById(`container-cal-${suiteId}`);
             const btnToggle = document.getElementById(`btn-toggle-cal-${suiteId}`);
 
             if (containerCal.classList.contains('hidden')) {
-                // Se está fechado, define o mês com base na data de check-in escolhida no filtro superior
                 if (!estadoMesCalendario[suiteId]) {
                     const checkinFiltro = document.getElementById('filtro-checkin').value;
                     const dRef = checkinFiltro ? new Date(checkinFiltro + 'T00:00:00') : new Date();
@@ -386,11 +381,16 @@
             }
         }
 
-        // NAVEGAÇÃO DE MESES (Anterior / Próximo)
+        // NAVEGAÇÃO DE MESES COM TRAVA NO MÊS DO CHECK-IN
         function mudarMesCalendario(suiteId, direcao) {
             if (!estadoMesCalendario[suiteId]) return;
             let { ano, mes } = estadoMesCalendario[suiteId];
             
+            const checkinFiltro = document.getElementById('filtro-checkin').value;
+            const dCheckin = checkinFiltro ? new Date(checkinFiltro + 'T00:00:00') : new Date();
+            const anoMin = dCheckin.getFullYear();
+            const mesMin = dCheckin.getMonth();
+
             mes += direcao;
             if (mes > 11) {
                 mes = 0;
@@ -399,14 +399,25 @@
                 mes = 11;
                 ano--;
             }
+
+            // Impede navegar para um mês anterior ao mês do check-in
+            if (ano < anoMin || (ano === anoMin && mes < mesMin)) {
+                return; // Não permite voltar antes do check-in
+            }
+
             estadoMesCalendario[suiteId] = { ano, mes };
             renderizarCalendarioMensal(suiteId);
         }
 
-        // MONTADOR DO CALENDÁRIO MENSAL EM GRADE DO MÊS INTEIRO
+        // MONTADOR DO CALENDÁRIO MENSAL COM BLOQUEIO VISUAL DOS DIAS ANTERIORES AO CHECK-IN
         function renderizarCalendarioMensal(suiteId) {
             const containerCal = document.getElementById(`container-cal-${suiteId}`);
             const { ano, mes } = estadoMesCalendario[suiteId];
+
+            const checkinFiltro = document.getElementById('filtro-checkin').value;
+            const dCheckin = checkinFiltro ? new Date(checkinFiltro + 'T00:00:00') : new Date();
+            const anoMin = dCheckin.getFullYear();
+            const mesMin = dCheckin.getMonth();
 
             const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
             const reservasDaSuite = cacheReservas.filter(r => r.suite_id === suiteId);
@@ -414,11 +425,16 @@
             const primeiroDiaDaSemana = new Date(ano, mes, 1).getDay();
             const totalDiasNoMes = new Date(ano, mes + 1, 0).getDate();
 
+            // Verifica se este é o mês mínimo para desativar o botão "Mês Anterior"
+            const ehMesMinimo = (ano === anoMin && mes === mesMin);
+
             let html = `
                 <div class="flex justify-between items-center mb-2 px-1">
-                    <button type="button" onclick="mudarMesCalendario('${suiteId}', -1)" class="bg-white border px-2 py-1 rounded-lg text-xs font-bold hover:bg-gray-100 shadow-sm">◀ Mês Anterior</button>
+                    <button type="button" onclick="mudarMesCalendario('${suiteId}', -1)" 
+                        class="bg-white border px-2 py-1 rounded-lg text-xs font-bold shadow-sm ${ehMesMinimo ? 'opacity-40 cursor-not-allowed text-gray-400' : 'hover:bg-gray-100 text-gray-700'}"
+                        ${ehMesMinimo ? 'disabled' : ''}>◀ Mês Anterior</button>
                     <span class="font-bold text-xs text-blue-900">${nomesMeses[mes]} de ${ano}</span>
-                    <button type="button" onclick="mudarMesCalendario('${suiteId}', 1)" class="bg-white border px-2 py-1 rounded-lg text-xs font-bold hover:bg-gray-100 shadow-sm">Próximo Mês ▶</button>
+                    <button type="button" onclick="mudarMesCalendario('${suiteId}', 1)" class="bg-white border px-2 py-1 rounded-lg text-xs font-bold hover:bg-gray-100 shadow-sm text-gray-700">Próximo Mês ▶</button>
                 </div>
                 <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-extrabold text-gray-500 mb-1">
                     <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
@@ -435,22 +451,41 @@
                 const diaStr = String(dia).padStart(2, '0');
                 const dataIso = `${ano}-${mesStr}-${diaStr}`;
 
-                let ocupado = false;
-                for (let res of reservasDaSuite) {
-                    if (dataIso >= res.checkin && dataIso < res.checkout) {
-                        ocupado = true;
-                        break;
+                // Verifica se o dia é anterior à data de check-in escolhida
+                const ehAnteriorAoCheckin = checkinFiltro && dataIso < checkinFiltro;
+
+                let corClasse = '';
+                let iconeOuTexto = '';
+                let tituloTooltip = '';
+
+                if (ehAnteriorAoCheckin) {
+                    corClasse = 'bg-gray-200 text-gray-400 border border-gray-300 opacity-60';
+                    iconeOuTexto = '-';
+                    tituloTooltip = `${dataIso}: Fora do período de busca`;
+                } else {
+                    let ocupado = false;
+                    for (let res of reservasDaSuite) {
+                        if (dataIso >= res.checkin && dataIso < res.checkout) {
+                            ocupado = true;
+                            break;
+                        }
+                    }
+
+                    if (ocupado) {
+                        corClasse = 'bg-rose-500 text-white font-bold';
+                        iconeOuTexto = '✕';
+                        tituloTooltip = `${dataIso}: Ocupada`;
+                    } else {
+                        corClasse = 'bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold';
+                        iconeOuTexto = '✓';
+                        tituloTooltip = `${dataIso}: Disponível`;
                     }
                 }
 
-                const corClasse = ocupado 
-                    ? 'bg-rose-500 text-white font-bold' 
-                    : 'bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold';
-
                 html += `
-                    <div class="${corClasse} rounded-md p-1 text-[10px] flex flex-col items-center justify-center shadow-sm" title="${dataIso}: ${ocupado ? 'Ocupada' : 'Disponível'}">
+                    <div class="${corClasse} rounded-md p-1 text-[10px] flex flex-col items-center justify-center shadow-sm" title="${tituloTooltip}">
                         <span class="text-[9px]">${dia}</span>
-                        <span>${ocupado ? '✕' : '✓'}</span>
+                        <span>${iconeOuTexto}</span>
                     </div>
                 `;
             }
@@ -566,7 +601,7 @@
             }]);
             
             if (errReserva) {
-                btnEnviar.disabled = false;
+                btnEnviar.disabled, btnEnviar.disabled = false;
                 btnEnviar.innerText = "Enviar Solicitação";
                 msgErro.innerText = "Erro ao enviar solicitação: " + errReserva.message;
                 msgErro.classList.remove('hidden');
