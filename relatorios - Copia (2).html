@@ -60,7 +60,7 @@
                         
                         <!-- Card 1: Financeiro (Tons de Azul) -->
                         <div onclick="selecionarView('vw_gestor_financeiro_relatorio', 'Resumo Financeiro Consolidado', this)" 
-                             class="card-view cursor-pointer bg-blue-50/40 p-4 rounded-xl shadow-sm border-2 border-blue-500 shadow-md transition group">
+                             class="card-view cursor-pointer bg-blue-50/40 p-4 rounded-xl shadow-sm border-2 border-blue-200 hover:border-blue-500 hover:shadow-md transition group">
                             <div class="flex items-center justify-between mb-2">
                                 <div class="w-8 h-8 bg-blue-100 text-blue-700 rounded-lg flex items-center justify-center text-sm shadow-sm">
                                     <i class="fa-solid fa-wallet"></i>
@@ -73,7 +73,7 @@
 
                         <!-- Card 2: Hospedagens (Tons de Esmeralda / Verde Claro) -->
                         <div onclick="selecionarView('vw_gestor_hospedagens_relatorio', 'Hospedagens, Suítes e Movimentações', this)" 
-                             class="card-view cursor-pointer bg-emerald-50/40 p-4 rounded-xl shadow-sm border-2 border-emerald-200 hover:border-emerald-500 hover:shadow-md transition group">
+                             class="card-view cursor-pointer bg-emerald-50/40 p-4 rounded-xl shadow-sm border-2 border-emerald-500 shadow-md transition group">
                             <div class="flex items-center justify-between mb-2">
                                 <div class="w-8 h-8 bg-emerald-100 text-emerald-700 rounded-lg flex items-center justify-center text-sm shadow-sm">
                                     <i class="fa-solid fa-bed"></i>
@@ -112,8 +112,8 @@
 
                     </div>
 
-                    <!-- Container Dinâmico de KPIs / Cards Informativos por View (Ajustado para 3 colunas no financeiro) -->
-                    <div id="containerKpis" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-5">
+                    <!-- Container Dinâmico de KPIs / Cards Informativos por View (Ajustado para evitar esprea) -->
+                    <div id="containerKpis" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
                         <!-- Conteúdo injetado dinamicamente via JS dependendo da View Ativa -->
                     </div>
 
@@ -172,8 +172,8 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let usuarioIdAtual = null;
-        let viewAtualSelecionada = 'vw_gestor_financeiro_relatorio'; // Iniciando direto no financeiro para melhor UX
-        let tituloBaseAtual = 'Resumo Financeiro Consolidado';
+        let viewAtualSelecionada = 'vw_gestor_hospedagens_relatorio';
+        let tituloBaseAtual = '[TESTE FRONT-END OK] Hospedagens, Suítes e Movimentações';
 
         function inicializarFiltroDatas() {
             const hoje = new Date();
@@ -234,12 +234,14 @@
 
             document.querySelectorAll('.card-view').forEach(card => {
                 card.classList.remove('border-blue-500', 'border-amber-500', 'border-purple-500', 'border-emerald-500', 'shadow-md');
+                // Restaura as bordas suaves padrão para cada um
                 if (card.onclick.toString().includes('financeiro')) card.classList.add('border-blue-200');
                 else if (card.onclick.toString().includes('hospedagens')) card.classList.add('border-emerald-200');
                 else if (card.onclick.toString().includes('tarifas')) card.classList.add('border-amber-200');
                 else card.classList.add('border-purple-200');
             });
 
+            // Aplica a borda forte selecionada
             if (nomeView.includes('financeiro')) elementoCard.classList.replace('border-blue-200', 'border-blue-500');
             else if (nomeView.includes('hospedagens')) elementoCard.classList.replace('border-emerald-200', 'border-emerald-500');
             else if (nomeView.includes('tarifas')) elementoCard.classList.replace('border-amber-200', 'border-amber-500');
@@ -331,7 +333,6 @@
                     thead.innerHTML = `<th class="py-3 px-4">INFORMAÇÃO</th>`;
                     tbody.innerHTML = `<tr><td class="py-6 text-center text-gray-500">NENHUM REGISTRO ENCONTRADO NESTA VIEW.</td></tr>`;
                     if (ehViewHospedagens) {
-                        containerKpis.className = "grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5";
                         containerKpis.innerHTML = `
                             <div class="bg-white p-4 rounded-xl shadow-sm border border-emerald-200 flex items-center justify-between">
                                 <div><p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Total de Reservas</p><p class="text-lg font-bold text-gray-800 mt-1">0</p></div>
@@ -340,22 +341,6 @@
                             <div class="bg-white p-4 rounded-xl shadow-sm border border-blue-200 flex items-center justify-between">
                                 <div><p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Status Físico das Suítes</p><p class="text-lg font-bold text-blue-600 mt-1">0 Disponíveis / 0 Ocupadas</p></div>
                                 <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-door-open"></i></div>
-                            </div>
-                        `;
-                    } else {
-                        containerKpis.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-5";
-                        containerKpis.innerHTML = `
-                            <div class="bg-white p-4 rounded-xl shadow-sm border border-blue-200 flex items-center justify-between">
-                                <div><p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Faturamento Bruto</p><p class="text-lg font-bold text-gray-800 mt-1">R$ 0,00</p></div>
-                                <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-sack-dollar"></i></div>
-                            </div>
-                            <div class="bg-white p-4 rounded-xl shadow-sm border border-emerald-200 flex items-center justify-between">
-                                <div><p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Total Recebido (Sinal)</p><p class="text-lg font-bold text-emerald-600 mt-1">R$ 0,00</p></div>
-                                <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-hand-holding-dollar"></i></div>
-                            </div>
-                            <div class="bg-white p-4 rounded-xl shadow-sm border border-amber-200 flex items-center justify-between">
-                                <div><p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Valor a Receber</p><p class="text-lg font-bold text-amber-600 mt-1">R$ 0,00</p></div>
-                                <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-file-invoice-dollar"></i></div>
                             </div>
                         `;
                     }
@@ -399,6 +384,7 @@
                     });
                 }
 
+                // --- ORDENAÇÃO POR CHECK-IN (PRIORIZANDO A DATA DE HOJE PARA CIMA) ---
                 const dataHojeStr = new Date().toISOString().split('T')[0];
                 const timestampHoje = new Date(dataHojeStr).getTime();
 
@@ -415,9 +401,8 @@
                     return timeA - timeB;
                 });
 
-                // --- RENDERIZAÇÃO DOS CARDS ---
+                // --- RENDERIZAÇÃO DOS CARDS (CONDICIONAL POR VIEW COM VISUAL MELHORADO) ---
                 if (ehViewHospedagens) {
-                    containerKpis.className = "grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5";
                     let totalReservasValidas = 0;
                     let qtdPendentes = 0;
                     let qtdAprovadas = 0;
@@ -461,7 +446,6 @@
                         </div>
                     `;
                 } else {
-                    containerKpis.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-5";
                     let somaBruto = 0;
                     let somaRecebido = 0;
                     let somaSaldo = 0;
@@ -493,15 +477,6 @@
                             </div>
                             <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-sm shadow-sm">
                                 <i class="fa-solid fa-hand-holding-dollar"></i>
-                            </div>
-                        </div>
-                        <div class="bg-white p-4 rounded-xl shadow-sm border border-amber-200 flex items-center justify-between">
-                            <div>
-                                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Valor a Receber</p>
-                                <p class="text-lg sm:text-xl font-bold text-amber-600 mt-1">${somaSaldo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
-                            </div>
-                            <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-sm shadow-sm">
-                                <i class="fa-solid fa-file-invoice-dollar"></i>
                             </div>
                         </div>
                     `;
