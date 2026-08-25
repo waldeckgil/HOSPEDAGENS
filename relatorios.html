@@ -163,9 +163,7 @@
                 return `${y}-${m}-${day}`;
             };
             
-            // Início do mês atual para abranger reservas futuras logo de cara
             const primeiroDiaMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-            // Fim do mês atual (ou avançado para frente)
             const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
 
             document.getElementById('filtroDataInicio').value = formatarDataInput(primeiroDiaMes);
@@ -391,7 +389,13 @@
                     });
                 }
 
+                // ORDENAÇÃO: Primeiro por nome da suíte, depois pela data de check-in (ou data de pagamento)
                 registrosFiltrados.sort((a, b) => {
+                    let suiteA = String(a['suite'] || '').trim().toUpperCase();
+                    let suiteB = String(b['suite'] || '').trim().toUpperCase();
+                    if (suiteA !== suiteB) {
+                        return suiteA.localeCompare(suiteB);
+                    }
                     let dataA = a['data_pagamento'] || a['checkin'] || '';
                     let dataB = b['data_pagamento'] || b['checkin'] || '';
                     return new Date(dataA) - new Date(dataB);
@@ -462,9 +466,9 @@
                             let diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
                             if (diffDays === 0) {
-                                htmlAlerta = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-white font-bold bg-emerald-600 shadow-sm"><i class="fa-solid fa-check"></i> CHECK-IN HOJE (OK)</span>`;
+                                htmlAlerta = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-white font-bold bg-emerald-600 shadow-sm"><i class="fa-solid fa-check"></i> CHEGA HOJE</span>`;
                             } else if (diffDays > 0) {
-                                htmlAlerta = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-purple-700 font-bold bg-purple-100 shadow-sm"><i class="fa-solid fa-hourglass-start"></i> EM ${diffDays} DIA${diffDays === 1 ? '' : 'S'}</span>`;
+                                htmlAlerta = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-purple-700 font-bold bg-purple-100 shadow-sm"><i class="fa-solid fa-hourglass-start"></i> CHEGA EM ${diffDays} DIA${diffDays === 1 ? '' : 'S'}</span>`;
                             } else {
                                 htmlAlerta = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-slate-600 font-bold bg-slate-200 shadow-sm"><i class="fa-solid fa-flag-checkered"></i> REALIZADO</span>`;
                             }
