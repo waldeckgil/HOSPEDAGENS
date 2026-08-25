@@ -55,92 +55,66 @@
                         </div>
                     </div>
 
-                    <!-- Cards de Seleção de Views -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+                    <!-- Cards de Seleção de Views com Cores Suaves e Bordas Diferenciadas -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                         
-                        <!-- Card 1: Financeiro -->
-                        <div onclick="selecionarView('vw_gestor_financeiro_relatorio', 'Resumo Financeiro Consolidado', this)" 
-                             class="card-view cursor-pointer bg-white p-4 rounded-xl shadow-sm border-2 border-transparent hover:border-gray-300 hover:shadow-md transition group">
+                        <!-- Card 1: Financeiro (Tons de Azul) -->
+                        <div onclick="selecionarView('vw_gestor_financeiro_relatorio', 'Extrato Detalhado de Pagamentos', this)" 
+                             class="card-view cursor-pointer bg-blue-50/40 p-4 rounded-xl shadow-sm border-2 border-blue-500 shadow-md transition group">
                             <div class="flex items-center justify-between mb-2">
-                                <div class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-sm">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-700 rounded-lg flex items-center justify-center text-sm shadow-sm">
                                     <i class="fa-solid fa-wallet"></i>
                                 </div>
-                                <span class="text-[9px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded">FINANCEIRO</span>
+                                <span class="text-[9px] font-bold uppercase tracking-wider bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">FINANCEIRO</span>
                             </div>
-                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-blue-600 transition">Visão Financeira</h3>
-                            <p class="text-[11px] text-gray-500 mt-0.5 truncate">Valores pagos e saldos pendentes.</p>
+                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-blue-700 transition">Visão Financeira (Extrato)</h3>
+                            <p class="text-[11px] text-gray-500 mt-0.5 truncate">Histórico detalhado de sinais e pagamentos.</p>
                         </div>
 
-                        <!-- Card 2: Hospedagens -->
+                        <!-- Card 2: Hospedagens (Tons de Esmeralda / Verde Claro) -->
                         <div onclick="selecionarView('vw_gestor_hospedagens_relatorio', 'Hospedagens, Suítes e Movimentações', this)" 
-                             class="card-view cursor-pointer bg-white p-4 rounded-xl shadow-sm border-2 border-emerald-600 shadow-md transition group">
+                             class="card-view cursor-pointer bg-emerald-50/40 p-4 rounded-xl shadow-sm border-2 border-emerald-200 hover:border-emerald-500 hover:shadow-md transition group">
                             <div class="flex items-center justify-between mb-2">
-                                <div class="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-sm">
+                                <div class="w-8 h-8 bg-emerald-100 text-emerald-700 rounded-lg flex items-center justify-center text-sm shadow-sm">
                                     <i class="fa-solid fa-bed"></i>
                                 </div>
-                                <span class="text-[9px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded">HOSPEDAGENS</span>
+                                <span class="text-[9px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">HOSPEDAGENS</span>
                             </div>
-                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-emerald-600 transition">Status Geral de Ocupação das Suites</h3>
+                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-emerald-700 transition">Status Geral de Ocupação das Suites</h3>
                             <p class="text-[11px] text-gray-500 mt-0.5 truncate">Cruzamento de nomes e acomodações.</p>
                         </div>
 
-                        <!-- Card 3: Tarifas Especiais -->
+                        <!-- Card 3: Tarifas Especiais (Tons de Âmbar / Amarelo Suave) -->
                         <div onclick="selecionarView('vw_gestor_tarifas_relatorio', 'Auditoria de Tarifas Especiais', this)" 
-                             class="card-view cursor-pointer bg-white p-4 rounded-xl shadow-sm border-2 border-transparent hover:border-gray-300 hover:shadow-md transition group">
+                             class="card-view cursor-pointer bg-amber-50/40 p-4 rounded-xl shadow-sm border-2 border-amber-200 hover:border-amber-500 hover:shadow-md transition group">
                             <div class="flex items-center justify-between mb-2">
-                                <div class="w-8 h-8 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center text-sm">
+                                <div class="w-8 h-8 bg-amber-100 text-amber-700 rounded-lg flex items-center justify-center text-sm shadow-sm">
                                     <i class="fa-solid fa-tags"></i>
                                 </div>
-                                <span class="text-[9px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded">TARIFAS</span>
+                                <span class="text-[9px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">TARIFAS</span>
                             </div>
-                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-amber-600 transition"> Tarifas Aplicadas por Suíte</h3>
+                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-amber-700 transition">Tarifas Aplicadas por Suíte</h3>
                             <p class="text-[11px] text-gray-500 mt-0.5 truncate">Valores e regras vigentes.</p>
                         </div>
 
-                        <!-- Card 4: Reservas e Futuras -->
+                        <!-- Card 4: Reservas e Futuras (Tons de Roxo / Violeta Claro) -->
                         <div onclick="selecionarView('vw_gestor_reservas_relatorio', 'Próximas Reservas do Mês Atual', this)" 
-                             class="card-view cursor-pointer bg-white p-4 rounded-xl shadow-sm border-2 border-transparent hover:border-gray-300 hover:shadow-md transition group">
+                             class="card-view cursor-pointer bg-purple-50/40 p-4 rounded-xl shadow-sm border-2 border-purple-200 hover:border-purple-500 hover:shadow-md transition group">
                             <div class="flex items-center justify-between mb-2">
-                                <div class="w-8 h-8 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center text-sm">
+                                <div class="w-8 h-8 bg-purple-100 text-purple-700 rounded-lg flex items-center justify-center text-sm shadow-sm">
                                     <i class="fa-solid fa-calendar-check"></i>
                                 </div>
-                                <span class="text-[9px] font-bold uppercase tracking-wider bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded">FUTURAS</span>
+                                <span class="text-[9px] font-bold uppercase tracking-wider bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">FUTURAS</span>
                             </div>
-                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-purple-600 transition">Reservas e Futuras</h3>
+                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-purple-700 transition">Reservas Futuras</h3>
                             <p class="text-[11px] text-gray-500 mt-0.5 truncate">Todas as reservas futuras.</p>
                         </div>
 
                     </div>
 
-                    <!-- Mini-Cards de Resumo Financeiro (Visíveis Especialmente na Visão Financeira ou Geral) -->
-                    <div id="containerKpis" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-                        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
-                            <div>
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Faturamento Bruto</p>
-                                <p id="kpiFaturamento" class="text-base sm:text-lg font-bold text-gray-800 mt-0.5">R$ 0,00</p>
-                            </div>
-                            <div class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-xs">
-                                <i class="fa-solid fa-sack-dollar"></i>
-                            </div>
-                        </div>
-                        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
-                            <div>
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Total Recebido (Sinal)</p>
-                                <p id="kpiRecebido" class="text-base sm:text-lg font-bold text-emerald-600 mt-0.5">R$ 0,00</p>
-                            </div>
-                            <div class="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-xs">
-                                <i class="fa-solid fa-hand-holding-dollar"></i>
-                            </div>
-                        </div>
-                        <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
-                            <div>
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Saldo Restante</p>
-                                <p id="kpiSaldo" class="text-base sm:text-lg font-bold text-amber-600 mt-0.5">R$ 0,00</p>
-                            </div>
-                            <div class="w-8 h-8 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center text-xs">
-                                <i class="fa-solid fa-scale-balanced"></i>
-                            </div>
-                        </div>
+                    <!-- 3 Cards de Resumo Financeiro Vinculados ao Período Selecionado -->
+                    <div id="containerKpis" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+                        <!-- Preenchido via JavaScript com base no período filtrado -->
                     </div>
 
                     <!-- Área de Exibição da Consulta Selecionada -->
@@ -198,24 +172,22 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let usuarioIdAtual = null;
-        let viewAtualSelecionada = 'vw_gestor_hospedagens_relatorio';
-        let tituloBaseAtual = '[TESTE FRONT-END OK] Hospedagens, Suítes e Movimentações';
+        let viewAtualSelecionada = 'vw_gestor_financeiro_relatorio'; 
+        let tituloBaseAtual = 'Extrato Detalhado de Pagamentos';
 
-      function inicializarFiltroDatas() {
+        function inicializarFiltroDatas() {
             const hoje = new Date();
-
             const formatarDataInput = (d) => {
                 let y = d.getFullYear();
                 let m = String(d.getMonth() + 1).padStart(2, '0');
                 let day = String(d.getDate()).padStart(2, '0');
                 return `${y}-${m}-${day}`;
             };
-
             const dataHojeFormatada = formatarDataInput(hoje);
-
             document.getElementById('filtroDataInicio').value = dataHojeFormatada;
             document.getElementById('filtroDataFim').value = dataHojeFormatada;
         }
+
         async function protegerPagina() {
             supabaseClient.auth.onAuthStateChange((event, session) => {
                 if (event === 'SIGNED_OUT' || !session) {
@@ -261,17 +233,33 @@
             tituloBaseAtual = tituloAmigavel;
 
             document.querySelectorAll('.card-view').forEach(card => {
-                card.classList.remove('border-blue-600', 'border-amber-500', 'border-purple-600', 'border-emerald-600', 'shadow-md');
-                card.classList.add('border-transparent');
+                card.classList.remove('border-blue-500', 'border-amber-500', 'border-purple-500', 'border-emerald-500', 'shadow-md');
+                if (card.onclick.toString().includes('financeiro')) card.classList.add('border-blue-200');
+                else if (card.onclick.toString().includes('hospedagens')) card.classList.add('border-emerald-200');
+                else if (card.onclick.toString().includes('tarifas')) card.classList.add('border-amber-200');
+                else card.classList.add('border-purple-200');
             });
-            elementoCard.classList.remove('border-transparent');
+
+            if (nomeView.includes('financeiro')) elementoCard.classList.replace('border-blue-200', 'border-blue-500');
+            else if (nomeView.includes('hospedagens')) elementoCard.classList.replace('border-emerald-200', 'border-emerald-500');
+            else if (nomeView.includes('tarifas')) elementoCard.classList.replace('border-amber-200', 'border-amber-500');
+            else elementoCard.classList.replace('border-purple-200', 'border-purple-500');
             
-            if (nomeView.includes('financeiro')) elementoCard.classList.add('border-blue-600', 'shadow-md');
-            else if (nomeView.includes('hospedagens')) elementoCard.classList.add('border-emerald-600', 'shadow-md');
-            else if (nomeView.includes('tarifas')) elementoCard.classList.add('border-amber-500', 'shadow-md');
-            else elementoCard.classList.add('border-purple-600', 'shadow-md');
+            elementoCard.classList.add('shadow-md');
 
             carregarDadosView();
+        }
+
+        function formatarDataHoraBr(valor) {
+            if (!valor) return '-';
+            let dt = new Date(valor);
+            if (isNaN(dt.getTime())) return String(valor).toUpperCase();
+            let dia = String(dt.getDate()).padStart(2, '0');
+            let mes = String(dt.getMonth() + 1).padStart(2, '0');
+            let ano = dt.getFullYear();
+            let hora = String(dt.getHours()).padStart(2, '0');
+            let minuto = String(dt.getMinutes()).padStart(2, '0');
+            return `${dia}/${mes}/${ano} ÀS ${hora}:${minuto}`;
         }
 
         function formatarDataBr(valor) {
@@ -286,17 +274,28 @@
             return str.toUpperCase();
         }
 
+        function calcularDiarias(checkin, checkout) {
+            if (!checkin || !checkout) return 0;
+            let d1 = new Date(checkin);
+            let d2 = new Date(checkout);
+            let diffTime = d2 - d1;
+            let diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays > 0 ? diffDays : 1;
+        }
+
         function obterApelidoColuna(col) {
             let c = col.toLowerCase();
-            if (c === 'suite') return 'SUÍTE';
             if (c === 'hospede') return 'HÓSPEDE';
-            if (c === 'valor_total') return 'VALOR TOTAL';
-            if (c === 'total_pago') return 'TOTAL PAGO';
-            if (c === 'saldo_restante') return 'SALDO RESTANTE';
-            if (c.includes('status_suite')) return 'STATUS SUÍTE';
-            if (c.includes('valor_diaria_padrao')) return 'VL. PADRÃO';
-            if (c.includes('valor_diaria_calculado')) return 'VL. CALCULADO';
-            if (c.includes('ajuste_aplicado')) return 'AJUSTE';
+            if (c === 'suite') return 'SUÍTE';
+            if (c === 'checkin') return 'CHECK-IN';
+            if (c === 'checkout') return 'CHECK-OUT';
+            if (c === 'diarias') return 'DIÁRIAS';
+            if (c === 'valor_total') return 'TOTAL';
+            if (c === 'valor_pago') return 'PAGO';
+            if (c === 'saldo_restante') return 'SALDO';
+            if (c === 'data_pagamento') return 'DATA/HORA';
+            if (c === 'forma_pagamento') return 'FORMA';
+            if (c === 'observacao') return 'OBS';
             return col.replace(/_/g, ' ').toUpperCase();
         }
 
@@ -305,6 +304,7 @@
 
             const tbody = document.getElementById('tabelaCorpo');
             const thead = document.getElementById('tabelaCabecalho');
+            const containerKpis = document.getElementById('containerKpis');
             const dataInicio = document.getElementById('filtroDataInicio').value;
             const dataFim = document.getElementById('filtroDataFim').value;
 
@@ -314,7 +314,7 @@
             let tituloCompleto = `${tituloBaseAtual} (DE ${dataInicioFormatada} ATÉ ${dataFimFormatada})`;
             document.getElementById('tituloViewAtiva').textContent = tituloCompleto.toUpperCase();
 
-            tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO DADOS...</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="11" class="py-6 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO DADOS...</td></tr>`;
 
             try {
                 let registros = [];
@@ -332,6 +332,51 @@
                     });
                     registros = (response.data || []).filter(row => row.pousada_id === usuarioIdAtual);
                     error = response.error;
+                } else if (ehViewFinanceiro) {
+                    const { data: pagamentosData, error: errPag } = await supabaseClient
+                        .from('hospede_pagamentos')
+                        .select(`
+                            id,
+                            valor_pago,
+                            forma_pagamento,
+                            observacao,
+                            criado_em,
+                            reserva_id,
+                            reservas (
+                                hospede_nome,
+                                checkin,
+                                checkout,
+                                valor_total,
+                                suites ( nome )
+                            )
+                        `)
+                        .eq('pousada_id', usuarioIdAtual);
+
+                    error = errPag;
+                    if (pagamentosData) {
+                        registros = pagamentosData.map(p => {
+                            let checkinStr = p.reservas?.checkin || '';
+                            let checkoutStr = p.reservas?.checkout || '';
+                            let valorTotal = Number(p.reservas?.valor_total || 0);
+                            let valorPago = Number(p.valor_pago || 0);
+                            let saldoRestante = valorTotal - valorPago;
+                            if (saldoRestante < 0) saldoRestante = 0;
+
+                            return {
+                                hospede: p.reservas?.hospede_nome || 'HÓSPEDE NÃO IDENTIFICADO',
+                                suite: p.reservas?.suites?.nome || 'SUÍTE NÃO INFORMADA',
+                                checkin: checkinStr,
+                                checkout: checkoutStr,
+                                diarias: calcularDiarias(checkinStr, checkoutStr),
+                                valor_total: valorTotal,
+                                data_pagamento: p.criado_em,
+                                valor_pago: valorPago,
+                                saldo_restante: saldoRestante,
+                                forma_pagamento: p.forma_pagamento || '-',
+                                observacao: p.observacao || '-'
+                            };
+                        });
+                    }
                 } else {
                     let query = supabaseClient
                         .from(viewAtualSelecionada)
@@ -344,191 +389,162 @@
                 }
 
                 if (error) {
-                    console.error("Erro ao consultar view:", error);
-                    tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-red-500 font-medium">ERRO AO CARREGAR A VIEW ${viewAtualSelecionada.toUpperCase()}.</td></tr>`;
+                    console.error("Erro ao consultar dados:", error);
+                    tbody.innerHTML = `<tr><td colspan="11" class="py-6 text-center text-red-500 font-medium">ERRO AO CARREGAR OS DADOS.</td></tr>`;
                     thead.innerHTML = `<th class="py-3 px-4">AVISO DE ERRO</th>`;
                     return;
                 }
 
-                if (!registros || registros.length === 0) {
-                    thead.innerHTML = `<th class="py-3 px-4">INFORMAÇÃO</th>`;
-                    tbody.innerHTML = `<tr><td class="py-6 text-center text-gray-500">NENHUM REGISTRO ENCONTRADO NESTA VIEW.</td></tr>`;
-                    document.getElementById('kpiFaturamento').textContent = 'R$ 0,00';
-                    document.getElementById('kpiRecebido').textContent = 'R$ 0,00';
-                    document.getElementById('kpiSaldo').textContent = 'R$ 0,00';
-                    return;
-                }
-
-                const colunas = Object.keys(registros[0]).filter(col => 
-                    col !== 'pousada_id' && 
-                    col !== 'reserva_id' && 
-                    col !== 'tarifa_id' && 
-                    !col.endsWith('_id') &&
-                    !col.toLowerCase().includes('dias')
-                );
-                
-                let colunaDataEncontrada = null;
-                Object.keys(registros[0]).forEach(col => {
-                    let c = col.toLowerCase();
-                    if ((c.includes('checkin') || c.includes('data_inicio') || c.includes('vigencia') || c.includes('criado')) && !colunaDataEncontrada) {
-                        colunaDataEncontrada = col;
-                    }
-                });
-
+                // Filtrar registros principais pelo período de datas selecionado
                 let registrosFiltrados = registros;
-                if (ehViewReservas) {
+                if (dataInicio && dataFim && !ehViewTarifas) {
                     registrosFiltrados = registrosFiltrados.filter(row => {
-                        let hospede = String(row['hospede'] || row['hospede_nome'] || '').trim();
-                        let checkin = String(row['checkin'] || '').trim();
-                        if (!hospede || hospede === '-' || !checkin || checkin === '-') {
-                            return false;
-                        }
-                        return true;
-                    });
-                }
-
-                if (dataInicio && dataFim && colunaDataEncontrada && !ehViewTarifas) {
-                    registrosFiltrados = registrosFiltrados.filter(row => {
-                        let valData = row[colunaDataEncontrada];
+                        let valData = row['data_pagamento'] || row['checkin'] || '';
                         if (!valData) return true;
                         let dataStr = String(valData).substring(0, 10);
                         return dataStr >= dataInicio && dataStr <= dataFim;
                     });
                 }
 
-                // --- ORDENAÇÃO POR CHECK-IN (PRIORIZANDO A DATA DE HOJE PARA CIMA) ---
-                const dataHojeStr = new Date().toISOString().split('T')[0];
-                const timestampHoje = new Date(dataHojeStr).getTime();
-
+                // --- ORDENAÇÃO CRONOLÓGICA CRESCENTE (DA MENOR HORA PARA A MAIOR) ---
                 registrosFiltrados.sort((a, b) => {
-                    let dataA = String(a['checkin'] || a['data_inicio'] || '9999-12-31').substring(0, 10);
-                    let dataB = String(b['checkin'] || b['data_inicio'] || '9999-12-31').substring(0, 10);
+                    let dataA = a['data_pagamento'] || a['checkin'] || '';
+                    let dataB = b['data_pagamento'] || b['checkin'] || '';
+                    return new Date(dataA) - new Date(dataB);
+                });
+
+                // --- CÁLCULO DOS KPIS FINANCEIROS EXATOS PARA O PERÍODO SELECIONADO ---
+                let faturamentoBrutoPeriodo = 0;
+                let totalRecebidoPeriodo = 0;
+                let valorAReceberPeriodo = 0;
+
+                if (ehViewFinanceiro) {
+                    let reservasIdsNoPeriodo = [...new Set(registrosFiltrados.map(r => r.reserva_id).filter(Boolean))];
                     
-                    let timeA = new Date(dataA).getTime();
-                    let timeB = new Date(dataB).getTime();
+                    totalRecebidoPeriodo = registrosFiltrados.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
+                    valorAReceberPeriodo = registrosFiltrados.reduce((acc, curr) => acc + Number(curr.saldo_restante || 0), 0);
 
-                    // Se a data de A for futura ou hoje e B for passada, A vem primeiro, etc.
-                    if (timeA >= timestampHoje && timeB < timestampHoje) return -1;
-                    if (timeB >= timestampHoje && timeA < timestampHoje) return 1;
+                    if (reservasIdsNoPeriodo.length > 0) {
+                        const { data: resPeriodo } = await supabaseClient
+                            .from('reservas')
+                            .select('id, valor_total')
+                            .in('id', reservasIdsNoPeriodo);
 
-                    return timeA - timeB; // Crescente a partir da data atual
-                });
+                        if (resPeriodo) {
+                            faturamentoBrutoPeriodo = resPeriodo.reduce((acc, curr) => acc + Number(curr.valor_total || 0), 0);
+                        }
+                    } else {
+                        faturamentoBrutoPeriodo = totalRecebidoPeriodo + valorAReceberPeriodo;
+                    }
+                }
 
-                // --- CÁLCULO DOS KPIS FINANCEIROS COM BASE NOS REGISTROS FILTRADOS ---
-                let somaBruto = 0;
-                let somaRecebido = 0;
-                let somaSaldo = 0;
+                if (!registrosFiltrados || registrosFiltrados.length === 0) {
+                    thead.innerHTML = `<th class="py-3 px-4">INFORMAÇÃO</th>`;
+                    tbody.innerHTML = `<tr><td class="py-6 text-center text-gray-500">NENHUM REGISTRO ENCONTRADO NESTE PERÍODO.</td></tr>`;
+                    
+                    if (ehViewFinanceiro) {
+                        containerKpis.className = "grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5";
+                        containerKpis.innerHTML = `
+                            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
+                                <div><p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Faturamento Bruto</p><p class="text-lg font-bold text-gray-800 mt-1">R$ 0,00</p></div>
+                                <div class="w-10 h-10 bg-slate-100 text-slate-700 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                            </div>
+                            <div class="bg-white p-4 rounded-xl shadow-sm border border-emerald-200 flex items-center justify-between">
+                                <div><p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Total Recebido (Sinal)</p><p class="text-lg font-bold text-emerald-600 mt-1">R$ 0,00</p></div>
+                                <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-sack-dollar"></i></div>
+                            </div>
+                            <div class="bg-white p-4 rounded-xl shadow-sm border border-amber-200 flex items-center justify-between">
+                                <div><p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Valor a Receber</p><p class="text-lg font-bold text-amber-600 mt-1">R$ 0,00</p></div>
+                                <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-clock"></i></div>
+                            </div>
+                        `;
+                    }
+                    return;
+                }
 
-                registrosFiltrados.forEach(row => {
-                    let vTotal = Number(row['valor_total'] || row['valor'] || row['valor_diaria_calculado'] || 0);
-                    let tPago = Number(row['total_pago'] || 0);
-                    let sRestante = Number(row['saldo_restante'] || (vTotal - tPago));
+                const colunas = Object.keys(registrosFiltrados[0]).filter(col => 
+                    col !== 'pousada_id' && 
+                    col !== 'reserva_id' && 
+                    col !== 'tarifa_id' && 
+                    !col.endsWith('_id') &&
+                    !col.toLowerCase().includes('dias')
+                );
 
-                    if (!isNaN(vTotal)) somaBruto += vTotal;
-                    if (!isNaN(tPago)) somaRecebido += tPago;
-                    if (!isNaN(sRestante)) somaSaldo += sRestante > 0 ? sRestante : 0;
-                });
-
-                document.getElementById('kpiFaturamento').textContent = somaBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                document.getElementById('kpiRecebido').textContent = somaRecebido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                document.getElementById('kpiSaldo').textContent = somaSaldo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                // --- RENDERIZAÇÃO DOS KPIS ---
+                if (ehViewHospedagens) {
+                    containerKpis.className = "grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5";
+                    let totalReservasValidas = registrosFiltrados.filter(r => r.hospede && r.hospede !== '-').length;
+                    containerKpis.innerHTML = `
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-emerald-200 flex items-center justify-between">
+                            <div>
+                                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Total de Reservas</p>
+                                <p class="text-lg sm:text-xl font-bold text-gray-800 mt-1">${totalReservasValidas}</p>
+                            </div>
+                            <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-bookmark"></i></div>
+                        </div>
+                    `;
+                } else if (ehViewFinanceiro) {
+                    containerKpis.className = "grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5";
+                    containerKpis.innerHTML = `
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
+                            <div>
+                                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Faturamento Bruto</p>
+                                <p class="text-lg sm:text-xl font-bold text-gray-800 mt-1">${faturamentoBrutoPeriodo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                            </div>
+                            <div class="w-10 h-10 bg-slate-100 text-slate-700 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-emerald-200 flex items-center justify-between">
+                            <div>
+                                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Total Recebido (Sinal)</p>
+                                <p class="text-lg sm:text-xl font-bold text-emerald-600 mt-1">${totalRecebidoPeriodo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                            </div>
+                            <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-sack-dollar"></i></div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-amber-200 flex items-center justify-between">
+                            <div>
+                                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Valor a Receber</p>
+                                <p class="text-lg sm:text-xl font-bold text-amber-600 mt-1">${valorAReceberPeriodo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                            </div>
+                            <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-clock"></i></div>
+                        </div>
+                    `;
+                } else {
+                    containerKpis.className = "hidden";
+                }
 
                 let htmlCabecalho = '';
                 colunas.forEach(col => {
                     htmlCabecalho += `<th class="py-3 px-4">${obterApelidoColuna(col)}</th>`;
                 });
-
-                if (ehViewReservas || ehViewTarifas) {
-                    htmlCabecalho += `<th class="py-3 px-4 text-center">STATUS / VIGÊNCIA</th>`;
-                }
                 thead.innerHTML = htmlCabecalho;
 
-                if (registrosFiltrados.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="${colunas.length + 1}" class="py-6 text-center text-gray-500">NENHUM REGISTRO VÁLIDO NO PERÍODO SELECIONADO.</td></tr>`;
-                    return;
-                }
-
                 let htmlLinhas = '';
-                registrosFiltrados.forEach(row => {
-                    let classeLinhaDestaque = "hover:bg-gray-50 transition";
-                    let badgeAcao = "";
+                let grupoCorAlternada = false;
+                let ultimaChaveGrupo = null;
 
-                    let isSuiteDisponivel = false;
-                    if (ehViewHospedagens) {
-                        let hospede = String(row['hospede'] || row['hospede_nome'] || '').trim();
-                        let checkin = String(row['checkin'] || '').trim();
-                        if (!hospede || hospede === '-' || !checkin || checkin === '-') {
-                            isSuiteDisponivel = true;
-                            classeLinhaDestaque = "bg-slate-200 text-slate-600 hover:bg-slate-300 transition font-medium";
-                        }
-                    }
-
-                    if (ehViewTarifas) {
-                        let ajuste = String(row['ajuste_aplicado'] || '').trim();
-                        let dataFimTarifa = String(row['data_fim'] || '').substring(0, 10);
-
-                        if (!ajuste || ajuste === '-' || ajuste === '') {
-                            classeLinhaDestaque = "bg-emerald-50/70 hover:bg-emerald-100/80 text-emerald-950 transition font-medium";
-                            badgeAcao = `<span class="bg-emerald-600 text-white px-2.5 py-1 rounded text-[10px] font-bold uppercase inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-circle-check"></i> VALOR PADRÃO</span>`;
-                        } else if (dataFimTarifa) {
-                            let timestampFim = new Date(dataFimTarifa).getTime();
-                            let diferencaDias = Math.ceil((timestampFim - timestampHoje) / (1000 * 60 * 60 * 24));
-
-                            if (diferencaDias < 0) {
-                                classeLinhaDestaque = "bg-gray-100 text-gray-500 transition";
-                                badgeAcao = `<span class="bg-gray-400 text-white px-2.5 py-1 rounded text-[10px] font-bold uppercase inline-flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation"></i> EXPIRADA</span>`;
-                            } else if (diferencaDias === 0) {
-                                classeLinhaDestaque = "bg-rose-100 hover:bg-rose-200 border-l-4 border-rose-600 text-rose-950 transition font-semibold";
-                                badgeAcao = `<span class="bg-rose-600 text-white px-2.5 py-1 rounded text-[10px] font-bold uppercase inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-triangle-exclamation"></i> EXPIRA HOJE</span>`;
-                            } else if (diferencaDias <= 7) {
-                                classeLinhaDestaque = "bg-amber-50 hover:bg-amber-100 border-l-4 border-amber-500 transition shadow-sm";
-                                badgeAcao = `<span class="bg-amber-500 text-white px-2.5 py-1 rounded text-[10px] font-bold uppercase inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-clock"></i> EXPIRA EM ${diferencaDias} DIAS</span>`;
-                            } else {
-                                badgeAcao = `<span class="bg-slate-200 text-slate-700 px-2.5 py-1 rounded text-[10px] font-bold uppercase inline-flex items-center gap-1"><i class="fa-solid fa-calendar-days"></i> VIGENTE (${diferencaDias} DIAS)</span>`;
-                            }
-                        }
-                    } else if (ehViewReservas) {
-                        let diasRestantes = null;
-                        Object.keys(row).forEach(col => {
-                            let colLower = col.toLowerCase();
-                            if (colLower.includes('dias') || colLower.includes('restante')) {
-                                let val = Number(row[col]);
-                                if (!isNaN(val)) diasRestantes = val;
-                            }
-                        });
-
-                        let statusReserva = String(row['status_reserva'] || '').toUpperCase();
-                        let statusFisico = String(row['status_fisico_suite'] || '').toUpperCase();
-
-                        if (diasRestantes === 0) {
-                            if (statusReserva === 'PENDENTE') {
-                                classeLinhaDestaque = "bg-rose-100 hover:bg-rose-200 border-l-4 border-rose-600 text-rose-950 transition shadow-sm font-semibold";
-                                badgeAcao = `<span class="bg-rose-600 text-white px-2.5 py-1 rounded text-[10px] font-bold uppercase inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-triangle-exclamation"></i> APROVAR HOJE</span>`;
-                            } else if (statusReserva === 'APROVADA' && statusFisico === 'DISPONÍVEL') {
-                                classeLinhaDestaque = "bg-amber-50 hover:bg-amber-100 border-l-4 border-amber-500 transition shadow-sm";
-                                badgeAcao = `<span class="bg-amber-500 text-white px-2.5 py-1 rounded text-[10px] font-bold uppercase inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-key"></i> CHECK-IN HOJE</span>`;
-                            } else {
-                                badgeAcao = `<span class="bg-emerald-600 text-white px-2.5 py-1 rounded text-[10px] font-bold uppercase inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-check"></i> CHECK-IN HOJE (OK)</span>`;
-                            }
-                        } else if (diasRestantes === 1) {
-                            classeLinhaDestaque = "bg-blue-50/60 hover:bg-blue-100 transition";
-                            badgeAcao = `<span class="bg-blue-600 text-white px-2.5 py-1 rounded text-[10px] font-bold uppercase inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-clock"></i> AMANHÃ (1 DIA)</span>`;
-                        } else if (diasRestantes > 1) {
-                            badgeAcao = `<span class="bg-slate-200 text-slate-700 px-2.5 py-1 rounded text-[10px] font-bold uppercase inline-flex items-center gap-1"><i class="fa-solid fa-calendar-day"></i> FALTAM ${diasRestantes} DIAS</span>`;
-                        } else {
-                            badgeAcao = `<span class="text-gray-400 text-[10px]">-</span>`;
-                        }
-                    }
-
-                    htmlLinhas += `<tr class="${classeLinhaDestaque}">`;
+                registrosFiltrados.forEach((row, index) => {
+                    let chaveAtual = `${String(row.hospede || '').trim()}|${String(row.suite || '').trim()}|${String(row.checkin || '').trim()}|${String(row.checkout || '').trim()}`;
                     
+                    if (index === 0) {
+                        grupoCorAlternada = false;
+                        ultimaChaveGrupo = chaveAtual;
+                    } else if (chaveAtual !== ultimaChaveGrupo) {
+                        grupoCorAlternada = !grupoCorAlternada;
+                        ultimaChaveGrupo = chaveAtual;
+                    }
+
+let classeCorFundo = grupoCorAlternada ? 'bg-emerald-100/70 hover:bg-emerald-200/60' : 'bg-white hover:bg-gray-50';
+
+                    htmlLinhas += `<tr class="${classeCorFundo} transition">`;
                     colunas.forEach(col => {
                         let valorBruto = row[col];
                         let valorExibicao = '-';
 
                         if (valorBruto !== null && valorBruto !== undefined) {
                             let colLower = col.toLowerCase();
-                            if (colLower.includes('data') || colLower.includes('checkin') || colLower.includes('checkout') || colLower.includes('vigencia') || colLower.includes('criado')) {
+                            if (colLower.includes('data_pagamento') || colLower.includes('criado_em')) {
+                                valorExibicao = formatarDataHoraBr(valorBruto);
+                            } else if (colLower.includes('checkin') || colLower.includes('checkout')) {
                                 valorExibicao = formatarDataBr(valorBruto);
                             } else {
                                 valorExibicao = String(valorBruto).toUpperCase();
@@ -536,35 +552,25 @@
                         }
                         
                         let colLower = col.toLowerCase();
-                        if ((colLower.includes('valor') || colLower.includes('pago') || colLower.includes('saldo')) && !isNaN(valorBruto)) {
-                            valorExibicao = Number(valorBruto).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                        }
-                        
-                        if (colLower.includes('status_fisico') && valorExibicao.includes('DISPONÍVEL')) {
-                            valorExibicao = `<span class="px-2.5 py-1 rounded-md border border-emerald-500 text-emerald-700 font-bold bg-emerald-50/50">DISPONÍVEL</span>`;
-                        }
-
-                        if ((colLower.includes('wats') || colLower.includes('app') || colLower.includes('telefone')) && valorBruto !== null && valorBruto !== undefined && !isSuiteDisponivel) {
-                            let numeroLimpo = String(valorBruto).replace(/\D/g, '');
-                            valorExibicao = `<a href="https://wa.me/55${numeroLimpo}" target="_blank" title="Abrir WhatsApp" class="text-emerald-700 hover:text-emerald-900 font-bold flex items-center gap-1.5 transition">
-                                <i class="fa-brands fa-whatsapp text-base"></i> ${String(valorBruto).toUpperCase()}
-                            </a>`;
+                        if (colLower.includes('valor_pago') && !isNaN(valorBruto)) {
+                            valorExibicao = `<span class="font-bold text-emerald-700">${Number(valorBruto).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>`;
+                        } else if (colLower.includes('valor_total') && !isNaN(valorBruto)) {
+                            valorExibicao = `<span class="font-bold text-gray-800">${Number(valorBruto).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>`;
+                        } else if (colLower.includes('saldo_restante') && !isNaN(valorBruto)) {
+                            valorExibicao = `<span class="font-bold text-amber-600">${Number(valorBruto).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>`;
+                        } else if (colLower.includes('diarias')) {
+                            valorExibicao = `<span class="font-semibold text-blue-600">${valorBruto} DIÁRIA(S)</span>`;
                         }
 
                         htmlLinhas += `<td class="py-3 px-4 font-medium">${valorExibicao}</td>`;
                     });
-
-                    if (ehViewReservas || ehViewTarifas) {
-                        htmlLinhas += `<td class="py-3 px-4 text-center">${badgeAcao}</td>`;
-                    }
-
                     htmlLinhas += `</tr>`;
                 });
                 tbody.innerHTML = htmlLinhas;
 
             } catch (err) {
                 console.error("Erro geral:", err);
-                tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-red-500">ERRO DE COMUNICAÇÃO.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="11" class="py-6 text-center text-red-500">ERRO DE COMUNICAÇÃO.</td></tr>`;
             }
         }
 
