@@ -180,7 +180,7 @@
                         <strong id="modal-qtd-diarias">1 diária(s)</strong>
                     </div>
                     <div class="flex justify-between">
-                        <span>Valor Total da Estadia:</span>
+                        <span>Valor Total da Estadia (c/ Tarifas Especiais):</span>
                         <strong id="modal-valor-total">R$ 0,00</strong>
                     </div>
                     <div class="flex justify-between border-t border-blue-200 pt-1">
@@ -535,27 +535,11 @@
                 return;
             }
 
-            for (const suite of suitesGlobaisCache) {
+            suitesGlobaisCache.forEach(suite => {
                 const reservasDaSuite = reservasGlobaisCache.filter(r => r.suite_id === suite.id && r.status !== 'Cancelada' && r.status !== 'Recusada' && r.status !== 'Finalizada');
                 const aprovadasDaSuite = reservasDaSuite.filter(r => r.status === 'Aprovada');
                 const pendentesDaSuite = reservasDaSuite.filter(r => r.status === 'Pendente');
 
-                // 🌟 ATUALIZAÇÃO SOLICITADA: Calcula dinamicamente a diária vigente (considerando tarifas especiais para o dia de hoje)
-            // LINHA MODIFICADA:
-let diariaVigenteCard = Number(suite.valor_diaria || 0);
-try {
-    const amanhaStr = new Date(Date.now() + 86400000).toLocaleDateString('sv-SE');
-    const { data: valorCalculadoCard } = await supabaseClient.rpc('calcular_total_reserva', {
-        p_suite_id: suite.id,
-        p_checkin: hojeStr,
-        p_checkout: amanhaStr
-    });
-    if (valorCalculadoCard !== null && !isNaN(valorCalculadoCard)) {
-        diariaVigenteCard = Number(valorCalculadoCard);
-    }
-} catch (errCalc) {
-    console.error("Erro ao calcular diária vigente para o card:", errCalc);
-}
                 if (aprovadasDaSuite.length > 0) {
                     aprovadasDaSuite.forEach((aprovada, index) => {
                         const isFutura = aprovada.checkin > hojeStr;
@@ -596,7 +580,7 @@ try {
                                     <div class="flex justify-between items-center">
                                         <div>
                                             <h2 class="text-base sm:text-lg font-bold text-gray-900">${suite.nome}${sufixoTitulo}${nomeHospedeExibicao}</h2>
-                                            <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária: ${formatarMoeda(diariaVigenteCard)}</span>
+                                            <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária Padrão: ${formatarMoeda(suite.valor_diaria)}</span>
                                         </div>
                                         <div class="flex items-center gap-2">
                                             <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm ${badgeClasses}">
@@ -662,7 +646,7 @@ try {
                                 <div class="flex justify-between items-center">
                                     <div>
                                         <h2 class="text-base sm:text-lg font-bold text-gray-900">${suite.nome}</h2>
-                                        <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária: ${formatarMoeda(diariaVigenteCard)}</span>
+                                        <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária Padrão: ${formatarMoeda(suite.valor_diaria)}</span>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm ${
@@ -713,7 +697,7 @@ try {
                                 <div class="flex justify-between items-center">
                                     <div>
                                         <h2 class="text-base sm:text-lg font-bold text-amber-950">${suite.nome}${sufixoTituloPend}${nomeHospedePendExibicao}</h2>
-                                        <span class="text-[11px] font-bold text-amber-900/80 bg-amber-200/60 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária: ${formatarMoeda(diariaVigenteCard)}</span>
+                                        <span class="text-[11px] font-bold text-amber-900/80 bg-amber-200/60 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária Padrão: ${formatarMoeda(suite.valor_diaria)}</span>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm bg-amber-200 text-amber-900">Pendente</span>
@@ -776,7 +760,7 @@ try {
                             </div>
                         </div>`;
                 });
-            }
+            });
         }
         
         async function abrirModal(id, nome, status, reservaId = null) {
@@ -889,13 +873,15 @@ try {
                 document.getElementById('edit-checkout').value = checkoutStr;
             }
 
+            // 1. Quantidade de diárias
             const qtdDiarias = calcularQuantidadeDiarias(checkinStr, checkoutStr);
             document.getElementById('modal-qtd-diarias').innerText = `${qtdDiarias} diária(s)`;
 
+            // 2. Valor total da estadia usando estritamente a RPC com tarifas especiais aplicadas
             let valorTotal = 0;
             const suiteObj = suitesGlobaisCache.find(s => s.id === suiteId);
             const valorDiaria = suiteObj ? Number(suiteObj.valor_diaria || 0) : 0;
-            valorTotal = qtdDiarias * valorDiaria;
+            valorTotal = qtdDiarias * valorDiaria; // Fallback inicial padrão
 
             try {
                 const { data: valorCalculado, error: erroRpc } = await supabaseClient.rpc('calcular_total_reserva', { 
@@ -912,6 +898,7 @@ try {
 
             document.getElementById('modal-valor-total').innerText = formatarMoeda(valorTotal);
 
+            // 3. Saldo Restante
             let totalPago = 0;
             if (reservaId) {
                 const pagamentosDestaReserva = pagamentosGlobaisCache.filter(p => p.reserva_id === reservaId);
