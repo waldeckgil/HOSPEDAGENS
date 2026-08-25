@@ -492,29 +492,31 @@
         }
 
         // Função auxiliar para calcular o valor vigente da diária (ou total do dia) usando a inteligência do banco
-      async function calcularValorVigenteCard(suiteId, checkinDate, checkoutDate) {
-    const dataConsulta = checkinDate || new Date().toLocaleDateString('sv-SE');
-    const dataFimConsulta = checkoutDate || dataConsulta;
-    
-    try {
-        const { data: valorCalculado, error } = await supabaseClient.rpc('calcular_total_reserva', {
-            p_suite_id: suiteId,
-            p_checkin: dataConsulta,
-            p_checkout: dataFimConsulta
-        });
+        async function calcularValorVigenteCard(suiteId, checkinDate, checkoutDate) {
+            const dataConsulta = checkinDate || new Date().toLocaleDateString('sv-SE');
+            const dataFimConsulta = checkoutDate || dataConsulta;
+            
+            try {
+                const { data: valorCalculado, error } = await supabaseClient.rpc('calcular_total_reserva', {
+                    p_suite_id: suiteId,
+                    p_checkin: dataConsulta,
+                    p_checkout: dataFimConsulta
+                });
 
-        if (!error && valorCalculado !== null && valorCalculado > 0) {
-            const qtd = calcularQuantidadeDiarias(dataConsulta, dataFimConsulta);
-            return Number(valorCalculado) / (qtd > 0 ? qtd : 1);
+                if (!error && valorCalculado !== null) {
+                    // Se for para mais de uma diária, retorna a média diária aplicada ou o total calculado dependendo do contexto.
+                    // Aqui dividimos pelo número de diárias para mostrar a diária unitária já com o reajuste aplicado da tarifa especial.
+                    const qtd = calcularQuantidadeDiarias(dataConsulta, dataFimConsulta);
+                    return Number(valorCalculado) / (qtd > 0 ? qtd : 1);
+                }
+            } catch (err) {
+                console.error("Erro ao calcular valor vigente via RPC:", err);
+            }
+            
+            // Fallback para o valor padrão da suíte cadastrada
+            const sObj = suitesGlobaisCache.find(s => s.id === suiteId);
+            return sObj ? Number(sObj.valor_diaria || 0) : 0;
         }
-    } catch (err) {
-        console.error("Erro ao calcular valor vigente via RPC:", err);
-    }
-    
-    // Fallback seguro: se o RPC falhar ou retornar zero, pega direto do cadastro da suíte
-    const sObj = suitesGlobaisCache.find(s => s.id === suiteId);
-    return sObj ? Number(sObj.valor_diaria || 0) : 0;
-}
 
         async function carregarDashboard() {
             await carregarPousada();
