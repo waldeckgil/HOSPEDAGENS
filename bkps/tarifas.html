@@ -21,10 +21,9 @@
                     <span>🏠</span> <span class="hidden sm:inline">Painel Principal</span><span class="sm:hidden">Suítes</span>
                 </a>
                 
-                    <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl transition shadow text-xs sm:text-sm flex items-center justify-center gap-2 mt-1">
-                        <i class="fa-solid fa-right-from-bracket"></i> Sair
-                    </button>
-                </div>
+                <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl transition shadow text-xs sm:text-sm flex items-center justify-center gap-2 mt-1">
+                    <i class="fa-solid fa-right-from-bracket"></i> Sair
+                </button>
             </nav>
         </div>
     </aside>
@@ -242,20 +241,19 @@
             document.getElementById('titulo-pousada').innerText = nomePousada;
             document.getElementById('nome-pousada-sidebar').innerText = nomePousada;
 
-            document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`;
-
             await carregarSuitesETarifas();
         }
 
-        function copiarLinkVitrine() {
-            if (!usuarioIdAtual) return;
-            navigator.clipboard.writeText(window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`).then(() => {
-                mostrarToast("Link da vitrine copiado para a área de transferência!");
-            });
-        }
-
         async function carregarSuitesETarifas() {
-            const { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', usuarioIdAtual);
+            let { data: suites, error } = await supabaseClient.from('suites').select('*').eq('pousada_id', usuarioIdAtual);
+            
+            if (!suites || suites.length === 0) {
+                const resAlternativa = await supabaseClient.from('suites').select('*').eq('id', usuarioIdAtual);
+                if (resAlternativa.data && resAlternativa.data.length > 0) {
+                    suites = resAlternativa.data;
+                }
+            }
+
             suitesCache = suites || [];
 
             const containerSuites = document.getElementById('lista-suites-tarifas');
@@ -265,17 +263,17 @@
             selectSuiteTarifa.innerHTML = '<option value="">Todas as Suítes da Pousada (Geral)</option>';
 
             if (suitesCache.length === 0) {
-                containerSuites.innerHTML = '<p class="text-gray-500 text-sm">Nenhuma suíte cadastrada. Cadastre suítes na aba Configuração de Suítes primeiro.</p>';
+                containerSuites.innerHTML = '<p class="text-gray-500 text-sm">Nenhuma suíte encontrada para esta pousada. Verifique se as suítes estão cadastradas corretamente no banco.</p>';
                 return;
             }
 
             suitesCache.forEach(suite => {
-                selectSuiteTarifa.innerHTML += `<option value="${suite.id}">${suite.nome} (Base: R$ ${Number(suite.valor_diaria || 0).toFixed(2)})</option>`;
+                selectSuiteTarifa.innerHTML += `<option value="${suite.id}">${suite.nome || 'Suíte'} (Base: R$ ${Number(suite.valor_diaria || 0).toFixed(2)})</option>`;
 
                 containerSuites.innerHTML += `
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center p-4 bg-gray-50 rounded-2xl border border-gray-200 gap-4">
                         <div>
-                            <h4 class="font-bold text-gray-900 text-base">${suite.nome}</h4>
+                            <h4 class="font-bold text-gray-900 text-base">${suite.nome || 'Suíte'}</h4>
                             <p class="text-xs text-gray-500">Status atual: ${suite.status || 'Disponível'}</p>
                         </div>
                         <div class="flex items-center gap-3 w-full md:w-auto">
