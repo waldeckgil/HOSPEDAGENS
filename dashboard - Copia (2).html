@@ -180,7 +180,7 @@
                         <strong id="modal-qtd-diarias">1 diária(s)</strong>
                     </div>
                     <div class="flex justify-between">
-                        <span>Valor Total da Estadia:</span>
+                        <span>Valor Total da Estadia (c/ Tarifas Especiais):</span>
                         <strong id="modal-valor-total">R$ 0,00</strong>
                     </div>
                     <div class="flex justify-between border-t border-blue-200 pt-1">
@@ -580,7 +580,7 @@
                                     <div class="flex justify-between items-center">
                                         <div>
                                             <h2 class="text-base sm:text-lg font-bold text-gray-900">${suite.nome}${sufixoTitulo}${nomeHospedeExibicao}</h2>
-                                            <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária: ${formatarMoeda(suite.valor_diaria)}</span>
+                                            <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária Padrão: ${formatarMoeda(suite.valor_diaria)}</span>
                                         </div>
                                         <div class="flex items-center gap-2">
                                             <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm ${badgeClasses}">
@@ -646,7 +646,7 @@
                                 <div class="flex justify-between items-center">
                                     <div>
                                         <h2 class="text-base sm:text-lg font-bold text-gray-900">${suite.nome}</h2>
-                                        <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária: ${formatarMoeda(suite.valor_diaria)}</span>
+                                        <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária Padrão: ${formatarMoeda(suite.valor_diaria)}</span>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm ${
@@ -697,7 +697,7 @@
                                 <div class="flex justify-between items-center">
                                     <div>
                                         <h2 class="text-base sm:text-lg font-bold text-amber-950">${suite.nome}${sufixoTituloPend}${nomeHospedePendExibicao}</h2>
-                                        <span class="text-[11px] font-bold text-amber-900/80 bg-amber-200/60 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária: ${formatarMoeda(suite.valor_diaria)}</span>
+                                        <span class="text-[11px] font-bold text-amber-900/80 bg-amber-200/60 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária Padrão: ${formatarMoeda(suite.valor_diaria)}</span>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm bg-amber-200 text-amber-900">Pendente</span>
@@ -863,7 +863,6 @@
 
             if (!checkinStr || !checkoutStr) return;
 
-            // Regra: Mínimo de 1 diária caso check-in e check-out sejam iguais ou inválidos
             let d1 = new Date(checkinStr);
             let d2 = new Date(checkoutStr);
 
@@ -874,15 +873,15 @@
                 document.getElementById('edit-checkout').value = checkoutStr;
             }
 
-            // 1. Calcular quantidade de diárias (mínimo 1)[cite: 1]
+            // 1. Quantidade de diárias
             const qtdDiarias = calcularQuantidadeDiarias(checkinStr, checkoutStr);
             document.getElementById('modal-qtd-diarias').innerText = `${qtdDiarias} diária(s)`;
 
-            // 2. Buscar valor total da estadia (RPC do banco ou cálculo local baseado na suíte)
+            // 2. Valor total da estadia usando estritamente a RPC com tarifas especiais aplicadas
             let valorTotal = 0;
             const suiteObj = suitesGlobaisCache.find(s => s.id === suiteId);
             const valorDiaria = suiteObj ? Number(suiteObj.valor_diaria || 0) : 0;
-            valorTotal = qtdDiarias * valorDiaria;
+            valorTotal = qtdDiarias * valorDiaria; // Fallback inicial padrão
 
             try {
                 const { data: valorCalculado, error: erroRpc } = await supabaseClient.rpc('calcular_total_reserva', { 
@@ -899,7 +898,7 @@
 
             document.getElementById('modal-valor-total').innerText = formatarMoeda(valorTotal);
 
-            // 3. Calcular Saldo Restante (Total - Valor já pago)
+            // 3. Saldo Restante
             let totalPago = 0;
             if (reservaId) {
                 const pagamentosDestaReserva = pagamentosGlobaisCache.filter(p => p.reserva_id === reservaId);
@@ -916,7 +915,6 @@
                 elSaldo.className = "text-emerald-600 font-extrabold";
             }
 
-            // Se o status for Checkout, atualiza também o saldo devedor de encerramento
             if (document.getElementById('edit-status').value === 'Checkout') {
                 document.getElementById('display-saldo-devedor-checkout').innerText = formatarMoeda(saldoRestante);
                 document.getElementById('edit-valor-sinal').value = saldoRestante > 0 ? saldoRestante.toFixed(2) : '0.00';

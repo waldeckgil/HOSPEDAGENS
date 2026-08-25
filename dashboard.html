@@ -241,6 +241,27 @@
         </div>
     </div>
 
+    <!-- MODAL DE VISUALIZAÇÃO DE TARIFA ESPECIAL -->
+    <div id="modal-tarifa-especial" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="fecharModalTarifaEspecial()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+            
+            <div class="flex items-center gap-2 mb-1">
+                <span class="text-xl">⚡</span>
+                <h3 class="text-lg font-bold text-gray-900">Tarifas Especiais Aplicadas</h3>
+            </div>
+            <p id="modal-tarifa-suite-nome" class="text-xs text-blue-600 font-bold mb-4 uppercase tracking-wider"></p>
+
+            <div id="modal-tarifa-conteudo" class="space-y-3">
+                <!-- Conteúdo injetado via JS -->
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                <button onclick="fecharModalTarifaEspecial()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition">Fechar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
@@ -251,6 +272,7 @@
         let reservasGlobaisCache = [];
         let suitesGlobaisCache = [];
         let pagamentosGlobaisCache = [];
+        let tarifasEspeciaisGlobaisCache = [];
         let camposLimposParaNovaReserva = false;
 
         async function protegerPagina() {
@@ -491,6 +513,59 @@
             }
         }
 
+        function abrirModalTarifaEspecial(suiteId) {
+            const suite = suitesGlobaisCache.find(s => s.id === suiteId);
+            const nomeSuite = suite ? suite.nome : 'Suíte';
+            
+            // Filtra regras específicas da suíte ou globais da pousada (suite_id nulo ou correspondente)
+            const tarifasDaSuite = tarifasEspeciaisGlobaisCache.filter(t => t.suite_id === suiteId || !t.suite_id);
+            
+            document.getElementById('modal-tarifa-suite-nome').innerText = `Suíte: ${nomeSuite}`;
+            const containerConteudo = document.getElementById('modal-tarifa-conteudo');
+            containerConteudo.innerHTML = '';
+
+            if (tarifasDaSuite.length === 0) {
+                containerConteudo.innerHTML = '<p class="text-xs text-gray-500 text-center py-4">Nenhuma regra ou tarifa especial cadastrada para esta suíte.</p>';
+            } else {
+                tarifasDaSuite.forEach(t => {
+                    let diasTexto = "Todos os dias";
+                    if (t.dias_semana) {
+                        try {
+                            const diasObj = typeof t.dias_semana === 'string' ? JSON.parse(t.dias_semana) : t.dias_semana;
+                            if (Array.isArray(diasObj) && diasObj.length > 0) {
+                                diasTexto = diasObj.join(', ');
+                            }
+                        } catch(e) {}
+                    }
+
+                    const tipoAjuste = t.tipo_ajuste || 'Valor Fixo';
+                    const valorFormatado = tipoAjuste.toLowerCase().includes('percent') || tipoAjuste.toLowerCase().includes('%') 
+                        ? `${t.valor_especial}%` 
+                        : formatarMoeda(t.valor_especial);
+
+                    containerConteudo.innerHTML += `
+                        <div class="bg-amber-50/60 border border-amber-200 p-3.5 rounded-xl space-y-1.5 text-xs text-amber-950">
+                            <div class="flex justify-between items-start">
+                                <strong class="text-sm font-bold text-amber-900">${t.descricao || 'Tarifa Especial'}</strong>
+                                <span class="bg-amber-200 text-amber-950 px-2 py-0.5 rounded-md font-extrabold text-xs">${valorFormatado}</span>
+                            </div>
+                            <div class="text-gray-600 space-y-0.5 pt-1 border-t border-amber-200/60">
+                                <p><strong>Período:</strong> ${formatarDataSimples(t.data_inicio)} até ${formatarDataSimples(t.data_fim)}</p>
+                                <p><strong>Dias aplicados:</strong> ${diasTexto}</p>
+                                <p><strong>Tipo de Ajuste:</strong> ${tipoAjuste}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('modal-tarifa-especial').classList.remove('hidden');
+        }
+
+        function fecharModalTarifaEspecial() {
+            document.getElementById('modal-tarifa-especial').classList.add('hidden');
+        }
+
         async function carregarDashboard() {
             await carregarPousada();
 
@@ -502,6 +577,9 @@
 
             const { data: pagamentos } = await supabaseClient.from('hospede_pagamentos').select('*').eq('pousada_id', usuarioIdAtual);
             pagamentosGlobaisCache = pagamentos || [];
+
+            const { data: tarifasEspeciais } = await supabaseClient.from('tarifas_especiais').select('*').eq('pousada_id', usuarioIdAtual);
+            tarifasEspeciaisGlobaisCache = tarifasEspeciais || [];
 
             const hojeStr = new Date().toLocaleDateString('sv-SE');
             let houveAtualizacaoAutomatica = false;
@@ -540,6 +618,12 @@
                 const aprovadasDaSuite = reservasDaSuite.filter(r => r.status === 'Aprovada');
                 const pendentesDaSuite = reservasDaSuite.filter(r => r.status === 'Pendente');
 
+                // Verifica se há tarifa especial para esta suíte
+                const temTarifaEspecial = tarifasEspeciaisGlobaisCache.some(t => t.suite_id === suite.id || !t.suite_id);
+                const htmlTarifaBadge = temTarifaEspecial 
+                    ? `<button onclick="abrirModalTarifaEspecial('${suite.id}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 text-[11px] font-bold px-2 py-0.5 rounded-md transition flex items-center gap-1 cursor-pointer"><span>⚡ Com Tarifa Especial</span></button>` 
+                    : '';
+
                 if (aprovadasDaSuite.length > 0) {
                     aprovadasDaSuite.forEach((aprovada, index) => {
                         const isFutura = aprovada.checkin > hojeStr;
@@ -577,10 +661,13 @@
                         container.innerHTML += `
                             <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md ${bgCardClasses} text-gray-900 flex flex-col justify-between transition hover:shadow-lg">
                                 <div>
-                                    <div class="flex justify-between items-center">
+                                    <div class="flex justify-between items-start mb-2">
                                         <div>
                                             <h2 class="text-base sm:text-lg font-bold text-gray-900">${suite.nome}${sufixoTitulo}${nomeHospedeExibicao}</h2>
-                                            <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária Padrão: ${formatarMoeda(suite.valor_diaria)}</span>
+                                            <div class="flex flex-wrap items-center gap-2 mt-1">
+                                                <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md">Diária Padrão: ${formatarMoeda(suite.valor_diaria)}</span>
+                                                ${htmlTarifaBadge}
+                                            </div>
                                         </div>
                                         <div class="flex items-center gap-2">
                                             <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm ${badgeClasses}">
@@ -643,10 +730,13 @@
                     container.innerHTML += `
                         <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md ${corClasses[suite.status] || 'bg-white border border-gray-200'} flex flex-col justify-between transition hover:shadow-lg">
                             <div>
-                                <div class="flex justify-between items-center">
+                                <div class="flex justify-between items-start mb-2">
                                     <div>
                                         <h2 class="text-base sm:text-lg font-bold text-gray-900">${suite.nome}</h2>
-                                        <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária Padrão: ${formatarMoeda(suite.valor_diaria)}</span>
+                                        <div class="flex flex-wrap items-center gap-2 mt-1">
+                                            <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md">Diária Padrão: ${formatarMoeda(suite.valor_diaria)}</span>
+                                            ${htmlTarifaBadge}
+                                        </div>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm ${
@@ -694,10 +784,13 @@
                     container.innerHTML += `
                         <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md bg-amber-50 border border-amber-200 flex flex-col justify-between transition hover:shadow-lg">
                             <div>
-                                <div class="flex justify-between items-center">
+                                <div class="flex justify-between items-start mb-2">
                                     <div>
                                         <h2 class="text-base sm:text-lg font-bold text-amber-950">${suite.nome}${sufixoTituloPend}${nomeHospedePendExibicao}</h2>
-                                        <span class="text-[11px] font-bold text-amber-900/80 bg-amber-200/60 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária Padrão: ${formatarMoeda(suite.valor_diaria)}</span>
+                                        <div class="flex flex-wrap items-center gap-2 mt-1">
+                                            <span class="text-[11px] font-bold text-amber-900/80 bg-amber-200/60 px-2 py-0.5 rounded-md">Diária Padrão: ${formatarMoeda(suite.valor_diaria)}</span>
+                                            ${htmlTarifaBadge}
+                                        </div>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm bg-amber-200 text-amber-900">Pendente</span>
@@ -873,15 +966,13 @@
                 document.getElementById('edit-checkout').value = checkoutStr;
             }
 
-            // 1. Quantidade de diárias
             const qtdDiarias = calcularQuantidadeDiarias(checkinStr, checkoutStr);
             document.getElementById('modal-qtd-diarias').innerText = `${qtdDiarias} diária(s)`;
 
-            // 2. Valor total da estadia usando estritamente a RPC com tarifas especiais aplicadas
             let valorTotal = 0;
             const suiteObj = suitesGlobaisCache.find(s => s.id === suiteId);
             const valorDiaria = suiteObj ? Number(suiteObj.valor_diaria || 0) : 0;
-            valorTotal = qtdDiarias * valorDiaria; // Fallback inicial padrão
+            valorTotal = qtdDiarias * valorDiaria;
 
             try {
                 const { data: valorCalculado, error: erroRpc } = await supabaseClient.rpc('calcular_total_reserva', { 
@@ -898,7 +989,6 @@
 
             document.getElementById('modal-valor-total').innerText = formatarMoeda(valorTotal);
 
-            // 3. Saldo Restante
             let totalPago = 0;
             if (reservaId) {
                 const pagamentosDestaReserva = pagamentosGlobaisCache.filter(p => p.reserva_id === reservaId);
