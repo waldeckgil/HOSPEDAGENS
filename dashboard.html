@@ -128,7 +128,7 @@
             <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">⚠️</div>
             <h3 class="text-lg sm:text-xl font-bold text-gray-900">Confirmar Saída / Limpeza?</h3>
             <p id="modal-confirmacao-texto" class="text-xs sm:text-sm text-gray-600">
-                Esta ação encerrará a estadia atual do hóspede e enviará a suíte para limpeza. Deseja prosseguir[cite: 5]?
+                Esta ação encerrará a estadia atual do hóspede e enviará a suíte para limpeza. Deseja prosseguir?
             </p>
             <div class="grid grid-cols-2 gap-3 pt-2">
                 <button type="button" onclick="fecharModalConfirmacao()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-xl transition text-xs sm:text-sm">Cancelar</button>
@@ -170,17 +170,17 @@
                         <span class="font-bold text-red-900 uppercase">Saldo Devedor do Hóspede:</span>
                         <strong id="display-saldo-devedor-checkout" class="text-red-700 font-extrabold text-base">R$ 0,00</strong>
                     </div>
-                    <p class="text-[11px] text-red-700 leading-tight">O valor do saldo devedor foi preenchido automaticamente no campo de pagamento abaixo como o valor mínimo obrigatório para quitar a estadia[cite: 5].</p>
+                    <p class="text-[11px] text-red-700 leading-tight">O valor do saldo devedor foi preenchido automaticamente no campo de pagamento abaixo como o valor mínimo obrigatório para quitar a estadia.</p>
                 </div>
 
                 <!-- RESUMO DINÂMICO DE TARIFA E DIÁRIAS NO MODAL -->
                 <div id="resumo-dinamico-container" class="bg-blue-50 border border-blue-200 p-3 rounded-xl space-y-1 text-xs text-blue-900">
                     <div class="flex justify-between">
-                        <span>Qtd. Diárias Calculadas[cite: 5]:</span>
+                        <span>Qtd. Diárias Calculadas:</span>
                         <strong id="modal-qtd-diarias">1 diária(s)</strong>
                     </div>
                     <div class="flex justify-between">
-                        <span>Valor Total da Estadia[cite: 5]:</span>
+                        <span>Valor Total da Estadia:</span>
                         <strong id="modal-valor-total">R$ 0,00</strong>
                     </div>
                     <div class="flex justify-between border-t border-blue-200 pt-1">
@@ -356,8 +356,8 @@
             let numeroFinal = apenasNumeros;
             if (numeroFinal.length <= 11 && !numeroFinal.startsWith('55')) numeroFinal = '55' + numeroFinal;
             const nomeCliente = nomeHospede ? nomeHospede.trim() : 'Hóspede';
-            let textoMensagem = `Olá ${nomeCliente}, agradecemos o contato! Entrando em contato sobre a sua solicitação na ${nomePousadaAtual}[cite: 5]`;
-            if (checkin && checkout) textoMensagem += `, para o período de ${formatarDataSimples(checkin)} até ${formatarDataSimples(checkout)}[cite: 5].`;
+            let textoMensagem = `Olá ${nomeCliente}, agradecemos o contato! Entrando em contato sobre a sua solicitação na ${nomePousadaAtual}`;
+            if (checkin && checkout) textoMensagem += `, para o período de ${formatarDataSimples(checkin)} até ${formatarDataSimples(checkout)}.`;
             return `https://wa.me/${numeroFinal}?text=${encodeURIComponent(textoMensagem)}`;
         }
 
@@ -394,7 +394,7 @@
         function copiarLinkVitrine() {
             if (!usuarioIdAtual) return;
             navigator.clipboard.writeText(window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`).then(() => {
-                mostrarToast("Copiado!", "Link da vitrine copiado para a área de transferência[cite: 5]!");
+                mostrarToast("Copiado!", "Link da vitrine copiado para a área de transferência!");
             });
         }
 
@@ -465,13 +465,13 @@
             radarContainer.classList.remove('hidden');
             if (diasProxima === 0) {
                 radarTitulo.innerText = `🔥 Atenção: Chegada de ${proxima.hospede_nome || 'Hóspede'} HOJE!`;
-                radarSubtitulo.innerText = `Destino: ${nomeSuite} (${formatarDataSimples(proxima.checkin)} até ${formatarDataSimples(proxima.checkout)})[cite: 5]`;
+                radarSubtitulo.innerText = `Destino: ${nomeSuite} (${formatarDataSimples(proxima.checkin)} até ${formatarDataSimples(proxima.checkout)})`;
             } else if (diasProxima === 1) {
                 radarTitulo.innerText = `⏳ Próxima Chegada Amanhã: ${proxima.hospede_nome || 'Hóspede'}`;
-                radarSubtitulo.innerText = `Destino: ${nomeSuite} - Check-in amanhã (${formatarDataSimples(proxima.checkin)})[cite: 5]`;
+                radarSubtitulo.innerText = `Destino: ${nomeSuite} - Check-in amanhã (${formatarDataSimples(proxima.checkin)})`;
             } else {
                 radarTitulo.innerText = `📅 Próxima Chegada em ${diasProxima} dias: ${proxima.hospede_nome || 'Hóspede'}`;
-                radarSubtitulo.innerText = `Destino: ${nomeSuite} (${formatarDataSimples(proxima.checkin)} a ${formatarDataSimples(proxima.checkout)})[cite: 5]`;
+                radarSubtitulo.innerText = `Destino: ${nomeSuite} (${formatarDataSimples(proxima.checkin)} a ${formatarDataSimples(proxima.checkout)})`;
             }
         }
 
@@ -616,7 +616,7 @@
                                         <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">WhatsApp:</span> <a href="${linkZap}" target="_blank" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${aprovada.whatsapp_hospede || 'Não informado'}</a></p>
                                         
                                         <div class="flex items-center justify-between pt-1 border-t border-black/5 mt-2">
-                                            <span class="text-xs font-semibold text-gray-700">Estadia: <strong class="text-gray-900">${qtdDiarias} diária(s)[cite: 5]</strong></span>
+                                            <span class="text-xs font-semibold text-gray-700">Estadia: <strong class="text-gray-900">${qtdDiarias} diária(s)</strong></span>
                                             <span class="text-xs font-extrabold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">Total: ${formatarMoeda(valorTotal)}</span>
                                         </div>
 
@@ -728,7 +728,7 @@
                                     <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">WhatsApp:</span> <a href="${linkZapPend}" target="_blank" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${pend.whatsapp_hospede || 'Não informado'}</a></p>
                                     
                                     <div class="flex items-center justify-between pt-1 border-t border-amber-200 mt-2">
-                                        <span class="text-xs font-semibold text-amber-900">Estadia: <strong class="text-gray-900">${qtdDiariasPend} diária(s)[cite: 5]</strong></span>
+                                        <span class="text-xs font-semibold text-amber-900">Estadia: <strong class="text-gray-900">${qtdDiariasPend} diária(s)</strong></span>
                                         <span class="text-xs font-extrabold text-blue-700 bg-white px-2.5 py-1 rounded-lg border border-amber-200">Total: ${formatarMoeda(valorTotalPend)}</span>
                                     </div>
 
@@ -998,7 +998,7 @@
             if (status === 'Checkout') {
                 const saldoDevedorMinimo = await calcularSaldoDevedorReservaAtual();
                 if (campoSinalStr === '' || isNaN(valorSinalInformado) || valorSinalInformado < saldoDevedorMinimo) {
-                    mostrarErroModal(`O valor informado (${formatarMoeda(valorSinalInformado)}) é menor que o saldo devedor atual (${formatarMoeda(saldoDevedorMinimo)}). A conta precisa fechar para concluir o checkout[cite: 5]!`);
+                    mostrarErroModal(`O valor informado (${formatarMoeda(valorSinalInformado)}) é menor que o saldo devedor atual (${formatarMoeda(saldoDevedorMinimo)}). A conta precisa fechar para concluir o checkout!`);
                     return;
                 }
             }
@@ -1019,7 +1019,7 @@
                 });
                 
                 if (!erroConflito && temConflito === true) {
-                    mostrarErroModal("Já existe uma reserva confirmada para esta suíte nestas datas[cite: 5]!");
+                    mostrarErroModal("Já existe uma reserva confirmada para esta suíte nestas datas!");
                     return; 
                 }
             } catch (err) {
@@ -1064,7 +1064,7 @@
                 const saldoRestanteAtual = valorTotalCalculado - totalJaPago;
 
                 if (valorSinalInformado > saldoRestanteAtual) {
-                    mostrarErroModal(`O valor do pagamento (${formatarMoeda(valorSinalInformado)}) é maior que o saldo restante (${formatarMoeda(saldoRestanteAtual)}). Corrija o valor[cite: 5].`);
+                    mostrarErroModal(`O valor do pagamento (${formatarMoeda(valorSinalInformado)}) é maior que o saldo restante (${formatarMoeda(saldoRestanteAtual)}). Corrija o valor.`);
                     return; 
                 }
             }
@@ -1126,7 +1126,7 @@
 
             fecharModal();
             carregarDashboard();
-            mostrarToast("Sucesso", "Dados salvos com sucesso[cite: 5]!");
+            mostrarToast("Sucesso", "Dados salvos com sucesso!");
         }
 
         document.getElementById('form-edicao').onsubmit = async (e) => {
@@ -1141,12 +1141,12 @@
             const hojeStr = new Date().toLocaleDateString('sv-SE');
 
             if (status === 'Ocupada' && checkinInformado > hojeStr) {
-                mostrarErroModal("Para alterar o status para 'Ocupada (Agora)', a data de check-in deve ser hoje ou anterior. Altere a data de check-in para a data de hoje ou mantenha o status como 'Reservado'[cite: 5].");
+                mostrarErroModal("Para alterar o status para 'Ocupada (Agora)', a data de check-in deve ser hoje ou anterior. Altere a data de check-in para a data de hoje ou mantenha o status como 'Reservado'.");
                 return; 
             }
 
             if (statusOriginal === 'Ocupada' && status === 'Disponível') {
-                mostrarErroModal("Uma suíte ocupada não pode ir direto para 'Disponível'. Envie para 'Limpeza' ou faça o 'Checkout'[cite: 5].");
+                mostrarErroModal("Uma suíte ocupada não pode ir direto para 'Disponível'. Envie para 'Limpeza' ou faça o 'Checkout'.");
                 return;
             }
 
