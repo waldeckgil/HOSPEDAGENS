@@ -89,7 +89,7 @@
                             <p class="text-[11px] text-gray-500 mt-0.5 truncate">Valores e regras vigentes.</p>
                         </div>
 
-                        <div onclick="selecionarView('vw_gestor_reservas_relatorio', 'Próximas Reservas do Mês Atual', this)" 
+                        <div onclick="selecionarView('vw_gestor_reservas_relatorio', 'Próximas Reservas Futuras', this)" 
                              class="card-view cursor-pointer bg-purple-50/40 p-4 rounded-xl shadow-sm border-2 border-purple-200 hover:border-purple-500 hover:shadow-md transition group">
                             <div class="flex items-center justify-between mb-2">
                                 <div class="w-8 h-8 bg-purple-100 text-purple-700 rounded-lg flex items-center justify-center text-sm shadow-sm">
@@ -163,11 +163,10 @@
                 return `${y}-${m}-${day}`;
             };
             
-            const primeiroDiaMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-            const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
-
-            document.getElementById('filtroDataInicio').value = formatarDataInput(primeiroDiaMes);
-            document.getElementById('filtroDataFim').value = formatarDataInput(ultimoDiaMes);
+            // Data inicial definida como a data atual (hoje)
+            document.getElementById('filtroDataInicio').value = formatarDataInput(hoje);
+            // Data final deixada em branco (sem limite)
+            document.getElementById('filtroDataFim').value = '';
         }
 
         async function protegerPagina() {
@@ -292,8 +291,8 @@
             const dataInicio = document.getElementById('filtroDataInicio').value;
             const dataFim = document.getElementById('filtroDataFim').value;
 
-            let dataInicioFormatada = dataInicio ? dataInicio.split('-').reverse().join('/') : '';
-            let dataFimFormatada = dataFim ? dataFim.split('-').reverse().join('/') : '';
+            let dataInicioFormatada = dataInicio ? dataInicio.split('-').reverse().join('/') : 'INÍCIO';
+            let dataFimFormatada = dataFim ? dataFim.split('-').reverse().join('/') : 'SEM LIMITE';
             
             let tituloCompleto = `${tituloBaseAtual} (DE ${dataInicioFormatada} ATÉ ${dataFimFormatada})`;
             document.getElementById('tituloViewAtiva').textContent = tituloCompleto.toUpperCase();
@@ -380,12 +379,20 @@
                 }
 
                 let registrosFiltrados = registros;
-                if (dataInicio && dataFim && !ehViewTarifas) {
+                if (!ehViewTarifas) {
                     registrosFiltrados = registrosFiltrados.filter(row => {
                         let valData = row['data_pagamento'] || row['checkin'] || '';
                         if (!valData) return true;
                         let dataStr = String(valData).substring(0, 10);
-                        return dataStr >= dataInicio && dataStr <= dataFim;
+                        
+                        if (dataInicio && dataFim) {
+                            return dataStr >= dataInicio && dataStr <= dataFim;
+                        } else if (dataInicio) {
+                            return dataStr >= dataInicio;
+                        } else if (dataFim) {
+                            return dataStr <= dataFim;
+                        }
+                        return true;
                     });
                 }
 
@@ -538,19 +545,32 @@
                 let htmlLinhas = '';
                 let grupoCorAlternada = false;
                 let ultimaChaveGrupo = null;
+                let ultimoNomeSuiteReservas = null;
 
                 registrosFiltrados.forEach((row, index) => {
-                    let chaveAtual = `${String(row.hospede || '').trim()}|${String(row.suite || '').trim()}|${String(row.checkin || '').trim()}|${String(row.checkout || '').trim()}`;
-                    
-                    if (index === 0) {
-                        grupoCorAlternada = false;
-                        ultimaChaveGrupo = chaveAtual;
-                    } else if (chaveAtual !== ultimaChaveGrupo) {
-                        grupoCorAlternada = !grupoCorAlternada;
-                        ultimaChaveGrupo = chaveAtual;
-                    }
+                    let classeCorFundo = '';
 
-                    let classeCorFundo = grupoCorAlternada ? 'bg-emerald-100/70 hover:bg-emerald-200/60' : 'bg-white hover:bg-gray-50';
+                    if (ehViewReservas) {
+                        let suiteAtual = String(row.suite || '').trim().toUpperCase();
+                        if (index === 0) {
+                            grupoCorAlternada = false;
+                            ultimoNomeSuiteReservas = suiteAtual;
+                        } else if (suiteAtual !== ultimoNomeSuiteReservas) {
+                            grupoCorAlternada = !grupoCorAlternada;
+                            ultimoNomeSuiteReservas = suiteAtual;
+                        }
+                        classeCorFundo = grupoCorAlternada ? 'bg-emerald-100/70 hover:bg-emerald-200/60' : 'bg-white hover:bg-gray-50';
+                    } else {
+                        let chaveAtual = `${String(row.hospede || '').trim()}|${String(row.suite || '').trim()}|${String(row.checkin || '').trim()}|${String(row.checkout || '').trim()}`;
+                        if (index === 0) {
+                            grupoCorAlternada = false;
+                            ultimaChaveGrupo = chaveAtual;
+                        } else if (chaveAtual !== ultimaChaveGrupo) {
+                            grupoCorAlternada = !grupoCorAlternada;
+                            ultimaChaveGrupo = chaveAtual;
+                        }
+                        classeCorFundo = grupoCorAlternada ? 'bg-emerald-100/70 hover:bg-emerald-200/60' : 'bg-white hover:bg-gray-50';
+                    }
 
                     htmlLinhas += `<tr class="${classeCorFundo} transition">`;
                     colunas.forEach(col => {
@@ -560,7 +580,7 @@
 
                         if (valorBruto !== null && valorBruto !== undefined) {
                             if (colLower.includes('alerta_status')) {
-                                valorExibicao = valorBruto; // Mantém o HTML estilizado do alerta montado acima
+                                valorExibicao = valorBruto; 
                             } else if (colLower.includes('data_pagamento') || colLower.includes('criado_em')) {
                                 valorExibicao = formatarDataHoraBr(valorBruto);
                             } else if (colLower.includes('checkin') || colLower.includes('checkout') || colLower.includes('fim') || colLower.includes('inicio')) {
