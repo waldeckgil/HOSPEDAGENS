@@ -290,11 +290,12 @@
             if (c === 'checkin') return 'CHECK-IN';
             if (c === 'checkout') return 'CHECK-OUT';
             if (c === 'diarias') return 'DIÁRIAS';
-            if (c === 'valor_total') return 'VALOR TOTAL';
-            if (c === 'data_pagamento') return 'DATA E HORA DO PAGAMENTO';
-            if (c === 'valor_pago') return 'VALOR PAGO';
-            if (c === 'forma_pagamento') return 'FORMA DE PAGAMENTO';
-            if (c === 'observacao') return 'OBSERVAÇÃO';
+            if (c === 'valor_total') return 'TOTAL';
+            if (c === 'valor_pago') return 'PAGO';
+            if (c === 'saldo_restante') return 'SALDO';
+            if (c === 'data_pagamento') return 'DATA/HORA';
+            if (c === 'forma_pagamento') return 'FORMA';
+            if (c === 'observacao') return 'OBS';
             return col.replace(/_/g, ' ').toUpperCase();
         }
 
@@ -313,7 +314,7 @@
             let tituloCompleto = `${tituloBaseAtual} (DE ${dataInicioFormatada} ATÉ ${dataFimFormatada})`;
             document.getElementById('tituloViewAtiva').textContent = tituloCompleto.toUpperCase();
 
-            tbody.innerHTML = `<tr><td colspan="10" class="py-6 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO DADOS...</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="11" class="py-6 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO DADOS...</td></tr>`;
 
             try {
                 let registros = [];
@@ -357,15 +358,21 @@
                         registros = pagamentosData.map(p => {
                             let checkinStr = p.reservas?.checkin || '';
                             let checkoutStr = p.reservas?.checkout || '';
+                            let valorTotal = Number(p.reservas?.valor_total || 0);
+                            let valorPago = Number(p.valor_pago || 0);
+                            let saldoRestante = valorTotal - valorPago;
+                            if (saldoRestante < 0) saldoRestante = 0;
+
                             return {
                                 hospede: p.reservas?.hospede_nome || 'HÓSPEDE NÃO IDENTIFICADO',
                                 suite: p.reservas?.suites?.nome || 'SUÍTE NÃO INFORMADA',
                                 checkin: checkinStr,
                                 checkout: checkoutStr,
                                 diarias: calcularDiarias(checkinStr, checkoutStr),
-                                valor_total: p.reservas?.valor_total || 0,
+                                valor_total: valorTotal,
                                 data_pagamento: p.criado_em,
-                                valor_pago: p.valor_pago,
+                                valor_pago: valorPago,
+                                saldo_restante: saldoRestante,
                                 forma_pagamento: p.forma_pagamento || '-',
                                 observacao: p.observacao || '-'
                             };
@@ -384,7 +391,7 @@
 
                 if (error) {
                     console.error("Erro ao consultar dados:", error);
-                    tbody.innerHTML = `<tr><td colspan="10" class="py-6 text-center text-red-500 font-medium">ERRO AO CARREGAR OS DADOS.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="11" class="py-6 text-center text-red-500 font-medium">ERRO AO CARREGAR OS DADOS.</td></tr>`;
                     thead.innerHTML = `<th class="py-3 px-4">AVISO DE ERRO</th>`;
                     return;
                 }
@@ -406,10 +413,10 @@
                 let valorAReceberPeriodo = 0;
 
                 if (ehViewFinanceiro) {
-                    // Para somar corretamente o faturamento e o a receber do período, buscamos as reservas ativas no filtro de data de pagamento
                     let reservasIdsNoPeriodo = [...new Set(registrosFiltrados.map(r => r.reserva_id).filter(Boolean))];
                     
                     totalRecebidoPeriodo = registrosFiltrados.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
+                    valorAReceberPeriodo = registrosFiltrados.reduce((acc, curr) => acc + Number(curr.saldo_restante || 0), 0);
 
                     if (reservasIdsNoPeriodo.length > 0) {
                         const { data: resPeriodo } = await supabaseClient
@@ -420,9 +427,9 @@
                         if (resPeriodo) {
                             faturamentoBrutoPeriodo = resPeriodo.reduce((acc, curr) => acc + Number(curr.valor_total || 0), 0);
                         }
+                    } else {
+                        faturamentoBrutoPeriodo = totalRecebidoPeriodo + valorAReceberPeriodo;
                     }
-                    valorAReceberPeriodo = faturamentoBrutoPeriodo - totalRecebidoPeriodo;
-                    if (valorAReceberPeriodo < 0) valorAReceberPeriodo = 0;
                 }
 
                 if (!registrosFiltrados || registrosFiltrados.length === 0) {
@@ -528,6 +535,8 @@
                             valorExibicao = `<span class="font-bold text-emerald-700">${Number(valorBruto).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>`;
                         } else if (colLower.includes('valor_total') && !isNaN(valorBruto)) {
                             valorExibicao = `<span class="font-bold text-gray-800">${Number(valorBruto).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>`;
+                        } else if (colLower.includes('saldo_restante') && !isNaN(valorBruto)) {
+                            valorExibicao = `<span class="font-bold text-amber-600">${Number(valorBruto).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>`;
                         } else if (colLower.includes('diarias')) {
                             valorExibicao = `<span class="font-semibold text-blue-600">${valorBruto} DIÁRIA(S)</span>`;
                         }
@@ -540,7 +549,7 @@
 
             } catch (err) {
                 console.error("Erro geral:", err);
-                tbody.innerHTML = `<tr><td colspan="10" class="py-6 text-center text-red-500">ERRO DE COMUNICAÇÃO.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="11" class="py-6 text-center text-red-500">ERRO DE COMUNICAÇÃO.</td></tr>`;
             }
         }
 
