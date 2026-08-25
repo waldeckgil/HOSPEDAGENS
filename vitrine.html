@@ -42,15 +42,14 @@
                     </button>
                 </div>
             </div>
-            <p id="aviso-filtro" class="text-[11px] sm:text-xs text-gray-500 mt-2 sm:mt-3 italic">Selecione o período desejado e clique em consultar para visualizar as suítes disponíveis.</p>
+            <p id="aviso-filtro" class="text-[11px] sm:text-xs text-gray-500 mt-2 sm:mt-3 italic">Selecione o período desejado e veja todas as opções e calendários de ocupação.</p>
         </div>
 
-        <!-- Container onde as suítes disponíveis serão injetadas após a busca -->
+        <!-- Container onde as suítes serão injetadas após a busca -->
         <div id="vitrine-container" class="grid gap-4 sm:gap-6">
             <div class="bg-white/90 backdrop-blur-md text-gray-700 p-6 sm:p-8 rounded-2xl text-center shadow-lg">
                 <span class="text-3xl">🗓️</span>
                 <p class="font-bold text-sm sm:text-base mt-2 text-gray-800">Selecione as datas de check-in e check-out acima.</p>
-                <p class="text-[11px] sm:text-xs text-gray-500 mt-1">As suítes livres para o período escolhido aparecerão aqui.</p>
             </div>
         </div>
     </div>
@@ -83,7 +82,6 @@
                             <span>🔍</span> Buscar CPF
                         </button>
                     </div>
-                    <p class="text-[10px] sm:text-[11px] text-blue-600 mt-1.5">Se já se hospedou conosco antes, clique em buscar para preencher automaticamente.</p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
@@ -144,7 +142,6 @@
         document.getElementById('filtro-checkin').setAttribute('min', hojeISO);
         document.getElementById('filtro-checkout').setAttribute('min', hojeISO);
 
-        // Define datas iniciais padrão no filtro se estiverem vazias (ex: próximos 5 dias)
         const dHj = new Date();
         const dFut = new Date();
         dFut.setDate(dHj.getDate() + 5);
@@ -158,7 +155,6 @@
             const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', pousadaIdGlobal).single();
             document.getElementById('titulo-pousada').innerText = pousada?.nome || "Nossa Pousada";
             
-            // Executa a busca inicial automaticamente com as datas padrão
             filtrarSuitesDisponiveisPorPeriodo();
         }
 
@@ -223,7 +219,7 @@
             const container = document.getElementById('vitrine-container');
 
             if (!checkinFiltro || !checkoutFiltro) {
-                alert("Por favor, selecione as datas de Check-in e Check-out para consultar a disponibilidade.");
+                alert("Por favor, selecione as datas de Check-in e Check-out para consultar.");
                 return;
             }
 
@@ -232,10 +228,9 @@
                 return;
             }
 
-            // Busca todas as suítes da pousada (removendo apenas suítes de teste explícitas)
             const { data: suitesBrutas } = await supabaseClient.from('suites').select('*').eq('pousada_id', pousadaIdGlobal);
             if (!suitesBrutas || suitesBrutas.length === 0) {
-                container.innerHTML = '<p class="text-center bg-black/40 p-6 rounded-xl">Nenhuma suíte cadastrada nesta pousada no momento.</p>';
+                container.innerHTML = '<p class="text-center bg-black/40 p-6 rounded-xl">Nenhuma suíte cadastrada.</p>';
                 return;
             }
 
@@ -246,39 +241,18 @@
                 return true;
             });
 
-            // Busca todas as reservas ativas ou pendentes da pousada para cruzar as datas
             const { data: todasReservas } = await supabaseClient
                 .from('reservas')
                 .select('*')
                 .eq('pousada_id', pousadaIdGlobal)
                 .in('status', ['Aprovada', 'Pendente']);
 
-            const novoInicio = new Date(checkinFiltro + 'T00:00:00');
-            const novoFim = new Date(checkoutFiltro + 'T00:00:00');
+            document.getElementById('aviso-filtro').innerText = `Exibindo suítes e status de ocupação para o período de ${checkinFiltro.split('-').reverse().join('/')} a ${checkoutFiltro.split('-').reverse().join('/')}.`;
 
-            const suitesOcupadasIds = new Set();
-
-            if (todasReservas) {
-                todasReservas.forEach(res => {
-                    const inicioExistente = new Date(res.checkin + 'T00:00:00');
-                    const fimExistente = new Date(res.checkout + 'T00:00:00');
-                    
-                    // Verifica se há sobreposição exata no período consultado
-                    if (novoInicio < fimExistente && novoFim > inicioExistente) {
-                        suitesOcupadasIds.add(res.suite_id);
-                    }
-                });
-            }
-
-            const suitesDisponiveis = suites.filter(s => !suitesOcupadasIds.has(s.id));
-            
-            document.getElementById('aviso-filtro').innerText = `Exibindo suítes livres para o período de ${checkinFiltro.split('-').reverse().join('/')} a ${checkoutFiltro.split('-').reverse().join('/')}.`;
-
-            container.innerHTML = suitesDisponiveis.length > 0 ? '' : '<p class="text-center text-amber-200 font-semibold bg-black/40 p-6 rounded-xl">⚠️ Nenhuma suíte disponível para o período selecionado. Tente outras datas!</p>';
-
+            container.innerHTML = '';
             const qtdNoites = Math.round((new Date(checkoutFiltro) - new Date(checkinFiltro)) / (1000 * 60 * 60 * 24));
 
-            for (let suite of suitesDisponiveis) {
+            for (let suite of suites) {
                 const fotos = suite.fotos || [];
                 const fotoPrincipal = fotos.length > 0 ? fotos[0] : 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80';
                 
@@ -298,11 +272,34 @@
                 const precoBase = suite.preco || suite.valor_diaria || 150.00;
                 const valorTotalEstadia = await calcularValorTotalEstadia(suite.id, checkinFiltro, checkoutFiltro, precoBase);
 
-                // GERAÇÃO DO MINI-CALENDÁRIO VISUAL (Próximos 14 dias a partir do check-in escolhido)
-                let calendarioHTML = gerarMiniCalendarioHTML(suite.id, checkinFiltro, todasReservas || []);
+                // Verifica se o período selecionado possui algum conflito exato
+                let temConflitoNoPeriodo = false;
+                const reservasDaSuite = (todasReservas || []).filter(r => r.suite_id === suite.id);
+                const novoInicio = new Date(checkinFiltro + 'T00:00:00');
+                const novoFim = new Date(checkoutFiltro + 'T00:00:00');
+
+                for (let res of reservasDaSuite) {
+                    const inicioExistente = new Date(res.checkin + 'T00:00:00');
+                    const fimExistente = new Date(res.checkout + 'T00:00:00');
+                    if (novoInicio < fimExistente && novoFim > inicioExistente) {
+                        temConflitoNoPeriodo = true;
+                        break;
+                    }
+                }
+
+                // GERAÇÃO DO MINI-CALENDÁRIO VISUAL (Exibe a partir do check-in escolhido)
+                let calendarioHTML = gerarMiniCalendarioHTML(suite.id, checkinFiltro, reservasDaSuite);
+
+                let statusBadge = temConflitoNoPeriodo 
+                    ? '<span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">⚠️ Indisponível no período exato (Veja o calendário abaixo)</span>'
+                    : '<span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-green-600 bg-green-50 px-2.5 py-1 rounded-full border border-green-200">Disponível</span>';
+
+                let botaoReservaHTML = temConflitoNoPeriodo
+                    ? `<button onclick="alert('Este período selecionado possui dias ocupados. Escolha datas livres indicadas no calendário verde abaixo para reservar.')" class="w-full bg-gray-400 text-white py-3 md:py-3.5 px-4 rounded-xl font-bold transition shadow-md text-center text-sm md:text-base cursor-not-allowed">Período Indisponível</button>`
+                    : `<button onclick="abrirModal('${suite.id}')" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 md:py-3.5 px-4 rounded-xl font-bold transition shadow-md text-center text-sm md:text-base">Solicitar Reserva</button>`;
 
                 container.innerHTML += `
-                    <div class="bg-white rounded-2xl shadow-xl overflow-hidden text-gray-800 border-l-8 border-green-500 p-4 md:p-6 mb-4">
+                    <div class="bg-white rounded-2xl shadow-xl overflow-hidden text-gray-800 border-l-8 ${temConflitoNoPeriodo ? 'border-amber-400' : 'border-green-500'} p-4 md:p-6 mb-4">
                         <div class="flex flex-col md:flex-row gap-4 md:gap-6">
                             
                             <!-- Bloco da Imagem -->
@@ -316,11 +313,11 @@
                                 ${miniaturasHTML}
                             </div>
 
-                            <!-- Detalhes e Botão -->
+                            <!-- Detalhes e Calendário -->
                             <div class="flex flex-col justify-between w-full md:w-1/3">
                                 <div>
                                     <div class="flex items-center justify-between mb-2">
-                                        <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-green-600 bg-green-50 px-2.5 py-1 rounded-full border border-green-200">Disponível</span>
+                                        ${statusBadge}
                                     </div>
                                     
                                     <div class="flex items-start justify-between gap-2 mb-1 md:mb-2">
@@ -351,9 +348,7 @@
                                     </div>
                                 </div>
 
-                                <button onclick="abrirModal('${suite.id}')" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 md:py-3.5 px-4 rounded-xl font-bold transition shadow-md text-center text-sm md:text-base">
-                                    Solicitar Reserva
-                                </button>
+                                ${botaoReservaHTML}
                             </div>
                         </div>
                     </div>
@@ -361,21 +356,15 @@
             }
         }
 
-        // Função para gerar visualmente os dias livres e ocupados em formato de mini-calendário
-        function gerarMiniCalendarioHTML(suiteId, dataBaseStr, todasReservas) {
+        function gerarMiniCalendarioHTML(suiteId, dataBaseStr, reservasDaSuite) {
             let html = '';
             let dataCursor = new Date(dataBaseStr + 'T00:00:00');
 
-            // Filtra as reservas desta suíte específica
-            const reservasDaSuite = todasReservas.filter(r => r.suite_id === suiteId);
-
-            // Mostra os próximos 14 dias a partir da data de check-in selecionada
             for (let i = 0; i < 14; i++) {
                 const diaIso = dataCursor.toISOString().split('T')[0];
                 const diaNum = dataCursor.getDate();
                 const mesNum = dataCursor.getMonth() + 1;
 
-                // Verifica se este dia específico está ocupado por alguma reserva
                 let ocupado = false;
                 for (let res of reservasDaSuite) {
                     if (diaIso >= res.checkin && diaIso < res.checkout) {
@@ -436,22 +425,16 @@
                 document.getElementById('rg-hospede').value = dados.rg || '';
                 document.getElementById('cep-hospede').value = dados.cep || '';
                 document.getElementById('endereco-hospede').value = dados.endereco || '';
-                
                 avisoEncontrado.classList.remove('hidden');
             } else {
                 avisoEncontrado.classList.add('hidden');
-                alert("Nenhum cadastro anterior encontrado com este CPF nesta pousada. Prossiga com o preenchimento normal.");
+                alert("Nenhum cadastro anterior encontrado com este CPF.");
             }
         }
 
         function abrirModal(sId) {
             const checkinFiltro = document.getElementById('filtro-checkin').value;
             const checkoutFiltro = document.getElementById('filtro-checkout').value;
-
-            if (!checkinFiltro || !checkoutFiltro) {
-                alert("Por favor, selecione o período de Check-in e Check-out.");
-                return;
-            }
 
             document.getElementById('suite-id-reserva').value = sId;
             document.getElementById('form-reserva').reset();
@@ -499,7 +482,7 @@
                 cpf: document.getElementById('cpf-hospede').value,
                 rg: document.getElementById('rg-hospede').value || null,
                 cep: document.getElementById('cep-hospede').value || null,
-                endereco: document.getElementById('endereco-hospede').value,
+                endereco: document.getElementById('endereco-hospede->value') || document.getElementById('endereco-hospede').value,
                 checkin: checkinVal,
                 checkout: checkoutVal,
                 valor_total: valorTotalCalculado,
@@ -510,14 +493,13 @@
             if (errReserva) {
                 btnEnviar.disabled = false;
                 btnEnviar.innerText = "Enviar Solicitação";
-                msgErro.innerText = "Erro ao enviar solicitação: " + errReserva.message;
+                msgErro.innerText = "Erro ao enviar solicitação: " + errReserp.message;
                 msgErro.classList.remove('hidden');
                 return;
             }
 
             btnEnviar.disabled = false;
             btnEnviar.innerText = "Enviar Solicitação";
-
             document.getElementById('form-reserva').style.display = 'none';
             msgSucesso.classList.remove('hidden');
             
