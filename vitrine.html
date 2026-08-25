@@ -381,7 +381,6 @@
             }
         }
 
-        // NAVEGAÇÃO DE MESES COM TRAVA NO MÊS DO CHECK-IN
         function mudarMesCalendario(suiteId, direcao) {
             if (!estadoMesCalendario[suiteId]) return;
             let { ano, mes } = estadoMesCalendario[suiteId];
@@ -400,16 +399,14 @@
                 ano--;
             }
 
-            // Impede navegar para um mês anterior ao mês do check-in
             if (ano < anoMin || (ano === anoMin && mes < mesMin)) {
-                return; // Não permite voltar antes do check-in
+                return;
             }
 
             estadoMesCalendario[suiteId] = { ano, mes };
             renderizarCalendarioMensal(suiteId);
         }
 
-        // MONTADOR DO CALENDÁRIO MENSAL COM BLOQUEIO VISUAL DOS DIAS ANTERIORES AO CHECK-IN
         function renderizarCalendarioMensal(suiteId) {
             const containerCal = document.getElementById(`container-cal-${suiteId}`);
             const { ano, mes } = estadoMesCalendario[suiteId];
@@ -425,7 +422,6 @@
             const primeiroDiaDaSemana = new Date(ano, mes, 1).getDay();
             const totalDiasNoMes = new Date(ano, mes + 1, 0).getDate();
 
-            // Verifica se este é o mês mínimo para desativar o botão "Mês Anterior"
             const ehMesMinimo = (ano === anoMin && mes === mesMin);
 
             let html = `
@@ -451,35 +447,30 @@
                 const diaStr = String(dia).padStart(2, '0');
                 const dataIso = `${ano}-${mesStr}-${diaStr}`;
 
-                // Verifica se o dia é anterior à data de check-in escolhida
                 const ehAnteriorAoCheckin = checkinFiltro && dataIso < checkinFiltro;
 
                 let corClasse = '';
                 let iconeOuTexto = '';
                 let tituloTooltip = '';
 
-                if (ehAnteriorAoCheckin) {
-                    corClasse = 'bg-gray-200 text-gray-400 border border-gray-300 opacity-60';
-                    iconeOuTexto = '-';
-                    tituloTooltip = `${dataIso}: Fora do período de busca`;
-                } else {
-                    let ocupado = false;
+                let ocupado = false;
+                if (!ehAnteriorAoCheckin) {
                     for (let res of reservasDaSuite) {
                         if (dataIso >= res.checkin && dataIso < res.checkout) {
                             ocupado = true;
                             break;
                         }
                     }
+                }
 
-                    if (ocupado) {
-                        corClasse = 'bg-rose-500 text-white font-bold';
-                        iconeOuTexto = '✕';
-                        tituloTooltip = `${dataIso}: Ocupada`;
-                    } else {
-                        corClasse = 'bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold';
-                        iconeOuTexto = '✓';
-                        tituloTooltip = `${dataIso}: Disponível`;
-                    }
+                if (ehAnteriorAoCheckin || ocupado) {
+                    corClasse = 'bg-gray-200 text-gray-400 border border-gray-300 opacity-60';
+                    iconeOuTexto = '-';
+                    tituloTooltip = ehAnteriorAoCheckin ? `${dataIso}: Fora do período de busca` : `${dataIso}: Indisponível`;
+                } else {
+                    corClasse = 'bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold';
+                    iconeOuTexto = '✓';
+                    tituloTooltip = `${dataIso}: Disponível`;
                 }
 
                 html += `
@@ -493,8 +484,8 @@
             html += `
                 </div>
                 <div class="flex justify-between items-center mt-3 pt-2 border-t border-gray-200 text-[10px] text-gray-600 font-semibold px-1">
-                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> Livre</span>
-                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span> Ocupada</span>
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> Disponível</span>
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-gray-300 inline-block"></span> Indisponível / Passado</span>
                 </div>
             `;
 
@@ -601,7 +592,7 @@
             }]);
             
             if (errReserva) {
-                btnEnviar.disabled, btnEnviar.disabled = false;
+                btnEnviar.disabled = false;
                 btnEnviar.innerText = "Enviar Solicitação";
                 msgErro.innerText = "Erro ao enviar solicitação: " + errReserva.message;
                 msgErro.classList.remove('hidden');
