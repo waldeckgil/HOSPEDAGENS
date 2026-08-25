@@ -42,7 +42,7 @@
                     </button>
                 </div>
             </div>
-            <p id="aviso-filtro" class="text-[11px] sm:text-xs text-gray-500 mt-2 sm:mt-3 italic">Selecione o período desejado e veja todas as opções e calendários de ocupação.</p>
+            <p id="aviso-filtro" class="text-[11px] sm:text-xs text-gray-500 mt-2 sm:mt-3 italic">Selecione o período desejado e veja todas as opções.</p>
         </div>
 
         <!-- Container onde as suítes serão injetadas -->
@@ -137,6 +137,10 @@
     <script>
         const supabaseClient = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
         let pousadaIdGlobal = '';
+        let cacheReservas = [];
+        let cacheSuites = [];
+        // Armazena o mês e ano sendo exibido no calendário expandido de cada suíte { [suiteId]: { ano, mes } }
+        let estadoMesCalendario = {};
 
         const hojeISO = new Date().toISOString().split('T')[0];
         document.getElementById('filtro-checkin').setAttribute('min', hojeISO);
@@ -155,6 +159,14 @@
             const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', pousadaIdGlobal).single();
             document.getElementById('titulo-pousada').innerText = pousada?.nome || "Nossa Pousada";
             
+            // Busca reservas gerais da pousada para cache
+            const { data: todasReservas } = await supabaseClient
+                .from('reservas')
+                .select('*')
+                .eq('pousada_id', pousadaIdGlobal)
+                .in('status', ['Aprovada', 'Pendente']);
+            cacheReservas = todasReservas || [];
+
             filtrarSuitesDisponiveisPorPeriodo();
         }
 
@@ -175,7 +187,6 @@
             while (dataAtual < checkout) {
                 const dataIsoStr = dataAtual.toISOString().split('T')[0];
                 const diaDaSemana = dataAtual.getDay();
-                
                 let precoDaNoite = precoBaseDiaria;
 
                 if (tarifasEspeciais && tarifasEspeciais.length > 0) {
@@ -205,11 +216,9 @@
                         }
                     }
                 }
-
                 valorTotal += precoDaNoite;
                 dataAtual.setDate(dataAtual.getDate() + 1);
             }
-
             return valorTotal;
         }
 
@@ -228,31 +237,28 @@
                 return;
             }
 
+            // Reseta o estado do calendário ao refazer o filtro para que ele aponte sempre para a nova data de check-in escolhida
+            estadoMesCalendario = {};
+
             const { data: suitesBrutas } = await supabaseClient.from('suites').select('*').eq('pousada_id', pousadaIdGlobal);
             if (!suitesBrutas || suitesBrutas.length === 0) {
                 container.innerHTML = '<p class="text-center bg-black/40 p-6 rounded-xl">Nenhuma suíte cadastrada.</p>';
                 return;
             }
 
-            const suites = suitesBrutas.filter(s => {
+            cacheSuites = suitesBrutas.filter(s => {
                 const nomeLower = (s.nome || '').toLowerCase();
                 if (nomeLower.includes('teste')) return false;
                 if (!s.nome) return false;
                 return true;
             });
 
-            const { data: todasReservas } = await supabaseClient
-                .from('reservas')
-                .select('*')
-                .eq('pousada_id', pousadaIdGlobal)
-                .in('status', ['Aprovada', 'Pendente']);
-
-            document.getElementById('aviso-filtro').innerText = `Exibindo suítes e status de ocupação para o período de ${checkinFiltro.split('-').reverse().join('/')} a ${checkoutFiltro.split('-').reverse().join('/')}.`;
+            document.getElementById('aviso-filtro').innerText = `Exibindo suítes para o período de ${checkinFiltro.split('-').reverse().join('/')} a ${checkoutFiltro.split('-').reverse().join('/')}.`;
 
             container.innerHTML = '';
             const qtdNoites = Math.round((new Date(checkoutFiltro) - new Date(checkinFiltro)) / (1000 * 60 * 60 * 24));
 
-            for (let suite of suites) {
+            for (let suite of cacheSuites) {
                 const fotos = suite.fotos || [];
                 const fotoPrincipal = fotos.length > 0 ? fotos[0] : 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80';
                 
@@ -272,9 +278,8 @@
                 const precoBase = suite.preco || suite.valor_diaria || 150.00;
                 const valorTotalEstadia = await calcularValorTotalEstadia(suite.id, checkinFiltro, checkoutFiltro, precoBase);
 
-                const reservasDaSuite = (todasReservas || []).filter(r => r.suite_id === suite.id);
+                const reservasDaSuite = cacheReservas.filter(r => r.suite_id === suite.id);
                 
-                // VERIFICAÇÃO INTELIGENTE DE CONFLITO NO INTERVALO EXATO SOLICITADO
                 let temConflitoNoPeriodo = false;
                 const novoInicio = new Date(checkinFiltro + 'T00:00:00');
                 const novoFim = new Date(checkoutFiltro + 'T00:00:00');
@@ -296,15 +301,12 @@
                     cursorChecagem.setDate(cursorChecagem.getDate() + 1);
                 }
 
-                // GERAÇÃO DO MINI-CALENDÁRIO VISUAL (Exibe a partir do check-in escolhido)
-                let calendarioHTML = gerarMiniCalendarioHTML(suite.id, checkinFiltro, reservasDaSuite);
-
                 let statusBadge = temConflitoNoPeriodo 
-                    ? '<span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">⚠️ Indisponível no período exato (Veja o calendário abaixo)</span>'
+                    ? '<span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">⚠️ Indisponível no período exato</span>'
                     : '<span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-green-600 bg-green-50 px-2.5 py-1 rounded-full border border-green-200">Disponível</span>';
 
                 let botaoReservaHTML = temConflitoNoPeriodo
-                    ? `<button onclick="alert('Este período selecionado possui dias ocupados. Escolha datas livres indicadas no calendário verde abaixo para reservar.')" class="w-full bg-gray-400 text-white py-3 md:py-3.5 px-4 rounded-xl font-bold transition shadow-md text-center text-sm md:text-base cursor-not-allowed">Período Indisponível</button>`
+                    ? `<button onclick="alert('Este período selecionado possui dias ocupados. Consulte o calendário mensal abaixo para escolher um período livre.')" class="w-full bg-gray-400 text-white py-3 md:py-3.5 px-4 rounded-xl font-bold transition shadow-md text-center text-sm md:text-base cursor-not-allowed">Período Indisponível</button>`
                     : `<button onclick="abrirModal('${suite.id}')" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 md:py-3.5 px-4 rounded-xl font-bold transition shadow-md text-center text-sm md:text-base">Solicitar Reserva</button>`;
 
                 container.innerHTML += `
@@ -322,7 +324,7 @@
                                 ${miniaturasHTML}
                             </div>
 
-                            <!-- Detalhes e Calendário -->
+                            <!-- Detalhes e Ação -->
                             <div class="flex flex-col justify-between w-full md:w-1/3">
                                 <div>
                                     <div class="flex items-center justify-between mb-2">
@@ -337,17 +339,15 @@
                                         </div>
                                     </div>
 
-                                    <!-- Mini Calendário de Ocupação da Suíte -->
-                                    <div class="bg-gray-50 p-2.5 rounded-xl border border-gray-200 mb-3">
-                                        <p class="text-[10px] font-bold text-gray-600 uppercase mb-1.5 flex items-center gap-1">
-                                            <span>📅</span> Status Diário (Próx. Dias):
-                                        </p>
-                                        <div class="grid grid-cols-7 gap-1 text-center">
-                                            ${calendarioHTML}
-                                        </div>
-                                        <div class="flex justify-between items-center mt-2 text-[9px] text-gray-500 font-semibold">
-                                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Livre</span>
-                                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-500 inline-block"></span> Ocupada</span>
+                                    <!-- BOTÃO PARA EXPANDIR / RECOLHER O CALENDÁRIO MENSAL -->
+                                    <div class="mb-3">
+                                        <button onclick="toggleCalendarioMensal('${suite.id}')" id="btn-toggle-cal-${suite.id}" class="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm">
+                                            <span>📅</span> Ver Calendário Mensal de Ocupação 🔽
+                                        </button>
+                                        
+                                        <!-- Container do Calendário Mensal (Incialmente Oculto) -->
+                                        <div id="container-cal-${suite.id}" class="hidden mt-2 bg-gray-50 p-3 rounded-xl border border-gray-200 shadow-inner">
+                                            <!-- Preenchido via JS dinamicamente -->
                                         </div>
                                     </div>
 
@@ -365,18 +365,79 @@
             }
         }
 
-        function gerarMiniCalendarioHTML(suiteId, dataBaseStr, reservasDaSuite) {
-            let html = '';
-            let dataCursor = new Date(dataBaseStr + 'T00:00:00');
+        // FUNÇÃO DE TOGGLE DO CALENDÁRIO MENSAL EXPANSÍVEL (Posicionado no mês do Check-in escolhido)
+        function toggleCalendarioMensal(suiteId) {
+            const containerCal = document.getElementById(`container-cal-${suiteId}`);
+            const btnToggle = document.getElementById(`btn-toggle-cal-${suiteId}`);
 
-            for (let i = 0; i < 14; i++) {
-                const diaIso = dataCursor.toISOString().split('T')[0];
-                const diaNum = dataCursor.getDate();
-                const mesNum = dataCursor.getMonth() + 1;
+            if (containerCal.classList.contains('hidden')) {
+                // Se está fechado, define o mês com base na data de check-in escolhida no filtro superior
+                if (!estadoMesCalendario[suiteId]) {
+                    const checkinFiltro = document.getElementById('filtro-checkin').value;
+                    const dRef = checkinFiltro ? new Date(checkinFiltro + 'T00:00:00') : new Date();
+                    estadoMesCalendario[suiteId] = { ano: dRef.getFullYear(), mes: dRef.getMonth() };
+                }
+                renderizarCalendarioMensal(suiteId);
+                containerCal.classList.remove('hidden');
+                btnToggle.innerHTML = `<span>📅</span> Ocultar Calendário Mensal 🔼`;
+            } else {
+                containerCal.classList.add('hidden');
+                btnToggle.innerHTML = `<span>📅</span> Ver Calendário Mensal de Ocupação 🔽`;
+            }
+        }
+
+        // NAVEGAÇÃO DE MESES (Anterior / Próximo)
+        function mudarMesCalendario(suiteId, direcao) {
+            if (!estadoMesCalendario[suiteId]) return;
+            let { ano, mes } = estadoMesCalendario[suiteId];
+            
+            mes += direcao;
+            if (mes > 11) {
+                mes = 0;
+                ano++;
+            } else if (mes < 0) {
+                mes = 11;
+                ano--;
+            }
+            estadoMesCalendario[suiteId] = { ano, mes };
+            renderizarCalendarioMensal(suiteId);
+        }
+
+        // MONTADOR DO CALENDÁRIO MENSAL EM GRADE DO MÊS INTEIRO
+        function renderizarCalendarioMensal(suiteId) {
+            const containerCal = document.getElementById(`container-cal-${suiteId}`);
+            const { ano, mes } = estadoMesCalendario[suiteId];
+
+            const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            const reservasDaSuite = cacheReservas.filter(r => r.suite_id === suiteId);
+
+            const primeiroDiaDaSemana = new Date(ano, mes, 1).getDay();
+            const totalDiasNoMes = new Date(ano, mes + 1, 0).getDate();
+
+            let html = `
+                <div class="flex justify-between items-center mb-2 px-1">
+                    <button type="button" onclick="mudarMesCalendario('${suiteId}', -1)" class="bg-white border px-2 py-1 rounded-lg text-xs font-bold hover:bg-gray-100 shadow-sm">◀ Mês Anterior</button>
+                    <span class="font-bold text-xs text-blue-900">${nomesMeses[mes]} de ${ano}</span>
+                    <button type="button" onclick="mudarMesCalendario('${suiteId}', 1)" class="bg-white border px-2 py-1 rounded-lg text-xs font-bold hover:bg-gray-100 shadow-sm">Próximo Mês ▶</button>
+                </div>
+                <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-extrabold text-gray-500 mb-1">
+                    <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
+                </div>
+                <div class="grid grid-cols-7 gap-1 text-center">
+            `;
+
+            for (let i = 0; i < primeiroDiaDaSemana; i++) {
+                html += `<div></div>`;
+            }
+
+            for (let dia = 1; dia <= totalDiasNoMes; dia++) {
+                const mesStr = String(mes + 1).padStart(2, '0');
+                const diaStr = String(dia).padStart(2, '0');
+                const dataIso = `${ano}-${mesStr}-${diaStr}`;
 
                 let ocupado = false;
                 for (let res of reservasDaSuite) {
-                    if (diaIso >= res.checkin && diaIso < res.checkout) {
+                    if (dataIso >= res.checkin && dataIso < res.checkout) {
                         ocupado = true;
                         break;
                     }
@@ -386,18 +447,23 @@
                     ? 'bg-rose-500 text-white font-bold' 
                     : 'bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold';
 
-                const tituloTooltip = `${diaNum}/${mesNum}: ${ocupado ? 'Ocupada' : 'Disponível'}`;
-
                 html += `
-                    <div class="${corClasse} rounded-lg p-1 text-[10px] flex flex-col items-center justify-center shadow-sm" title="${tituloTooltip}">
-                        <span class="text-[8px] opacity-80">${diaNum}/${mesNum}</span>
+                    <div class="${corClasse} rounded-md p-1 text-[10px] flex flex-col items-center justify-center shadow-sm" title="${dataIso}: ${ocupado ? 'Ocupada' : 'Disponível'}">
+                        <span class="text-[9px]">${dia}</span>
                         <span>${ocupado ? '✕' : '✓'}</span>
                     </div>
                 `;
-
-                dataCursor.setDate(dataCursor.getDate() + 1);
             }
-            return html;
+
+            html += `
+                </div>
+                <div class="flex justify-between items-center mt-3 pt-2 border-t border-gray-200 text-[10px] text-gray-600 font-semibold px-1">
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> Livre</span>
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span> Ocupada</span>
+                </div>
+            `;
+
+            containerCal.innerHTML = html;
         }
 
         function trocarFotoPrincipal(elementoMiniatura, novaUrl) {
