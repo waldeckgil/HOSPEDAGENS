@@ -275,7 +275,6 @@
             if (c === 'data_pagamento') return 'DATA/HORA';
             if (c === 'forma_pagamento') return 'FORMA';
             if (c === 'observacao') return 'OBS';
-            if (c === 'whatsapp') return 'WHATSAPP';
             if (c === 'alerta_status_tarifa') return 'ALERTA VIGÊNCIA';
             if (c === 'alerta_status_reserva') return 'ALERTA CHECK-IN';
             return col.replace(/_/g, ' ').toUpperCase();
@@ -598,14 +597,6 @@
                                 valorExibicao = formatarDataHoraBr(valorBruto);
                             } else if (colLower.includes('checkin') || colLower.includes('checkout') || colLower.includes('fim') || colLower.includes('inicio')) {
                                 valorExibicao = formatarDataBr(valorBruto);
-                            } else if (colLower === 'whatsapp') {
-                                // Habilita o link do WhatsApp dinamicamente
-                                let numeroLimpo = String(valorBruto).replace(/\D/g, '');
-                                if (numeroLimpo.length >= 8) {
-                                    valorExibicao = `<a href="https://wa.me/${numeroLimpo}" target="_blank" title="Abrir conversa no WhatsApp" class="inline-flex items-center gap-1.5 text-emerald-700 hover:text-emerald-900 font-bold transition"><i class="fa-brands fa-whatsapp text-sm"></i> ${String(valorBruto).toUpperCase()}</a>`;
-                                } else {
-                                    valorExibicao = String(valorBruto).toUpperCase();
-                                }
                             } else {
                                 valorExibicao = String(valorBruto).toUpperCase();
                             }
