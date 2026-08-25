@@ -350,7 +350,8 @@
                                 suites ( nome )
                             )
                         `)
-                        .eq('pousada_id', usuarioIdAtual);
+                        .eq('pousada_id', usuarioIdAtual)
+                        .order('criado_em', { ascending: false });
 
                     error = errPag;
                     if (pagamentosData) {
@@ -405,13 +406,6 @@
                         return dataStr >= dataInicio && dataStr <= dataFim;
                     });
                 }
-
-                // --- ORDENAÇÃO CRONOLÓGICA CRESCENTE (DA MENOR HORA PARA A MAIOR) ---
-                registrosFiltrados.sort((a, b) => {
-                    let dataA = a['data_pagamento'] || a['checkin'] || '';
-                    let dataB = b['data_pagamento'] || b['checkin'] || '';
-                    return new Date(dataA) - new Date(dataB);
-                });
 
                 // --- CÁLCULO DOS KPIS FINANCEIROS EXATOS PARA O PERÍODO SELECIONADO ---
                 let faturamentoBrutoPeriodo = 0;
@@ -519,23 +513,8 @@
                 thead.innerHTML = htmlCabecalho;
 
                 let htmlLinhas = '';
-                let grupoCorAlternada = false;
-                let ultimaChaveGrupo = null;
-
-                registrosFiltrados.forEach((row, index) => {
-                    let chaveAtual = `${String(row.hospede || '').trim()}|${String(row.suite || '').trim()}|${String(row.checkin || '').trim()}|${String(row.checkout || '').trim()}`;
-                    
-                    if (index === 0) {
-                        grupoCorAlternada = false;
-                        ultimaChaveGrupo = chaveAtual;
-                    } else if (chaveAtual !== ultimaChaveGrupo) {
-                        grupoCorAlternada = !grupoCorAlternada;
-                        ultimaChaveGrupo = chaveAtual;
-                    }
-
-                    let classeCorFundo = grupoCorAlternada ? 'bg-emerald-50/50 hover:bg-emerald-100/50' : 'bg-white hover:bg-gray-50';
-
-                    htmlLinhas += `<tr class="${classeCorFundo} transition">`;
+                registrosFiltrados.forEach(row => {
+                    htmlLinhas += `<tr class="hover:bg-gray-50 transition">`;
                     colunas.forEach(col => {
                         let valorBruto = row[col];
                         let valorExibicao = '-';
