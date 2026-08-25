@@ -45,7 +45,7 @@
             <p id="aviso-filtro" class="text-[11px] sm:text-xs text-gray-500 mt-2 sm:mt-3 italic">Selecione o período desejado e veja todas as opções e calendários de ocupação.</p>
         </div>
 
-        <!-- Container onde as suítes serão injetadas após a busca -->
+        <!-- Container onde as suítes serão injetadas -->
         <div id="vitrine-container" class="grid gap-4 sm:gap-6">
             <div class="bg-white/90 backdrop-blur-md text-gray-700 p-6 sm:p-8 rounded-2xl text-center shadow-lg">
                 <span class="text-3xl">🗓️</span>
@@ -272,19 +272,28 @@
                 const precoBase = suite.preco || suite.valor_diaria || 150.00;
                 const valorTotalEstadia = await calcularValorTotalEstadia(suite.id, checkinFiltro, checkoutFiltro, precoBase);
 
-                // Verifica se o período selecionado possui algum conflito exato
-                let temConflitoNoPeriodo = false;
                 const reservasDaSuite = (todasReservas || []).filter(r => r.suite_id === suite.id);
+                
+                // VERIFICAÇÃO INTELIGENTE DE CONFLITO NO INTERVALO EXATO SOLICITADO
+                let temConflitoNoPeriodo = false;
                 const novoInicio = new Date(checkinFiltro + 'T00:00:00');
                 const novoFim = new Date(checkoutFiltro + 'T00:00:00');
 
-                for (let res of reservasDaSuite) {
-                    const inicioExistente = new Date(res.checkin + 'T00:00:00');
-                    const fimExistente = new Date(res.checkout + 'T00:00:00');
-                    if (novoInicio < fimExistente && novoFim > inicioExistente) {
+                let cursorChecagem = new Date(novoInicio);
+                while (cursorChecagem < novoFim) {
+                    const diaIsoStr = cursorChecagem.toISOString().split('T')[0];
+                    let diaOcupado = false;
+                    for (let res of reservasDaSuite) {
+                        if (diaIsoStr >= res.checkin && diaIsoStr < res.checkout) {
+                            diaOcupado = true;
+                            break;
+                        }
+                    }
+                    if (diaOcupado) {
                         temConflitoNoPeriodo = true;
                         break;
                     }
+                    cursorChecagem.setDate(cursorChecagem.getDate() + 1);
                 }
 
                 // GERAÇÃO DO MINI-CALENDÁRIO VISUAL (Exibe a partir do check-in escolhido)
@@ -482,7 +491,7 @@
                 cpf: document.getElementById('cpf-hospede').value,
                 rg: document.getElementById('rg-hospede').value || null,
                 cep: document.getElementById('cep-hospede').value || null,
-                endereco: document.getElementById('endereco-hospede->value') || document.getElementById('endereco-hospede').value,
+                endereco: document.getElementById('endereco-hospede').value,
                 checkin: checkinVal,
                 checkout: checkoutVal,
                 valor_total: valorTotalCalculado,
@@ -493,7 +502,7 @@
             if (errReserva) {
                 btnEnviar.disabled = false;
                 btnEnviar.innerText = "Enviar Solicitação";
-                msgErro.innerText = "Erro ao enviar solicitação: " + errReserp.message;
+                msgErro.innerText = "Erro ao enviar solicitação: " + errReserva.message;
                 msgErro.classList.remove('hidden');
                 return;
             }
