@@ -465,28 +465,43 @@
                 `;
             });
         }
-
-        function prepararEdicaoTarifa(id) {
+function prepararEdicaoTarifa(id) {
             const tarifa = tarifasCache.find(t => t.id === id);
             if (!tarifa) return;
 
             document.getElementById('tarifa-editando-id').value = tarifa.id;
             document.getElementById('select-suite-tarifa').value = tarifa.suite_id || '';
-            document.getElementById('tarifa-inicio').value = tarifa.data_inicio;
-            document.getElementById('tarifa-fim').value = tarifa.data_fim;
+            
+            // CORREÇÃO: Força o corte da string da data, ignorando horas e fuso (o 'T')
+            const dataInicioFormatada = tarifa.data_inicio ? tarifa.data_inicio.split('T')[0] : '';
+            const dataFimFormatada = tarifa.data_fim ? tarifa.data_fim.split('T')[0] : '';
+            
+            document.getElementById('tarifa-inicio').value = dataInicioFormatada;
+            document.getElementById('tarifa-fim').value = dataFimFormatada;
+            
             document.getElementById('tipo-ajuste').value = tarifa.tipo_ajuste || 'percentual';
             alternarTipoAjuste();
+            
             document.getElementById('tarifa-valor').value = tarifa.valor_especial;
             document.getElementById('tarifa-descricao').value = tarifa.descricao || '';
 
+            // CORREÇÃO: Garante que os checkboxes leiam corretamente o array de dias
             const checkboxes = document.querySelectorAll('input[name="dias_semana"]');
+            let diasArray = [];
+            if (tarifa.dias_semana) {
+                // Se o banco trouxer como string JSON, converte. Se já for array, usa direto.
+                diasArray = typeof tarifa.dias_semana === 'string' ? JSON.parse(tarifa.dias_semana) : tarifa.dias_semana;
+            }
+            
             checkboxes.forEach(cb => {
-                cb.checked = tarifa.dias_semana && tarifa.dias_semana.includes(Number(cb.value));
+                cb.checked = diasArray.includes(Number(cb.value));
             });
 
             document.getElementById('titulo-form-regra').innerText = "Editando Regra de Tarifa";
             document.getElementById('btn-submit-regra').innerText = "Atualizar Regra";
             document.getElementById('btn-cancelar-edicao').classList.remove('hidden');
+            
+            // Rola a página suavemente para o topo para o usuário ver o formulário
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
