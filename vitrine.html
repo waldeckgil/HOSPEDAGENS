@@ -42,9 +42,8 @@
                     <input type="date" id="filtro-checkout" class="w-full p-2.5 sm:p-3 border rounded-xl font-bold bg-gray-50 text-sm sm:text-base">
                 </div>
                 <div>
-                    <label class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">Adultos</label>
+                    <label class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">Adultos (Mínimo 2)</label>
                     <select id="filtro-adultos" class="w-full p-2.5 sm:p-3 border rounded-xl font-bold bg-gray-50 text-sm sm:text-base text-gray-800">
-                        <option value="1">1 Adulto</option>
                         <option value="2" selected>2 Adultos</option>
                         <option value="3">3 Adultos</option>
                         <option value="4">4 Adultos</option>
@@ -294,26 +293,34 @@
         function abrirModalFotosPousada() {
             const grid = document.getElementById('grid-fotos-pousada');
             const fotos = dadosPousadaGlobal.fotos_pousada || [];
-            grid.innerHTML = fotos.map((f, i) => `
-                <div class="h-48 rounded-xl overflow-hidden shadow border bg-gray-100">
-                    <img src="${f}" alt="Foto ${i+1}" class="w-full h-full object-cover">
-                </div>
-            `).join('');
+            grid.innerHTML = fotos.map((f, i) => {
+                const urlFoto = typeof f === 'object' && f !== null ? (f.url || f.caminho || '') : f;
+                return `
+                    <div class="h-48 rounded-xl overflow-hidden shadow border bg-gray-100">
+                        <img src="${urlFoto}" alt="Foto ${i+1}" class="w-full h-full object-cover">
+                    </div>
+                `;
+            }).join('');
             document.getElementById('modal-fotos-pousada').classList.remove('hidden');
         }
 
         function abrirModalAtracoes() {
             const grid = document.getElementById('grid-atracoes');
             const atracoes = dadosPousadaGlobal.atracoes_turisticas || [];
-            grid.innerHTML = atracoes.map(a => `
-                <div class="bg-gray-50 border rounded-xl overflow-hidden shadow flex flex-col">
-                    ${a.foto ? `<div class="h-36 w-full"><img src="${a.foto}" class="w-full h-full object-cover"></div>` : ''}
-                    <div class="p-3">
-                        <h4 class="font-extrabold text-blue-900 text-sm mb-1">${a.titulo || a.nome || 'Atração'}</h4>
-                        <p class="text-xs text-gray-600">${a.descricao || ''}</p>
+            grid.innerHTML = atracoes.map(a => {
+                const fotoAtracao = typeof a === 'object' && a !== null ? (a.foto || a.imagem || '') : '';
+                const tituloAtracao = typeof a === 'object' && a !== null ? (a.titulo || a.nome || 'Atração') : 'Atração';
+                const descAtracao = typeof a === 'object' && a !== null ? (a.descricao || '') : '';
+                return `
+                    <div class="bg-gray-50 border rounded-xl overflow-hidden shadow flex flex-col">
+                        ${fotoAtracao ? `<div class="h-36 w-full"><img src="${fotoAtracao}" class="w-full h-full object-cover"></div>` : ''}
+                        <div class="p-3">
+                            <h4 class="font-extrabold text-blue-900 text-sm mb-1">${tituloAtracao}</h4>
+                            <p class="text-xs text-gray-600">${descAtracao}</p>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
             document.getElementById('modal-atracoes').classList.remove('hidden');
         }
 
@@ -352,7 +359,6 @@
             const { data: suiteData } = await supabaseClient.from('suites').select('*').eq('id', suiteId).single();
             const hospedesInclusos = suiteData?.hospedes_inclusos || 2;
             
-            // Valida idade limite para contagem de hóspede extra infantil
             let criancasConsideradasExtras = 0;
             const idadeLimite = Number(dadosPousadaGlobal.idade_limite_crianca) || 5;
             for (let i = 1; i <= qtdCriancas; i++) {
@@ -441,7 +447,7 @@
         async function filtrarSuitesDisponiveisPorPeriodo() {
             const checkinFiltro = document.getElementById('filtro-checkin').value;
             const checkoutFiltro = document.getElementById('filtro-checkout').value;
-            const qtdAdultos = parseInt(document.getElementById('filtro-adultos').value) || 1;
+            const qtdAdultos = parseInt(document.getElementById('filtro-adultos').value) || 2;
             const qtdCriancas = parseInt(document.getElementById('filtro-criancas').value) || 0;
             const container = document.getElementById('vitrine-container');
 
@@ -477,7 +483,6 @@
                 return true;
             });
 
-            // Valida idade das crianças para capacidade
             let criancasExtrasBusca = 0;
             const idadeLimite = Number(dadosPousadaGlobal.idade_limite_crianca) || 5;
             for (let i = 1; i <= qtdCriancas; i++) {
@@ -518,7 +523,6 @@
                 return { ...suite, temConflitoNoPeriodo, atendeCapacidade };
             });
 
-            // Oculta as que não atendem capacidade ou ordena
             const suitesFiltradas = suitesComStatus.filter(s => s.atendeCapacidade);
             suitesFiltradas.sort((a, b) => (a.temConflitoNoPeriodo === b.temConflitoNoPeriodo) ? 0 : a.temConflitoNoPeriodo ? 1 : -1);
 
@@ -769,7 +773,7 @@
         async function abrirModal(sId) {
             const checkinFiltro = document.getElementById('filtro-checkin').value;
             const checkoutFiltro = document.getElementById('filtro-checkout').value;
-            const qtdAdultos = parseInt(document.getElementById('filtro-adultos').value) || 1;
+            const qtdAdultos = parseInt(document.getElementById('filtro-adultos').value) || 2;
             const qtdCriancas = parseInt(document.getElementById('filtro-criancas').value) || 0;
 
             document.getElementById('suite-id-reserva').value = sId;
@@ -778,7 +782,6 @@
             document.getElementById('checkin').value = checkinFiltro;
             document.getElementById('checkout').value = checkoutFiltro;
 
-            // Tratamento da Opção de Pet
             const secaoPet = document.getElementById('secao-pet-modal');
             if (dadosPousadaGlobal.aceita_pet) {
                 secaoPet.classList.remove('hidden');
@@ -787,7 +790,6 @@
                 secaoPet.classList.add('hidden');
             }
 
-            // Atualiza resumo no modal
             await atualizarResumoModal(sId, checkinFiltro, checkoutFiltro, qtdAdultos, qtdCriancas);
 
             document.getElementById('check-trazer-pet').onchange = async () => {
@@ -847,7 +849,7 @@
             const suiteId = document.getElementById('suite-id-reserva').value;
             const checkinVal = document.getElementById('checkin').value;
             const checkoutVal = document.getElementById('checkout').value;
-            const qtdAdultos = parseInt(document.getElementById('filtro-adultos').value) || 1;
+            const qtdAdultos = parseInt(document.getElementById('filtro-adultos').value) || 2;
             const qtdCriancas = parseInt(document.getElementById('filtro-criancas').value) || 0;
 
             const { data: suiteData } = await supabaseClient.from('suites').select('*').eq('id', suiteId).single();
