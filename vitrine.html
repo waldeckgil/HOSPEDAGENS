@@ -65,6 +65,18 @@
             <!-- Container Dinâmico para Idade das Crianças -->
             <div id="container-idades-criancas" class="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 bg-blue-50/50 p-3 rounded-xl border border-blue-100"></div>
 
+            <!-- Bloco de Pet na Vitrine Prévia -->
+            <div id="secao-pet-filtro" class="mt-3 hidden bg-amber-50 border border-amber-200 p-3 rounded-xl flex items-center justify-between">
+                <div>
+                    <span class="font-bold text-amber-900 text-xs block">🐾 Vai trazer um Pet?</span>
+                    <span id="label-valor-pet-filtro" class="text-[11px] text-amber-700">Taxa adicional aplicável.</span>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="check-trazer-pet-filtro" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                </label>
+            </div>
+
             <div class="mt-4">
                 <button onclick="filtrarSuitesDisponiveisPorPeriodo()" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-2.5 sm:p-3 rounded-xl font-bold transition shadow-md text-sm sm:text-base">
                     Consultar Disponibilidade
@@ -176,18 +188,6 @@
                     </div>
                 </div>
 
-                <!-- Bloco Condicional de Pet -->
-                <div id="secao-pet-modal" class="hidden bg-amber-50 border border-amber-200 p-3 rounded-xl flex items-center justify-between">
-                    <div>
-                        <span class="font-bold text-amber-900 text-xs block">🐾 Vai trazer um Pet?</span>
-                        <span id="label-valor-pet" class="text-[11px] text-amber-700">Taxa adicional aplicável.</span>
-                    </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="check-trazer-pet" class="sr-only peer">
-                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
-                    </label>
-                </div>
-
                 <!-- Resumo de Valores Detalhado no Modal -->
                 <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 text-xs space-y-1">
                     <div class="flex justify-between text-gray-600">
@@ -240,6 +240,7 @@
             document.getElementById('titulo-pousada').innerText = dadosPousadaGlobal.nome || "Nossa Pousada";
             
             renderizarBarraInstitucional();
+            verificarSecaoPetFiltro();
 
             const { data: todasReservas } = await supabaseClient
                 .from('reservas')
@@ -250,6 +251,16 @@
 
             gerarCamposIdadeCriancas();
             filtrarSuitesDisponiveisPorPeriodo();
+        }
+
+        function verificarSecaoPetFiltro() {
+            const secaoPet = document.getElementById('secao-pet-filtro');
+            if (dadosPousadaGlobal.aceita_pet === true || dadosPousadaGlobal.aceita_pet === 'true' || dadosPousadaGlobal.aceita_pet === 'Sim') {
+                secaoPet.classList.remove('hidden');
+                document.getElementById('label-valor-pet-filtro').innerText = `Taxa única de R$ ${Number(dadosPousadaGlobal.valor_pet || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            } else {
+                secaoPet.classList.add('hidden');
+            }
         }
 
         function renderizarBarraInstitucional() {
@@ -303,7 +314,6 @@
             const atracoes = dadosPousadaGlobal.atracoes_turisticas || [];
             
             grid.innerHTML = atracoes.map(a => {
-                // Correção robusta para lidar com diferentes nomenclaturas de chaves de imagem e texto nas atrações
                 const fotoAtracao = typeof a === 'object' && a !== null ? (a.foto || a.imagem || a.url || '') : '';
                 const tituloAtracao = typeof a === 'object' && a !== null ? (a.titulo || a.nome || 'Atração') : 'Atração';
                 const descAtracao = typeof a === 'object' && a !== null ? (a.descricao || a.detalhes || '') : '';
@@ -337,7 +347,7 @@
                 return;
             }
 
-            let html = `<span class="col-span-full text-[11px] font-bold text-blue-800">Informe a idade de cada criança (Limite de isenção: até ${idadeLimite} anos):</span>`;
+            let html = `<span class="col-span-full text-[11px] font-bold text-blue-800">Informe a idade de cada criança (Isentas até ${idadeLimite} anos):</span>`;
             for (let i = 1; i <= qtd; i++) {
                 html += `
                     <div>
@@ -357,13 +367,18 @@
             const { data: suiteData } = await supabaseClient.from('suites').select('*').eq('id', suiteId).single();
             const hospedesInclusos = suiteData?.hospedes_inclusos || 2;
             
-            let criancasConsideradasExtras = 0;
             const idadeLimite = Number(dadosPousadaGlobal.idade_limite_crianca) || 5;
+            let criancasConsideradasExtras = 0;
+            let detalhesCriancasArr = [];
+
             for (let i = 1; i <= qtdCriancas; i++) {
                 const elIdade = document.getElementById(`idade-crianca-${i}`);
                 const idade = elIdade ? parseInt(elIdade.value) || 0 : 0;
-                if (idade > idadeLimite) {
+                if (idade <= idadeLimite) {
+                    detalhesCriancasArr.push(`Criança (${idade}a - Grátis)`);
+                } else {
                     criancasConsideradasExtras++;
+                    detalhesCriancasArr.push(`Criança (${idade}a - Pagante)`);
                 }
             }
 
@@ -388,6 +403,7 @@
                 .gte('data_fim', checkinStr);
 
             let valorDiariasTotal = 0;
+            let temTarifaEspecialAplicada = false;
             let dataAtual = new Date(checkin);
 
             while (dataAtual < checkout) {
@@ -410,6 +426,7 @@
                             }
 
                             if (atendeDiaSemana) {
+                                temTarifaEspecialAplicada = true;
                                 if (tarifa.tipo_ajuste === 'percentual' || tarifa.tipo_ajuste === 'porcentagem') {
                                     precoDaNoite = precoBaseDiaria * (1 + (Number(tarifa.valor_especial) / 100));
                                 } else if (tarifa.tipo_ajuste === 'fixo_acrescimo') {
@@ -438,7 +455,9 @@
                 valorExtraTotalPeriodo,
                 valorDiariasTotal,
                 valorTotalGeral,
-                criancasConsideradasExtras
+                criancasConsideradasExtras,
+                detalhesCriancasArr,
+                temTarifaEspecialAplicada
             };
         }
 
@@ -562,11 +581,18 @@
                     ? `<button onclick="alert('Este período selecionado possui dias ocupados. Consulte o calendário mensal abaixo para escolher um período livre.')" class="w-full bg-gray-400 text-white py-3 md:py-3.5 px-4 rounded-xl font-bold transition shadow-md text-center text-sm md:text-base cursor-not-allowed">Período Indisponível</button>`
                     : `<button onclick="abrirModal('${suite.id}')" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 md:py-3.5 px-4 rounded-xl font-bold transition shadow-md text-center text-sm md:text-base">Solicitar Reserva</button>`;
 
+                // Rótulo da Diária Base / Especial
+                let rotuloPrecoDiaria = `R$ ${precoBase.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+                let avisoTarifaEspecial = '';
+                if (calcEstadia.temTarifaEspecialAplicada) {
+                    avisoTarifaEspecial = `<span class="text-[10px] text-amber-700 font-bold block bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 mt-0.5">⭐ Inclui Tarifa Especial no período</span>`;
+                }
+
                 let detalhamentoOcupantesHTML = `
                     <div class="bg-blue-50/70 border border-blue-100 p-2.5 rounded-xl mb-3 text-xs space-y-1 text-gray-700">
                         <div class="flex justify-between font-semibold">
                             <span>👥 Ocupantes:</span>
-                            <span>${qtdAdultos} Adulto(s)${qtdCriancas > 0 ? ` + ${qtdCriancas} Criança(s)` : ''}</span>
+                            <span>${qtdAdultos} Adulto(s)${calcEstadia.detalhesCriancasArr.length > 0 ? ` + ${calcEstadia.detalhesCriancasArr.join(', ')}` : ''}</span>
                         </div>
                         <div class="flex justify-between">
                             <span>Diárias (${calcEstadia.qtdNoites} noite${calcEstadia.qtdNoites > 1 ? 's' : ''}):</span>
@@ -589,7 +615,25 @@
                         </div>
                     `;
                 }
+
+                // Inclusão do Pet no detalhamento se marcado
+                const aceitaPetGlobal = dadosPousadaGlobal.aceita_pet === true || dadosPousadaGlobal.aceita_pet === 'true' || dadosPousadaGlobal.aceita_pet === 'Sim';
+                const checkPetFiltro = document.getElementById('check-trazer-pet-filtro');
+                const vaiTrazerPet = aceitaPetGlobal && checkPetFiltro && checkPetFiltro.checked;
+                let valorPetTotal = 0;
+                if (vaiTrazerPet) {
+                    valorPetTotal = Number(dadosPousadaGlobal.valor_pet) || 0;
+                    detalhamentoOcupantesHTML += `
+                        <div class="flex justify-between text-amber-800 font-medium">
+                            <span>🐾 Taxa de Pet:</span>
+                            <span>R$ ${valorPetTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+                        </div>
+                    `;
+                }
+
                 detalhamentoOcupantesHTML += `</div>`;
+
+                const valorTotalComPet = calc.valorTotalGeral + valorPetTotal;
 
                 container.innerHTML += `
                     <div class="bg-white rounded-2xl shadow-xl overflow-hidden text-gray-800 border-l-8 ${temConflitoNoPeriodo ? 'border-amber-400' : 'border-green-500'} p-4 md:p-6 mb-4">
@@ -617,7 +661,8 @@
                                         <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900">${suite.nome}</h2>
                                         <div class="text-right shrink-0">
                                             <span class="text-[10px] uppercase text-gray-400 font-bold block">Diária Base</span>
-                                            <span class="text-sm sm:text-base font-extrabold text-blue-600">R$ ${precoBase.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+                                            <span class="text-sm sm:text-base font-extrabold text-blue-600">${rotuloPrecoDiaria}</span>
+                                            ${avisoTarifaEspecial}
                                         </div>
                                     </div>
                                     <p class="text-xs text-gray-500 mb-2">Capacidade: até ${suite.capacidade_hospedes || 2} hóspedes (${suite.hospedes_inclusos || 2} inclusos)</p>
@@ -637,7 +682,7 @@
 
                                     <div class="border-t border-gray-100 pt-2 mb-3 flex justify-between items-center">
                                         <span class="text-xs font-bold text-gray-600">Total Estimado:</span>
-                                        <span class="text-xl sm:text-2xl font-extrabold text-green-600">R$ ${calcEstadia.valorTotalGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+                                        <span class="text-xl sm:text-2xl font-extrabold text-green-600">R$ ${valorTotalComPet.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
                                     </div>
                                 </div>
 
@@ -812,20 +857,7 @@
             document.getElementById('checkin').value = checkinFiltro;
             document.getElementById('checkout').value = checkoutFiltro;
 
-            const secaoPet = document.getElementById('secao-pet-modal');
-            if (dadosPousadaGlobal.aceita_pet === true || dadosPousadaGlobal.aceita_pet === 'true') {
-                secaoPet.classList.remove('hidden');
-                document.getElementById('label-valor-pet').innerText = `Taxa de Pet: R$ ${Number(dadosPousadaGlobal.valor_pet || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            } else {
-                secaoPet.classList.add('hidden');
-                document.getElementById('check-trazer-pet').checked = false;
-            }
-
             await atualizarResumoModal(sId, checkinFiltro, checkoutFiltro, qtdAdultos, qtdCriancas);
-
-            document.getElementById('check-trazer-pet').onchange = async () => {
-                await atualizarResumoModal(sId, checkinFiltro, checkoutFiltro, qtdAdultos, qtdCriancas);
-            };
 
             document.getElementById('feedback-sucesso').classList.add('hidden');
             document.getElementById('feedback-erro').classList.add('hidden');
@@ -852,9 +884,10 @@
             }
 
             const linhaPet = document.getElementById('linha-resumo-pet');
-            const checkPet = document.getElementById('check-trazer-pet');
+            const checkPetFiltro = document.getElementById('check-trazer-pet-filtro');
+            const aceitaPetGlobal = dadosPousadaGlobal.aceita_pet === true || dadosPousadaGlobal.aceita_pet === 'true' || dadosPousadaGlobal.aceita_pet === 'Sim';
             let valorPetTotal = 0;
-            if (checkPet && checkPet.checked && (dadosPousadaGlobal.aceita_pet === true || dadosPousadaGlobal.aceita_pet === 'true')) {
+            if (aceitaPetGlobal && checkPetFiltro && checkPetFiltro.checked) {
                 valorPetTotal = Number(dadosPousadaGlobal.valor_pet) || 0;
             }
 
@@ -895,9 +928,10 @@
             const precoBase = suiteData ? (suiteData.valor_diaria || suiteData.preco || 150.00) : 150.00;
             const calc = await calcularValorTotalEstadiaCompleto(suiteId, checkinVal, checkoutVal, precoBase, qtdAdultos, qtdCriancas);
 
-            const checkPet = document.getElementById('check-trazer-pet');
+            const aceitaPetGlobal = dadosPousadaGlobal.aceita_pet === true || dadosPousadaGlobal.aceita_pet === 'true' || dadosPousadaGlobal.aceita_pet === 'Sim';
+            const checkPetFiltro = document.getElementById('check-trazer-pet-filtro');
             let valorPetTotal = 0;
-            if (checkPet && checkPet.checked && (dadosPousadaGlobal.aceita_pet === true || dadosPousadaGlobal.aceita_pet === 'true')) {
+            if (aceitaPetGlobal && checkPetFiltro && checkPetFiltro.checked) {
                 valorPetTotal = Number(dadosPousadaGlobal.valor_pet) || 0;
             }
 
