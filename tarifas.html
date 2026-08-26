@@ -490,9 +490,10 @@
                     const legenda = descricoes[i] ? descricoes[i].value : `Foto ${i + 1}`;
                     const fileName = `${usuarioIdAtual}/pousada_${Date.now()}_${i}_${file.name}`;
                     
-                    const { error: uploadError } = await supabaseClient.storage.from('pousadas').upload(fileName, file);
+                    // AJUSTE REALIZADO: Usando o bucket correto 'suites-fotos' e o ID dinâmico da sessão
+                    const { error: uploadError } = await supabaseClient.storage.from('suites-fotos').upload(fileName, file);
                     if (!uploadError) {
-                        const { data: { publicUrl } } = supabaseClient.storage.from('pousadas').getPublicUrl(fileName);
+                        const { data: { publicUrl } } = supabaseClient.storage.from('suites-fotos').getPublicUrl(fileName);
                         fotosPousadaArray.push({ url: publicUrl, legenda: legenda });
                     } else {
                         console.error("Erro no upload de foto da pousada:", uploadError.message);
@@ -510,9 +511,10 @@
                     const legenda = descricoesAtracoes[i] ? descricoesAtracoes[i].value : `Atração ${i + 1}`;
                     const fileName = `${usuarioIdAtual}/atracao_${Date.now()}_${i}_${file.name}`;
                     
-                    const { error: uploadError } = await supabaseClient.storage.from('pousadas').upload(fileName, file);
+                    // AJUSTE REALIZADO: Usando o bucket correto 'suites-fotos' e o ID dinâmico da sessão
+                    const { error: uploadError } = await supabaseClient.storage.from('suites-fotos').upload(fileName, file);
                     if (!uploadError) {
-                        const { data: { publicUrl } } = supabaseClient.storage.from('pousadas').getPublicUrl(fileName);
+                        const { data: { publicUrl } } = supabaseClient.storage.from('suites-fotos').getPublicUrl(fileName);
                         atracoesArray.push({ url: publicUrl, legenda: legenda });
                     } else {
                         console.error("Erro no upload de atração:", uploadError.message);
@@ -742,7 +744,7 @@
         }
 
         document.getElementById('btn-confirmar-exclusao').onclick = async () => {
-            if (!idParaExcluir) return; // Correção efetuada aqui de "idParaExcluri" para "idParaExcluir"
+            if (!idParaExcluir) return;
             const { error } = await supabaseClient.from('tarifas_especiais').delete().eq('id', idParaExcluir);
             fecharModalExclusao();
             if (error) { alert("Erro ao excluir: " + error.message); return; }
