@@ -603,12 +603,12 @@
                     ? `<button onclick="alert('Este período selecionado possui dias ocupados. Consulte o calendário mensal abaixo para escolher um período livre.')" class="w-full bg-gray-400 text-white py-3 md:py-3.5 px-4 rounded-xl font-bold transition shadow-md text-center text-sm md:text-base cursor-not-allowed">Período Indisponível</button>`
                     : `<button onclick="abrirModal('${suite.id}')" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 md:py-3.5 px-4 rounded-xl font-bold transition shadow-md text-center text-sm md:text-base">Solicitar Reserva</button>`;
 
-                // Rótulo da Diária Base / Especial exibida no topo do card
+                // Rótulo da Diária Especial ou Diária Base exibida no topo do card
                 let precoExibidoTopo = calc.temTarifaEspecialAplicada ? calc.primeiraDiariaAplicada : precoBase;
                 let rotuloPrecoDiaria = `R$ ${precoExibidoTopo.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
                 let avisoTarifaEspecial = '';
                 if (calc.temTarifaEspecialAplicada) {
-                    avisoTarifaEspecial = `<span class="text-[10px] text-amber-700 font-bold block bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 mt-0.5">⭐ Inclui Tarifa Especial no período</span>`;
+                    avisoTarifaEspecial = `<span class="text-[10px] text-amber-700 font-bold block bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 mt-0.5">⭐ Diária Especial</span>`;
                 }
 
                 // LAYOUT VERTICAL DETALHADO DOS OCUPANTES E DIÁRIAS
@@ -658,7 +658,7 @@
                     `;
                 }
 
-                // Inclusão do Pet no detalhamento vertical se marcado
+                // Inclusão combustível do Pet no detalhamento vertical se marcado
                 const aceitaPetGlobal = dadosPousadaGlobal.aceita_pet === true || dadosPousadaGlobal.aceita_pet === 'true' || dadosPousadaGlobal.aceita_pet === 'Sim';
                 const checkPetFiltro = document.getElementById('check-trazer-pet-filtro');
                 const vaiTrazerPet = aceitaPetGlobal && checkPetFiltro && checkPetFiltro.checked;
@@ -702,7 +702,7 @@
                                     <div class="flex items-start justify-between gap-2 mb-1 md:mb-2">
                                         <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900">${suite.nome}</h2>
                                         <div class="text-right shrink-0">
-                                            <span class="text-[10px] uppercase text-gray-400 font-bold block">Diária Base</span>
+                                            <span class="text-[10px] uppercase text-gray-400 font-bold block">Diária</span>
                                             <span class="text-sm sm:text-base font-extrabold text-blue-600">${rotuloPrecoDiaria}</span>
                                             ${avisoTarifaEspecial}
                                         </div>
