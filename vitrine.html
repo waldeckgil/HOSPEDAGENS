@@ -382,7 +382,8 @@
             const { data: tarifasEspeciais } = await supabaseClient
                 .from('tarifas_especiais')
                 .select('*')
-                .eq('suite_id', suiteId)
+                .or(`suite_id.eq.${suiteId},suite_id.is.null`)
+                .eq('pousada_id', pousadaIdGlobal)
                 .lte('data_inicio', checkoutStr)
                 .gte('data_fim', checkinStr);
 
@@ -552,7 +553,7 @@
                     miniaturasHTML += '</div>';
                 }
 
-                const precoBase = suite.preco || suite.valor_diaria || 150.00;
+                const precoBase = suite.valor_diaria || suite.preco || 150.00;
                 const calcEstadia = await calcularValorTotalEstadiaCompleto(suite.id, checkinFiltro, checkoutFiltro, precoBase, qtdAdultos, qtdCriancas);
                 const temConflitoNoPeriodo = suite.temConflitoNoPeriodo;
 
@@ -805,7 +806,7 @@
 
         async function atualizarResumoModal(suiteId, checkinVal, checkoutVal, qtdAdultos, qtdCriancas) {
             const { data: suiteData } = await supabaseClient.from('suites').select('*').eq('id', suiteId).single();
-            const precoBase = suiteData ? (suiteData.preco || suiteData.valor_diaria || 150.00) : 150.00;
+            const precoBase = suiteData ? (suiteData.valor_diaria || suiteData.preco || 150.00) : 150.00;
             const calc = await calcularValorTotalEstadiaCompleto(suiteId, checkinVal, checkoutVal, precoBase, qtdAdultos, qtdCriancas);
 
             document.getElementById('resumo-qtd-noites').innerText = calc.qtdNoites;
@@ -853,7 +854,7 @@
             const qtdCriancas = parseInt(document.getElementById('filtro-criancas').value) || 0;
 
             const { data: suiteData } = await supabaseClient.from('suites').select('*').eq('id', suiteId).single();
-            const precoBase = suiteData ? (suiteData.preco || suiteData.valor_diaria || 150.00) : 150.00;
+            const precoBase = suiteData ? (suiteData.valor_diaria || suiteData.preco || 150.00) : 150.00;
             const calc = await calcularValorTotalEstadiaCompleto(suiteId, checkinVal, checkoutVal, precoBase, qtdAdultos, qtdCriancas);
 
             const { error: errReserva } = await supabaseClient.from('reservas').insert([{
