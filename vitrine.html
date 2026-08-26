@@ -372,9 +372,7 @@
             let detalhesCriancasArr = [];
             let resumoItensOcupantesArr = [];
 
-            // Adultos inclusos vs extras
             let adultosInclusosCount = Math.min(qtdAdultos, hospedesInclusos);
-            let adultosExtrasCount = Math.max(0, qtdAdultos - hospedesInclusos);
 
             if (adultosInclusosCount > 0) {
                 resumoItensOcupantesArr.push({ texto: `${adultosInclusosCount} Adulto(s)`, valorStr: 'Incluso' });
@@ -384,18 +382,17 @@
                 const elIdade = document.getElementById(`idade-crianca-${i}`);
                 const idade = elIdade ? parseInt(elIdade.value) || 0 : 0;
                 if (idade <= idadeLimite) {
-                    criancasConsideradasExtras++; // contabiliza na lógica se passar da vaga, mas se for isenta fica grátis
                     detalhesCriancasArr.push(`Criança (${idade}a - Grátis)`);
                     resumoItensOcupantesArr.push({ texto: `Criança (${idade}a)`, valorStr: 'Grátis' });
                 } else {
-                    criancasConsideradasExtras++;
+                    criancasConsideradasExtras++; // Criança pagante conta como hóspede extra
                     detalhesCriancasArr.push(`Criança (${idade}a - Pagante)`);
                     resumoItensOcupantesArr.push({ texto: `Criança (${idade}a)`, valorStr: 'Pagante' });
                 }
             }
 
-            const totalOcupantes = qtdAdultos + criancasConsideradasExtras;
-            const hospedesExtras = Math.max(0, totalOcupantes - hospedesInclusos);
+            const adultosExtras = Math.max(0, qtdAdultos - hospedesInclusos);
+            const totalHospedesExtras = adultosExtras + criancasConsideradasExtras;
             
             let valorExtraPorNoiteUnitario = 0;
             if (suiteData?.usa_adicional_customizado && suiteData?.valor_hospede_extra_customizado != null) {
@@ -404,7 +401,7 @@
                 valorExtraPorNoiteUnitario = Number(dadosPousadaGlobal.valor_hospede_extra);
             }
 
-            const valorExtraTotalPorNoite = valorExtraPorNoiteUnitario * hospedesExtras;
+            const valorExtraTotalPorNoite = valorExtraPorNoiteUnitario * totalHospedesExtras;
 
             const { data: tarifasEspeciais } = await supabaseClient
                 .from('tarifas_especiais')
@@ -469,8 +466,9 @@
             return {
                 qtdNoites,
                 hospedesInclusos,
-                totalOcupantes,
-                hospedesExtras,
+                totalOcupantes: qtdAdultos + qtdCriancas,
+                hospedesExtras: totalHospedesExtras,
+                adultosExtras,
                 valorExtraPorNoiteUnitario,
                 valorExtraTotalPeriodo,
                 valorDiariasTotal,
@@ -537,7 +535,7 @@
 
             const suitesComStatus = cacheSuites.map(suite => {
                 const capacidadeMax = suite.capacidade_hospedes || 99;
-                const atendeCapacidade = totalOcupantesBusca <= capacidadeMax;
+                const atendeCapacidade = (qtdAdultos + qtdCriancas) <= capacidadeMax;
 
                 const reservasDaSuite = cacheReservas.filter(r => r.suite_id === suite.id);
                 let temConflitoNoPeriodo = false;
@@ -603,7 +601,6 @@
                     ? `<button onclick="alert('Este período selecionado possui dias ocupados. Consulte o calendário mensal abaixo para escolher um período livre.')" class="w-full bg-gray-400 text-white py-3 md:py-3.5 px-4 rounded-xl font-bold transition shadow-md text-center text-sm md:text-base cursor-not-allowed">Período Indisponível</button>`
                     : `<button onclick="abrirModal('${suite.id}')" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 md:py-3.5 px-4 rounded-xl font-bold transition shadow-md text-center text-sm md:text-base">Solicitar Reserva</button>`;
 
-                // Rótulo da Diária Especial ou Diária Base exibida no topo do card
                 let precoExibidoTopo = calc.temTarifaEspecialAplicada ? calc.primeiraDiariaAplicada : precoBase;
                 let rotuloPrecoDiaria = `R$ ${precoExibidoTopo.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
                 let avisoTarifaEspecial = '';
@@ -611,7 +608,6 @@
                     avisoTarifaEspecial = `<span class="text-[10px] text-amber-700 font-bold block bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 mt-0.5">⭐ Diária Especial</span>`;
                 }
 
-                // LAYOUT VERTICAL DETALHADO DOS OCUPANTES E DIÁRIAS
                 let detalhamentoOcupantesHTML = `
                     <div class="bg-blue-50/70 border border-blue-100 p-3 rounded-xl mb-3 text-xs space-y-1.5 text-gray-700">
                         <div class="font-extrabold text-blue-900 border-b border-blue-200 pb-1 mb-1">👥 Detalhes da Estadia:</div>
@@ -622,7 +618,6 @@
                         </div>
                 `;
 
-                // Exibir adultos e crianças verticalmente
                 let adultosInclusosCount = Math.min(qtdAdultos, calc.hospedesInclusos);
                 let adultosExtrasCount = Math.max(0, qtdAdultos - calc.hospedesInclusos);
 
@@ -633,7 +628,6 @@
                     </div>
                 `;
 
-                // Se houver adultos extras
                 if (adultosExtrasCount > 0) {
                     detalhamentoOcupantesHTML += `
                         <div class="flex justify-between pl-2 text-blue-800 font-medium">
@@ -643,22 +637,29 @@
                     `;
                 }
 
-                // Crianças verticalmente com indicação exata
                 for (let i = 1; i <= qtdCriancas; i++) {
                     const elIdade = document.getElementById(`idade-crianca-${i}`);
                     const idade = elIdade ? parseInt(elIdade.value) || 0 : 0;
-                    const idadeLimite = Number(dadosPousadaGlobal.idade_limite_crianca) || 5;
-                    const ehGratis = idade <= idadeLimite;
+                    const idadeLimiteVal = Number(dadosPousadaGlobal.idade_limite_crianca) || 5;
+                    const ehGratis = idade <= idadeLimiteVal;
 
-                    detalhamentoOcupantesHTML += `
-                        <div class="flex justify-between pl-2 ${ehGratis ? 'text-emerald-700' : 'text-blue-800'} font-medium">
-                            <span>• Criança (${idade} anos):</span>
-                            <span class="font-bold uppercase">${ehGratis ? 'Grátis' : 'Pagante'}</span>
-                        </div>
-                    `;
+                    if (ehGratis) {
+                        detalhamentoOcupantesHTML += `
+                            <div class="flex justify-between pl-2 text-emerald-700 font-medium">
+                                <span>• Criança (${idade} anos - Isenta):</span>
+                                <span class="font-bold uppercase">Grátis</span>
+                            </div>
+                        `;
+                    } else {
+                        detalhamentoOcupantesHTML += `
+                            <div class="flex justify-between pl-2 text-blue-800 font-medium">
+                                <span>• Criança (${idade} anos - Hóspede Extra) (${calc.qtdNoites}n × R$ ${calc.valorExtraPorNoiteUnitario.toLocaleString('pt-BR', {minimumFractionDigits: 2})}):</span>
+                                <span>R$ ${(calc.valorExtraPorNoiteUnitario * calc.qtdNoites).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+                            </div>
+                        `;
+                    }
                 }
 
-                // Inclusão combustível do Pet no detalhamento vertical se marcado
                 const aceitaPetGlobal = dadosPousadaGlobal.aceita_pet === true || dadosPousadaGlobal.aceita_pet === 'true' || dadosPousadaGlobal.aceita_pet === 'Sim';
                 const checkPetFiltro = document.getElementById('check-trazer-pet-filtro');
                 const vaiTrazerPet = aceitaPetGlobal && checkPetFiltro && checkPetFiltro.checked;
@@ -709,17 +710,14 @@
                                     </div>
                                     <p class="text-xs text-gray-500 mb-2">Capacidade: até ${suite.capacidade_hospedes || 2} hóspedes (${suite.hospedes_inclusos || 2} inclusos)</p>
 
-                                    <!-- BOTÃO PARA EXPANDIR / RECOLHER O CALENDÁRIO MENSAL -->
                                     <div class="mb-3">
                                         <button onclick="toggleCalendarioMensal('${suite.id}')" id="btn-toggle-cal-${suite.id}" class="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm">
                                             <span>📅</span> Ver Calendário Mensal de Ocupação 🔽
                                         </button>
                                         
-                                        <!-- Container do Calendário Mensal -->
                                         <div id="container-cal-${suite.id}" class="hidden mt-2 bg-gray-50 p-3 rounded-xl border border-gray-200 shadow-inner"></div>
                                     </div>
 
-                                    <!-- DETALHAMENTO VERTICAL DE OCUPANTES E VALORES -->
                                     ${detalhamentoOcupantesHTML}
 
                                     <div class="border-t border-gray-100 pt-2 mb-3 flex justify-between items-center">
