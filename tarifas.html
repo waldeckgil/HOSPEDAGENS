@@ -382,8 +382,6 @@
             containerPousada.innerHTML = '';
             containerAtracoes.innerHTML = '';
 
-            // Exemplo de estrutura esperada no banco (Array de objetos ou URLs nas colunas fotos_pousada / atracoes_turisticas)
-            // Ajuste conforme os nomes exatos das colunas da sua tabela 'pousadas' no Supabase
             const listaFotosPousada = dadosPousadaCache?.fotos_pousada || dadosPousadaCache?.fotos || [];
             const listaAtracoes = dadosPousadaCache?.atracoes_turisticas || dadosPousadaCache?.atracoes || [];
 
@@ -475,7 +473,6 @@
                 document.getElementById('check-exibir-atracoes').checked = pousada.exibir_atracoes || false;
                 toggleSecaoAtracoes();
 
-                // Renderiza as fotos já cadastradas na base
                 renderizarFotosCadastradas();
             }
 
@@ -484,6 +481,42 @@
 
         async function salvarRegrasPousada() {
             const nomeAtualPousada = document.getElementById('titulo-pousada').innerText || "Minha Pousada";
+
+            // Processar upload de novas fotos da pousada se houver
+            let fotosPousadaArray = dadosPousadaCache?.fotos_pousada || [];
+            const inputFotos = document.getElementById('input-fotos-pousada');
+            if (inputFotos.files && inputFotos.files.length > 0) {
+                const descricoes = document.querySelectorAll('.input-desc-pousada');
+                for (let i = 0; i < inputFotos.files.length; i++) {
+                    const file = inputFotos.files[i];
+                    const legenda = descricoes[i] ? descricoes[i].value : `Foto ${i + 1}`;
+                    const fileName = `${usuarioIdAtual}/pousada_${Date.now()}_${i}_${file.name}`;
+                    
+                    const { data: uploadData, error: uploadError } = await supabaseClient.storage.from('pousadas').upload(fileName, file);
+                    if (!uploadError) {
+                        const { data: { publicUrl } } = supabaseClient.storage.from('pousadas').getPublicUrl(fileName);
+                        fotosPousadaArray.push({ url: publicUrl, legenda: legenda });
+                    }
+                }
+            }
+
+            // Processar upload de novas fotos de atrações se houver
+            let atracoesArray = dadosPousadaCache?.atracoes_turisticas || [];
+            const inputAtracoes = document.getElementById('input-fotos-atracoes');
+            if (inputAtracoes.files && inputAtracoes.files.length > 0) {
+                const descricoesAtracoes = document.querySelectorAll('.input-desc-atracoes');
+                for (let i = 0; i < inputAtracoes.files.length; i++) {
+                    const file = inputAtracoes.files[i];
+                    const legenda = descricoesAtracoes[i] ? descricoesAtracoes[i].value : `Atração ${i + 1}`;
+                    const fileName = `${usuarioIdAtual}/atracao_${Date.now()}_${i}_${file.name}`;
+                    
+                    const { data: uploadData, error: uploadError } = await supabaseClient.storage.from('pousadas').upload(fileName, file);
+                    if (!uploadError) {
+                        const { data: { publicUrl } } = supabaseClient.storage.from('pousadas').getPublicUrl(fileName);
+                        atracoesArray.push({ url: publicUrl, legenda: legenda });
+                    }
+                }
+            }
 
             const dadosAtualizacao = {
                 id: usuarioIdAtual,
@@ -496,11 +529,22 @@
                 valor_pet: document.getElementById('pousada-aceita-pet').value === 'sim' ? (Number(document.getElementById('pousada-valor-pet').value) || 0) : null,
                 valor_hospede_extra: Number(document.getElementById('pousada-valor-hospede-extra').value) || 0,
                 exibir_fotos_pousada: document.getElementById('check-exibir-fotos').checked,
-                exibir_atracoes: document.getElementById('check-exibir-atracoes').checked
+                exibir_atracoes: document.getElementById('check-exibir-atracoes').checked,
+                fotos_pousada: fotosPousadaArray,
+                atracoes_turisticas: atracoesArray
             };
 
             const { error } = await supabaseClient.from('pousadas').upsert(dadosAtualizacao, { onConflict: 'id' });
             if (error) { alert("Erro ao salvar regras da pousada: " + error.message); return; }
+
+            // Atualiza o cache local e limpa os inputs de arquivo
+            dadosPousadaCache = dadosAtualizacao;
+            inputFotos.value = '';
+            inputAtracoes.value = '';
+            document.getElementById('lista-descricoes-fotos').innerHTML = '';
+            document.getElementById('lista-descricoes-atracoes').innerHTML = '';
+            renderizarFotosCadastradas();
+
             mostrarToast("Regras gerais da pousada salvas com sucesso!");
         }
 
@@ -727,7 +771,7 @@
                 const res = await supabaseClient.from('tarifas_especiais').update(dadosRegra).eq('id', idEditando);
                 error = res.error;
             } else {
-                const res = await supabaseClient.from('tarifas_especiais').insert([dadosRegla]);
+                const res = await supabaseClient.from('tarifas_especiais').insert([dadosRegra]);
                 error = res.error;
             }
 
