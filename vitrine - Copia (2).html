@@ -221,7 +221,6 @@
         let pousadaIdGlobal = '';
         let cacheReservas = [];
         let cacheSuites = [];
-        let cacheTarifasEspeciais = [];
         let dadosPousadaGlobal = {};
         let estadoMesCalendario = {};
 
@@ -250,12 +249,6 @@
                 .in('status', ['Aprovada', 'Pendente']);
             cacheReservas = todasReservas || [];
 
-            const { data: todasTarifas } = await supabaseClient
-                .from('tarifas_especiais')
-                .select('*')
-                .eq('pousada_id', pousadaIdGlobal);
-            cacheTarifasEspeciais = todasTarifas || [];
-
             gerarCamposIdadeCriancas();
             filtrarSuitesDisponiveisPorPeriodo();
         }
@@ -263,6 +256,8 @@
         function verificarSecaoPetFiltro() {
             const secaoPet = document.getElementById('secao-pet-filtro');
             const aceitaPet = dadosPousadaGlobal.aceita_pet === true || dadosPousadaGlobal.aceita_pet === 'true' || dadosPousadaGlobal.aceita_pet === 'Sim';
+            
+            // Pega o valor do pet independentemente do nome da coluna exata no banco
             const valorPetNum = Number(dadosPousadaGlobal.valor_pet || dadosPousadaGlobal.taxa_pet || dadosPousadaGlobal.valor_taxa_pet || 0);
 
             if (aceitaPet && valorPetNum > 0) {
@@ -369,50 +364,6 @@
             container.innerHTML = html;
         }
 
-        // Função de cálculo individual do preço do dia considerando as tarifas especiais
-        function calcularPrecoDiaSuite(dataObj, suiteId, precoBaseSuite) {
-            const ano = dataObj.getFullYear();
-            const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
-            const dia = String(dataObj.getDate()).padStart(2, '0');
-            const dataStrYYYYMMDD = `${ano}-${mes}-${dia}`;
-            const diaSemana = dataObj.getDay(); // 0 = Dom, 6 = Sáb
-
-            let precoFinal = precoBaseSuite;
-            const tarifasDaSuite = cacheTarifasEspeciais.filter(t => t.suite_id === null || t.suite_id === suiteId);
-
-            for (let tarifa of tarifasDaSuite) {
-                const inicio = tarifa.data_inicio.split('T')[0];
-                const fim = tarifa.data_fim.split('T')[0];
-
-                if (dataStrYYYYMMDD >= inicio && dataStrYYYYMMDD <= fim) {
-                    let atendeDiaSemana = true;
-                    if (tarifa.dias_semana) {
-                        let diasPermitidos = tarifa.dias_semana;
-                        if (typeof diasPermitidos === 'string') {
-                            try { diasPermitidos = JSON.parse(diasPermitidos); } catch(e){}
-                        }
-                        if (Array.isArray(diasPermitidos)) {
-                            atendeDiaSemana = diasPermitidos.includes(diaSemana);
-                        } else if (typeof diasPermitidos === 'object' && diasPermitidos !== null) {
-                            atendeDiaSemana = diasPermitidos[diaSemana] === true || diasPermitidos[String(diaSemana)] === true;
-                        }
-                    }
-
-                    if (atendeDiaSemana) {
-                        if (tarifa.tipo_ajuste === 'percentual' || tarifa.tipo_ajuste === 'porcentagem') {
-                            precoFinal = precoBaseSuite * (1 + (Number(tarifa.valor_especial) / 100));
-                        } else if (tarifa.tipo_ajuste === 'fixo_acrescimo') {
-                            precoFinal = precoBaseSuite + Number(tarifa.valor_especial);
-                        } else {
-                            precoFinal = Number(tarifa.valor_especial);
-                        }
-                        break;
-                    }
-                }
-            }
-            return precoFinal;
-        }
-
         async function calcularValorTotalEstadiaCompleto(suiteId, checkinStr, checkoutStr, precoBaseDiaria, qtdAdultos, qtdCriancas) {
             const checkin = new Date(checkinStr + 'T00:00:00');
             const checkout = new Date(checkoutStr + 'T00:00:00');
@@ -457,6 +408,14 @@
 
             const valorExtraTotalPorNoite = valorExtraPorNoiteUnitario * totalHospedesExtras;
 
+            const { data: tarifasEspeciais } = await supabaseClient
+                .from('tarifas_especiais')
+                .select('*')
+                .or(`suite_id.eq.${suiteId},suite_id.is.null`)
+                .eq('pousada_id', pousadaIdGlobal)
+                .lte('data_inicio', checkoutStr)
+                .gte('data_fim', checkinStr);
+
             let valorDiariasTotal = 0;
             let temTarifaEspecialAplicada = false;
             let primeiraDiariaAplicada = precoBaseDiaria;
@@ -464,9 +423,37 @@
             let primeiroDiaCalculado = false;
 
             while (dataAtual < checkout) {
-                const precoDaNoite = calcularPrecoDiaSuite(dataAtual, suiteId, precoBaseDiaria);
-                if (precoDaNoite !== precoBaseDiaria) {
-                    temTarifaEspecialAplicada = true;
+                const dataIsoStr = dataAtual.toISOString().split('T')[0];
+                const diaDaSemana = dataAtual.getDay();
+                let precoDaNoite = precoBaseDiaria;
+
+                if (tarifasEspeciais && tarifasEspeciais.length > 0) {
+                    for (let tarifa of tarifasEspeciais) {
+                        if (dataIsoStr >= tarifa.data_inicio && dataIsoStr <= tarifa.data_fim) {
+                            let diasPermitidos = tarifa.dias_semana;
+                            let atendeDiaSemana = true;
+                            
+                            if (diasPermitidos) {
+                                if (Array.isArray(diasPermitidos)) {
+                                    atendeDiaSemana = diasPermitidos.includes(diaDaSemana);
+                                } else if (typeof diasPermitidos === 'object') {
+                                    atendeDiaSemana = diasPermitidos[diaDaSemana] === true || diasPermitidos[String(diaDaSemana)] === true;
+                                }
+                            }
+
+                            if (atendeDiaSemana) {
+                                temTarifaEspecialAplicada = true;
+                                if (tarifa.tipo_ajuste === 'percentual' || tarifa.tipo_ajuste === 'porcentagem') {
+                                    precoDaNoite = precoBaseDiaria * (1 + (Number(tarifa.valor_especial) / 100));
+                                } else if (tarifa.tipo_ajuste === 'fixo_acrescimo') {
+                                    precoDaNoite = precoBaseDiaria + Number(tarifa.valor_especial);
+                                } else {
+                                    precoDaNoite = Number(tarifa.valor_especial);
+                                }
+                                break;
+                            }
+                        }
+                    }
                 }
 
                 if (!primeiroDiaCalculado) {
@@ -546,6 +533,7 @@
                     criancasExtrasBusca++;
                 }
             }
+            const totalOcupantesBusca = qtdAdultos + criancasExtrasBusca;
 
             const novoInicio = new Date(checkinFiltro + 'T00:00:00');
             const novoFim = new Date(checkoutFiltro + 'T00:00:00');
@@ -800,8 +788,6 @@
 
             const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
             const reservasDaSuite = cacheReservas.filter(r => r.suite_id === suiteId);
-            const suiteObj = cacheSuites.find(s => s.id === suiteId);
-            const precoBaseSuite = suiteObj ? (suiteObj.valor_diaria || suiteObj.preco || 150.00) : 150.00;
 
             const primeiroDiaDaSemana = new Date(ano, mes, 1).getDay();
             const totalDiasNoMes = new Date(ano, mes + 1, 0).getDate();
@@ -827,7 +813,6 @@
                 const mesStr = String(mes + 1).padStart(2, '0');
                 const diaStr = String(dia).padStart(2, '0');
                 const dataIso = `${ano}-${mesStr}-${diaStr}`;
-                const dataObjAtual = new Date(ano, mes, dia);
 
                 const ehAnteriorAoCheckin = checkinFiltro && dataIso < checkinFiltro;
                 let ocupado = false;
@@ -841,24 +826,23 @@
                 }
 
                 let corClasse = '';
-                let conteudoCel = '';
+                let iconeOuTexto = '';
                 let tituloTooltip = '';
 
                 if (ehAnteriorAoCheckin || ocupado) {
                     corClasse = 'bg-gray-200 text-gray-400 border border-gray-300 opacity-60';
-                    conteudoCel = `<span class="text-[9px] font-bold line-through">x</span>`;
-                    tituloTooltip = ehAnteriorAoCheckin ? `${dataIso}: Fora do período` : `${dataIso}: Ocupado`;
+                    iconeOuTexto = '-';
+                    tituloTooltip = ehAnteriorAoCheckin ? `${dataIso}: Fora do período de busca` : `${dataIso}: Indisponível`;
                 } else {
-                    const precoDiaCalculado = calcularPrecoDiaSuite(dataObjAtual, suiteId, precoBaseSuite);
-                    corClasse = 'bg-emerald-50 text-emerald-900 border border-emerald-300 font-bold';
-                    conteudoCel = `<span class="text-[8px] opacity-90 font-medium">R$ ${precoDiaCalculado.toFixed(0)}</span>`;
-                    tituloTooltip = `${dataIso}: Disponível - R$ ${precoDiaCalculado.toFixed(2)}`;
+                    corClasse = 'bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold';
+                    iconeOuTexto = '✓';
+                    tituloTooltip = `${dataIso}: Disponível`;
                 }
 
                 html += `
-                    <div class="${corClasse} rounded-md p-1 h-11 flex flex-col items-center justify-center shadow-sm" title="${tituloTooltip}">
-                        <span class="text-[10px] font-bold">${dia}</span>
-                        ${conteudoCel}
+                    <div class="${corClasse} rounded-md p-1 text-[10px] flex flex-col items-center justify-center shadow-sm" title="${tituloTooltip}">
+                        <span class="text-[9px]">${dia}</span>
+                        <span>${iconeOuTexto}</span>
                     </div>
                 `;
             }
