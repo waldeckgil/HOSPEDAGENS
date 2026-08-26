@@ -97,7 +97,8 @@
                                         Habilitar Fotos da Pousada na Vitrine
                                     </label>
                                     <div id="container-upload-fotos" class="hidden space-y-2 mt-2 bg-white p-3 rounded-xl border border-gray-200">
-                                        <label class="block text-[10px] font-bold text-gray-500 uppercase">Selecionar arquivos de fotos:</label>
+                                        <div id="lista-fotos-salvas-pousada"></div>
+                                        <label class="block text-[10px] font-bold text-gray-500 uppercase mt-2">Adicionar novos arquivos de fotos:</label>
                                         <input type="file" id="input-fotos-pousada" multiple accept="image/*" class="w-full text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700" onchange="gerarCamposDescricaoFotos('pousada')">
                                         <div id="lista-descricoes-fotos" class="space-y-1.5 mt-2"></div>
                                     </div>
@@ -110,7 +111,8 @@
                                         Habilitar Atrações Turísticas na Vitrine
                                     </label>
                                     <div id="container-upload-atracoes" class="hidden space-y-2 mt-2 bg-white p-3 rounded-xl border border-gray-200">
-                                        <label class="block text-[10px] font-bold text-gray-500 uppercase">Selecionar fotos das atrações:</label>
+                                        <div id="lista-fotos-salvas-atracoes"></div>
+                                        <label class="block text-[10px] font-bold text-gray-500 uppercase mt-2">Adicionar novas fotos das atrações:</label>
                                         <input type="file" id="input-fotos-atracoes" multiple accept="image/*" class="w-full text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700" onchange="gerarCamposDescricaoFotos('atracoes')">
                                         <div id="lista-descricoes-atracoes" class="space-y-1.5 mt-2"></div>
                                     </div>
@@ -333,6 +335,55 @@
             }
         }
 
+        function renderizarFotosSalvas(tipo, fotosJson) {
+            const containerId = tipo === 'pousada' ? 'lista-fotos-salvas-pousada' : 'lista-fotos-salvas-atracoes';
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            let listaFotos = [];
+            try {
+                listaFotos = typeof fotosJson === 'string' ? JSON.parse(fotosJson) : (fotosJson || []);
+            } catch (e) {
+                listaFotos = [];
+            }
+
+            if (listaFotos.length === 0) {
+                container.innerHTML = '';
+                container.dataset.fotosSalvas = JSON.stringify([]);
+                return;
+            }
+
+            let html = `<div class="mb-3 p-2.5 bg-blue-50 rounded-xl border border-blue-100">
+                <span class="block text-[10px] font-bold text-blue-700 uppercase mb-2">Fotos já salvas no banco (${listaFotos.length}):</span>
+                <div class="space-y-1.5">`;
+
+            listaFotos.forEach((foto, idx) => {
+                html += `
+                    <div class="flex items-center justify-between gap-2 bg-white p-2 rounded-lg border border-blue-200 text-xs">
+                        <a href="${foto.url}" target="_blank" class="text-blue-600 hover:underline truncate flex-1 font-medium" title="Visualizar imagem">
+                            👁️ ${foto.legenda || 'Foto ' + (idx + 1)}
+                        </a>
+                        <button type="button" onclick="removerFotoSalva('${tipo}', ${idx})" class="text-red-600 hover:text-red-800 font-bold px-2 py-0.5 text-xs bg-red-50 rounded border border-red-100">Remover</button>
+                    </div>`;
+            });
+
+            html += `</div></div>`;
+            container.innerHTML = html;
+            container.dataset.fotosSalvas = JSON.stringify(listaFotos);
+        }
+
+        function removerFotoSalva(tipo, index) {
+            const containerId = tipo === 'pousada' ? 'lista-fotos-salvas-pousada' : 'lista-fotos-salvas-atracoes';
+            const container = document.getElementById(containerId);
+            if (!container || !container.dataset.fotosSalvas) return;
+
+            try {
+                let listaFotos = JSON.parse(container.dataset.fotosSalvas);
+                listaFotos.splice(index, 1);
+                renderizarFotosSalvas(tipo, listaFotos);
+            } catch (e) {}
+        }
+
         function toggleAdicionalCustomizado(suiteId) {
             const container = document.getElementById(`container-customizado-${suiteId}`);
             const checkbox = document.getElementById(`chk-customizado-${suiteId}`);
@@ -380,8 +431,11 @@
 
                 document.getElementById('check-exibir-fotos').checked = pousada.exibir_fotos_pousada || false;
                 toggleSecaoFotos();
+                renderizarFotosSalvas('pousada', pousada.fotos_pousada);
+
                 document.getElementById('check-exibir-atracoes').checked = pousada.exibir_atracoes || false;
                 toggleSecaoAtracoes();
+                renderizarFotosSalvas('atracoes', pousada.atracoes_turisticas);
             }
 
             await carregarSuitesETarifas();
@@ -389,6 +443,64 @@
 
         async function salvarRegrasPousada() {
             const nomeAtualPousada = document.getElementById('titulo-pousada').innerText || "Minha Pousada";
+
+            // Recuperar fotos já salvas que foram mantidas/editadas
+            let fotosPousadaArray = [];
+            try {
+                const containerPousada = document.getElementById('lista-fotos-salvas-pousada');
+                if (containerPousada && containerPousada.dataset.fotosSalvas) {
+                    fotosPousadaArray = JSON.parse(containerPousada.dataset.fotosSalvas);
+                }
+            } catch (e) {}
+
+            // Processar upload de novas fotos da pousada selecionadas via input
+            const inputFotos = document.getElementById('input-fotos-pousada');
+            if (inputFotos && inputFotos.files && inputFotos.files.length > 0) {
+                const inputsDesc = document.querySelectorAll('.input-desc-pousada');
+                for (let i = 0; i < inputFotos.files.length; i++) {
+                    const file = inputFotos.files[i];
+                    const legenda = inputsDesc[i] ? inputsDesc[i].value : `Foto da pousada - ${nomeAtualPousada}`;
+                    const filePath = `${usuarioIdAtual}/pousada_${Date.now()}_${i}_${file.name}`;
+                    
+                    const { data: uploadData, error: uploadError } = await supabaseClient.storage
+                        .from('suites-fotos')
+                        .upload(filePath, file, { upsert: true });
+
+                    if (!uploadError) {
+                        const { data: { publicUrl } } = supabaseClient.storage.from('suites-fotos').getPublicUrl(filePath);
+                        fotosPousadaArray.push({ url: publicUrl, legenda: legenda });
+                    }
+                }
+            }
+
+            // Recuperar fotos de atrações turísticas já salvas que foram mantidas/editadas
+            let fotosAtracoesArray = [];
+            try {
+                const containerAtracoes = document.getElementById('lista-fotos-salvas-atracoes');
+                if (containerAtracoes && containerAtracoes.dataset.fotosSalvas) {
+                    fotosAtracoesArray = JSON.parse(containerAtracoes.dataset.fotosSalvas);
+                }
+            } catch (e) {}
+
+            // Processar upload de novas fotos de atrações turísticas selecionadas via input
+            const inputAtracoes = document.getElementById('input-fotos-atracoes');
+            if (inputAtracoes && inputAtracoes.files && inputAtracoes.files.length > 0) {
+                const inputsDescAtra = document.querySelectorAll('.input-desc-atracoes');
+                for (let i = 0; i < inputAtracoes.files.length; i++) {
+                    const file = inputAtracoes.files[i];
+                    const legenda = inputsDescAtra[i] ? inputsDescAtra[i].value : `Atração Turística`;
+                    const filePath = `${usuarioIdAtual}/atracao_${Date.now()}_${i}_${file.name}`;
+                    
+                    const { data: uploadData, error: uploadError } = await supabaseClient.storage
+                        .from('suites-fotos')
+                        .upload(filePath, file, { upsert: true });
+
+                    if (!uploadError) {
+                        const { data: { publicUrl } } = supabaseClient.storage.from('suites-fotos').getPublicUrl(filePath);
+                        fotosAtracoesArray.push({ url: publicUrl, legenda: legenda });
+                    }
+                }
+            }
 
             const dadosAtualizacao = {
                 id: usuarioIdAtual,
@@ -401,12 +513,16 @@
                 valor_pet: document.getElementById('pousada-aceita-pet').value === 'sim' ? (Number(document.getElementById('pousada-valor-pet').value) || 0) : null,
                 valor_hospede_extra: Number(document.getElementById('pousada-valor-hospede-extra').value) || 0,
                 exibir_fotos_pousada: document.getElementById('check-exibir-fotos').checked,
-                exibir_atracoes: document.getElementById('check-exibir-atracoes').checked
+                fotos_pousada: fotosPousadaArray,
+                exibir_atracoes: document.getElementById('check-exibir-atracoes').checked,
+                atracoes_turisticas: fotosAtracoesArray
             };
 
             const { error } = await supabaseClient.from('pousadas').upsert(dadosAtualizacao, { onConflict: 'id' });
             if (error) { alert("Erro ao salvar regras da pousada: " + error.message); return; }
-            mostrarToast("Regras gerais da pousada salvas com sucesso!");
+            
+            mostrarToast("Regras gerais e mídias da pousada salvas com sucesso!");
+            protegerPagina();
         }
 
         async function carregarSuitesETarifas() {
