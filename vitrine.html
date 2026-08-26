@@ -176,7 +176,7 @@
                     </div>
                 </div>
 
-                <!-- Bloco Condicional de Pet (Exibido apenas se aceita_pet for true nas configurações) -->
+                <!-- Bloco Condicional de Pet -->
                 <div id="secao-pet-modal" class="hidden bg-amber-50 border border-amber-200 p-3 rounded-xl flex items-center justify-between">
                     <div>
                         <span class="font-bold text-amber-900 text-xs block">🐾 Vai trazer um Pet?</span>
@@ -228,7 +228,6 @@
         document.getElementById('filtro-checkin').setAttribute('min', hojeISO);
         document.getElementById('filtro-checkout').setAttribute('min', hojeISO);
 
-        // Predefinição de datas para teste rápido (ex: 31/08/2026 a 02/09/2026)
         document.getElementById('filtro-checkin').value = '2026-08-31';
         document.getElementById('filtro-checkout').value = '2026-09-02';
 
@@ -302,16 +301,21 @@
         function abrirModalAtracoes() {
             const grid = document.getElementById('grid-atracoes');
             const atracoes = dadosPousadaGlobal.atracoes_turisticas || [];
+            
             grid.innerHTML = atracoes.map(a => {
-                const fotoAtracao = typeof a === 'object' && a !== null ? (a.foto || a.imagem || '') : '';
+                // Correção robusta para lidar com diferentes nomenclaturas de chaves de imagem e texto nas atrações
+                const fotoAtracao = typeof a === 'object' && a !== null ? (a.foto || a.imagem || a.url || '') : '';
                 const tituloAtracao = typeof a === 'object' && a !== null ? (a.titulo || a.nome || 'Atração') : 'Atração';
-                const descAtracao = typeof a === 'object' && a !== null ? (a.descricao || '') : '';
+                const descAtracao = typeof a === 'object' && a !== null ? (a.descricao || a.detalhes || '') : '';
+                
                 return `
                     <div class="bg-gray-50 border rounded-xl overflow-hidden shadow flex flex-col">
-                        ${fotoAtracao ? `<div class="h-36 w-full"><img src="${fotoAtracao}" class="w-full h-full object-cover"></div>` : ''}
-                        <div class="p-3">
-                            <h4 class="font-extrabold text-blue-900 text-sm mb-1">${tituloAtracao}</h4>
-                            <p class="text-xs text-gray-600">${descAtracao}</p>
+                        ${fotoAtracao ? `<div class="h-40 w-full"><img src="${fotoAtracao}" alt="${tituloAtracao}" class="w-full h-full object-cover"></div>` : ''}
+                        <div class="p-3.5 flex flex-col justify-between flex-grow">
+                            <div>
+                                <h4 class="font-extrabold text-blue-900 text-sm mb-1">${tituloAtracao}</h4>
+                                <p class="text-xs text-gray-600">${descAtracao}</p>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -558,7 +562,6 @@
                     ? `<button onclick="alert('Este período selecionado possui dias ocupados. Consulte o calendário mensal abaixo para escolher um período livre.')" class="w-full bg-gray-400 text-white py-3 md:py-3.5 px-4 rounded-xl font-bold transition shadow-md text-center text-sm md:text-base cursor-not-allowed">Período Indisponível</button>`
                     : `<button onclick="abrirModal('${suite.id}')" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 md:py-3.5 px-4 rounded-xl font-bold transition shadow-md text-center text-sm md:text-base">Solicitar Reserva</button>`;
 
-                // Montagem do detalhamento descritivo de hóspedes e valores antes do total estimado
                 let detalhamentoOcupantesHTML = `
                     <div class="bg-blue-50/70 border border-blue-100 p-2.5 rounded-xl mb-3 text-xs space-y-1 text-gray-700">
                         <div class="flex justify-between font-semibold">
@@ -809,7 +812,6 @@
             document.getElementById('checkin').value = checkinFiltro;
             document.getElementById('checkout').value = checkoutFiltro;
 
-            // VALIDAÇÃO CONDICIONAL DO PET: Só exibe se o gestor configurou aceita_pet como true
             const secaoPet = document.getElementById('secao-pet-modal');
             if (dadosPousadaGlobal.aceita_pet === true || dadosPousadaGlobal.aceita_pet === 'true') {
                 secaoPet.classList.remove('hidden');
