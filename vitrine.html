@@ -72,7 +72,7 @@
                     <span id="label-valor-pet-filtro" class="text-[11px] text-amber-700">Taxa adicional aplicável.</span>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" id="check-trazer-pet-filtro" class="sr-only peer">
+                    <input type="checkbox" id="check-trazer-pet-filtro" onchange="filtrarSuitesDisponiveisPorPeriodo()" class="sr-only peer">
                     <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
                 </label>
             </div>
@@ -255,9 +255,14 @@
 
         function verificarSecaoPetFiltro() {
             const secaoPet = document.getElementById('secao-pet-filtro');
-            if (dadosPousadaGlobal.aceita_pet === true || dadosPousadaGlobal.aceita_pet === 'true' || dadosPousadaGlobal.aceita_pet === 'Sim') {
+            const aceitaPet = dadosPousadaGlobal.aceita_pet === true || dadosPousadaGlobal.aceita_pet === 'true' || dadosPousadaGlobal.aceita_pet === 'Sim';
+            
+            // Pega o valor do pet independentemente do nome da coluna exata no banco
+            const valorPetNum = Number(dadosPousadaGlobal.valor_pet || dadosPousadaGlobal.taxa_pet || dadosPousadaGlobal.valor_taxa_pet || 0);
+
+            if (aceitaPet && valorPetNum > 0) {
                 secaoPet.classList.remove('hidden');
-                document.getElementById('label-valor-pet-filtro').innerText = `Taxa única de R$ ${Number(dadosPousadaGlobal.valor_pet || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+                document.getElementById('label-valor-pet-filtro').innerText = `Taxa única de R$ ${valorPetNum.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
             } else {
                 secaoPet.classList.add('hidden');
             }
@@ -352,7 +357,7 @@
                 html += `
                     <div>
                         <label class="block text-[10px] text-gray-600 font-bold">Criança ${i} (anos)</label>
-                        <input type="number" min="0" max="17" value="${i === 1 ? 3 : 2}" id="idade-crianca-${i}" onchange="filtrarSuitesDisponiveisPorPeriodo()" class="w-full p-1.5 border rounded-lg text-xs bg-white font-bold text-gray-800">
+                        <input type="number" min="0" max="17" value="${i === 1 ? 6 : 2}" id="idade-crianca-${i}" onchange="filtrarSuitesDisponiveisPorPeriodo()" class="w-full p-1.5 border rounded-lg text-xs bg-white font-bold text-gray-800">
                     </div>
                 `;
             }
@@ -385,7 +390,7 @@
                     detalhesCriancasArr.push(`Criança (${idade}a - Grátis)`);
                     resumoItensOcupantesArr.push({ texto: `Criança (${idade}a)`, valorStr: 'Grátis' });
                 } else {
-                    criancasConsideradasExtras++; // Criança pagante conta como hóspede extra
+                    criancasConsideradasExtras++;
                     detalhesCriancasArr.push(`Criança (${idade}a - Pagante)`);
                     resumoItensOcupantesArr.push({ texto: `Criança (${idade}a)`, valorStr: 'Pagante' });
                 }
@@ -665,7 +670,7 @@
                 const vaiTrazerPet = aceitaPetGlobal && checkPetFiltro && checkPetFiltro.checked;
                 let valorPetTotal = 0;
                 if (vaiTrazerPet) {
-                    valorPetTotal = Number(dadosPousadaGlobal.valor_pet) || 0;
+                    valorPetTotal = Number(dadosPousadaGlobal.valor_pet || dadosPousadaGlobal.taxa_pet || dadosPousadaGlobal.valor_taxa_pet || 0);
                     detalhamentoOcupantesHTML += `
                         <div class="flex justify-between pl-2 text-amber-800 font-medium border-t border-blue-100 pt-1 mt-1">
                             <span>• Taxa de Pet:</span>
@@ -928,7 +933,7 @@
             const aceitaPetGlobal = dadosPousadaGlobal.aceita_pet === true || dadosPousadaGlobal.aceita_pet === 'true' || dadosPousadaGlobal.aceita_pet === 'Sim';
             let valorPetTotal = 0;
             if (aceitaPetGlobal && checkPetFiltro && checkPetFiltro.checked) {
-                valorPetTotal = Number(dadosPousadaGlobal.valor_pet) || 0;
+                valorPetTotal = Number(dadosPousadaGlobal.valor_pet || dadosPousadaGlobal.taxa_pet || dadosPousadaGlobal.valor_taxa_pet || 0);
             }
 
             if (valorPetTotal > 0) {
@@ -972,7 +977,7 @@
             const checkPetFiltro = document.getElementById('check-trazer-pet-filtro');
             let valorPetTotal = 0;
             if (aceitaPetGlobal && checkPetFiltro && checkPetFiltro.checked) {
-                valorPetTotal = Number(dadosPousadaGlobal.valor_pet) || 0;
+                valorPetTotal = Number(dadosPousadaGlobal.valor_pet || dadosPousadaGlobal.taxa_pet || dadosPousadaGlobal.valor_taxa_pet || 0);
             }
 
             const valorTotalFinal = calc.valorTotalGeral + valorPetTotal;
