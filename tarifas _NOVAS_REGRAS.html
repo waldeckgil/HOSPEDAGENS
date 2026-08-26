@@ -42,80 +42,75 @@
 
         <!-- CORPO DA PÁGINA -->
         <main class="p-4 sm:p-6 md:p-8 flex-1 overflow-y-auto">
-            <div class="max-w-7xl mx-auto space-y-6">
+            <div class="max-w-5xl mx-auto space-y-8">
                 
-                <!-- GRID SUPERIOR: REGRAS GERAIS E SUÍTES (Lado a Lado em Telas Grandes) -->
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- SEÇÃO 0: REGRAS GERAIS E POLÍTICAS DA POUSADA -->
+                <div class="bg-white p-5 sm:p-8 rounded-3xl shadow-md border border-gray-200">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2">
+                        <h2 class="text-base sm:text-xl font-bold text-blue-600 flex items-center gap-2">
+                            <i class="fa-solid fa-hotel"></i> Regras e Políticas Gerais da Pousada
+                        </h2>
+                    </div>
+                    <p class="text-xs sm:text-sm text-gray-600 mb-6">Defina os horários padrão, política de pets, diária mínima e valores globais aplicáveis ao estabelecimento.</p>
                     
-                    <!-- SEÇÃO 0: REGRAS GERAIS DA POUSADA (Ocupa 5 colunas no LG) -->
-                    <div class="lg:col-span-5 bg-white p-5 sm:p-6 rounded-3xl shadow-md border border-gray-200 flex flex-col justify-between">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-200 mb-6">
                         <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <h2 class="text-base sm:text-lg font-bold text-blue-600 flex items-center gap-2">
-                                    <i class="fa-solid fa-hotel"></i> Regras da Pousada
-                                </h2>
-                            </div>
-                            <p class="text-xs text-gray-500 mb-4">Políticas gerais e taxas globais do estabelecimento.</p>
-                            
-                            <div class="grid grid-cols-2 gap-3 bg-gray-50 p-4 rounded-2xl border border-gray-200 mb-4">
-                                <div>
-                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Check-in</label>
-                                    <input type="time" id="pousada-checkin" class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs sm:text-sm">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Check-out</label>
-                                    <input type="time" id="pousada-checkout" class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs sm:text-sm">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Diária Mín.</label>
-                                    <input type="number" min="1" id="pousada-diaria-minima" placeholder="Ex: 1" class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs sm:text-sm">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Aceita Pet?</label>
-                                    <select id="pousada-aceita-pet" onchange="alternarCampoPet()" class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs sm:text-sm">
-                                        <option value="nao">Não</option>
-                                        <option value="sim">Sim</option>
-                                    </select>
-                                </div>
-                                <div id="container-valor-pet" class="hidden col-span-2">
-                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Valor Adicional Pet (R$)</label>
-                                    <input type="number" step="0.01" id="pousada-valor-pet" placeholder="Ex: 40.00" class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs sm:text-sm">
-                                </div>
-                                <div class="col-span-2">
-                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Hóspede Extra Global (R$)</label>
-                                    <input type="number" step="0.01" id="pousada-valor-hospede-extra" placeholder="Ex: 50.00" class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs sm:text-sm">
-                                </div>
-                            </div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Horário de Check-in</label>
+                            <input type="time" id="pousada-checkin" class="w-full p-3 border rounded-xl font-medium bg-white text-sm transition-colors">
                         </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Horário de Check-out</label>
+                            <input type="time" id="pousada-checkout" class="w-full p-3 border rounded-xl font-medium bg-white text-sm transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Diária Mínima (Noites)</label>
+                            <input type="number" min="1" id="pousada-diaria-minima" placeholder="Ex: 1 ou 2" class="w-full p-3 border rounded-xl font-medium bg-white text-sm transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Aceita Pet?</label>
+                            <select id="pousada-aceita-pet" onchange="alternarCampoPet()" class="w-full p-3 border rounded-xl font-medium bg-white text-sm transition-colors">
+                                <option value="nao">Não</option>
+                                <option value="sim">Sim</option>
+                            </select>
+                        </div>
+                        <div id="container-valor-pet" class="hidden">
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Valor Adicional Pet (R$)</label>
+                            <input type="number" step="0.01" id="pousada-valor-pet" placeholder="Ex: 40.00" class="w-full p-3 border rounded-xl font-medium bg-white text-sm transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Valor Hóspede Extra Global (R$)</label>
+                            <input type="number" step="0.01" id="pousada-valor-hospede-extra" placeholder="Ex: 50.00" class="w-full p-3 border rounded-xl font-medium bg-white text-sm transition-colors">
+                        </div>
+                    </div>
 
-                        <button type="button" onclick="salvarRegrasPousada()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl transition text-xs sm:text-sm shadow-md">
+                    <div class="flex justify-end">
+                        <button type="button" onclick="salvarRegrasPousada()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition text-sm shadow-md">
                             Salvar Regras da Pousada
                         </button>
                     </div>
-
-                    <!-- SEÇÃO 1: VALOR DA DIÁRIA E REGRAS POR SUÍTE (Ocupa 7 colunas no LG) -->
-                    <div class="lg:col-span-7 bg-white p-5 sm:p-6 rounded-3xl shadow-md border border-gray-200">
-                        <h2 class="text-base sm:text-lg font-bold text-blue-600 mb-1 flex items-center gap-2">
-                            <i class="fa-solid fa-tag"></i> Tarifas e Capacidade por Suíte
-                        </h2>
-                        <p class="text-xs text-gray-500 mb-4">Ajuste valores, capacidade e regras de hóspedes extras por quarto.</p>
-                        
-                        <div id="lista-suites-tarifas" class="space-y-4 max-h-[500px] overflow-y-auto pr-1">
-                            <p class="text-gray-500 text-sm">Carregando suítes...</p>
-                        </div>
-                    </div>
-
                 </div>
 
-                <!-- SEÇÃO 2: TARIFAS ESPECIAIS (Largura Total abaixo) -->
+                <!-- SEÇÃO 1: VALOR DA DIÁRIA E REGRAS POR SUÍTE -->
+                <div class="bg-white p-5 sm:p-8 rounded-3xl shadow-md border border-gray-200">
+                    <h2 class="text-base sm:text-xl font-bold text-blue-600 mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-tag"></i> 1. Tarifas e Regras Individuais por Suíte
+                    </h2>
+                    <p class="text-xs sm:text-sm text-gray-600 mb-6">Defina o valor base da diária, a capacidade máxima de hóspedes e o adicional customizado de cada suíte.</p>
+                    
+                    <div id="lista-suites-tarifas" class="space-y-6">
+                        <p class="text-gray-500 text-sm">Carregando suítes...</p>
+                    </div>
+                </div>
+
+                <!-- SEÇÃO 2: TARIFAS ESPECIAIS (PERCENTUAL / DIAS DA SEMANA / PERÍODOS) -->
                 <div class="bg-white p-5 sm:p-8 rounded-3xl shadow-md border border-gray-200">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2">
                         <h2 id="titulo-form-regra" class="text-base sm:text-xl font-bold text-blue-600 flex items-center gap-2">
-                            <i class="fa-solid fa-sliders"></i> Regras de Tarifas e Percentuais Especiais
+                            <i class="fa-solid fa-sliders"></i> 2. Regras de Tarifas e Percentuais Especiais
                         </h2>
                         <button id="btn-cancelar-edicao" onclick="cancelarEdicao()" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1.5 px-4 rounded-xl text-xs transition">Cancelar Edição</button>
                     </div>
-                    <p class="text-xs sm:text-sm text-gray-600 mb-6">Defina acréscimos percentuais ou valores fixos para períodos ou dias específicos.</p>
+                    <p class="text-xs sm:text-sm text-gray-600 mb-6">Defina acréscimos percentuais ou valores fixos para períodos específicos.</p>
                     
                     <form id="form-tarifa-especial" class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-200 mb-6">
                         <input type="hidden" id="tarifa-editando-id" value="">
@@ -268,6 +263,7 @@
             }
         }
 
+        // Função para alternar a exibição do link de adicional customizado por suíte
         function toggleAdicionalCustomizado(suiteId) {
             const container = document.getElementById(`container-customizado-${suiteId}`);
             const checkbox = document.getElementById(`chk-customizado-${suiteId}`);
@@ -358,41 +354,53 @@
                 const hiddenClass = suite.usa_adicional_customizado ? '' : 'hidden';
 
                 containerSuites.innerHTML += `
-                    <div class="p-4 bg-gray-50 rounded-2xl border border-gray-200 space-y-3">
-                        <div class="flex justify-between items-center">
-                            <h4 class="font-bold text-gray-900 text-sm sm:text-base">${suite.nome || 'Suíte'}</h4>
-                            <span class="text-[11px] text-gray-500 bg-white px-2.5 py-1 rounded-lg border">Status: ${suite.status || 'Disponível'}</span>
-                        </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white p-3 rounded-xl border border-gray-200">
+                    <div class="p-5 bg-gray-50 rounded-2xl border border-gray-200 space-y-4">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
                             <div>
-                                <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Diária (R$)</label>
-                                <input type="number" step="0.01" id="valor-suite-${suite.id}" value="${suite.valor_diaria || ''}" placeholder="0.00" class="p-2 w-full border rounded-xl font-bold bg-white text-xs sm:text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Máx. Hóspedes</label>
-                                <input type="number" min="1" id="capacidade-suite-${suite.id}" value="${suite.capacidade_hospedes || ''}" placeholder="Ex: 4" class="p-2 w-full border rounded-xl font-medium bg-white text-xs sm:text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Inclusos Base</label>
-                                <input type="number" min="1" id="inclusos-suite-${suite.id}" value="${suite.hospedes_inclusos || 2}" placeholder="Ex: 2" class="p-2 w-full border rounded-xl font-medium bg-white text-xs sm:text-sm">
+                                <h4 class="font-bold text-gray-900 text-base">${suite.nome || 'Suíte'}</h4>
+                                <p class="text-xs text-gray-500">Status: ${suite.status || 'Disponível'}</p>
                             </div>
                         </div>
 
-                        <div class="space-y-1.5">
-                            <label class="flex items-center gap-2 cursor-pointer text-[11px] font-bold text-blue-600 hover:text-blue-800 w-fit">
-                                <input type="checkbox" id="chk-customizado-${suite.id}" ${usaCustom} onchange="toggleAdicionalCustomizado('${suite.id}')" class="w-3.5 h-3.5 text-blue-600 rounded">
-                                <span>Usar adicional extra customizado para esta suíte</span>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded-xl border border-gray-200">
+                            <!-- Valor da Diária -->
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Valor Diária Padrão (R$)</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-3 text-xs font-bold text-gray-500">R$</span>
+                                    <input type="number" step="0.01" id="valor-suite-${suite.id}" value="${suite.valor_diaria || ''}" placeholder="0.00" class="pl-9 p-2.5 w-full border rounded-xl font-bold bg-white text-sm">
+                                </div>
+                            </div>
+
+                            <!-- Capacidade Máxima de Hóspedes -->
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Máx. Hóspedes (Capacidade)</label>
+                                <input type="number" min="1" id="capacidade-suite-${suite.id}" value="${suite.capacidade_hospedes || ''}" placeholder="Ex: 4" class="p-2.5 w-full border rounded-xl font-medium bg-white text-sm">
+                            </div>
+
+                            <!-- Hóspedes Inclusos no Valor Base -->
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Hóspedes Inclusos no Valor</label>
+                                <input type="number" min="1" id="inclusos-suite-${suite.id}" value="${suite.hospedes_inclusos || 2}" placeholder="Ex: 2" class="p-2.5 w-full border rounded-xl font-medium bg-white text-sm">
+                            </div>
+                        </div>
+
+                        <!-- Link / Opção de Adicional Customizado -->
+                        <div class="space-y-2">
+                            <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-blue-600 hover:text-blue-800 w-fit">
+                                <input type="checkbox" id="chk-customizado-${suite.id}" ${usaCustom} onchange="toggleAdicionalCustomizado('${suite.id}')" class="w-4 h-4 text-blue-600 rounded">
+                                <span>Definir adicional de hóspede extra customizado para esta suíte (Diferente do padrão geral)</span>
                             </label>
 
-                            <div id="container-customizado-${suite.id}" class="${hiddenClass}">
-                                <input type="number" step="0.01" id="valor-customizado-${suite.id}" value="${suite.valor_hospede_extra_customizado || ''}" placeholder="Valor adicional extra (R$)" class="p-2 w-full sm:w-1/2 border rounded-xl font-medium bg-white text-xs sm:text-sm">
+                            <div id="container-customizado-${suite.id}" class="${hiddenClass} pt-2">
+                                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Valor Adicional Customizado (R$ ou %)</label>
+                                <input type="number" step="0.01" id="valor-customizado-${suite.id}" value="${suite.valor_hospede_extra_customizado || ''}" placeholder="Ex: 60.00" class="p-2.5 w-full md:w-1/3 border rounded-xl font-medium bg-white text-sm">
                             </div>
                         </div>
 
-                        <div class="flex justify-end pt-1 border-t border-gray-200">
-                            <button onclick="salvarRegrasSuite('${suite.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition shadow-sm">
-                                Salvar Suíte
+                        <div class="flex justify-end pt-2 border-t border-gray-200">
+                            <button onclick="salvarRegrasSuite('${suite.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition shadow-sm">
+                                Salvar Configurações da Suíte
                             </button>
                         </div>
                     </div>
@@ -433,7 +441,7 @@
                 return;
             }
 
-            const nomesDias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+            const nomesDias = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
 
             tarifasCache.forEach(t => {
                 let nomeSuiteObj = "Todas as Suítes";
@@ -448,7 +456,7 @@
 
                 if (t.dias_semana && t.dias_semana.length > 0) {
                     const diasStr = t.dias_semana.map(d => nomesDias[d]).join(', ');
-                    textoRegra += `<br><span class="text-[11px] text-gray-500">Dias: ${diasStr}</span>`;
+                    textoRegra += `<br><span class="text-xs text-gray-500">Dias: ${diasStr}</span>`;
                 }
 
                 tbody.innerHTML += `
@@ -494,7 +502,7 @@
             document.getElementById('form-tarifa-especial').reset();
             document.getElementById('tarifa-editando-id').value = '';
             alternarTipoAjuste();
-            document.getElementById('titulo-form-regra').innerText = "Regras de Tarifas e Percentuais Especiais";
+            document.getElementById('titulo-form-regra').innerText = "2. Regras de Tarifas e Percentuais Especiais";
             document.getElementById('btn-submit-regra').innerText = "+ Salvar Regra de Tarifa Especial";
             document.getElementById('btn-cancelar-edicao').classList.add('hidden');
         }
