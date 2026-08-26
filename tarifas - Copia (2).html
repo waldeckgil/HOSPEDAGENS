@@ -55,7 +55,7 @@
                                     <i class="fa-solid fa-hotel"></i> Regras da Pousada
                                 </h2>
                             </div>
-                            <p class="text-xs text-gray-500 mb-4">Políticas gerais, taxas globais e mídias do estabelecimento.</p>
+                            <p class="text-xs text-gray-500 mb-4">Políticas gerais e taxas globais do estabelecimento.</p>
                             
                             <div class="grid grid-cols-2 gap-3 bg-gray-50 p-4 rounded-2xl border border-gray-200 mb-4">
                                 <div>
@@ -71,10 +71,6 @@
                                     <input type="number" min="1" id="pousada-diaria-minima" placeholder="Ex: 1" class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs sm:text-sm">
                                 </div>
                                 <div>
-                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Idade Criança Grátis</label>
-                                    <input type="number" min="0" max="18" id="pousada-idade-crianca" placeholder="Ex: 5" class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs sm:text-sm" title="Até que idade a criança não paga?">
-                                </div>
-                                <div>
                                     <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Aceita Pet?</label>
                                     <select id="pousada-aceita-pet" onchange="alternarCampoPet()" class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs sm:text-sm">
                                         <option value="nao">Não</option>
@@ -88,32 +84,6 @@
                                 <div class="col-span-2">
                                     <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Hóspede Extra Global (R$)</label>
                                     <input type="number" step="0.01" id="pousada-valor-hospede-extra" placeholder="Ex: 50.00" class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs sm:text-sm">
-                                </div>
-
-                                <!-- BLOCO: HABILITAR FOTOS DA POUSADA -->
-                                <div class="col-span-2 pt-2 border-t border-gray-200">
-                                    <label class="flex items-center gap-2 cursor-pointer font-bold text-xs text-gray-700 mb-2">
-                                        <input type="checkbox" id="check-exibir-fotos" class="w-4 h-4 text-blue-600 rounded" onchange="toggleSecaoFotos()">
-                                        Habilitar Fotos da Pousada na Vitrine
-                                    </label>
-                                    <div id="container-upload-fotos" class="hidden space-y-2 mt-2 bg-white p-3 rounded-xl border border-gray-200">
-                                        <label class="block text-[10px] font-bold text-gray-500 uppercase">Selecionar arquivos de fotos:</label>
-                                        <input type="file" id="input-fotos-pousada" multiple accept="image/*" class="w-full text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700" onchange="gerarCamposDescricaoFotos('pousada')">
-                                        <div id="lista-descricoes-fotos" class="space-y-1.5 mt-2"></div>
-                                    </div>
-                                </div>
-
-                                <!-- BLOCO: HABILITAR ATRAÇÕES TURÍSTICAS -->
-                                <div class="col-span-2 pt-2 border-t border-gray-200">
-                                    <label class="flex items-center gap-2 cursor-pointer font-bold text-xs text-gray-700 mb-2">
-                                        <input type="checkbox" id="check-exibir-atracoes" class="w-4 h-4 text-blue-600 rounded" onchange="toggleSecaoAtracoes()">
-                                        Habilitar Atrações Turísticas na Vitrine
-                                    </label>
-                                    <div id="container-upload-atracoes" class="hidden space-y-2 mt-2 bg-white p-3 rounded-xl border border-gray-200">
-                                        <label class="block text-[10px] font-bold text-gray-500 uppercase">Selecionar fotos das atrações:</label>
-                                        <input type="file" id="input-fotos-atracoes" multiple accept="image/*" class="w-full text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700" onchange="gerarCamposDescricaoFotos('atracoes')">
-                                        <div id="lista-descricoes-atracoes" class="space-y-1.5 mt-2"></div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -240,7 +210,7 @@
                 <p id="modal-texto-exclusao" class="text-sm text-gray-600">Deseja realmente remover esta regra?</p>
             </div>
             <div class="flex justify-center gap-3 pt-2">
-                <button type="button" onclick="fecharModalExclusao()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-5 py-2.5 rounded-xl text-sm">Cancelar</button>
+                <button type="button" onclick="fecharModalExclusao()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-5 py-2.5 rounded-xl text-sm">Cancelar</th>
                 <button type="button" id="btn-confirmar-exclusao" class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow-md">Sim, Excluir</button>
             </div>
         </div>
@@ -298,41 +268,6 @@
             }
         }
 
-        function toggleSecaoFotos() {
-            const ativo = document.getElementById('check-exibir-fotos').checked;
-            document.getElementById('container-upload-fotos').classList.toggle('hidden', !ativo);
-        }
-
-        function toggleSecaoAtracoes() {
-            const ativo = document.getElementById('check-exibir-atracoes').checked;
-            document.getElementById('container-upload-atracoes').classList.toggle('hidden', !ativo);
-        }
-
-        function gerarCamposDescricaoFotos(tipo) {
-            const inputId = tipo === 'pousada' ? 'input-fotos-pousada' : 'input-fotos-atracoes';
-            const containerId = tipo === 'pousada' ? 'lista-descricoes-fotos' : 'lista-descricoes-atracoes';
-            const inputFiles = document.getElementById(inputId);
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
-
-            if (inputFiles.files.length > 0) {
-                Array.from(inputFiles.files).forEach((file, index) => {
-                    const divItem = document.createElement('div');
-                    divItem.className = 'flex items-center gap-2 bg-gray-50 p-2 rounded-lg border border-gray-200';
-                    
-                    const nomePousadaAtual = document.getElementById('titulo-pousada').innerText || "Pousada";
-                    const sugestaoPadrao = tipo === 'pousada' ? `Veja as fotos da nossa pousada - ${nomePousadaAtual}` : `Atração Turística: ${file.name.split('.')[0]}`;
-
-                    divItem.innerHTML = `
-                        <span class="text-[10px] font-bold text-blue-600 truncate w-1/3">📷 ${file.name}</span>
-                        <input type="text" value="${sugestaoPadrao}" data-index="${index}" placeholder="Nome do local / Legenda" 
-                               class="input-desc-${tipo} w-2/3 p-1.5 text-xs border rounded bg-white focus:outline-none focus:border-blue-500" required>
-                    `;
-                    container.appendChild(divItem);
-                });
-            }
-        }
-
         function toggleAdicionalCustomizado(suiteId) {
             const container = document.getElementById(`container-customizado-${suiteId}`);
             const checkbox = document.getElementById(`chk-customizado-${suiteId}`);
@@ -367,7 +302,6 @@
                 document.getElementById('pousada-checkin').value = pousada.horario_checkin || '';
                 document.getElementById('pousada-checkout').value = pousada.horario_checkout || '';
                 document.getElementById('pousada-diaria-minima').value = pousada.diaria_minima || '';
-                document.getElementById('pousada-idade-crianca').value = pousada.idade_limite_crianca || '';
                 
                 const aceitaPetVal = pousada.aceita_pet ? 'sim' : 'nao';
                 document.getElementById('pousada-aceita-pet').value = aceitaPetVal;
@@ -377,37 +311,32 @@
                     document.getElementById('pousada-valor-pet').value = pousada.valor_pet || '';
                 }
                 document.getElementById('pousada-valor-hospede-extra').value = pousada.valor_hospede_extra || '';
-
-                document.getElementById('check-exibir-fotos').checked = pousada.exibir_fotos_pousada || false;
-                toggleSecaoFotos();
-                document.getElementById('check-exibir-atracoes').checked = pousada.exibir_atracoes || false;
-                toggleSecaoAtracoes();
             }
 
             await carregarSuitesETarifas();
         }
 
-        async function salvarRegrasPousada() {
-            const nomeAtualPousada = document.getElementById('titulo-pousada').innerText || "Minha Pousada";
+      async function salvarRegrasPousada() {
+    // Pega o nome que já está sendo exibido no cabeçalho ou na sidebar para não mandar nulo
+    const nomeAtualPousada = document.getElementById('titulo-pousada').innerText || "Minha Pousada";
 
-            const dadosAtualizacao = {
-                id: usuarioIdAtual,
-                nome: nomeAtualPousada,
-                horario_checkin: document.getElementById('pousada-checkin').value || null,
-                horario_checkout: document.getElementById('pousada-checkout').value || null,
-                diaria_minima: Number(document.getElementById('pousada-diaria-minima').value) || null,
-                idade_limite_crianca: Number(document.getElementById('pousada-idade-crianca').value) || 0,
-                aceita_pet: document.getElementById('pousada-aceita-pet').value === 'sim',
-                valor_pet: document.getElementById('pousada-aceita-pet').value === 'sim' ? (Number(document.getElementById('pousada-valor-pet').value) || 0) : null,
-                valor_hospede_extra: Number(document.getElementById('pousada-valor-hospede-extra').value) || 0,
-                exibir_fotos_pousada: document.getElementById('check-exibir-fotos').checked,
-                exibir_atracoes: document.getElementById('check-exibir-atracoes').checked
-            };
+    const dadosAtualizacao = {
+        id: usuarioIdAtual,
+        nome: nomeAtualPousada, // <--- Adicionado para respeitar a restrição NOT NULL do banco!
+        horario_checkin: document.getElementById('pousada-checkin').value || null,
+        horario_checkout: document.getElementById('pousada-checkout').value || null,
+        diaria_minima: Number(document.getElementById('pousada-diaria-minima').value) || null,
+        aceita_pet: document.getElementById('pousada-aceita-pet').value === 'sim',
+        valor_pet: document.getElementById('pousada-aceita-pet').value === 'sim' ? (Number(document.getElementById('pousada-valor-pet').value) || 0) : null,
+        valor_hospede_extra: Number(document.getElementById('pousada-valor-hospede-extra').value) || 0
+    };
 
-            const { error } = await supabaseClient.from('pousadas').upsert(dadosAtualizacao, { onConflict: 'id' });
-            if (error) { alert("Erro ao salvar regras da pousada: " + error.message); return; }
-            mostrarToast("Regras gerais da pousada salvas com sucesso!");
-        }
+    const { error } = await supabaseClient.from('pousadas').upsert(dadosAtualizacao, { onConflict: 'id' });
+    if (error) { alert("Erro ao salvar regras da pousada: " + error.message); return; }
+    mostrarToast("Regras gerais da pousada salvas com sucesso!");
+}
+
+
 
         async function carregarSuitesETarifas() {
             let { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', usuarioIdAtual);
@@ -511,8 +440,9 @@
             }
 
             const nomesDias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-            const hoje = '2026-08-26';
+            const hoje = '2026-08-26'; // Data de referência atual
 
+            // Filtra se existe alguma regra geral ativa (aplicada a "Todas as Suítes")
             const regrasGerais = tarifasCache.filter(t => !t.suite_id && hoje >= t.data_inicio.split('T')[0] && hoje <= t.data_fim.split('T')[0]);
 
             tarifasCache.forEach(t => {
@@ -536,6 +466,7 @@
                     textoRegra += `<br><span class="text-[11px] text-gray-500">Dias: ${diasStr}</span>`;
                 }
 
+                // Lógica do Selo Visual de Status
                 let statusBadge = '';
                 const ativaHoje = (hoje >= dInicioStr && hoje <= dFimStr);
                 if (ativaHoje) {
@@ -546,8 +477,10 @@
                     statusBadge = '<br><span style="background-color: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block; margin-top: 4px;">🔴 Expirada</span>';
                 }
 
+                // Lógica do Ícone Informativo (Tooltip) para avisar sobre sobreposição/hierarquia
                 let iconeInfo = '';
                 if (ehEspecifica && ativaHoje) {
+                    // Verifica se há alguma regra geral batendo no mesmo período
                     const conflitoGeral = regrasGerais.find(rg => {
                         const rgInicio = rg.data_inicio.split('T')[0];
                         const rgFim = rg.data_fim.split('T')[0];
