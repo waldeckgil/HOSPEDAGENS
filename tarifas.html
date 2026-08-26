@@ -316,21 +316,27 @@
             await carregarSuitesETarifas();
         }
 
-        async function salvarRegrasPousada() {
-            const dadosAtualizacao = {
-                id: usuarioIdAtual,
-                horario_checkin: document.getElementById('pousada-checkin').value || null,
-                horario_checkout: document.getElementById('pousada-checkout').value || null,
-                diaria_minima: Number(document.getElementById('pousada-diaria-minima').value) || null,
-                aceita_pet: document.getElementById('pousada-aceita-pet').value === 'sim',
-                valor_pet: document.getElementById('pousada-aceita-pet').value === 'sim' ? (Number(document.getElementById('pousada-valor-pet').value) || 0) : null,
-                valor_hospede_extra: Number(document.getElementById('pousada-valor-hospede-extra').value) || 0
-            };
+      async function salvarRegrasPousada() {
+    // Pega o nome que já está sendo exibido no cabeçalho ou na sidebar para não mandar nulo
+    const nomeAtualPousada = document.getElementById('titulo-pousada').innerText || "Minha Pousada";
 
-            const { error } = await supabaseClient.from('pousadas').upsert(dadosAtualizacao, { onConflict: 'id' });
-            if (error) { alert("Erro ao salvar regras da pousada: " + error.message); return; }
-            mostrarToast("Regras gerais da pousada salvas com sucesso!");
-        }
+    const dadosAtualizacao = {
+        id: usuarioIdAtual,
+        nome: nomeAtualPousada, // <--- Adicionado para respeitar a restrição NOT NULL do banco!
+        horario_checkin: document.getElementById('pousada-checkin').value || null,
+        horario_checkout: document.getElementById('pousada-checkout').value || null,
+        diaria_minima: Number(document.getElementById('pousada-diaria-minima').value) || null,
+        aceita_pet: document.getElementById('pousada-aceita-pet').value === 'sim',
+        valor_pet: document.getElementById('pousada-aceita-pet').value === 'sim' ? (Number(document.getElementById('pousada-valor-pet').value) || 0) : null,
+        valor_hospede_extra: Number(document.getElementById('pousada-valor-hospede-extra').value) || 0
+    };
+
+    const { error } = await supabaseClient.from('pousadas').upsert(dadosAtualizacao, { onConflict: 'id' });
+    if (error) { alert("Erro ao salvar regras da pousada: " + error.message); return; }
+    mostrarToast("Regras gerais da pousada salvas com sucesso!");
+}
+
+
 
         async function carregarSuitesETarifas() {
             let { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', usuarioIdAtual);
