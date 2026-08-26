@@ -228,8 +228,8 @@
         document.getElementById('filtro-checkin').setAttribute('min', hojeISO);
         document.getElementById('filtro-checkout').setAttribute('min', hojeISO);
 
-        document.getElementById('filtro-checkin').value = '2026-08-31';
-        document.getElementById('filtro-checkout').value = '2026-09-02';
+        document.getElementById('filtro-checkin').value = '2026-09-11';
+        document.getElementById('filtro-checkout').value = '2026-09-13';
 
         async function inicializarVitrine() {
             const params = new URLSearchParams(window.location.search);
@@ -370,15 +370,27 @@
             const idadeLimite = Number(dadosPousadaGlobal.idade_limite_crianca) || 5;
             let criancasConsideradasExtras = 0;
             let detalhesCriancasArr = [];
+            let resumoItensOcupantesArr = [];
+
+            // Adultos inclusos vs extras
+            let adultosInclusosCount = Math.min(qtdAdultos, hospedesInclusos);
+            let adultosExtrasCount = Math.max(0, qtdAdultos - hospedesInclusos);
+
+            if (adultosInclusosCount > 0) {
+                resumoItensOcupantesArr.push({ texto: `${adultosInclusosCount} Adulto(s)`, valorStr: 'Incluso' });
+            }
 
             for (let i = 1; i <= qtdCriancas; i++) {
                 const elIdade = document.getElementById(`idade-crianca-${i}`);
                 const idade = elIdade ? parseInt(elIdade.value) || 0 : 0;
                 if (idade <= idadeLimite) {
+                    criancasConsideradasExtras++; // contabiliza na lógica se passar da vaga, mas se for isenta fica grátis
                     detalhesCriancasArr.push(`Criança (${idade}a - Grátis)`);
+                    resumoItensOcupantesArr.push({ texto: `Criança (${idade}a)`, valorStr: 'Grátis' });
                 } else {
                     criancasConsideradasExtras++;
                     detalhesCriancasArr.push(`Criança (${idade}a - Pagante)`);
+                    resumoItensOcupantesArr.push({ texto: `Criança (${idade}a)`, valorStr: 'Pagante' });
                 }
             }
 
@@ -404,7 +416,9 @@
 
             let valorDiariasTotal = 0;
             let temTarifaEspecialAplicada = false;
+            let primeiraDiariaAplicada = precoBaseDiaria;
             let dataAtual = new Date(checkin);
+            let primeiroDiaCalculado = false;
 
             while (dataAtual < checkout) {
                 const dataIsoStr = dataAtual.toISOString().split('T')[0];
@@ -439,6 +453,12 @@
                         }
                     }
                 }
+
+                if (!primeiroDiaCalculado) {
+                    primeiraDiariaAplicada = precoDaNoite;
+                    primeiroDiaCalculado = true;
+                }
+
                 valorDiariasTotal += precoDaNoite;
                 dataAtual.setDate(dataAtual.getDate() + 1);
             }
@@ -457,7 +477,9 @@
                 valorTotalGeral,
                 criancasConsideradasExtras,
                 detalhesCriancasArr,
-                temTarifaEspecialAplicada
+                resumoItensOcupantesArr,
+                temTarifaEspecialAplicada,
+                primeiraDiariaAplicada
             };
         }
 
@@ -581,42 +603,62 @@
                     ? `<button onclick="alert('Este período selecionado possui dias ocupados. Consulte o calendário mensal abaixo para escolher um período livre.')" class="w-full bg-gray-400 text-white py-3 md:py-3.5 px-4 rounded-xl font-bold transition shadow-md text-center text-sm md:text-base cursor-not-allowed">Período Indisponível</button>`
                     : `<button onclick="abrirModal('${suite.id}')" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 md:py-3.5 px-4 rounded-xl font-bold transition shadow-md text-center text-sm md:text-base">Solicitar Reserva</button>`;
 
-                // Rótulo da Diária Base / Especial
-                let rotuloPrecoDiaria = `R$ ${precoBase.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+                // Rótulo da Diária Base / Especial exibida no topo do card
+                let precoExibidoTopo = calc.temTarifaEspecialAplicada ? calc.primeiraDiariaAplicada : precoBase;
+                let rotuloPrecoDiaria = `R$ ${precoExibidoTopo.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
                 let avisoTarifaEspecial = '';
                 if (calc.temTarifaEspecialAplicada) {
                     avisoTarifaEspecial = `<span class="text-[10px] text-amber-700 font-bold block bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 mt-0.5">⭐ Inclui Tarifa Especial no período</span>`;
                 }
 
+                // LAYOUT VERTICAL DETALHADO DOS OCUPANTES E DIÁRIAS
                 let detalhamentoOcupantesHTML = `
-                    <div class="bg-blue-50/70 border border-blue-100 p-2.5 rounded-xl mb-3 text-xs space-y-1 text-gray-700">
+                    <div class="bg-blue-50/70 border border-blue-100 p-3 rounded-xl mb-3 text-xs space-y-1.5 text-gray-700">
+                        <div class="font-extrabold text-blue-900 border-b border-blue-200 pb-1 mb-1">👥 Detalhes da Estadia:</div>
+                        
                         <div class="flex justify-between font-semibold">
-                            <span>👥 Ocupantes:</span>
-                            <span>${qtdAdultos} Adulto(s)${calc.detalhesCriancasArr.length > 0 ? ` + ${calc.detalhesCriancasArr.join(', ')}` : ''}</span>
-                        </div>
-                        <div class="flex justify-between">
                             <span>Diárias (${calc.qtdNoites} noite${calc.qtdNoites > 1 ? 's' : ''}):</span>
                             <span>R$ ${calc.valorDiariasTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
                         </div>
                 `;
 
-                if (calc.hospedesExtras > 0) {
+                // Exibir adultos e crianças verticalmente
+                let adultosInclusosCount = Math.min(qtdAdultos, calc.hospedesInclusos);
+                let adultosExtrasCount = Math.max(0, qtdAdultos - calc.hospedesInclusos);
+
+                detalhamentoOcupantesHTML += `
+                    <div class="flex justify-between pl-2 text-gray-600">
+                        <span>• ${adultosInclusosCount} Adulto(s) (Incluso):</span>
+                        <span class="font-bold text-gray-800">Incluso</span>
+                    </div>
+                `;
+
+                // Se houver adultos extras
+                if (adultosExtrasCount > 0) {
                     detalhamentoOcupantesHTML += `
-                        <div class="flex justify-between text-blue-800 font-medium">
-                            <span>+ ${calc.hospedesExtras} hóspede(s) extra(s) (${calc.qtdNoites}n × R$ ${calc.valorExtraPorNoiteUnitario.toLocaleString('pt-BR', {minimumFractionDigits: 2})}):</span>
-                            <span>R$ ${calc.valorExtraTotalPeriodo.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
-                        </div>
-                    `;
-                } else {
-                    detalhamentoOcupantesHTML += `
-                        <div class="flex justify-between text-gray-500 text-[11px]">
-                            <span>(Ocupantes dentro do limite incluso de ${calc.hospedesInclusos} pessoas)</span>
-                            <span>R$ 0,00</span>
+                        <div class="flex justify-between pl-2 text-blue-800 font-medium">
+                            <span>• ${adultosExtrasCount} Adulto(s) Extra(s) (${calc.qtdNoites}n × R$ ${calc.valorExtraPorNoiteUnitario.toLocaleString('pt-BR', {minimumFractionDigits: 2})}):</span>
+                            <span>R$ ${(adultosExtrasCount * calc.valorExtraPorNoiteUnitario * calc.qtdNoites).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
                         </div>
                     `;
                 }
 
-                // Inclusão do Pet no detalhamento se marcado
+                // Crianças verticalmente com indicação exata
+                for (let i = 1; i <= qtdCriancas; i++) {
+                    const elIdade = document.getElementById(`idade-crianca-${i}`);
+                    const idade = elIdade ? parseInt(elIdade.value) || 0 : 0;
+                    const idadeLimite = Number(dadosPousadaGlobal.idade_limite_crianca) || 5;
+                    const ehGratis = idade <= idadeLimite;
+
+                    detalhamentoOcupantesHTML += `
+                        <div class="flex justify-between pl-2 ${ehGratis ? 'text-emerald-700' : 'text-blue-800'} font-medium">
+                            <span>• Criança (${idade} anos):</span>
+                            <span class="font-bold uppercase">${ehGratis ? 'Grátis' : 'Pagante'}</span>
+                        </div>
+                    `;
+                }
+
+                // Inclusão do Pet no detalhamento vertical se marcado
                 const aceitaPetGlobal = dadosPousadaGlobal.aceita_pet === true || dadosPousadaGlobal.aceita_pet === 'true' || dadosPousadaGlobal.aceita_pet === 'Sim';
                 const checkPetFiltro = document.getElementById('check-trazer-pet-filtro');
                 const vaiTrazerPet = aceitaPetGlobal && checkPetFiltro && checkPetFiltro.checked;
@@ -624,8 +666,8 @@
                 if (vaiTrazerPet) {
                     valorPetTotal = Number(dadosPousadaGlobal.valor_pet) || 0;
                     detalhamentoOcupantesHTML += `
-                        <div class="flex justify-between text-amber-800 font-medium">
-                            <span>🐾 Taxa de Pet:</span>
+                        <div class="flex justify-between pl-2 text-amber-800 font-medium border-t border-blue-100 pt-1 mt-1">
+                            <span>• Taxa de Pet:</span>
                             <span>R$ ${valorPetTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
                         </div>
                     `;
@@ -677,7 +719,7 @@
                                         <div id="container-cal-${suite.id}" class="hidden mt-2 bg-gray-50 p-3 rounded-xl border border-gray-200 shadow-inner"></div>
                                     </div>
 
-                                    <!-- DETALHAMENTO DE OCUPANTES E VALORES ADICIONAIS ANTES DO TOTAL -->
+                                    <!-- DETALHAMENTO VERTICAL DE OCUPANTES E VALORES -->
                                     ${detalhamentoOcupantesHTML}
 
                                     <div class="border-t border-gray-100 pt-2 mb-3 flex justify-between items-center">
