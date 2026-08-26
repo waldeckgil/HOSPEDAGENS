@@ -44,8 +44,8 @@
                 <div>
                     <label class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">Adultos (Mínimo 2)</label>
                     <select id="filtro-adultos" class="w-full p-2.5 sm:p-3 border rounded-xl font-bold bg-gray-50 text-sm sm:text-base text-gray-800">
-                        <option value="2" selected>2 Adultos</option>
-                        <option value="3">3 Adultos</option>
+                        <option value="2">2 Adultos</option>
+                        <option value="3" selected>3 Adultos</option>
                         <option value="4">4 Adultos</option>
                         <option value="5">5+ Adultos</option>
                     </select>
@@ -53,8 +53,8 @@
                 <div>
                     <label class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">Crianças</label>
                     <select id="filtro-criancas" onchange="gerarCamposIdadeCriancas()" class="w-full p-2.5 sm:p-3 border rounded-xl font-bold bg-gray-50 text-sm sm:text-base text-gray-800">
-                        <option value="0" selected>0 Crianças</option>
-                        <option value="1">1 Criança</option>
+                        <option value="0">0 Crianças</option>
+                        <option value="1" selected>1 Criança</option>
                         <option value="2">2 Crianças</option>
                         <option value="3">3 Crianças</option>
                         <option value="4">4 Crianças</option>
@@ -63,7 +63,7 @@
             </div>
 
             <!-- Container Dinâmico para Idade das Crianças -->
-            <div id="container-idades-criancas" class="mt-3 hidden grid grid-cols-2 sm:grid-cols-4 gap-2 bg-blue-50/50 p-3 rounded-xl border border-blue-100"></div>
+            <div id="container-idades-criancas" class="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 bg-blue-50/50 p-3 rounded-xl border border-blue-100"></div>
 
             <div class="mt-4">
                 <button onclick="filtrarSuitesDisponiveisPorPeriodo()" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-2.5 sm:p-3 rounded-xl font-bold transition shadow-md text-sm sm:text-base">
@@ -89,9 +89,7 @@
                 <h3 class="text-xl font-extrabold text-blue-600">📷 Fotos da Pousada</h3>
                 <button onclick="fecharModalGenerico('modal-fotos-pousada')" class="text-gray-500 hover:text-gray-800 font-bold text-lg px-2">✕</button>
             </div>
-            <div id="grid-fotos-pousada" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                <!-- Preenchido dinamicamente -->
-            </div>
+            <div id="grid-fotos-pousada" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
         </div>
     </div>
 
@@ -102,9 +100,7 @@
                 <h3 class="text-xl font-extrabold text-blue-600">🌴 Atrações da Região</h3>
                 <button onclick="fecharModalGenerico('modal-atracoes')" class="text-gray-500 hover:text-gray-800 font-bold text-lg px-2">✕</button>
             </div>
-            <div id="grid-atracoes" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <!-- Preenchido dinamicamente -->
-            </div>
+            <div id="grid-atracoes" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
         </div>
     </div>
 
@@ -180,7 +176,7 @@
                     </div>
                 </div>
 
-                <!-- Bloco Condicional de Pet -->
+                <!-- Bloco Condicional de Pet (Exibido apenas se aceita_pet for true nas configurações) -->
                 <div id="secao-pet-modal" class="hidden bg-amber-50 border border-amber-200 p-3 rounded-xl flex items-center justify-between">
                     <div>
                         <span class="font-bold text-amber-900 text-xs block">🐾 Vai trazer um Pet?</span>
@@ -192,14 +188,14 @@
                     </label>
                 </div>
 
-                <!-- Resumo de Valores Detalhado -->
+                <!-- Resumo de Valores Detalhado no Modal -->
                 <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 text-xs space-y-1">
                     <div class="flex justify-between text-gray-600">
                         <span>Diárias (<span id="resumo-qtd-noites">0</span> noites):</span>
                         <span id="resumo-valor-diarias">R$ 0,00</span>
                     </div>
                     <div id="linha-resumo-hospede-extra" class="flex justify-between text-gray-600 hidden">
-                        <span>Hóspede(s) Extra(s):</span>
+                        <span id="resumo-texto-hospede-extra">Hóspede(s) Extra(s):</span>
                         <span id="resumo-valor-hospede-extra">R$ 0,00</span>
                     </div>
                     <div id="linha-resumo-pet" class="flex justify-between text-gray-600 hidden">
@@ -232,11 +228,9 @@
         document.getElementById('filtro-checkin').setAttribute('min', hojeISO);
         document.getElementById('filtro-checkout').setAttribute('min', hojeISO);
 
-        const dHj = new Date();
-        const dFut = new Date();
-        dFut.setDate(dHj.getDate() + 5);
-        document.getElementById('filtro-checkin').value = dHj.toISOString().split('T')[0];
-        document.getElementById('filtro-checkout').value = dFut.toISOString().split('T')[0];
+        // Predefinição de datas para teste rápido (ex: 31/08/2026 a 02/09/2026)
+        document.getElementById('filtro-checkin').value = '2026-08-31';
+        document.getElementById('filtro-checkout').value = '2026-09-02';
 
         async function inicializarVitrine() {
             const params = new URLSearchParams(window.location.search);
@@ -255,6 +249,7 @@
                 .in('status', ['Aprovada', 'Pendente']);
             cacheReservas = todasReservas || [];
 
+            gerarCamposIdadeCriancas();
             filtrarSuitesDisponiveisPorPeriodo();
         }
 
@@ -331,24 +326,23 @@
         function gerarCamposIdadeCriancas() {
             const qtd = parseInt(document.getElementById('filtro-criancas').value) || 0;
             const container = document.getElementById('container-idades-criancas');
+            const idadeLimite = Number(dadosPousadaGlobal.idade_limite_crianca) || 5;
             
             if (qtd === 0) {
-                container.classList.add('hidden');
-                container.innerHTML = '';
+                container.innerHTML = '<span class="col-span-full text-[11px] text-gray-500 font-semibold">Nenhuma criança selecionada.</span>';
                 return;
             }
 
-            let html = '<span class="col-span-full text-[11px] font-bold text-blue-800">Informe a idade de cada criança (Limite isenção: ' + (dadosPousadaGlobal.idade_limite_crianca || 5) + ' anos):</span>';
+            let html = `<span class="col-span-full text-[11px] font-bold text-blue-800">Informe a idade de cada criança (Limite de isenção: até ${idadeLimite} anos):</span>`;
             for (let i = 1; i <= qtd; i++) {
                 html += `
                     <div>
                         <label class="block text-[10px] text-gray-600 font-bold">Criança ${i} (anos)</label>
-                        <input type="number" min="0" max="17" value="3" id="idade-crianca-${i}" class="w-full p-1.5 border rounded-lg text-xs bg-white font-bold text-gray-800">
+                        <input type="number" min="0" max="17" value="${i === 1 ? 3 : 2}" id="idade-crianca-${i}" onchange="filtrarSuitesDisponiveisPorPeriodo()" class="w-full p-1.5 border rounded-lg text-xs bg-white font-bold text-gray-800">
                     </div>
                 `;
             }
             container.innerHTML = html;
-            container.classList.remove('hidden');
         }
 
         async function calcularValorTotalEstadiaCompleto(suiteId, checkinStr, checkoutStr, precoBaseDiaria, qtdAdultos, qtdCriancas) {
@@ -372,12 +366,14 @@
             const totalOcupantes = qtdAdultos + criancasConsideradasExtras;
             const hospedesExtras = Math.max(0, totalOcupantes - hospedesInclusos);
             
-            let valorExtraPorNoite = 0;
+            let valorExtraPorNoiteUnitario = 0;
             if (suiteData?.usa_adicional_customizado && suiteData?.valor_hospede_extra_customizado != null) {
-                valorExtraPorNoite = Number(suiteData.valor_hospede_extra_customizado) * hospedesExtras;
+                valorExtraPorNoiteUnitario = Number(suiteData.valor_hospede_extra_customizado);
             } else if (dadosPousadaGlobal.valor_hospede_extra != null) {
-                valorExtraPorNoite = Number(dadosPousadaGlobal.valor_hospede_extra) * hospedesExtras;
+                valorExtraPorNoiteUnitario = Number(dadosPousadaGlobal.valor_hospede_extra);
             }
+
+            const valorExtraTotalPorNoite = valorExtraPorNoiteUnitario * hospedesExtras;
 
             const { data: tarifasEspeciais } = await supabaseClient
                 .from('tarifas_especiais')
@@ -426,22 +422,19 @@
                 dataAtual.setDate(dataAtual.getDate() + 1);
             }
 
-            const valorExtraTotalPeriodo = valorExtraPorNoite * qtdNoites;
-            let valorPetTotal = 0;
-            const checkPet = document.getElementById('check-trazer-pet');
-            if (checkPet && checkPet.checked && dadosPousadaGlobal.aceita_pet) {
-                valorPetTotal = Number(dadosPousadaGlobal.valor_pet) || 0;
-            }
-
-            const valorTotalGeral = valorDiariasTotal + valorExtraTotalPeriodo + valorPetTotal;
+            const valorExtraTotalPeriodo = valorExtraTotalPorNoite * qtdNoites;
+            const valorTotalGeral = valorDiariasTotal + valorExtraTotalPeriodo;
 
             return {
                 qtdNoites,
-                valorDiariasTotal,
+                hospedesInclusos,
+                totalOcupantes,
+                hospedesExtras,
+                valorExtraPorNoiteUnitario,
                 valorExtraTotalPeriodo,
-                valorPetTotal,
+                valorDiariasTotal,
                 valorTotalGeral,
-                hospedesExtras
+                criancasConsideradasExtras
             };
         }
 
@@ -565,6 +558,36 @@
                     ? `<button onclick="alert('Este período selecionado possui dias ocupados. Consulte o calendário mensal abaixo para escolher um período livre.')" class="w-full bg-gray-400 text-white py-3 md:py-3.5 px-4 rounded-xl font-bold transition shadow-md text-center text-sm md:text-base cursor-not-allowed">Período Indisponível</button>`
                     : `<button onclick="abrirModal('${suite.id}')" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 md:py-3.5 px-4 rounded-xl font-bold transition shadow-md text-center text-sm md:text-base">Solicitar Reserva</button>`;
 
+                // Montagem do detalhamento descritivo de hóspedes e valores antes do total estimado
+                let detalhamentoOcupantesHTML = `
+                    <div class="bg-blue-50/70 border border-blue-100 p-2.5 rounded-xl mb-3 text-xs space-y-1 text-gray-700">
+                        <div class="flex justify-between font-semibold">
+                            <span>👥 Ocupantes:</span>
+                            <span>${qtdAdultos} Adulto(s)${qtdCriancas > 0 ? ` + ${qtdCriancas} Criança(s)` : ''}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Diárias (${calcEstadia.qtdNoites} noite${calcEstadia.qtdNoites > 1 ? 's' : ''}):</span>
+                            <span>R$ ${calcEstadia.valorDiariasTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+                        </div>
+                `;
+
+                if (calcEstadia.hospedesExtras > 0) {
+                    detalhamentoOcupantesHTML += `
+                        <div class="flex justify-between text-blue-800 font-medium">
+                            <span>+ ${calcEstadia.hospedesExtras} hóspede(s) extra(s) (${calcEstadia.qtdNoites}n × R$ ${calcEstadia.valorExtraPorNoiteUnitario.toLocaleString('pt-BR', {minimumFractionDigits: 2})}):</span>
+                            <span>R$ ${calcEstadia.valorExtraTotalPeriodo.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+                        </div>
+                    `;
+                } else {
+                    detalhamentoOcupantesHTML += `
+                        <div class="flex justify-between text-gray-500 text-[11px]">
+                            <span>(Ocupantes dentro do limite incluso de ${calcEstadia.hospedesInclusos} pessoas)</span>
+                            <span>R$ 0,00</span>
+                        </div>
+                    `;
+                }
+                detalhamentoOcupantesHTML += `</div>`;
+
                 container.innerHTML += `
                     <div class="bg-white rounded-2xl shadow-xl overflow-hidden text-gray-800 border-l-8 ${temConflitoNoPeriodo ? 'border-amber-400' : 'border-green-500'} p-4 md:p-6 mb-4">
                         <div class="flex flex-col md:flex-row gap-4 md:gap-6">
@@ -590,7 +613,7 @@
                                     <div class="flex items-start justify-between gap-2 mb-1 md:mb-2">
                                         <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900">${suite.nome}</h2>
                                         <div class="text-right shrink-0">
-                                            <span class="text-[10px] uppercase text-gray-400 font-bold block">Diária</span>
+                                            <span class="text-[10px] uppercase text-gray-400 font-bold block">Diária Base</span>
                                             <span class="text-sm sm:text-base font-extrabold text-blue-600">R$ ${precoBase.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
                                         </div>
                                     </div>
@@ -606,9 +629,12 @@
                                         <div id="container-cal-${suite.id}" class="hidden mt-2 bg-gray-50 p-3 rounded-xl border border-gray-200 shadow-inner"></div>
                                     </div>
 
-                                    <div class="border-t border-gray-100 pt-2 mb-3">
-                                        <p class="text-[11px] sm:text-xs text-gray-500">Total estimado para ${calcEstadia.qtdNoites} noite(s):</p>
-                                        <p class="text-xl sm:text-2xl font-extrabold text-green-600">R$ ${calcEstadia.valorTotalGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+                                    <!-- DETALHAMENTO DE OCUPANTES E VALORES ADICIONAIS ANTES DO TOTAL -->
+                                    ${detalhamentoOcupantesHTML}
+
+                                    <div class="border-t border-gray-100 pt-2 mb-3 flex justify-between items-center">
+                                        <span class="text-xs font-bold text-gray-600">Total Estimado:</span>
+                                        <span class="text-xl sm:text-2xl font-extrabold text-green-600">R$ ${calcEstadia.valorTotalGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
                                     </div>
                                 </div>
 
@@ -783,12 +809,14 @@
             document.getElementById('checkin').value = checkinFiltro;
             document.getElementById('checkout').value = checkoutFiltro;
 
+            // VALIDAÇÃO CONDICIONAL DO PET: Só exibe se o gestor configurou aceita_pet como true
             const secaoPet = document.getElementById('secao-pet-modal');
-            if (dadosPousadaGlobal.aceita_pet) {
+            if (dadosPousadaGlobal.aceita_pet === true || dadosPousadaGlobal.aceita_pet === 'true') {
                 secaoPet.classList.remove('hidden');
                 document.getElementById('label-valor-pet').innerText = `Taxa de Pet: R$ ${Number(dadosPousadaGlobal.valor_pet || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
             } else {
                 secaoPet.classList.add('hidden');
+                document.getElementById('check-trazer-pet').checked = false;
             }
 
             await atualizarResumoModal(sId, checkinFiltro, checkoutFiltro, qtdAdultos, qtdCriancas);
@@ -815,20 +843,28 @@
             const linhaExtra = document.getElementById('linha-resumo-hospede-extra');
             if (calc.hospedesExtras > 0) {
                 linhaExtra.classList.remove('hidden');
+                document.getElementById('resumo-texto-hospede-extra').innerText = `${calc.hospedesExtras} Hóspede(s) Extra(s):`;
                 document.getElementById('resumo-valor-hospede-extra').innerText = `R$ ${calc.valorExtraTotalPeriodo.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
             } else {
                 linhaExtra.classList.add('hidden');
             }
 
             const linhaPet = document.getElementById('linha-resumo-pet');
-            if (calc.valorPetTotal > 0) {
+            const checkPet = document.getElementById('check-trazer-pet');
+            let valorPetTotal = 0;
+            if (checkPet && checkPet.checked && (dadosPousadaGlobal.aceita_pet === true || dadosPousadaGlobal.aceita_pet === 'true')) {
+                valorPetTotal = Number(dadosPousadaGlobal.valor_pet) || 0;
+            }
+
+            if (valorPetTotal > 0) {
                 linhaPet.classList.remove('hidden');
-                document.getElementById('resumo-valor-pet').innerText = `R$ ${calc.valorPetTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+                document.getElementById('resumo-valor-pet').innerText = `R$ ${valorPetTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
             } else {
                 linhaPet.classList.add('hidden');
             }
 
-            document.getElementById('resumo-valor-total').innerText = `R$ ${calc.valorTotalGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            const valorTotalGeralFinal = calc.valorTotalGeral + valorPetTotal;
+            document.getElementById('resumo-valor-total').innerText = `R$ ${valorTotalGeralFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
         }
 
         function fecharModal() { 
@@ -857,6 +893,14 @@
             const precoBase = suiteData ? (suiteData.valor_diaria || suiteData.preco || 150.00) : 150.00;
             const calc = await calcularValorTotalEstadiaCompleto(suiteId, checkinVal, checkoutVal, precoBase, qtdAdultos, qtdCriancas);
 
+            const checkPet = document.getElementById('check-trazer-pet');
+            let valorPetTotal = 0;
+            if (checkPet && checkPet.checked && (dadosPousadaGlobal.aceita_pet === true || dadosPousadaGlobal.aceita_pet === 'true')) {
+                valorPetTotal = Number(dadosPousadaGlobal.valor_pet) || 0;
+            }
+
+            const valorTotalFinal = calc.valorTotalGeral + valorPetTotal;
+
             const { error: errReserva } = await supabaseClient.from('reservas').insert([{
                 pousada_id: pousadaIdGlobal,
                 suite_id: suiteId,
@@ -869,7 +913,7 @@
                 endereco: document.getElementById('endereco-hospede').value,
                 checkin: checkinVal,
                 checkout: checkoutVal,
-                valor_total: calc.valorTotalGeral,
+                valor_total: valorTotalFinal,
                 status: 'Pendente',
                 criado_em: new Date().toISOString()
             }]);
