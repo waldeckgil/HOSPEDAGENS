@@ -434,6 +434,7 @@
             }
 
             const nomesDias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+            const hoje = '2026-08-26'; // Data de referência atual para validação do selo
 
             tarifasCache.forEach(t => {
                 let nomeSuiteObj = "Todas as Suítes";
@@ -442,8 +443,11 @@
                     if (found) nomeSuiteObj = found.nome;
                 }
 
-                const dInicio = t.data_inicio.split('-').reverse().join('/');
-                const dFim = t.data_fim.split('-').reverse().join('/');
+                const dInicioStr = t.data_inicio ? t.data_inicio.split('T')[0] : '';
+                const dFimStr = t.data_fim ? t.data_fim.split('T')[0] : '';
+
+                const dInicioBR = dInicioStr.split('-').reverse().join('/');
+                const dFimBR = dFimStr.split('-').reverse().join('/');
                 let textoRegra = t.tipo_ajuste === 'percentual' ? `+${t.valor_especial}%` : `R$ ${Number(t.valor_especial).toFixed(2)}`;
 
                 if (t.dias_semana && t.dias_semana.length > 0) {
@@ -451,11 +455,21 @@
                     textoRegra += `<br><span class="text-[11px] text-gray-500">Dias: ${diasStr}</span>`;
                 }
 
+                // Lógica do Selo Visual de Status
+                let statusBadge = '';
+                if (hoje >= dInicioStr && hoje <= dFimStr) {
+                    statusBadge = '<br><span style="background-color: #d1fae5; color: #065f46; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block; margin-top: 4px;">🟢 Ativa Hoje</span>';
+                } else if (dInicioStr > hoje) {
+                    statusBadge = '<br><span style="background-color: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block; margin-top: 4px;">⏳ Futura</span>';
+                } else {
+                    statusBadge = '<br><span style="background-color: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block; margin-top: 4px;">🔴 Expirada</span>';
+                }
+
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-50">
                         <td class="p-3 font-semibold text-gray-900">${t.descricao || 'Especial'}</td>
                         <td class="p-3 text-gray-600">${nomeSuiteObj}</td>
-                        <td class="p-3 text-gray-600">${dInicio} até ${dFim}</td>
+                        <td class="p-3 text-gray-600">${dInicioBR} até ${dFimBR} ${statusBadge}</td>
                         <td class="p-3 font-bold text-blue-600">${textoRegra}</td>
                         <td class="p-3 text-right space-x-2">
                             <button onclick="prepararEdicaoTarifa('${t.id}')" class="text-blue-600 font-bold text-xs bg-blue-50 px-3 py-1.5 rounded-lg">Editar</button>
@@ -465,14 +479,15 @@
                 `;
             });
         }
-function prepararEdicaoTarifa(id) {
+
+        function prepararEdicaoTarifa(id) {
             const tarifa = tarifasCache.find(t => t.id === id);
             if (!tarifa) return;
 
             document.getElementById('tarifa-editando-id').value = tarifa.id;
             document.getElementById('select-suite-tarifa').value = tarifa.suite_id || '';
             
-            // CORREÇÃO: Força o corte da string da data, ignorando horas e fuso (o 'T')
+            // Força o corte da string da data, ignorando horas e fuso (o 'T')
             const dataInicioFormatada = tarifa.data_inicio ? tarifa.data_inicio.split('T')[0] : '';
             const dataFimFormatada = tarifa.data_fim ? tarifa.data_fim.split('T')[0] : '';
             
@@ -485,11 +500,10 @@ function prepararEdicaoTarifa(id) {
             document.getElementById('tarifa-valor').value = tarifa.valor_especial;
             document.getElementById('tarifa-descricao').value = tarifa.descricao || '';
 
-            // CORREÇÃO: Garante que os checkboxes leiam corretamente o array de dias
+            // Garante que os checkboxes leiam corretamente o array de dias
             const checkboxes = document.querySelectorAll('input[name="dias_semana"]');
             let diasArray = [];
             if (tarifa.dias_semana) {
-                // Se o banco trouxer como string JSON, converte. Se já for array, usa direto.
                 diasArray = typeof tarifa.dias_semana === 'string' ? JSON.parse(tarifa.dias_semana) : tarifa.dias_semana;
             }
             
@@ -501,8 +515,19 @@ function prepararEdicaoTarifa(id) {
             document.getElementById('btn-submit-regra').innerText = "Atualizar Regra";
             document.getElementById('btn-cancelar-edicao').classList.remove('hidden');
             
-            // Rola a página suavemente para o topo para o usuário ver o formulário
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // UX MELHORADA: Rola a tela suavemente focando direto no topo do card do formulário
+            const cardFormulario = document.getElementById('titulo-form-regra');
+            if (cardFormulario) {
+                cardFormulario.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            // UX MELHORADA: Joga o cursor piscando diretamente no primeiro campo do card
+            setTimeout(() => {
+                const primeiroCampo = document.getElementById('select-suite-tarifa');
+                if (primeiroCampo) {
+                    primeiroCampo.focus();
+                }
+            }, 350);
         }
 
         function cancelarEdicao() {
