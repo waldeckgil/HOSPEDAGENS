@@ -30,11 +30,9 @@
                     <span>🏠</span> <span class="hidden sm:inline">Painel Principal</span><span class="sm:hidden">Suítes</span>
                 </a>
                 <a href="reservas.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
-                    <span>📋</span> <span class="hidden sm:inline">Ver Reservas</span><span class="sm:hidden">Reservas</span>
+                    <span>📋</span> <span class="hidden sm:inline">Historico de Reservas</span><span class="sm:hidden">Reservas</span>
                 </a>
-                <a href="financeiro.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
-                    <span>📋</span> <span class="hidden sm:inline">Gestão Financeira</span><span class="sm:hidden">Financeiro</span>
-                </a>
+     
                 <a href="relatorios.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
                     <span>📋</span> <span class="hidden sm:inline">Relatorios Consultas</span><span class="sm:hidden">Consultas</span>
                 </a>
@@ -180,7 +178,7 @@
                         <strong id="modal-qtd-diarias">1 diária(s)</strong>
                     </div>
                     <div class="flex justify-between">
-                        <span>Valor Total da Estadia:</span>
+                        <span>Valor Total da Estadia (c/ Tarifas Especiais):</span>
                         <strong id="modal-valor-total">R$ 0,00</strong>
                     </div>
                     <div class="flex justify-between border-t border-blue-200 pt-1">
@@ -241,6 +239,61 @@
         </div>
     </div>
 
+    <!-- MODAL DE VISUALIZAÇÃO DE TARIFA ESPECIAL -->
+    <div id="modal-tarifa-especial" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="fecharModalTarifaEspecial()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+            
+            <div class="flex items-center gap-2 mb-1">
+                <span class="text-xl">⚡</span>
+                <h3 class="text-lg font-bold text-gray-900">Tarifas Especiais Aplicadas</h3>
+            </div>
+            <p id="modal-tarifa-suite-nome" class="text-xs text-blue-600 font-bold mb-4 uppercase tracking-wider"></p>
+
+            <div id="modal-tarifa-conteudo" class="space-y-3">
+                <!-- Conteúdo injetado via JS -->
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                <button onclick="fecharModalTarifaEspecial()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CALENDÁRIO DE DISPONIBILIDADE DA SUÍTE -->
+    <div id="modal-calendario-suite" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative">
+            <button onclick="fecharModalCalendario()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+            
+            <div class="flex items-center gap-2 mb-1">
+                <span class="text-xl">📅</span>
+                <h3 id="cal-suite-nome" class="text-lg font-bold text-gray-900">Calendário da Suíte</h3>
+            </div>
+            <p class="text-xs text-emerald-700 font-medium mb-4">Dias em <strong class="bg-emerald-100 px-1 rounded">verde</strong> estão livres para novas reservas[cite: 2].</p>
+
+            <!-- Cabeçalho do Mês e Navegação -->
+            <div class="flex justify-between items-center mb-4 bg-gray-50 p-2.5 rounded-xl border border-gray-200">
+                <button onclick="mudarMesCalendario(-1)" class="px-3 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-xs">◀ Mês Anterior</button>
+                <strong id="cal-mes-ano-atual" class="text-xs sm:text-sm font-bold text-gray-800 uppercase">MÊS / ANO</strong>
+                <button onclick="mudarMesCalendario(1)" class="px-3 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-xs">Próximo Mês ▶</button>
+            </div>
+
+            <!-- Grade dos Dias da Semana -->
+            <div class="grid grid-cols-7 gap-1 text-center font-bold text-[11px] text-gray-500 mb-2">
+                <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sexta</div><div>Sáb</div>
+            </div>
+
+            <!-- Grade Dinâmica dos Dias -->
+            <div id="cal-grid-dias" class="grid grid-cols-7 gap-1.5 text-center text-xs">
+                <!-- Preenchido via JS -->
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                <button onclick="fecharModalCalendario()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold text-xs sm:text-sm py-2.5 rounded-xl transition">Fechar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
@@ -251,7 +304,95 @@
         let reservasGlobaisCache = [];
         let suitesGlobaisCache = [];
         let pagamentosGlobaisCache = [];
+        let tarifasEspeciaisGlobaisCache = [];
         let camposLimposParaNovaReserva = false;
+
+        // Variáveis globais para o Modal de Calendário
+        let calSuiteIdAtual = null;
+        let calSuiteNomeAtual = "";
+        let calDataReferencia = new Date();
+
+        function abrirCalendarioSuite(suiteId, suiteNome) {
+            calSuiteIdAtual = suiteId;
+            calSuiteNomeAtual = suiteNome;
+            calDataReferencia = new Date();
+            document.getElementById('cal-suite-nome').innerText = `Suíte: ${suiteNome}`;
+            renderizarGridCalendario();
+            document.getElementById('modal-calendario-suite').classList.remove('hidden');
+        }
+
+        function fecharModalCalendario() {
+            document.getElementById('modal-calendario-suite').classList.add('hidden');
+        }
+
+        function mudarMesCalendario(direcao) {
+            calDataReferencia.setMonth(calDataReferencia.getMonth() + direcao);
+            renderizarGridCalendario();
+        }
+
+        function renderizarGridCalendario() {
+            const gridEl = document.getElementById('cal-grid-dias');
+            const labelMesAno = document.getElementById('cal-mes-ano-atual');
+            gridEl.innerHTML = '';
+
+            const ano = calDataReferencia.getFullYear();
+            const mes = calDataReferencia.getMonth();
+
+            const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            labelMesAno.innerText = `${nomesMeses[mes]} de ${ano}`;
+
+            const primeiroDiaSemana = new Date(ano, mes, 1).getDay();
+            const ultimoDiaMes = new Date(ano, mes + 1, 0).getDate();
+
+            const reservasDaSuite = reservasGlobaisCache.filter(r => r.suite_id === calSuiteIdAtual && (r.status === 'Aprovada' || r.status === 'Ocupada'));
+
+            const datasOcupadas = new Set();
+            reservasDaSuite.forEach(r => {
+                if (!r.checkin || !r.checkout) return;
+                let dCurr = new Date(r.checkin + 'T00:00:00');
+                const dFim = new Date(r.checkout + 'T00:00:00');
+                
+                while (dCurr < dFim) {
+                    datasOcupadas.add(dCurr.toLocaleDateString('sv-SE'));
+                    dCurr.setDate(dCurr.getDate() + 1);
+                }
+            });
+
+            for (let i = 0; i < primeiroDiaSemana; i++) {
+                gridEl.innerHTML += `<div></div>`;
+            }
+
+            const hojeStr = new Date().toLocaleDateString('sv-SE');
+
+            for (let dia = 1; dia <= ultimoDiaMes; dia++) {
+                const mesStr = String(mes + 1).padStart(2, '0');
+                const diaStr = String(dia).padStart(2, '0');
+                const dataIso = `${ano}-${mesStr}-${diaStr}`;
+
+                const estaOcupado = datasOcupadas.has(dataIso);
+                const ePassado = dataIso < hojeStr;
+
+                let estiloClasse = "";
+                let textoTooltip = "";
+
+                if (ePassado) {
+                    estiloClasse = "bg-gray-100 text-gray-400 border border-gray-200 opacity-60";
+                    textoTooltip = "Data passada";
+                } else if (estaOcupado) {
+                    estiloClasse = "bg-red-100 text-red-700 font-bold border border-red-300";
+                    textoTooltip = "Ocupada / Reservada";
+                } else {
+                    estiloClasse = "bg-emerald-100 text-emerald-800 font-extrabold border border-emerald-300 shadow-xs";
+                    textoTooltip = "Disponível!";
+                }
+
+                gridEl.innerHTML += `
+                    <div class="h-9 flex flex-col items-center justify-center rounded-xl text-xs ${estiloClasse}" title="${textoTooltip}">
+                        <span>${dia}</span>
+                    </div>
+                `;
+            }
+        }
 
         async function protegerPagina() {
             supabaseClient.auth.onAuthStateChange((event, session) => {
@@ -491,6 +632,58 @@
             }
         }
 
+        function abrirModalTarifaEspecial(suiteId) {
+            const suite = suitesGlobaisCache.find(s => s.id === suiteId);
+            const nomeSuite = suite ? suite.nome : 'Suíte';
+            
+            const tarifasDaSuite = tarifasEspeciaisGlobaisCache.filter(t => t.suite_id === suiteId || !t.suite_id);
+            
+            document.getElementById('modal-tarifa-suite-nome').innerText = `Suíte: ${nomeSuite}`;
+            const containerConteudo = document.getElementById('modal-tarifa-conteudo');
+            containerConteudo.innerHTML = '';
+
+            if (tarifasDaSuite.length === 0) {
+                containerConteudo.innerHTML = '<p class="text-xs text-gray-500 text-center py-4">Nenhuma regra ou tarifa especial cadastrada para esta suíte.</p>';
+            } else {
+                tarifasDaSuite.forEach(t => {
+                    let diasTexto = "Todos os dias";
+                    if (t.dias_semana) {
+                        try {
+                            const diasObj = typeof t.dias_semana === 'string' ? JSON.parse(t.dias_semana) : t.dias_semana;
+                            if (Array.isArray(diasObj) && diasObj.length > 0) {
+                                diasTexto = diasObj.join(', ');
+                            }
+                        } catch(e) {}
+                    }
+
+                    const tipoAjuste = t.tipo_ajuste || 'Valor Fixo';
+                    const valorFormatado = tipoAjuste.toLowerCase().includes('percent') || tipoAjuste.toLowerCase().includes('%') 
+                        ? `${t.valor_especial}%` 
+                        : formatarMoeda(t.valor_especial);
+
+                    containerConteudo.innerHTML += `
+                        <div class="bg-amber-50/60 border border-amber-200 p-3.5 rounded-xl space-y-1.5 text-xs text-amber-950">
+                            <div class="flex justify-between items-start">
+                                <strong class="text-sm font-bold text-amber-900">${t.descricao || 'Tarifa Especial'}</strong>
+                                <span class="bg-amber-200 text-amber-950 px-2 py-0.5 rounded-md font-extrabold text-xs">${valorFormatado}</span>
+                            </div>
+                            <div class="text-gray-600 space-y-0.5 pt-1 border-t border-amber-200/60">
+                                <p><strong>Período:</strong> ${formatarDataSimples(t.data_inicio)} até ${formatarDataSimples(t.data_fim)}</p>
+                                <p><strong>Dias aplicados:</strong> ${(() => { try { const d = typeof t.dias_semana === 'string' ? JSON.parse(t.dias_semana) : t.dias_semana; if (Array.isArray(d) && d.length > 0) { const map = {1:'Segunda',2:'Terça',3:'Quarta',4:'Quinta',5:'Sexta',6:'Sábado',7:'Domingo'}; return d.map(x => map[x] || x).join(', '); } } catch(e){} return diasTexto || 'Todos os dias'; })()}</p>
+                                <p><strong>Tipo de Ajuste:</strong> ${tipoAjuste}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('modal-tarifa-especial').classList.remove('hidden');
+        }
+
+        function fecharModalTarifaEspecial() {
+            document.getElementById('modal-tarifa-especial').classList.add('hidden');
+        }
+
         async function carregarDashboard() {
             await carregarPousada();
 
@@ -502,6 +695,9 @@
 
             const { data: pagamentos } = await supabaseClient.from('hospede_pagamentos').select('*').eq('pousada_id', usuarioIdAtual);
             pagamentosGlobaisCache = pagamentos || [];
+
+            const { data: tarifasEspeciais } = await supabaseClient.from('tarifas_especiais').select('*').eq('pousada_id', usuarioIdAtual);
+            tarifasEspeciaisGlobaisCache = tarifasEspeciais || [];
 
             const hojeStr = new Date().toLocaleDateString('sv-SE');
             let houveAtualizacaoAutomatica = false;
@@ -540,6 +736,26 @@
                 const aprovadasDaSuite = reservasDaSuite.filter(r => r.status === 'Aprovada');
                 const pendentesDaSuite = reservasDaSuite.filter(r => r.status === 'Pendente');
 
+                const temTarifaEspecial = tarifasEspeciaisGlobaisCache.some(t => {
+                    const atendeSuite = (t.suite_id === suite.id || !t.suite_id);
+                    const reservaDaVez = aprovadasDaSuite.find(r => r.suite_id === suite.id);
+                    
+                    if (reservaDaVez && reservaDaVez.checkin && reservaDaVez.checkout && t.data_inicio && t.data_fim) {
+                        const temSobreposicao = (reservaDaVez.checkin <= t.data_fim) && (reservaDaVez.checkout >= t.data_inicio);
+                        return atendeSuite && temSobreposicao;
+                    }
+                    
+                    const dentroDaVigenciaGeral = t.data_inicio && t.data_fim && hojeStr >= t.data_inicio && hojeStr <= t.data_fim;
+                    return atendeSuite && dentroDaVigenciaGeral;
+                });
+                
+                const htmlTarifaBadge = temTarifaEspecial 
+                    ? `<button onclick="abrirModalTarifaEspecial('${suite.id}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 text-[11px] font-bold px-2 py-0.5 rounded-md transition flex items-center gap-1 cursor-pointer"><span>⚡ Com Tarifa Especial</span></button>` 
+                    : '';
+
+                // Botão "Ver Calendário" inserido no card para acesso rápido do gestor
+                const htmlBotaoCalendario = `<button onclick="abrirCalendarioSuite('${suite.id}', '${suite.nome}')" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-[11px] font-bold px-2.5 py-0.5 rounded-md transition flex items-center gap-1 cursor-pointer"><span>📅 Ver Calendário</span></button>`;
+
                 if (aprovadasDaSuite.length > 0) {
                     aprovadasDaSuite.forEach((aprovada, index) => {
                         const isFutura = aprovada.checkin > hojeStr;
@@ -577,10 +793,14 @@
                         container.innerHTML += `
                             <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md ${bgCardClasses} text-gray-900 flex flex-col justify-between transition hover:shadow-lg">
                                 <div>
-                                    <div class="flex justify-between items-center">
+                                    <div class="flex justify-between items-start mb-2">
                                         <div>
                                             <h2 class="text-base sm:text-lg font-bold text-gray-900">${suite.nome}${sufixoTitulo}${nomeHospedeExibicao}</h2>
-                                            <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária: ${formatarMoeda(suite.valor_diaria)}</span>
+                                            <div class="flex flex-wrap items-center gap-2 mt-1">
+                                                <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md">Diária Padrão: ${formatarMoeda(suite.valor_diaria)}</span>
+                                                ${htmlTarifaBadge}
+                                                ${htmlBotaoCalendario}
+                                            </div>
                                         </div>
                                         <div class="flex items-center gap-2">
                                             <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm ${badgeClasses}">
@@ -643,10 +863,14 @@
                     container.innerHTML += `
                         <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md ${corClasses[suite.status] || 'bg-white border border-gray-200'} flex flex-col justify-between transition hover:shadow-lg">
                             <div>
-                                <div class="flex justify-between items-center">
+                                <div class="flex justify-between items-start mb-2">
                                     <div>
                                         <h2 class="text-base sm:text-lg font-bold text-gray-900">${suite.nome}</h2>
-                                        <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária: ${formatarMoeda(suite.valor_diaria)}</span>
+                                        <div class="flex flex-wrap items-center gap-2 mt-1">
+                                            <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md">Diária Padrão: ${formatarMoeda(suite.valor_diaria)}</span>
+                                            ${htmlTarifaBadge}
+                                            ${htmlBotaoCalendario}
+                                        </div>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm ${
@@ -694,10 +918,14 @@
                     container.innerHTML += `
                         <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md bg-amber-50 border border-amber-200 flex flex-col justify-between transition hover:shadow-lg">
                             <div>
-                                <div class="flex justify-between items-center">
+                                <div class="flex justify-between items-start mb-2">
                                     <div>
                                         <h2 class="text-base sm:text-lg font-bold text-amber-950">${suite.nome}${sufixoTituloPend}${nomeHospedePendExibicao}</h2>
-                                        <span class="text-[11px] font-bold text-amber-900/80 bg-amber-200/60 px-2 py-0.5 rounded-md mt-0.5 inline-block">Diária: ${formatarMoeda(suite.valor_diaria)}</span>
+                                        <div class="flex flex-wrap items-center gap-2 mt-1">
+                                            <span class="text-[11px] font-bold text-amber-900/80 bg-amber-200/60 px-2 py-0.5 rounded-md">Diária Padrão: ${formatarMoeda(suite.valor_diaria)}</span>
+                                            ${htmlTarifaBadge}
+                                            ${htmlBotaoCalendario}
+                                        </div>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm bg-amber-200 text-amber-900">Pendente</span>
@@ -863,7 +1091,6 @@
 
             if (!checkinStr || !checkoutStr) return;
 
-            // Regra: Mínimo de 1 diária caso check-in e check-out sejam iguais ou inválidos
             let d1 = new Date(checkinStr);
             let d2 = new Date(checkoutStr);
 
@@ -874,11 +1101,9 @@
                 document.getElementById('edit-checkout').value = checkoutStr;
             }
 
-            // 1. Calcular quantidade de diárias (mínimo 1)[cite: 1]
             const qtdDiarias = calcularQuantidadeDiarias(checkinStr, checkoutStr);
             document.getElementById('modal-qtd-diarias').innerText = `${qtdDiarias} diária(s)`;
 
-            // 2. Buscar valor total da estadia (RPC do banco ou cálculo local baseado na suíte)
             let valorTotal = 0;
             const suiteObj = suitesGlobaisCache.find(s => s.id === suiteId);
             const valorDiaria = suiteObj ? Number(suiteObj.valor_diaria || 0) : 0;
@@ -899,7 +1124,6 @@
 
             document.getElementById('modal-valor-total').innerText = formatarMoeda(valorTotal);
 
-            // 3. Calcular Saldo Restante (Total - Valor já pago)
             let totalPago = 0;
             if (reservaId) {
                 const pagamentosDestaReserva = pagamentosGlobaisCache.filter(p => p.reserva_id === reservaId);
@@ -916,7 +1140,6 @@
                 elSaldo.className = "text-emerald-600 font-extrabold";
             }
 
-            // Se o status for Checkout, atualiza também o saldo devedor de encerramento
             if (document.getElementById('edit-status').value === 'Checkout') {
                 document.getElementById('display-saldo-devedor-checkout').innerText = formatarMoeda(saldoRestante);
                 document.getElementById('edit-valor-sinal').value = saldoRestante > 0 ? saldoRestante.toFixed(2) : '0.00';

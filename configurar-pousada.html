@@ -234,8 +234,6 @@
             document.getElementById('titulo-pousada').innerText = nomePousada;
             document.getElementById('nome-pousada-sidebar').innerText = nomePousada;
 
-            document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${userId}`;
-
             const { data: suites, error: errSuites } = await supabaseClient
                 .from('suites')
                 .select('id, nome, fotos')
