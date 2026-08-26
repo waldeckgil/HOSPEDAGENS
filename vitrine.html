@@ -324,10 +324,10 @@
             const atracoes = dadosPousadaGlobal.atracoes_turisticas || [];
             
             grid.innerHTML = atracoes.map(a => {
-                const fotoAtracao = typeof a === 'object' && a !== null ? (a.foto || a.imagem || a.url || '') : '';
-                const tituloAtracao = typeof a === 'object' && a !== null ? (a.titulo || a.nome || 'Atração') : 'Atração';
-                const descAtracao = typeof a === 'object' && a !== null ? (a.descricao || a.detalhes || '') : '';
-                
+              // ✅ CÓDIGO CORRIGIDO
+const fotoAtracao = typeof a === 'object' && a !== null ? (a.foto || a.imagem || a.url || '') : '';
+const tituloAtracao = typeof a === 'object' && a !== null ? (a.legenda || a.titulo || a.nome || 'Atração') : 'Atração';
+const descAtracao = typeof a === 'object' && a !== null ? (a.descricao || a.detalhes || '') : '';
                 return `
                     <div class="bg-gray-50 border rounded-xl overflow-hidden shadow flex flex-col">
                         ${fotoAtracao ? `<div class="h-40 w-full"><img src="${fotoAtracao}" alt="${tituloAtracao}" class="w-full h-full object-cover"></div>` : ''}
