@@ -570,7 +570,7 @@
                 }
 
                 const precoBase = suite.valor_diaria || suite.preco || 150.00;
-                const calcEstadia = await calcularValorTotalEstadiaCompleto(suite.id, checkinFiltro, checkoutFiltro, precoBase, qtdAdultos, qtdCriancas);
+                const calc = await calcularValorTotalEstadiaCompleto(suite.id, checkinFiltro, checkoutFiltro, precoBase, qtdAdultos, qtdCriancas);
                 const temConflitoNoPeriodo = suite.temConflitoNoPeriodo;
 
                 let statusBadge = temConflitoNoPeriodo 
@@ -584,7 +584,7 @@
                 // Rótulo da Diária Base / Especial
                 let rotuloPrecoDiaria = `R$ ${precoBase.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
                 let avisoTarifaEspecial = '';
-                if (calcEstadia.temTarifaEspecialAplicada) {
+                if (calc.temTarifaEspecialAplicada) {
                     avisoTarifaEspecial = `<span class="text-[10px] text-amber-700 font-bold block bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 mt-0.5">⭐ Inclui Tarifa Especial no período</span>`;
                 }
 
@@ -592,25 +592,25 @@
                     <div class="bg-blue-50/70 border border-blue-100 p-2.5 rounded-xl mb-3 text-xs space-y-1 text-gray-700">
                         <div class="flex justify-between font-semibold">
                             <span>👥 Ocupantes:</span>
-                            <span>${qtdAdultos} Adulto(s)${calcEstadia.detalhesCriancasArr.length > 0 ? ` + ${calcEstadia.detalhesCriancasArr.join(', ')}` : ''}</span>
+                            <span>${qtdAdultos} Adulto(s)${calc.detalhesCriancasArr.length > 0 ? ` + ${calc.detalhesCriancasArr.join(', ')}` : ''}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span>Diárias (${calcEstadia.qtdNoites} noite${calcEstadia.qtdNoites > 1 ? 's' : ''}):</span>
-                            <span>R$ ${calcEstadia.valorDiariasTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+                            <span>Diárias (${calc.qtdNoites} noite${calc.qtdNoites > 1 ? 's' : ''}):</span>
+                            <span>R$ ${calc.valorDiariasTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
                         </div>
                 `;
 
-                if (calcEstadia.hospedesExtras > 0) {
+                if (calc.hospedesExtras > 0) {
                     detalhamentoOcupantesHTML += `
                         <div class="flex justify-between text-blue-800 font-medium">
-                            <span>+ ${calcEstadia.hospedesExtras} hóspede(s) extra(s) (${calcEstadia.qtdNoites}n × R$ ${calcEstadia.valorExtraPorNoiteUnitario.toLocaleString('pt-BR', {minimumFractionDigits: 2})}):</span>
-                            <span>R$ ${calcEstadia.valorExtraTotalPeriodo.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+                            <span>+ ${calc.hospedesExtras} hóspede(s) extra(s) (${calc.qtdNoites}n × R$ ${calc.valorExtraPorNoiteUnitario.toLocaleString('pt-BR', {minimumFractionDigits: 2})}):</span>
+                            <span>R$ ${calc.valorExtraTotalPeriodo.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
                         </div>
                     `;
                 } else {
                     detalhamentoOcupantesHTML += `
                         <div class="flex justify-between text-gray-500 text-[11px]">
-                            <span>(Ocupantes dentro do limite incluso de ${calcEstadia.hospedesInclusos} pessoas)</span>
+                            <span>(Ocupantes dentro do limite incluso de ${calc.hospedesInclusos} pessoas)</span>
                             <span>R$ 0,00</span>
                         </div>
                     `;
