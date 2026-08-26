@@ -336,7 +336,6 @@
             document.getElementById('container-upload-atracoes').classList.toggle('hidden', !ativo);
         }
 
-        // --- GERAR INPUTS DE LEGENDA ---
         function gerarCamposDescricaoFotos(tipo) {
             const inputId = tipo === 'pousada' ? 'input-fotos-pousada' : 'input-fotos-atracoes';
             const containerId = tipo === 'pousada' ? 'lista-descricoes-fotos' : 'lista-descricoes-atracoes';
@@ -374,7 +373,6 @@
             }
         }
 
-        // --- CARREGAR E EXIBIR FOTOS JÁ CADASTRADAS COM O "OLHINHO" ---
         function renderizarFotosCadastradas() {
             const containerPousada = document.getElementById('fotos-cadastradas-pousada');
             const containerAtracoes = document.getElementById('fotos-cadastradas-atracoes');
@@ -382,8 +380,9 @@
             containerPousada.innerHTML = '';
             containerAtracoes.innerHTML = '';
 
-            const listaFotosPousada = dadosPousadaCache?.fotos_pousada || dadosPousadaCache?.fotos || [];
-            const listaAtracoes = dadosPousadaCache?.atracoes_turisticas || dadosPousadaCache?.atracoes || [];
+            // Garante tratamento seguro se vier vazio ou nulo da base
+            const listaFotosPousada = (dadosPousadaCache && dadosPousadaCache.fotos_pousada) ? dadosPousadaCache.fotos_pousada : [];
+            const listaAtracoes = (dadosPousadaCache && dadosPousadaCache.atracoes_turisticas) ? dadosPousadaCache.atracoes_turisticas : [];
 
             if (listaFotosPousada.length === 0) {
                 containerPousada.innerHTML = '<span class="text-[11px] text-gray-400">Nenhuma foto salva na base.</span>';
@@ -482,9 +481,10 @@
         async function salvarRegrasPousada() {
             const nomeAtualPousada = document.getElementById('titulo-pousada').innerText || "Minha Pousada";
 
-            // Processar upload de novas fotos da pousada se houver
-            let fotosPousadaArray = dadosPousadaCache?.fotos_pousada || [];
+            // Mantém as fotos existentes caso já estejam cadastradas
+            let fotosPousadaArray = (dadosPousadaCache && dadosPousadaCache.fotos_pousada) ? [...dadosPousadaCache.fotos_pousada] : [];
             const inputFotos = document.getElementById('input-fotos-pousada');
+            
             if (inputFotos.files && inputFotos.files.length > 0) {
                 const descricoes = document.querySelectorAll('.input-desc-pousada');
                 for (let i = 0; i < inputFotos.files.length; i++) {
@@ -492,17 +492,20 @@
                     const legenda = descricoes[i] ? descricoes[i].value : `Foto ${i + 1}`;
                     const fileName = `${usuarioIdAtual}/pousada_${Date.now()}_${i}_${file.name}`;
                     
-                    const { data: uploadData, error: uploadError } = await supabaseClient.storage.from('pousadas').upload(fileName, file);
+                    const { error: uploadError } = await supabaseClient.storage.from('pousadas').upload(fileName, file);
                     if (!uploadError) {
                         const { data: { publicUrl } } = supabaseClient.storage.from('pousadas').getPublicUrl(fileName);
                         fotosPousadaArray.push({ url: publicUrl, legenda: legenda });
+                    } else {
+                        console.error("Erro no upload de foto da pousada:", uploadError.message);
                     }
                 }
             }
 
-            // Processar upload de novas fotos de atrações se houver
-            let atracoesArray = dadosPousadaCache?.atracoes_turisticas || [];
+            // Mantém as atrações existentes caso já estejam cadastradas
+            let atracoesArray = (dadosPousadaCache && dadosPousadaCache.atracoes_turisticas) ? [...dadosPousadaCache.atracoes_turisticas] : [];
             const inputAtracoes = document.getElementById('input-fotos-atracoes');
+            
             if (inputAtracoes.files && inputAtracoes.files.length > 0) {
                 const descricoesAtracoes = document.querySelectorAll('.input-desc-atracoes');
                 for (let i = 0; i < inputAtracoes.files.length; i++) {
@@ -510,10 +513,12 @@
                     const legenda = descricoesAtracoes[i] ? descricoesAtracoes[i].value : `Atração ${i + 1}`;
                     const fileName = `${usuarioIdAtual}/atracao_${Date.now()}_${i}_${file.name}`;
                     
-                    const { data: uploadData, error: uploadError } = await supabaseClient.storage.from('pousadas').upload(fileName, file);
+                    const { error: uploadError } = await supabaseClient.storage.from('pousadas').upload(fileName, file);
                     if (!uploadError) {
                         const { data: { publicUrl } } = supabaseClient.storage.from('pousadas').getPublicUrl(fileName);
                         atracoesArray.push({ url: publicUrl, legenda: legenda });
+                    } else {
+                        console.error("Erro no upload de atração:", uploadError.message);
                     }
                 }
             }
@@ -537,7 +542,6 @@
             const { error } = await supabaseClient.from('pousadas').upsert(dadosAtualizacao, { onConflict: 'id' });
             if (error) { alert("Erro ao salvar regras da pousada: " + error.message); return; }
 
-            // Atualiza o cache local e limpa os inputs de arquivo
             dadosPousadaCache = dadosAtualizacao;
             inputFotos.value = '';
             inputAtracoes.value = '';
@@ -545,7 +549,7 @@
             document.getElementById('lista-descricoes-atracoes').innerHTML = '';
             renderizarFotosCadastradas();
 
-            mostrarToast("Regras gerais da pousada salvas com sucesso!");
+            mostrarToast("Regras gerais e fotos salvas com sucesso!");
         }
 
         async function carregarSuitesETarifas() {
@@ -741,7 +745,7 @@
         }
 
         document.getElementById('btn-confirmar-exclusao').onclick = async () => {
-            if (!idParaExcluir) return;
+            if (!idParaExcluri) return;
             const { error } = await supabaseClient.from('tarifas_especiais').delete().eq('id', idParaExcluir);
             fecharModalExclusao();
             if (error) { alert("Erro ao excluir: " + error.message); return; }
