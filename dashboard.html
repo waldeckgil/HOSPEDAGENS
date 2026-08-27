@@ -212,27 +212,21 @@
 
                     <!-- DETALHES DA ESTADIA (ADULTOS, CRIANÇAS E PET) COM CÁLCULO DINÂMICO -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-             
-             
                         <div>
-    <label class="block text-xs font-bold text-gray-700 mb-1">Adultos</label>
-    <input type="number" id="edit-adultos" min="1" value="2" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="recalcularValoresModalEdicao()" oninput="recalcularValoresModalEdicao()">
-</div>
-<div>
-    <label class="block text-xs font-bold text-gray-700 mb-1">Crianças</label>
-    <input type="number" id="edit-criancas" min="0" value="0" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="recalcularValoresModalEdicao()" oninput="recalcularValoresModalEdicao()">
-</div>          
-                          
-
-     <!-- Localize exatamente este bloco no arquivo HTML/JS do seu projeto -->
-<div>
-    <label class="block text-xs font-bold text-gray-700 mb-1">Taxa de Pet</label>
-    <select id="edit-pet" class="w-full p-3 border rounded-xl bg-white text-sm font-bold" onchange="recalcularValoresModalEdicao()" oninput="recalcularValoresModalEdicao()">
-        <option value="false">Não</option>
-        <option value="true">Sim</option>
-    </select>
-</div>
-
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Adultos</label>
+                            <input type="number" id="edit-adultos" min="1" value="2" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="recalcularValoresModalEdicao()" oninput="recalcularValoresModalEdicao()">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Crianças</label>
+                            <input type="number" id="edit-criancas" min="0" value="0" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="recalcularValoresModalEdicao()" oninput="recalcularValoresModalEdicao()">
+                        </div>          
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Taxa de Pet</label>
+                            <select id="edit-pet" class="w-full p-3 border rounded-xl bg-white text-sm font-bold" onchange="recalcularValoresModalEdicao()" oninput="recalcularValoresModalEdicao()">
+                                <option value="false">Não</option>
+                                <option value="true">Sim</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- CONTAINER DINÂMICO PARA IDADES DAS CRIANÇAS E CÁLCULO -->
@@ -244,11 +238,11 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-in</label>
-                            <input type="date" id="edit-checkin" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="recalcularValoresModalEdicao()">
+                            <input type="date" id="edit-checkin" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="recalcularValoresModalEdicao()" oninput="recalcularValoresModalEdicao()">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-out</label>
-                            <input type="date" id="edit-checkout" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="recalcularValoresModalEdicao()">
+                            <input type="date" id="edit-checkout" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="recalcularValoresModalEdicao()" oninput="recalcularValoresModalEdicao()">
                         </div>
                     </div>
 
