@@ -1200,7 +1200,7 @@
 
             if (status === 'Checkout') {
                 containerCheckout.classList.remove('hidden');
-                lblValorSinal.innerText = "Valor do Pagamento o Checkout (R$) * Mínimo Obrigatório";
+                lblValorSinal.innerText = "Valor do Pagamento no Checkout (R$) * Mínimo Obrigatório";
                 lblValorSinal.classList.add('text-red-700');
                 lblValorSinal.classList.remove('text-emerald-700');
                 await atualizarSaldoCheckoutModal();
@@ -1384,14 +1384,6 @@
             const statusOriginal = document.getElementById('edit-status-original').value;
             const suiteId = document.getElementById('edit-suite-id').value;
             
-            // VERIFICAÇÃO DE SUÍTE PAUSADA: Permite apenas o status "Limpeza"
-            const suiteObj = suitesGlobaisCache.find(s => s.id === suiteId);
-            const estaPausada = suiteObj && (suiteObj.ativa === false || suiteObj.ativa === 'false');
-            if (estaPausada && status !== 'Limpeza') {
-                mostrarErroModal("A suíte está pausada! Para poder alterar o status para outras opções, você precisa ativar a suíte na tela de Configuração de Suíte. O único status permitido no momento é Limpeza.");
-                return;
-            }
-
             const checkinInformado = document.getElementById('edit-checkin').value;
             const hojeStr = new Date().toLocaleDateString('sv-SE');
 
