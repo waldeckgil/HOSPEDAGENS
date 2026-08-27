@@ -20,9 +20,12 @@
                 <a href="dashboard.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
                     <span>🏠</span> <span class="hidden sm:inline">Painel Principal</span><span class="sm:hidden">Suítes</span>
                 </a>
-                <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl transition shadow text-xs sm:text-sm flex items-center justify-center gap-2 mt-1">
-                    <i class="fa-solid fa-right-from-bracket"></i> Sair
-                </button>
+                
+                
+                    <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl transition shadow text-xs sm:text-sm flex items-center justify-center gap-2 mt-1">
+                        <i class="fa-solid fa-right-from-bracket"></i> Sair
+                    </button>
+                </div>
             </nav>
         </div>
     </aside>
@@ -84,7 +87,7 @@
                             <div class="text-blue-600"><i class="fa-solid fa-circle-info text-base mt-0.5"></i></div>
                             <div class="text-xs text-blue-900 leading-relaxed">
                                 <span class="font-bold block mb-1">Dica de Gestão:</span>
-                                Você pode pausar uma suíte temporariamente para ocultá-la da vitrine de reservas sem precisar apagá-la.
+                                Suas suítes cadastradas aparecem ao lado. Você pode adicionar novas unidades ou gerenciar as existentes de forma independente.
                             </div>
                         </div>
                     </div>
@@ -195,14 +198,16 @@
             document.getElementById('mensagem-container').className = 'hidden';
         }
 
-        // --- PROTEÇÃO DE SESSÃO UNIFICADA ---
+        // --- PROTEÇÃO DE SESSÃO UNIFICADA (VALIDAÇÃO IMEDIATA + TEMPO REAL) ---
         async function protegerPagina() {
+            // 1. Ouve alterações de estado em tempo real (logout, expiração, etc.)
             supabaseClient.auth.onAuthStateChange((event, session) => {
                 if (event === 'SIGNED_OUT' || !session) {
                     window.location.href = 'index.html';
                 }
             });
 
+            // 2. Validação imediata ao carregar a página
             const { data: { session }, error } = await supabaseClient.auth.getSession();
             
             if (error || !session) {
@@ -216,7 +221,7 @@
         }
 
         async function carregarConfiguracao(userId) {
-            const { data: pousada } = await supabaseClient
+            const { data: pousada, error: errPousada } = await supabaseClient
                 .from('pousadas')
                 .select('nome')
                 .eq('id', userId)
@@ -229,10 +234,9 @@
             document.getElementById('titulo-pousada').innerText = nomePousada;
             document.getElementById('nome-pousada-sidebar').innerText = nomePousada;
 
-            // Buscando também a coluna 'ativa'
-            const { data: suites } = await supabaseClient
+            const { data: suites, error: errSuites } = await supabaseClient
                 .from('suites')
-                .select('id, nome, fotos, ativa')
+                .select('id, nome, fotos')
                 .eq('pousada_id', userId);
 
             const container = document.getElementById('suites-container');
@@ -240,14 +244,21 @@
 
             if (suites && suites.length > 0) {
                 suites.forEach(suite => {
-                    adicionarCampo(suite.id, suite.nome, suite.fotos, suite.ativa);
+                    adicionarCampo(suite.id, suite.nome, suite.fotos);
                 });
             } else {
                 adicionarCampo();
             }
         }
 
-        function adicionarCampo(id = '', nome = '', fotos = [], ativa = true) {
+        function copiarLinkVitrine() {
+            if (!usuarioIdAtual) return;
+            navigator.clipboard.writeText(window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`).then(() => {
+                mostrarToast("Copiado!", "Link da vitrine copiado para a área de transferência!");
+            });
+        }
+
+        function adicionarCampo(id = '', nome = '', fotos = []) {
             const container = document.getElementById('suites-container');
             
             if (container.querySelector('p')) {
@@ -255,8 +266,10 @@
             }
 
             const div = document.createElement('div');
-            div.className = `suite-row flex flex-col gap-3 items-start sm:items-center p-4 rounded-2xl border transition ${ativa === false ? 'bg-amber-50/60 border-amber-200' : 'bg-slate-50 border-slate-200'}`;
+            div.className = 'suite-row flex flex-col gap-3 items-start sm:items-center bg-slate-50 p-4 rounded-2xl border border-slate-200 transition';
             div.dataset.suiteId = id;
+            
+            const badgeTag = id ? '<span class="text-[10px] bg-slate-200 text-slate-600 px-2 py-1 rounded-md font-bold uppercase">Cadastrada</span>' : '<span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-1 rounded-md font-bold uppercase">Nova</span>';
             
             let fotosInfoHtml = '';
             if (fotos && fotos.length > 0) {
@@ -268,7 +281,6 @@
                 fotosInfoHtml = `<span class="text-[11px] bg-gray-200 text-gray-600 px-2.5 py-1.5 rounded-md border border-gray-300">Sem fotos</span>`;
             }
 
-            // HTML ajustado com o Checkbox / Toggle de Pausar / Ativar Suíte
             div.innerHTML = `
                 <div class="flex items-center gap-3 w-full">
                     <div class="text-slate-400"><i class="fa-solid fa-bed"></i></div>
@@ -283,13 +295,8 @@
                             <input type="file" class="upload-fotos text-xs text-slate-600 file:mr-2 file:py-1 file:px-2.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer w-full sm:w-auto" multiple accept="image/*">
                         </div>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <!-- Toggle / Checkbox de Pausar Suíte -->
-                        <label class="flex items-center gap-1.5 cursor-pointer select-none bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-xs">
-                            <input type="checkbox" class="suite-ativa-checkbox w-4 h-4 text-blue-600 rounded focus:ring-blue-500" ${ativa !== false ? 'checked' : ''} onchange="atualizarEstiloLinha(this)">
-                            <span class="text-xs font-bold ${ativa !== false ? 'text-emerald-700' : 'text-amber-700'} status-texto">${ativa !== false ? 'Ativa' : 'Pausada'}</span>
-                        </label>
-                        
+                    <div class="flex items-center gap-2">
+                        ${badgeTag}
                         <button type="button" onclick="removerCampo(this)" class="bg-white hover:bg-red-50 text-red-500 hover:text-red-700 border border-slate-200 p-2.5 rounded-xl transition cursor-pointer" title="Excluir Suíte">
                             <i class="fa-solid fa-trash-can text-sm"></i>
                         </button>
@@ -297,21 +304,6 @@
                 </div>
             `;
             container.appendChild(div);
-        }
-
-        // Altera o visual da linha dinamicamente quando o gestor clica em pausar/ativar
-        function atualizarEstiloLinha(checkbox) {
-            const rowDiv = checkbox.closest('.suite-row');
-            const textoStatus = rowDiv.querySelector('.status-texto');
-            if (checkbox.checked) {
-                rowDiv.className = 'suite-row flex flex-col gap-3 items-start sm:items-center p-4 rounded-2xl border transition bg-slate-50 border-slate-200';
-                textoStatus.innerText = 'Ativa';
-                textoStatus.className = 'text-xs font-bold text-emerald-700 status-texto';
-            } else {
-                rowDiv.className = 'suite-row flex flex-col gap-3 items-start sm:items-center p-4 rounded-2xl border transition bg-amber-50/60 border-amber-200';
-                textoStatus.innerText = 'Pausada';
-                textoStatus.className = 'text-xs font-bold text-amber-700 status-texto';
-            }
         }
 
         async function removerCampo(botao) {
@@ -341,7 +333,9 @@
                     mostrarMensagem('Suíte excluída com sucesso.', 'sucesso');
                 };
 
-                btnNao.onclick = () => { modal.classList.add('hidden'); };
+                btnNao.onclick = () => {
+                    modal.classList.add('hidden');
+                };
             } else {
                 rowDiv.remove();
             }
@@ -360,11 +354,17 @@
                 const nomeArquivoLimpo = arquivo.name.replace(/[^a-zA-Z0-9_.-]/g, '_');
                 const caminhoStorage = `suite_${suiteId}/${Date.now()}_${nomeArquivoLimpo}`;
 
-                const { error: uploadError } = await supabaseClient.storage
+                const { data, error: uploadError } = await supabaseClient.storage
                     .from('suites-fotos')
-                    .upload(caminhoStorage, arquivo, { cacheControl: '3600', upsert: false });
+                    .upload(caminhoStorage, arquivo, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
 
-                if (uploadError) continue;
+                if (uploadError) {
+                    console.error("Erro ao enviar imagem:", uploadError.message);
+                    continue;
+                }
 
                 const { data: urlData } = supabaseClient.storage
                     .from('suites-fotos')
@@ -374,6 +374,7 @@
                     urlsPublicas.push(urlData.publicUrl);
                 }
             }
+
             return urlsPublicas;
         }
 
@@ -397,23 +398,17 @@
             
             for (const div of linhasSuites) {
                 const input = div.querySelector('.suite-input');
-                const checkboxAtiva = div.querySelector('.suite-ativa-checkbox');
                 if (!input) continue;
                 
                 const suiteId = div.dataset.suiteId;
                 const valorNome = input.value.trim();
-                const estaAtiva = checkboxAtiva ? checkboxAtiva.checked : true;
 
                 if (valorNome === "") continue;
 
                 if (suiteId) {
                     const novasFotos = await salvarFotos(suiteId, div);
                     
-                    const updateData = { 
-                        nome: valorNome,
-                        ativa: estaAtiva // Salva se está ativa ou pausada
-                    };
-
+                    const updateData = { nome: valorNome };
                     if (novasFotos && novasFotos.length > 0) {
                         const { data: suiteAtual } = await supabaseClient
                             .from('suites')
@@ -433,8 +428,7 @@
                             nome: valorNome, 
                             status: 'Disponível',
                             pousada_id: userId,
-                            fotos: [],
-                            ativa: estaAtiva // Salva o estado ao criar
+                            fotos: []
                         })
                         .select()
                         .single();
@@ -451,7 +445,8 @@
                 }
             }
 
-            mostrarMensagem('Configurações salvas com sucesso!', 'sucesso');
+            // Exibe mensagem de sucesso, dispara o toast e recarrega os dados na própria tela (sem redirecionar)
+            mostrarMensagem('Configurações e fotos salvas com sucesso!', 'sucesso');
             mostrarToast("Sucesso!", "Alterações salvas com sucesso!");
             carregarConfiguracao(userId);
         }
@@ -479,11 +474,17 @@
                 const btnNao = document.getElementById('btn-confirma-nao');
 
                 titulo.innerText = "Renomear Pousada";
-                texto.innerText = `Você está alterando o nome da sua pousada de "${nomePousadaOriginal}" para "${nomePousada}". Deseja continuar?`;
+                texto.innerText = `Você está alterando o nome da sua pousada de "${nomePousadaOriginal}" para "${nomePousada}". Deseja continuar com a renomeação?`;
                 modal.classList.remove('hidden');
 
-                btnSim.onclick = () => { modal.classList.add('hidden'); executarSalvamento(); };
-                btnNao.onclick = () => { modal.classList.add('hidden'); };
+                btnSim.onclick = () => {
+                    modal.classList.add('hidden');
+                    executarSalvamento();
+                };
+
+                btnNao.onclick = () => {
+                    modal.classList.add('hidden');
+                };
             } else {
                 executarSalvamento();
             }
@@ -512,6 +513,7 @@
             } else {
                 galeria.innerHTML = '<p class="text-sm text-slate-500 col-span-full py-4 text-center">Nenhuma foto disponível para esta suíte.</p>';
             }
+            
             modal.classList.remove('hidden');
         }
 
