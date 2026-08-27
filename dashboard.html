@@ -1153,6 +1153,9 @@
             const reservaId = document.getElementById('edit-reserva-id').value;
             const checkinVal = document.getElementById('edit-checkin').value;
             const checkoutVal = document.getElementById('edit-checkout').value;
+            const adultosVal = parseInt(document.getElementById('edit-adultos').value) || 2;
+            const criancasVal = parseInt(document.getElementById('edit-criancas').value) || 0;
+            const petVal = document.getElementById('edit-pet').value === 'true';
 
             if (!suiteId || !checkinVal || !checkoutVal) return 0;
 
@@ -1161,7 +1164,10 @@
                 const { data: valorCalculado, error: erroRpc } = await supabaseClient.rpc('calcular_total_reserva', { 
                     p_suite_id: suiteId, 
                     p_checkin: checkinVal, 
-                    p_checkout: checkoutVal 
+                    p_checkout: checkoutVal,
+                    p_adultos: adultosVal,
+                    p_criancas: criancasVal,
+                    p_pet: petVal
                 });
                 
                 if (!erroRpc && valorCalculado !== null) {
@@ -1189,6 +1195,9 @@
             const reservaId = document.getElementById('edit-reserva-id').value;
             let checkinStr = document.getElementById('edit-checkin').value;
             let checkoutStr = document.getElementById('edit-checkout').value;
+            const adultosVal = parseInt(document.getElementById('edit-adultos').value) || 2;
+            const criancasVal = parseInt(document.getElementById('edit-criancas').value) || 0;
+            const petVal = document.getElementById('edit-pet').value === 'true';
 
             if (!checkinStr || !checkoutStr) return;
 
@@ -1211,10 +1220,14 @@
             valorTotal = qtdDiarias * valorDiaria;
 
             try {
+                // AJUSTE: Passando parâmetros de adultos, crianças e pet para o RPC calcular_total_reserva
                 const { data: valorCalculado, error: erroRpc } = await supabaseClient.rpc('calcular_total_reserva', { 
                     p_suite_id: suiteId, 
                     p_checkin: checkinStr, 
-                    p_checkout: checkoutStr 
+                    p_checkout: checkoutStr,
+                    p_adultos: adultosVal,
+                    p_criancas: criancasVal,
+                    p_pet: petVal
                 });
                 if (!erroRpc && valorCalculado !== null) {
                     valorTotal = Number(valorCalculado);
@@ -1319,6 +1332,9 @@
             
             const checkinVal = document.getElementById('edit-checkin').value || new Date().toLocaleDateString('sv-SE');
             let checkoutVal = document.getElementById('edit-checkout').value || new Date().toLocaleDateString('sv-SE');
+            const adultosVal = parseInt(document.getElementById('edit-adultos').value) || 2;
+            const criancasVal = parseInt(document.getElementById('edit-criancas').value) || 0;
+            const petVal = document.getElementById('edit-pet').value === 'true';
 
             if (status === 'Checkout') {
                 const saldoDevedorMinimo = await calcularSaldoDevedorReservaAtual();
@@ -1361,9 +1377,9 @@
                 endereco: document.getElementById('edit-endereco').value,
                 cep: document.getElementById('edit-cep').value,
                 email: document.getElementById('edit-email').value,
-                adultos: parseInt(document.getElementById('edit-adultos').value) || 2,
-                qtd_criancas: parseInt(document.getElementById('edit-criancas').value) || 0,
-                tem_pet: document.getElementById('edit-pet').value === 'true',
+                qtd_adultos: adultosVal,
+                qtd_criancas: criancasVal,
+                tem_pet: petVal,
                 checkin: checkinVal,
                 checkout: checkoutVal,
                 observacao: observacaoInformada,
@@ -1372,10 +1388,14 @@
 
             let valorTotalCalculado = 0;
             try {
+                // AJUSTE: Passando parâmetros de adultos, crianças e pet também ao salvar a reserva
                 const { data: valorCalculado, error: erroRpc } = await supabaseClient.rpc('calcular_total_reserva', { 
                     p_suite_id: suiteId, 
                     p_checkin: checkinVal, 
-                    p_checkout: checkoutVal 
+                    p_checkout: checkoutVal,
+                    p_adultos: adultosVal,
+                    p_criancas: criancasVal,
+                    p_pet: petVal
                 });
                 
                 if (!erroRpc && valorCalculado !== null) {
