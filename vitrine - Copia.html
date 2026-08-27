@@ -43,7 +43,7 @@
                 </div>
                 <div>
                     <label class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">Adultos (Mínimo 2)</label>
-                    <select id="filtro-adultos" onchange="atualizarFiltrosOcupantesDinamicos()" class="w-full p-2.5 sm:p-3 border rounded-xl font-bold bg-gray-50 text-sm sm:text-base text-gray-800">
+                    <select id="filtro-adultos" class="w-full p-2.5 sm:p-3 border rounded-xl font-bold bg-gray-50 text-sm sm:text-base text-gray-800">
                         <option value="2">2 Adultos</option>
                         <option value="3" selected>3 Adultos</option>
                         <option value="4">4 Adultos</option>
@@ -52,7 +52,7 @@
                 </div>
                 <div>
                     <label class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">Crianças</label>
-                    <select id="filtro-criancas" onchange="gerarCamposIdadeCriancas(); atualizarFiltrosOcupantesDinamicos();" class="w-full p-2.5 sm:p-3 border rounded-xl font-bold bg-gray-50 text-sm sm:text-base text-gray-800">
+                    <select id="filtro-criancas" onchange="gerarCamposIdadeCriancas()" class="w-full p-2.5 sm:p-3 border rounded-xl font-bold bg-gray-50 text-sm sm:text-base text-gray-800">
                         <option value="0">0 Crianças</option>
                         <option value="1" selected>1 Criança</option>
                         <option value="2">2 Crianças</option>
@@ -373,61 +373,6 @@
         }
 
         // Função de cálculo individual do preço do dia considerando as tarifas especiais
-        // Função chamada ao mudar adultos/crianças para manter total <= capacidade máxima
-        function atualizarFiltrosOcupantesDinamicos() {
-            try {
-                if (!cacheSuites || cacheSuites.length === 0) return;
-                const capacidades = cacheSuites.map(s => Number(s.capacidade_hospedes) || 0).filter(n => n > 0);
-                const capacidadeMaximaGeral = capacidades.length > 0 ? Math.max(...capacidades) : 0;
-                const limiteGeral = capacidadeMaximaGeral > 0 ? capacidadeMaximaGeral : 10;
-                
-                const selAdultos = document.getElementById('filtro-adultos');
-                const selCriancas = document.getElementById('filtro-criancas');
-                if (!selAdultos || !selCriancas) return;
-                
-                const adultos = parseInt(selAdultos.value) || 0;
-                let criancas = parseInt(selCriancas.value) || 0;
-                
-                // Calcula máximo de crianças permitido
-                const maxCriancas = Math.max(0, limiteGeral - adultos);
-                
-                // Se crianças atual excede, ajusta e avisa
-                if (criancas > maxCriancas) {
-                    // Mantém valor mas vai gerar aviso no filtro principal
-                    // Remonta opções de crianças para refletir limite
-                    const valorAtual = criancas;
-                    selCriancas.innerHTML = '';
-                    for (let c = 0; c <= valorAtual; c++) {
-                        const opt = document.createElement('option');
-                        opt.value = c;
-                        if (c <= maxCriancas) {
-                            opt.textContent = c === 0 ? '0 Crianças' : c === 1 ? '1 Criança' : `${c} Crianças`;
-                        } else {
-                            opt.textContent = `${c} Crianças (máx ${maxCriancas} com ${adultos} adultos)`;
-                        }
-                        if (c === valorAtual) opt.selected = true;
-                        selCriancas.appendChild(opt);
-                    }
-                    selCriancas.dataset.ultimoAdultos = adultos;
-                } else {
-                    // Remonta crianças até max permitido + margem
-                    const valorAtual = criancas;
-                    selCriancas.innerHTML = '';
-                    const limiteExibir = Math.max(maxCriancas, valorAtual);
-                    for (let c = 0; c <= Math.min(limiteExibir, 10); c++) {
-                        const opt = document.createElement('option');
-                        opt.value = c;
-                        opt.textContent = c === 0 ? '0 Crianças' : c === 1 ? '1 Criança' : `${c} Crianças`;
-                        if (c === valorAtual) opt.selected = true;
-                        selCriancas.appendChild(opt);
-                    }
-                    selCriancas.dataset.ultimoAdultos = adultos;
-                }
-                gerarCamposIdadeCriancas();
-            } catch (e) { console.warn(e); }
-        }
-
-
         function calcularPrecoDiaSuite(dataObj, suiteId, precoBaseSuite) {
             const ano = dataObj.getFullYear();
             const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
@@ -602,54 +547,6 @@
                 return true;
             });
 
-            // >>> FILTROS DINÂMICOS: capacidade máxima lida da tabela suites (GESTOR)
-            // Adultos + Crianças <= capacidade_maxima
-            try {
-                const capacidades = cacheSuites.map(s => Number(s.capacidade_hospedes) || 0).filter(n => n > 0);
-                const capacidadeMaximaGeral = capacidades.length > 0 ? Math.max(...capacidades) : 0;
-                const limiteAdultos = capacidadeMaximaGeral > 0 ? Math.min(capacidadeMaximaGeral, 20) : 10;
-                const selAdultos = document.getElementById('filtro-adultos');
-                const selCriancas = document.getElementById('filtro-criancas');
-                if (selAdultos && !selAdultos.dataset.dinamicoInicial) {
-                    const atualAd = parseInt(selAdultos.value) || 2;
-                    selAdultos.innerHTML = '';
-                    for (let i = 1; i <= limiteAdultos; i++) {
-                        const o = document.createElement('option');
-                        o.value = i;
-                        o.textContent = i === 1 ? '1 Adulto' : `${i} Adultos`;
-                        if (i === atualAd) o.selected = true;
-                        selAdultos.appendChild(o);
-                    }
-                    if (atualAd > limiteAdultos) {
-                        const o = document.createElement('option');
-                        o.value = atualAd;
-                        o.textContent = `${atualAd} Adultos (acima máx ${limiteAdultos})`;
-                        o.selected = true;
-                        selAdultos.appendChild(o);
-                    }
-                    selAdultos.dataset.dinamicoInicial = '1';
-                }
-                // Atualiza crianças baseado em adultos atuais
-                if (selAdultos && selCriancas) {
-                    const ad = parseInt(selAdultos.value) || 2;
-                    const maxCri = Math.max(0, (capacidadeMaximaGeral || 10) - ad);
-                    const atualCr = parseInt(selCriancas.value) || 0;
-                    if (!selCriancas.dataset.ultimoAdultos || selCriancas.dataset.ultimoAdultos != ad) {
-                        selCriancas.innerHTML = '';
-                        const limiteExibir = Math.max(maxCri, atualCr);
-                        for (let c = 0; c <= Math.min(limiteExibir, 10); c++) {
-                            const opt = document.createElement('option');
-                            opt.value = c;
-                            opt.textContent = c === 0 ? '0 Crianças' : c === 1 ? '1 Criança' : `${c} Crianças`;
-                            if (c === atualCr) opt.selected = true;
-                            if (c > maxCri) opt.textContent += ` (máx ${maxCri} c/ ${ad} adultos)`;
-                            selCriancas.appendChild(opt);
-                        }
-                        selCriancas.dataset.ultimoAdultos = ad;
-                    }
-                }
-            } catch (e) { console.warn(e); }
-
             let criancasExtrasBusca = 0;
             const idadeLimite = Number(dadosPousadaGlobal.idade_limite_crianca) || 5;
             for (let i = 1; i <= qtdCriancas; i++) {
@@ -663,11 +560,8 @@
             const novoFim = new Date(checkoutFiltro + 'T00:00:00');
 
             const suitesComStatus = cacheSuites.map(suite => {
-                // REGRA DE NEGÓCIO: capacidade_hospedes da tabela suites soma ADULTO + CRIANÇA (inclusive grátis)
-                // Ex: Suíte Standard Luxo capacidade 4 -> 2 adultos + 2 crianças = 4 OK, 5 adultos + 4 crianças = 9 NÃO ATENDE
-                const capacidadeMax = suite.capacidade_hospedes ? Number(suite.capacidade_hospedes) : 99;
-                const totalOcupantes = (Number(qtdAdultos) || 0) + (Number(qtdCriancas) || 0);
-                const atendeCapacidade = totalOcupantes <= capacidadeMax;
+                const capacidadeMax = suite.capacidade_hospedes || 99;
+                const atendeCapacidade = (qtdAdultos + qtdCriancas) <= capacidadeMax;
 
                 const reservasDaSuite = cacheReservas.filter(r => r.suite_id === suite.id);
                 let temConflitoNoPeriodo = false;
