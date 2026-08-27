@@ -1278,16 +1278,6 @@
                 lblValorSinal.classList.add('text-emerald-700');
             }
 
-            // AJUSTE IMPLEMENTADO: Se o gestor selecionar Ocupada (Agora), antecipa automaticamente o check-in para hoje e recalcula
-            if (status === 'Ocupada') {
-                const hojeStr = new Date().toLocaleDateString('sv-SE');
-                const checkinInput = document.getElementById('edit-checkin');
-                if (checkinInput.value > hojeStr || !checkinInput.value) {
-                    checkinInput.value = hojeStr;
-                    await recalcularValoresModalEdicao();
-                }
-            }
-
             if (status === 'Reservado' && statusOriginal !== 'Reservado' && !camposLimposParaNovaReserva) {
                 document.getElementById('edit-reserva-id').value = '';
                 document.getElementById('edit-hospede').value = '';
@@ -1478,12 +1468,9 @@
             const checkinInformado = document.getElementById('edit-checkin').value;
             const hojeStr = new Date().toLocaleDateString('sv-SE');
 
-            // AJUSTE IMPLEMENTADO: Antecipação permitida de forma fluida (atualiza para hoje se for futura)
-            if (status === 'Ocupada') {
-                if (checkinInformado > hojeStr) {
-                    document.getElementById('edit-checkin').value = hojeStr;
-                    await recalcularValoresModalEdicao();
-                }
+            if (status === 'Ocupada' && checkinInformado > hojeStr) {
+                mostrarErroModal("Para alterar o status para 'Ocupada (Agora)', a data de check-in deve ser hoje ou anterior. Altere a data de check-in para a data de hoje ou mantenha o status como 'Reservado'.");
+                return; 
             }
 
             if (statusOriginal === 'Ocupada' && status === 'Disponível') {
