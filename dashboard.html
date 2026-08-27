@@ -1384,11 +1384,11 @@
             const statusOriginal = document.getElementById('edit-status-original').value;
             const suiteId = document.getElementById('edit-suite-id').value;
             
-            // VERIFICAÇÃO DE SUÍTE PAUSADA: Permite apenas o status "Limpeza"
+            // VERIFICAÇÃO DE SUÍTE PAUSADA: Permite apenas Limpeza ou Checkout para suítes pausadas
             const suiteObj = suitesGlobaisCache.find(s => s.id === suiteId);
             const estaPausada = suiteObj && (suiteObj.ativa === false || suiteObj.ativa === 'false');
-            if (estaPausada && status !== 'Limpeza') {
-                mostrarErroModal("A suíte está pausada! Para poder alterar o status para outras opções, você precisa ativar a suíte na tela de Configuração de Suíte. O único status permitido no momento é Limpeza.");
+            if (estaPausada && status !== 'Limpeza' && status !== 'Checkout') {
+                mostrarErroModal("A suíte está pausada! Para poder alterar o status para outras opções, você precisa ativar a suíte na tela de Configuração de Suíte. Os únicos status permitidos para uma suíte pausada no momento são Limpeza ou Checkout.");
                 return;
             }
 
