@@ -821,7 +821,7 @@
                         // Detalhes da estadia (Adultos, Crianças e Pet)
                         const qtdAdultos = aprovada.adultos !== undefined && aprovada.adultos !== null ? aprovada.adultos : (aprovada.qtd_adultos || 1);
                         const qtdCriancas = aprovada.criancas !== undefined && aprovada.criancas !== null ? aprovada.criancas : (aprovada.crianca || aprovada.qtd_criancas || 0);
-                        const temPet = (aprovada.pet === true || aprovada.pet === 'true' || aprovada.taxa_pet === true || aprovada.taxa_pet === 'true') ? 'Sim' : 'Não';
+                        const temPet = (aprovada.pet === true || aprovada.pet === 'true' || aprovada.taxa_pet === true || aprovada.taxa_pet === 'true' || aprovada.tem_pet === true || aprovada.tem_pet === 'true') ? 'Sim' : 'Não';
 
                         const pagamentosDestaReserva = pagamentosGlobaisCache.filter(p => p.reserva_id === aprovada.id);
                         const totalPago = pagamentosDestaReserva.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
@@ -973,7 +973,7 @@
                     // Detalhes da estadia pendente (Adultos, Crianças e Pet)
                     const qtdAdultosPend = pend.adultos !== undefined && pend.adultos !== null ? pend.adultos : (pend.qtd_adultos || 1);
                     const qtdCriancasPend = pend.criancas !== undefined && pend.criancas !== null ? pend.criancas : (pend.crianca || pend.qtd_criancas || 0);
-                    const temPetPend = (pend.pet === true || pend.pet === 'true' || pend.taxa_pet === true || pend.taxa_pet === 'true') ? 'Sim' : 'Não';
+                    const temPetPend = (pend.pet === true || pend.pet === 'true' || pend.taxa_pet === true || pend.taxa_pet === 'true' || pend.tem_pet === true || pend.tem_pet === 'true') ? 'Sim' : 'Não';
 
                     const pagamentosPend = pagamentosGlobaisCache.filter(p => p.reserva_id === pend.id);
                     const totalPagoPend = pagamentosPend.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
@@ -1117,7 +1117,7 @@
                 document.getElementById('edit-email').value = reserva.email || '';
                 document.getElementById('edit-adultos').value = reserva.adultos !== undefined && reserva.adultos !== null ? reserva.adultos : (reserva.qtd_adultos || 1);
                 document.getElementById('edit-criancas').value = reserva.criancas !== undefined && reserva.criancas !== null ? reserva.criancas : (reserva.crianca || reserva.qtd_criancas || 0);
-                document.getElementById('edit-pet').value = (reserva.pet === true || reserva.pet === 'true' || reserva.taxa_pet === true || reserva.taxa_pet === 'true') ? 'true' : 'false';
+                document.getElementById('edit-pet').value = (reserva.pet === true || reserva.pet === 'true' || reserva.taxa_pet === true || reserva.taxa_pet === 'true' || reserva.tem_pet === true || reserva.tem_pet === 'true') ? 'true' : 'false';
                 document.getElementById('edit-checkin').value = reserva.checkin || '';
                 document.getElementById('edit-checkout').value = reserva.checkout || '';
                 document.getElementById('edit-observacao').value = reserva.observacao || '';
@@ -1362,9 +1362,9 @@
                 endereco: document.getElementById('edit-endereco').value,
                 cep: document.getElementById('edit-cep').value,
                 email: document.getElementById('edit-email').value,
-                adultos: parseInt(document.getElementById('edit-adultos').value) || 1,
-                criancas: parseInt(document.getElementById('edit-criancas').value) || 0,
-                pet: document.getElementById('edit-pet').value === 'true',
+                qtd_adultos: parseInt(document.getElementById('edit-adultos').value) || 1,
+                qtd_criancas: parseInt(document.getElementById('edit-criancas').value) || 0,
+                tem_pet: document.getElementById('edit-pet').value === 'true',
                 checkin: checkinVal,
                 checkout: checkoutVal,
                 observacao: observacaoInformada,
