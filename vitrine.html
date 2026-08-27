@@ -259,19 +259,23 @@
             gerarCamposIdadeCriancas();
             filtrarSuitesDisponiveisPorPeriodo();
         }
+        
+  function verificarSecaoPetFiltro() {
+    const secaoPet = document.getElementById('secao-pet-filtro');
+    const aceitaPet = dadosPousadaGlobal.aceita_pet === true || dadosPousadaGlobal.aceita_pet === 'true' || dadosPousadaGlobal.aceita_pet === 'Sim';
+    const valorPetNum = Number(dadosPousadaGlobal.valor_pet || dadosPousadaGlobal.taxa_pet || dadosPousadaGlobal.valor_taxa_pet || 0);
 
-        function verificarSecaoPetFiltro() {
-            const secaoPet = document.getElementById('secao-pet-filtro');
-            const aceitaPet = dadosPousadaGlobal.aceita_pet === true || dadosPousadaGlobal.aceita_pet === 'true' || dadosPousadaGlobal.aceita_pet === 'Sim';
-            const valorPetNum = Number(dadosPousadaGlobal.valor_pet || dadosPousadaGlobal.taxa_pet || dadosPousadaGlobal.valor_taxa_pet || 0);
-
-            if (aceitaPet && valorPetNum > 0) {
-                secaoPet.classList.remove('hidden');
-                document.getElementById('label-valor-pet-filtro').innerText = `Taxa única de R$ ${valorPetNum.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            } else {
-                secaoPet.classList.add('hidden');
-            }
+    if (aceitaPet) {
+        secaoPet.classList.remove('hidden');
+        if (valorPetNum > 0) {
+            document.getElementById('label-valor-pet-filtro').innerText = `Taxa única de R$ ${valorPetNum.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+        } else {
+            document.getElementById('label-valor-pet-filtro').innerText = `Pet permitido (Sem taxa adicional)`;
         }
+    } else {
+        secaoPet.classList.add('hidden');
+    }
+}
 
         function renderizarBarraInstitucional() {
             const container = document.getElementById('container-institucional');
