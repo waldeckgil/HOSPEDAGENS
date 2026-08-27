@@ -1099,11 +1099,10 @@
             document.getElementById('modal-titulo').innerText = "Gerenciar Suíte: " + nome;
 
             let reserva = null;
-            if (reservaId) {
+            if (reservaId && reservaId !== 'null' && reservaId !== 'undefined' && reservaId !== '') {
                 reserva = reservasGlobaisCache.find(r => r.id === reservaId);
             } else {
-                const hojeStr = new Date().toLocaleDateString('sv-SE');
-                reserva = reservasGlobaisCache.find(r => r.suite_id === id && r.status === 'Aprovada' && r.checkin <= hojeStr);
+                reserva = null;
             }
 
             if (reserva) {
