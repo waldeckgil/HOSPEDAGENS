@@ -229,6 +229,12 @@
                         </div>
                     </div>
 
+                    <!-- CONTAINER DINÂMICO PARA IDADES DAS CRIANÇAS E CÁLCULO -->
+                    <div id="container-idades-criancas" class="hidden bg-gray-50 border border-gray-200 p-3 rounded-xl space-y-2">
+                        <label class="block text-xs font-bold text-gray-700">Idade(s) da(s) Criança(s) (para cálculo e isenção):</label>
+                        <div id="lista-idades-criancas" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+                    </div>
+
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-in</label>
@@ -752,7 +758,6 @@
             await verificarReservasPendentesDashboard();
             atualizarRadarEKPIs();
 
-            // Verificar suítes pausadas para exibir aviso no topo
             const suitesPausadas = suitesGlobaisCache.filter(s => s.ativa === false || s.ativa === 'false');
             const cardAvisoPausadas = document.getElementById('card-aviso-pausadas');
             const textoSuitesPausadas = document.getElementById('texto-suites-pausadas');
@@ -798,7 +803,6 @@
                     ? `<button onclick="abrirModalTarifaEspecial('${suite.id}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 text-[11px] font-bold px-2 py-0.5 rounded-md transition flex items-center gap-1 cursor-pointer"><span>⚡ Com Tarifa Especial</span></button>` 
                     : '';
 
-                // Botão "Ver Calendário" inserido no card para acesso rápido do gestor
                 const htmlBotaoCalendario = `<button onclick="abrirCalendarioSuite('${suite.id}', '${suite.nome}')" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-[11px] font-bold px-2.5 py-0.5 rounded-md transition flex items-center gap-1 cursor-pointer"><span>📅 Ver Calendário</span></button>`;
 
                 if (aprovadasDaSuite.length > 0) {
@@ -818,7 +822,6 @@
                         const qtdDiarias = calcularQuantidadeDiarias(aprovada.checkin, aprovada.checkout);
                         const valorTotal = Number(aprovada.valor_total || 0);
 
-                        // Detalhes da estadia (Adultos, Crianças e Pet)
                         const qtdAdultos = aprovada.adultos !== undefined && aprovada.adultos !== null ? aprovada.adultos : (aprovada.qtd_adultos || 2);
                         const qtdCriancas = aprovada.criancas !== undefined && aprovada.criancas !== null ? aprovada.criancas : (aprovada.crianca || aprovada.qtd_criancas || 0);
                         const temPet = (aprovada.pet === true || aprovada.pet === 'true' || aprovada.taxa_pet === true || aprovada.taxa_pet === 'true' || aprovada.tem_pet === true || aprovada.tem_pet === 'true') ? 'Sim' : 'Não';
@@ -872,7 +875,6 @@
                                         <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">Hóspede:</span> <span class="font-bold text-gray-900">${aprovada.hospede_nome}</span></p>
                                         <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">WhatsApp:</span> <a href="${linkZap}" target="_blank" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${aprovada.whatsapp_hospede || 'Não informado'}</a></p>
                                         
-                                        <!-- DETALHES DA ESTADIA (ADULTOS, CRIANÇAS E PET) -->
                                         <div class="grid grid-cols-3 gap-2 bg-white/80 p-2.5 rounded-xl border border-black/5 text-xs mt-2">
                                             <div>
                                                 <span class="text-gray-500 block text-[10px] uppercase font-bold">Adultos</span>
@@ -970,7 +972,6 @@
                     const sufixoTituloPend = pendentesDaSuite.length > 1 ? ` (${index + 1})` : '';
                     const nomeHospedePendExibicao = pend.hospede_nome ? ` - <span class="font-normal text-amber-950/80 text-sm sm:text-base">${pend.hospede_nome}</span>` : '';
 
-                    // Detalhes da estadia pendente (Adultos, Crianças e Pet)
                     const qtdAdultosPend = pend.adultos !== undefined && pend.adultos !== null ? pend.adultos : (pend.qtd_adultos || 2);
                     const qtdCriancasPend = pend.criancas !== undefined && pend.criancas !== null ? pend.criancas : (pend.crianca || pend.qtd_criancas || 0);
                     const temPetPend = (pend.pet === true || pend.pet === 'true' || pend.taxa_pet === true || pend.taxa_pet === 'true' || pend.tem_pet === true || pend.tem_pet === 'true') ? 'Sim' : 'Não';
@@ -1019,7 +1020,6 @@
                                     <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">Hóspede:</span> <span class="font-bold text-gray-900">${pend.hospede_nome || 'Não informado'}</span></p>
                                     <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">WhatsApp:</span> <a href="${linkZapPend}" target="_blank" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${pend.whatsapp_hospede || 'Não informado'}</a></p>
                                     
-                                    <!-- DETALHES DA ESTADIA (ADULTOS, CRIANÇAS E PET) -->
                                     <div class="grid grid-cols-3 gap-2 bg-white/80 p-2.5 rounded-xl border border-amber-200 text-xs mt-2">
                                         <div>
                                             <span class="text-gray-500 block text-[10px] uppercase font-bold">Adultos</span>
@@ -1148,6 +1148,28 @@
             carregarDashboard();
         }
 
+        function renderizarInputsIdadesCriancas(qtdCriancas, idadesAtuais = []) {
+            const container = document.getElementById('container-idades-criancas');
+            const lista = document.getElementById('lista-idades-criancas');
+            lista.innerHTML = '';
+
+            if (qtdCriancas <= 0) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            container.classList.remove('hidden');
+            for (let i = 0; i < qtdCriancas; i++) {
+                const idadeVal = idadesAtuais[i] !== undefined ? idadesAtuais[i] : 5;
+                lista.innerHTML += `
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-0.5">Criança ${i + 1} (Idade)</label>
+                        <input type="number" min="0" max="17" value="${idadeVal}" class="input-idade-crianca w-full p-2 border rounded-lg bg-white text-xs font-bold text-center" onchange="recalcularValoresModalEdicao()" oninput="recalcularValoresModalEdicao()">
+                    </div>
+                `;
+            }
+        }
+
         async function calcularSaldoDevedorReservaAtual() {
             const suiteId = document.getElementById('edit-suite-id').value;
             const reservaId = document.getElementById('edit-reserva-id').value;
@@ -1199,6 +1221,8 @@
             const criancasVal = parseInt(document.getElementById('edit-criancas').value) || 0;
             const petVal = document.getElementById('edit-pet').value === 'true';
 
+            renderizarInputsIdadesCriancas(criancasVal);
+
             if (!checkinStr || !checkoutStr) return;
 
             let d1 = new Date(checkinStr);
@@ -1220,7 +1244,6 @@
             valorTotal = qtdDiarias * valorDiaria;
 
             try {
-                // AJUSTE: Passando parâmetros de adultos, crianças e pet para o RPC calcular_total_reserva
                 const { data: valorCalculado, error: erroRpc } = await supabaseClient.rpc('calcular_total_reserva', { 
                     p_suite_id: suiteId, 
                     p_checkin: checkinStr, 
@@ -1336,6 +1359,10 @@
             const criancasVal = parseInt(document.getElementById('edit-criancas').value) || 0;
             const petVal = document.getElementById('edit-pet').value === 'true';
 
+            // Coleta idades informadas das crianças
+            const inputsIdades = document.querySelectorAll('.input-idade-crianca');
+            const idadesCriancasArr = Array.from(inputsIdades).map(input => parseInt(input.value) || 0);
+
             if (status === 'Checkout') {
                 const saldoDevedorMinimo = await calcularSaldoDevedorReservaAtual();
                 if (campoSinalStr === '' || isNaN(valorSinalInformado) || valorSinalInformado < saldoDevedorMinimo) {
@@ -1379,6 +1406,7 @@
                 email: document.getElementById('edit-email').value,
                 qtd_adultos: adultosVal,
                 qtd_criancas: criancasVal,
+                idades_criancas: idadesCriancasArr,
                 tem_pet: petVal,
                 checkin: checkinVal,
                 checkout: checkoutVal,
@@ -1388,7 +1416,6 @@
 
             let valorTotalCalculado = 0;
             try {
-                // AJUSTE: Passando parâmetros de adultos, crianças e pet também ao salvar a reserva
                 const { data: valorCalculado, error: erroRpc } = await supabaseClient.rpc('calcular_total_reserva', { 
                     p_suite_id: suiteId, 
                     p_checkin: checkinVal, 
