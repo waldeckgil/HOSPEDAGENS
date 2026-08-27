@@ -165,7 +165,7 @@
                     <select id="edit-status" class="w-full p-3 border rounded-xl font-bold bg-gray-50 text-sm" onchange="(async () => { await verificarStatusModal(); })()">
                         <option value="Disponível">Disponível</option>
                         <option value="Ocupada">Ocupada (Agora)</option>
-                        <option value="Reservado">Criar Nova Reserva</option>
+                        <option value="Reservado">Reservado (Adicionar/Editar Datas Futuras)</option>
                         <option value="Limpeza">Limpeza</option>
                         <option value="Pendente">Pendente</option>
                         <option value="Checkout">Checkout (Finalizar Estadia)</option>
@@ -1137,30 +1137,6 @@
             document.getElementById('edit-forma-pagamento').value = 'Pix / Sinal';
             document.getElementById('edit-observacao').value = '';
             document.getElementById('modal-titulo').innerText = "Gerenciar Suíte: " + nome;
-            // >>> Exibir capacidade real da suíte editada (regra: adultos + crianças)
-            try {
-                const suiteDados = suitesGlobaisCache.find(s => s.id === id);
-                if (suiteDados) {
-                    const capMax = Number(suiteDados.capacidade_hospedes) || 0;
-                    const inclusos = Number(suiteDados.hospedes_inclusos) || 2;
-                    let capInfoEl = document.getElementById('info-capacidade-suite');
-                    if (!capInfoEl) {
-                        // Cria elemento se não existir
-                        const tituloEl = document.getElementById('modal-titulo');
-                        capInfoEl = document.createElement('div');
-                        capInfoEl.id = 'info-capacidade-suite';
-                        capInfoEl.className = 'mt-2 bg-blue-50 border border-blue-200 p-2.5 rounded-xl text-xs font-bold text-blue-900 flex items-center gap-2';
-                        tituloEl.parentNode.insertBefore(capInfoEl, tituloEl.nextSibling);
-                    }
-                    if (capMax > 0) {
-                        capInfoEl.innerHTML = `<span>🏨 Capacidade real desta suíte: <strong>${capMax} pessoa(s)</strong> no total (adultos + crianças) | ${inclusos} incluso(s)</span>`;
-                        capInfoEl.classList.remove('hidden');
-                    } else {
-                        capInfoEl.innerHTML = `<span>🏨 Capacidade não definida para esta suíte (defina em Configurar Pousada)</span>`;
-                        capInfoEl.classList.remove('hidden');
-                    }
-                }
-            } catch(e) { console.warn('Erro capacidade modal', e); }
 
             let reserva = null;
             if (reservaId && reservaId !== 'null' && reservaId !== 'undefined' && reservaId !== '') {
@@ -1323,34 +1299,6 @@
             let checkoutStr = document.getElementById('edit-checkout').value;
             const adultosVal = parseInt(document.getElementById('edit-adultos').value) || 2;
             const criancasVal = parseInt(document.getElementById('edit-criancas').value) || 0;
-
-            // >>> VALIDAÇÃO DE CAPACIDADE: adultos + crianças <= capacidade_hospedes (mesma regra da vitrine)
-            try {
-                const suiteCap = suitesGlobaisCache.find(s => s.id === suiteId);
-                if (suiteCap) {
-                    const capMax = Number(suiteCap.capacidade_hospedes) || 0;
-                    const totalOcup = (Number(adultosVal) || 0) + (Number(criancasVal) || 0);
-                    let avisoCap = document.getElementById('aviso-capacidade-modal');
-                    if (!avisoCap) {
-                        const containerIdades = document.getElementById('container-idades-criancas');
-                        avisoCap = document.createElement('div');
-                        avisoCap.id = 'aviso-capacidade-modal';
-                        avisoCap.className = 'mt-2 p-2.5 rounded-xl text-xs font-bold hidden';
-                        containerIdades.parentNode.insertBefore(avisoCap, containerIdades.nextSibling);
-                    }
-                    if (capMax > 0 && totalOcup > capMax) {
-                        avisoCap.className = 'mt-2 p-2.5 rounded-xl text-xs font-bold bg-red-50 border border-red-300 text-red-800';
-                        avisoCap.innerHTML = `⚠️ Capacidade excedida: esta suíte comporta no máximo ${capMax} pessoa(s) (adultos + crianças). Você informou ${totalOcup} (${adultosVal} adultos + ${criancasVal} crianças).`;
-                        avisoCap.classList.remove('hidden');
-                    } else if (capMax > 0) {
-                        avisoCap.className = 'mt-2 p-2.5 rounded-xl text-xs font-bold bg-green-50 border border-green-200 text-green-800';
-                        avisoCap.innerHTML = `✅ Ocupação OK: ${totalOcup}/${capMax} pessoa(s) (capacidade máxima ${capMax})`;
-                        avisoCap.classList.remove('hidden');
-                    } else {
-                        avisoCap.classList.add('hidden');
-                    }
-                }
-            } catch(e) { console.warn(e); }
             // Defensivo: aceitar true/false, Sim/Não, 1/0
             const petRaw = document.getElementById('edit-pet').value;
             const petVal = (petRaw === 'true' || petRaw === true || String(petRaw).toLowerCase() === 'sim' || petRaw === '1' || petRaw === 1);
@@ -1489,47 +1437,24 @@
                 }
             }
 
-            if (status === 'Reservado' && !camposLimposParaNovaReserva) {
-                // Ao selecionar "Criar Nova Reserva", limpa campos para nova reserva (como solicitado)
-                // Se estiver editando uma reserva existente (statusOriginal === 'Reservado' e tem reservaId), mantém dados para edição
-                // mas se veio de Disponível/Limpeza, limpa para criar nova
-                const reservaIdAtual = document.getElementById('edit-reserva-id').value;
-                const deveLimpar = statusOriginal !== 'Reservado' || !reservaIdAtual;
-                if (deveLimpar) {
-                    document.getElementById('edit-reserva-id').value = '';
-                    document.getElementById('edit-hospede').value = '';
-                    document.getElementById('edit-whatsapp').value = '';
-                    document.getElementById('edit-cpf').value = '';
-                    document.getElementById('edit-rg').value = '';
-                    document.getElementById('edit-endereco').value = '';
-                    document.getElementById('edit-cep').value = '';
-                    document.getElementById('edit-email').value = '';
-                    document.getElementById('edit-adultos').value = '2';
-                    document.getElementById('edit-criancas').value = '0';
-                    document.getElementById('edit-pet').value = 'false';
-                    document.getElementById('edit-checkin').value = '';
-                    document.getElementById('edit-checkout').value = '';
-                    document.getElementById('edit-valor-sinal').value = '';
-                    document.getElementById('edit-forma-pagamento').value = 'Pix / Sinal';
-                    document.getElementById('edit-observacao').value = '';
-                    // Limpa idades crianças
-                    const listaIdades = document.getElementById('lista-idades-criancas');
-                    if (listaIdades) listaIdades.innerHTML = '';
-                    const containerIdades = document.getElementById('container-idades-criancas');
-                    if (containerIdades) containerIdades.classList.add('hidden');
-                }
+            if (status === 'Reservado' && statusOriginal !== 'Reservado' && !camposLimposParaNovaReserva) {
+                document.getElementById('edit-reserva-id').value = '';
+                document.getElementById('edit-hospede').value = '';
+                document.getElementById('edit-whatsapp').value = '';
+                document.getElementById('edit-cpf').value = '';
+                document.getElementById('edit-rg').value = '';
+                document.getElementById('edit-endereco').value = '';
+                document.getElementById('edit-cep').value = '';
+                document.getElementById('edit-email').value = '';
+                document.getElementById('edit-adultos').value = '2';
+                document.getElementById('edit-criancas').value = '0';
+                document.getElementById('edit-pet').value = 'false';
+                document.getElementById('edit-checkin').value = '';
+                document.getElementById('edit-checkout').value = '';
+                document.getElementById('edit-valor-sinal').value = '';
+                document.getElementById('edit-forma-pagamento').value = 'Pix / Sinal';
+                document.getElementById('edit-observacao').value = '';
                 camposLimposParaNovaReserva = true;
-                // Atualiza título para "Criar Nova Reserva"
-                try {
-                    const suiteId = document.getElementById('edit-suite-id').value;
-                    const suiteN = suitesGlobaisCache.find(s => s.id === suiteId);
-                    const nomeSuite = suiteN ? suiteN.nome : '';
-                    if (deveLimpar) {
-                        document.getElementById('modal-titulo').innerText = `Criar Nova Reserva: ${nomeSuite}`;
-                    }
-                } catch(e) {}
-            } else if (status !== 'Reservado') {
-                camposLimposParaNovaReserva = false;
             }
         }
 
@@ -1568,19 +1493,6 @@
                 checkoutVal = dataSeguinte.toLocaleDateString('sv-SE');
                 document.getElementById('edit-checkout').value = checkoutVal;
             }
-
-            // >>> VALIDAÇÃO DE CAPACIDADE NO SALVAMENTO (dashboard - gestor)
-            try {
-                const suiteCapSave = suitesGlobaisCache.find(s => s.id === suiteId);
-                if (suiteCapSave) {
-                    const capMaxSave = Number(suiteCapSave.capacidade_hospedes) || 0;
-                    const totalOcupSave = (Number(adultosVal) || 0) + (Number(criancasVal) || 0);
-                    if (capMaxSave > 0 && totalOcupSave > capMaxSave) {
-                        mostrarErroModal(`Capacidade excedida: esta suíte (${suiteCapSave.nome}) comporta no máximo ${capMaxSave} pessoa(s) (adultos + crianças). Você informou ${totalOcupSave} (${adultosVal} adultos + ${criancasVal} crianças).`);
-                        return;
-                    }
-                }
-            } catch(e) { console.warn(e); }
 
             try {
                 const { data: temConflito, error: erroConflito } = await supabaseClient.rpc('verificar_conflito_reserva', { 
