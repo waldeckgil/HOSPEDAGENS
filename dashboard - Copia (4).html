@@ -836,7 +836,6 @@
                                     p_checkout: aprovada.checkout,
                                     p_adultos: qtdAdultos,
                                     p_criancas: qtdCriancas,
-                                    p_idades_criancas: aprovada.idades_criancas || '',
                                     p_pet: petVal
                                 });
                                 if (valorCalculado !== null) valorTotal = Number(valorCalculado);
@@ -1003,7 +1002,6 @@
                                 p_checkout: pend.checkout,
                                 p_adultos: qtdAdultosPend,
                                 p_criancas: qtdCriancasPend,
-                                p_idades_criancas: pend.idades_criancas || '',
                                 p_pet: petPendVal
                             });
                             if (valorCalculado !== null) valorTotalPend = Number(valorCalculado);
@@ -1160,15 +1158,6 @@
                 document.getElementById('edit-checkin').value = reserva.checkin || '';
                 document.getElementById('edit-checkout').value = reserva.checkout || '';
                 document.getElementById('edit-observacao').value = reserva.observacao || '';
-                // Renderizar idades das crianças vindas do banco (TEXT "5,7" ou array)
-                const qtdCriancasReserva = reserva.criancas !== undefined && reserva.criancas !== null ? reserva.criancas : (reserva.crianca || reserva.qtd_criancas || 0);
-                const idadesReserva = reserva.idades_criancas || '';
-                // Primeiro mostra modal para garantir que DOM exista
-                document.getElementById('modal-edicao').classList.remove('hidden');
-                await verificarStatusModal();
-                renderizarInputsIdadesCriancas(parseInt(qtdCriancasReserva) || 0, idadesReserva);
-                await recalcularValoresModalEdicao();
-                return;
             } else {
                 document.getElementById('edit-reserva-id').value = '';
                 document.getElementById('edit-hospede').value = '';
@@ -1200,22 +1189,6 @@
         function renderizarInputsIdadesCriancas(qtdCriancas, idadesAtuais = []) {
             const container = document.getElementById('container-idades-criancas');
             const lista = document.getElementById('lista-idades-criancas');
-            
-            // Preservar valores existentes quando idadesAtuais vier vazio (ex: mudança de Adulto/Pet)
-            let idadesNorm = [];
-            if (typeof idadesAtuais === 'string' && idadesAtuais.trim() !== '') {
-                // Vem do banco como TEXT "5,7,2"
-                idadesNorm = idadesAtuais.split(',').map(s => s.trim()).filter(s => s !== '').map(v => parseInt(v) || 5);
-            } else if (Array.isArray(idadesAtuais) && idadesAtuais.length > 0) {
-                idadesNorm = idadesAtuais.map(v => parseInt(v) || 5);
-            } else {
-                // Tentar reaproveitar o que já está digitado no DOM
-                const existentes = document.querySelectorAll('.input-idade-crianca');
-                if (existentes.length > 0) {
-                    idadesNorm = Array.from(existentes).map(el => parseInt(el.value) || 5);
-                }
-            }
-
             lista.innerHTML = '';
 
             if (qtdCriancas <= 0) {
@@ -1224,22 +1197,15 @@
             }
 
             container.classList.remove('hidden');
-            let html = '';
             for (let i = 0; i < qtdCriancas; i++) {
-                let idadeVal;
-                if (idadesNorm[i] !== undefined) {
-                    idadeVal = idadesNorm[i];
-                } else {
-                    idadeVal = 5;
-                }
-                html += `
+                const idadeVal = idadesAtuais[i] !== undefined ? idadesAtuais[i] : 5;
+                lista.innerHTML += `
                     <div>
                         <label class="block text-[11px] font-bold text-gray-600 mb-0.5">Criança ${i + 1} (Idade)</label>
                         <input type="number" min="0" max="17" value="${idadeVal}" class="input-idade-crianca w-full p-2 border rounded-lg bg-white text-xs font-bold text-center" onchange="recalcularValoresModalEdicao()" oninput="recalcularValoresModalEdicao()">
                     </div>
                 `;
             }
-            lista.innerHTML = html;
         }
 
         async function calcularSaldoDevedorReservaAtual() {
@@ -1249,14 +1215,9 @@
             const checkoutVal = document.getElementById('edit-checkout').value;
             const adultosVal = parseInt(document.getElementById('edit-adultos').value) || 2;
             const criancasVal = parseInt(document.getElementById('edit-criancas').value) || 0;
-            const petRaw = document.getElementById('edit-pet').value;
-            const petVal = (petRaw === 'true' || petRaw === true || String(petRaw).toLowerCase() === 'sim' || petRaw === '1' || petRaw === 1);
+            const petVal = document.getElementById('edit-pet').value === 'true';
 
             if (!suiteId || !checkinVal || !checkoutVal) return 0;
-
-            const inputsIdades = document.querySelectorAll('.input-idade-crianca');
-            const idadesArr = Array.from(inputsIdades).map(el => parseInt(el.value) || 0);
-            const idadesStr = idadesArr.join(',');
 
             let valorTotalCalculado = 0;
             try {
@@ -1266,7 +1227,6 @@
                     p_checkout: checkoutVal,
                     p_adultos: adultosVal,
                     p_criancas: criancasVal,
-                    p_idades_criancas: idadesStr,
                     p_pet: petVal
                 });
                 
@@ -1290,31 +1250,16 @@
             return saldo > 0 ? saldo : 0;
         }
 
-        let _ultimaChamadaRecalculoId = 0;
         async function recalcularValoresModalEdicao() {
-            const chamadaAtualId = ++_ultimaChamadaRecalculoId;
             const suiteId = document.getElementById('edit-suite-id').value;
             const reservaId = document.getElementById('edit-reserva-id').value;
             let checkinStr = document.getElementById('edit-checkin').value;
             let checkoutStr = document.getElementById('edit-checkout').value;
             const adultosVal = parseInt(document.getElementById('edit-adultos').value) || 2;
             const criancasVal = parseInt(document.getElementById('edit-criancas').value) || 0;
-            // Defensivo: aceitar true/false, Sim/Não, 1/0
-            const petRaw = document.getElementById('edit-pet').value;
-            const petVal = (petRaw === 'true' || petRaw === true || String(petRaw).toLowerCase() === 'sim' || petRaw === '1' || petRaw === 1);
+            const petVal = document.getElementById('edit-pet').value === 'true';
 
-            // Coletar idades atuais antes de re-renderizar para preservar
-            const inputsAntes = document.querySelectorAll('.input-idade-crianca');
-            const idadesAntes = Array.from(inputsAntes).map(el => el.value);
-            renderizarInputsIdadesCriancas(criancasVal, idadesAntes.length ? idadesAntes : []);
-
-            // Após render, coletar idades finais para enviar à RPC
-            const inputsIdadesFinais = document.querySelectorAll('.input-idade-crianca');
-            const idadesArr = Array.from(inputsIdadesFinais).map(input => {
-                const v = parseInt(input.value);
-                return isNaN(v) ? 0 : v;
-            });
-            const idadesStr = idadesArr.join(',');
+            renderizarInputsIdadesCriancas(criancasVal);
 
             if (!checkinStr || !checkoutStr) return;
 
@@ -1343,32 +1288,10 @@
                     p_checkout: checkoutStr,
                     p_adultos: adultosVal,
                     p_criancas: criancasVal,
-                    p_idades_criancas: idadesStr,
                     p_pet: petVal
                 });
-                // Ignorar respostas antigas se usuário digitou rápido
-                if (chamadaAtualId !== _ultimaChamadaRecalculoId) return;
-                
                 if (!erroRpc && valorCalculado !== null) {
                     valorTotal = Number(valorCalculado);
-                } else if (erroRpc) {
-                    console.error("Erro RPC calcular_total_reserva (com idades):", erroRpc);
-                    // Fallback compatibilidade: tentar sem idades caso função antiga
-                    try {
-                        const { data: valorFallback, error: erroFallback } = await supabaseClient.rpc('calcular_total_reserva', {
-                            p_suite_id: suiteId,
-                            p_checkin: checkinStr,
-                            p_checkout: checkoutStr,
-                            p_adultos: adultosVal,
-                            p_criancas: criancasVal,
-                            p_pet: petVal
-                        });
-                        if (!erroFallback && valorFallback !== null) {
-                            valorTotal = Number(valorFallback);
-                        }
-                    } catch (e2) {
-                        console.error("Fallback RPC também falhou:", e2);
-                    }
                 }
             } catch (err) {
                 console.error("Erro ao recalcular via RPC:", err);
@@ -1472,12 +1395,10 @@
             let checkoutVal = document.getElementById('edit-checkout').value || new Date().toLocaleDateString('sv-SE');
             const adultosVal = parseInt(document.getElementById('edit-adultos').value) || 2;
             const criancasVal = parseInt(document.getElementById('edit-criancas').value) || 0;
-            const petRawExec = document.getElementById('edit-pet').value;
-            const petVal = (petRawExec === 'true' || petRawExec === true || String(petRawExec).toLowerCase() === 'sim' || petRawExec === '1' || petRawExec === 1);
+            const petVal = document.getElementById('edit-pet').value === 'true';
 
             const inputsIdades = document.querySelectorAll('.input-idade-crianca');
             const idadesCriancasArr = Array.from(inputsIdades).map(input => parseInt(input.value) || 0);
-            const idadesCriancasStr = idadesCriancasArr.join(',');
 
             if (status === 'Checkout') {
                 const saldoDevedorMinimo = await calcularSaldoDevedorReservaAtual();
@@ -1522,7 +1443,7 @@
                 email: document.getElementById('edit-email').value,
                 qtd_adultos: adultosVal,
                 qtd_criancas: criancasVal,
-                idades_criancas: idadesCriancasStr,
+                idades_criancas: idadesCriancasArr,
                 tem_pet: petVal,
                 checkin: checkinVal,
                 checkout: checkoutVal,
@@ -1538,7 +1459,6 @@
                     p_checkout: checkoutVal,
                     p_adultos: adultosVal,
                     p_criancas: criancasVal,
-                    p_idades_criancas: idadesCriancasStr,
                     p_pet: petVal
                 });
                 
