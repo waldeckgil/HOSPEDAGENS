@@ -210,6 +210,25 @@
                         <input type="email" id="edit-email" placeholder="E-mail" class="p-3 border rounded-xl text-sm">
                     </div>
 
+                    <!-- DETALHES DA ESTADIA (ADULTOS, CRIANÇAS E PET) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Adultos</label>
+                            <input type="number" id="edit-adultos" min="1" value="1" class="w-full p-3 border rounded-xl bg-white text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Crianças</label>
+                            <input type="number" id="edit-criancas" min="0" value="0" class="w-full p-3 border rounded-xl bg-white text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Taxa de Pet</label>
+                            <select id="edit-pet" class="w-full p-3 border rounded-xl bg-white text-sm font-bold">
+                                <option value="false">Não</option>
+                                <option value="true">Sim</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-in</label>
@@ -799,6 +818,11 @@
                         const qtdDiarias = calcularQuantidadeDiarias(aprovada.checkin, aprovada.checkout);
                         const valorTotal = Number(aprovada.valor_total || 0);
 
+                        // Detalhes da estadia (Adultos, Crianças e Pet)
+                        const qtdAdultos = aprovada.adultos !== undefined && aprovada.adultos !== null ? aprovada.adultos : (aprovada.qtd_adultos || 1);
+                        const qtdCriancas = aprovada.criancas !== undefined && aprovada.criancas !== null ? aprovada.criancas : (aprovada.crianca || aprovada.qtd_criancas || 0);
+                        const temPet = (aprovada.pet === true || aprovada.pet === 'true' || aprovada.taxa_pet === true || aprovada.taxa_pet === 'true') ? 'Sim' : 'Não';
+
                         const pagamentosDestaReserva = pagamentosGlobaisCache.filter(p => p.reserva_id === aprovada.id);
                         const totalPago = pagamentosDestaReserva.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
                         const saldoRestante = valorTotal - totalPago;
@@ -848,6 +872,22 @@
                                         <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">Hóspede:</span> <span class="font-bold text-gray-900">${aprovada.hospede_nome}</span></p>
                                         <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">WhatsApp:</span> <a href="${linkZap}" target="_blank" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${aprovada.whatsapp_hospede || 'Não informado'}</a></p>
                                         
+                                        <!-- DETALHES DA ESTADIA (ADULTOS, CRIANÇAS E PET) -->
+                                        <div class="grid grid-cols-3 gap-2 bg-white/80 p-2.5 rounded-xl border border-black/5 text-xs mt-2">
+                                            <div>
+                                                <span class="text-gray-500 block text-[10px] uppercase font-bold">Adultos</span>
+                                                <strong class="text-gray-900">${qtdAdultos}</strong>
+                                            </div>
+                                            <div>
+                                                <span class="text-gray-500 block text-[10px] uppercase font-bold">Crianças</span>
+                                                <strong class="text-gray-900">${qtdCriancas}</strong>
+                                            </div>
+                                            <div>
+                                                <span class="text-gray-500 block text-[10px] uppercase font-bold">Taxa Pet</span>
+                                                <strong class="text-gray-900">${temPet}</strong>
+                                            </div>
+                                        </div>
+
                                         <div class="flex items-center justify-between pt-1 border-t border-black/5 mt-2">
                                             <span class="text-xs font-semibold text-gray-700">Estadia: <strong class="text-gray-900">${qtdDiarias} diária(s)</strong></span>
                                             <span class="text-xs font-extrabold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">Total: ${formatarMoeda(valorTotal)}</span>
@@ -930,6 +970,11 @@
                     const sufixoTituloPend = pendentesDaSuite.length > 1 ? ` (${index + 1})` : '';
                     const nomeHospedePendExibicao = pend.hospede_nome ? ` - <span class="font-normal text-amber-950/80 text-sm sm:text-base">${pend.hospede_nome}</span>` : '';
 
+                    // Detalhes da estadia pendente (Adultos, Crianças e Pet)
+                    const qtdAdultosPend = pend.adultos !== undefined && pend.adultos !== null ? pend.adultos : (pend.qtd_adultos || 1);
+                    const qtdCriancasPend = pend.criancas !== undefined && pend.criancas !== null ? pend.criancas : (pend.crianca || pend.qtd_criancas || 0);
+                    const temPetPend = (pend.pet === true || pend.pet === 'true' || pend.taxa_pet === true || pend.taxa_pet === 'true') ? 'Sim' : 'Não';
+
                     const pagamentosPend = pagamentosGlobaisCache.filter(p => p.reserva_id === pend.id);
                     const totalPagoPend = pagamentosPend.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
                     const saldoRestantePend = valorTotalPend - totalPagoPend;
@@ -974,6 +1019,22 @@
                                     <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">Hóspede:</span> <span class="font-bold text-gray-900">${pend.hospede_nome || 'Não informado'}</span></p>
                                     <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">WhatsApp:</span> <a href="${linkZapPend}" target="_blank" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${pend.whatsapp_hospede || 'Não informado'}</a></p>
                                     
+                                    <!-- DETALHES DA ESTADIA (ADULTOS, CRIANÇAS E PET) -->
+                                    <div class="grid grid-cols-3 gap-2 bg-white/80 p-2.5 rounded-xl border border-amber-200 text-xs mt-2">
+                                        <div>
+                                            <span class="text-gray-500 block text-[10px] uppercase font-bold">Adultos</span>
+                                            <strong class="text-gray-900">${qtdAdultosPend}</strong>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-500 block text-[10px] uppercase font-bold">Crianças</span>
+                                            <strong class="text-gray-900">${qtdCriancasPend}</strong>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-500 block text-[10px] uppercase font-bold">Taxa Pet</span>
+                                            <strong class="text-gray-900">${temPetPend}</strong>
+                                        </div>
+                                    </div>
+
                                     <div class="flex items-center justify-between pt-1 border-t border-amber-200 mt-2">
                                         <span class="text-xs font-semibold text-amber-900">Estadia: <strong class="text-gray-900">${qtdDiariasPend} diária(s)</strong></span>
                                         <span class="text-xs font-extrabold text-blue-700 bg-white px-2.5 py-1 rounded-lg border border-amber-200">Total: ${formatarMoeda(valorTotalPend)}</span>
@@ -1054,6 +1115,9 @@
                 document.getElementById('edit-endereco').value = reserva.endereco || '';
                 document.getElementById('edit-cep').value = reserva.cep || '';
                 document.getElementById('edit-email').value = reserva.email || '';
+                document.getElementById('edit-adultos').value = reserva.adultos !== undefined && reserva.adultos !== null ? reserva.adultos : (reserva.qtd_adultos || 1);
+                document.getElementById('edit-criancas').value = reserva.criancas !== undefined && reserva.criancas !== null ? reserva.criancas : (reserva.crianca || reserva.qtd_criancas || 0);
+                document.getElementById('edit-pet').value = (reserva.pet === true || reserva.pet === 'true' || reserva.taxa_pet === true || reserva.taxa_pet === 'true') ? 'true' : 'false';
                 document.getElementById('edit-checkin').value = reserva.checkin || '';
                 document.getElementById('edit-checkout').value = reserva.checkout || '';
                 document.getElementById('edit-observacao').value = reserva.observacao || '';
@@ -1066,6 +1130,9 @@
                 document.getElementById('edit-endereco').value = '';
                 document.getElementById('edit-cep').value = '';
                 document.getElementById('edit-email').value = '';
+                document.getElementById('edit-adultos').value = '1';
+                document.getElementById('edit-criancas').value = '0';
+                document.getElementById('edit-pet').value = 'false';
                 document.getElementById('edit-checkin').value = '';
                 document.getElementById('edit-checkout').value = '';
                 document.getElementById('edit-observacao').value = '';
@@ -1220,6 +1287,9 @@
                 document.getElementById('edit-endereco').value = '';
                 document.getElementById('edit-cep').value = '';
                 document.getElementById('edit-email').value = '';
+                document.getElementById('edit-adultos').value = '1';
+                document.getElementById('edit-criancas').value = '0';
+                document.getElementById('edit-pet').value = 'false';
                 document.getElementById('edit-checkin').value = '';
                 document.getElementById('edit-checkout').value = '';
                 document.getElementById('edit-valor-sinal').value = '';
@@ -1283,6 +1353,9 @@
                 endereco: document.getElementById('edit-endereco').value,
                 cep: document.getElementById('edit-cep').value,
                 email: document.getElementById('edit-email').value,
+                adultos: parseInt(document.getElementById('edit-adultos').value) || 1,
+                criancas: parseInt(document.getElementById('edit-criancas').value) || 0,
+                pet: document.getElementById('edit-pet').value === 'true',
                 checkin: checkinVal,
                 checkout: checkoutVal,
                 observacao: observacaoInformada,
