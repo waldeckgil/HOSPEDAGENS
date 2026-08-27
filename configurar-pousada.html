@@ -445,8 +445,10 @@
                 }
             }
 
-            mostrarMensagem('Configurações e fotos salvas com sucesso! Redirecionando...', 'sucesso');
-            setTimeout(() => window.location.href = 'dashboard.html', 1500);
+            // Exibe mensagem de sucesso, dispara o toast e recarrega os dados na própria tela (sem redirecionar)
+            mostrarMensagem('Configurações e fotos salvas com sucesso!', 'sucesso');
+            mostrarToast("Sucesso!", "Alterações salvas com sucesso!");
+            carregarConfiguracao(userId);
         }
 
         async function salvarConfiguracao() {
