@@ -1137,6 +1137,7 @@
             document.getElementById('edit-forma-pagamento').value = 'Pix / Sinal';
             document.getElementById('edit-observacao').value = '';
             document.getElementById('modal-titulo').innerText = "Gerenciar Suíte: " + nome;
+            // >>> Exibir capacidade real da suíte editada (regra: adultos + crianças)
             try {
                 const suiteDados = suitesGlobaisCache.find(s => s.id === id);
                 if (suiteDados) {
@@ -1144,6 +1145,7 @@
                     const inclusos = Number(suiteDados.hospedes_inclusos) || 2;
                     let capInfoEl = document.getElementById('info-capacidade-suite');
                     if (!capInfoEl) {
+                        // Cria elemento se não existir
                         const tituloEl = document.getElementById('modal-titulo');
                         capInfoEl = document.createElement('div');
                         capInfoEl.id = 'info-capacidade-suite';
@@ -1154,7 +1156,7 @@
                         capInfoEl.innerHTML = `<span>🏨 Capacidade real desta suíte: <strong>${capMax} pessoa(s)</strong> no total (adultos + crianças) | ${inclusos} incluso(s)</span>`;
                         capInfoEl.classList.remove('hidden');
                     } else {
-                        capInfoEl.innerHTML = `<span>🏨 Capacidade não definida (defina em Configurar Pousada)</span>`;
+                        capInfoEl.innerHTML = `<span>🏨 Capacidade não definida para esta suíte (defina em Configurar Pousada)</span>`;
                         capInfoEl.classList.remove('hidden');
                     }
                 }
@@ -1322,6 +1324,7 @@
             const adultosVal = parseInt(document.getElementById('edit-adultos').value) || 2;
             const criancasVal = parseInt(document.getElementById('edit-criancas').value) || 0;
 
+            // >>> VALIDAÇÃO DE CAPACIDADE: adultos + crianças <= capacidade_hospedes (mesma regra da vitrine)
             try {
                 const suiteCap = suitesGlobaisCache.find(s => s.id === suiteId);
                 if (suiteCap) {
@@ -1341,7 +1344,7 @@
                         avisoCap.classList.remove('hidden');
                     } else if (capMax > 0) {
                         avisoCap.className = 'mt-2 p-2.5 rounded-xl text-xs font-bold bg-green-50 border border-green-200 text-green-800';
-                        avisoCap.innerHTML = `✅ Ocupação OK: ${totalOcup}/${capMax} pessoa(s)`;
+                        avisoCap.innerHTML = `✅ Ocupação OK: ${totalOcup}/${capMax} pessoa(s) (capacidade máxima ${capMax})`;
                         avisoCap.classList.remove('hidden');
                     } else {
                         avisoCap.classList.add('hidden');
@@ -1487,6 +1490,9 @@
             }
 
             if (status === 'Reservado' && !camposLimposParaNovaReserva) {
+                // Ao selecionar "Criar Nova Reserva", limpa campos para nova reserva (como solicitado)
+                // Se estiver editando uma reserva existente (statusOriginal === 'Reservado' e tem reservaId), mantém dados para edição
+                // mas se veio de Disponível/Limpeza, limpa para criar nova
                 const reservaIdAtual = document.getElementById('edit-reserva-id').value;
                 const deveLimpar = statusOriginal !== 'Reservado' || !reservaIdAtual;
                 if (deveLimpar) {
@@ -1506,22 +1512,14 @@
                     document.getElementById('edit-valor-sinal').value = '';
                     document.getElementById('edit-forma-pagamento').value = 'Pix / Sinal';
                     document.getElementById('edit-observacao').value = '';
+                    // Limpa idades crianças
                     const listaIdades = document.getElementById('lista-idades-criancas');
                     if (listaIdades) listaIdades.innerHTML = '';
                     const containerIdades = document.getElementById('container-idades-criancas');
                     if (containerIdades) containerIdades.classList.add('hidden');
-                    // Limpa resumo dinâmico
-                    const elQtdDiarias = document.getElementById('modal-qtd-diarias');
-                    const elValorTotal = document.getElementById('modal-valor-total');
-                    const elSaldoRest = document.getElementById('modal-saldo-restante');
-                    if (elQtdDiarias) elQtdDiarias.innerText = '0 diária(s)';
-                    if (elValorTotal) elValorTotal.innerText = 'R$ 0,00';
-                    if (elSaldoRest) elSaldoRest.innerText = 'R$ 0,00';
-                    const avisoCap = document.getElementById('aviso-capacidade-modal');
-                    if (avisoCap) { avisoCap.classList.add('hidden'); avisoCap.innerHTML = ''; }
-                    limparErroModal();
                 }
                 camposLimposParaNovaReserva = true;
+                // Atualiza título para "Criar Nova Reserva"
                 try {
                     const suiteId = document.getElementById('edit-suite-id').value;
                     const suiteN = suitesGlobaisCache.find(s => s.id === suiteId);
@@ -1571,6 +1569,7 @@
                 document.getElementById('edit-checkout').value = checkoutVal;
             }
 
+            // >>> VALIDAÇÃO DE CAPACIDADE NO SALVAMENTO (dashboard - gestor)
             try {
                 const suiteCapSave = suitesGlobaisCache.find(s => s.id === suiteId);
                 if (suiteCapSave) {
