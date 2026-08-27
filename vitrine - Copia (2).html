@@ -990,16 +990,6 @@
             const qtdAdultos = parseInt(document.getElementById('filtro-adultos').value) || 2;
             const qtdCriancas = parseInt(document.getElementById('filtro-criancas').value) || 0;
 
-            // Captura idades das crianças informadas
-            let idadesCriancasArr = [];
-            for (let i = 1; i <= qtdCriancas; i++) {
-                const elIdade = document.getElementById(`idade-crianca-${i}`);
-                if (elIdade) {
-                    idadesCriancasArr.push(elIdade.value);
-                }
-            }
-            const idadesCriancasStr = idadesCriancasArr.join(', ');
-
             const { data: suiteData } = await supabaseClient.from('suites').select('*').eq('id', suiteId).single();
             const precoBase = suiteData ? (suiteData.valor_diaria || suiteData.preco || 150.00) : 150.00;
             const calc = await calcularValorTotalEstadiaCompleto(suiteId, checkinVal, checkoutVal, precoBase, qtdAdultos, qtdCriancas);
@@ -1007,10 +997,7 @@
             const aceitaPetGlobal = dadosPousadaGlobal.aceita_pet === true || dadosPousadaGlobal.aceita_pet === 'true' || dadosPousadaGlobal.aceita_pet === 'Sim';
             const checkPetFiltro = document.getElementById('check-trazer-pet-filtro');
             let valorPetTotal = 0;
-            let temPetCheck = false;
-            
-            if (aceitaPetGlobal && checkPetFiltro && checkPetFiltro.checked) {
-                temPetCheck = true;
+            if (aceitaPetGlobal && checkPetFilsro && checkPetFiltro.checked) {
                 valorPetTotal = Number(dadosPousadaGlobal.valor_pet || dadosPousadaGlobal.taxa_pet || dadosPousadaGlobal.valor_taxa_pet || 0);
             }
 
@@ -1028,12 +1015,6 @@
                 endereco: document.getElementById('endereco-hospede').value,
                 checkin: checkinVal,
                 checkout: checkoutVal,
-                // Novos campos adicionados:
-                qtd_adultos: qtdAdultos,
-                qtd_criancas: qtdCriancas,
-                idades_criancas: idadesCriancasStr,
-                tem_pet: temPetCheck,
-                taxa_pet: valorPetTotal,
                 valor_total: valorTotalFinal,
                 status: 'Pendente',
                 criado_em: new Date().toISOString()
