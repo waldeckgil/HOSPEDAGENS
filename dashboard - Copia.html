@@ -79,16 +79,6 @@
 
         <!-- CORPO DA PÁGINA -->
         <main class="p-4 sm:p-6 md:p-8 flex-1 overflow-y-auto">
-            
-            <!-- AVISO DE SUÍTES PAUSADAS -->
-            <div id="card-aviso-pausadas" class="hidden mb-6 bg-slate-800 border-l-8 border-slate-500 p-4 sm:p-5 rounded-2xl shadow-sm text-white flex flex-col gap-1">
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">⚠️</span>
-                    <h3 class="text-sm sm:text-base font-bold">Aviso: Existem suítes pausadas no momento</h3>
-                </div>
-                <p id="texto-suites-pausadas" class="text-xs text-slate-300 pl-7"></p>
-            </div>
-
             <!-- RADAR DE PRÓXIMAS CHEGADAS -->
             <div id="radar-chegadas-container" class="hidden mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-l-8 border-blue-600 p-4 sm:p-5 rounded-2xl shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div class="flex items-center gap-3">
@@ -279,7 +269,7 @@
                 <span class="text-xl">📅</span>
                 <h3 id="cal-suite-nome" class="text-lg font-bold text-gray-900">Calendário da Suíte</h3>
             </div>
-            <p class="text-xs text-emerald-700 font-medium mb-4">Dias em <strong class="bg-emerald-100 px-1 rounded">verde</strong> estão livres para novas reservas.</p>
+            <p class="text-xs text-emerald-700 font-medium mb-4">Dias em <strong class="bg-emerald-100 px-1 rounded">verde</strong> estão livres para novas reservas[cite: 2].</p>
 
             <!-- Cabeçalho do Mês e Navegação -->
             <div class="flex justify-between items-center mb-4 bg-gray-50 p-2.5 rounded-xl border border-gray-200">
@@ -733,19 +723,6 @@
             await verificarReservasPendentesDashboard();
             atualizarRadarEKPIs();
 
-            // Verificar suítes pausadas para exibir aviso no topo
-            const suitesPausadas = suitesGlobaisCache.filter(s => s.ativa === false || s.ativa === 'false');
-            const cardAvisoPausadas = document.getElementById('card-aviso-pausadas');
-            const textoSuitesPausadas = document.getElementById('texto-suites-pausadas');
-            
-            if (suitesPausadas.length > 0) {
-                const nomesPausadas = suitesPausadas.map(s => s.nome).join(', ');
-                textoSuitesPausadas.innerText = `As seguintes unidades estão ocultas para os clientes na vitrine: ${nomesPausadas}.`;
-                cardAvisoPausadas.classList.remove('hidden');
-            } else {
-                cardAvisoPausadas.classList.add('hidden');
-            }
-
             const container = document.getElementById('suites-container');
             container.innerHTML = '';
             
@@ -755,9 +732,6 @@
             }
 
             suitesGlobaisCache.forEach(suite => {
-                const estaAtiva = suite.ativa !== false && suite.ativa !== 'false';
-                const tagPausadaHtml = !estaAtiva ? `<span class="bg-slate-700 text-slate-200 text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">⏸️ Pausada</span>` : '';
-
                 const reservasDaSuite = reservasGlobaisCache.filter(r => r.suite_id === suite.id && r.status !== 'Cancelada' && r.status !== 'Recusada' && r.status !== 'Finalizada');
                 const aprovadasDaSuite = reservasDaSuite.filter(r => r.status === 'Aprovada');
                 const pendentesDaSuite = reservasDaSuite.filter(r => r.status === 'Pendente');
@@ -821,10 +795,7 @@
                                 <div>
                                     <div class="flex justify-between items-start mb-2">
                                         <div>
-                                            <div class="flex items-center gap-2 mb-1">
-                                                <h2 class="text-base sm:text-lg font-bold text-gray-900">${suite.nome}${sufixoTitulo}${nomeHospedeExibicao}</h2>
-                                                ${tagPausadaHtml}
-                                            </div>
+                                            <h2 class="text-base sm:text-lg font-bold text-gray-900">${suite.nome}${sufixoTitulo}${nomeHospedeExibicao}</h2>
                                             <div class="flex flex-wrap items-center gap-2 mt-1">
                                                 <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md">Diária Padrão: ${formatarMoeda(suite.valor_diaria)}</span>
                                                 ${htmlTarifaBadge}
@@ -894,10 +865,7 @@
                             <div>
                                 <div class="flex justify-between items-start mb-2">
                                     <div>
-                                        <div class="flex items-center gap-2 mb-1">
-                                            <h2 class="text-base sm:text-lg font-bold text-gray-900">${suite.nome}</h2>
-                                            ${tagPausadaHtml}
-                                        </div>
+                                        <h2 class="text-base sm:text-lg font-bold text-gray-900">${suite.nome}</h2>
                                         <div class="flex flex-wrap items-center gap-2 mt-1">
                                             <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md">Diária Padrão: ${formatarMoeda(suite.valor_diaria)}</span>
                                             ${htmlTarifaBadge}
@@ -952,10 +920,7 @@
                             <div>
                                 <div class="flex justify-between items-start mb-2">
                                     <div>
-                                        <div class="flex items-center gap-2 mb-1">
-                                            <h2 class="text-base sm:text-lg font-bold text-amber-950">${suite.nome}${sufixoTituloPend}${nomeHospedePendExibicao}</h2>
-                                            ${tagPausadaHtml}
-                                        </div>
+                                        <h2 class="text-base sm:text-lg font-bold text-amber-950">${suite.nome}${sufixoTituloPend}${nomeHospedePendExibicao}</h2>
                                         <div class="flex flex-wrap items-center gap-2 mt-1">
                                             <span class="text-[11px] font-bold text-amber-900/80 bg-amber-200/60 px-2 py-0.5 rounded-md">Diária Padrão: ${formatarMoeda(suite.valor_diaria)}</span>
                                             ${htmlTarifaBadge}
