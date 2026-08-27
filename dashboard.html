@@ -778,7 +778,7 @@
                 return;
             }
 
-            suitesGlobaisCache.forEach(suite => {
+            for (const suite of suitesGlobaisCache) {
                 const estaAtiva = suite.ativa !== false && suite.ativa !== 'false';
                 const tagPausadaHtml = !estaAtiva ? `<span class="bg-slate-700 text-slate-200 text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">⏸️ Pausada</span>` : '';
 
@@ -806,7 +806,8 @@
                 const htmlBotaoCalendario = `<button onclick="abrirCalendarioSuite('${suite.id}', '${suite.nome}')" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-[11px] font-bold px-2.5 py-0.5 rounded-md transition flex items-center gap-1 cursor-pointer"><span>📅 Ver Calendário</span></button>`;
 
                 if (aprovadasDaSuite.length > 0) {
-                    aprovadasDaSuite.forEach((aprovada, index) => {
+                    for (let index = 0; index < aprovadasDaSuite.length; index++) {
+                        const aprovada = aprovadasDaSuite[index];
                         const isFutura = aprovada.checkin > hojeStr;
                         const statusParaModal = isFutura ? 'Reservado' : 'Ocupada';
                         const badgeText = isFutura ? 'Reserva Futura' : 'Ocupada';
@@ -820,12 +821,30 @@
                         const nomeHospedeExibicao = aprovada.hospede_nome ? ` - <span class="font-normal text-gray-700 text-sm sm:text-base">${aprovada.hospede_nome}</span>` : '';
                         
                         const qtdDiarias = calcularQuantidadeDiarias(aprovada.checkin, aprovada.checkout);
-                        const valorTotal = Number(aprovada.valor_total || 0);
-
+                        
+                        // Garante o cálculo dinâmico do valor total caso venha zerado do banco
+                        let valorTotal = Number(aprovada.valor_total || 0);
                         const qtdAdultos = aprovada.adultos !== undefined && aprovada.adultos !== null ? aprovada.adultos : (aprovada.qtd_adultos || 2);
                         const qtdCriancas = aprovada.criancas !== undefined && aprovada.criancas !== null ? aprovada.criancas : (aprovada.crianca || aprovada.qtd_criancas || 0);
-                        const temPet = (aprovada.pet === true || aprovada.pet === 'true' || aprovada.taxa_pet === true || aprovada.taxa_pet === 'true' || aprovada.tem_pet === true || aprovada.tem_pet === 'true') ? 'Sim' : 'Não';
+                        const petVal = (aprovada.pet === true || aprovada.pet === 'true' || aprovada.taxa_pet === true || aprovada.taxa_pet === 'true' || aprovada.tem_pet === true || aprovada.tem_pet === 'true');
 
+                        if (valorTotal <= 0 && aprovada.checkin && aprovada.checkout) {
+                            try {
+                                const { data: valorCalculado } = await supabaseClient.rpc('calcular_total_reserva', { 
+                                    p_suite_id: suite.id, 
+                                    p_checkin: aprovada.checkin, 
+                                    p_checkout: aprovada.checkout,
+                                    p_adultos: qtdAdultos,
+                                    p_criancas: qtdCriancas,
+                                    p_pet: petVal
+                                });
+                                if (valorCalculado !== null) valorTotal = Number(valorCalculado);
+                            } catch (err) {
+                                console.error("Erro ao recalcular valor no render:", err);
+                            }
+                        }
+
+                        const temPet = petVal ? 'Sim' : 'Não';
                         const pagamentosDestaReserva = pagamentosGlobaisCache.filter(p => p.reserva_id === aprovada.id);
                         const totalPago = pagamentosDestaReserva.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
                         const saldoRestante = valorTotal - totalPago;
@@ -922,7 +941,7 @@
                                     </div>
                                 </div>
                             </div>`;
-                    });
+                    }
                 } 
                 
                 if (aprovadasDaSuite.length === 0 && pendentesDaSuite.length === 0) {
@@ -964,17 +983,36 @@
                         </div>`;
                 }
 
-                pendentesDaSuite.forEach((pend, index) => {
+                for (let index = 0; index < pendentesDaSuite.length; index++) {
+                    const pend = pendentesDaSuite[index];
                     const linkZapPend = gerarLinkWhatsApp(pend.whatsapp_hospede, pend.hospede_nome, pend.checkin, pend.checkout);
                     const dataSolicitacaoFormatada = formatarDataHora(pend.criado_em);
                     const qtdDiariasPend = calcularQuantidadeDiarias(pend.checkin, pend.checkout);
-                    const valorTotalPend = Number(pend.valor_total || 0);
-                    const sufixoTituloPend = pendentesDaSuite.length > 1 ? ` (${index + 1})` : '';
-                    const nomeHospedePendExibicao = pend.hospede_nome ? ` - <span class="font-normal text-amber-950/80 text-sm sm:text-base">${pend.hospede_nome}</span>` : '';
-
+                    
+                    let valorTotalPend = Number(pend.valor_total || 0);
                     const qtdAdultosPend = pend.adultos !== undefined && pend.adultos !== null ? pend.adultos : (pend.qtd_adultos || 2);
                     const qtdCriancasPend = pend.criancas !== undefined && pend.criancas !== null ? pend.criancas : (pend.crianca || pend.qtd_criancas || 0);
-                    const temPetPend = (pend.pet === true || pend.pet === 'true' || pend.taxa_pet === true || pend.taxa_pet === 'true' || pend.tem_pet === true || pend.tem_pet === 'true') ? 'Sim' : 'Não';
+                    const petPendVal = (pend.pet === true || pend.pet === 'true' || pend.taxa_pet === true || pend.taxa_pet === 'true' || pend.tem_pet === true || pend.tem_pet === 'true');
+
+                    if (valorTotalPend <= 0 && pend.checkin && pend.checkout) {
+                        try {
+                            const { data: valorCalculado } = await supabaseClient.rpc('calcular_total_reserva', { 
+                                p_suite_id: suite.id, 
+                                p_checkin: pend.checkin, 
+                                p_checkout: pend.checkout,
+                                p_adultos: qtdAdultosPend,
+                                p_criancas: qtdCriancasPend,
+                                p_pet: petPendVal
+                            });
+                            if (valorCalculado !== null) valorTotalPend = Number(valorCalculado);
+                        } catch (err) {
+                            console.error("Erro ao recalcular valor pendente no render:", err);
+                        }
+                    }
+
+                    const sufixoTituloPend = pendentesDaSuite.length > 1 ? ` (${index + 1})` : '';
+                    const nomeHospedePendExibicao = pend.hospede_nome ? ` - <span class="font-normal text-amber-950/80 text-sm sm:text-base">${pend.hospede_nome}</span>` : '';
+                    const temPetPend = petPendVal ? 'Sim' : 'Não';
 
                     const pagamentosPend = pagamentosGlobaisCache.filter(p => p.reserva_id === pend.id);
                     const totalPagoPend = pagamentosPend.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
@@ -1083,8 +1121,8 @@
                                 </div>
                             </div>
                         </div>`;
-                });
-            });
+                }
+            }
         }
         
         async function abrirModal(id, nome, status, reservaId = null) {
@@ -1359,7 +1397,6 @@
             const criancasVal = parseInt(document.getElementById('edit-criancas').value) || 0;
             const petVal = document.getElementById('edit-pet').value === 'true';
 
-            // Coleta idades informadas das crianças
             const inputsIdades = document.querySelectorAll('.input-idade-crianca');
             const idadesCriancasArr = Array.from(inputsIdades).map(input => parseInt(input.value) || 0);
 
