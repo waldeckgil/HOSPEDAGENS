@@ -147,7 +147,7 @@
 
     <!-- Modal de Edição -->
     <div id="modal-edicao" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-hidden">
-        <div id="modal-edicao-card" class="bg-white p-6 sm:p-8 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto relative cursor-default select-none" style="touch-action:none;">
+        <div id="modal-edicao-card" class="bg-white p-5 sm:p-7 rounded-[24px] w-full max-w-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] max-h-[88vh] overflow-y-auto relative border border-gray-100">
             <div id="modal-drag-handle" class="flex justify-between items-center mb-4 cursor-move select-none">
                 <h2 id="modal-titulo" class="text-xl sm:text-2xl font-bold text-blue-600 m-0">Gerenciar Suíte</h2>
                 <div class="flex items-center gap-2">
@@ -166,15 +166,14 @@
                 <input type="hidden" id="edit-status-original">
                 <input type="hidden" id="edit-reserva-id">
                 
-                <div>
-                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Status Físico da Suíte</label>
-                    <select id="edit-status" class="w-full p-3 border rounded-xl font-bold bg-gray-50 text-sm" onchange="(async () => { await verificarStatusModal(); })()">
+                <div class="bg-gradient-to-r from-slate-50 to-blue-50 border-2 border-blue-200 rounded-2xl p-4 shadow-sm">
+                    <label class="block text-[11px] font-extrabold text-blue-800 uppercase tracking-widest mb-2 flex items-center gap-1.5">🏨 Status Físico da Suíte</label>
+                    <select id="edit-status" class="w-full p-3.5 border-2 border-blue-200 rounded-xl font-bold bg-white text-sm shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition" onchange="(async () => { await verificarStatusModal(); })()">
                         <option value="Disponível">Disponível</option>
                         <option value="Ocupada">Ocupada (Agora)</option>
                         <option value="Reservado">Criar Nova Reserva</option>
                         <option value="Limpeza">Limpeza</option>
-                        <option value="Pendente">Pendente</option>
-                        <option value="Checkout">Checkout (Finalizar Estadia)</option>
+                                                <option value="Checkout">Checkout (Finalizar Estadia)</option>
                     </select>
                 </div>
 
@@ -188,7 +187,7 @@
                 </div>
 
                 <!-- RESUMO DINÂMICO DE TARIFA E DIÁRIAS NO MODAL -->
-                <div id="resumo-dinamico-container" class="bg-blue-50 border border-blue-200 p-3 rounded-xl space-y-1 text-xs text-blue-900">
+                <div id="resumo-dinamico-container" class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-3.5 rounded-2xl space-y-1.5 text-xs text-blue-900 shadow-sm">
                     <div class="flex justify-between">
                         <span>Qtd. Diárias Calculadas:</span>
                         <strong id="modal-qtd-diarias">1 diária(s)</strong>
@@ -203,6 +202,13 @@
                     </div>
                 </div>
 
+                <div class="pt-1">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-[12px]">👤</div>
+                        <span class="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest">Dados do Hóspede</span>
+                        <div class="flex-1 h-px bg-gray-100"></div>
+                    </div>
+                </div>
                 <div id="campos-hospede-container" class="space-y-3 transition-all">
                     <div class="grid grid-cols-1 gap-2">
                         <input type="text" id="edit-hospede" placeholder="Nome Hóspede" class="p-3 border rounded-xl text-sm">
@@ -274,8 +280,10 @@
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold mt-4 transition text-sm">Salvar Alterações</button>
-                <button type="button" onclick="fecharModal()" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 p-3 rounded-xl font-bold mt-2 transition text-sm">Cancelar</button>
+                <div class="sticky bottom-0 bg-white/95 backdrop-blur-sm pt-4 mt-6 border-t border-gray-100 -mx-1 px-1 flex flex-col gap-2">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3.5 rounded-xl font-bold transition text-sm shadow-lg shadow-blue-200">Salvar Alterações</button>
+                    <button type="button" onclick="fecharModal()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 p-3 rounded-xl font-bold transition text-sm">Cancelar</button>
+                </div>
             </form>
         </div>
     </div>
@@ -354,17 +362,6 @@
         let calSuiteNomeAtual = "";
         let calDataReferencia = new Date();
 
-        /**
-         * FUNÇÃO: abrirCalendarioSuite(suiteId, suiteNome)
-         * OBJETIVO: Abrir o modal de calendário de disponibilidade da suíte para o GESTOR visualizar dias livres/ocupados.
-         * QUANDO É CHAMADA: Clique no ícone de calendário no card da suíte no dashboard.
-         * PARÂMETROS: suiteId (UUID da suíte), suiteNome (nome exibido no header do modal).
-         * DEPENDÊNCIAS: Usa reservasGlobaisCache filtrando por suite_id e status Aprovada/Ocupada. Usa calDataReferencia global.
-         * RLS/SEGURANÇA: Apenas leitura de cache já filtrado por pousada_id = auth.uid() no carregarDashboard().
-         * EFEITOS: Define calSuiteIdAtual, reseta calDataReferencia para hoje, renderiza grid e remove hidden do modal.
-         * DICA DEV: Se mudar lógica de ocupação, revise renderizarGridCalendario() que calcula datasOcupadas com while loop incluindo checkin < checkout.
-         */
-
         function abrirCalendarioSuite(suiteId, suiteNome) {
             calSuiteIdAtual = suiteId;
             calSuiteNomeAtual = suiteNome;
@@ -374,36 +371,14 @@
             document.getElementById('modal-calendario-suite').classList.remove('hidden');
         }
 
-        /**
-         * FUNÇÃO: fecharModalCalendario()
-         * OBJETIVO: Fechar o modal de calendário sem recarregar dashboard.
-         * DICA DEV: Apenas adiciona classe hidden. Não limpa cache. Seguro chamar múltiplas vezes.
-         */
-
         function fecharModalCalendario() {
             document.getElementById('modal-calendario-suite').classList.add('hidden');
         }
-
-        /**
-         * FUNÇÃO: mudarMesCalendario(direcao)
-         * OBJETIVO: Navegar meses no calendário da suíte (anterior/próximo).
-         * PARÂMETROS: direcao = -1 ou +1. Usa setMonth que já lida com virada de ano.
-         * EFEITOS: Atualiza calDataReferencia e chama renderizarGridCalendario().
-         * DICA DEV: Se implementar limites (ex: não voltar além de 12 meses atrás), valide aqui antes do setMonth.
-         */
 
         function mudarMesCalendario(direcao) {
             calDataReferencia.setMonth(calDataReferencia.getMonth() + direcao);
             renderizarGridCalendario();
         }
-
-        /**
-         * FUNÇÃO: renderizarGridCalendario()
-         * OBJETIVO: Renderizar a grade de dias do mês com cores: cinza (passado), vermelho (ocupado), verde (livre).
-         * LÓGICA: Cria Set datasOcupadas varrendo reservasGlobaisCache da suíte atual. Para cada reserva, loop de checkin até checkout-1 com toLocaleDateString('sv-SE') para ISO date.
-         * DEPENDÊNCIAS: calDataReferencia, calSuiteIdAtual, reservasGlobaisCache, elementos cal-grid-dias e cal-mes-ano-atual.
-         * DICA DEV: Performance OK para <500 reservas. Se pousada tiver milhares, considere mover cálculo de datasOcupadas para um RPC ou memoizar por suiteId.
-         */
 
         function renderizarGridCalendario() {
             const gridEl = document.getElementById('cal-grid-dias');
@@ -469,14 +444,6 @@
             }
         }
 
-        /**
-         * FUNÇÃO: protegerPagina() - GUARD DE AUTENTICAÇÃO DO DASHBOARD
-         * OBJETIVO: Garantir que apenas GESTOR autenticado acesse o dashboard. Redireciona para index.html se não houver sessão.
-         * FLUXO: 1) Registra onAuthStateChange para deslogar se SIGNED_OUT. 2) getSession(). 3) Se erro ou sem session => redirect. 4) Define usuarioIdAtual = session.user.id (que é igual a pousadas.id via RLS id = auth.uid()). 5) Chama carregarDashboard().
-         * RLS: usuarioIdAtual é usado em todos os selects filtrando pousada_id = auth.uid(). Sem ele, nenhuma query retorna.
-         * DICA DEV: Nunca remova o onAuthStateChange. Se adicionar novas páginas protegidas, reutilize este padrão. Se precisar de loading state, adicione antes de getSession().
-         */
-
         async function protegerPagina() {
             supabaseClient.auth.onAuthStateChange((event, session) => {
                 if (event === 'SIGNED_OUT' || !session) {
@@ -494,14 +461,6 @@
             usuarioIdAtual = session.user.id;
             carregarDashboard();
         }
-
-        /**
-         * FUNÇÃO: mostrarToast(titulo, mensagem, tipo = 'sucesso')
-         * OBJETIVO: Exibir notificação flutuante (toast) de sucesso ou erro por 3.5s.
-         * PARÂMETROS: titulo (string curta), mensagem (detalhe), tipo 'sucesso' ou 'erro' muda cor e ícone.
-         * DEPENDÊNCIAS: Elementos toast-notificacao, toast-titulo, toast-mensagem, toast-icone, toast-content no DOM.
-         * DICA DEV: Para evitar toast sobreposto, considere adicionar clearTimeout antes do setTimeout se chamar em sequência rápida.
-         */
 
         function mostrarToast(titulo, mensagem, tipo = 'sucesso') {
             const toast = document.getElementById('toast-notificacao');
@@ -525,14 +484,6 @@
             setTimeout(() => { toast.classList.add('translate-y-24', 'opacity-0'); }, 3500);
         }
 
-        /**
-         * FUNÇÃO: mostrarErroModal(mensagem)
-         * OBJETIVO: Exibir alerta de erro dentro do modal de edição (validação de capacidade, campos obrigatórios, saldo devedor).
-         * PARÂMETROS: mensagem (string).
-         * EFEITOS: Remove hidden de modal-erro-alerta e faz scrollIntoView.
-         * DICA DEV: Sempre chame limparErroModal() no início do onsubmit para limpar erro anterior. Esta função não bloqueia salvamento, apenas exibe.
-         */
-
         function mostrarErroModal(mensagem) {
             const alertaEl = document.getElementById('modal-erro-alerta');
             const textoEl = document.getElementById('modal-erro-texto');
@@ -541,22 +492,10 @@
             alertaEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
-        /**
-         * FUNÇÃO: limparErroModal()
-         * OBJETIVO: Esconder o alerta de erro do modal. Chamado no início de abrirModal e onsubmit.
-         */
-
         function limparErroModal() {
             const alertaEl = document.getElementById('modal-erro-alerta');
             alertaEl.classList.add('hidden');
         }
-
-        /**
-         * FUNÇÃO: calcularDiasRestantes(dataAlvo) -> number
-         * OBJETIVO: Calcular diferença em dias entre hoje (zerada 00:00) e dataAlvo (YYYY-MM-DD). Usado para indicadores de checkout/chegada.
-         * RETORNO: Inteiro positivo (futuro), 0 (hoje), negativo (atrasado).
-         * DICA DEV: Usa split('-') e new Date(ano, mes-1, dia) para evitar bug de timezone UTC. Mantenha este padrão, não use new Date(dataAlvo) direto.
-         */
 
         function calcularDiasRestantes(dataAlvo) {
             const hoje = new Date();
@@ -566,14 +505,6 @@
             alvo.setHours(0, 0, 0, 0);
             return Math.round((alvo.getTime() - hoje.getTime()) / (1000 * 3600 * 24));
         }
-
-        /**
-         * FUNÇÃO: calcularQuantidadeDiarias(checkinStr, checkoutStr) -> number
-         * OBJETIVO: Calcular quantidade de diárias = checkout - checkin em dias. Mínimo 1.
-         * PARÂMETROS: strings YYYY-MM-DD.
-         * LÓGICA: diffTime / (1000*3600*24) com Math.round. Se diff <=0 retorna 1 para evitar 0 diárias.
-         * DICA DEV: Esta é a base para exibição, mas o valor financeiro real vem da RPC calcular_total_reserva que considera tarifas especiais, crianças, pet.
-         */
 
         function calcularQuantidadeDiarias(checkinStr, checkoutStr) {
             if (!checkinStr || !checkoutStr) return 1;
@@ -586,21 +517,10 @@
             return diffDays > 0 ? diffDays : 1;
         }
 
-        /**
-         * FUNÇÃO: formatarMoeda(valor) -> string
-         * OBJETIVO: Formatar número para BRL (R$ 0,00). Trata null, undefined, NaN.
-         * DICA DEV: Usa toLocaleString('pt-BR'). Se precisar de moeda sem símbolo, crie variação.
-         */
-
         function formatarMoeda(valor) {
             if (valor === null || valor === undefined || isNaN(valor)) return 'R$ 0,00';
             return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
-
-        /**
-         * FUNÇÃO: formatarDataSimples(dataStr) -> string DD/MM/YYYY
-         * OBJETIVO: Converter YYYY-MM-DD para formato brasileiro para exibição no card. Sem hora.
-         */
 
         function formatarDataSimples(dataStr) {
             if (!dataStr) return '';
@@ -608,13 +528,6 @@
             if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
             return dataStr;
         }
-
-        /**
-         * FUNÇÃO: formatarDataHora(timestampStr) -> string DD/MM/YYYY às HH:MM
-         * OBJETIVO: Formatar criado_em (ISO timestamp) para exibição de quando HÓSPEDE solicitou reserva.
-         * RETORNO: 'Recente' se vazio, ou string formatada.
-         * DICA DEV: Usa new Date(timestampStr) nativo. Se timestamp vier com +00, Date já converte para local.
-         */
 
         function formatarDataHora(timestampStr) {
             if (!timestampStr) return 'Recente';
@@ -628,13 +541,6 @@
             return `${dia}/${mes}/${ano} às ${hora}:${min}`;
         }
 
-        /**
-         * FUNÇÃO: gerarLinkWhatsApp(whats, nomeHospede, checkin, checkout) -> url
-         * OBJETIVO: Gerar link wa.me com mensagem pré-preenchida para contato com HÓSPEDE.
-         * LÓGICA: Remove \D, adiciona 55 se não começar com 55 e tamanho <=11. Mensagem inclui nome e período.
-         * DICA DEV: Se mudar texto padrão, mantenha encodeURIComponent. Teste com números com 9º dígito.
-         */
-
         function gerarLinkWhatsApp(whats, nomeHospede, checkin, checkout) {
             if (!whats) return '#';
             const apenasNumeros = whats.replace(/\D/g, '');
@@ -646,13 +552,6 @@
             return `https://wa.me/${numeroFinal}?text=${encodeURIComponent(textoMensagem)}`;
         }
 
-        /**
-         * FUNÇÃO: obterIndicadorCheckout(checkoutStr) -> {texto, classe}
-         * OBJETIVO: Retornar badge visual de urgência de checkout: vencido, hoje, amanhã, em X dias.
-         * USO: Nos cards Ocupada para GESTOR priorizar limpeza.
-         * DICA DEV: Classes Tailwind definidas aqui (bg-red-100 etc). Se mudar design system, altere apenas aqui.
-         */
-
         function obterIndicadorCheckout(checkoutStr) {
             const dias = calcularDiasRestantes(checkoutStr);
             if (dias < 0) return { texto: `⚠️ Checkout vencido há ${Math.abs(dias)} dia(s)`, classe: 'bg-red-100 text-red-700 border-red-300' };
@@ -661,12 +560,6 @@
             return { texto: `Saída em ${dias} dias`, classe: 'bg-blue-50 text-blue-700 border-blue-200' };
         }
 
-        /**
-         * FUNÇÃO: obterIndicadorProximaEstada(checkinStr) -> {texto, classe}
-         * OBJETIVO: Badge de chegada futura: hoje, amanhã, em X dias, em andamento.
-         * USO: Nos cards Reservado/Aprovada.
-         */
-
         function obterIndicadorProximaEstada(checkinStr) {
             const dias = calcularDiasRestantes(checkinStr);
             if (dias < 0) return { texto: `Em andamento`, classe: 'bg-gray-100 text-gray-600 border-gray-200' };
@@ -674,15 +567,6 @@
             if (dias === 1) return { texto: `🔔 Próxima estada amanhã`, classe: 'bg-indigo-100 text-indigo-800 border-indigo-300' };
             return { texto: `Chegada em ${dias} dias`, classe: 'bg-purple-50 text-purple-700 border-purple-200' };
         }
-
-        /**
-         * FUNÇÃO: carregarPousada() - CARREGA DADOS DA POUSADA LOGADA
-         * OBJETIVO: Buscar nome e aceita_pet da pousada do GESTOR logado e atualizar UI (título header e menu) e cache de regra de pet.
-         * QUERY: supabase.from('pousadas').select('nome, aceita_pet').eq('id', usuarioIdAtual).single()
-         * RLS: Tabela pousadas tem policy 'Gerenciamento próprio' onde id = auth.uid(). Sem service_role, só retorna própria pousada.
-         * EFEITOS: Define nomePousadaAtual, pousadaAceitaPetCache = pousada?.aceita_pet === true, atualiza #titulo-pousada, #titulo-menu-pousada e link da vitrine.
-         * DICA DEV: Se adicionar novas colunas em pousadas (ex: aceita_crianca, taxa_extra), expanda o select aqui e crie caches similares. Não remova aceita_pet pois controla visibilidade de Taxa de Pet no modal via aplicarVisibilidadeTaxaPet().
-         */
 
         async function carregarPousada() {
             if (!usuarioIdAtual) return;
@@ -700,14 +584,6 @@
         }
 
         // Regra: só exibir Taxa de Pet se pousadas.aceita_pet = true (id = auth.uid())
-        /**
-         * FUNÇÃO: aplicarVisibilidadeTaxaPet() - REGRA DE NEGÓCIO POUSADAS.ACEITA_PET
-         * OBJETIVO: Mostrar/esconder campo Taxa de Pet no modal conforme configuração da pousada.
-         * REGRA: Só exibe se pousadaAceitaPetCache === true (vem de pousadas.aceita_pet). Se false/null, adiciona hidden e força edit-pet = 'false' para não cobrar indevidamente.
-         * QUANDO CHAMAR: Sempre que abrir modal (abrirModal) e após carregarPousada(). Também é chamado dentro de recalcularValoresModalEdicao() para garantir petVal = false quando não aceita.
-         * DICA DEV: Se pousada mudar aceita_pet em Configurações, esta função garante UI reativa sem reload. Não remova o force false, é segurança financeira.
-         */
-
         function aplicarVisibilidadeTaxaPet() {
             const container = document.getElementById('container-taxa-pet');
             if (!container) return;
@@ -720,27 +596,12 @@
             }
         }
 
-        /**
-         * FUNÇÃO: copiarLinkVitrine()
-         * OBJETIVO: Copiar link público da vitrine da pousada (vitrine.html?pousada_id=usuarioIdAtual) para clipboard e mostrar toast.
-         * DICA DEV: Usa navigator.clipboard que requer HTTPS. Se rodar em HTTP local, pode falhar - considere fallback com document.execCommand.
-         */
-
         function copiarLinkVitrine() {
             if (!usuarioIdAtual) return;
             navigator.clipboard.writeText(window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`).then(() => {
                 mostrarToast("Copiado!", "Link da vitrine copiado para a área de transferência!");
             });
         }
-
-        /**
-         * FUNÇÃO: verificarReservasPendentesDashboard() - ATENÇÃO HÓSPEDE SOLICITOU RESERVA
-         * OBJETIVO: Buscar reservas com status = 'Pendente' da pousada logada e exibir card de atenção no topo do dashboard.
-         * QUERY: from('reservas').select('*').eq('pousada_id', usuarioIdAtual).eq('status','Pendente')
-         * RLS: reservas tem policy para GESTOR ver apenas onde pousada_id = auth.uid(). HÓSPEDE cria pendente via INSERT anon com policy true.
-         * EFEITOS: Mostra #card-atencao-pendentes e lista resumo com nome, data formatada e link WhatsApp.
-         * DICA DEV: Pendente é status exclusivo do fluxo HÓSPEDE -> GESTOR. Nunca permita GESTOR selecionar Pendente no select edit-status (já removido do HTML).
-         */
 
         async function verificarReservasPendentesDashboard() {
             const { data: pendentes } = await supabaseClient.from('reservas').select('*').eq('pousada_id', usuarioIdAtual).eq('status', 'Pendente');
@@ -769,12 +630,6 @@
                 `;
             });
         }
-
-        /**
-         * FUNÇÃO: atualizarRadarEKPIs()
-         * OBJETIVO: Atualizar cards de KPI do dashboard (total suítes, ocupadas, disponíveis, faturamento, etc) baseado nos caches globais suitesGlobaisCache, reservasGlobaisCache, pagamentosGlobaisCache.
-         * DICA DEV: Esta função é chamada ao final de carregarDashboard(). Se adicionar novo KPI, calcule aqui e atualize DOM correspondente. Evite nova query Supabase, use caches já carregados para performance.
-         */
 
         function atualizarRadarEKPIs() {
             const hojeStr = new Date().toLocaleDateString('sv-SE');
@@ -825,13 +680,6 @@
             }
         }
 
-        /**
-         * FUNÇÃO: alternarExpandirCard(btnElement)
-         * OBJETIVO: Expandir/recolher detalhes adicionais do card da suíte (ex: lista de reservas futuras, tarifas especiais).
-         * PARÂMETROS: btnElement (botão clicado) para alternar texto e classe.
-         * DICA DEV: Usa classes Tailwind hidden/block. Se mudar estrutura do card, mantenha data attributes para identificar qual card expandir.
-         */
-
         function alternarExpandirCard(btnElement) {
             const card = btnElement.closest('.card-suite');
             const detalhes = card.querySelector('.card-detalhes');
@@ -847,13 +695,6 @@
                 btnElement.innerText = 'Expandir Detalhes ▾';
             }
         }
-
-        /**
-         * FUNÇÃO: abrirModalTarifaEspecial(suiteId)
-         * OBJETIVO: Abrir modal que lista tarifas especiais aplicadas à suíte (ex: alta temporada, feriado) vindas de tarifasEspeciaisGlobaisCache.
-         * PARÂMETROS: suiteId para filtrar tarifas da suíte.
-         * DICA DEV: Conteúdo injetado via JS em #modal-tarifa-conteudo. Se mudar tabela tarifas_especiais, atualize aqui e na RPC calcular_total_reserva que também considera essas tarifas.
-         */
 
         function abrirModalTarifaEspecial(suiteId) {
             const suite = suitesGlobaisCache.find(s => s.id === suiteId);
@@ -903,23 +744,9 @@
             document.getElementById('modal-tarifa-especial').classList.remove('hidden');
         }
 
-        /**
-         * FUNÇÃO: fecharModalTarifaEspecial()
-         * OBJETIVO: Fechar modal de tarifas especiais.
-         */
-
         function fecharModalTarifaEspecial() {
             document.getElementById('modal-tarifa-especial').classList.add('hidden');
         }
-
-        /**
-         * FUNÇÃO: carregarDashboard() - FUNÇÃO MÃE DO DASHBOARD DO GESTOR
-         * OBJETIVO: Carregar todos os dados da pousada logada e renderizar suítes, reservas, pagamentos e KPIs.
-         * FLUXO: 1) carregarPousada() 2) Paralelo: supabase.from('suites').select('*').eq('pousada_id', usuarioIdAtual), from('reservas'), from('hospede_pagamentos'), from('tarifas_especiais') 3) Armazena em caches globais 4) Chama verificarReservasPendentesDashboard() 5) Chama atualizarRadarEKPIs() 6) Renderiza grid de suítes com status físico e indicadores de checkout/chegada.
-         * RLS: Todas as queries filtram pousada_id = auth.uid(). Sem isso, RLS bloqueia.
-         * PERFORMANCE: Usa Promise.all para buscar em paralelo. Se adicionar nova tabela, adicione aqui e no cache.
-         * DICA DEV: Nunca faça select('*') sem filtro de pousada_id. Se precisar de realtime, considere supabase channel para ouvir INSERT em reservas status Pendente.
-         */
 
         async function carregarDashboard() {
             await carregarPousada();
@@ -1418,30 +1245,11 @@
             await recalcularValoresModalEdicao();
         }
 
-        /**
-         * FUNÇÃO: mudarStatusReserva(reservaId, novoStatus) - AÇÃO RÁPIDA DE STATUS
-         * OBJETIVO: Alterar status da reserva diretamente sem abrir modal (ex: Aprovar Pendente, Recusar).
-         * QUERY: supabase.from('reservas').update({status: novoStatus}).eq('id', reservaId)
-         * RLS: Update permitido apenas se pousada_id = auth.uid() (policy de gerenciamento próprio).
-         * EFEITOS: Mostra toast e chama carregarDashboard() para refresh.
-         * DICA DEV: Use esta função para botões de ação rápida no card de pendentes. Se adicionar novo status, valide transição (ex: não permitir Finalizada -> Pendente).
-         */
-
         async function mudarStatusReserva(reservaId, novoStatus) {
             await supabaseClient.from('reservas').update({ status: novoStatus }).eq('id', reservaId);
             mostrarToast("Sucesso", `Reserva ${novoStatus.toLowerCase()}!`);
             carregarDashboard();
         }
-
-        /**
-         * FUNÇÃO: renderizarInputsIdadesCriancas(qtdCriancas, idadesAtuais = [])
-         * OBJETIVO: Renderizar dinamicamente inputs de idade para cada criança informada, preservando valores já digitados quando GESTOR muda quantidade.
-         * PARÂMETROS: qtdCriancas (number), idadesAtuais (string '5,7' ou array ou []).
-         * LÓGICA DE PRESERVAÇÃO: Se idadesAtuais vier vazia (ex: GESTOR mudou Adultos/Pet), tenta reaproveitar o que já está no DOM via querySelectorAll('.input-idade-crianca').
-         * DOM: Cria grid em #lista-idades-criancas com inputs .input-idade-crianca, cada com onchange recalcularValoresModalEdicao().
-         * RPC: As idades são enviadas para calcular_total_reserva como string '5,7' para calcular isenção/taxa por idade.
-         * DICA DEV: Se mudar regra de isenção (ex: até 6 anos grátis), a lógica está na RPC, não aqui. Aqui apenas coleta.
-         */
 
         function renderizarInputsIdadesCriancas(qtdCriancas, idadesAtuais = []) {
             const container = document.getElementById('container-idades-criancas');
@@ -1487,15 +1295,6 @@
             }
             lista.innerHTML = html;
         }
-
-        /**
-         * FUNÇÃO: calcularSaldoDevedorReservaAtual() -> number (saldo devedor)
-         * OBJETIVO: Calcular saldo restante a pagar da reserva atual no modal, usado para validar checkout (conta precisa fechar).
-         * FLUXO: 1) Pega suiteId, reservaId, checkin, checkout, adultos, criancas, pet, idades do DOM. 2) Chama RPC calcular_total_reserva para valor total atualizado. 3) Se erro RPC e tem reservaId, usa valor_total do cache. 4) Soma pagamentos de hospede_pagamentos filtrando reserva_id. 5) saldo = valorTotal - totalPago, mínimo 0.
-         * RPC: calcular_total_reserva(p_suite_id, p_checkin, p_checkout, p_adultos, p_criancas, p_idades_criancas, p_pet)
-         * REGRA PET: Se pousadaAceitaPetCache !== true, petVal forçado false antes de chamar RPC.
-         * DICA DEV: Esta função é async e usada no fluxo de Checkout. Se mudar lógica de pagamento parcial, revise aqui e em atualizarSaldoCheckoutModal().
-         */
 
         async function calcularSaldoDevedorReservaAtual() {
             const suiteId = document.getElementById('edit-suite-id').value;
@@ -1547,15 +1346,6 @@
         }
 
         let _ultimaChamadaRecalculoId = 0;
-        /**
-         * FUNÇÃO: recalcularValoresModalEdicao() - CÁLCULO DINÂMICO DE DIÁRIAS E TOTAL NO MODAL
-         * OBJETIVO: Recalcular em tempo real qtd diárias, valor total e saldo restante enquanto GESTOR edita adultos, crianças, pet, datas e idades.
-         * FLUXO: 1) Valida capacidade: busca suite em suitesGlobaisCache, calcula totalOcup = adultos+criancas, compara com capacidade_hospedes, exibe aviso verde/vermelho em #aviso-capacidade-modal. 2) Coleta idades preservando valores antigos, chama renderizarInputsIdadesCriancas(). 3) Ajusta checkout se <= checkin (auto +1 dia). 4) Calcula qtdDiarias via calcularQuantidadeDiarias(). 5) Chama RPC calcular_total_reserva com todos os parâmetros incluindo petVal (forçado false se pousada não aceita pet) e idadesStr. 6) Atualiza #modal-qtd-diarias, #modal-valor-total, #modal-saldo-restante e chama atualizarSaldoCheckoutModal().
-         * DEBOUNCE: Usa _ultimaChamadaRecalculoId para evitar race condition de chamadas rápidas (oninput).
-         * RLS: RPC deve ter SECURITY DEFINER ou policy que permita GESTOR chamar com sua pousada. Ela considera tarifas_especiais da suíte.
-         * DICA DEV: Esta é a função mais sensível do modal. Se adicionar novo fator de preço (ex: taxa extra por adulto além do incluso), adicione parâmetro na RPC e passe aqui. Sempre teste com suite pausada e com pet true/false.
-         */
-
         async function recalcularValoresModalEdicao() {
             const chamadaAtualId = ++_ultimaChamadaRecalculoId;
             const suiteId = document.getElementById('edit-suite-id').value;
@@ -1690,23 +1480,9 @@
             }
         }
 
-        /**
-         * FUNÇÃO: atualizarSaldoCheckoutModal()
-         * OBJETIVO: Atualizar visualmente o saldo devedor no container de checkout quando GESTOR altera pagamento ou datas.
-         * DEPENDÊNCIAS: Usa calcularSaldoDevedorReservaAtual() internamente.
-         * DICA DEV: Chamado dentro de recalcularValoresModalEdicao(). Se mudar ID do display, atualize aqui.
-         */
-
         async function atualizarSaldoCheckoutModal() {
             await recalcularValoresModalEdicao();
         }
-
-        /**
-         * FUNÇÃO: verificarStatusModal() - CONTROLE DE VISIBILIDADE DE CAMPOS POR STATUS FÍSICO
-         * OBJETIVO: Mostrar/esconder #campos-hospede-container e #container-checkout-financeiro conforme status selecionado.
-         * REGRAS: Se status = 'Disponível' ou 'Limpeza' => esconde dados do hóspede (não precisa). Se 'Ocupada', 'Reservado', 'Checkout' => mostra. Se Checkout, mostra também container-checkout-financeiro e preenche saldo devedor.
-         * DICA DEV: Esta função é chamada no onchange do select edit-status e ao abrir modal. Se adicionar novo status, defina aqui se deve mostrar dados do hóspede ou não. Nunca permita Pendente aqui (removido do HTML).
-         */
 
         async function verificarStatusModal() {
             const status = document.getElementById('edit-status').value;
@@ -1792,31 +1568,7 @@
         }
 
         function fecharModal() { document.getElementById('modal-edicao').classList.add('hidden'); }
-        /**
-         * FUNÇÃO: fecharModalConfirmacao()
-         * OBJETIVO: Fechar modal de confirmação de ação (ex: liberar suíte Ocupada -> Limpeza/Checkout).
-         */
-
         function fecharModalConfirmacao() { document.getElementById('modal-confirmacao').classList.add('hidden'); }
-
-        /**
-         * FUNÇÃO: executarSalvamento(suiteId, status) - CORE DE SALVAMENTO DE RESERVA DO GESTOR
-         * OBJETIVO: Validar e salvar (INSERT nova reserva ou UPDATE existente) + registrar pagamento + atualizar status físico da suíte. É a função mais crítica do dashboard.
-         * FLUXO COMPLETO:
-         *   1) Coleta todos os inputs: reservaIdEditada, valorSinal, formaPagamento, observacao, checkin, checkout, adultos, criancas, pet, idades.
-         *   2) Se status = Checkout, valida saldo devedor mínimo via calcularSaldoDevedorReservaAtual() e exige pagamento >= saldo.
-         *   3) Valida capacidade: suite.capacidade_hospedes vs adultos+criancas.
-         *   4) Se status exige reserva (Ocupada/Reservado), valida campos obrigatórios já validados no onsubmit, mas reforça aqui.
-         *   5) Chama RPC verificar_conflito_reserva(p_suite_id, p_checkin, p_checkout, p_reserva_id_excluir) para evitar overbooking. Se conflito, mostra erro e return.
-         *   6) Chama RPC calcular_total_reserva para valor_total oficial (considera tarifas especiais, pet, crianças).
-         *   7) Se reservaIdEditada existe => UPDATE reservas set ... WHERE id = reservaIdEditada. Se não => INSERT em reservas com pousada_id = usuarioIdAtual, suite_id, etc, status = Aprovada ou Ocupada conforme seleção.
-         *   8) Se valorSinal >0, INSERT em hospede_pagamentos com reserva_id, pousada_id, valor_pago, forma_pagamento.
-         *   9) UPDATE suites set status_fisico = status (Disponível, Ocupada, Limpeza) onde id = suiteId.
-         *   10) Toast sucesso e carregarDashboard().
-         * RLS: Todas as tabelas (reservas, suites, hospede_pagamentos) têm policy pousada_id = auth.uid(). INSERT de reserva pelo GESTOR funciona porque ele é autenticado. INSERT de Pendente pelo HÓSPEDE funciona via policy anon true.
-         * TRANSAÇÃO: Hoje não usa transação atômica. Se falhar após INSERT reserva mas antes de pagamento, reserva fica sem pagamento. Para produção, considere RPC transacional.
-         * DICA DEV: Se adicionar novo campo obrigatório, adicione tanto no INSERT quanto no UPDATE. Se mudar regra de pet, lembre que petVal é forçado false quando pousadaAceitaPetCache false. Teste sempre os 3 cenários: nova reserva, edição de reserva existente, e checkout com saldo.
-         */
 
         async function executarSalvamento(suiteId, status) {
             const reservaIdEditada = document.getElementById('edit-reserva-id').value;
@@ -2033,11 +1785,6 @@
             await executarSalvamento(suiteId, status);
         };
 
-        /**
-         * FUNÇÃO: fazerLogout()
-         * OBJETIVO: Deslogar GESTOR e redirecionar para index.html. Usa supabase.auth.signOut().
-         */
-
         async function fazerLogout() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
         
         protegerPagina();
@@ -2051,22 +1798,10 @@
             let isDragging = false;
             let startX, startY, initialLeft, initialTop;
 
-        /**
-         * FUNÇÃO: getCardPosition() - DRAG DO MODAL
-         * OBJETIVO: Retornar posição atual do card modal para cálculo de drag (arraste). Usado em onMouseDown/Move/Up.
-         * DICA DEV: Parte do sistema de arraste do modal-edicao-card via #modal-drag-handle. Se remover drag, pode remover estas 4 funções.
-         */
-
             function getCardPosition() {
                 const rect = card.getBoundingClientRect();
                 return { left: rect.left, top: rect.top };
             }
-
-        /**
-         * FUNÇÃO: onMouseDown(e) - INÍCIO DO DRAG DO MODAL
-         * OBJETIVO: Capturar posição inicial do mouse e preparar card para arraste. Define flag isDragging.
-         * DICA DEV: Usa e.clientX/Y. Se adicionar suporte touch mobile, adicione onTouchStart equivalente.
-         */
 
             function onMouseDown(e) {
                 if (e.target.closest('button')) return; // não arrasta ao clicar no X
@@ -2086,12 +1821,6 @@
                 document.body.style.userSelect = 'none';
             }
 
-        /**
-         * FUNÇÃO: onMouseMove(e) - MOVIMENTO DO DRAG DO MODAL
-         * OBJETIVO: Mover card conforme mouse move, atualizando left/top com transform. Respeita limites da viewport.
-         * DICA DEV: Se modal ficar fora da tela após drag, verifique cálculo de limites em getCardPosition().
-         */
-
             function onMouseMove(e) {
                 if (!isDragging) return;
                 const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
@@ -2108,11 +1837,6 @@
                 card.style.left = newLeft + 'px';
                 card.style.top = newTop + 'px';
             }
-
-        /**
-         * FUNÇÃO: onMouseUp() - FIM DO DRAG DO MODAL
-         * OBJETIVO: Finalizar arraste, remover listeners e salvar posição se necessário.
-         */
 
             function onMouseUp() {
                 if (!isDragging) return;
