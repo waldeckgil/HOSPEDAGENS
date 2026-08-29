@@ -102,26 +102,9 @@
                         </div>
                     </div>
 
-                    <div id="containerKpis" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5"></div>
 
-                    <!-- FILTRO POR SUÍTE - VISÃO FINANCEIRA -->
-                    <div id="containerFiltroSuites" class="hidden mb-5">
-                        <div class="bg-white rounded-xl shadow-sm border border-blue-100 p-4">
-                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
-                                <span class="text-[11px] font-extrabold text-blue-700 uppercase tracking-widest flex items-center gap-2">
-                                    <i class="fa-solid fa-filter"></i> FILTRAR EXTRATO POR SUÍTE
-                                    <span id="badgeSuiteAtiva" class="hidden ml-2 bg-blue-600 text-white px-2 py-0.5 rounded-full text-[9px]"></span>
-                                </span>
-                                <button id="btnVerTodasSuites" onclick="filtrarPorSuite(null)" class="text-[10px] font-bold bg-slate-800 hover:bg-slate-900 text-white px-3.5 py-1.5 rounded-lg transition shadow-sm flex items-center gap-1.5">
-                                    <i class="fa-solid fa-layer-group"></i> VER TODAS AS SUÍTES
-                                </button>
-                            </div>
-                            <div id="gridSuitesFiltro" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
-                                <div class="col-span-full py-4 text-center text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO SUÍTES...</div>
-                            </div>
-                            <p class="text-[10px] text-gray-400 mt-2.5">Clique em uma suíte para ver apenas o extrato dela no período selecionado. Clique em VER TODAS para voltar.</p>
-                        </div>
-                    </div>
+                    
+                    <div id="containerKpis" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5"></div>
 
                     <!-- Área da Tabela -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
@@ -171,8 +154,6 @@
 
         let usuarioIdAtual = null;
         let viewAtualSelecionada = 'vw_gestor_financeiro_relatorio'; 
-        let suiteFiltroAtual = null;
-        let suitesDaPousadaCache = []; 
         let tituloBaseAtual = 'Extrato Detalhado de Pagamentos';
 
         function inicializarFiltroDatas() {
@@ -220,75 +201,6 @@
                 labelMenu.textContent = "PAINEL ADMINISTRATIVO";
             }
 
-            await carregarSuitesParaFiltro();
-            carregarDadosView();
-        }
-
-        async function carregarSuitesParaFiltro() {
-            try {
-                const { data, error } = await supabaseClient.from('suites').select('id,nome').eq('pousada_id', usuarioIdAtual).order('nome');
-                if (!error && data) {
-                    suitesDaPousadaCache = data;
-                    renderizarFiltroSuites([]); // renderiza inicial sem contagens
-                }
-            } catch (e) {
-                console.warn('Erro ao carregar suítes para filtro:', e);
-            }
-        }
-
-        function renderizarFiltroSuites(registrosAtuais = []) {
-            const grid = document.getElementById('gridSuitesFiltro');
-            if (!grid) return;
-            if (!suitesDaPousadaCache || suitesDaPousadaCache.length === 0) {
-                grid.innerHTML = '<div class="col-span-full py-3 text-center text-gray-400 text-xs">NENHUMA SUÍTE CADASTRADA</div>';
-                return;
-            }
-            // Contar reservas por suíte nos registros atuais (se houver)
-            const contagemPorSuite = {};
-            if (registrosAtuais && registrosAtuais.length) {
-                registrosAtuais.forEach(r => {
-                    let nome = String(r.suite || '').trim();
-                    if (nome) contagemPorSuite[nome.toUpperCase()] = (contagemPorSuite[nome.toUpperCase()] || 0) + 1;
-                });
-            }
-            let html = '';
-            suitesDaPousadaCache.forEach(suite => {
-                let nomeUpper = suite.nome.trim().toUpperCase();
-                let isAtiva = suiteFiltroAtual && String(suiteFiltroAtual).trim().toUpperCase() === nomeUpper;
-                let qtd = contagemPorSuite[nomeUpper] || 0;
-                let borda = isAtiva ? 'border-blue-500 bg-blue-50 shadow-md' : 'border-gray-200 hover:border-blue-300 bg-white hover:bg-blue-50/40';
-                let badge = qtd > 0 ? `<span class="text-[9px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-bold">${qtd}</span>` : `<span class="text-[9px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">0</span>`;
-                html += `<div onclick="filtrarPorSuite('${suite.nome.replace(/'/g, "\\'")}')" class="cursor-pointer ${borda} border-2 p-3 rounded-xl transition group flex flex-col gap-1.5">
-                    <div class="flex items-center justify-between">
-                        <div class="w-7 h-7 bg-indigo-100 text-indigo-700 rounded-lg flex items-center justify-center text-[11px]"><i class="fa-solid fa-bed"></i></div>
-                        ${badge}
-                    </div>
-                    <span class="font-bold text-[11px] text-gray-800 uppercase truncate group-hover:text-blue-700">${suite.nome.toUpperCase()}</span>
-                    <span class="text-[10px] text-gray-500 truncate">${isAtiva ? 'FILTRADA' : 'CLIQUE PARA FILTRAR'}</span>
-                </div>`;
-            });
-            grid.innerHTML = html;
-            // Atualiza badge ativa
-            const badgeAtiva = document.getElementById('badgeSuiteAtiva');
-            if (suiteFiltroAtual && badgeAtiva) {
-                badgeAtiva.textContent = suiteFiltroAtual.toUpperCase();
-                badgeAtiva.classList.remove('hidden');
-            } else if (badgeAtiva) {
-                badgeAtiva.classList.add('hidden');
-            }
-        }
-
-        function filtrarPorSuite(nomeSuite) {
-            suiteFiltroAtual = nomeSuite ? String(nomeSuite).trim() : null;
-            // Atualiza botão Ver Todas visual
-            const btnTodas = document.getElementById('btnVerTodasSuites');
-            if (btnTodas) {
-                if (!suiteFiltroAtual) {
-                    btnTodas.className = "text-[10px] font-bold bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg transition shadow-sm flex items-center gap-1.5";
-                } else {
-                    btnTodas.className = "text-[10px] font-bold bg-slate-800 hover:bg-slate-900 text-white px-3.5 py-1.5 rounded-lg transition shadow-sm flex items-center gap-1.5";
-                }
-            }
             carregarDadosView();
         }
 
@@ -315,11 +227,6 @@
             else elementoCard.classList.replace('border-purple-200', 'border-purple-500');
             
             elementoCard.classList.add('shadow-md');
-
-            // Ao trocar de view, reseta filtro de suíte se não for financeiro
-            if (!nomeView.includes('financeiro')) {
-                suiteFiltroAtual = null;
-            }
 
             carregarDadosView();
         }
@@ -391,16 +298,6 @@
             let tituloCompleto = `${tituloBaseAtual} (DE ${dataInicioFormatada} ATÉ ${dataFimFormatada})`;
             document.getElementById('tituloViewAtiva').textContent = tituloCompleto.toUpperCase();
 
-            // Controle de visibilidade do filtro por suíte - só na visão financeira
-            const containerFiltro = document.getElementById('containerFiltroSuites');
-            if (containerFiltro) {
-                if (ehViewFinanceiro) {
-                    containerFiltro.classList.remove('hidden');
-                } else {
-                    containerFiltro.classList.add('hidden');
-                }
-            }
-
             tbody.innerHTML = `<tr><td colspan="12" class="py-6 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO DADOS...</td></tr>`;
 
             try {
@@ -411,7 +308,6 @@
                 let ehViewHospedagens = (viewAtualSelecionada === 'vw_gestor_hospedagens_relatorio');
                 let ehViewTarifas = (viewAtualSelecionada === 'vw_gestor_tarifas_relatorio');
                 let ehViewFinanceiro = (viewAtualSelecionada === 'vw_gestor_financeiro_relatorio');
-                let ehViewFinanceiroSuite = (viewAtualSelecionada === 'vw_gestor_financeiro_suite_relatorio');
 
                 if (ehViewTarifas) {
                     const response = await supabaseClient.rpc('fn_gestor_tarifas_relatorio', {
@@ -497,12 +393,6 @@
                     });
                 }
 
-                if (ehViewFinanceiro && suiteFiltroAtual) {
-                    // Aplica filtro adicional de suíte no extrato financeiro
-                    let tituloComSuite = `${tituloBaseAtual} (DE ${dataInicioFormatada} ATÉ ${dataFimFormatada}) - SUÍTE ${suiteFiltroAtual.toUpperCase()}`;
-                    document.getElementById('tituloViewAtiva').textContent = tituloComSuite.toUpperCase();
-                }
-
                 if (!ehViewTarifas) {
                     registrosFiltrados = registrosFiltrados.filter(row => {
                         let valData = row['data_pagamento'] || row['checkin'] || '';
@@ -517,14 +407,6 @@
                             return dataStr <= dataFim;
                         }
                         return true;
-                    });
-                }
-
-                // FILTRO ADICIONAL POR SUÍTE (Visão Financeira) - permite tudo ou suíte específica
-                if (ehViewFinanceiro && suiteFiltroAtual) {
-                    registrosFiltrados = registrosFiltrados.filter(row => {
-                        let suiteRow = String(row['suite'] || '').trim().toUpperCase();
-                        return suiteRow === String(suiteFiltroAtual).trim().toUpperCase();
                     });
                 }
 
@@ -560,10 +442,6 @@
                     } else {
                         faturamentoBrutoPeriodo = totalRecebidoPeriodo + valorAReceberPeriodo;
                     }
-                }
-
-                if (ehViewFinanceiro) {
-                    renderizarFiltroSuites(registros);
                 }
 
                 if (!registrosFiltrados || registrosFiltrados.length === 0) {
