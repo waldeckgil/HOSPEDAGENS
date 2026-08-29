@@ -226,7 +226,7 @@
                             <label class="block text-xs font-bold text-gray-700 mb-1">Crianças</label>
                             <input type="number" id="edit-criancas" min="0" value="0" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="recalcularValoresModalEdicao()" oninput="recalcularValoresModalEdicao()">
                         </div>          
-                        <div>
+                        <div id="container-taxa-pet">
                             <label class="block text-xs font-bold text-gray-700 mb-1">Taxa de Pet</label>
                             <select id="edit-pet" class="w-full p-3 border rounded-xl bg-white text-sm font-bold" onchange="recalcularValoresModalEdicao()" oninput="recalcularValoresModalEdicao()">
                                 <option value="false">Não</option>
@@ -347,6 +347,7 @@
         let pagamentosGlobaisCache = [];
         let tarifasEspeciaisGlobaisCache = [];
         let camposLimposParaNovaReserva = false;
+        let pousadaAceitaPetCache = false; // Controle de exibição Taxa de Pet conforme pousadas.aceita_pet
 
         // Variáveis globais para o Modal de Calendário
         let calSuiteIdAtual = null;
@@ -561,7 +562,8 @@
 
         async function carregarPousada() {
             if (!usuarioIdAtual) return;
-            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', usuarioIdAtual).single();
+            const { data: pousada } = await supabaseClient.from('pousadas').select('nome, aceita_pet').eq('id', usuarioIdAtual).single();
+            pousadaAceitaPetCache = pousada?.aceita_pet === true;
             if (pousada && pousada.nome) {
                 nomePousadaAtual = pousada.nome;
                 document.getElementById('titulo-pousada').innerText = pousada.nome;
@@ -571,6 +573,19 @@
                 document.getElementById('titulo-menu-pousada').innerText = "Minha Pousada";
             }
             document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`;
+        }
+
+        // Regra: só exibir Taxa de Pet se pousadas.aceita_pet = true (id = auth.uid())
+        function aplicarVisibilidadeTaxaPet() {
+            const container = document.getElementById('container-taxa-pet');
+            if (!container) return;
+            if (pousadaAceitaPetCache === true) {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+                const elPet = document.getElementById('edit-pet');
+                if (elPet) elPet.value = 'false';
+            }
         }
 
         function copiarLinkVitrine() {
@@ -1136,6 +1151,7 @@
         async function abrirModal(id, nome, status, reservaId = null) {
             camposLimposParaNovaReserva = false;
             limparErroModal();
+            aplicarVisibilidadeTaxaPet();
             document.getElementById('edit-suite-id').value = id;
             document.getElementById('edit-status').value = status;
             document.getElementById('edit-status-original').value = status;
@@ -1193,6 +1209,7 @@
                 const idadesReserva = reserva.idades_criancas || '';
                 // Primeiro mostra modal para garantir que DOM exista
                 document.getElementById('modal-edicao').classList.remove('hidden');
+                aplicarVisibilidadeTaxaPet();
                 await verificarStatusModal();
                 renderizarInputsIdadesCriancas(parseInt(qtdCriancasReserva) || 0, idadesReserva);
                 await recalcularValoresModalEdicao();
@@ -1215,6 +1232,7 @@
             }
             
             document.getElementById('modal-edicao').classList.remove('hidden');
+            aplicarVisibilidadeTaxaPet();
             await verificarStatusModal();
             await recalcularValoresModalEdicao();
         }
@@ -1278,7 +1296,8 @@
             const adultosVal = parseInt(document.getElementById('edit-adultos').value) || 2;
             const criancasVal = parseInt(document.getElementById('edit-criancas').value) || 0;
             const petRaw = document.getElementById('edit-pet').value;
-            const petVal = (petRaw === 'true' || petRaw === true || String(petRaw).toLowerCase() === 'sim' || petRaw === '1' || petRaw === 1);
+            let petVal = (petRaw === 'true' || petRaw === true || String(petRaw).toLowerCase() === 'sim' || petRaw === '1' || petRaw === 1);
+            if (pousadaAceitaPetCache !== true) petVal = false;
 
             if (!suiteId || !checkinVal || !checkoutVal) return 0;
 
@@ -1353,9 +1372,10 @@
                     }
                 }
             } catch(e) { console.warn(e); }
-            // Defensivo: aceitar true/false, Sim/Não, 1/0
+            // Defensivo: aceitar true/false, Sim/Não, 1/0 + regra pousadas.aceita_pet
             const petRaw = document.getElementById('edit-pet').value;
-            const petVal = (petRaw === 'true' || petRaw === true || String(petRaw).toLowerCase() === 'sim' || petRaw === '1' || petRaw === 1);
+            let petVal = (petRaw === 'true' || petRaw === true || String(petRaw).toLowerCase() === 'sim' || petRaw === '1' || petRaw === 1);
+            if (pousadaAceitaPetCache !== true) petVal = false;
 
             // Coletar idades atuais antes de re-renderizar para preservar
             const inputsAntes = document.querySelectorAll('.input-idade-crianca');

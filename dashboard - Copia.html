@@ -146,9 +146,15 @@
     </div>
 
     <!-- Modal de Edição -->
-    <div id="modal-edicao" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white p-6 sm:p-8 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
-            <h2 id="modal-titulo" class="text-xl sm:text-2xl font-bold mb-4 text-blue-600">Gerenciar Suíte</h2>
+    <div id="modal-edicao" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-hidden">
+        <div id="modal-edicao-card" class="bg-white p-6 sm:p-8 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto relative cursor-default select-none" style="touch-action:none;">
+            <div id="modal-drag-handle" class="flex justify-between items-center mb-4 cursor-move select-none">
+                <h2 id="modal-titulo" class="text-xl sm:text-2xl font-bold text-blue-600 m-0">Gerenciar Suíte</h2>
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] text-gray-400 font-bold uppercase hidden sm:block">Arraste aqui ↕</span>
+                    <button type="button" onclick="fecharModal()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold">✕</button>
+                </div>
+            </div>
             
             <div id="modal-erro-alerta" class="hidden mb-4 bg-red-50 border-l-4 border-red-500 p-3 rounded-xl text-red-900 text-xs sm:text-sm font-bold flex items-center gap-2">
                 <span>⚠️</span>
@@ -1137,7 +1143,6 @@
             document.getElementById('edit-forma-pagamento').value = 'Pix / Sinal';
             document.getElementById('edit-observacao').value = '';
             document.getElementById('modal-titulo').innerText = "Gerenciar Suíte: " + nome;
-            // >>> Exibir capacidade real da suíte editada (regra: adultos + crianças)
             try {
                 const suiteDados = suitesGlobaisCache.find(s => s.id === id);
                 if (suiteDados) {
@@ -1145,18 +1150,17 @@
                     const inclusos = Number(suiteDados.hospedes_inclusos) || 2;
                     let capInfoEl = document.getElementById('info-capacidade-suite');
                     if (!capInfoEl) {
-                        // Cria elemento se não existir
                         const tituloEl = document.getElementById('modal-titulo');
                         capInfoEl = document.createElement('div');
                         capInfoEl.id = 'info-capacidade-suite';
-                        capInfoEl.className = 'mt-2 bg-blue-50 border border-blue-200 p-2.5 rounded-xl text-xs font-bold text-blue-900 flex items-center gap-2';
-                        tituloEl.parentNode.insertBefore(capInfoEl, tituloEl.nextSibling);
+                        capInfoEl.className = 'mt-2 mb-3 bg-blue-50 border border-blue-200 p-2.5 rounded-xl text-xs font-bold text-blue-900 flex items-center gap-2';
+                        tituloEl.parentNode.parentNode.insertBefore(capInfoEl, tituloEl.parentNode.nextSibling);
                     }
                     if (capMax > 0) {
                         capInfoEl.innerHTML = `<span>🏨 Capacidade real desta suíte: <strong>${capMax} pessoa(s)</strong> no total (adultos + crianças) | ${inclusos} incluso(s)</span>`;
                         capInfoEl.classList.remove('hidden');
                     } else {
-                        capInfoEl.innerHTML = `<span>🏨 Capacidade não definida para esta suíte (defina em Configurar Pousada)</span>`;
+                        capInfoEl.innerHTML = `<span>🏨 Capacidade não definida (defina em Configurar Pousada)</span>`;
                         capInfoEl.classList.remove('hidden');
                     }
                 }
@@ -1323,8 +1327,6 @@
             let checkoutStr = document.getElementById('edit-checkout').value;
             const adultosVal = parseInt(document.getElementById('edit-adultos').value) || 2;
             const criancasVal = parseInt(document.getElementById('edit-criancas').value) || 0;
-
-            // >>> VALIDAÇÃO DE CAPACIDADE: adultos + crianças <= capacidade_hospedes (mesma regra da vitrine)
             try {
                 const suiteCap = suitesGlobaisCache.find(s => s.id === suiteId);
                 if (suiteCap) {
@@ -1344,7 +1346,7 @@
                         avisoCap.classList.remove('hidden');
                     } else if (capMax > 0) {
                         avisoCap.className = 'mt-2 p-2.5 rounded-xl text-xs font-bold bg-green-50 border border-green-200 text-green-800';
-                        avisoCap.innerHTML = `✅ Ocupação OK: ${totalOcup}/${capMax} pessoa(s) (capacidade máxima ${capMax})`;
+                        avisoCap.innerHTML = `✅ Ocupação OK: ${totalOcup}/${capMax} pessoa(s)`;
                         avisoCap.classList.remove('hidden');
                     } else {
                         avisoCap.classList.add('hidden');
@@ -1490,9 +1492,6 @@
             }
 
             if (status === 'Reservado' && !camposLimposParaNovaReserva) {
-                // Ao selecionar "Criar Nova Reserva", limpa campos para nova reserva (como solicitado)
-                // Se estiver editando uma reserva existente (statusOriginal === 'Reservado' e tem reservaId), mantém dados para edição
-                // mas se veio de Disponível/Limpeza, limpa para criar nova
                 const reservaIdAtual = document.getElementById('edit-reserva-id').value;
                 const deveLimpar = statusOriginal !== 'Reservado' || !reservaIdAtual;
                 if (deveLimpar) {
@@ -1512,14 +1511,21 @@
                     document.getElementById('edit-valor-sinal').value = '';
                     document.getElementById('edit-forma-pagamento').value = 'Pix / Sinal';
                     document.getElementById('edit-observacao').value = '';
-                    // Limpa idades crianças
                     const listaIdades = document.getElementById('lista-idades-criancas');
                     if (listaIdades) listaIdades.innerHTML = '';
                     const containerIdades = document.getElementById('container-idades-criancas');
                     if (containerIdades) containerIdades.classList.add('hidden');
+                    const elQtdDiarias = document.getElementById('modal-qtd-diarias');
+                    const elValorTotal = document.getElementById('modal-valor-total');
+                    const elSaldoRest = document.getElementById('modal-saldo-restante');
+                    if (elQtdDiarias) elQtdDiarias.innerText = '0 diária(s)';
+                    if (elValorTotal) elValorTotal.innerText = 'R$ 0,00';
+                    if (elSaldoRest) elSaldoRest.innerText = 'R$ 0,00';
+                    const avisoCap = document.getElementById('aviso-capacidade-modal');
+                    if (avisoCap) { avisoCap.classList.add('hidden'); avisoCap.innerHTML = ''; }
+                    limparErroModal();
                 }
                 camposLimposParaNovaReserva = true;
-                // Atualiza título para "Criar Nova Reserva"
                 try {
                     const suiteId = document.getElementById('edit-suite-id').value;
                     const suiteN = suitesGlobaisCache.find(s => s.id === suiteId);
@@ -1569,7 +1575,6 @@
                 document.getElementById('edit-checkout').value = checkoutVal;
             }
 
-            // >>> VALIDAÇÃO DE CAPACIDADE NO SALVAMENTO (dashboard - gestor)
             try {
                 const suiteCapSave = suitesGlobaisCache.find(s => s.id === suiteId);
                 if (suiteCapSave) {
@@ -1755,6 +1760,83 @@
         async function fazerLogout() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
         
         protegerPagina();
-    </script>
+    
+        // >>> DRAGGABLE MODAL: permitir arrastar card na tela para ver outros cards
+        (function() {
+            const modal = document.getElementById('modal-edicao');
+            const card = document.getElementById('modal-edicao-card');
+            const handle = document.getElementById('modal-drag-handle');
+            if (!modal || !card || !handle) return;
+            let isDragging = false;
+            let startX, startY, initialLeft, initialTop;
+
+            function getCardPosition() {
+                const rect = card.getBoundingClientRect();
+                return { left: rect.left, top: rect.top };
+            }
+
+            function onMouseDown(e) {
+                if (e.target.closest('button')) return; // não arrasta ao clicar no X
+                isDragging = true;
+                card.style.transition = 'none';
+                const pos = getCardPosition();
+                initialLeft = pos.left;
+                initialTop = pos.top;
+                startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                startY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+                // Centraliza transform para posicionamento absoluto durante drag
+                card.style.position = 'fixed';
+                card.style.left = initialLeft + 'px';
+                card.style.top = initialTop + 'px';
+                card.style.margin = '0';
+                card.style.zIndex = '60';
+                document.body.style.userSelect = 'none';
+            }
+
+            function onMouseMove(e) {
+                if (!isDragging) return;
+                const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+                const dx = clientX - startX;
+                const dy = clientY - startY;
+                let newLeft = initialLeft + dx;
+                let newTop = initialTop + dy;
+                // Limites para não sair totalmente da tela
+                const maxLeft = window.innerWidth - 100;
+                const maxTop = window.innerHeight - 100;
+                newLeft = Math.min(Math.max(newLeft, -card.offsetWidth + 100), maxLeft);
+                newTop = Math.min(Math.max(newTop, 0), maxTop);
+                card.style.left = newLeft + 'px';
+                card.style.top = newTop + 'px';
+            }
+
+            function onMouseUp() {
+                if (!isDragging) return;
+                isDragging = false;
+                card.style.transition = '';
+                document.body.style.userSelect = '';
+            }
+
+            handle.addEventListener('mousedown', onMouseDown);
+            handle.addEventListener('touchstart', onMouseDown, {passive:false});
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('touchmove', onMouseMove, {passive:false});
+            window.addEventListener('mouseup', onMouseUp);
+            window.addEventListener('touchend', onMouseUp);
+
+            // Reset posição ao fechar/abrir
+            const origFechar = window.fecharModal;
+            window.fecharModal = function() {
+                card.style.position = '';
+                card.style.left = '';
+                card.style.top = '';
+                card.style.margin = '';
+                card.style.zIndex = '';
+                card.style.transition = '';
+                document.getElementById('modal-edicao').classList.add('hidden');
+            };
+        })();
+
+</script>
 </body>
 </html>
