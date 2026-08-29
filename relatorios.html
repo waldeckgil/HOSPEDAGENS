@@ -391,16 +391,6 @@
             let tituloCompleto = `${tituloBaseAtual} (DE ${dataInicioFormatada} ATÉ ${dataFimFormatada})`;
             document.getElementById('tituloViewAtiva').textContent = tituloCompleto.toUpperCase();
 
-            // Controle de visibilidade do filtro por suíte - só na visão financeira
-            const containerFiltro = document.getElementById('containerFiltroSuites');
-            if (containerFiltro) {
-                if (ehViewFinanceiro) {
-                    containerFiltro.classList.remove('hidden');
-                } else {
-                    containerFiltro.classList.add('hidden');
-                }
-            }
-
             tbody.innerHTML = `<tr><td colspan="12" class="py-6 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO DADOS...</td></tr>`;
 
             try {
@@ -412,6 +402,16 @@
                 let ehViewTarifas = (viewAtualSelecionada === 'vw_gestor_tarifas_relatorio');
                 let ehViewFinanceiro = (viewAtualSelecionada === 'vw_gestor_financeiro_relatorio');
                 let ehViewFinanceiroSuite = (viewAtualSelecionada === 'vw_gestor_financeiro_suite_relatorio');
+
+                // Controle de visibilidade do filtro por suíte - só na visão financeira
+                const containerFiltro = document.getElementById('containerFiltroSuites');
+                if (containerFiltro) {
+                    if (ehViewFinanceiro) {
+                        containerFiltro.classList.remove('hidden');
+                    } else {
+                        containerFiltro.classList.add('hidden');
+                    }
+                }
 
                 if (ehViewTarifas) {
                     const response = await supabaseClient.rpc('fn_gestor_tarifas_relatorio', {
