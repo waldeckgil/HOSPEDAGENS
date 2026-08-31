@@ -306,23 +306,6 @@
                 `;
             }
 
-            // REGIME DE PENSÃO - 3 OPÇÕES - BARRA INSTITUCIONAL
-            if (dadosPousadaGlobal.tipo_pensao) {
-                const tipoGlobal = String(dadosPousadaGlobal.tipo_pensao).toLowerCase();
-                let textoPensao = '';
-                let corPensao = 'bg-white/20 backdrop-blur-md border-white/30';
-                if (tipoGlobal === 'cafe_completo' || tipoGlobal.includes('cafe')) { textoPensao = '☕ Café da manhã completo'; corPensao = 'bg-amber-500/20 backdrop-blur-md border-amber-300/30'; }
-                else if (tipoGlobal === 'meia_pensao' || tipoGlobal.includes('meia')) { textoPensao = '🍽️ Meia pensão'; corPensao = 'bg-blue-500/20 backdrop-blur-md border-blue-300/30'; }
-                else if (tipoGlobal === 'pensao_completa' || tipoGlobal.includes('completa')) { textoPensao = '🍽️ Pensão completa'; corPensao = 'bg-emerald-500/20 backdrop-blur-md border-emerald-300/30'; }
-                if (textoPensao) {
-                    html += `
-                        <div class="${corPensao} px-3 py-1.5 rounded-xl border shadow">
-                            ${textoPensao}
-                        </div>
-                    `;
-                }
-            }
-
             container.innerHTML = html;
         }
 
@@ -742,23 +725,6 @@
                 const calc = await calcularValorTotalEstadiaCompleto(suite.id, checkinFiltro, checkoutFiltro, precoBase, qtdAdultos, qtdCriancas);
                 const temConflitoNoPeriodo = suite.temConflitoNoPeriodo;
 
-                // REGIME DE PENSÃO - 3 OPÇÕES, NÃO OBRIGATÓRIO
-                let regimePensaoBadge = '';
-                let descricaoPensaoTexto = '';
-                if (dadosPousadaGlobal.tipo_pensao) {
-                    const tipo = String(dadosPousadaGlobal.tipo_pensao).toLowerCase();
-                    if (tipo === 'cafe_completo' || tipo === 'cafe' || tipo.includes('cafe')) {
-                        regimePensaoBadge = '<span class="inline-flex items-center gap-1.5 bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">☕ Café da manhã completo incluso</span>';
-                    } else if (tipo === 'meia_pensao' || tipo.includes('meia')) {
-                        regimePensaoBadge = '<span class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-800 border border-blue-200 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">🍽️ Meia pensão</span>';
-                    } else if (tipo === 'pensao_completa' || tipo.includes('completa')) {
-                        regimePensaoBadge = '<span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">🍽️ Pensão completa</span>';
-                    }
-                    if (dadosPousadaGlobal.descricao_pensao) {
-                        descricaoPensaoTexto = `<p class="text-[11px] text-gray-600 mt-1.5 italic bg-gray-50 p-2 rounded-lg border border-gray-100">ℹ️ ${dadosPousadaGlobal.descricao_pensao}</p>`;
-                    }
-                }
-
                 let statusBadge = temConflitoNoPeriodo 
                     ? '<span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">⚠️ Indisponível no período exato</span>'
                     : '<span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-green-600 bg-green-50 px-2.5 py-1 rounded-full border border-green-200">Disponível</span>';
@@ -875,10 +841,6 @@
                                         </div>
                                     </div>
                                     <p class="text-xs text-gray-500 mb-2">Capacidade: até ${suite.capacidade_hospedes || 2} hóspedes (${suite.hospedes_inclusos || 2} inclusos)</p>
-                                    <div class="mb-2 flex flex-col gap-1.5">
-                                        ${regimePensaoBadge}
-                                        ${descricaoPensaoTexto}
-                                    </div>
 
                                     <div class="mb-3">
                                         <button onclick="toggleCalendarioMensal('${suite.id}')" id="btn-toggle-cal-${suite.id}" class="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm">
