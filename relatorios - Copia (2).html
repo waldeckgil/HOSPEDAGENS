@@ -642,11 +642,9 @@
                         }
                         novoRow['alerta_status_tarifa'] = htmlAlerta;
                     } else if (ehViewReservas) {
-                        let statusAtual = String(novoRow['status_reserva'] || novoRow['status'] || '').trim().toUpperCase();
+                        let checkinVal = novoRow['checkin'];
                         let htmlAlerta = '-';
-                        if (statusAtual !== 'RECUSADA') {
-                            let checkinVal = novoRow['checkin'];
-                            if (checkinVal) {
+                        if (checkinVal) {
                             let dtCheckin = new Date(checkinVal);
                             dtCheckin.setHours(0, 0, 0, 0);
                             let diffTime = dtCheckin - hojeDataObj;
@@ -658,7 +656,6 @@
                                 htmlAlerta = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-purple-700 font-bold bg-purple-100 shadow-sm"><i class="fa-solid fa-hourglass-start"></i> CHEGA EM ${diffDays} DIA${diffDays === 1 ? '' : 'S'}</span>`;
                             } else {
                                 htmlAlerta = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-slate-600 font-bold bg-slate-200 shadow-sm"><i class="fa-solid fa-flag-checkered"></i> REALIZADO</span>`;
-                            }
                             }
                         }
                         novoRow['alerta_status_reserva'] = htmlAlerta;
