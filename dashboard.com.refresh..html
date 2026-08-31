@@ -74,12 +74,12 @@
                     <span>📊</span> <span id="kpi-texto-mes">Reservas no mês: 0</span>
                 </div>
                 <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200 w-fit flex items-center gap-2">
-                <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> Sistema Online
-            </span>
-            <span id="ultima-atualizacao" class="text-[10px] text-gray-400 font-medium">Atualizado agora</span>
-            <button onclick="atualizarAgora()" title="Atualizar agora (sem F5)" class="bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 p-1.5 rounded-full w-7 h-7 flex items-center justify-center transition">
-                <i class="fa-solid fa-rotate text-[11px]"></i>
-            </button>
+                    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> Sistema Online
+                </span>
+                <span id="ultima-atualizacao" class="text-[10px] text-gray-400 font-medium">Atualizado agora</span>
+                <button onclick="atualizarAgora()" title="Atualizar agora (sem F5)" class="bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 p-1.5 rounded-full w-7 h-7 flex items-center justify-center transition">
+                    <i class="fa-solid fa-rotate text-[11px]"></i>
+                </button>
             </div>
         </header>
 
@@ -1134,25 +1134,15 @@
                                         <p><span class="text-amber-800">Check-out:</span> <strong class="text-gray-900">${formatarDataSimples(pend.checkout)}</strong></p>
                                     </div>
 
-                                    <div class="mt-4 pt-3 border-t border-amber-200 flex gap-2 hidden sm:flex">
-                                        <button onclick="mudarStatusReserva('${pend.id}', 'Aprovada')" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✔ Aprovar (detalhes)</button>
-                                        <button onclick="mudarStatusReserva('${pend.id}', 'Recusada')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✖ Recusar (detalhes)</button>
+                                    <div class="mt-4 pt-3 border-t border-amber-200 flex gap-2">
+                                        <button onclick="mudarStatusReserva('${pend.id}', 'Aprovada')" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✔ Aprovar</button>
+                                        <button onclick="mudarStatusReserva('${pend.id}', 'Recusada')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✖ Recusar</button>
                                     </div>
                                 </div>
 
-                                <!-- BOTÕES VISÍVEIS SEM EXPANDIR - DESTAQUE MÁXIMO -->
-                                <div class="mt-3 bg-amber-100 border-2 border-amber-500 rounded-xl p-2.5 flex gap-2 alerta-piscando shadow-sm">
-                                    <button onclick="mudarStatusReserva('${pend.id}', 'Aprovada')" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-extrabold py-3 px-3 rounded-xl shadow-md text-sm transition flex items-center justify-center gap-1.5">
-                                        ✔ Aprovar
-                                    </button>
-                                    <button onclick="if(confirm('Tem certeza que deseja RECUSAR esta reserva de ${pend.hospede_nome || 'hóspede'}? Ela ficará registrada como Recusada para auditoria.')) mudarStatusReserva('${pend.id}', 'Recusada')" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-extrabold py-3 px-3 rounded-xl shadow-md text-sm transition flex items-center justify-center gap-1.5">
-                                        ✖ Recusar
-                                    </button>
-                                </div>
-
-                                <div class="mt-3 pt-3 flex justify-between items-center border-t border-amber-200">
+                                <div class="mt-4 pt-3 flex justify-between items-center border-t border-amber-200">
                                     <button type="button" onclick="alternarExpandirCard(this)" class="text-xs font-bold text-amber-900 hover:text-amber-950 underline">
-                                        Ver detalhes / WhatsApp ▾
+                                        Expandir Detalhes ▾
                                     </button>
                                     <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', 'Pendente', '${pend.id}')" class="text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 px-3.5 py-2 rounded-xl transition shadow-xs">
                                         Editar Card &rarr;
@@ -1798,19 +1788,27 @@
         protegerPagina();
 
         // >>> AUTO-REFRESH PROFISSIONAL - SEM PRECISAR F5
+        // 1) Atualiza a cada 60 segundos automaticamente
         let intervaloAutoRefresh = null;
         let canalRealtime = null;
+
         function iniciarAutoRefresh() {
+            // Evita duplicar intervalo
             if (intervaloAutoRefresh) clearInterval(intervaloAutoRefresh);
+            
             intervaloAutoRefresh = setInterval(() => {
+                // Só atualiza se modal não estiver aberto (não atrapalha edição)
                 const modalAberto = document.getElementById('modal-edicao') && !document.getElementById('modal-edicao').classList.contains('hidden');
                 if (!modalAberto) {
                     console.log('🔄 Auto-refresh 60s');
                     carregarDashboard();
                     atualizarHorarioUltimaAtualizacao();
                 }
-            }, 60000);
+            }, 60000); // 60 segundos
+
+            console.log('✅ Auto-refresh a cada 60s ativado');
         }
+
         function atualizarHorarioUltimaAtualizacao() {
             const el = document.getElementById('ultima-atualizacao');
             if (el) {
@@ -1818,15 +1816,24 @@
                 el.innerText = `Atualizado às ${agora}`;
             }
         }
+
         async function iniciarRealtime() {
+            // Supabase Realtime - escuta mudanças em reservas e suites da sua pousada
             try {
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 if (!session) return;
                 const pousadaId = session.user.id;
-                if (canalRealtime) supabaseClient.removeChannel(canalRealtime);
+
+                // Fecha canal antigo se existir
+                if (canalRealtime) {
+                    supabaseClient.removeChannel(canalRealtime);
+                }
+
                 canalRealtime = supabaseClient
                     .channel(`dashboard-pousada-${pousadaId}`)
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'reservas', filter: `pousada_id=eq.${pousadaId}` }, (payload) => {
+                        console.log('🔔 Mudança em reservas detectada', payload.eventType);
+                        // Se modal fechado, atualiza na hora
                         const modalAberto = document.getElementById('modal-edicao') && !document.getElementById('modal-edicao').classList.contains('hidden');
                         if (!modalAberto) {
                             carregarDashboard();
@@ -1835,19 +1842,45 @@
                         }
                     })
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'suites', filter: `pousada_id=eq.${pousadaId}` }, () => {
+                        console.log('🔔 Mudança em suítes detectada');
                         const modalAberto = document.getElementById('modal-edicao') && !document.getElementById('modal-edicao').classList.contains('hidden');
-                        if (!modalAberto) { carregarDashboard(); atualizarHorarioUltimaAtualizacao(); }
+                        if (!modalAberto) {
+                            carregarDashboard();
+                            atualizarHorarioUltimaAtualizacao();
+                        }
                     })
-                    .subscribe();
-            } catch (e) { console.warn('Realtime falhou:', e); }
+                    .subscribe((status) => {
+                        console.log('📡 Realtime status:', status);
+                    });
+
+                console.log('✅ Realtime conectado');
+            } catch (e) {
+                console.warn('Realtime falhou, usando só polling:', e);
+            }
         }
+
+        // Atualiza quando volta pra aba (sem F5)
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
-                carregarDashboard(); atualizarHorarioUltimaAtualizacao();
+                console.log('👁️ Aba visível - atualizando');
+                carregarDashboard();
+                atualizarHorarioUltimaAtualizacao();
             }
         });
-        setTimeout(() => { iniciarAutoRefresh(); iniciarRealtime(); atualizarHorarioUltimaAtualizacao(); }, 2000);
-        window.atualizarAgora = function() { carregarDashboard(); atualizarHorarioUltimaAtualizacao(); mostrarToast('Atualizado', 'Painel atualizado agora!'); }
+
+        // Inicia tudo após carregar
+        setTimeout(() => {
+            iniciarAutoRefresh();
+            iniciarRealtime();
+            atualizarHorarioUltimaAtualizacao();
+        }, 2000);
+
+        // Botão manual de refresh (opcional)
+        window.atualizarAgora = function() {
+            carregarDashboard();
+            atualizarHorarioUltimaAtualizacao();
+            mostrarToast('Atualizado', 'Painel atualizado agora!');
+        }
         
     
         // >>> DRAGGABLE MODAL: permitir arrastar card na tela para ver outros cards
