@@ -1145,7 +1145,7 @@
                                     <button onclick="mudarStatusReserva('${pend.id}', 'Aprovada')" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-extrabold py-3 px-3 rounded-xl shadow-md text-sm transition flex items-center justify-center gap-1.5">
                                         ✔ Aprovar
                                     </button>
-                                    <button onclick="if(confirm('Tem certeza que deseja RECUSAR esta reserva de ${pend.hospede_nome || 'hóspede'}? Ela ficará registrada como Recusada para auditoria.')) mudarStatusReserva('${pend.id}', 'Recusada')" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-extrabold py-3 px-3 rounded-xl shadow-md text-sm transition flex items-center justify-center gap-1.5">
+                                    <button onclick="abrirModalRecusa('${pend.id}', '${(pend.hospede_nome || 'hóspede').replace("'", "").replace('"', '')}')" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-extrabold py-3 px-3 rounded-xl shadow-md text-sm transition flex items-center justify-center gap-1.5">
                                         ✖ Recusar
                                     </button>
                                 </div>
@@ -1850,8 +1850,64 @@
         window.atualizarAgora = function() { carregarDashboard(); atualizarHorarioUltimaAtualizacao(); mostrarToast('Atualizado', 'Painel atualizado agora!'); }
         
     
+
+        // >>> MODAL PROFISSIONAL DE RECUSA - SUBSTITUI confirm() NATIVO
+        let reservaIdParaRecusar = null;
+        function abrirModalRecusa(reservaId, nomeHospede) {
+            reservaIdParaRecusar = reservaId;
+            document.getElementById('nome-hospede-recusa').innerText = nomeHospede || 'hóspede';
+            document.getElementById('modal-recusa-profissional').classList.remove('hidden');
+        }
+        function fecharModalRecusa() {
+            reservaIdParaRecusar = null;
+            document.getElementById('modal-recusa-profissional').classList.add('hidden');
+        }
+        async function confirmarRecusaReserva() {
+            if (!reservaIdParaRecusar) return;
+            await mudarStatusReserva(reservaIdParaRecusar, 'Recusada');
+            fecharModalRecusa();
+        }
+        // Fecha ao clicar fora
+        document.addEventListener('click', (e) => {
+            const modal = document.getElementById('modal-recusa-profissional');
+            if (modal && !modal.classList.contains('hidden') && e.target === modal) {
+                fecharModalRecusa();
+            }
+        });
+
+
         // >>> DRAGGABLE MODAL: permitir arrastar card na tela para ver outros cards
-        (function() {
+            <!-- MODAL PROFISSIONAL DE RECUSA - SUBSTITUI O CONFIRM NATIVO -->
+    <div id="modal-recusa-profissional" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-[70]">
+        <div class="bg-white p-6 sm:p-7 rounded-3xl w-full max-w-md shadow-2xl border border-gray-100 transform transition-all">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center text-xl flex-shrink-0">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-base sm:text-lg font-extrabold text-gray-900">Recusar reserva?</h3>
+                    <p class="text-xs sm:text-sm text-gray-600 mt-1.5 leading-relaxed">
+                        Tem certeza que deseja <strong class="text-red-700">RECUSAR</strong> a reserva de <strong id="nome-hospede-recusa" class="text-gray-900">hóspede</strong>?
+                    </p>
+                    <div class="mt-3 bg-amber-50 border border-amber-200 rounded-xl p-2.5 flex items-start gap-2">
+                        <span class="text-amber-600 text-sm">📋</span>
+                        <p class="text-[11px] text-amber-900 font-medium leading-snug">Ela ficará registrada como <strong>Recusada</strong> no Supabase para auditoria (tabela <code class="bg-white px-1.5 py-0.5 rounded border text-[10px]">reservas</code> → <code class="bg-white px-1.5 py-0.5 rounded border text-[10px]">status = Recusada</code>).</p>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 flex gap-2.5">
+                <button onclick="fecharModalRecusa()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-4 rounded-xl transition text-sm">
+                    Cancelar
+                </button>
+                <button onclick="confirmarRecusaReserva()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-extrabold py-2.5 px-4 rounded-xl shadow-md transition text-sm flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-xmark"></i> Sim, Recusar
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    (function() {
             const modal = document.getElementById('modal-edicao');
             const card = document.getElementById('modal-edicao-card');
             const handle = document.getElementById('modal-drag-handle');
