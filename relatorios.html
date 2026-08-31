@@ -528,7 +528,7 @@
                     });
                 }
 
-                registrosFiltrados.sort((a, b) => {
+             registrosFiltrados.sort((a, b) => {
                     let suiteA = String(a['suite'] || '').trim().toUpperCase();
                     let suiteB = String(b['suite'] || '').trim().toUpperCase();
                     if (suiteA !== suiteB) {
@@ -536,7 +536,7 @@
                     }
                     let dataA = a['data_pagamento'] || a['checkin'] || '';
                     let dataB = b['data_pagamento'] || b['checkin'] || '';
-                    return new Date(dataA) - new Date(dataB);
+                    return new Date(dataB) - new Date(dataA);
                 });
 
                 let faturamentoBrutoPeriodo = 0;
