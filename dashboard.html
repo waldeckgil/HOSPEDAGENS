@@ -73,7 +73,13 @@
                 <div id="kpi-mes-container" class="hidden bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-full text-indigo-900 text-xs font-bold flex items-center gap-1.5">
                     <span>📊</span> <span id="kpi-texto-mes">Reservas no mês: 0</span>
                 </div>
-                <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200 w-fit">Sistema Online</span>
+                <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200 w-fit flex items-center gap-2">
+                    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> Sistema Online
+                </span>
+                <span id="ultima-atualizacao" class="text-[10px] text-gray-400 font-medium">Atualizado agora</span>
+                <button onclick="atualizarAgora()" title="Atualizar agora (sem F5)" class="bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 p-1.5 rounded-full w-7 h-7 flex items-center justify-center transition">
+                    <i class="fa-solid fa-rotate text-[11px]"></i>
+                </button>
             </div>
         </header>
 
@@ -134,7 +140,7 @@
     <div id="modal-confirmacao" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-6 sm:p-8 rounded-3xl w-full max-w-md shadow-2xl text-center space-y-4">
             <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">⚠️</div>
-            <h3 class="text-lg sm:text-xl font-bold text-gray-900">Confirmar Checkout ?</h3>
+            <h3 class="text-lg sm:text-xl font-bold text-gray-900">Confirmar Saída / Limpeza?</h3>
             <p id="modal-confirmacao-texto" class="text-xs sm:text-sm text-gray-600">
                 Esta ação encerrará a estadia atual do hóspede e enviará a suíte para limpeza. Deseja prosseguir?
             </p>
@@ -147,7 +153,7 @@
 
     <!-- Modal de Edição -->
     <div id="modal-edicao" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-hidden">
-        <div id="modal-edicao-card" class="bg-white p-5 sm:p-7 rounded-[24px] w-full max-w-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] max-h-[88vh] overflow-y-auto relative border border-gray-100">
+        <div id="modal-edicao-card" class="bg-white p-6 sm:p-8 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto relative cursor-default select-none" style="touch-action:none;">
             <div id="modal-drag-handle" class="flex justify-between items-center mb-4 cursor-move select-none">
                 <h2 id="modal-titulo" class="text-xl sm:text-2xl font-bold text-blue-600 m-0">Gerenciar Suíte</h2>
                 <div class="flex items-center gap-2">
@@ -166,14 +172,15 @@
                 <input type="hidden" id="edit-status-original">
                 <input type="hidden" id="edit-reserva-id">
                 
-                <div class="bg-gradient-to-r from-slate-50 to-blue-50 border-2 border-blue-200 rounded-2xl p-4 shadow-sm">
-                    <label class="block text-[11px] font-extrabold text-blue-800 uppercase tracking-widest mb-2 flex items-center gap-1.5">🏨 Status Físico da Suíte</label>
-                    <select id="edit-status" class="w-full p-3.5 border-2 border-blue-200 rounded-xl font-bold bg-white text-sm shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition" onchange="(async () => { await verificarStatusModal(); })()">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Status Físico da Suíte</label>
+                    <select id="edit-status" class="w-full p-3 border rounded-xl font-bold bg-gray-50 text-sm" onchange="(async () => { await verificarStatusModal(); })()">
                         <option value="Disponível">Disponível</option>
                         <option value="Ocupada">Ocupada (Agora)</option>
                         <option value="Reservado">Criar Nova Reserva</option>
                         <option value="Limpeza">Limpeza</option>
-                                                <option value="Checkout">Checkout (Finalizar Estadia)</option>
+                        <option value="Pendente">Pendente</option>
+                        <option value="Checkout">Checkout (Finalizar Estadia)</option>
                     </select>
                 </div>
 
@@ -187,7 +194,7 @@
                 </div>
 
                 <!-- RESUMO DINÂMICO DE TARIFA E DIÁRIAS NO MODAL -->
-                <div id="resumo-dinamico-container" class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-3.5 rounded-2xl space-y-1.5 text-xs text-blue-900 shadow-sm">
+                <div id="resumo-dinamico-container" class="bg-blue-50 border border-blue-200 p-3 rounded-xl space-y-1 text-xs text-blue-900">
                     <div class="flex justify-between">
                         <span>Qtd. Diárias Calculadas:</span>
                         <strong id="modal-qtd-diarias">1 diária(s)</strong>
@@ -202,13 +209,6 @@
                     </div>
                 </div>
 
-                <div class="pt-1">
-                    <div class="flex items-center gap-2 mb-3">
-                        <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-[12px]">👤</div>
-                        <span class="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest">Dados do Hóspede</span>
-                        <div class="flex-1 h-px bg-gray-100"></div>
-                    </div>
-                </div>
                 <div id="campos-hospede-container" class="space-y-3 transition-all">
                     <div class="grid grid-cols-1 gap-2">
                         <input type="text" id="edit-hospede" placeholder="Nome Hóspede" class="p-3 border rounded-xl text-sm">
@@ -280,10 +280,8 @@
                     </div>
                 </div>
 
-                <div class="sticky bottom-0 bg-white/95 backdrop-blur-sm pt-4 mt-6 border-t border-gray-100 -mx-1 px-1 flex flex-col gap-2">
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3.5 rounded-xl font-bold transition text-sm shadow-lg shadow-blue-200">Salvar Alterações</button>
-                    <button type="button" onclick="fecharModal()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 p-3 rounded-xl font-bold transition text-sm">Cancelar</button>
-                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold mt-4 transition text-sm">Salvar Alterações</button>
+                <button type="button" onclick="fecharModal()" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 p-3 rounded-xl font-bold mt-2 transition text-sm">Cancelar</button>
             </form>
         </div>
     </div>
@@ -1788,6 +1786,102 @@
         async function fazerLogout() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
         
         protegerPagina();
+
+        // >>> AUTO-REFRESH PROFISSIONAL - SEM PRECISAR F5
+        // 1) Atualiza a cada 60 segundos automaticamente
+        let intervaloAutoRefresh = null;
+        let canalRealtime = null;
+
+        function iniciarAutoRefresh() {
+            // Evita duplicar intervalo
+            if (intervaloAutoRefresh) clearInterval(intervaloAutoRefresh);
+            
+            intervaloAutoRefresh = setInterval(() => {
+                // Só atualiza se modal não estiver aberto (não atrapalha edição)
+                const modalAberto = document.getElementById('modal-edicao') && !document.getElementById('modal-edicao').classList.contains('hidden');
+                if (!modalAberto) {
+                    console.log('🔄 Auto-refresh 60s');
+                    carregarDashboard();
+                    atualizarHorarioUltimaAtualizacao();
+                }
+            }, 60000); // 60 segundos
+
+            console.log('✅ Auto-refresh a cada 60s ativado');
+        }
+
+        function atualizarHorarioUltimaAtualizacao() {
+            const el = document.getElementById('ultima-atualizacao');
+            if (el) {
+                const agora = new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+                el.innerText = `Atualizado às ${agora}`;
+            }
+        }
+
+        async function iniciarRealtime() {
+            // Supabase Realtime - escuta mudanças em reservas e suites da sua pousada
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) return;
+                const pousadaId = session.user.id;
+
+                // Fecha canal antigo se existir
+                if (canalRealtime) {
+                    supabaseClient.removeChannel(canalRealtime);
+                }
+
+                canalRealtime = supabaseClient
+                    .channel(`dashboard-pousada-${pousadaId}`)
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'reservas', filter: `pousada_id=eq.${pousadaId}` }, (payload) => {
+                        console.log('🔔 Mudança em reservas detectada', payload.eventType);
+                        // Se modal fechado, atualiza na hora
+                        const modalAberto = document.getElementById('modal-edicao') && !document.getElementById('modal-edicao').classList.contains('hidden');
+                        if (!modalAberto) {
+                            carregarDashboard();
+                            atualizarHorarioUltimaAtualizacao();
+                            mostrarToast('Atualizado', `Reserva ${payload.eventType === 'INSERT' ? 'nova' : 'alterada'} detectada!`);
+                        }
+                    })
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'suites', filter: `pousada_id=eq.${pousadaId}` }, () => {
+                        console.log('🔔 Mudança em suítes detectada');
+                        const modalAberto = document.getElementById('modal-edicao') && !document.getElementById('modal-edicao').classList.contains('hidden');
+                        if (!modalAberto) {
+                            carregarDashboard();
+                            atualizarHorarioUltimaAtualizacao();
+                        }
+                    })
+                    .subscribe((status) => {
+                        console.log('📡 Realtime status:', status);
+                    });
+
+                console.log('✅ Realtime conectado');
+            } catch (e) {
+                console.warn('Realtime falhou, usando só polling:', e);
+            }
+        }
+
+        // Atualiza quando volta pra aba (sem F5)
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                console.log('👁️ Aba visível - atualizando');
+                carregarDashboard();
+                atualizarHorarioUltimaAtualizacao();
+            }
+        });
+
+        // Inicia tudo após carregar
+        setTimeout(() => {
+            iniciarAutoRefresh();
+            iniciarRealtime();
+            atualizarHorarioUltimaAtualizacao();
+        }, 2000);
+
+        // Botão manual de refresh (opcional)
+        window.atualizarAgora = function() {
+            carregarDashboard();
+            atualizarHorarioUltimaAtualizacao();
+            mostrarToast('Atualizado', 'Painel atualizado agora!');
+        }
+        
     
         // >>> DRAGGABLE MODAL: permitir arrastar card na tela para ver outros cards
         (function() {
