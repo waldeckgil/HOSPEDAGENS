@@ -97,8 +97,7 @@
                                 <div class="col-span-2">
                                     <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Qual regime a pousada oferece?</label>
                                     <select id="pousada-tipo-pensao" class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs sm:text-sm">
-                                        <option value="">Selecione o regime</option>
-                                        <option value="sem_cafe">🚫 Sem café</option>
+                                        <option value="">Selecione (opcional)</option>
                                         <option value="cafe_completo">☕ Café da manhã Completo</option>
                                         <option value="meia_pensao">🍽️ Meia pensão</option>
                                         <option value="pensao_completa">🍽️ Pensão completa</option>
@@ -108,16 +107,6 @@
                                 <div class="col-span-2">
                                     <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Descrição do regime (opcional - aparece na vitrine)</label>
                                     <textarea id="pousada-descricao-pensao" rows="2" placeholder="Ex: Meia pensão inclui café da manhã e jantar. Pensão completa inclui 3 refeições..." class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs sm:text-sm"></textarea>
-                                </div>
-
-                                <!-- DESCRIÇÃO INSTITUCIONAL DA POUSADA -->
-                                <div class="col-span-2 pt-3 border-t border-gray-200 mt-2">
-                                    <span class="block text-[10px] font-extrabold text-blue-700 uppercase tracking-widest mb-2">📝 Descrição da Pousada (Vitrine)</span>
-                                </div>
-                                <div class="col-span-2">
-                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Descreva sua pousada - aparece no topo das fotos</label>
-                                    <textarea id="pousada-descricao-pousada" rows="5" placeholder="Ex: Você desfruta de um ambiente ideal para descanso e lazer da família, combinando hospitalidade, diversão e experiências que ficarão para sempre na memória. Rodeado pelas montanhas e o verde da Mata Atlântica..." class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs sm:text-sm"></textarea>
-                                    <p class="text-[10px] text-gray-500 mt-1">Esse texto aparece quando o hóspede clica em 'Conheça a Pousada' na vitrine.</p>
                                 </div>
 
                                 <!-- BLOCO: HABILITAR FOTOS DA POUSADA -->
@@ -462,7 +451,6 @@
                 // REGIME DE PENSÃO - carregamento
                 document.getElementById('pousada-tipo-pensao').value = pousada.tipo_pensao || '';
                 document.getElementById('pousada-descricao-pensao').value = pousada.descricao_pensao || '';
-                document.getElementById('pousada-descricao-pousada').value = pousada.descricao_pousada || '';
 
                 document.getElementById('check-exibir-fotos').checked = pousada.exibir_fotos_pousada || false;
                 toggleSecaoFotos();
@@ -550,7 +538,6 @@
                 // REGIME DE PENSÃO
                 tipo_pensao: document.getElementById('pousada-tipo-pensao').value || null,
                 descricao_pensao: document.getElementById('pousada-descricao-pensao').value || null,
-                descricao_pousada: document.getElementById('pousada-descricao-pousada').value || null,
                 exibir_fotos_pousada: document.getElementById('check-exibir-fotos').checked,
                 fotos_pousada: fotosPousadaArray,
                 exibir_atracoes: document.getElementById('check-exibir-atracoes').checked,

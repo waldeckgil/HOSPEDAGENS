@@ -101,7 +101,6 @@
                 <h3 class="text-xl font-extrabold text-blue-600">📷 Fotos da Pousada</h3>
                 <button onclick="fecharModalGenerico('modal-fotos-pousada')" class="text-gray-500 hover:text-gray-800 font-bold text-lg px-2">✕</button>
             </div>
-            <div id="descricao-pousada-modal" class="hidden"></div>
             <div id="grid-fotos-pousada" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
         </div>
     </div>
@@ -307,13 +306,12 @@
                 `;
             }
 
-            // REGIME DE PENSÃO - EXIBIÇÃO GLOBAL NA BARRA INSTITUCIONAL
+            // REGIME DE PENSÃO - 3 OPÇÕES - BARRA INSTITUCIONAL
             if (dadosPousadaGlobal.tipo_pensao) {
                 const tipoGlobal = String(dadosPousadaGlobal.tipo_pensao).toLowerCase();
                 let textoPensao = '';
                 let corPensao = 'bg-white/20 backdrop-blur-md border-white/30';
-                if (tipoGlobal === 'sem_cafe') { textoPensao = '🚫 Sem café'; }
-                else if (tipoGlobal === 'cafe_completo' || tipoGlobal.includes('cafe')) { textoPensao = '☕ Café da manhã completo'; corPensao = 'bg-amber-500/20 backdrop-blur-md border-amber-300/30'; }
+                if (tipoGlobal === 'cafe_completo' || tipoGlobal.includes('cafe')) { textoPensao = '☕ Café da manhã completo'; corPensao = 'bg-amber-500/20 backdrop-blur-md border-amber-300/30'; }
                 else if (tipoGlobal === 'meia_pensao' || tipoGlobal.includes('meia')) { textoPensao = '🍽️ Meia pensão'; corPensao = 'bg-blue-500/20 backdrop-blur-md border-blue-300/30'; }
                 else if (tipoGlobal === 'pensao_completa' || tipoGlobal.includes('completa')) { textoPensao = '🍽️ Pensão completa'; corPensao = 'bg-emerald-500/20 backdrop-blur-md border-emerald-300/30'; }
                 if (textoPensao) {
@@ -330,22 +328,6 @@
 
         function abrirModalFotosPousada() {
             const grid = document.getElementById('grid-fotos-pousada');
-            // DESCRIÇÃO DA POUSADA NO TOPO DO MODAL
-            const containerDescricao = document.getElementById('descricao-pousada-modal');
-            if (containerDescricao) {
-                if (dadosPousadaGlobal.descricao_pousada) {
-                    containerDescricao.innerHTML = `
-                        <div class="bg-blue-50 border border-blue-100 p-4 rounded-xl mb-4 text-left">
-                            <h4 class="font-bold text-blue-800 text-sm mb-2 flex items-center gap-2">📝 Sobre a Pousada</h4>
-                            <p class="text-sm text-gray-700 leading-relaxed whitespace-pre-line">${dadosPousadaGlobal.descricao_pousada}</p>
-                        </div>
-                    `;
-                    containerDescricao.classList.remove('hidden');
-                } else {
-                    containerDescricao.innerHTML = '';
-                    containerDescricao.classList.add('hidden');
-                }
-            }
             const fotos = dadosPousadaGlobal.fotos_pousada || [];
             grid.innerHTML = fotos.map((f, i) => {
                 const urlFoto = typeof f === 'object' && f !== null ? (f.url || f.caminho || '') : f;
@@ -760,14 +742,12 @@
                 const calc = await calcularValorTotalEstadiaCompleto(suite.id, checkinFiltro, checkoutFiltro, precoBase, qtdAdultos, qtdCriancas);
                 const temConflitoNoPeriodo = suite.temConflitoNoPeriodo;
 
-                // REGIME DE PENSÃO DEFINIDO PELO GESTOR - EXIBE NO CARD DA SUÍTE
+                // REGIME DE PENSÃO - 3 OPÇÕES, NÃO OBRIGATÓRIO
                 let regimePensaoBadge = '';
                 let descricaoPensaoTexto = '';
                 if (dadosPousadaGlobal.tipo_pensao) {
                     const tipo = String(dadosPousadaGlobal.tipo_pensao).toLowerCase();
-                    if (tipo === 'sem_cafe') {
-                        regimePensaoBadge = '<span class="inline-flex items-center gap-1.5 bg-gray-100 text-gray-700 border border-gray-200 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">🚫 Sem café</span>';
-                    } else if (tipo === 'cafe_completo' || tipo === 'cafe' || tipo.includes('cafe')) {
+                    if (tipo === 'cafe_completo' || tipo === 'cafe' || tipo.includes('cafe')) {
                         regimePensaoBadge = '<span class="inline-flex items-center gap-1.5 bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">☕ Café da manhã completo incluso</span>';
                     } else if (tipo === 'meia_pensao' || tipo.includes('meia')) {
                         regimePensaoBadge = '<span class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-800 border border-blue-200 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">🍽️ Meia pensão</span>';
