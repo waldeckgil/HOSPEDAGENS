@@ -73,13 +73,7 @@
                 <div id="kpi-mes-container" class="hidden bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-full text-indigo-900 text-xs font-bold flex items-center gap-1.5">
                     <span>📊</span> <span id="kpi-texto-mes">Reservas no mês: 0</span>
                 </div>
-                <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200 w-fit flex items-center gap-2">
-                <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> Sistema Online
-            </span>
-            <span id="ultima-atualizacao" class="text-[10px] text-gray-400 font-medium">Atualizado agora</span>
-            <button onclick="atualizarAgora()" title="Atualizar agora (sem F5)" class="bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 p-1.5 rounded-full w-7 h-7 flex items-center justify-center transition">
-                <i class="fa-solid fa-rotate text-[11px]"></i>
-            </button>
+                <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200 w-fit">Sistema Online</span>
             </div>
         </header>
 
@@ -341,7 +335,37 @@
         </div>
     </div>
 
-    <script>
+    
+    <!-- MODAL PROFISSIONAL DE RECUSA - SUBSTITUI O CONFIRM NATIVO -->
+    <div id="modal-recusa-profissional" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-[70]">
+        <div class="bg-white p-6 sm:p-7 rounded-3xl w-full max-w-md shadow-2xl border border-gray-100 transform transition-all">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center text-xl flex-shrink-0">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-base sm:text-lg font-extrabold text-gray-900">Recusar reserva?</h3>
+                    <p class="text-xs sm:text-sm text-gray-600 mt-1.5 leading-relaxed">
+                        Tem certeza que deseja <strong class="text-red-700">RECUSAR</strong> a reserva de <strong id="nome-hospede-recusa" class="text-gray-900">hóspede</strong>?
+                    </p>
+                    <div class="mt-3 bg-amber-50 border border-amber-200 rounded-xl p-2.5 flex items-start gap-2">
+                        <span class="text-amber-600 text-sm">📋</span>
+                        <p class="text-[11px] text-amber-900 font-medium leading-snug">Ela ficará registrada como <strong>Recusada</strong> no Supabase para auditoria (tabela <code class="bg-white px-1.5 py-0.5 rounded border text-[10px]">reservas</code> → <code class="bg-white px-1.5 py-0.5 rounded border text-[10px]">status = Recusada</code>).</p>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 flex gap-2.5">
+                <button onclick="fecharModalRecusa()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-4 rounded-xl transition text-sm">
+                    Cancelar
+                </button>
+                <button onclick="confirmarRecusaReserva()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-extrabold py-2.5 px-4 rounded-xl shadow-md transition text-sm flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-xmark"></i> Sim, Recusar
+                </button>
+            </div>
+        </div>
+    </div>
+
+<script>
         const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -1136,16 +1160,16 @@
 
                                     <div class="mt-4 pt-3 border-t border-amber-200 flex gap-2 hidden sm:flex">
                                         <button onclick="mudarStatusReserva('${pend.id}', 'Aprovada')" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✔ Aprovar (detalhes)</button>
-                                        <button onclick="mudarStatusReserva('${pend.id}', 'Recusada')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✖ Recusar (detalhes)</button>
+                                        <button onclick="abrirModalRecusa('${pend.id}', '${pend.hospede_nome || 'hóspede'}')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✖ Recusar (detalhes)</button>
                                     </div>
                                 </div>
 
                                 <!-- BOTÕES VISÍVEIS SEM EXPANDIR - DESTAQUE MÁXIMO -->
-                                <div class="mt-3 bg-amber-100 border-2 border-amber-500 rounded-xl p-2.5 flex gap-2 alerta-piscando shadow-sm">
+                                <div class="mt-3 bg-amber-100 border-2 border-amber-500 rounded-xl p-2.5 flex gap-2 shadow-sm">
                                     <button onclick="mudarStatusReserva('${pend.id}', 'Aprovada')" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-extrabold py-3 px-3 rounded-xl shadow-md text-sm transition flex items-center justify-center gap-1.5">
                                         ✔ Aprovar
                                     </button>
-                                    <button onclick="abrirModalRecusa('${pend.id}', '${(pend.hospede_nome || 'hóspede').replace("'", "").replace('"', '')}')" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-extrabold py-3 px-3 rounded-xl shadow-md text-sm transition flex items-center justify-center gap-1.5">
+                                    <button onclick="abrirModalRecusa('${pend.id}', '${(pend.hospede_nome || 'hóspede').replace(/'/g, '').replace(/"/g, '')}')" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-extrabold py-3 px-3 rounded-xl shadow-md text-sm transition flex items-center justify-center gap-1.5">
                                         ✖ Recusar
                                     </button>
                                 </div>
@@ -1803,8 +1827,9 @@
         function iniciarAutoRefresh() {
             if (intervaloAutoRefresh) clearInterval(intervaloAutoRefresh);
             intervaloAutoRefresh = setInterval(() => {
-                const modalAberto = document.getElementById('modal-edicao') && !document.getElementById('modal-edicao').classList.contains('hidden');
-                if (!modalAberto) {
+                const modalEdicaoAberto = document.getElementById('modal-edicao') && !document.getElementById('modal-edicao').classList.contains('hidden');
+                const modalRecusaAberto = document.getElementById('modal-recusa-profissional') && !document.getElementById('modal-recusa-profissional').classList.contains('hidden');
+                if (!modalEdicaoAberto && !modalRecusaAberto) {
                     console.log('🔄 Auto-refresh 60s');
                     carregarDashboard();
                     atualizarHorarioUltimaAtualizacao();
@@ -1827,87 +1852,51 @@
                 canalRealtime = supabaseClient
                     .channel(`dashboard-pousada-${pousadaId}`)
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'reservas', filter: `pousada_id=eq.${pousadaId}` }, (payload) => {
-                        const modalAberto = document.getElementById('modal-edicao') && !document.getElementById('modal-edicao').classList.contains('hidden');
-                        if (!modalAberto) {
+                        const modalEdicaoAberto = document.getElementById('modal-edicao') && !document.getElementById('modal-edicao').classList.contains('hidden');
+                        const modalRecusaAberto = document.getElementById('modal-recusa-profissional') && !document.getElementById('modal-recusa-profissional').classList.contains('hidden');
+                        if (!modalEdicaoAberto && !modalRecusaAberto) {
                             carregarDashboard();
                             atualizarHorarioUltimaAtualizacao();
                             mostrarToast('Atualizado', `Reserva ${payload.eventType === 'INSERT' ? 'nova' : 'alterada'} detectada!`);
                         }
                     })
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'suites', filter: `pousada_id=eq.${pousadaId}` }, () => {
-                        const modalAberto = document.getElementById('modal-edicao') && !document.getElementById('modal-edicao').classList.contains('hidden');
-                        if (!modalAberto) { carregarDashboard(); atualizarHorarioUltimaAtualizacao(); }
+                        const modalEdicaoAberto = document.getElementById('modal-edicao') && !document.getElementById('modal-edicao').classList.contains('hidden');
+                        const modalRecusaAberto = document.getElementById('modal-recusa-profissional') && !document.getElementById('modal-recusa-profissional').classList.contains('hidden');
+                        if (!modalEdicaoAberto && !modalRecusaAberto) { carregarDashboard(); atualizarHorarioUltimaAtualizacao(); }
                     })
                     .subscribe();
             } catch (e) { console.warn('Realtime falhou:', e); }
         }
         document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible') {
-                carregarDashboard(); atualizarHorarioUltimaAtualizacao();
-            }
+            if (document.visibilityState === 'visible') { carregarDashboard(); atualizarHorarioUltimaAtualizacao(); }
         });
         setTimeout(() => { iniciarAutoRefresh(); iniciarRealtime(); atualizarHorarioUltimaAtualizacao(); }, 2000);
         window.atualizarAgora = function() { carregarDashboard(); atualizarHorarioUltimaAtualizacao(); mostrarToast('Atualizado', 'Painel atualizado agora!'); }
-        
-    
 
         // >>> MODAL PROFISSIONAL DE RECUSA - SUBSTITUI confirm() NATIVO
         let reservaIdParaRecusar = null;
         function abrirModalRecusa(reservaId, nomeHospede) {
             reservaIdParaRecusar = reservaId;
-            document.getElementById('nome-hospede-recusa').innerText = nomeHospede || 'hóspede';
-            document.getElementById('modal-recusa-profissional').classList.remove('hidden');
+            const elNome = document.getElementById('nome-hospede-recusa');
+            if (elNome) elNome.innerText = nomeHospede || 'hóspede';
+            const modal = document.getElementById('modal-recusa-profissional');
+            if (modal) modal.classList.remove('hidden');
         }
         function fecharModalRecusa() {
             reservaIdParaRecusar = null;
-            document.getElementById('modal-recusa-profissional').classList.add('hidden');
+            const modal = document.getElementById('modal-recusa-profissional');
+            if (modal) modal.classList.add('hidden');
         }
         async function confirmarRecusaReserva() {
             if (!reservaIdParaRecusar) return;
             await mudarStatusReserva(reservaIdParaRecusar, 'Recusada');
             fecharModalRecusa();
         }
-        // Fecha ao clicar fora
-        document.addEventListener('click', (e) => {
-            const modal = document.getElementById('modal-recusa-profissional');
-            if (modal && !modal.classList.contains('hidden') && e.target === modal) {
-                fecharModalRecusa();
-            }
-        });
 
-
+    
         // >>> DRAGGABLE MODAL: permitir arrastar card na tela para ver outros cards
-            <!-- MODAL PROFISSIONAL DE RECUSA - SUBSTITUI O CONFIRM NATIVO -->
-    <div id="modal-recusa-profissional" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-[70]">
-        <div class="bg-white p-6 sm:p-7 rounded-3xl w-full max-w-md shadow-2xl border border-gray-100 transform transition-all">
-            <div class="flex items-start gap-4">
-                <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center text-xl flex-shrink-0">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                </div>
-                <div class="flex-1">
-                    <h3 class="text-base sm:text-lg font-extrabold text-gray-900">Recusar reserva?</h3>
-                    <p class="text-xs sm:text-sm text-gray-600 mt-1.5 leading-relaxed">
-                        Tem certeza que deseja <strong class="text-red-700">RECUSAR</strong> a reserva de <strong id="nome-hospede-recusa" class="text-gray-900">hóspede</strong>?
-                    </p>
-                    <div class="mt-3 bg-amber-50 border border-amber-200 rounded-xl p-2.5 flex items-start gap-2">
-                        <span class="text-amber-600 text-sm">📋</span>
-                        <p class="text-[11px] text-amber-900 font-medium leading-snug">Ela ficará registrada como <strong>Recusada</strong> no Supabase para auditoria (tabela <code class="bg-white px-1.5 py-0.5 rounded border text-[10px]">reservas</code> → <code class="bg-white px-1.5 py-0.5 rounded border text-[10px]">status = Recusada</code>).</p>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-6 flex gap-2.5">
-                <button onclick="fecharModalRecusa()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-4 rounded-xl transition text-sm">
-                    Cancelar
-                </button>
-                <button onclick="confirmarRecusaReserva()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-extrabold py-2.5 px-4 rounded-xl shadow-md transition text-sm flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-xmark"></i> Sim, Recusar
-                </button>
-            </div>
-        </div>
-    </div>
-
-
-    (function() {
+        (function() {
             const modal = document.getElementById('modal-edicao');
             const card = document.getElementById('modal-edicao-card');
             const handle = document.getElementById('modal-drag-handle');
