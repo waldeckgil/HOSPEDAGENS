@@ -89,16 +89,16 @@
                             <p class="text-[11px] text-gray-500 mt-0.5 truncate">Valores e regras vigentes.</p>
                         </div>
 
-                        <div onclick="selecionarView('vw_gestor_reservas_relatorio', 'Reservas Futuras e Recusadas', this)" 
+                        <div onclick="selecionarView('vw_gestor_reservas_relatorio', 'Próximas Reservas Futuras', this)" 
                              class="card-view cursor-pointer bg-purple-50/40 p-4 rounded-xl shadow-sm border-2 border-purple-200 hover:border-purple-500 hover:shadow-md transition group">
                             <div class="flex items-center justify-between mb-2">
                                 <div class="w-8 h-8 bg-purple-100 text-purple-700 rounded-lg flex items-center justify-center text-sm shadow-sm">
-                                    <i class="fa-solid fa-calendar-xmark"></i>
+                                    <i class="fa-solid fa-calendar-check"></i>
                                 </div>
-                                <span class="text-[9px] font-bold uppercase tracking-wider bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">FUTURAS / RECUSADAS</span>
+                                <span class="text-[9px] font-bold uppercase tracking-wider bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">FUTURAS</span>
                             </div>
-                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-purple-700 transition">Reservas Futuras / Recusadas</h3>
-                            <p class="text-[11px] text-gray-500 mt-0.5 truncate">Futuras + recusadas com suíte e auditoria.</p>
+                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-purple-700 transition">Reservas Futuras</h3>
+                            <p class="text-[11px] text-gray-500 mt-0.5 truncate">Todas as reservas futuras.</p>
                         </div>
                     </div>
 
@@ -465,48 +465,6 @@
                             };
                         });
                     }
-                } else if (ehViewReservas) {
-                    // Busca direta da tabela reservas para garantir que RECUSADAS apareçam mesmo se a VIEW antiga filtrar só APROVADA
-                    const { data: reservasDiretas, error: errReservas } = await supabaseClient
-                        .from('reservas')
-                        .select(`
-                            id,
-                            hospede_nome,
-                            checkin,
-                            checkout,
-                            status,
-                            valor_total,
-                            whatsapp_hospede,
-                            cpf,
-                            email,
-                            criado_em,
-                            suite_id,
-                            suites ( nome )
-                        `)
-                        .eq('pousada_id', usuarioIdAtual)
-                        .in('status', ['Aprovada', 'Recusada'])
-                        .order('checkin', { ascending: true });
-
-                    if (!errReservas && reservasDiretas) {
-                        registros = reservasDiretas.map(r => ({
-                            pousada_id: usuarioIdAtual,
-                            hospede: r.hospede_nome,
-                            suite: r.suites?.nome || 'SUÍTE NÃO INFORMADA',
-                            checkin: r.checkin,
-                            checkout: r.checkout,
-                            diarias: calcularDiarias(r.checkin, r.checkout),
-                            valor_total: r.valor_total,
-                            status_reserva: r.status,
-                            status: r.status,
-                            status_fisico_suite: r.status === 'Recusada' ? 'RECUSADA' : 'RESERVA FUTURA',
-                            whatsapp: r.whatsapp_hospede,
-                            cpf: r.cpf,
-                            email: r.email,
-                            criado_em: r.criado_em,
-                            alerta_status_reserva: r.status === 'Recusada' ? '<span class="text-red-600 font-bold">❌ RECUSADA - AUDITORIA</span>' : ''
-                        }));
-                    }
-                    error = errReservas;
                 } else {
                     let query = supabaseClient
                         .from(viewAtualSelecionada)
@@ -529,15 +487,13 @@
 
                 if (ehViewReservas) {
                     registrosFiltrados = registrosFiltrados.filter(row => {
-                        let statusReserva = String(row['status_reserva'] || row['status'] || '').trim().toUpperCase();
+                        let statusReserva = String(row['status_reserva'] || '').trim().toUpperCase();
                         let statusFisico = String(row['status_fisico_suite'] || '').trim().toUpperCase();
                         
                         let isAprovada = (statusReserva === 'APROVADA');
-                        let isRecusada = (statusReserva === 'RECUSADA');
-                        let isOcupadaOuFutura = (statusFisico === 'OCUPADA' || statusFisico === 'RESERVA FUTURA' || statusFisico === '');
+                        let isOcupadaOuFutura = (statusFisico === 'OCUPADA' || statusFisico === 'RESERVA FUTURA');
 
-                        // Agora mostra APROVADA (futura/ocupada) + RECUSADA (qualquer data para auditoria)
-                        return (isAprovada && isOcupadaOuFutura) || isRecusada;
+                        return isAprovada && isOcupadaOuFutura;
                     });
                 }
 
@@ -725,12 +681,8 @@
 
                 registrosFiltrados.forEach((row, index) => {
                     let classeCorFundo = '';
-                    let statusLinha = String(row.status_reserva || row.status || '').trim().toUpperCase();
-                    let isRecusadaLinha = statusLinha === 'RECUSADA';
 
-                    if (isRecusadaLinha) {
-                        classeCorFundo = 'bg-red-50 hover:bg-red-100 border-l-4 border-red-500';
-                    } else if (ehViewReservas) {
+                    if (ehViewReservas) {
                         let suiteAtual = String(row.suite || '').trim().toUpperCase();
                         if (index === 0) {
                             grupoCorAlternada = false;
@@ -778,9 +730,7 @@
                             }
                         }
                         
-                        if (colLower.includes('status') && String(valorBruto).toUpperCase() === 'RECUSADA') {
-                            valorExibicao = `<span class="inline-flex items-center gap-1 bg-red-100 text-red-700 border border-red-200 px-2.5 py-0.5 rounded-full font-extrabold text-[10px]"><i class="fa-solid fa-xmark"></i> RECUSADA</span>`;
-                        } else if (colLower.includes('valor_pago') && !isNaN(valorBruto)) {
+                        if (colLower.includes('valor_pago') && !isNaN(valorBruto)) {
                             valorExibicao = `<span class="font-bold text-emerald-700">${Number(valorBruto).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>`;
                         } else if (colLower.includes('valor_total') && !isNaN(valorBruto)) {
                             valorExibicao = `<span class="font-bold text-gray-800">${Number(valorBruto).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>`;
