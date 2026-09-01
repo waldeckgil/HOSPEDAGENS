@@ -6,7 +6,6 @@
     <title>Painel Principal </title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @keyframes piscarAlerta {
@@ -336,7 +335,55 @@
         </div>
     </div>
 
-    <script>
+    
+    <!-- MODAL PROFISSIONAL DE RECUSA COM MOTIVO OBRIGATÓRIO -->
+    <div id="modal-recusa-profissional" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-[70]">
+        <div class="bg-white p-6 sm:p-7 rounded-3xl w-full max-w-md shadow-2xl border border-gray-100 transform transition-all">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center text-xl flex-shrink-0">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-base sm:text-lg font-extrabold text-gray-900">Recusar reserva?</h3>
+                    <p class="text-xs sm:text-sm text-gray-600 mt-1.5 leading-relaxed">
+                        Tem certeza que deseja <strong class="text-red-700">RECUSAR</strong> a reserva de <strong id="nome-hospede-recusa" class="text-gray-900">hóspede</strong>?
+                    </p>
+                    <div class="mt-3 bg-amber-50 border border-amber-200 rounded-xl p-2.5 flex items-start gap-2">
+                        <span class="text-amber-600 text-sm">📋</span>
+                        <p class="text-[11px] text-amber-900 font-medium leading-snug">Ela ficará registrada como <strong>Recusada</strong> para auditoria com motivo obrigatório.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- CAMPO OBRIGATÓRIO MOTIVO DA RECUSA -->
+            <div class="mt-5">
+                <label class="block text-xs font-extrabold text-red-700 uppercase tracking-wider mb-1.5">
+                    <i class="fa-solid fa-pen-to-square mr-1"></i> Motivo da recusa <span class="text-red-600">*</span> (obrigatório)
+                </label>
+                <textarea id="motivo-recusa-input" rows="3" maxlength="500" placeholder="Ex: Sem pagamento do sinal, datas indisponíveis, cliente não respondeu WhatsApp..." class="w-full p-3 border-2 border-red-200 bg-red-50/30 focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-100 rounded-xl text-sm font-medium text-gray-900 placeholder:text-gray-400 outline-none transition"></textarea>
+                <div class="flex justify-between items-center mt-1.5">
+                    <span id="erro-motivo-recusa" class="hidden text-[11px] font-bold text-red-600 flex items-center gap-1"><i class="fa-solid fa-circle-exclamation"></i> Informe o motivo (mínimo 1 caractere)</span>
+                    <span class="text-[10px] text-gray-400 ml-auto"><span id="contador-motivo">0</span>/500</span>
+                </div>
+                <div class="mt-2 flex flex-wrap gap-1.5">
+                    <button type="button" onclick="document.getElementById('motivo-recusa-input').value='Sem pagamento do sinal'; document.getElementById('motivo-recusa-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition">Sem pagamento</button>
+                    <button type="button" onclick="document.getElementById('motivo-recusa-input').value='Datas indisponíveis'; document.getElementById('motivo-recusa-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition">Datas indisponíveis</button>
+                    <button type="button" onclick="document.getElementById('motivo-recusa-input').value='Cliente não respondeu WhatsApp'; document.getElementById('motivo-recusa-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition">Sem resposta</button>
+                </div>
+            </div>
+
+            <div class="mt-6 flex gap-2.5">
+                <button onclick="fecharModalRecusa()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-4 rounded-xl transition text-sm">
+                    Cancelar
+                </button>
+                <button onclick="confirmarRecusaReserva()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-extrabold py-2.5 px-4 rounded-xl shadow-md transition text-sm flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-xmark"></i> Sim, Recusar
+                </button>
+            </div>
+        </div>
+    </div>
+
+<script>
         const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -1129,15 +1176,25 @@
                                         <p><span class="text-amber-800">Check-out:</span> <strong class="text-gray-900">${formatarDataSimples(pend.checkout)}</strong></p>
                                     </div>
 
-                                    <div class="mt-4 pt-3 border-t border-amber-200 flex gap-2">
-                                        <button onclick="mudarStatusReserva('${pend.id}', 'Aprovada')" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✔ Aprovar</button>
-                                        <button onclick="mudarStatusReserva('${pend.id}', 'Recusada')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✖ Recusar</button>
+                                    <div class="mt-4 pt-3 border-t border-amber-200 flex gap-2 hidden sm:flex">
+                                        <button onclick="mudarStatusReserva('${pend.id}', 'Aprovada')" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✔ Aprovar (detalhes)</button>
+                                        <button onclick="abrirModalRecusa('${pend.id}', '${pend.hospede_nome || 'hóspede'}')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✖ Recusar (detalhes)</button>
                                     </div>
                                 </div>
 
-                                <div class="mt-4 pt-3 flex justify-between items-center border-t border-amber-200">
+                                <!-- BOTÕES VISÍVEIS SEM EXPANDIR - DESTAQUE MÁXIMO -->
+                                <div class="mt-3 bg-amber-100 border-2 border-amber-500 rounded-xl p-2.5 flex gap-2 shadow-sm">
+                                    <button onclick="mudarStatusReserva('${pend.id}', 'Aprovada')" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-extrabold py-3 px-3 rounded-xl shadow-md text-sm transition flex items-center justify-center gap-1.5">
+                                        ✔ Aprovar
+                                    </button>
+                                    <button onclick="abrirModalRecusa('${pend.id}', '${(pend.hospede_nome || 'hóspede').replace(/'/g, '').replace(/"/g, '')}')" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-extrabold py-3 px-3 rounded-xl shadow-md text-sm transition flex items-center justify-center gap-1.5">
+                                        ✖ Recusar
+                                    </button>
+                                </div>
+
+                                <div class="mt-3 pt-3 flex justify-between items-center border-t border-amber-200">
                                     <button type="button" onclick="alternarExpandirCard(this)" class="text-xs font-bold text-amber-900 hover:text-amber-950 underline">
-                                        Expandir Detalhes ▾
+                                        Ver detalhes / WhatsApp ▾
                                     </button>
                                     <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', 'Pendente', '${pend.id}')" class="text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 px-3.5 py-2 rounded-xl transition shadow-xs">
                                         Editar Card &rarr;
@@ -1238,129 +1295,21 @@
             await recalcularValoresModalEdicao();
         }
 
-        // >>> CENÁRIO B - APROVAÇÃO COM PDF + WHATSAPP (Especificação Original)
-        // Equivalente ao backend Java: gera PDF, upload Supabase Storage, salva pdf_url, retorna url_whatsapp
-        async function mudarStatusReserva(reservaId, novoStatus) {
-            if (novoStatus !== 'Aprovada') {
-                // Para Recusada mantém fluxo simples
-                await supabaseClient.from('reservas').update({ status: novoStatus }).eq('id', reservaId);
-                mostrarToast("Sucesso", `Reserva ${novoStatus.toLowerCase()}!`);
-                carregarDashboard();
+        async function mudarStatusReserva(reservaId, novoStatus, motivoRecusa = null) {
+            let payload = { status: novoStatus };
+            if (novoStatus === 'Recusada') {
+                payload.motivo_recusa = motivoRecusa || 'Sem motivo informado';
+                payload.observacao = motivoRecusa || 'Sem motivo informado';
+                // recusado_em e recusado_por serão preenchidos pela trigger fn_audit_recusa
+            }
+            const { error } = await supabaseClient.from('reservas').update(payload).eq('id', reservaId);
+            if (error) {
+                console.error('Erro ao atualizar reserva:', error);
+                mostrarToast('Erro', error.message);
                 return;
             }
-
-            try {
-                mostrarToast("Processando", "Gerando comprovante PDF e preparando WhatsApp... ⏳");
-                
-                // 1. Busca dados completos da reserva + suíte + pousada
-                const { data: reserva, error: errReserva } = await supabaseClient.from('reservas').select('*, suites(nome)').eq('id', reservaId).single();
-                if (errReserva || !reserva) throw new Error("Reserva não encontrada");
-                
-                const nomeHospede = reserva.hospede_nome || 'Hóspede';
-                const whatsappRaw = reserva.whatsapp_hospede || reserva.whatsapp || '';
-                const checkin = reserva.checkin;
-                const checkout = reserva.checkout;
-                const valorTotal = Number(reserva.valor_total || 0);
-                const suiteNome = reserva.suites?.nome || 'Suíte';
-                const pousadaNome = nomePousadaAtual || 'Pousada';
-
-                // 2. GERA PDF DEFINITIVO (equivale a OpenPDF/PDFBox do Java)
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                
-                // Cabeçalho
-                doc.setFillColor(37, 99, 235); // azul
-                doc.rect(0, 0, 210, 25, 'F');
-                doc.setTextColor(255,255,255);
-                doc.setFontSize(16);
-                doc.setFont(undefined, 'bold');
-                doc.text(pousadaNome.toUpperCase(), 105, 15, { align: 'center' });
-                
-                // Corpo
-                doc.setTextColor(0,0,0);
-                doc.setFontSize(12);
-                doc.setFont(undefined, 'bold');
-                doc.text("COMPROVANTE DE RESERVA APROVADA", 105, 35, { align: 'center' });
-                
-                doc.setFont(undefined, 'normal');
-                doc.setFontSize(11);
-                let y = 50;
-                doc.text(`Hóspede: ${nomeHospede}`, 15, y); y+=8;
-                doc.text(`Suíte: ${suiteNome}`, 15, y); y+=8;
-                doc.text(`Check-in: ${formatarDataSimples(checkin)}`, 15, y); y+=8;
-                doc.text(`Check-out: ${formatarDataSimples(checkout)}`, 15, y); y+=8;
-                doc.text(`Valor Total: R$ ${valorTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`, 15, y); y+=8;
-                doc.text(`WhatsApp: ${whatsappRaw}`, 15, y); y+=8;
-                doc.text(`Status: APROVADA`, 15, y); y+=15;
-                
-                doc.setFontSize(10);
-                doc.setTextColor(100,100,100);
-                doc.text(`Reserva ID: ${reservaId}`, 15, y); y+=6;
-                doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 15, y); y+=6;
-                doc.text(`Pousada ID: ${usuarioIdAtual}`, 15, y);
-
-                // Rodapé
-                doc.setFontSize(9);
-                doc.text("Obrigado pela preferência! Esperamos você!", 105, 280, { align: 'center' });
-
-                // 3. Converte para Blob
-                const pdfBlob = doc.output('blob');
-                const fileName = `${reservaId}.pdf`;
-                const filePath = `aprovadas/${usuarioIdAtual}/${fileName}`;
-
-                // 4. UPLOAD PARA SUPABASE STORAGE - bucket 'comprovantes' (equivalente ao Java)
-                // Tenta criar bucket se não existir (ignora erro se já existe)
-                try {
-                    await supabaseClient.storage.createBucket('comprovantes', { public: true });
-                } catch(e) {}
-
-                const { data: uploadData, error: uploadError } = await supabaseClient.storage
-                    .from('comprovantes')
-                    .upload(filePath, pdfBlob, { contentType: 'application/pdf', upsert: true });
-                
-                if (uploadError) throw uploadError;
-
-                // 5. Pega URL pública (equivale ao getPublicUrl do Java)
-                const { data: urlData } = supabaseClient.storage.from('comprovantes').getPublicUrl(filePath);
-                const pdfPublicUrl = urlData.publicUrl;
-
-                // 6. Atualiza reservas: status APROVADA + pdf_url
-                const { error: updateError } = await supabaseClient.from('reservas').update({ 
-                    status: 'Aprovada',
-                    pdf_url: pdfPublicUrl
-                }).eq('id', reservaId);
-                
-                if (updateError) throw updateError;
-
-                // 7. MONTA TEXTO OFICIAL CODIFICADO (Passo 4 da especificação)
-                let textoMensagem = `Olá ${nomeHospede}, sua reserva na ${pousadaNome} foi aprovada! 🎉\n`;
-                textoMensagem += `Check-in: ${formatarDataSimples(checkin)} | Check-out: ${formatarDataSimples(checkout)}\n`;
-                textoMensagem += `Suíte: ${suiteNome}\n`;
-                textoMensagem += `Valor: R$ ${valorTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}\n\n`;
-                textoMensagem += `Acesse o comprovante completo no link abaixo:\n${pdfPublicUrl}\n\n`;
-                textoMensagem += `Esperamos você!`;
-
-                // 8. GERA LINK wa.me (Passo 4 da especificação)
-                let apenasNumeros = whatsappRaw.replace(/\D/g, '');
-                if (apenasNumeros.length <= 11 && !apenasNumeros.startsWith('55')) apenasNumeros = '55' + apenasNumeros;
-                const urlWhatsapp = `https://wa.me/${apenasNumeros}?text=${encodeURIComponent(textoMensagem)}`;
-
-                // 9. RETORNA url_whatsapp e abre nova aba (Passo 5 da especificação)
-                mostrarToast("Aprovada!", "Comprovante gerado. Abrindo WhatsApp... ✅");
-                carregarDashboard();
-                
-                // Abre WhatsApp em nova aba para o GESTOR enviar com 1 clique
-                window.open(urlWhatsapp, '_blank');
-
-            } catch (err) {
-                console.error("Erro no fluxo de aprovação com PDF:", err);
-                mostrarToast("Erro", "Falha ao gerar PDF: " + err.message, true);
-                // Fallback: aprova sem PDF para não travar GESTOR
-                try {
-                    await supabaseClient.from('reservas').update({ status: 'Aprovada' }).eq('id', reservaId);
-                    carregarDashboard();
-                } catch(e) {}
-            }
+            mostrarToast("Sucesso", `Reserva ${novoStatus.toLowerCase()}!${novoStatus === 'Recusada' ? ' Motivo salvo.' : ''}`);
+            carregarDashboard();
         }
 
         function renderizarInputsIdadesCriancas(qtdCriancas, idadesAtuais = []) {
@@ -1900,6 +1849,114 @@
         async function fazerLogout() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
         
         protegerPagina();
+
+        // >>> AUTO-REFRESH PROFISSIONAL - SEM PRECISAR F5
+        let intervaloAutoRefresh = null;
+        let canalRealtime = null;
+        function iniciarAutoRefresh() {
+            if (intervaloAutoRefresh) clearInterval(intervaloAutoRefresh);
+            intervaloAutoRefresh = setInterval(() => {
+                const modalEdicaoAberto = document.getElementById('modal-edicao') && !document.getElementById('modal-edicao').classList.contains('hidden');
+                const modalRecusaAberto = document.getElementById('modal-recusa-profissional') && !document.getElementById('modal-recusa-profissional').classList.contains('hidden');
+                if (!modalEdicaoAberto && !modalRecusaAberto) {
+                    console.log('🔄 Auto-refresh 60s');
+                    carregarDashboard();
+                    atualizarHorarioUltimaAtualizacao();
+                }
+            }, 60000);
+        }
+        function atualizarHorarioUltimaAtualizacao() {
+            const el = document.getElementById('ultima-atualizacao');
+            if (el) {
+                const agora = new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+                el.innerText = `Atualizado às ${agora}`;
+            }
+        }
+        async function iniciarRealtime() {
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) return;
+                const pousadaId = session.user.id;
+                if (canalRealtime) supabaseClient.removeChannel(canalRealtime);
+                canalRealtime = supabaseClient
+                    .channel(`dashboard-pousada-${pousadaId}`)
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'reservas', filter: `pousada_id=eq.${pousadaId}` }, (payload) => {
+                        const modalEdicaoAberto = document.getElementById('modal-edicao') && !document.getElementById('modal-edicao').classList.contains('hidden');
+                        const modalRecusaAberto = document.getElementById('modal-recusa-profissional') && !document.getElementById('modal-recusa-profissional').classList.contains('hidden');
+                        if (!modalEdicaoAberto && !modalRecusaAberto) {
+                            carregarDashboard();
+                            atualizarHorarioUltimaAtualizacao();
+                            mostrarToast('Atualizado', `Reserva ${payload.eventType === 'INSERT' ? 'nova' : 'alterada'} detectada!`);
+                        }
+                    })
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'suites', filter: `pousada_id=eq.${pousadaId}` }, () => {
+                        const modalEdicaoAberto = document.getElementById('modal-edicao') && !document.getElementById('modal-edicao').classList.contains('hidden');
+                        const modalRecusaAberto = document.getElementById('modal-recusa-profissional') && !document.getElementById('modal-recusa-profissional').classList.contains('hidden');
+                        if (!modalEdicaoAberto && !modalRecusaAberto) { carregarDashboard(); atualizarHorarioUltimaAtualizacao(); }
+                    })
+                    .subscribe();
+            } catch (e) { console.warn('Realtime falhou:', e); }
+        }
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') { carregarDashboard(); atualizarHorarioUltimaAtualizacao(); }
+        });
+        setTimeout(() => { iniciarAutoRefresh(); iniciarRealtime(); atualizarHorarioUltimaAtualizacao(); }, 2000);
+        window.atualizarAgora = function() { carregarDashboard(); atualizarHorarioUltimaAtualizacao(); mostrarToast('Atualizado', 'Painel atualizado agora!'); }
+
+        // >>> MODAL PROFISSIONAL DE RECUSA COM MOTIVO OBRIGATÓRIO
+        let reservaIdParaRecusar = null;
+        function abrirModalRecusa(reservaId, nomeHospede) {
+            reservaIdParaRecusar = reservaId;
+            const elNome = document.getElementById('nome-hospede-recusa');
+            if (elNome) elNome.innerText = nomeHospede || 'hóspede';
+            const input = document.getElementById('motivo-recusa-input');
+            const erro = document.getElementById('erro-motivo-recusa');
+            const contador = document.getElementById('contador-motivo');
+            if (input) { input.value = ''; input.classList.remove('border-red-500','ring-2','ring-red-200'); }
+            if (erro) erro.classList.add('hidden');
+            if (contador) contador.innerText = '0';
+            const modal = document.getElementById('modal-recusa-profissional');
+            if (modal) modal.classList.remove('hidden');
+            setTimeout(() => { if (input) input.focus(); }, 150);
+        }
+        function fecharModalRecusa() {
+            reservaIdParaRecusar = null;
+            const modal = document.getElementById('modal-recusa-profissional');
+            if (modal) modal.classList.add('hidden');
+            const input = document.getElementById('motivo-recusa-input');
+            const erro = document.getElementById('erro-motivo-recusa');
+            if (input) input.value = '';
+            if (erro) erro.classList.add('hidden');
+        }
+        async function confirmarRecusaReserva() {
+            if (!reservaIdParaRecusar) return;
+            const input = document.getElementById('motivo-recusa-input');
+            const erro = document.getElementById('erro-motivo-recusa');
+            const motivo = input ? input.value.trim() : '';
+            if (!motivo || motivo.length < 1) {
+                if (erro) erro.classList.remove('hidden');
+                if (input) { input.classList.add('border-red-500','ring-2','ring-red-200'); input.focus(); }
+                return;
+            }
+            if (erro) erro.classList.add('hidden');
+            if (input) input.classList.remove('border-red-500','ring-2','ring-red-200');
+            await mudarStatusReserva(reservaIdParaRecusar, 'Recusada', motivo);
+            fecharModalRecusa();
+        }
+        // Contador e esconde erro ao digitar
+        document.addEventListener('DOMContentLoaded', () => {
+            const input = document.getElementById('motivo-recusa-input');
+            const contador = document.getElementById('contador-motivo');
+            const erro = document.getElementById('erro-motivo-recusa');
+            if (input) {
+                input.addEventListener('input', () => {
+                    if (contador) contador.innerText = String(input.value.length);
+                    if (erro && input.value.trim().length >= 1) erro.classList.add('hidden');
+                    input.classList.remove('border-red-500','ring-2','ring-red-200');
+                });
+            }
+        });
+
     
         // >>> DRAGGABLE MODAL: permitir arrastar card na tela para ver outros cards
         (function() {
