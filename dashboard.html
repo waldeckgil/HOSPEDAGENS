@@ -1,0 +1,2039 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Principal </title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes piscarAlerta {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(1.002); }
+        }
+        .alerta-piscando {
+            animation: piscarAlerta 1.5s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row">
+
+    <!-- MENU LATERAL -->
+    <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl">
+        <div class="p-4 sm:p-6">
+            <div class="flex justify-between items-center md:block">
+                <h1 id="titulo-menu-pousada" class="text-xl sm:text-2xl font-extrabold text-white mb-0 md:mb-6 tracking-wider text-center">Painel 360</h1>
+            </div>
+            <nav class="mt-4 md:mt-0 space-y-1.5 sm:space-y-2 flex flex-wrap md:flex-col gap-1.5 md:gap-0">
+                <a href="dashboard.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold shadow-md text-xs sm:text-sm">
+                    <span>🏠</span> <span class="hidden sm:inline">Painel Principal</span><span class="sm:hidden">Suítes</span>
+                </a>
+                <a href="reservas.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
+                    <span>📋</span> <span class="hidden sm:inline">Historico de Reservas</span><span class="sm:hidden">Reservas</span>
+                </a>
+     
+                <a href="relatorios.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
+                    <span>📋</span> <span class="hidden sm:inline">Relatorios Consultas</span><span class="sm:hidden">Consultas</span>
+                </a>
+                <a href="hospedes.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
+                    <span>👥</span> <span class="hidden sm:inline">Gestão de Hóspedes</span><span class="sm:hidden">Hóspedes</span>
+                </a>
+                <a href="configurar-pousada.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
+                    <span>⚙️</span> <span class="hidden sm:inline">Configuração de Suítes</span><span class="sm:hidden">Configurações</span>
+                </a>
+                <a href="tarifas.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
+                    <span>💰</span> <span class="hidden sm:inline">Gerenciar Tarifas</span><span class="sm:hidden">Tarifas</span>
+                </a>
+                
+                <div class="w-full pt-3 mt-2 border-t border-slate-800 flex flex-col md:space-y-2 gap-2">
+                    <button onclick="copiarLinkVitrine()" class="w-full flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300 text-left text-xs sm:text-sm">
+                        <span>🔗</span> Copiar Link (Enviar p/ Hospedes)
+                    </button>
+                    <a id="link-ver-vitrine" href="#" target="_blank" class="w-full flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300 text-xs sm:text-sm">
+                        <span>👁️</span> Ver Vitrine (Visão dos Hospedes)
+                    </a>
+                    <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl transition shadow text-xs sm:text-sm flex items-center justify-center gap-2 mt-1">
+                        <i class="fa-solid fa-right-from-bracket"></i> Sair
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="flex-1 flex flex-col min-w-0">
+        <!-- CABEÇALHO -->
+        <header class="bg-white shadow-xs border-b border-gray-200 p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                <h2 class="text-lg sm:text-xl font-bold text-gray-800">Painel Principal - Controle de Suítes</h2>
+                <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold w-fit">Carregando...</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <div id="kpi-mes-container" class="hidden bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-full text-indigo-900 text-xs font-bold flex items-center gap-1.5">
+                    <span>📊</span> <span id="kpi-texto-mes">Reservas no mês: 0</span>
+                </div>
+                <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200 w-fit">Sistema Online</span>
+            </div>
+        </header>
+
+        <!-- CORPO DA PÁGINA -->
+        <main class="p-4 sm:p-6 md:p-8 flex-1 overflow-y-auto">
+            
+            <!-- AVISO DE SUÍTES PAUSADAS -->
+            <div id="card-aviso-pausadas" class="hidden mb-6 bg-slate-800 border-l-8 border-slate-500 p-4 sm:p-5 rounded-2xl shadow-sm text-white flex flex-col gap-1">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">⚠️</span>
+                    <h3 class="text-sm sm:text-base font-bold">Aviso: Existem suítes pausadas no momento</h3>
+                </div>
+                <p id="texto-suites-pausadas" class="text-xs text-slate-300 pl-7"></p>
+            </div>
+
+            <!-- RADAR DE PRÓXIMAS CHEGADAS -->
+            <div id="radar-chegadas-container" class="hidden mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-l-8 border-blue-600 p-4 sm:p-5 rounded-2xl shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">🚀</span>
+                    <div>
+                        <h3 class="text-sm sm:text-base font-bold text-blue-950" id="radar-titulo">Radar de Próxima Chegada</h3>
+                        <p class="text-xs text-blue-800" id="radar-subtitulo">Calculando próxima estada...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CARD DE ATENÇÃO NO TOPO (PENDENTES) -->
+            <div id="card-atencao-pendentes" class="hidden mb-8 bg-amber-50 border-l-8 border-amber-500 p-4 sm:p-6 rounded-2xl shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-4 alerta-piscando">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xl sm:text-2xl">🔔</span>
+                        <h2 class="text-base sm:text-xl font-bold text-red-700">Você tem <span id="contador-pendentes">0</span> solicitação(ões) de reserva pendente(s)!</h2>
+                    </div>
+                    <p class="text-xs sm:text-sm text-amber-700 mt-1">Há hóspedes aguardando a aprovação. Veja os detalhes e a data/hora da solicitação abaixo:</p>
+                    <div id="lista-resumo-pendentes" class="mt-3 flex flex-wrap gap-2"></div>
+                </div>
+                <a href="reservas.html" class="w-full sm:w-auto text-center bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-3 rounded-xl transition shadow-sm whitespace-nowrap text-xs sm:text-sm">
+                    Gerenciar Todas las Reservas &rarr;
+                </a>
+            </div>
+
+            <div id="suites-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </main>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast-notificacao" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+        <div id="toast-content" class="bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
+            <span id="toast-icone" class="text-xl">✨</span>
+            <div>
+                <h4 id="toast-titulo" class="font-bold text-sm">Sucesso</h4>
+                <p id="toast-mensagem" class="text-xs text-gray-300">Alterações salvas com sucesso!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMAÇÃO -->
+    <div id="modal-confirmacao" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-6 sm:p-8 rounded-3xl w-full max-w-md shadow-2xl text-center space-y-4">
+            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">⚠️</div>
+            <h3 class="text-lg sm:text-xl font-bold text-gray-900">Confirmar Saída / Limpeza?</h3>
+            <p id="modal-confirmacao-texto" class="text-xs sm:text-sm text-gray-600">
+                Esta ação encerrará a estadia atual do hóspede e enviará a suíte para limpeza. Deseja prosseguir?
+            </p>
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <button type="button" onclick="fecharModalConfirmacao()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-xl transition text-xs sm:text-sm">Cancelar</button>
+                <button type="button" id="btn-confirmar-acao" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl transition text-xs sm:text-sm shadow-md">Sim, Liberar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Edição -->
+    <div id="modal-edicao" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-hidden">
+        <div id="modal-edicao-card" class="bg-white p-6 sm:p-8 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto relative cursor-default select-none" style="touch-action:none;">
+            <div id="modal-drag-handle" class="flex justify-between items-center mb-4 cursor-move select-none">
+                <h2 id="modal-titulo" class="text-xl sm:text-2xl font-bold text-blue-600 m-0">Gerenciar Suíte</h2>
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] text-gray-400 font-bold uppercase hidden sm:block">Arraste aqui ↕</span>
+                    <button type="button" onclick="fecharModal()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold">✕</button>
+                </div>
+            </div>
+            
+            <div id="modal-erro-alerta" class="hidden mb-4 bg-red-50 border-l-4 border-red-500 p-3 rounded-xl text-red-900 text-xs sm:text-sm font-bold flex items-center gap-2">
+                <span>⚠️</span>
+                <span id="modal-erro-texto">Mensagem de erro aqui</span>
+            </div>
+
+            <form id="form-edicao" class="space-y-3">
+                <input type="hidden" id="edit-suite-id">
+                <input type="hidden" id="edit-status-original">
+                <input type="hidden" id="edit-reserva-id">
+                
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Status Físico da Suíte</label>
+                    <select id="edit-status" class="w-full p-3 border rounded-xl font-bold bg-gray-50 text-sm" onchange="(async () => { await verificarStatusModal(); })()">
+                        <option value="Disponível">Disponível</option>
+                        <option value="Ocupada">Ocupada (Agora)</option>
+                        <option value="Reservado">Criar Nova Reserva</option>
+                        <option value="Limpeza">Limpeza</option>
+                        <option value="Pendente">Pendente</option>
+                        <option value="Checkout">Checkout (Finalizar Estadia)</option>
+                    </select>
+                </div>
+
+                <!-- CARD DE SALDO DEVEDOR / PAGAMENTO DE CHECKOUT -->
+                <div id="container-checkout-financeiro" class="hidden bg-red-50 border border-red-200 p-4 rounded-xl space-y-2">
+                    <div class="flex justify-between items-center text-xs sm:text-sm">
+                        <span class="font-bold text-red-900 uppercase">Saldo Devedor do Hóspede:</span>
+                        <strong id="display-saldo-devedor-checkout" class="text-red-700 font-extrabold text-base">R$ 0,00</strong>
+                    </div>
+                    <p class="text-[11px] text-red-700 leading-tight">O valor do saldo devedor foi preenchido automaticamente no campo de pagamento abaixo como o valor mínimo obrigatório para quitar a estadia.</p>
+                </div>
+
+                <!-- RESUMO DINÂMICO DE TARIFA E DIÁRIAS NO MODAL -->
+                <div id="resumo-dinamico-container" class="bg-blue-50 border border-blue-200 p-3 rounded-xl space-y-1 text-xs text-blue-900">
+                    <div class="flex justify-between">
+                        <span>Qtd. Diárias Calculadas:</span>
+                        <strong id="modal-qtd-diarias">1 diária(s)</strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Valor Total da Estadia (c/ Tarifas Especiais):</span>
+                        <strong id="modal-valor-total">R$ 0,00</strong>
+                    </div>
+                    <div class="flex justify-between border-t border-blue-200 pt-1">
+                        <span>Saldo Restante Atualizado:</span>
+                        <strong id="modal-saldo-restante" class="text-amber-700">R$ 0,00</strong>
+                    </div>
+                </div>
+
+                <div id="campos-hospede-container" class="space-y-3 transition-all">
+                    <div class="grid grid-cols-1 gap-2">
+                        <input type="text" id="edit-hospede" placeholder="Nome Hóspede" class="p-3 border rounded-xl text-sm">
+                        <input type="text" id="edit-whatsapp" placeholder="WhatsApp" class="p-3 border rounded-xl text-sm">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <input type="text" id="edit-cpf" placeholder="CPF (Opcional)" class="p-3 border rounded-xl text-sm">
+                            <input type="text" id="edit-rg" placeholder="RG (Opcional)" class="p-3 border rounded-xl text-sm">
+                        </div>
+                        <input type="text" id="edit-endereco" placeholder="Endereço" class="p-3 border rounded-xl text-sm">
+                        <input type="text" id="edit-cep" placeholder="CEP" class="p-3 border rounded-xl text-sm">
+                        <input type="email" id="edit-email" placeholder="E-mail" class="p-3 border rounded-xl text-sm">
+                    </div>
+
+                    <!-- DETALHES DA ESTADIA (ADULTOS, CRIANÇAS E PET) COM CÁLCULO DINÂMICO -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Adultos</label>
+                            <input type="number" id="edit-adultos" min="1" value="2" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="recalcularValoresModalEdicao()" oninput="recalcularValoresModalEdicao()">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Crianças</label>
+                            <input type="number" id="edit-criancas" min="0" value="0" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="recalcularValoresModalEdicao()" oninput="recalcularValoresModalEdicao()">
+                        </div>          
+                        <div id="container-taxa-pet">
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Taxa de Pet</label>
+                            <select id="edit-pet" class="w-full p-3 border rounded-xl bg-white text-sm font-bold" onchange="recalcularValoresModalEdicao()" oninput="recalcularValoresModalEdicao()">
+                                <option value="false">Não</option>
+                                <option value="true">Sim</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- CONTAINER DINÂMICO PARA IDADES DAS CRIANÇAS E CÁLCULO -->
+                    <div id="container-idades-criancas" class="hidden bg-gray-50 border border-gray-200 p-3 rounded-xl space-y-2">
+                        <label class="block text-xs font-bold text-gray-700">Idade(s) da(s) Criança(s) (para cálculo e isenção):</label>
+                        <div id="lista-idades-criancas" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-in</label>
+                            <input type="date" id="edit-checkin" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="recalcularValoresModalEdicao()" oninput="recalcularValoresModalEdicao()">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-out</label>
+                            <input type="date" id="edit-checkout" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="recalcularValoresModalEdicao()" oninput="recalcularValoresModalEdicao()">
+                        </div>
+                    </div>
+
+                    <div class="pt-2 space-y-2">
+                        <div>
+                            <label id="lbl-valor-sinal" class="block text-xs font-bold text-emerald-700 mb-1">Registrar Novo Pagamento / Sinal (R$)</label>
+                            <input type="number" step="0.01" id="edit-valor-sinal" placeholder="0.00" class="w-full p-3 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-emerald-900 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-emerald-700 mb-1">Forma de Pagamento</label>
+                            <select id="edit-forma-pagamento" class="w-full p-3 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-emerald-900 text-sm">
+                                <option value="Pix / Sinal">Pix / Sinal</option>
+                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                                <option value="Cartão de Débito">Cartão de Débito</option>
+                                <option value="Transferência Bancária">Transferência Bancária</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-amber-700 mb-1">⚠️ Observação / Mensagem de Alerta Importante</label>
+                            <textarea id="edit-observacao" rows="2" placeholder="Ex: Hóspede solicitou late checkout, alergia a algo, etc." class="w-full p-3 border border-amber-300 bg-amber-50/40 rounded-xl text-sm font-medium text-amber-950"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold mt-4 transition text-sm">Salvar Alterações</button>
+                <button type="button" onclick="fecharModal()" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 p-3 rounded-xl font-bold mt-2 transition text-sm">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE VISUALIZAÇÃO DE TARIFA ESPECIAL -->
+    <div id="modal-tarifa-especial" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="fecharModalTarifaEspecial()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+            
+            <div class="flex items-center gap-2 mb-1">
+                <span class="text-xl">⚡</span>
+                <h3 class="text-lg font-bold text-gray-900">Tarifas Especiais Aplicadas</h3>
+            </div>
+            <p id="modal-tarifa-suite-nome" class="text-xs text-blue-600 font-bold mb-4 uppercase tracking-wider"></p>
+
+            <div id="modal-tarifa-conteudo" class="space-y-3">
+                <!-- Conteúdo injetado via JS -->
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                <button onclick="fecharModalTarifaEspecial()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CALENDÁRIO DE DISPONIBILIDADE DA SUÍTE -->
+    <div id="modal-calendario-suite" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative">
+            <button onclick="fecharModalCalendario()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+            
+            <div class="flex items-center gap-2 mb-1">
+                <span class="text-xl">📅</span>
+                <h3 id="cal-suite-nome" class="text-lg font-bold text-gray-900">Calendário da Suíte</h3>
+            </div>
+            <p class="text-xs text-emerald-700 font-medium mb-4">Dias em <strong class="bg-emerald-100 px-1 rounded">verde</strong> estão livres para novas reservas.</p>
+
+            <!-- Cabeçalho do Mês e Navegação -->
+            <div class="flex justify-between items-center mb-4 bg-gray-50 p-2.5 rounded-xl border border-gray-200">
+                <button onclick="mudarMesCalendario(-1)" class="px-3 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-xs">◀ Mês Anterior</button>
+                <strong id="cal-mes-ano-atual" class="text-xs sm:text-sm font-bold text-gray-800 uppercase">MÊS / ANO</strong>
+                <button onclick="mudarMesCalendario(1)" class="px-3 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-xs">Próximo Mês ▶</button>
+            </div>
+
+            <!-- Grade dos Dias da Semana -->
+            <div class="grid grid-cols-7 gap-1 text-center font-bold text-[11px] text-gray-500 mb-2">
+                <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sexta</div><div>Sáb</div>
+            </div>
+
+            <!-- Grade Dinâmica dos Dias -->
+            <div id="cal-grid-dias" class="grid grid-cols-7 gap-1.5 text-center text-xs">
+                <!-- Preenchido via JS -->
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                <button onclick="fecharModalCalendario()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold text-xs sm:text-sm py-2.5 rounded-xl transition">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- MODAL PROFISSIONAL DE RECUSA COM MOTIVO OBRIGATÓRIO -->
+    <div id="modal-recusa-profissional" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-[70]">
+        <div class="bg-white p-6 sm:p-7 rounded-3xl w-full max-w-md shadow-2xl border border-gray-100 transform transition-all">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center text-xl flex-shrink-0">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-base sm:text-lg font-extrabold text-gray-900">Recusar reserva?</h3>
+                    <p class="text-xs sm:text-sm text-gray-600 mt-1.5 leading-relaxed">
+                        Tem certeza que deseja <strong class="text-red-700">RECUSAR</strong> a reserva de <strong id="nome-hospede-recusa" class="text-gray-900">hóspede</strong>?
+                    </p>
+                    <div class="mt-3 bg-amber-50 border border-amber-200 rounded-xl p-2.5 flex items-start gap-2">
+                        <span class="text-amber-600 text-sm">📋</span>
+                        <p class="text-[11px] text-amber-900 font-medium leading-snug">Ela ficará registrada como <strong>Recusada</strong> para auditoria com motivo obrigatório.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- CAMPO OBRIGATÓRIO MOTIVO DA RECUSA -->
+            <div class="mt-5">
+                <label class="block text-xs font-extrabold text-red-700 uppercase tracking-wider mb-1.5">
+                    <i class="fa-solid fa-pen-to-square mr-1"></i> Motivo da recusa <span class="text-red-600">*</span> (obrigatório)
+                </label>
+                <textarea id="motivo-recusa-input" rows="3" maxlength="500" placeholder="Ex: Sem pagamento do sinal, datas indisponíveis, cliente não respondeu WhatsApp..." class="w-full p-3 border-2 border-red-200 bg-red-50/30 focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-100 rounded-xl text-sm font-medium text-gray-900 placeholder:text-gray-400 outline-none transition"></textarea>
+                <div class="flex justify-between items-center mt-1.5">
+                    <span id="erro-motivo-recusa" class="hidden text-[11px] font-bold text-red-600 flex items-center gap-1"><i class="fa-solid fa-circle-exclamation"></i> Informe o motivo (mínimo 1 caractere)</span>
+                    <span class="text-[10px] text-gray-400 ml-auto"><span id="contador-motivo">0</span>/500</span>
+                </div>
+                <div class="mt-2 flex flex-wrap gap-1.5">
+                    <button type="button" onclick="document.getElementById('motivo-recusa-input').value='Sem pagamento do sinal'; document.getElementById('motivo-recusa-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition">Sem pagamento</button>
+                    <button type="button" onclick="document.getElementById('motivo-recusa-input').value='Datas indisponíveis'; document.getElementById('motivo-recusa-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition">Datas indisponíveis</button>
+                    <button type="button" onclick="document.getElementById('motivo-recusa-input').value='Cliente não respondeu WhatsApp'; document.getElementById('motivo-recusa-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition">Sem resposta</button>
+                </div>
+            </div>
+
+            <div class="mt-6 flex gap-2.5">
+                <button onclick="fecharModalRecusa()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-4 rounded-xl transition text-sm">
+                    Cancelar
+                </button>
+                <button onclick="confirmarRecusaReserva()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-extrabold py-2.5 px-4 rounded-xl shadow-md transition text-sm flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-xmark"></i> Sim, Recusar
+                </button>
+            </div>
+        </div>
+    </div>
+
+<script>
+        const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let usuarioIdAtual = null;
+        let nomePousadaAtual = "nossa pousada";
+        let reservasGlobaisCache = [];
+        let suitesGlobaisCache = [];
+        let pagamentosGlobaisCache = [];
+        let tarifasEspeciaisGlobaisCache = [];
+        let camposLimposParaNovaReserva = false;
+        let pousadaAceitaPetCache = false; // Controle de exibição Taxa de Pet conforme pousadas.aceita_pet
+
+        // Variáveis globais para o Modal de Calendário
+        let calSuiteIdAtual = null;
+        let calSuiteNomeAtual = "";
+        let calDataReferencia = new Date();
+
+        function abrirCalendarioSuite(suiteId, suiteNome) {
+            calSuiteIdAtual = suiteId;
+            calSuiteNomeAtual = suiteNome;
+            calDataReferencia = new Date();
+            document.getElementById('cal-suite-nome').innerText = `Suíte: ${suiteNome}`;
+            renderizarGridCalendario();
+            document.getElementById('modal-calendario-suite').classList.remove('hidden');
+        }
+
+        function fecharModalCalendario() {
+            document.getElementById('modal-calendario-suite').classList.add('hidden');
+        }
+
+        function mudarMesCalendario(direcao) {
+            calDataReferencia.setMonth(calDataReferencia.getMonth() + direcao);
+            renderizarGridCalendario();
+        }
+
+        function renderizarGridCalendario() {
+            const gridEl = document.getElementById('cal-grid-dias');
+            const labelMesAno = document.getElementById('cal-mes-ano-atual');
+            gridEl.innerHTML = '';
+
+            const ano = calDataReferencia.getFullYear();
+            const mes = calDataReferencia.getMonth();
+
+            const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            labelMesAno.innerText = `${nomesMeses[mes]} de ${ano}`;
+
+            const primeiroDiaSemana = new Date(ano, mes, 1).getDay();
+            const ultimoDiaMes = new Date(ano, mes + 1, 0).getDate();
+
+            const reservasDaSuite = reservasGlobaisCache.filter(r => r.suite_id === calSuiteIdAtual && (r.status === 'Aprovada' || r.status === 'Ocupada'));
+
+            const datasOcupadas = new Set();
+            reservasDaSuite.forEach(r => {
+                if (!r.checkin || !r.checkout) return;
+                let dCurr = new Date(r.checkin + 'T00:00:00');
+                const dFim = new Date(r.checkout + 'T00:00:00');
+                
+                while (dCurr < dFim) {
+                    datasOcupadas.add(dCurr.toLocaleDateString('sv-SE'));
+                    dCurr.setDate(dCurr.getDate() + 1);
+                }
+            });
+
+            for (let i = 0; i < primeiroDiaSemana; i++) {
+                gridEl.innerHTML += `<div></div>`;
+            }
+
+            const hojeStr = new Date().toLocaleDateString('sv-SE');
+
+            for (let dia = 1; dia <= ultimoDiaMes; dia++) {
+                const mesStr = String(mes + 1).padStart(2, '0');
+                const diaStr = String(dia).padStart(2, '0');
+                const dataIso = `${ano}-${mesStr}-${diaStr}`;
+
+                const estaOcupado = datasOcupadas.has(dataIso);
+                const ePassado = dataIso < hojeStr;
+
+                let estiloClasse = "";
+                let textoTooltip = "";
+
+                if (ePassado) {
+                    estiloClasse = "bg-gray-100 text-gray-400 border border-gray-200 opacity-60";
+                    textoTooltip = "Data passada";
+                } else if (estaOcupado) {
+                    estiloClasse = "bg-red-100 text-red-700 font-bold border border-red-300";
+                    textoTooltip = "Ocupada / Reservada";
+                } else {
+                    estiloClasse = "bg-emerald-100 text-emerald-800 font-extrabold border border-emerald-300 shadow-xs";
+                    textoTooltip = "Disponível!";
+                }
+
+                gridEl.innerHTML += `
+                    <div class="h-9 flex flex-col items-center justify-center rounded-xl text-xs ${estiloClasse}" title="${textoTooltip}">
+                        <span>${dia}</span>
+                    </div>
+                `;
+            }
+        }
+
+        async function protegerPagina() {
+            supabaseClient.auth.onAuthStateChange((event, session) => {
+                if (event === 'SIGNED_OUT' || !session) {
+                    window.location.href = 'index.html';
+                }
+            });
+
+            const { data: { session }, error } = await supabaseClient.auth.getSession();
+            
+            if (error || !session) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            usuarioIdAtual = session.user.id;
+            carregarDashboard();
+        }
+
+        function mostrarToast(titulo, mensagem, tipo = 'sucesso') {
+            const toast = document.getElementById('toast-notificacao');
+            const toastTitulo = document.getElementById('toast-titulo');
+            const toastMsg = document.getElementById('toast-mensagem');
+            const toastIcone = document.getElementById('toast-icone');
+            const toastContent = document.getElementById('toast-content');
+
+            toastTitulo.innerText = titulo;
+            toastMsg.innerText = mensagem;
+
+            if (tipo === 'sucesso') {
+                toastContent.className = "bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800";
+                toastIcone.innerText = "✨";
+            } else {
+                toastContent.className = "bg-red-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-red-800";
+                toastIcone.innerText = "🚨";
+            }
+
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => { toast.classList.add('translate-y-24', 'opacity-0'); }, 3500);
+        }
+
+        function mostrarErroModal(mensagem) {
+            const alertaEl = document.getElementById('modal-erro-alerta');
+            const textoEl = document.getElementById('modal-erro-texto');
+            textoEl.innerText = mensagem;
+            alertaEl.classList.remove('hidden');
+            alertaEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function limparErroModal() {
+            const alertaEl = document.getElementById('modal-erro-alerta');
+            alertaEl.classList.add('hidden');
+        }
+
+        function calcularDiasRestantes(dataAlvo) {
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            const [ano, mes, dia] = dataAlvo.split('-');
+            const alvo = new Date(ano, mes - 1, dia);
+            alvo.setHours(0, 0, 0, 0);
+            return Math.round((alvo.getTime() - hoje.getTime()) / (1000 * 3600 * 24));
+        }
+
+        function calcularQuantidadeDiarias(checkinStr, checkoutStr) {
+            if (!checkinStr || !checkoutStr) return 1;
+            const [anoIn, mesIn, diaIn] = checkinStr.split('-');
+            const [anoOut, mesOut, diaOut] = checkoutStr.split('-');
+            const d1 = new Date(anoIn, mesIn - 1, diaIn);
+            const d2 = new Date(anoOut, mesOut - 1, diaOut);
+            const diffTime = d2.getTime() - d1.getTime();
+            const diffDays = Math.round(diffTime / (1000 * 3600 * 24));
+            return diffDays > 0 ? diffDays : 1;
+        }
+
+        function formatarMoeda(valor) {
+            if (valor === null || valor === undefined || isNaN(valor)) return 'R$ 0,00';
+            return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function formatarDataSimples(dataStr) {
+            if (!dataStr) return '';
+            const partes = dataStr.split('-');
+            if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
+            return dataStr;
+        }
+
+        function formatarDataHora(timestampStr) {
+            if (!timestampStr) return 'Recente';
+            const dataObj = new Date(timestampStr);
+            if (isNaN(dataObj.getTime())) return timestampStr;
+            const dia = String(dataObj.getDate()).padStart(2, '0');
+            const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
+            const ano = dataObj.getFullYear();
+            const hora = String(dataObj.getHours()).padStart(2, '0');
+            const min = String(dataObj.getMinutes()).padStart(2, '0');
+            return `${dia}/${mes}/${ano} às ${hora}:${min}`;
+        }
+
+        function gerarLinkWhatsApp(whats, nomeHospede, checkin, checkout) {
+            if (!whats) return '#';
+            const apenasNumeros = whats.replace(/\D/g, '');
+            let numeroFinal = apenasNumeros;
+            if (numeroFinal.length <= 11 && !numeroFinal.startsWith('55')) numeroFinal = '55' + numeroFinal;
+            const nomeCliente = nomeHospede ? nomeHospede.trim() : 'Hóspede';
+            let textoMensagem = `Olá ${nomeCliente}, agradecemos o contato! Entrando em contato sobre a sua solicitação na ${nomePousadaAtual}`;
+            if (checkin && checkout) textoMensagem += `, para o período de ${formatarDataSimples(checkin)} até ${formatarDataSimples(checkout)}.`;
+            return `https://wa.me/${numeroFinal}?text=${encodeURIComponent(textoMensagem)}`;
+        }
+
+        function obterIndicadorCheckout(checkoutStr) {
+            const dias = calcularDiasRestantes(checkoutStr);
+            if (dias < 0) return { texto: `⚠️ Checkout vencido há ${Math.abs(dias)} dia(s)`, classe: 'bg-red-100 text-red-700 border-red-300' };
+            if (dias === 0) return { texto: `🔥 Checkout HOJE!`, classe: 'bg-orange-100 text-orange-800 border-orange-300 font-bold' };
+            if (dias === 1) return { texto: `⏳ Checkout amanhã`, classe: 'bg-yellow-100 text-yellow-800 border-yellow-300' };
+            return { texto: `Saída em ${dias} dias`, classe: 'bg-blue-50 text-blue-700 border-blue-200' };
+        }
+
+        function obterIndicadorProximaEstada(checkinStr) {
+            const dias = calcularDiasRestantes(checkinStr);
+            if (dias < 0) return { texto: `Em andamento`, classe: 'bg-gray-100 text-gray-600 border-gray-200' };
+            if (dias === 0) return { texto: `🚀 Chegada HOJE!`, classe: 'bg-green-100 text-green-800 border-green-300 font-bold' };
+            if (dias === 1) return { texto: `🔔 Próxima estada amanhã`, classe: 'bg-indigo-100 text-indigo-800 border-indigo-300' };
+            return { texto: `Chegada em ${dias} dias`, classe: 'bg-purple-50 text-purple-700 border-purple-200' };
+        }
+
+        async function carregarPousada() {
+            if (!usuarioIdAtual) return;
+            const { data: pousada } = await supabaseClient.from('pousadas').select('nome, aceita_pet').eq('id', usuarioIdAtual).single();
+            pousadaAceitaPetCache = pousada?.aceita_pet === true;
+            if (pousada && pousada.nome) {
+                nomePousadaAtual = pousada.nome;
+                document.getElementById('titulo-pousada').innerText = pousada.nome;
+                document.getElementById('titulo-menu-pousada').innerText = pousada.nome;
+            } else {
+                document.getElementById('titulo-pousada').innerText = "Minha Pousada";
+                document.getElementById('titulo-menu-pousada').innerText = "Minha Pousada";
+            }
+            document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`;
+        }
+
+        // Regra: só exibir Taxa de Pet se pousadas.aceita_pet = true (id = auth.uid())
+        function aplicarVisibilidadeTaxaPet() {
+            const container = document.getElementById('container-taxa-pet');
+            if (!container) return;
+            if (pousadaAceitaPetCache === true) {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+                const elPet = document.getElementById('edit-pet');
+                if (elPet) elPet.value = 'false';
+            }
+        }
+
+        function copiarLinkVitrine() {
+            if (!usuarioIdAtual) return;
+            navigator.clipboard.writeText(window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`).then(() => {
+                mostrarToast("Copiado!", "Link da vitrine copiado para a área de transferência!");
+            });
+        }
+
+        async function verificarReservasPendentesDashboard() {
+            const { data: pendentes } = await supabaseClient.from('reservas').select('*').eq('pousada_id', usuarioIdAtual).eq('status', 'Pendente');
+            const cardContainer = document.getElementById('card-atencao-pendentes');
+            const listaResumo = document.getElementById('lista-resumo-pendentes');
+            
+            if (!pendentes || pendentes.length === 0) { 
+                cardContainer.classList.add('hidden'); 
+                return; 
+            }
+            
+            cardContainer.classList.remove('hidden');
+            document.getElementById('contador-pendentes').innerText = pendentes.length;
+            
+            listaResumo.innerHTML = '';
+            pendentes.forEach(p => {
+                const dataFormatada = formatarDataHora(p.criado_em);
+                listaResumo.innerHTML += `
+                    <div class="bg-white border border-amber-200 px-3.5 py-2 rounded-xl shadow-sm text-xs flex items-center gap-2 text-amber-950 font-medium">
+                        <span class="text-base">👤</span>
+                        <div>
+                            <strong>${p.hospede_nome || 'Hóspede'}</strong>
+                            <div class="text-gray-500 text-[10px]">🕒 ${dataFormatada}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function atualizarRadarEKPIs() {
+            const hojeStr = new Date().toLocaleDateString('sv-SE');
+            const [anoAtual, mesAtual] = hojeStr.split('-');
+
+            const aprovadas = reservasGlobaisCache.filter(r => r.status === 'Aprovada');
+
+            const reservasDoMes = aprovadas.filter(r => {
+                if (!r.checkin) return false;
+                const [anoCheck, mesCheck] = r.checkin.split('-');
+                return anoCheck === anoAtual && mesCheck === mesAtual;
+            });
+
+            const kpiContainer = document.getElementById('kpi-mes-container');
+            const kpiTexto = document.getElementById('kpi-texto-mes');
+            if (kpiContainer && kpiTexto) {
+                kpiContainer.classList.remove('hidden');
+                kpiTexto.innerText = `Reservas no mês: ${reservasDoMes.length}`;
+            }
+
+            const radarContainer = document.getElementById('radar-chegadas-container');
+            const radarTitulo = document.getElementById('radar-titulo');
+            const radarSubtitulo = document.getElementById('radar-subtitulo');
+
+            const futurasOuHoje = aprovadas.filter(r => r.checkin >= hojeStr);
+
+            if (futurasOuHoje.length === 0) {
+                radarContainer.classList.add('hidden');
+                return;
+            }
+
+            futurasOuHoje.sort((a, b) => a.checkin.localeCompare(b.checkin));
+            const proxima = futurasOuHoje[0];
+            const diasProxima = calcularDiasRestantes(proxima.checkin);
+            const suiteObj = suitesGlobaisCache.find(s => s.id === proxima.suite_id);
+            const nomeSuite = suiteObj ? suiteObj.nome : 'Suíte';
+
+            radarContainer.classList.remove('hidden');
+            if (diasProxima === 0) {
+                radarTitulo.innerText = `🔥 Atenção: Chegada de ${proxima.hospede_nome || 'Hóspede'} HOJE!`;
+                radarSubtitulo.innerText = `Destino: ${nomeSuite} (${formatarDataSimples(proxima.checkin)} até ${formatarDataSimples(proxima.checkout)})`;
+            } else if (diasProxima === 1) {
+                radarTitulo.innerText = `⏳ Próxima Chegada Amanhã: ${proxima.hospede_nome || 'Hóspede'}`;
+                radarSubtitulo.innerText = `Destino: ${nomeSuite} - Check-in amanhã (${formatarDataSimples(proxima.checkin)})`;
+            } else {
+                radarTitulo.innerText = `📅 Próxima Chegada em ${diasProxima} dias: ${proxima.hospede_nome || 'Hóspede'}`;
+                radarSubtitulo.innerText = `Destino: ${nomeSuite} (${formatarDataSimples(proxima.checkin)} a ${formatarDataSimples(proxima.checkout)})`;
+            }
+        }
+
+        function alternarExpandirCard(btnElement) {
+            const card = btnElement.closest('.card-suite');
+            const detalhes = card.querySelector('.card-detalhes');
+            const iconeSeta = card.querySelector('.icone-seta');
+            
+            if (detalhes.classList.contains('hidden')) {
+                detalhes.classList.remove('hidden');
+                if (iconeSeta) iconeSeta.style.transform = 'rotate(180deg)';
+                btnElement.innerText = 'Recolher ▴';
+            } else {
+                detalhes.classList.add('hidden');
+                if (iconeSeta) iconeSeta.style.transform = 'rotate(0deg)';
+                btnElement.innerText = 'Expandir Detalhes ▾';
+            }
+        }
+
+        function abrirModalTarifaEspecial(suiteId) {
+            const suite = suitesGlobaisCache.find(s => s.id === suiteId);
+            const nomeSuite = suite ? suite.nome : 'Suíte';
+            
+            const tarifasDaSuite = tarifasEspeciaisGlobaisCache.filter(t => t.suite_id === suiteId || !t.suite_id);
+            
+            document.getElementById('modal-tarifa-suite-nome').innerText = `Suíte: ${nomeSuite}`;
+            const containerConteudo = document.getElementById('modal-tarifa-conteudo');
+            containerConteudo.innerHTML = '';
+
+            if (tarifasDaSuite.length === 0) {
+                containerConteudo.innerHTML = '<p class="text-xs text-gray-500 text-center py-4">Nenhuma regra ou tarifa especial cadastrada para esta suíte.</p>';
+            } else {
+                tarifasDaSuite.forEach(t => {
+                    let diasTexto = "Todos os dias";
+                    if (t.dias_semana) {
+                        try {
+                            const diasObj = typeof t.dias_semana === 'string' ? JSON.parse(t.dias_semana) : t.dias_semana;
+                            if (Array.isArray(diasObj) && diasObj.length > 0) {
+                                diasTexto = diasObj.join(', ');
+                            }
+                        } catch(e) {}
+                    }
+
+                    const tipoAjuste = t.tipo_ajuste || 'Valor Fixo';
+                    const valorFormatado = tipoAjuste.toLowerCase().includes('percent') || tipoAjuste.toLowerCase().includes('%') 
+                        ? `${t.valor_especial}%` 
+                        : formatarMoeda(t.valor_especial);
+
+                    containerConteudo.innerHTML += `
+                        <div class="bg-amber-50/60 border border-amber-200 p-3.5 rounded-xl space-y-1.5 text-xs text-amber-950">
+                            <div class="flex justify-between items-start">
+                                <strong class="text-sm font-bold text-amber-900">${t.descricao || 'Tarifa Especial'}</strong>
+                                <span class="bg-amber-200 text-amber-950 px-2 py-0.5 rounded-md font-extrabold text-xs">${valorFormatado}</span>
+                            </div>
+                            <div class="text-gray-600 space-y-0.5 pt-1 border-t border-amber-200/60">
+                                <p><strong>Período:</strong> ${formatarDataSimples(t.data_inicio)} até ${formatarDataSimples(t.data_fim)}</p>
+                                <p><strong>Dias aplicados:</strong> ${(() => { try { const d = typeof t.dias_semana === 'string' ? JSON.parse(t.dias_semana) : t.dias_semana; if (Array.isArray(d) && d.length > 0) { const map = {1:'Segunda',2:'Terça',3:'Quarta',4:'Quinta',5:'Sexta',6:'Sábado',7:'Domingo'}; return d.map(x => map[x] || x).join(', '); } } catch(e){} return diasTexto || 'Todos os dias'; })()}</p>
+                                <p><strong>Tipo de Ajuste:</strong> ${tipoAjuste}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('modal-tarifa-especial').classList.remove('hidden');
+        }
+
+        function fecharModalTarifaEspecial() {
+            document.getElementById('modal-tarifa-especial').classList.add('hidden');
+        }
+
+        async function carregarDashboard() {
+            await carregarPousada();
+
+            const { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', usuarioIdAtual);
+            suitesGlobaisCache = suites || [];
+
+            const { data: reservas } = await supabaseClient.from('reservas').select('*').eq('pousada_id', usuarioIdAtual);
+            reservasGlobaisCache = reservas || [];
+
+            const { data: pagamentos } = await supabaseClient.from('hospede_pagamentos').select('*').eq('pousada_id', usuarioIdAtual);
+            pagamentosGlobaisCache = pagamentos || [];
+
+            const { data: tarifasEspeciais } = await supabaseClient.from('tarifas_especiais').select('*').eq('pousada_id', usuarioIdAtual);
+            tarifasEspeciaisGlobaisCache = tarifasEspeciais || [];
+
+            const hojeStr = new Date().toLocaleDateString('sv-SE');
+            let houveAtualizacaoAutomatica = false;
+
+            for (const suite of suitesGlobaisCache) {
+                if (suite.status === 'Disponível' || suite.status === 'Reservado') {
+                    const reservasAtivasDaSuite = reservasGlobaisCache.filter(r => r.suite_id === suite.id && r.status === 'Aprovada');
+                    const reservaParaOcupar = reservasAtivasDaSuite.find(r => r.checkin && r.checkin <= hojeStr && r.checkout > hojeStr);
+                    
+                    if (reservaParaOcupar && suite.status !== 'Ocupada') {
+                        await supabaseClient.from('suites').update({ status: 'Ocupada' }).eq('id', suite.id);
+                        suite.status = 'Ocupada';
+                        houveAtualizacaoAutomatica = true;
+                    }
+                }
+            }
+
+            if (houveAtualizacaoAutomatica) {
+                const { data: suitesAtualizadas } = await supabaseClient.from('suites').select('*').eq('pousada_id', usuarioIdAtual);
+                suitesGlobaisCache = suitesAtualizadas || [];
+            }
+
+            await verificarReservasPendentesDashboard();
+            atualizarRadarEKPIs();
+
+            const suitesPausadas = suitesGlobaisCache.filter(s => s.ativa === false || s.ativa === 'false');
+            const cardAvisoPausadas = document.getElementById('card-aviso-pausadas');
+            const textoSuitesPausadas = document.getElementById('texto-suites-pausadas');
+            
+            if (suitesPausadas.length > 0) {
+                const nomesPausadas = suitesPausadas.map(s => s.nome).join(', ');
+                textoSuitesPausadas.innerText = `As seguintes unidades estão ocultas para os clientes na vitrine: ${nomesPausadas}.`;
+                cardAvisoPausadas.classList.remove('hidden');
+            } else {
+                cardAvisoPausadas.classList.add('hidden');
+            }
+
+            const container = document.getElementById('suites-container');
+            container.innerHTML = '';
+            
+            if (suitesGlobaisCache.length === 0) {
+                container.innerHTML = '<p class="text-gray-600 col-span-3 text-center">Nenhuma suíte cadastrada.</p>';
+                return;
+            }
+
+            for (const suite of suitesGlobaisCache) {
+                const estaAtiva = suite.ativa !== false && suite.ativa !== 'false';
+                const tagPausadaHtml = !estaAtiva ? `<span class="bg-slate-700 text-slate-200 text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">⏸️ Pausada</span>` : '';
+
+                const reservasDaSuite = reservasGlobaisCache.filter(r => r.suite_id === suite.id && r.status !== 'Cancelada' && r.status !== 'Recusada' && r.status !== 'Finalizada');
+                const aprovadasDaSuite = reservasDaSuite.filter(r => r.status === 'Aprovada');
+                const pendentesDaSuite = reservasDaSuite.filter(r => r.status === 'Pendente');
+
+                const temTarifaEspecial = tarifasEspeciaisGlobaisCache.some(t => {
+                    const atendeSuite = (t.suite_id === suite.id || !t.suite_id);
+                    const reservaDaVez = aprovadasDaSuite.find(r => r.suite_id === suite.id);
+                    
+                    if (reservaDaVez && reservaDaVez.checkin && reservaDaVez.checkout && t.data_inicio && t.data_fim) {
+                        const temSobreposicao = (reservaDaVez.checkin <= t.data_fim) && (reservaDaVez.checkout >= t.data_inicio);
+                        return atendeSuite && temSobreposicao;
+                    }
+                    
+                    const dentroDaVigenciaGeral = t.data_inicio && t.data_fim && hojeStr >= t.data_inicio && hojeStr <= t.data_fim;
+                    return atendeSuite && dentroDaVigenciaGeral;
+                });
+                
+                const htmlTarifaBadge = temTarifaEspecial 
+                    ? `<button onclick="abrirModalTarifaEspecial('${suite.id}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 text-[11px] font-bold px-2 py-0.5 rounded-md transition flex items-center gap-1 cursor-pointer"><span>⚡ Com Tarifa Especial</span></button>` 
+                    : '';
+
+                const htmlBotaoCalendario = `<button onclick="abrirCalendarioSuite('${suite.id}', '${suite.nome}')" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-[11px] font-bold px-2.5 py-0.5 rounded-md transition flex items-center gap-1 cursor-pointer"><span>📅 Ver Calendário</span></button>`;
+
+                if (aprovadasDaSuite.length > 0) {
+                    for (let index = 0; index < aprovadasDaSuite.length; index++) {
+                        const aprovada = aprovadasDaSuite[index];
+                        const isFutura = aprovada.checkin > hojeStr;
+                        const statusParaModal = isFutura ? 'Reservado' : 'Ocupada';
+                        const badgeText = isFutura ? 'Reserva Futura' : 'Ocupada';
+                        const badgeClasses = isFutura ? 'bg-blue-200 text-blue-900' : 'bg-gray-200 text-red-600 font-bold';
+                        const bgCardClasses = isFutura ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50 border border-gray-300';
+                        
+                        const indicador = isFutura ? obterIndicadorProximaEstada(aprovada.checkin) : obterIndicadorCheckout(aprovada.checkout);
+                        const linkZap = gerarLinkWhatsApp(aprovada.whatsapp_hospede, aprovada.hospede_nome, aprovada.checkin, aprovada.checkout);
+                        
+                        const sufixoTitulo = aprovadasDaSuite.length > 1 ? ` (${index + 1})` : '';
+                        const nomeHospedeExibicao = aprovada.hospede_nome ? ` - <span class="font-normal text-gray-700 text-sm sm:text-base">${aprovada.hospede_nome}</span>` : '';
+                        
+                        const qtdDiarias = calcularQuantidadeDiarias(aprovada.checkin, aprovada.checkout);
+                        
+                        // Garante o cálculo dinâmico do valor total caso venha zerado do banco
+                        let valorTotal = Number(aprovada.valor_total || 0);
+                        const qtdAdultos = aprovada.adultos !== undefined && aprovada.adultos !== null ? aprovada.adultos : (aprovada.qtd_adultos || 2);
+                        const qtdCriancas = aprovada.criancas !== undefined && aprovada.criancas !== null ? aprovada.criancas : (aprovada.crianca || aprovada.qtd_criancas || 0);
+                        const petVal = (aprovada.pet === true || aprovada.pet === 'true' || aprovada.taxa_pet === true || aprovada.taxa_pet === 'true' || aprovada.tem_pet === true || aprovada.tem_pet === 'true');
+
+                        if (valorTotal <= 0 && aprovada.checkin && aprovada.checkout) {
+                            try {
+                                const { data: valorCalculado } = await supabaseClient.rpc('calcular_total_reserva', { 
+                                    p_suite_id: suite.id, 
+                                    p_checkin: aprovada.checkin, 
+                                    p_checkout: aprovada.checkout,
+                                    p_adultos: qtdAdultos,
+                                    p_criancas: qtdCriancas,
+                                    p_idades_criancas: aprovada.idades_criancas || '',
+                                    p_pet: petVal
+                                });
+                                if (valorCalculado !== null) valorTotal = Number(valorCalculado);
+                            } catch (err) {
+                                console.error("Erro ao recalcular valor no render:", err);
+                            }
+                        }
+
+                        const temPet = petVal ? 'Sim' : 'Não';
+                        const pagamentosDestaReserva = pagamentosGlobaisCache.filter(p => p.reserva_id === aprovada.id);
+                        const totalPago = pagamentosDestaReserva.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
+                        const saldoRestante = valorTotal - totalPago;
+
+                        let htmlAlertaTopo = '';
+                        if (aprovada.observacao && aprovada.observacao.trim() !== '') {
+                            htmlAlertaTopo = `
+                                <div class="mt-3 bg-amber-100 border-l-4 border-amber-500 p-3 rounded-xl text-amber-950 text-xs sm:text-sm font-semibold flex items-start gap-2 shadow-xs">
+                                    <span class="text-base">⚠️</span>
+                                    <div>
+                                        <strong class="block text-amber-900 uppercase text-[10px] tracking-wide">Aviso Importante:</strong>
+                                        <span>${aprovada.observacao}</span>
+                                    </div>
+                                </div>
+                            `;
+                        }
+
+                        container.innerHTML += `
+                            <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md ${bgCardClasses} text-gray-900 flex flex-col justify-between transition hover:shadow-lg">
+                                <div>
+                                    <div class="flex justify-between items-start mb-2">
+                                        <div>
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <h2 class="text-base sm:text-lg font-bold text-gray-900">${suite.nome}${sufixoTitulo}${nomeHospedeExibicao}</h2>
+                                                ${tagPausadaHtml}
+                                            </div>
+                                            <div class="flex flex-wrap items-center gap-2 mt-1">
+                                                <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md">Diária Padrão (2 Ad.): ${formatarMoeda(suite.valor_diaria)}</span>
+                                                ${htmlTarifaBadge}
+                                                ${htmlBotaoCalendario}
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm ${badgeClasses}">
+                                                ${badgeText}
+                                            </span>
+                                            <span class="icone-seta text-gray-400 text-sm transition-transform duration-300">▼</span>
+                                        </div>
+                                    </div>
+
+                                    ${htmlAlertaTopo}
+
+                                    <div class="card-detalhes hidden mt-3 pt-3 border-t border-black/10 text-xs sm:text-sm space-y-1.5">
+                                        <div class="mb-2">
+                                            <div class="inline-block px-3 py-1 rounded-lg border text-xs font-semibold ${indicador.classe}">${indicador.texto}</div>
+                                        </div>
+                                        <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">Hóspede:</span> <span class="font-bold text-gray-900">${aprovada.hospede_nome}</span></p>
+                                        <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">WhatsApp:</span> <a href="${linkZap}" target="_blank" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${aprovada.whatsapp_hospede || 'Não informado'}</a></p>
+                                        
+                                        <div class="grid grid-cols-3 gap-2 bg-white/80 p-2.5 rounded-xl border border-black/5 text-xs mt-2">
+                                            <div>
+                                                <span class="text-gray-500 block text-[10px] uppercase font-bold">Adultos</span>
+                                                <strong class="text-gray-900">${qtdAdultos}</strong>
+                                            </div>
+                                            <div>
+                                                <span class="text-gray-500 block text-[10px] uppercase font-bold">Crianças</span>
+                                                <strong class="text-gray-900">${qtdCriancas}</strong>
+                                            </div>
+                                            <div>
+                                                <span class="text-gray-500 block text-[10px] uppercase font-bold">Taxa Pet</span>
+                                                <strong class="text-gray-900">${temPet}</strong>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex items-center justify-between pt-1 border-t border-black/5 mt-2">
+                                            <span class="text-xs font-semibold text-gray-700">Estadia: <strong class="text-gray-900">${qtdDiarias} diária(s)</strong></span>
+                                            <span class="text-xs font-extrabold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">Total: ${formatarMoeda(valorTotal)}</span>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-2 bg-white/80 p-2.5 rounded-xl border border-black/5 text-xs mt-2">
+                                            <div>
+                                                <span class="text-gray-500 block text-[10px] uppercase font-bold">Pago / Sinal</span>
+                                                <strong class="text-emerald-700">${formatarMoeda(totalPago)}</strong>
+                                            </div>
+                                            <div>
+                                                <span class="text-gray-500 block text-[10px] uppercase font-bold">Saldo Restante</span>
+                                                <strong class="${saldoRestante > 0 ? 'text-amber-700' : 'text-emerald-600'}">${formatarMoeda(saldoRestante)}</strong>
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-black/5 text-xs">
+                                            <p><span class="text-gray-500">Check-in:</span> <strong class="text-gray-900">${formatarDataSimples(aprovada.checkin)}</strong></p>
+                                            <p><span class="text-gray-500">Check-out:</span> <strong class="text-gray-900">${formatarDataSimples(aprovada.checkout)}</strong></p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-4 pt-3 flex justify-between items-center border-t border-black/10">
+                                        <button type="button" onclick="alternarExpandirCard(this)" class="text-xs font-bold text-gray-600 hover:text-gray-900 underline">
+                                            Expandir Detalhes ▾
+                                        </button>
+                                        <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', '${statusParaModal}', '${aprovada.id}')" class="text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 px-3.5 py-2 rounded-xl transition shadow-xs">
+                                            Editar Card &rarr;
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>`;
+                    }
+                } 
+                
+                if (aprovadasDaSuite.length === 0 && pendentesDaSuite.length === 0) {
+                    const corClasses = {
+                        'Disponível': 'bg-green-50 border border-green-200 text-green-900', 
+                        'Limpeza': 'bg-red-50 border border-red-200 text-red-900', 
+                    };
+                    
+                    container.innerHTML += `
+                        <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md ${corClasses[suite.status] || 'bg-white border border-gray-200'} flex flex-col justify-between transition hover:shadow-lg">
+                            <div>
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <h2 class="text-base sm:text-lg font-bold text-gray-900">${suite.nome}</h2>
+                                            ${tagPausadaHtml}
+                                        </div>
+                                        <div class="flex flex-wrap items-center gap-2 mt-1">
+                                            <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md">Diária Padrão (2 Ad.): ${formatarMoeda(suite.valor_diaria)}</span>
+                                            ${htmlTarifaBadge}
+                                            ${htmlBotaoCalendario}
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm ${
+                                            suite.status === 'Disponível' ? 'bg-green-200 text-green-900' : 'bg-red-200 text-red-900'
+                                        }">
+                                            ${suite.status}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4 pt-3 border-t border-black/10 flex justify-end">
+                                    <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', '${suite.status}')" class="text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 px-3.5 py-2 rounded-xl transition shadow-xs">
+                                        Gerenciar / Adicionar &rarr;
+                                    </button>
+                                </div>
+                            </div>
+                        </div>`;
+                }
+
+                for (let index = 0; index < pendentesDaSuite.length; index++) {
+                    const pend = pendentesDaSuite[index];
+                    const linkZapPend = gerarLinkWhatsApp(pend.whatsapp_hospede, pend.hospede_nome, pend.checkin, pend.checkout);
+                    const dataSolicitacaoFormatada = formatarDataHora(pend.criado_em);
+                    const qtdDiariasPend = calcularQuantidadeDiarias(pend.checkin, pend.checkout);
+                    
+                    let valorTotalPend = Number(pend.valor_total || 0);
+                    const qtdAdultosPend = pend.adultos !== undefined && pend.adultos !== null ? pend.adultos : (pend.qtd_adultos || 2);
+                    const qtdCriancasPend = pend.criancas !== undefined && pend.criancas !== null ? pend.criancas : (pend.crianca || pend.qtd_criancas || 0);
+                    const petPendVal = (pend.pet === true || pend.pet === 'true' || pend.taxa_pet === true || pend.taxa_pet === 'true' || pend.tem_pet === true || pend.tem_pet === 'true');
+
+                    if (valorTotalPend <= 0 && pend.checkin && pend.checkout) {
+                        try {
+                            const { data: valorCalculado } = await supabaseClient.rpc('calcular_total_reserva', { 
+                                p_suite_id: suite.id, 
+                                p_checkin: pend.checkin, 
+                                p_checkout: pend.checkout,
+                                p_adultos: qtdAdultosPend,
+                                p_criancas: qtdCriancasPend,
+                                p_idades_criancas: pend.idades_criancas || '',
+                                p_pet: petPendVal
+                            });
+                            if (valorCalculado !== null) valorTotalPend = Number(valorCalculado);
+                        } catch (err) {
+                            console.error("Erro ao recalcular valor pendente no render:", err);
+                        }
+                    }
+
+                    const sufixoTituloPend = pendentesDaSuite.length > 1 ? ` (${index + 1})` : '';
+                    const nomeHospedePendExibicao = pend.hospede_nome ? ` - <span class="font-normal text-amber-950/80 text-sm sm:text-base">${pend.hospede_nome}</span>` : '';
+                    const temPetPend = petPendVal ? 'Sim' : 'Não';
+
+                    const pagamentosPend = pagamentosGlobaisCache.filter(p => p.reserva_id === pend.id);
+                    const totalPagoPend = pagamentosPend.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
+                    const saldoRestantePend = valorTotalPend - totalPagoPend;
+
+                    let htmlAlertaTopoPend = '';
+                    if (pend.observacao && pend.observacao.trim() !== '') {
+                        htmlAlertaTopoPend = `
+                            <div class="mt-3 bg-amber-200/80 border-l-4 border-amber-600 p-3 rounded-xl text-amber-950 text-xs sm:text-sm font-semibold flex items-start gap-2 shadow-xs">
+                                <span class="text-base">⚠️</span>
+                                <div>
+                                    <strong class="block text-amber-900 uppercase text-[10px] tracking-wide">Aviso Importante:</strong>
+                                    <span>${pend.observacao}</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    container.innerHTML += `
+                        <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md bg-amber-50 border border-amber-200 flex flex-col justify-between transition hover:shadow-lg">
+                            <div>
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <h2 class="text-base sm:text-lg font-bold text-amber-950">${suite.nome}${sufixoTituloPend}${nomeHospedePendExibicao}</h2>
+                                            ${tagPausadaHtml}
+                                        </div>
+                                        <div class="flex flex-wrap items-center gap-2 mt-1">
+                                            <span class="text-[11px] font-bold text-amber-900/80 bg-amber-200/60 px-2 py-0.5 rounded-md">Diária Padrão (2 Ad.): ${formatarMoeda(suite.valor_diaria)}</span>
+                                            ${htmlTarifaBadge}
+                                            ${htmlBotaoCalendario}
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm bg-amber-200 text-amber-900">Pendente</span>
+                                        <span class="icone-seta text-amber-700 text-sm transition-transform duration-300">▼</span>
+                                    </div>
+                                </div>
+                                
+                                ${htmlAlertaTopoPend}
+
+                                <div class="card-detalhes hidden mt-3 pt-3 border-t border-amber-200 text-xs sm:text-sm space-y-1.5">
+                                    <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">Hóspede:</span> <span class="font-bold text-gray-900">${pend.hospede_nome || 'Não informado'}</span></p>
+                                    <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">WhatsApp:</span> <a href="${linkZapPend}" target="_blank" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${pend.whatsapp_hospede || 'Não informado'}</a></p>
+                                    
+                                    <div class="grid grid-cols-3 gap-2 bg-white/80 p-2.5 rounded-xl border border-amber-200 text-xs mt-2">
+                                        <div>
+                                            <span class="text-gray-500 block text-[10px] uppercase font-bold">Adultos</span>
+                                            <strong class="text-gray-900">${qtdAdultosPend}</strong>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-500 block text-[10px] uppercase font-bold">Crianças</span>
+                                            <strong class="text-gray-900">${qtdCriancasPend}</strong>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-500 block text-[10px] uppercase font-bold">Taxa Pet</span>
+                                            <strong class="text-gray-900">${temPetPend}</strong>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center justify-between pt-1 border-t border-amber-200 mt-2">
+                                        <span class="text-xs font-semibold text-amber-900">Estadia: <strong class="text-gray-900">${qtdDiariasPend} diária(s)</strong></span>
+                                        <span class="text-xs font-extrabold text-blue-700 bg-white px-2.5 py-1 rounded-lg border border-amber-200">Total: ${formatarMoeda(valorTotalPend)}</span>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-2 bg-white/80 p-2.5 rounded-xl border border-amber-200 text-xs mt-2">
+                                        <div>
+                                            <span class="text-gray-500 block text-[10px] uppercase font-bold">Pago / Sinal</span>
+                                            <strong class="text-emerald-700">${formatarMoeda(totalPagoPend)}</strong>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-500 block text-[10px] uppercase font-bold">Saldo Restante</span>
+                                            <strong class="text-amber-700">${formatarMoeda(saldoRestantePend)}</strong>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-white/70 border border-amber-200 p-3 rounded-xl mt-3 space-y-1 text-xs text-amber-900 shadow-sm">
+                                        <p><span class="font-semibold text-gray-600">CPF:</span> ${pend.cpf || 'Não informado'}</p>
+                                        <p><span class="font-semibold text-gray-600">RG:</span> ${pend.rg || 'Não informado'}</p>
+                                        <p><span class="font-semibold text-gray-600">Endereço:</span> ${pend.endereco || 'Não informado'}</p>
+                                        <p><span class="font-semibold text-gray-600">CEP:</span> ${pend.cep || 'Não informado'}</p>
+                                        <p><span class="font-semibold text-gray-600">E-mail:</span> ${pend.email || 'Não informado'}</p>
+                                        <div class="pt-1.5 border-t border-amber-100 flex items-center gap-1 text-gray-500 font-medium">
+                                            <span>🕒</span> <span>Solicitado em: <strong>${dataSolicitacaoFormatada}</strong></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-amber-200 text-xs">
+                                        <p><span class="text-amber-800">Check-in:</span> <strong class="text-gray-900">${formatarDataSimples(pend.checkin)}</strong></p>
+                                        <p><span class="text-amber-800">Check-out:</span> <strong class="text-gray-900">${formatarDataSimples(pend.checkout)}</strong></p>
+                                    </div>
+
+                                    <div class="mt-4 pt-3 border-t border-amber-200 flex gap-2 hidden sm:flex">
+                                        <button onclick="mudarStatusReserva('${pend.id}', 'Aprovada')" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✔ Aprovar (detalhes)</button>
+                                        <button onclick="abrirModalRecusa('${pend.id}', '${pend.hospede_nome || 'hóspede'}')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl shadow-sm text-xs transition">✖ Recusar (detalhes)</button>
+                                    </div>
+                                </div>
+
+                                <!-- BOTÕES VISÍVEIS SEM EXPANDIR - DESTAQUE MÁXIMO -->
+                                <div class="mt-3 bg-amber-100 border-2 border-amber-500 rounded-xl p-2.5 flex gap-2 shadow-sm">
+                                    <button onclick="mudarStatusReserva('${pend.id}', 'Aprovada')" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-extrabold py-3 px-3 rounded-xl shadow-md text-sm transition flex items-center justify-center gap-1.5">
+                                        ✔ Aprovar
+                                    </button>
+                                    <button onclick="abrirModalRecusa('${pend.id}', '${(pend.hospede_nome || 'hóspede').replace(/'/g, '').replace(/"/g, '')}')" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-extrabold py-3 px-3 rounded-xl shadow-md text-sm transition flex items-center justify-center gap-1.5">
+                                        ✖ Recusar
+                                    </button>
+                                </div>
+
+                                <div class="mt-3 pt-3 flex justify-between items-center border-t border-amber-200">
+                                    <button type="button" onclick="alternarExpandirCard(this)" class="text-xs font-bold text-amber-900 hover:text-amber-950 underline">
+                                        Ver detalhes / WhatsApp ▾
+                                    </button>
+                                    <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', 'Pendente', '${pend.id}')" class="text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 px-3.5 py-2 rounded-xl transition shadow-xs">
+                                        Editar Card &rarr;
+                                    </button>
+                                </div>
+                            </div>
+                        </div>`;
+                }
+            }
+        }
+        
+        async function abrirModal(id, nome, status, reservaId = null) {
+            camposLimposParaNovaReserva = false;
+            limparErroModal();
+            aplicarVisibilidadeTaxaPet();
+            document.getElementById('edit-suite-id').value = id;
+            document.getElementById('edit-status').value = status;
+            document.getElementById('edit-status-original').value = status;
+            document.getElementById('edit-valor-sinal').value = '';
+            document.getElementById('edit-forma-pagamento').value = 'Pix / Sinal';
+            document.getElementById('edit-observacao').value = '';
+            document.getElementById('modal-titulo').innerText = "Gerenciar Suíte: " + nome;
+            try {
+                const suiteDados = suitesGlobaisCache.find(s => s.id === id);
+                if (suiteDados) {
+                    const capMax = Number(suiteDados.capacidade_hospedes) || 0;
+                    const inclusos = Number(suiteDados.hospedes_inclusos) || 2;
+                    let capInfoEl = document.getElementById('info-capacidade-suite');
+                    if (!capInfoEl) {
+                        const tituloEl = document.getElementById('modal-titulo');
+                        capInfoEl = document.createElement('div');
+                        capInfoEl.id = 'info-capacidade-suite';
+                        capInfoEl.className = 'mt-2 mb-3 bg-blue-50 border border-blue-200 p-2.5 rounded-xl text-xs font-bold text-blue-900 flex items-center gap-2';
+                        tituloEl.parentNode.parentNode.insertBefore(capInfoEl, tituloEl.parentNode.nextSibling);
+                    }
+                    if (capMax > 0) {
+                        capInfoEl.innerHTML = `<span>🏨 Capacidade real desta suíte: <strong>${capMax} pessoa(s)</strong> no total (adultos + crianças) | ${inclusos} incluso(s)</span>`;
+                        capInfoEl.classList.remove('hidden');
+                    } else {
+                        capInfoEl.innerHTML = `<span>🏨 Capacidade não definida (defina em Configurar Pousada)</span>`;
+                        capInfoEl.classList.remove('hidden');
+                    }
+                }
+            } catch(e) { console.warn('Erro capacidade modal', e); }
+
+            let reserva = null;
+            if (reservaId && reservaId !== 'null' && reservaId !== 'undefined' && reservaId !== '') {
+                reserva = reservasGlobaisCache.find(r => r.id === reservaId);
+            } else {
+                reserva = null;
+            }
+
+            if (reserva) {
+                document.getElementById('edit-reserva-id').value = reserva.id;
+                document.getElementById('edit-hospede').value = reserva.hospede_nome || '';
+                document.getElementById('edit-whatsapp').value = reserva.whatsapp_hospede || '';
+                document.getElementById('edit-cpf').value = reserva.cpf || '';
+                document.getElementById('edit-rg').value = reserva.rg || '';
+                document.getElementById('edit-endereco').value = reserva.endereco || '';
+                document.getElementById('edit-cep').value = reserva.cep || '';
+                document.getElementById('edit-email').value = reserva.email || '';
+                document.getElementById('edit-adultos').value = reserva.adultos !== undefined && reserva.adultos !== null ? reserva.adultos : (reserva.qtd_adultos || 2);
+                document.getElementById('edit-criancas').value = reserva.criancas !== undefined && reserva.criancas !== null ? reserva.criancas : (reserva.crianca || reserva.qtd_criancas || 0);
+                document.getElementById('edit-pet').value = (reserva.pet === true || reserva.pet === 'true' || reserva.taxa_pet === true || reserva.taxa_pet === 'true' || reserva.tem_pet === true || reserva.tem_pet === 'true') ? 'true' : 'false';
+                document.getElementById('edit-checkin').value = reserva.checkin || '';
+                document.getElementById('edit-checkout').value = reserva.checkout || '';
+                document.getElementById('edit-observacao').value = reserva.observacao || '';
+                // Renderizar idades das crianças vindas do banco (TEXT "5,7" ou array)
+                const qtdCriancasReserva = reserva.criancas !== undefined && reserva.criancas !== null ? reserva.criancas : (reserva.crianca || reserva.qtd_criancas || 0);
+                const idadesReserva = reserva.idades_criancas || '';
+                // Primeiro mostra modal para garantir que DOM exista
+                document.getElementById('modal-edicao').classList.remove('hidden');
+                aplicarVisibilidadeTaxaPet();
+                await verificarStatusModal();
+                renderizarInputsIdadesCriancas(parseInt(qtdCriancasReserva) || 0, idadesReserva);
+                await recalcularValoresModalEdicao();
+                return;
+            } else {
+                document.getElementById('edit-reserva-id').value = '';
+                document.getElementById('edit-hospede').value = '';
+                document.getElementById('edit-whatsapp').value = '';
+                document.getElementById('edit-cpf').value = '';
+                document.getElementById('edit-rg').value = '';
+                document.getElementById('edit-endereco').value = '';
+                document.getElementById('edit-cep').value = '';
+                document.getElementById('edit-email').value = '';
+                document.getElementById('edit-adultos').value = '2';
+                document.getElementById('edit-criancas').value = '0';
+                document.getElementById('edit-pet').value = 'false';
+                document.getElementById('edit-checkin').value = '';
+                document.getElementById('edit-checkout').value = '';
+                document.getElementById('edit-observacao').value = '';
+            }
+            
+            document.getElementById('modal-edicao').classList.remove('hidden');
+            aplicarVisibilidadeTaxaPet();
+            await verificarStatusModal();
+            await recalcularValoresModalEdicao();
+        }
+
+        async function mudarStatusReserva(reservaId, novoStatus, motivoRecusa = null) {
+            let payload = { status: novoStatus };
+            if (novoStatus === 'Recusada') {
+                payload.motivo_recusa = motivoRecusa || 'Sem motivo informado';
+                payload.observacao = motivoRecusa || 'Sem motivo informado';
+                // recusado_em e recusado_por serão preenchidos pela trigger fn_audit_recusa
+            }
+            const { error } = await supabaseClient.from('reservas').update(payload).eq('id', reservaId);
+            if (error) {
+                console.error('Erro ao atualizar reserva:', error);
+                mostrarToast('Erro', error.message);
+                return;
+            }
+            mostrarToast("Sucesso", `Reserva ${novoStatus.toLowerCase()}!${novoStatus === 'Recusada' ? ' Motivo salvo.' : ''}`);
+            carregarDashboard();
+        }
+
+        function renderizarInputsIdadesCriancas(qtdCriancas, idadesAtuais = []) {
+            const container = document.getElementById('container-idades-criancas');
+            const lista = document.getElementById('lista-idades-criancas');
+            
+            // Preservar valores existentes quando idadesAtuais vier vazio (ex: mudança de Adulto/Pet)
+            let idadesNorm = [];
+            if (typeof idadesAtuais === 'string' && idadesAtuais.trim() !== '') {
+                // Vem do banco como TEXT "5,7,2"
+                idadesNorm = idadesAtuais.split(',').map(s => s.trim()).filter(s => s !== '').map(v => parseInt(v) || 5);
+            } else if (Array.isArray(idadesAtuais) && idadesAtuais.length > 0) {
+                idadesNorm = idadesAtuais.map(v => parseInt(v) || 5);
+            } else {
+                // Tentar reaproveitar o que já está digitado no DOM
+                const existentes = document.querySelectorAll('.input-idade-crianca');
+                if (existentes.length > 0) {
+                    idadesNorm = Array.from(existentes).map(el => parseInt(el.value) || 5);
+                }
+            }
+
+            lista.innerHTML = '';
+
+            if (qtdCriancas <= 0) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            container.classList.remove('hidden');
+            let html = '';
+            for (let i = 0; i < qtdCriancas; i++) {
+                let idadeVal;
+                if (idadesNorm[i] !== undefined) {
+                    idadeVal = idadesNorm[i];
+                } else {
+                    idadeVal = 5;
+                }
+                html += `
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-600 mb-0.5">Criança ${i + 1} (Idade)</label>
+                        <input type="number" min="0" max="17" value="${idadeVal}" class="input-idade-crianca w-full p-2 border rounded-lg bg-white text-xs font-bold text-center" onchange="recalcularValoresModalEdicao()" oninput="recalcularValoresModalEdicao()">
+                    </div>
+                `;
+            }
+            lista.innerHTML = html;
+        }
+
+        async function calcularSaldoDevedorReservaAtual() {
+            const suiteId = document.getElementById('edit-suite-id').value;
+            const reservaId = document.getElementById('edit-reserva-id').value;
+            const checkinVal = document.getElementById('edit-checkin').value;
+            const checkoutVal = document.getElementById('edit-checkout').value;
+            const adultosVal = parseInt(document.getElementById('edit-adultos').value) || 2;
+            const criancasVal = parseInt(document.getElementById('edit-criancas').value) || 0;
+            const petRaw = document.getElementById('edit-pet').value;
+            let petVal = (petRaw === 'true' || petRaw === true || String(petRaw).toLowerCase() === 'sim' || petRaw === '1' || petRaw === 1);
+            if (pousadaAceitaPetCache !== true) petVal = false;
+
+            if (!suiteId || !checkinVal || !checkoutVal) return 0;
+
+            const inputsIdades = document.querySelectorAll('.input-idade-crianca');
+            const idadesArr = Array.from(inputsIdades).map(el => parseInt(el.value) || 0);
+            const idadesStr = idadesArr.join(',');
+
+            let valorTotalCalculado = 0;
+            try {
+                const { data: valorCalculado, error: erroRpc } = await supabaseClient.rpc('calcular_total_reserva', { 
+                    p_suite_id: suiteId, 
+                    p_checkin: checkinVal, 
+                    p_checkout: checkoutVal,
+                    p_adultos: adultosVal,
+                    p_criancas: criancasVal,
+                    p_idades_criancas: idadesStr,
+                    p_pet: petVal
+                });
+                
+                if (!erroRpc && valorCalculado !== null) {
+                    valorTotalCalculado = Number(valorCalculado);
+                } else if (reservaId) {
+                    const rObj = reservasGlobaisCache.find(r => r.id === reservaId);
+                    if (rObj) valorTotalCalculado = Number(rObj.valor_total || 0);
+                }
+            } catch (err) {
+                console.error("Erro ao calcular total para saldo:", err);
+            }
+
+            let totalPago = 0;
+            if (reservaId) {
+                const pagamentos = pagamentosGlobaisCache.filter(p => p.reserva_id === reservaId);
+                totalPago = pagamentos.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
+            }
+
+            const saldo = valorTotalCalculado - totalPago;
+            return saldo > 0 ? saldo : 0;
+        }
+
+        let _ultimaChamadaRecalculoId = 0;
+        async function recalcularValoresModalEdicao() {
+            const chamadaAtualId = ++_ultimaChamadaRecalculoId;
+            const suiteId = document.getElementById('edit-suite-id').value;
+            const reservaId = document.getElementById('edit-reserva-id').value;
+            let checkinStr = document.getElementById('edit-checkin').value;
+            let checkoutStr = document.getElementById('edit-checkout').value;
+            const adultosVal = parseInt(document.getElementById('edit-adultos').value) || 2;
+            const criancasVal = parseInt(document.getElementById('edit-criancas').value) || 0;
+            try {
+                const suiteCap = suitesGlobaisCache.find(s => s.id === suiteId);
+                if (suiteCap) {
+                    const capMax = Number(suiteCap.capacidade_hospedes) || 0;
+                    const totalOcup = (Number(adultosVal) || 0) + (Number(criancasVal) || 0);
+                    let avisoCap = document.getElementById('aviso-capacidade-modal');
+                    if (!avisoCap) {
+                        const containerIdades = document.getElementById('container-idades-criancas');
+                        avisoCap = document.createElement('div');
+                        avisoCap.id = 'aviso-capacidade-modal';
+                        avisoCap.className = 'mt-2 p-2.5 rounded-xl text-xs font-bold hidden';
+                        containerIdades.parentNode.insertBefore(avisoCap, containerIdades.nextSibling);
+                    }
+                    if (capMax > 0 && totalOcup > capMax) {
+                        avisoCap.className = 'mt-2 p-2.5 rounded-xl text-xs font-bold bg-red-50 border border-red-300 text-red-800';
+                        avisoCap.innerHTML = `⚠️ Capacidade excedida: esta suíte comporta no máximo ${capMax} pessoa(s) (adultos + crianças). Você informou ${totalOcup} (${adultosVal} adultos + ${criancasVal} crianças).`;
+                        avisoCap.classList.remove('hidden');
+                    } else if (capMax > 0) {
+                        avisoCap.className = 'mt-2 p-2.5 rounded-xl text-xs font-bold bg-green-50 border border-green-200 text-green-800';
+                        avisoCap.innerHTML = `✅ Ocupação OK: ${totalOcup}/${capMax} pessoa(s)`;
+                        avisoCap.classList.remove('hidden');
+                    } else {
+                        avisoCap.classList.add('hidden');
+                    }
+                }
+            } catch(e) { console.warn(e); }
+            // Defensivo: aceitar true/false, Sim/Não, 1/0 + regra pousadas.aceita_pet
+            const petRaw = document.getElementById('edit-pet').value;
+            let petVal = (petRaw === 'true' || petRaw === true || String(petRaw).toLowerCase() === 'sim' || petRaw === '1' || petRaw === 1);
+            if (pousadaAceitaPetCache !== true) petVal = false;
+
+            // Coletar idades atuais antes de re-renderizar para preservar
+            const inputsAntes = document.querySelectorAll('.input-idade-crianca');
+            const idadesAntes = Array.from(inputsAntes).map(el => el.value);
+            renderizarInputsIdadesCriancas(criancasVal, idadesAntes.length ? idadesAntes : []);
+
+            // Após render, coletar idades finais para enviar à RPC
+            const inputsIdadesFinais = document.querySelectorAll('.input-idade-crianca');
+            const idadesArr = Array.from(inputsIdadesFinais).map(input => {
+                const v = parseInt(input.value);
+                return isNaN(v) ? 0 : v;
+            });
+            const idadesStr = idadesArr.join(',');
+
+            if (!checkinStr || !checkoutStr) return;
+
+            let d1 = new Date(checkinStr);
+            let d2 = new Date(checkoutStr);
+
+            if (d2 <= d1) {
+                let [ano, mes, dia] = checkinStr.split('-');
+                let dataSeguinte = new Date(ano, mes - 1, Number(dia) + 1);
+                checkoutStr = dataSeguinte.toLocaleDateString('sv-SE');
+                document.getElementById('edit-checkout').value = checkoutStr;
+            }
+
+            const qtdDiarias = calcularQuantidadeDiarias(checkinStr, checkoutStr);
+            document.getElementById('modal-qtd-diarias').innerText = `${qtdDiarias} diária(s)`;
+
+            let valorTotal = 0;
+            const suiteObj = suitesGlobaisCache.find(s => s.id === suiteId);
+            const valorDiaria = suiteObj ? Number(suiteObj.valor_diaria || 0) : 0;
+            valorTotal = qtdDiarias * valorDiaria;
+
+            try {
+                const { data: valorCalculado, error: erroRpc } = await supabaseClient.rpc('calcular_total_reserva', { 
+                    p_suite_id: suiteId, 
+                    p_checkin: checkinStr, 
+                    p_checkout: checkoutStr,
+                    p_adultos: adultosVal,
+                    p_criancas: criancasVal,
+                    p_idades_criancas: idadesStr,
+                    p_pet: petVal
+                });
+                // Ignorar respostas antigas se usuário digitou rápido
+                if (chamadaAtualId !== _ultimaChamadaRecalculoId) return;
+                
+                if (!erroRpc && valorCalculado !== null) {
+                    valorTotal = Number(valorCalculado);
+                } else if (erroRpc) {
+                    console.error("Erro RPC calcular_total_reserva (com idades):", erroRpc);
+                    // Fallback compatibilidade: tentar sem idades caso função antiga
+                    try {
+                        const { data: valorFallback, error: erroFallback } = await supabaseClient.rpc('calcular_total_reserva', {
+                            p_suite_id: suiteId,
+                            p_checkin: checkinStr,
+                            p_checkout: checkoutStr,
+                            p_adultos: adultosVal,
+                            p_criancas: criancasVal,
+                            p_pet: petVal
+                        });
+                        if (!erroFallback && valorFallback !== null) {
+                            valorTotal = Number(valorFallback);
+                        }
+                    } catch (e2) {
+                        console.error("Fallback RPC também falhou:", e2);
+                    }
+                }
+            } catch (err) {
+                console.error("Erro ao recalcular via RPC:", err);
+            }
+
+            document.getElementById('modal-valor-total').innerText = formatarMoeda(valorTotal);
+
+            let totalPago = 0;
+            if (reservaId) {
+                const pagamentosDestaReserva = pagamentosGlobaisCache.filter(p => p.reserva_id === reservaId);
+                totalPago = pagamentosDestaReserva.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
+            }
+
+            const saldoRestante = valorTotal - totalPago;
+            const elSaldo = document.getElementById('modal-saldo-restante');
+            elSaldo.innerText = formatarMoeda(saldoRestante);
+            
+            if (saldoRestante > 0) {
+                elSaldo.className = "text-amber-700 font-extrabold";
+            } else {
+                elSaldo.className = "text-emerald-600 font-extrabold";
+            }
+
+            if (document.getElementById('edit-status').value === 'Checkout') {
+                document.getElementById('display-saldo-devedor-checkout').innerText = formatarMoeda(saldoRestante);
+                document.getElementById('edit-valor-sinal').value = saldoRestante > 0 ? saldoRestante.toFixed(2) : '0.00';
+            }
+        }
+
+        async function atualizarSaldoCheckoutModal() {
+            await recalcularValoresModalEdicao();
+        }
+
+        async function verificarStatusModal() {
+            const status = document.getElementById('edit-status').value;
+            const statusOriginal = document.getElementById('edit-status-original').value;
+            const containerCampos = document.getElementById('campos-hospede-container');
+            const containerCheckout = document.getElementById('container-checkout-financeiro');
+            const lblValorSinal = document.getElementById('lbl-valor-sinal');
+            
+            if (status === 'Disponível' || status === 'Limpeza') {
+                containerCampos.classList.add('opacity-50');
+            } else {
+                containerCampos.classList.remove('opacity-50');
+            }
+
+            if (status === 'Checkout') {
+                containerCheckout.classList.remove('hidden');
+                lblValorSinal.innerText = "Valor do Pagamento o Checkout (R$) * Mínimo Obrigatório";
+                lblValorSinal.classList.add('text-red-700');
+                lblValorSinal.classList.remove('text-emerald-700');
+                await atualizarSaldoCheckoutModal();
+            } else {
+                containerCheckout.classList.add('hidden');
+                lblValorSinal.innerText = "Registrar Novo Pagamento / Sinal (R$)";
+                lblValorSinal.classList.remove('text-red-700');
+                lblValorSinal.classList.add('text-emerald-700');
+            }
+
+            if (status === 'Ocupada') {
+                const hojeStr = new Date().toLocaleDateString('sv-SE');
+                const checkinInput = document.getElementById('edit-checkin');
+                if (checkinInput.value > hojeStr || !checkinInput.value) {
+                    checkinInput.value = hojeStr;
+                    await recalcularValoresModalEdicao();
+                }
+            }
+
+            if (status === 'Reservado' && !camposLimposParaNovaReserva) {
+                const reservaIdAtual = document.getElementById('edit-reserva-id').value;
+                const deveLimpar = statusOriginal !== 'Reservado' || !reservaIdAtual;
+                if (deveLimpar) {
+                    document.getElementById('edit-reserva-id').value = '';
+                    document.getElementById('edit-hospede').value = '';
+                    document.getElementById('edit-whatsapp').value = '';
+                    document.getElementById('edit-cpf').value = '';
+                    document.getElementById('edit-rg').value = '';
+                    document.getElementById('edit-endereco').value = '';
+                    document.getElementById('edit-cep').value = '';
+                    document.getElementById('edit-email').value = '';
+                    document.getElementById('edit-adultos').value = '2';
+                    document.getElementById('edit-criancas').value = '0';
+                    document.getElementById('edit-pet').value = 'false';
+                    document.getElementById('edit-checkin').value = '';
+                    document.getElementById('edit-checkout').value = '';
+                    document.getElementById('edit-valor-sinal').value = '';
+                    document.getElementById('edit-forma-pagamento').value = 'Pix / Sinal';
+                    document.getElementById('edit-observacao').value = '';
+                    const listaIdades = document.getElementById('lista-idades-criancas');
+                    if (listaIdades) listaIdades.innerHTML = '';
+                    const containerIdades = document.getElementById('container-idades-criancas');
+                    if (containerIdades) containerIdades.classList.add('hidden');
+                    const elQtdDiarias = document.getElementById('modal-qtd-diarias');
+                    const elValorTotal = document.getElementById('modal-valor-total');
+                    const elSaldoRest = document.getElementById('modal-saldo-restante');
+                    if (elQtdDiarias) elQtdDiarias.innerText = '0 diária(s)';
+                    if (elValorTotal) elValorTotal.innerText = 'R$ 0,00';
+                    if (elSaldoRest) elSaldoRest.innerText = 'R$ 0,00';
+                    const avisoCap = document.getElementById('aviso-capacidade-modal');
+                    if (avisoCap) { avisoCap.classList.add('hidden'); avisoCap.innerHTML = ''; }
+                    limparErroModal();
+                }
+                camposLimposParaNovaReserva = true;
+                try {
+                    const suiteId = document.getElementById('edit-suite-id').value;
+                    const suiteN = suitesGlobaisCache.find(s => s.id === suiteId);
+                    const nomeSuite = suiteN ? suiteN.nome : '';
+                    if (deveLimpar) {
+                        document.getElementById('modal-titulo').innerText = `Criar Nova Reserva: ${nomeSuite}`;
+                    }
+                } catch(e) {}
+            } else if (status !== 'Reservado') {
+                camposLimposParaNovaReserva = false;
+            }
+        }
+
+        function fecharModal() { document.getElementById('modal-edicao').classList.add('hidden'); }
+        function fecharModalConfirmacao() { document.getElementById('modal-confirmacao').classList.add('hidden'); }
+
+        async function executarSalvamento(suiteId, status) {
+            const reservaIdEditada = document.getElementById('edit-reserva-id').value;
+            const campoSinalStr = document.getElementById('edit-valor-sinal').value.trim();
+            const valorSinalInformado = parseFloat(campoSinalStr) || 0;
+            const formaPagamentoSelecionada = document.getElementById('edit-forma-pagamento').value || 'Pix / Sinal';
+            const observacaoInformada = document.getElementById('edit-observacao').value || '';
+            
+            const checkinVal = document.getElementById('edit-checkin').value || new Date().toLocaleDateString('sv-SE');
+            let checkoutVal = document.getElementById('edit-checkout').value || new Date().toLocaleDateString('sv-SE');
+            const adultosVal = parseInt(document.getElementById('edit-adultos').value) || 2;
+            const criancasVal = parseInt(document.getElementById('edit-criancas').value) || 0;
+            const petRawExec = document.getElementById('edit-pet').value;
+            const petVal = (petRawExec === 'true' || petRawExec === true || String(petRawExec).toLowerCase() === 'sim' || petRawExec === '1' || petRawExec === 1);
+
+            const inputsIdades = document.querySelectorAll('.input-idade-crianca');
+            const idadesCriancasArr = Array.from(inputsIdades).map(input => parseInt(input.value) || 0);
+            const idadesCriancasStr = idadesCriancasArr.join(',');
+
+            if (status === 'Checkout') {
+                const saldoDevedorMinimo = await calcularSaldoDevedorReservaAtual();
+                if (campoSinalStr === '' || isNaN(valorSinalInformado) || valorSinalInformado < saldoDevedorMinimo) {
+                    mostrarErroModal(`O valor informado (${formatarMoeda(valorSinalInformado)}) é menor que o saldo devedor atual (${formatarMoeda(saldoDevedorMinimo)}). A conta precisa fechar para concluir o checkout!`);
+                    return;
+                }
+            }
+
+            if (status === 'Checkout' && checkinVal === checkoutVal) {
+                const [ano, mes, dia] = checkinVal.split('-');
+                let dataSeguinte = new Date(ano, mes - 1, Number(dia) + 1);
+                checkoutVal = dataSeguinte.toLocaleDateString('sv-SE');
+                document.getElementById('edit-checkout').value = checkoutVal;
+            }
+
+            try {
+                const suiteCapSave = suitesGlobaisCache.find(s => s.id === suiteId);
+                if (suiteCapSave) {
+                    const capMaxSave = Number(suiteCapSave.capacidade_hospedes) || 0;
+                    const totalOcupSave = (Number(adultosVal) || 0) + (Number(criancasVal) || 0);
+                    if (capMaxSave > 0 && totalOcupSave > capMaxSave) {
+                        mostrarErroModal(`Capacidade excedida: esta suíte (${suiteCapSave.nome}) comporta no máximo ${capMaxSave} pessoa(s) (adultos + crianças). Você informou ${totalOcupSave} (${adultosVal} adultos + ${criancasVal} crianças).`);
+                        return;
+                    }
+                }
+            } catch(e) { console.warn(e); }
+
+            try {
+                const { data: temConflito, error: erroConflito } = await supabaseClient.rpc('verificar_conflito_reserva', { 
+                    p_suite_id: suiteId, 
+                    p_checkin: checkinVal, 
+                    p_checkout: checkoutVal,
+                    p_reserva_id: reservaIdEditada ? reservaIdEditada : null
+                });
+                
+                if (!erroConflito && temConflito === true) {
+                    mostrarErroModal("Já existe uma reserva confirmada para esta suíte nestas datas!");
+                    return; 
+                }
+            } catch (err) {
+                console.error("Erro ao verificar conflito de reservas:", err);
+            }
+
+            const dadosReserva = {
+                pousada_id: usuarioIdAtual,
+                suite_id: suiteId,
+                hospede_nome: document.getElementById('edit-hospede').value || 'Hóspede',
+                whatsapp_hospede: document.getElementById('edit-whatsapp').value,
+                cpf: document.getElementById('edit-cpf').value,
+                rg: document.getElementById('edit-rg').value,
+                endereco: document.getElementById('edit-endereco').value,
+                cep: document.getElementById('edit-cep').value,
+                email: document.getElementById('edit-email').value,
+                qtd_adultos: adultosVal,
+                qtd_criancas: criancasVal,
+                idades_criancas: idadesCriancasStr,
+                tem_pet: petVal,
+                checkin: checkinVal,
+                checkout: checkoutVal,
+                observacao: observacaoInformada,
+                status: status === 'Checkout' ? 'Finalizada' : 'Aprovada'
+            };
+
+            let valorTotalCalculado = 0;
+            try {
+                const { data: valorCalculado, error: erroRpc } = await supabaseClient.rpc('calcular_total_reserva', { 
+                    p_suite_id: suiteId, 
+                    p_checkin: checkinVal, 
+                    p_checkout: checkoutVal,
+                    p_adultos: adultosVal,
+                    p_criancas: criancasVal,
+                    p_idades_criancas: idadesCriancasStr,
+                    p_pet: petVal
+                });
+                
+                if (!erroRpc && valorCalculado !== null) {
+                    valorTotalCalculado = Number(valorCalculado);
+                    dadosReserva.valor_total = valorTotalCalculado;
+                }
+            } catch (err) {
+                console.error("Erro ao invocar a função de cálculo no banco:", err);
+            }
+
+            if (valorSinalInformado > 0 && reservaIdEditada && status !== 'Checkout') {
+                const pagamentosExistentes = pagamentosGlobaisCache.filter(p => p.reserva_id === reservaIdEditada);
+                const totalJaPago = pagamentosExistentes.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
+                const saldoRestanteAtual = valorTotalCalculado - totalJaPago;
+
+                if (valorSinalInformado > saldoRestanteAtual) {
+                    mostrarErroModal(`O valor do pagamento (${formatarMoeda(valorSinalInformado)}) é maior que o saldo restante (${formatarMoeda(saldoRestanteAtual)}). Corrija o valor.`);
+                    return; 
+                }
+            }
+
+            let reservaIdFinal = reservaIdEditada;
+
+            let statusDestino = status;
+            if (status === 'Checkout') {
+                statusDestino = 'Limpeza';
+            } else if (status === 'Reservado' || status === 'Ocupada') {
+                statusDestino = 'Ocupada';
+            } else if (status === 'Limpeza') {
+                statusDestino = 'Limpeza';
+            } else {
+                statusDestino = 'Disponível';
+            }
+
+            await supabaseClient.from('suites').update({ status: statusDestino }).eq('id', suiteId);
+
+            if (status === 'Reservado' || status === 'Ocupada' || status === 'Aprovada' || status === 'Checkout') {
+                if (reservaIdEditada) {
+                    await supabaseClient.from('reservas').update(dadosReserva).eq('id', reservaIdEditada);
+                } else {
+                    const { data: novaReservaInserida, error: errIns } = await supabaseClient.from('reservas').insert([dadosReserva]).select('*');
+                    if (errIns) {
+                        console.error("Erro ao inserir reserva:", errIns);
+                        mostrarErroModal("Erro ao salvar reserva: " + (errIns.message || JSON.stringify(errIns)));
+                        return;
+                    }
+                    if (novaReservaInserida && novaReservaInserida.length > 0) {
+                        reservaIdFinal = novaReservaInserida[0].id;
+                    }
+                }
+            } else if (status === 'Disponível' || status === 'Limpeza') {
+                if (reservaIdEditada) {
+                    await supabaseClient.from('reservas').update({ status: 'Finalizada' }).eq('id', reservaIdEditada);
+                } else {
+                    const hoje = new Date().toLocaleDateString('sv-SE');
+                    await supabaseClient.from('reservas').update({ status: 'Finalizada' })
+                        .eq('suite_id', suiteId)
+                        .eq('status', 'Aprovada')
+                        .lte('checkin', hoje);
+                }
+            }
+
+            if ((valorSinalInformado > 0 || status === 'Checkout') && reservaIdFinal) {
+                const { error: errPag } = await supabaseClient.from('hospede_pagamentos').insert([{
+                    pousada_id: usuarioIdAtual,
+                    reserva_id: reservaIdFinal,
+                    valor_pago: valorSinalInformado,
+                    forma_pagamento: formaPagamentoSelecionada,
+                    observacao: status === 'Checkout' ? 'Quitado no encerramento (Checkout)' : 'Lançado via painel de gestão'
+                }]);
+
+                if (errPag) {
+                    console.error("Erro ao gravar pagamento:", errPag);
+                }
+            }
+
+            fecharModal();
+            carregarDashboard();
+            mostrarToast("Sucesso", "Dados salvos com sucesso!");
+        }
+
+        document.getElementById('form-edicao').onsubmit = async (e) => {
+            e.preventDefault();
+            limparErroModal();
+
+            const status = document.getElementById('edit-status').value;
+            const statusOriginal = document.getElementById('edit-status-original').value;
+            const suiteId = document.getElementById('edit-suite-id').value;
+            
+            const suiteObj = suitesGlobaisCache.find(s => s.id === suiteId);
+            const estaPausada = suiteObj && (suiteObj.ativa === false || suiteObj.ativa === 'false');
+            if (estaPausada && status !== 'Limpeza' && status !== 'Checkout') {
+                mostrarErroModal("A suíte está pausada! Para poder alterar o status para outras opções, você precisa ativar a suíte na tela de Configuração de Suíte. Os únicos status permitidos para uma suíte pausada no momento são Limpeza ou Checkout.");
+                return;
+            }
+
+            const checkinInformado = document.getElementById('edit-checkin').value;
+            const hojeStr = new Date().toLocaleDateString('sv-SE');
+
+            if (status === 'Ocupada') {
+                if (checkinInformado > hojeStr) {
+                    document.getElementById('edit-checkin').value = hojeStr;
+                    await recalcularValoresModalEdicao();
+                }
+            }
+
+            if (statusOriginal === 'Ocupada' && status === 'Disponível') {
+                mostrarErroModal("Uma suíte ocupada não pode ir direto para 'Disponível'. Envie para 'Limpeza' ou faça o 'Checkout'.");
+                return;
+            }
+
+            if (statusOriginal === 'Ocupada' && (status === 'Limpeza' || status === 'Checkout')) {
+                fecharModal(); 
+                document.getElementById('modal-confirmacao').classList.remove('hidden');
+                document.getElementById('btn-confirmar-acao').onclick = async () => {
+                    fecharModalConfirmacao();
+                    await executarSalvamento(suiteId, status);
+                };
+                return;
+            }
+
+            await executarSalvamento(suiteId, status);
+        };
+
+        async function fazerLogout() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
+        
+        protegerPagina();
+
+        // >>> AUTO-REFRESH PROFISSIONAL - SEM PRECISAR F5
+        let intervaloAutoRefresh = null;
+        let canalRealtime = null;
+        function iniciarAutoRefresh() {
+            if (intervaloAutoRefresh) clearInterval(intervaloAutoRefresh);
+            intervaloAutoRefresh = setInterval(() => {
+                const modalEdicaoAberto = document.getElementById('modal-edicao') && !document.getElementById('modal-edicao').classList.contains('hidden');
+                const modalRecusaAberto = document.getElementById('modal-recusa-profissional') && !document.getElementById('modal-recusa-profissional').classList.contains('hidden');
+                if (!modalEdicaoAberto && !modalRecusaAberto) {
+                    console.log('🔄 Auto-refresh 60s');
+                    carregarDashboard();
+                    atualizarHorarioUltimaAtualizacao();
+                }
+            }, 60000);
+        }
+        function atualizarHorarioUltimaAtualizacao() {
+            const el = document.getElementById('ultima-atualizacao');
+            if (el) {
+                const agora = new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+                el.innerText = `Atualizado às ${agora}`;
+            }
+        }
+        async function iniciarRealtime() {
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) return;
+                const pousadaId = session.user.id;
+                if (canalRealtime) supabaseClient.removeChannel(canalRealtime);
+                canalRealtime = supabaseClient
+                    .channel(`dashboard-pousada-${pousadaId}`)
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'reservas', filter: `pousada_id=eq.${pousadaId}` }, (payload) => {
+                        const modalEdicaoAberto = document.getElementById('modal-edicao') && !document.getElementById('modal-edicao').classList.contains('hidden');
+                        const modalRecusaAberto = document.getElementById('modal-recusa-profissional') && !document.getElementById('modal-recusa-profissional').classList.contains('hidden');
+                        if (!modalEdicaoAberto && !modalRecusaAberto) {
+                            carregarDashboard();
+                            atualizarHorarioUltimaAtualizacao();
+                            mostrarToast('Atualizado', `Reserva ${payload.eventType === 'INSERT' ? 'nova' : 'alterada'} detectada!`);
+                        }
+                    })
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'suites', filter: `pousada_id=eq.${pousadaId}` }, () => {
+                        const modalEdicaoAberto = document.getElementById('modal-edicao') && !document.getElementById('modal-edicao').classList.contains('hidden');
+                        const modalRecusaAberto = document.getElementById('modal-recusa-profissional') && !document.getElementById('modal-recusa-profissional').classList.contains('hidden');
+                        if (!modalEdicaoAberto && !modalRecusaAberto) { carregarDashboard(); atualizarHorarioUltimaAtualizacao(); }
+                    })
+                    .subscribe();
+            } catch (e) { console.warn('Realtime falhou:', e); }
+        }
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') { carregarDashboard(); atualizarHorarioUltimaAtualizacao(); }
+        });
+        setTimeout(() => { iniciarAutoRefresh(); iniciarRealtime(); atualizarHorarioUltimaAtualizacao(); }, 2000);
+        window.atualizarAgora = function() { carregarDashboard(); atualizarHorarioUltimaAtualizacao(); mostrarToast('Atualizado', 'Painel atualizado agora!'); }
+
+        // >>> MODAL PROFISSIONAL DE RECUSA COM MOTIVO OBRIGATÓRIO
+        let reservaIdParaRecusar = null;
+        function abrirModalRecusa(reservaId, nomeHospede) {
+            reservaIdParaRecusar = reservaId;
+            const elNome = document.getElementById('nome-hospede-recusa');
+            if (elNome) elNome.innerText = nomeHospede || 'hóspede';
+            const input = document.getElementById('motivo-recusa-input');
+            const erro = document.getElementById('erro-motivo-recusa');
+            const contador = document.getElementById('contador-motivo');
+            if (input) { input.value = ''; input.classList.remove('border-red-500','ring-2','ring-red-200'); }
+            if (erro) erro.classList.add('hidden');
+            if (contador) contador.innerText = '0';
+            const modal = document.getElementById('modal-recusa-profissional');
+            if (modal) modal.classList.remove('hidden');
+            setTimeout(() => { if (input) input.focus(); }, 150);
+        }
+        function fecharModalRecusa() {
+            reservaIdParaRecusar = null;
+            const modal = document.getElementById('modal-recusa-profissional');
+            if (modal) modal.classList.add('hidden');
+            const input = document.getElementById('motivo-recusa-input');
+            const erro = document.getElementById('erro-motivo-recusa');
+            if (input) input.value = '';
+            if (erro) erro.classList.add('hidden');
+        }
+        async function confirmarRecusaReserva() {
+            if (!reservaIdParaRecusar) return;
+            const input = document.getElementById('motivo-recusa-input');
+            const erro = document.getElementById('erro-motivo-recusa');
+            const motivo = input ? input.value.trim() : '';
+            if (!motivo || motivo.length < 1) {
+                if (erro) erro.classList.remove('hidden');
+                if (input) { input.classList.add('border-red-500','ring-2','ring-red-200'); input.focus(); }
+                return;
+            }
+            if (erro) erro.classList.add('hidden');
+            if (input) input.classList.remove('border-red-500','ring-2','ring-red-200');
+            await mudarStatusReserva(reservaIdParaRecusar, 'Recusada', motivo);
+            fecharModalRecusa();
+        }
+        // Contador e esconde erro ao digitar
+        document.addEventListener('DOMContentLoaded', () => {
+            const input = document.getElementById('motivo-recusa-input');
+            const contador = document.getElementById('contador-motivo');
+            const erro = document.getElementById('erro-motivo-recusa');
+            if (input) {
+                input.addEventListener('input', () => {
+                    if (contador) contador.innerText = String(input.value.length);
+                    if (erro && input.value.trim().length >= 1) erro.classList.add('hidden');
+                    input.classList.remove('border-red-500','ring-2','ring-red-200');
+                });
+            }
+        });
+
+    
+        // >>> DRAGGABLE MODAL: permitir arrastar card na tela para ver outros cards
+        (function() {
+            const modal = document.getElementById('modal-edicao');
+            const card = document.getElementById('modal-edicao-card');
+            const handle = document.getElementById('modal-drag-handle');
+            if (!modal || !card || !handle) return;
+            let isDragging = false;
+            let startX, startY, initialLeft, initialTop;
+
+            function getCardPosition() {
+                const rect = card.getBoundingClientRect();
+                return { left: rect.left, top: rect.top };
+            }
+
+            function onMouseDown(e) {
+                if (e.target.closest('button')) return; // não arrasta ao clicar no X
+                isDragging = true;
+                card.style.transition = 'none';
+                const pos = getCardPosition();
+                initialLeft = pos.left;
+                initialTop = pos.top;
+                startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                startY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+                // Centraliza transform para posicionamento absoluto durante drag
+                card.style.position = 'fixed';
+                card.style.left = initialLeft + 'px';
+                card.style.top = initialTop + 'px';
+                card.style.margin = '0';
+                card.style.zIndex = '60';
+                document.body.style.userSelect = 'none';
+            }
+
+            function onMouseMove(e) {
+                if (!isDragging) return;
+                const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+                const dx = clientX - startX;
+                const dy = clientY - startY;
+                let newLeft = initialLeft + dx;
+                let newTop = initialTop + dy;
+                // Limites para não sair totalmente da tela
+                const maxLeft = window.innerWidth - 100;
+                const maxTop = window.innerHeight - 100;
+                newLeft = Math.min(Math.max(newLeft, -card.offsetWidth + 100), maxLeft);
+                newTop = Math.min(Math.max(newTop, 0), maxTop);
+                card.style.left = newLeft + 'px';
+                card.style.top = newTop + 'px';
+            }
+
+            function onMouseUp() {
+                if (!isDragging) return;
+                isDragging = false;
+                card.style.transition = '';
+                document.body.style.userSelect = '';
+            }
+
+            handle.addEventListener('mousedown', onMouseDown);
+            handle.addEventListener('touchstart', onMouseDown, {passive:false});
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('touchmove', onMouseMove, {passive:false});
+            window.addEventListener('mouseup', onMouseUp);
+            window.addEventListener('touchend', onMouseUp);
+
+            // Reset posição ao fechar/abrir
+            const origFechar = window.fecharModal;
+            window.fecharModal = function() {
+                card.style.position = '';
+                card.style.left = '';
+                card.style.top = '';
+                card.style.margin = '';
+                card.style.zIndex = '';
+                card.style.transition = '';
+                document.getElementById('modal-edicao').classList.add('hidden');
+            };
+        })();
+
+</script>
+</body>
+</html>
