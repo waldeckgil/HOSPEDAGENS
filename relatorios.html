@@ -171,7 +171,7 @@
 
         let usuarioIdAtual = null;
         let viewAtualSelecionada = 'vw_gestor_financeiro_relatorio';
-        let filtroStatusReservasAtual = 'APROVADA'; // padrão APROVADA 
+        var filtroStatusReservasAtual = 'APROVADA'; 
         let suiteFiltroAtual = null;
         let suitesDaPousadaCache = []; 
         let tituloBaseAtual = 'Extrato Detalhado de Pagamentos';
@@ -222,7 +222,6 @@
             }
 
             await carregarSuitesParaFiltro();
-            atualizarVisibilidadeFiltroStatus();
             carregarDadosView();
         }
 
@@ -304,20 +303,15 @@
             filtroStatusReservasAtual = valor;
             carregarDadosView();
         }
-
         function atualizarVisibilidadeFiltroStatus() {
-            let container = document.getElementById('containerFiltroStatusReservas');
+            var container = document.getElementById('containerFiltroStatusReservas');
             if (!container) return;
             if (viewAtualSelecionada === 'vw_gestor_reservas_relatorio') {
                 container.style.display = 'flex';
-                container.classList.remove('hidden');
             } else {
                 container.style.display = 'none';
             }
         }
-        // Chama no load também
-        document.addEventListener('DOMContentLoaded', () => { setTimeout(atualizarVisibilidadeFiltroStatus, 500); });
-
 
         function selecionarView(nomeView, tituloAmigavel, elementoCard) {
             viewAtualSelecionada = nomeView;
@@ -337,6 +331,7 @@
             else elementoCard.classList.replace('border-purple-200', 'border-purple-500');
             
             elementoCard.classList.add('shadow-md');
+            atualizarVisibilidadeFiltroStatus();
 
             // Ao trocar de view, reseta filtro de suíte se não for financeiro
             if (!nomeView.includes('financeiro')) {
@@ -477,12 +472,8 @@
                         let statusFisico = String(row.status_fisico_suite || '').toUpperCase();
                         let isRecusada = (status === 'RECUSADA' || statusFisico === 'RECUSADA');
                         let isAprovada = (status === 'APROVADA');
-
-                        // Aplica filtro de status (padrão APROVADA)
                         if (filtroStatusReservasAtual === 'APROVADA' && isRecusada) return false;
                         if (filtroStatusReservasAtual === 'RECUSADA' && !isRecusada) return false;
-                        // TODAS deixa passar tudo
-
                         if (isRecusada) return true;
                         if (isAprovada) return true;
                         return false;
@@ -531,11 +522,7 @@
                 let htmlLinhas = '';
                 registrosFiltrados.forEach((row, index) => {
                     let isRecusada = String(row.status||row.status_reserva||'').toUpperCase()==='RECUSADA';
-                    let isAprovada = String(row.status||row.status_reserva||'').toUpperCase()==='APROVADA';
-                    let classeCorFundo = '';
-                    if (isRecusada) classeCorFundo = 'bg-red-50 hover:bg-red-100 border-l-4 border-red-400';
-                    else if (isAprovada) classeCorFundo = 'bg-emerald-50 hover:bg-emerald-100 border-l-4 border-emerald-500';
-                    else classeCorFundo = (index%2===0 ? 'bg-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100');
+                    let isAprovada = String(row.status||row.status_reserva||'').toUpperCase()==='APROVADA'; let classeCorFundo = ''; if (isRecusada) classeCorFundo = 'bg-red-50 hover:bg-red-100 border-l-4 border-red-400'; else if (isAprovada) classeCorFundo = 'bg-emerald-50 hover:bg-emerald-100 border-l-4 border-emerald-500'; else classeCorFundo = (index%2===0 ? 'bg-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100');
                     htmlLinhas += `<tr class="${classeCorFundo} transition">`;
                     colunas.forEach(col => {
                         let valorBruto = row[col];
@@ -549,23 +536,8 @@
                                 valorExibicao = formatarDataHoraBr(valorBruto);
                             } else if (colLower.includes('checkin') || colLower.includes('checkout')) {
                                 valorExibicao = formatarDataBr(valorBruto);
-                            } else if (colLower === 'dias_restantes') {
-                                if (isRecusada) {
-                                    valorExibicao = '<span class="text-gray-400">-</span>';
-                                } else if (valorBruto !== null && valorBruto !== '' && !isNaN(valorBruto)) {
-                                } else {
-                                    let dias = Number(valorBruto);
-                                    if (!isNaN(dias) && dias >= 0) valorExibicao = `<span class="text-emerald-700 font-bold">${dias} DIAS</span>`;
-                                    else valorExibicao = '<span class="text-gray-400">-</span>';
-                                }
-                                } else if (colLower === 'dias_restantes') {
-                                    // Se view não trouxe dias, calcula pelo checkin
-                                    if (isRecusada) valorExibicao = '<span class="text-gray-400">-</span>';
-                                    else if (row.checkin) {
-                                        let diff = Math.ceil((new Date(row.checkin) - new Date()) / (1000*60*60*24));
-                                        valorExibicao = diff >=0 ? `<span class="text-emerald-700 font-bold">${diff} DIAS</span>` : '<span class="text-gray-400">-</span>';
-                                    }
-                                }
+                            } else if (colLower === 'dias_restantes') { if (isRecusada) { valorExibicao = '<span class="text-gray-400">-</span>'; } else if (valorBruto !== null && valorBruto !== '' && !isNaN(valorBruto)) {
+                                    let dias = Number(valorBruto); valorExibicao = '<span class="text-emerald-700 font-bold">' + dias + ' DIAS</span>'; } else { if (row.checkin && !isRecusada) { var diff = Math.ceil((new Date(row.checkin) - new Date()) / (1000*60*60*24)); if (diff >=0) valorExibicao = '<span class="text-emerald-700 font-bold">' + diff + ' DIAS</span>'; else valorExibicao = '<span class="text-gray-400">-</span>'; } else { valorExibicao = '<span class="text-gray-400">-</span>'; } }
                             } else {
                                 valorExibicao = String(valorBruto).toUpperCase();
                             }
