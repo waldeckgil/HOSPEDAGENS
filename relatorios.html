@@ -89,16 +89,16 @@
                             <p class="text-[11px] text-gray-500 mt-0.5 truncate">Valores e regras vigentes.</p>
                         </div>
 
-                        <div onclick="selecionarView('vw_gestor_reservas_relatorio', 'Reservas Futuras e Recusadas', this)" 
+                        <div onclick="selecionarView('vw_gestor_reservas_relatorio', 'Próximas Reservas Futuras', this)" 
                              class="card-view cursor-pointer bg-purple-50/40 p-4 rounded-xl shadow-sm border-2 border-purple-200 hover:border-purple-500 hover:shadow-md transition group">
                             <div class="flex items-center justify-between mb-2">
                                 <div class="w-8 h-8 bg-purple-100 text-purple-700 rounded-lg flex items-center justify-center text-sm shadow-sm">
-                                    <i class="fa-solid fa-calendar-xmark"></i>
+                                    <i class="fa-solid fa-calendar-check"></i>
                                 </div>
-                                <span class="text-[9px] font-bold uppercase tracking-wider bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">FUTURAS / RECUSADAS</span>
+                                <span class="text-[9px] font-bold uppercase tracking-wider bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">FUTURAS</span>
                             </div>
-                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-purple-700 transition">Reservas Futuras / Recusadas</h3>
-                            <p class="text-[11px] text-gray-500 mt-0.5 truncate">Futuras + recusadas com suíte e auditoria.</p>
+                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-purple-700 transition">Reservas Futuras</h3>
+                            <p class="text-[11px] text-gray-500 mt-0.5 truncate">Todas as reservas futuras.</p>
                         </div>
                     </div>
 
@@ -370,9 +370,6 @@
             if (c === 'data_pagamento') return 'DATA/HORA';
             if (c === 'forma_pagamento') return 'FORMA';
             if (c === 'observacao') return 'OBS';
-            if (c === 'motivo_recusa') return 'MOTIVO RECUSA';
-            if (c === 'recusado_em') return 'RECUSADO EM';
-            if (c === 'recusado_por') return 'RECUSADO POR';
             if (c === 'whatsapp') return 'WHATSAPP';
             if (c === 'alerta_status_tarifa') return 'ALERTA VIGÊNCIA';
             if (c === 'alerta_status_reserva') return 'ALERTA CHECK-IN';
@@ -394,27 +391,16 @@
             let tituloCompleto = `${tituloBaseAtual} (DE ${dataInicioFormatada} ATÉ ${dataFimFormatada})`;
             document.getElementById('tituloViewAtiva').textContent = tituloCompleto.toUpperCase();
 
-            tbody.innerHTML = `<tr><td colspan="12" class="py-6 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO DADOS...</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="14" class="py-6 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO DADOS...</td></tr>`;
 
             try {
-                let registros = [];
-                let error = null;
-
                 let ehViewReservas = (viewAtualSelecionada === 'vw_gestor_reservas_relatorio');
                 let ehViewHospedagens = (viewAtualSelecionada === 'vw_gestor_hospedagens_relatorio');
                 let ehViewTarifas = (viewAtualSelecionada === 'vw_gestor_tarifas_relatorio');
                 let ehViewFinanceiro = (viewAtualSelecionada === 'vw_gestor_financeiro_relatorio');
-                let ehViewFinanceiroSuite = (viewAtualSelecionada === 'vw_gestor_financeiro_suite_relatorio');
 
-                // Controle de visibilidade do filtro por suíte - só na visão financeira
-                const containerFiltro = document.getElementById('containerFiltroSuites');
-                if (containerFiltro) {
-                    if (ehViewFinanceiro) {
-                        containerFiltro.classList.remove('hidden');
-                    } else {
-                        containerFiltro.classList.add('hidden');
-                    }
-                }
+                let registros = [];
+                let error = null;
 
                 if (ehViewTarifas) {
                     const response = await supabaseClient.rpc('fn_gestor_tarifas_relatorio', {
@@ -426,150 +412,38 @@
                 } else if (ehViewFinanceiro) {
                     const { data: pagamentosData, error: errPag } = await supabaseClient
                         .from('hospede_pagamentos')
-                        .select(`
-                            id,
-                            valor_pago,
-                            forma_pagamento,
-                            observacao,
-                            criado_em,
-                            reserva_id,
-                            reservas (
-                                hospede_nome,
-                                checkin,
-                                checkout,
-                                valor_total,
-                                suites ( nome )
-                            )
-                        `)
+                        .select(`id, valor_pago, forma_pagamento, observacao, criado_em, reserva_id, reservas (hospede_nome, checkin, checkout, valor_total, suites ( nome ))`)
                         .eq('pousada_id', usuarioIdAtual);
-
                     error = errPag;
                     if (pagamentosData) {
-                        registros = pagamentosData.map(p => {
-                            let checkinStr = p.reservas?.checkin || '';
-                            let checkoutStr = p.reservas?.checkout || '';
-                            let valorTotal = Number(p.reservas?.valor_total || 0);
-                            let valorPago = Number(p.valor_pago || 0);
-                            let saldoRestante = valorTotal - valorPago;
-                            if (saldoRestante < 0) saldoRestante = 0;
-
-                            return {
-                                hospede: p.reservas?.hospede_nome || 'HÓSPEDE NÃO IDENTIFICADO',
-                                suite: p.reservas?.suites?.nome || 'SUÍTE NÃO INFORMADA',
-                                checkin: checkinStr,
-                                checkout: checkoutStr,
-                                diarias: calcularDiarias(checkinStr, checkoutStr),
-                                valor_total: valorTotal,
-                                data_pagamento: p.criado_em,
-                                valor_pago: valorPago,
-                                saldo_restante: saldoRestante,
-                                forma_pagamento: p.forma_pagamento || '-',
-                                observacao: p.observacao || '-'
-                            };
-                        });
+                        registros = pagamentosData.map(p => ({
+                            hospede: p.reservas?.hospede_nome || 'HÓSPEDE NÃO IDENTIFICADO',
+                            suite: p.reservas?.suites?.nome || 'SUÍTE NÃO INFORMADA',
+                            checkin: p.reservas?.checkin || '',
+                            checkout: p.reservas?.checkout || '',
+                            diarias: calcularDiarias(p.reservas?.checkin, p.reservas?.checkout),
+                            valor_total: Number(p.reservas?.valor_total || 0),
+                            data_pagamento: p.criado_em,
+                            valor_pago: Number(p.valor_pago || 0),
+                            saldo_restante: Number(p.reservas?.valor_total || 0) - Number(p.valor_pago || 0),
+                            forma_pagamento: p.forma_pagamento || '-',
+                            observacao: p.observacao || '-'
+                        }));
                     }
-                } else if (ehViewReservas) {
-                    // Busca direta da tabela reservas para garantir que RECUSADAS apareçam mesmo se a VIEW antiga filtrar só APROVADA
-                    const { data: reservasDiretas, error: errReservas } = await supabaseClient
-                        .from('vw_gestor_reservas_relatorio')
-                        .select('*')
-                        .eq('pousada_id', usuarioIdAtual)
-                        .eq('status', 'Recusada')
-                        .order('criado_em', { ascending: false });
-
-                    if (!errReservas && reservasDiretas) {
-                        // LÓGICA MASTER COALESCE: Se nome nulo → traz email
-                        let idsRecusadores = [...new Set(reservasDiretas.map(r => r.recusado_por).filter(id => id && String(id).length > 20))];
-                        let mapaUsuarios = {}; // user_id -> nome_completo
-                        let mapaPousadas = {}; // id -> email_admin (login)
-                        
-                        if (idsRecusadores.length > 0) {
-                            // 1º TENTA: tabela usuarios (nome_completo)
-                            const { data: usuariosRecusaram } = await supabaseClient
-                                .from('usuarios')
-                                .select('user_id, nome_completo')
-                                .in('user_id', idsRecusadores);
-                            if (usuariosRecusaram) {
-                                usuariosRecusaram.forEach(u => {
-                                    // Só guarda se não for vazio e não for 'Novo Gestor'
-                                    let nome = (u.nome_completo || '').trim();
-                                    if (nome && nome.toLowerCase() !== 'novo gestor') {
-                                        mapaUsuarios[u.user_id] = nome;
-                                    }
-                                });
-                            }
-                            // 2º TENTA: tabela pousadas (email_admin = login)
-                            const { data: pousadasRecusaram } = await supabaseClient
-                                .from('pousadas')
-                                .select('id, nome, email_admin')
-                                .in('id', idsRecusadores);
-                            if (pousadasRecusaram) {
-                                pousadasRecusaram.forEach(p => {
-                                    mapaPousadas[p.id] = p.email_admin || p.nome || '';
-                                });
-                            }
-                        }
-
-                        let nomePousadaLogada = document.getElementById('nomePousadaLogada')?.innerText || nomePousadaAtual || 'Gestor';
-
-                        registros = reservasDiretas.map(r => {
-                            let idRecusador = r.recusado_por;
-                            let nomeQuemRecusou = '-';
-                            
-                            if (idRecusador) {
-                                // COALESCE: nome_completo → email_admin → nome pousada → id curto
-                                if (mapaUsuarios[idRecusador]) {
-                                    nomeQuemRecusou = mapaUsuarios[idRecusador]; // Prioridade 1: Waldeck Gil Castelo Branco
-                                } else if (mapaPousadas[idRecusador] && mapaPousadas[idRecusador].trim() !== '') {
-                                    nomeQuemRecusou = mapaPousadas[idRecusador]; // Prioridade 2: waldeckgil@gmail.com (se nome nulo)
-                                } else if (String(idRecusador).length > 20) {
-                                    nomeQuemRecusou = nomePousadaLogada !== 'nossa pousada' ? nomePousadaLogada : (String(idRecusador).substring(0,8) + '...');
-                                } else {
-                                    nomeQuemRecusou = String(idRecusador);
-                                }
-                            }
-
-                            return {
-                                pousada_id: usuarioIdAtual,
-                                hospede: r.hospede_nome,
-                                suite: r.suites?.nome || 'SUÍTE NÃO INFORMADA',
-                                checkin: r.checkin,
-                                checkout: r.checkout,
-                                diarias: calcularDiarias(r.checkin, r.checkout),
-                                valor_total: r.valor_total,
-                                status_reserva: r.status,
-                                status: r.status,
-                                status_fisico_suite: r.status === 'Recusada' ? 'RECUSADA' : 'RESERVA FUTURA',
-                                whatsapp: r.whatsapp_hospede,
-                                alerta_status_reserva: r.status === 'Recusada' 
-                                    ? `<span class="inline-flex items-center gap-1 bg-red-100 text-red-700 border border-red-200 px-2.5 py-0.5 rounded-full font-extrabold text-[10px]"><i class="fa-solid fa-xmark"></i> RECUSADA</span>` 
-                                    : (r.checkin ? `<span class="inline-flex items-center gap-1 bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-0.5 rounded-full font-bold text-[10px]">⏳ ${Math.ceil((new Date(r.checkin) - new Date())/(1000*60*60*24))} DIAS</span>` : '-'),
-                                cpf: r.cpf,
-                                email: r.email,
-                                criado_em: r.criado_em,
-                                motivo_recusa: r.motivo_recusa || r.observacao || '-',
-                                recusado_em: r.recusado_em || r.criado_em,
-                                recusado_por: nomeQuemRecusou,
-                                observacao: r.observacao
-                            };
-                        });
-                    }
-                    error = errReservas;
                 } else {
-                    let query = supabaseClient
-                        .from(viewAtualSelecionada)
-                        .select('*')
-                        .eq('pousada_id', usuarioIdAtual);
-
+                    let query = supabaseClient.from(viewAtualSelecionada).select('*').eq('pousada_id', usuarioIdAtual);
+                    if (dataInicio) query = query.gte('checkin', dataInicio);
+                    if (dataFim) query = query.lte('checkin', dataFim);
+                    query = query.order('checkin', { ascending: true, nullsFirst: true });
                     const res = await query;
-                    registros = res.data;
+                    registros = res.data || [];
                     error = res.error;
+                    console.log('VIEW RETORNOU', registros.length, 'registros', registros);
                 }
 
                 if (error) {
-                    console.error("Erro ao consultar dados:", error);
-                    tbody.innerHTML = `<tr><td colspan="12" class="py-6 text-center text-red-500 font-medium">ERRO AO CARREGAR OS DADOS.</td></tr>`;
-                    thead.innerHTML = `<th class="py-3 px-4">AVISO DE ERRO</th>`;
+                    console.error("Erro:", error);
+                    tbody.innerHTML = `<tr><td colspan="14" class="py-6 text-center text-red-500">ERRO: ${error.message}</td></tr>`;
                     return;
                 }
 
@@ -577,281 +451,100 @@
 
                 if (ehViewReservas) {
                     registrosFiltrados = registrosFiltrados.filter(row => {
-                        let statusReserva = String(row['status_reserva'] || row['status'] || '').trim().toUpperCase();
-                        let statusFisico = String(row['status_fisico_suite'] || '').trim().toUpperCase();
-                        
-                        let isAprovada = (statusReserva === 'APROVADA');
-                        let isRecusada = (statusReserva === 'RECUSADA');
-                        let isOcupadaOuFutura = (statusFisico === 'OCUPADA' || statusFisico === 'RESERVA FUTURA' || statusFisico === '');
-
-                        // Agora mostra APROVADA (futura/ocupada) + RECUSADA (qualquer data para auditoria)
-                        return (isAprovada && isOcupadaOuFutura) || isRecusada;
+                        let status = String(row.status || row.status_reserva || '').toUpperCase();
+                        let statusFisico = String(row.status_fisico_suite || '').toUpperCase();
+                        if (status === 'RECUSADA' || statusFisico === 'RECUSADA') return true;
+                        if (status === 'APROVADA' && (statusFisico === 'RESERVA FUTURA' || statusFisico === 'OCUPADA' || statusFisico === 'DISPONIVEL' || statusFisico.includes('FUTURA') || statusFisico.includes('OCUPADA'))) return true;
+                        if (!row.status && statusFisico === 'DISPONIVEL') return false;
+                        return status === 'APROVADA' || status === 'RECUSADA';
                     });
-                }
-
-                if (ehViewFinanceiro && suiteFiltroAtual) {
-                    // Aplica filtro adicional de suíte no extrato financeiro
-                    let tituloComSuite = `${tituloBaseAtual} (DE ${dataInicioFormatada} ATÉ ${dataFimFormatada}) - SUÍTE ${suiteFiltroAtual.toUpperCase()}`;
-                    document.getElementById('tituloViewAtiva').textContent = tituloComSuite.toUpperCase();
-                }
-
-                if (!ehViewTarifas) {
+                } else if (!ehViewTarifas) {
                     registrosFiltrados = registrosFiltrados.filter(row => {
                         let valData = row['data_pagamento'] || row['checkin'] || '';
                         if (!valData) return true;
                         let dataStr = String(valData).substring(0, 10);
-                        
-                        if (dataInicio && dataFim) {
-                            return dataStr >= dataInicio && dataStr <= dataFim;
-                        } else if (dataInicio) {
-                            return dataStr >= dataInicio;
-                        } else if (dataFim) {
-                            return dataStr <= dataFim;
-                        }
+                        if (dataInicio && dataFim) return dataStr >= dataInicio && dataStr <= dataFim;
+                        else if (dataInicio) return dataStr >= dataInicio;
+                        else if (dataFim) return dataStr <= dataFim;
                         return true;
                     });
                 }
 
-                // FILTRO ADICIONAL POR SUÍTE (Visão Financeira) - permite tudo ou suíte específica
-                if (ehViewFinanceiro && suiteFiltroAtual) {
-                    registrosFiltrados = registrosFiltrados.filter(row => {
-                        let suiteRow = String(row['suite'] || '').trim().toUpperCase();
-                        return suiteRow === String(suiteFiltroAtual).trim().toUpperCase();
-                    });
-                }
-
-             registrosFiltrados.sort((a, b) => {
-                    let suiteA = String(a['suite'] || '').trim().toUpperCase();
-                    let suiteB = String(b['suite'] || '').trim().toUpperCase();
-                    if (suiteA !== suiteB) {
-                        return suiteA.localeCompare(suiteB);
-                    }
-                    let dataA = a['data_pagamento'] || a['checkin'] || '';
-                    let dataB = b['data_pagamento'] || b['checkin'] || '';
-                    return new Date(dataB) - new Date(dataA);
+                registrosFiltrados.sort((a,b)=>{
+                    let sa = String(a.suite||'').toUpperCase();
+                    let sb = String(b.suite||'').toUpperCase();
+                    if (sa !== sb) return sa.localeCompare(sb);
+                    let da = a.checkin || '';
+                    let db = b.checkin || '';
+                    return new Date(da) - new Date(db);
                 });
-
-                let faturamentoBrutoPeriodo = 0;
-                let totalRecebidoPeriodo = 0;
-                let valorAReceberPeriodo = 0;
-
-                if (ehViewFinanceiro) {
-                    let reservasIdsNoPeriodo = [...new Set(registrosFiltrados.map(r => r.reserva_id).filter(Boolean))];
-                    totalRecebidoPeriodo = registrosFiltrados.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
-                    valorAReceberPeriodo = registrosFiltrados.reduce((acc, curr) => acc + Number(curr.saldo_restante || 0), 0);
-
-                    if (reservasIdsNoPeriodo.length > 0) {
-                        const { data: resPeriodo } = await supabaseClient
-                            .from('reservas')
-                            .select('id, valor_total')
-                            .in('id', reservasIdsNoPeriodo);
-
-                        if (resPeriodo) {
-                            faturamentoBrutoPeriodo = resPeriodo.reduce((acc, curr) => acc + Number(curr.valor_total || 0), 0);
-                        }
-                    } else {
-                        faturamentoBrutoPeriodo = totalRecebidoPeriodo + valorAReceberPeriodo;
-                    }
-                }
-
-                if (ehViewFinanceiro) {
-                    renderizarFiltroSuites(registros);
-                }
 
                 if (!registrosFiltrados || registrosFiltrados.length === 0) {
                     thead.innerHTML = `<th class="py-3 px-4">INFORMAÇÃO</th>`;
-                    tbody.innerHTML = `<tr><td class="py-6 text-center text-gray-500">NENHUM REGISTRO ENCONTRADO NESTE PERÍODO.</td></tr>`;
-                    containerKpis.className = "hidden";
+                    tbody.innerHTML = `<tr><td class="py-6 text-center text-gray-500">NENHUM REGISTRO ENCONTRADO.</td></tr>`;
+                    document.getElementById('containerKpis').className = "hidden";
                     return;
                 }
 
-                registrosFiltrados = registrosFiltrados.map(row => {
-                    let novoRow = { ...row };
-                    const hojeDataObj = new Date();
-                    hojeDataObj.setHours(0, 0, 0, 0);
-
-                    if (ehViewTarifas) {
-                        let dataFimTarifa = novoRow['data_fim'] || novoRow['fim'];
-                        let htmlAlerta = '-';
-                        if (dataFimTarifa) {
-                            let dtFim = new Date(dataFimTarifa);
-                            let diffTime = dtFim - hojeDataObj;
-                            let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                            
-                            if (!isNaN(diffDays)) {
-                                if (diffDays <= 7 && diffDays >= 0) {
-                                    htmlAlerta = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-white font-bold bg-amber-500 shadow-sm"><i class="fa-solid fa-clock"></i> EXPIRA EM ${diffDays} DIA${diffDays === 1 ? '' : 'S'}</span>`;
-                                } else if (diffDays < 0) {
-                                    htmlAlerta = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-white font-bold bg-red-500 shadow-sm"><i class="fa-solid fa-triangle-exclamation"></i> EXPIRADO</span>`;
-                                } else {
-                                    htmlAlerta = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-slate-700 font-bold bg-slate-200 shadow-sm"><i class="fa-solid fa-calendar-days"></i> VIGENTE (${diffDays} DIAS)</span>`;
-                                }
-                            }
-                        }
-                        novoRow['alerta_status_tarifa'] = htmlAlerta;
-                    } else if (ehViewReservas) {
-                        let statusAtual = String(novoRow['status_reserva'] || novoRow['status'] || '').trim().toUpperCase();
-                        let htmlAlerta = '-';
-                        if (statusAtual !== 'RECUSADA') {
-                            let checkinVal = novoRow['checkin'];
-                            if (checkinVal) {
-                            let dtCheckin = new Date(checkinVal);
-                            dtCheckin.setHours(0, 0, 0, 0);
-                            let diffTime = dtCheckin - hojeDataObj;
-                            let diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-
-                            if (diffDays === 0) {
-                                htmlAlerta = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-white font-bold bg-emerald-600 shadow-sm"><i class="fa-solid fa-check"></i> CHEGA HOJE</span>`;
-                            } else if (diffDays > 0) {
-                                htmlAlerta = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-purple-700 font-bold bg-purple-100 shadow-sm"><i class="fa-solid fa-hourglass-start"></i> CHEGA EM ${diffDays} DIA${diffDays === 1 ? '' : 'S'}</span>`;
-                            } else {
-                                htmlAlerta = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-slate-600 font-bold bg-slate-200 shadow-sm"><i class="fa-solid fa-flag-checkered"></i> REALIZADO</span>`;
-                            }
-                            }
-                        }
-                        novoRow['alerta_status_reserva'] = htmlAlerta;
-                    }
-                    return novoRow;
-                });
-
-                const colunas = Object.keys(registrosFiltrados[0]).filter(col => 
-                    col !== 'pousada_id' && 
-                    col !== 'reserva_id' && 
-                    col !== 'tarifa_id' && 
-                    !col.endsWith('_id') &&
-                    !col.toLowerCase().includes('dias')
-                );
-
-                if (ehViewHospedagens) {
-                    containerKpis.className = "grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5";
-                    let totalReservasValidas = registrosFiltrados.filter(r => r.hospede && r.hospede !== '-').length;
-                    containerKpis.innerHTML = `
-                        <div class="bg-white p-4 rounded-xl shadow-sm border border-emerald-200 flex items-center justify-between">
-                            <div>
-                                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Total de Reservas</p>
-                                <p class="text-lg sm:text-xl font-bold text-gray-800 mt-1">${totalReservasValidas}</p>
-                            </div>
-                            <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-bookmark"></i></div>
-                        </div>
-                    `;
-                } else if (ehViewFinanceiro) {
-                    containerKpis.className = "grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5";
-                    containerKpis.innerHTML = `
-                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between">
-                            <div>
-                                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Faturamento Bruto</p>
-                                <p class="text-lg sm:text-xl font-bold text-gray-800 mt-1">${faturamentoBrutoPeriodo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
-                            </div>
-                            <div class="w-10 h-10 bg-slate-100 text-slate-700 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-file-invoice-dollar"></i></div>
-                        </div>
-                        <div class="bg-white p-4 rounded-xl shadow-sm border border-emerald-200 flex items-center justify-between">
-                            <div>
-                                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Total Recebido (Sinal)</p>
-                                <p class="text-lg sm:text-xl font-bold text-emerald-600 mt-1">${totalRecebidoPeriodo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
-                            </div>
-                            <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-sack-dollar"></i></div>
-                        </div>
-                        <div class="bg-white p-4 rounded-xl shadow-sm border border-amber-200 flex items-center justify-between">
-                            <div>
-                                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Valor a Receber</p>
-                                <p class="text-lg sm:text-xl font-bold text-amber-600 mt-1">${valorAReceberPeriodo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
-                            </div>
-                            <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-clock"></i></div>
-                        </div>
-                    `;
+                let colunas = [];
+                if (ehViewReservas) {
+                    colunas = ['status', 'status_fisico_suite', 'suite', 'hospede', 'checkin', 'checkout', 'dias_restantes', 'alerta_check_in', 'whatsapp', 'cpf', 'email', 'criado_em', 'motivo_recusa', 'recusado_em', 'recusado_por', 'obs'];
                 } else {
-                    containerKpis.className = "hidden";
+                    colunas = Object.keys(registrosFiltrados[0] || {}).filter(k => k !== 'pousada_id' && k !== 'reserva_id' && !k.includes('login_original') && !k.includes('nome_original') && k !== 'nome_pousada_que_recusou' && k !== 'dia_semana' && k !== 'alerta_status_reserva');
                 }
 
                 let htmlCabecalho = '';
                 colunas.forEach(col => {
-                    htmlCabecalho += `<th class="py-3 px-4">${obterApelidoColuna(col)}</th>`;
+                    htmlCabecalho += `<th class="py-3 px-4 text-[11px]">${obterApelidoColuna(col)}</th>`;
                 });
                 thead.innerHTML = htmlCabecalho;
 
                 let htmlLinhas = '';
-                let grupoCorAlternada = false;
-                let ultimaChaveGrupo = null;
-                let ultimoNomeSuiteReservas = null;
-
                 registrosFiltrados.forEach((row, index) => {
-                    let classeCorFundo = '';
-                    let statusLinha = String(row.status_reserva || row.status || '').trim().toUpperCase();
-                    let isRecusadaLinha = statusLinha === 'RECUSADA';
-
-                    if (isRecusadaLinha) {
-                        classeCorFundo = 'bg-red-50 hover:bg-red-100 border-l-4 border-red-500';
-                    } else if (ehViewReservas) {
-                        let suiteAtual = String(row.suite || '').trim().toUpperCase();
-                        if (index === 0) {
-                            grupoCorAlternada = false;
-                            ultimoNomeSuiteReservas = suiteAtual;
-                        } else if (suiteAtual !== ultimoNomeSuiteReservas) {
-                            grupoCorAlternada = !grupoCorAlternada;
-                            ultimoNomeSuiteReservas = suiteAtual;
-                        }
-                        classeCorFundo = grupoCorAlternada ? 'bg-emerald-100/70 hover:bg-emerald-200/60' : 'bg-white hover:bg-gray-50';
-                    } else {
-                        let chaveAtual = `${String(row.hospede || '').trim()}|${String(row.suite || '').trim()}|${String(row.checkin || '').trim()}|${String(row.checkout || '').trim()}`;
-                        if (index === 0) {
-                            grupoCorAlternada = false;
-                            ultimaChaveGrupo = chaveAtual;
-                        } else if (chaveAtual !== ultimaChaveGrupo) {
-                            grupoCorAlternada = !grupoCorAlternada;
-                            ultimaChaveGrupo = chaveAtual;
-                        }
-                        classeCorFundo = grupoCorAlternada ? 'bg-emerald-100/70 hover:bg-emerald-200/60' : 'bg-white hover:bg-gray-50';
-                    }
-
+                    let isRecusada = String(row.status||row.status_reserva||'').toUpperCase()==='RECUSADA';
+                    let classeCorFundo = isRecusada ? 'bg-red-50 hover:bg-red-100' : (index%2===0 ? 'bg-white hover:bg-gray-50' : 'bg-purple-50/50 hover:bg-purple-100/50');
                     htmlLinhas += `<tr class="${classeCorFundo} transition">`;
                     colunas.forEach(col => {
                         let valorBruto = row[col];
                         let valorExibicao = '-';
                         let colLower = col.toLowerCase();
 
-                        if (valorBruto !== null && valorBruto !== undefined) {
-                            if (colLower.includes('alerta_status')) {
-                                valorExibicao = valorBruto; 
-                            } else if (colLower.includes('data_pagamento') || colLower.includes('criado_em') || colLower.includes('recusado_em') || colLower.includes('recusado')) {
+                        if (valorBruto !== null && valorBruto !== undefined && String(valorBruto).trim() !== '') {
+                            if (colLower.includes('alerta_check_in') || colLower.includes('alerta_status')) {
+                                valorExibicao = valorBruto;
+                            } else if (colLower.includes('criado_em') || colLower.includes('recusado_em')) {
                                 valorExibicao = formatarDataHoraBr(valorBruto);
-                            } else if (colLower.includes('checkin') || colLower.includes('checkout') || colLower.includes('fim') || colLower.includes('inicio')) {
+                            } else if (colLower.includes('checkin') || colLower.includes('checkout')) {
                                 valorExibicao = formatarDataBr(valorBruto);
-                            } else if (colLower === 'whatsapp') {
-                                // Exige no mínimo 9 dígitos para habilitar o link do WhatsApp (evita testes curtos como "2121")
-                                let numeroLimpo = String(valorBruto).replace(/\D/g, '');
-                                if (numeroLimpo.length >= 9) {
-                                    valorExibicao = `<a href="https://wa.me/${numeroLimpo}" target="_blank" title="Abrir conversa no WhatsApp" class="inline-flex items-center gap-1.5 text-emerald-700 hover:text-emerald-900 font-bold transition"><i class="fa-brands fa-whatsapp text-sm"></i> ${String(valorBruto).toUpperCase()}</a>`;
-                                } else {
-                                    valorExibicao = String(valorBruto).toUpperCase();
-                                }
+                            } else if (colLower === 'dias_restantes' && !isNaN(valorBruto)) {
+                                let dias = Number(valorBruto);
+                                if (isRecusada) valorExibicao = `<span class="text-red-600 font-bold">${dias} DIAS</span>`;
+                                else valorExibicao = `<span class="text-purple-700 font-bold">${dias} DIAS</span>`;
                             } else {
                                 valorExibicao = String(valorBruto).toUpperCase();
                             }
                         }
-                        
-                        if (colLower.includes('status') && String(valorBruto).toUpperCase() === 'RECUSADA') {
-                            valorExibicao = `<span class="inline-flex items-center gap-1 bg-red-100 text-red-700 border border-red-200 px-2.5 py-0.5 rounded-full font-extrabold text-[10px]"><i class="fa-solid fa-xmark"></i> RECUSADA</span>`;
-                        } else if (colLower.includes('valor_pago') && !isNaN(valorBruto)) {
-                            valorExibicao = `<span class="font-bold text-emerald-700">${Number(valorBruto).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>`;
-                        } else if (colLower.includes('valor_total') && !isNaN(valorBruto)) {
-                            valorExibicao = `<span class="font-bold text-gray-800">${Number(valorBruto).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>`;
-                        } else if (colLower.includes('saldo_restante') && !isNaN(valorBruto)) {
-                            valorExibicao = `<span class="font-bold text-amber-600">${Number(valorBruto).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>`;
-                        } else if (colLower.includes('diarias')) {
-                            valorExibicao = `<span class="font-semibold text-blue-600">${valorBruto} DIÁRIA(S)</span>`;
+
+                        if (colLower === 'recusado_por' && isRecusada) {
+                            if (row.recusado_por_nome_original) valorExibicao = `<span class="font-bold text-blue-700">${String(row.recusado_por_nome_original).toUpperCase()}</span>`;
+                            else valorExibicao = `<span class="font-bold text-blue-700">${valorExibicao}</span>`;
                         }
 
-                        htmlLinhas += `<td class="py-3 px-4 font-medium">${valorExibicao}</td>`;
+                        if (colLower.includes('valor_total') && !isNaN(valorBruto)) {
+                            valorExibicao = `<span class="font-bold text-gray-800">${Number(valorBruto).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>`;
+                        }
+
+                        htmlLinhas += `<td class="py-3 px-4 text-[12px] font-medium">${valorExibicao}</td>`;
                     });
                     htmlLinhas += `</tr>`;
                 });
                 tbody.innerHTML = htmlLinhas;
-
             } catch (err) {
                 console.error("Erro geral:", err);
-                tbody.innerHTML = `<tr><td colspan="12" class="py-6 text-center text-red-500">ERRO DE COMUNICAÇÃO.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="14" class="py-6 text-center text-red-500">ERRO: ${err.message}</td></tr>`;
             }
         }
+
 
         window.onload = () => {
             protegerPagina();
