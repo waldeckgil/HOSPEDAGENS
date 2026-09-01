@@ -102,7 +102,6 @@
                         </div>
                     </div>
 
-                    <!-- CONTAINER DE KPIS FINANCEIROS OU GERAIS -->
                     <div id="containerKpis" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5"></div>
 
                     <!-- FILTRO POR SUÍTE - VISÃO FINANCEIRA -->
@@ -241,7 +240,7 @@
                 const { data, error } = await supabaseClient.from('suites').select('id,nome').eq('pousada_id', usuarioIdAtual).order('nome');
                 if (!error && data) {
                     suitesDaPousadaCache = data;
-                    renderizarFiltroSuites([]); 
+                    renderizarFiltroSuites([]); // renderiza inicial sem contagens
                 }
             } catch (e) {
                 console.warn('Erro ao carregar suítes para filtro:', e);
@@ -255,6 +254,7 @@
                 grid.innerHTML = '<div class="col-span-full py-3 text-center text-gray-400 text-xs">NENHUMA SUÍTE CADASTRADA</div>';
                 return;
             }
+            // Contar reservas por suíte nos registros atuais (se houver)
             const contagemPorSuite = {};
             if (registrosAtuais && registrosAtuais.length) {
                 registrosAtuais.forEach(r => {
@@ -279,6 +279,7 @@
                 </div>`;
             });
             grid.innerHTML = html;
+            // Atualiza badge ativa
             const badgeAtiva = document.getElementById('badgeSuiteAtiva');
             if (suiteFiltroAtual && badgeAtiva) {
                 badgeAtiva.textContent = suiteFiltroAtual.toUpperCase();
@@ -290,6 +291,7 @@
 
         function filtrarPorSuite(nomeSuite) {
             suiteFiltroAtual = nomeSuite ? String(nomeSuite).trim() : null;
+            // Atualiza botão Ver Todas visual
             const btnTodas = document.getElementById('btnVerTodasSuites');
             if (btnTodas) {
                 if (!suiteFiltroAtual) {
@@ -308,6 +310,7 @@
 
         function alterarFiltroStatusReservas(valor) {
             filtroStatusReservasAtual = valor;
+            // Atualiza visual dos botões
             var btnA = document.getElementById('btnAprovada');
             var btnR = document.getElementById('btnRecusada');
             var btnT = document.getElementById('btnTodas');
@@ -347,6 +350,7 @@
             elementoCard.classList.add('shadow-md');
             atualizarVisibilidadeFiltroStatus();
 
+            // Ao trocar de view, reseta filtro de suíte se não for financeiro
             if (!nomeView.includes('financeiro')) {
                 suiteFiltroAtual = null;
             }
@@ -403,9 +407,6 @@
             if (c === 'whatsapp') return 'WHATSAPP';
             if (c === 'alerta_status_tarifa') return 'ALERTA VIGÊNCIA';
             if (c === 'alerta_status_reserva') return 'ALERTA CHECK-IN';
-            if (c === 'data_inicio' || c === 'vigencia_inicio') return 'INÍCIO VIGÊNCIA';
-            if (c === 'data_fim' || c === 'vigencia_fim') return 'FIM VIGÊNCIA';
-            if (c === 'status_ocupacao') return 'STATUS OCUPAÇÃO';
             return col.replace(/_/g, ' ').toUpperCase();
         }
 
@@ -463,47 +464,6 @@
                             observacao: p.observacao || '-'
                         }));
                     }
-                } else if (ehViewHospedagens) {
-                    // TRATAMENTO EXCLUSIVO PARA GARANTIR TODAS AS SUÍTES DA TABELA CADASTRADAS (Disponíveis e Ocupadas)
-                    const { data: todasSuites, error: errSuites } = await supabaseClient
-                        .from('suites')
-                        .select('id, nome')
-                        .eq('pousada_id', usuarioIdAtual)
-                        .order('nome');
-
-                    const resView = await supabaseClient.from(viewAtualSelecionada).select('*').eq('pousada_id', usuarioIdAtual);
-                    let reservasAtivasView = resView.data || [];
-
-                    if (errSuites) {
-                        error = errSuites;
-                    } else {
-                        // Cruzamento robusto cobrindo 100% das suítes cadastradas na tabela
-                        let hojeStr = new Date().toISOString().split('T')[0];
-                        registros = todasSuites.map(suite => {
-                            // Procura reserva ativa para esta suíte na data de hoje ou futura próxima
-                            let reservaEncontrada = reservasAtivasView.find(r => 
-                                String(r.suite || '').trim().toUpperCase() === String(suite.nome || '').trim().toUpperCase() &&
-                                String(r.status || r.status_reserva || '').toUpperCase() === 'APROVADA'
-                            );
-
-                            if (reservaEncontrada) {
-                                return {
-                                    ...reservaEncontrada,
-                                    status_ocupacao: 'OCUPADA / RESERVADA',
-                                    suite: suite.nome
-                                };
-                            } else {
-                                return {
-                                    status_ocupacao: 'DISPONÍVEL',
-                                    suite: suite.nome,
-                                    hospede: 'NENHUM (DISPONÍVEL)',
-                                    checkin: '-',
-                                    checkout: '-',
-                                    status: 'DISPONÍVEL'
-                                };
-                            }
-                        });
-                    }
                 } else {
                     let query = supabaseClient.from(viewAtualSelecionada).select('*').eq('pousada_id', usuarioIdAtual);
                     if (dataInicio) query = query.gte('checkin', dataInicio);
@@ -531,9 +491,9 @@
 
                         if (filtroStatusReservasAtual === 'APROVADA') return isAprovada && !isRecusada;
                         if (filtroStatusReservasAtual === 'RECUSADA') return isRecusada;
-                        return true; 
+                        return true; // Se for 'TODAS'
                     });
-                } else if (!ehViewTarifas && !ehViewHospedagens) {
+                } else if (!ehViewTarifas) {
                     registrosFiltrados = registrosFiltrados.filter(row => {
                         let valData = row['data_pagamento'] || row['checkin'] || '';
                         if (!valData) return true;
@@ -545,68 +505,25 @@
                     });
                 }
 
-                if (ehViewFinanceiro && suiteFiltroAtual) {
-                    registrosFiltrados = registrosFiltrados.filter(r => String(r.suite || '').trim().toUpperCase() === String(suiteFiltroAtual).trim().toUpperCase());
-                }
-
-                // Renderiza KPI explicito no topo dependendo da View
-                containerKpis.classList.remove("hidden");
-                if (ehViewFinanceiro) {
-                    let totalGeralBruto = registrosFiltrados.reduce((acc, r) => acc + Number(r.valor_total || 0), 0);
-                    let totalJaPago = registrosFiltrados.reduce((acc, r) => acc + Number(r.valor_pago || 0), 0);
-                    let saldoRestanteGeral = totalGeralBruto - totalJaPago;
-
-                    containerKpis.innerHTML = `
-                        <div class="bg-white p-4 rounded-xl border border-blue-200 shadow-sm flex flex-col gap-1">
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Saldo Total Bruto (Reservas)</span>
-                            <span class="text-lg font-extrabold text-blue-700">${totalGeralBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-                        </div>
-                        <div class="bg-white p-4 rounded-xl border border-emerald-200 shadow-sm flex flex-col gap-1">
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Já Pago (Recebido)</span>
-                            <span class="text-lg font-extrabold text-emerald-600">${totalJaPago.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-                        </div>
-                        <div class="bg-white p-4 rounded-xl border border-amber-200 shadow-sm flex flex-col gap-1">
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Saldo Restante a Receber</span>
-                            <span class="text-lg font-extrabold text-amber-600">${saldoRestanteGeral.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-                        </div>
-                    `;
-                    renderizarFiltroSuites(registros);
-                    document.getElementById('containerFiltroSuites').classList.remove('hidden');
-                } else if (ehViewHospedagens) {
-                    let totalSuites = registros.length;
-                    let ocupadas = registros.filter(r => r.status_ocupacao === 'OCUPADA / RESERVADA').length;
-                    let disponiveis = totalSuites - ocupadas;
-                    containerKpis.innerHTML = `
-                        <div class="bg-white p-4 rounded-xl border border-emerald-200 shadow-sm flex flex-col gap-1">
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total de Suítes Cadastradas</span>
-                            <span class="text-lg font-extrabold text-slate-800">${totalSuites} SUÍTES</span>
-                        </div>
-                        <div class="bg-white p-4 rounded-xl border border-emerald-200 shadow-sm flex flex-col gap-1">
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Suítes Ocupadas / Reservadas</span>
-                            <span class="text-lg font-extrabold text-blue-600">${ocupadas} SUÍTES</span>
-                        </div>
-                        <div class="bg-white p-4 rounded-xl border border-emerald-200 shadow-sm flex flex-col gap-1">
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Suítes Disponíveis</span>
-                            <span class="text-lg font-extrabold text-emerald-600">${disponiveis} SUÍTES</span>
-                        </div>
-                    `;
-                    document.getElementById('containerFiltroSuites').classList.add('hidden');
-                } else {
-                    containerKpis.className = "hidden";
-                    document.getElementById('containerFiltroSuites').classList.add('hidden');
-                }
+                registrosFiltrados.sort((a,b)=>{
+                    let sa = String(a.suite||'').toUpperCase();
+                    let sb = String(b.suite||'').toUpperCase();
+                    if (sa !== sb) return sa.localeCompare(sb);
+                    let da = a.checkin || '';
+                    let db = b.checkin || '';
+                    return new Date(da) - new Date(db);
+                });
 
                 if (!registrosFiltrados || registrosFiltrados.length === 0) {
                     thead.innerHTML = `<th class="py-3 px-4">INFORMAÇÃO</th>`;
                     tbody.innerHTML = `<tr><td class="py-6 text-center text-gray-500">NENHUM REGISTRO ENCONTRADO.</td></tr>`;
+                    document.getElementById('containerKpis').className = "hidden";
                     return;
                 }
 
                 let colunas = [];
                 if (ehViewReservas) {
                     colunas = ['status', 'status_fisico_suite', 'suite', 'hospede', 'checkin', 'checkout', 'dias_restantes', 'alerta_check_in', 'whatsapp', 'cpf', 'email', 'criado_em', 'motivo_recusa', 'recusado_em', 'recusado_por', 'obs'];
-                } else if (ehViewHospedagens) {
-                    colunas = ['status_ocupacao', 'suite', 'hospede', 'checkin', 'checkout', 'status'];
                 } else {
                     colunas = Object.keys(registrosFiltrados[0] || {}).filter(k => k !== 'pousada_id' && k !== 'reserva_id' && !k.includes('login_original') && !k.includes('nome_original') && k !== 'nome_pousada_que_recusou' && k !== 'dia_semana' && k !== 'alerta_status_reserva');
                 }
@@ -629,10 +546,6 @@
                     else if (isAprovada) classeCorFundo = 'bg-emerald-50 hover:bg-emerald-100 border-l-4 border-emerald-500'; 
                     else classeCorFundo = (index%2===0 ? 'bg-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100');
 
-                    if (ehViewHospedagens && row.status_ocupacao === 'DISPONÍVEL') {
-                        classeCorFundo = 'bg-slate-50 hover:bg-slate-100 border-l-4 border-slate-300';
-                    }
-
                     htmlLinhas += `<tr class="${classeCorFundo} transition">`;
                     colunas.forEach(col => {
                         let valorBruto = row[col];
@@ -644,7 +557,7 @@
                                 valorExibicao = valorBruto;
                             } else if (colLower.includes('criado_em') || colLower.includes('recusado_em')) {
                                 valorExibicao = formatarDataHoraBr(valorBruto);
-                            } else if (colLower.includes('checkin') || colLower.includes('checkout') || colLower.includes('data_inicio') || colLower.includes('data_fim')) {
+                            } else if (colLower.includes('checkin') || colLower.includes('checkout')) {
                                 valorExibicao = formatarDataBr(valorBruto);
                             } else if (colLower === 'dias_restantes') { 
                                 if (isRecusada) { 
@@ -670,17 +583,8 @@
                             else valorExibicao = `<span class="font-bold text-blue-700">${valorExibicao}</span>`;
                         }
 
-                        if ((colLower.includes('valor_total') || colLower.includes('valor_pago') || colLower.includes('saldo_restante')) && !isNaN(valorBruto)) {
-                            let corTexto = colLower.includes('saldo_restante') && Number(valorBruto) > 0 ? 'text-amber-600' : 'text-gray-800';
-                            valorExibicao = `<span class="font-bold ${corTexto}">${Number(valorBruto).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>`;
-                        }
-
-                        if (colLower === 'status_ocupacao') {
-                            if (valorBruto === 'DISPONÍVEL') {
-                                valorExibicao = `<span class="px-2 py-1 bg-slate-200 text-slate-700 rounded-md font-bold text-[10px]">DISPONÍVEL</span>`;
-                            } else {
-                                valorExibicao = `<span class="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-md font-bold text-[10px]">OCUPADA</span>`;
-                            }
+                        if (colLower.includes('valor_total') && !isNaN(valorBruto)) {
+                            valorExibicao = `<span class="font-bold text-gray-800">${Number(valorBruto).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>`;
                         }
 
                         htmlLinhas += `<td class="py-3 px-4 text-[12px] font-medium">${valorExibicao}</td>`;
