@@ -480,6 +480,9 @@
                             cpf,
                             email,
                             criado_em,
+                            motivo_recusa,
+                            recusado_em,
+                            observacao,
                             suite_id,
                             suites ( nome )
                         `)
@@ -503,7 +506,10 @@
                             cpf: r.cpf,
                             email: r.email,
                             criado_em: r.criado_em,
-                            alerta_status_reserva: r.status === 'Recusada' ? '<span class="text-red-600 font-bold">❌ RECUSADA - AUDITORIA</span>' : ''
+                            motivo_recusa: r.motivo_recusa || r.observacao || '-',
+                            recusado_em: r.recusado_em || r.criado_em,
+                            observacao: r.observacao,
+                            alerta_status_reserva: r.status === 'Recusada' ? `<span class="text-red-600 font-bold">❌ RECUSADA: ${ (r.motivo_recusa || r.observacao || 'SEM MOTIVO INFORMADO').toUpperCase() } - ${ r.recusado_em ? new Date(r.recusado_em).toLocaleString('pt-BR') : '' }</span>` : ''
                         }));
                     }
                     error = errReservas;
