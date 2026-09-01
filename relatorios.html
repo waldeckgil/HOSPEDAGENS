@@ -505,7 +505,7 @@
                                 .in('id', idsRecusadores);
                             if (pousadasRecusaram) {
                                 pousadasRecusaram.forEach(p => {
-                                    mapaPousadas[p.id] = p.nome || p.email_admin || p.slug || 'Gestor';
+                                    mapaPousadas[p.id] = p.email_admin || p.nome || p.slug || 'Gestor'; // LOGIN = email_admin
                                 });
                             }
                         }
@@ -520,7 +520,7 @@
                                     nomeQuemRecusou = mapaPousadas[idRecusador];
                                 } else if (String(idRecusador).length > 20) {
                                     // Se é UUID e não achou, mostra nome da pousada logada + 8 chars do ID
-                                    nomeQuemRecusou = nomePousadaLogada !== 'nossa pousada' ? nomePousadaLogada : (String(idRecusador).substring(0,8) + '...');
+                                    nomeQuemRecusou = nomePousadaLogada !== 'nossa pousada' ? nomePousadaLogada : mapaPousadas[idRecusador] || String(idRecusador).substring(0,8) + '...';
                                 } else {
                                     nomeQuemRecusou = String(idRecusador);
                                 }
