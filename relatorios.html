@@ -471,28 +471,11 @@
                 } else if (ehViewReservas) {
                     // Busca direta da tabela reservas para garantir que RECUSADAS apareçam mesmo se a VIEW antiga filtrar só APROVADA
                     const { data: reservasDiretas, error: errReservas } = await supabaseClient
-                        .from('reservas')
-                        .select(`
-                            id,
-                            hospede_nome,
-                            checkin,
-                            checkout,
-                            status,
-                            valor_total,
-                            whatsapp_hospede,
-                            cpf,
-                            email,
-                            criado_em,
-                            motivo_recusa,
-                            recusado_em,
-                            recusado_por,
-                            observacao,
-                            suite_id,
-                            suites ( nome )
-                        `)
+                        .from('vw_gestor_reservas_relatorio')
+                        .select('*')
                         .eq('pousada_id', usuarioIdAtual)
-                        .in('status', ['Aprovada', 'Recusada'])
-                        .order('checkin', { ascending: true });
+                        .eq('status', 'Recusada')
+                        .order('criado_em', { ascending: false });
 
                     if (!errReservas && reservasDiretas) {
                         // LÓGICA MASTER COALESCE: Se nome nulo → traz email
