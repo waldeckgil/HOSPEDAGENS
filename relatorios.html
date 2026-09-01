@@ -370,6 +370,9 @@
             if (c === 'data_pagamento') return 'DATA/HORA';
             if (c === 'forma_pagamento') return 'FORMA';
             if (c === 'observacao') return 'OBS';
+            if (c === 'motivo_recusa') return 'MOTIVO RECUSA';
+            if (c === 'recusado_em') return 'RECUSADO EM';
+            if (c === 'recusado_por') return 'RECUSADO POR';
             if (c === 'whatsapp') return 'WHATSAPP';
             if (c === 'alerta_status_tarifa') return 'ALERTA VIGÊNCIA';
             if (c === 'alerta_status_reserva') return 'ALERTA CHECK-IN';
@@ -770,7 +773,7 @@
                         if (valorBruto !== null && valorBruto !== undefined) {
                             if (colLower.includes('alerta_status')) {
                                 valorExibicao = valorBruto; 
-                            } else if (colLower.includes('data_pagamento') || colLower.includes('criado_em')) {
+                            } else if (colLower.includes('data_pagamento') || colLower.includes('criado_em') || colLower.includes('recusado_em') || colLower.includes('recusado')) {
                                 valorExibicao = formatarDataHoraBr(valorBruto);
                             } else if (colLower.includes('checkin') || colLower.includes('checkout') || colLower.includes('fim') || colLower.includes('inicio')) {
                                 valorExibicao = formatarDataBr(valorBruto);
