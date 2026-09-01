@@ -170,7 +170,8 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let usuarioIdAtual = null;
-        let viewAtualSelecionada = 'vw_gestor_financeiro_relatorio'; 
+        let viewAtualSelecionada = 'vw_gestor_financeiro_relatorio';
+        let filtroStatusReservasAtual = 'APROVADA'; // padrão APROVADA 
         let suiteFiltroAtual = null;
         let suitesDaPousadaCache = []; 
         let tituloBaseAtual = 'Extrato Detalhado de Pagamentos';
@@ -221,6 +222,7 @@
             }
 
             await carregarSuitesParaFiltro();
+            atualizarVisibilidadeFiltroStatus();
             carregarDadosView();
         }
 
@@ -296,6 +298,25 @@
             await supabaseClient.auth.signOut();
             window.location.href = 'index.html';
         }
+
+
+        function alterarFiltroStatusReservas(valor) {
+            filtroStatusReservasAtual = valor;
+            carregarDadosView();
+        }
+
+        function atualizarVisibilidadeFiltroStatus() {
+            let container = document.getElementById('containerFiltroStatusReservas');
+            if (!container) return;
+            if (viewAtualSelecionada === 'vw_gestor_reservas_relatorio') {
+                container.classList.remove('hidden');
+                container.classList.add('flex');
+            } else {
+                container.classList.add('hidden');
+                container.classList.remove('flex');
+            }
+        }
+
 
         function selecionarView(nomeView, tituloAmigavel, elementoCard) {
             viewAtualSelecionada = nomeView;
@@ -453,10 +474,17 @@
                     registrosFiltrados = registrosFiltrados.filter(row => {
                         let status = String(row.status || row.status_reserva || '').toUpperCase();
                         let statusFisico = String(row.status_fisico_suite || '').toUpperCase();
-                        if (status === 'RECUSADA' || statusFisico === 'RECUSADA') return true;
-                        if (status === 'APROVADA' && (statusFisico === 'RESERVA FUTURA' || statusFisico === 'OCUPADA' || statusFisico === 'DISPONIVEL' || statusFisico.includes('FUTURA') || statusFisico.includes('OCUPADA'))) return true;
-                        if (!row.status && statusFisico === 'DISPONIVEL') return false;
-                        return status === 'APROVADA' || status === 'RECUSADA';
+                        let isRecusada = (status === 'RECUSADA' || statusFisico === 'RECUSADA');
+                        let isAprovada = (status === 'APROVADA');
+
+                        // Aplica filtro de status (padrão APROVADA)
+                        if (filtroStatusReservasAtual === 'APROVADA' && isRecusada) return false;
+                        if (filtroStatusReservasAtual === 'RECUSADA' && !isRecusada) return false;
+                        // TODAS deixa passar tudo
+
+                        if (isRecusada) return true;
+                        if (isAprovada) return true;
+                        return false;
                     });
                 } else if (!ehViewTarifas) {
                     registrosFiltrados = registrosFiltrados.filter(row => {
@@ -502,7 +530,11 @@
                 let htmlLinhas = '';
                 registrosFiltrados.forEach((row, index) => {
                     let isRecusada = String(row.status||row.status_reserva||'').toUpperCase()==='RECUSADA';
-                    let classeCorFundo = isRecusada ? 'bg-red-50 hover:bg-red-100' : (index%2===0 ? 'bg-white hover:bg-gray-50' : 'bg-purple-50/50 hover:bg-purple-100/50');
+                    let isAprovada = String(row.status||row.status_reserva||'').toUpperCase()==='APROVADA';
+                    let classeCorFundo = '';
+                    if (isRecusada) classeCorFundo = 'bg-red-50 hover:bg-red-100 border-l-4 border-red-400';
+                    else if (isAprovada) classeCorFundo = 'bg-emerald-50 hover:bg-emerald-100 border-l-4 border-emerald-500';
+                    else classeCorFundo = (index%2===0 ? 'bg-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100');
                     htmlLinhas += `<tr class="${classeCorFundo} transition">`;
                     colunas.forEach(col => {
                         let valorBruto = row[col];
@@ -516,10 +548,14 @@
                                 valorExibicao = formatarDataHoraBr(valorBruto);
                             } else if (colLower.includes('checkin') || colLower.includes('checkout')) {
                                 valorExibicao = formatarDataBr(valorBruto);
-                            } else if (colLower === 'dias_restantes' && !isNaN(valorBruto)) {
-                                let dias = Number(valorBruto);
-                                if (isRecusada) valorExibicao = `<span class="text-red-600 font-bold">${dias} DIAS</span>`;
-                                else valorExibicao = `<span class="text-purple-700 font-bold">${dias} DIAS</span>`;
+                            } else if (colLower === 'dias_restantes') {
+                                if (isRecusada) {
+                                    valorExibicao = '<span class="text-gray-400">-</span>';
+                                } else if (!isNaN(valorBruto)) {
+                                } else {
+                                    let dias = Number(valorBruto);
+                                    valorExibicao = `<span class="text-emerald-700 font-bold">${dias} DIAS</span>`;
+                                }
                             } else {
                                 valorExibicao = String(valorBruto).toUpperCase();
                             }
