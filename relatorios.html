@@ -123,6 +123,16 @@
                         </div>
                     </div>
 
+                    <!-- FILTRO RÁPIDO DE STATUS DE RESERVAS -->
+                    <div id="containerFiltroStatusReservas" style="display: none;" class="mb-4 flex items-center gap-2 bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
+                        <span class="text-[10px] font-extrabold text-gray-500 uppercase tracking-widest mr-2">
+                            <i class="fa-solid fa-filter mr-1"></i> Status:
+                        </span>
+                        <button id="btnAprovada" onclick="alterarFiltroStatusReservas('APROVADA')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500 text-white shadow-sm">APROVADAS</button>
+                        <button id="btnRecusada" onclick="alterarFiltroStatusReservas('RECUSADA')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-white text-red-600 border border-red-200 hover:bg-red-50">RECUSADAS</button>
+                        <button id="btnTodas" onclick="alterarFiltroStatusReservas('TODAS')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-white text-gray-600 border border-gray-200 hover:bg-gray-50">TODAS</button>
+                    </div>
+
                     <!-- Área da Tabela -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
                         <div class="px-5 py-3.5 border-b border-gray-200 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 bg-gray-50/50">
@@ -298,8 +308,6 @@
             window.location.href = 'index.html';
         }
 
-
-
         function alterarFiltroStatusReservas(valor) {
             filtroStatusReservasAtual = valor;
             // Atualiza visual dos botões
@@ -311,6 +319,7 @@
             if (btnT) { btnT.className = (valor==='TODAS' ? 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-800 text-white shadow-sm' : 'px-3 py-1 rounded-full text-[11px] font-bold bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'); }
             carregarDadosView();
         }
+
         function atualizarVisibilidadeFiltroStatus() {
             var container = document.getElementById('containerFiltroStatusReservas');
             if (!container) return;
@@ -320,7 +329,6 @@
                 container.style.display = 'none';
             }
         }
-
 
         function selecionarView(nomeView, tituloAmigavel, elementoCard) {
             viewAtualSelecionada = nomeView;
@@ -464,7 +472,6 @@
                     const res = await query;
                     registros = res.data || [];
                     error = res.error;
-                    console.log('VIEW RETORNOU', registros.length, 'registros', registros);
                 }
 
                 if (error) {
@@ -480,12 +487,11 @@
                         let status = String(row.status || row.status_reserva || '').toUpperCase();
                         let statusFisico = String(row.status_fisico_suite || '').toUpperCase();
                         let isRecusada = (status === 'RECUSADA' || statusFisico === 'RECUSADA');
-                        let isAprovada = (status === 'APROVADA');
-                        if (filtroStatusReservasAtual === 'APROVADA' && isRecusada) return false;
-                        if (filtroStatusReservasAtual === 'RECUSADA' && !isRecusada) return false;
-                        if (isRecusada) return true;
-                        if (isAprovada) return true;
-                        return false;
+                        let isAprovada = (status === 'APROVADA' || statusFisico === 'APROVADA');
+
+                        if (filtroStatusReservasAtual === 'APROVADA') return isAprovada && !isRecusada;
+                        if (filtroStatusReservasAtual === 'RECUSADA') return isRecusada;
+                        return true; // Se for 'TODAS'
                     });
                 } else if (!ehViewTarifas) {
                     registrosFiltrados = registrosFiltrados.filter(row => {
@@ -530,8 +536,16 @@
 
                 let htmlLinhas = '';
                 registrosFiltrados.forEach((row, index) => {
-                    let isRecusada = String(row.status||row.status_reserva||'').toUpperCase()==='RECUSADA';
-                    let isAprovada = String(row.status||row.status_reserva||'').toUpperCase()==='APROVADA'; let classeCorFundo = ''; if (isRecusada) classeCorFundo = 'bg-red-50 hover:bg-red-100 border-l-4 border-red-400'; else if (isAprovada) classeCorFundo = 'bg-emerald-50 hover:bg-emerald-100 border-l-4 border-emerald-500'; else classeCorFundo = (index%2===0 ? 'bg-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100');
+                    let statusRow = String(row.status || row.status_reserva || '').toUpperCase();
+                    let statusFisicoRow = String(row.status_fisico_suite || '').toUpperCase();
+                    let isRecusada = (statusRow === 'RECUSADA' || statusFisicoRow === 'RECUSADA');
+                    let isAprovada = (statusRow === 'APROVADA');
+                    let classeCorFundo = ''; 
+                    
+                    if (isRecusada) classeCorFundo = 'bg-red-50 hover:bg-red-100 border-l-4 border-red-400'; 
+                    else if (isAprovada) classeCorFundo = 'bg-emerald-50 hover:bg-emerald-100 border-l-4 border-emerald-500'; 
+                    else classeCorFundo = (index%2===0 ? 'bg-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100');
+
                     htmlLinhas += `<tr class="${classeCorFundo} transition">`;
                     colunas.forEach(col => {
                         let valorBruto = row[col];
@@ -545,8 +559,20 @@
                                 valorExibicao = formatarDataHoraBr(valorBruto);
                             } else if (colLower.includes('checkin') || colLower.includes('checkout')) {
                                 valorExibicao = formatarDataBr(valorBruto);
-                            } else if (colLower === 'dias_restantes') { if (isRecusada) { valorExibicao = '<span class="text-gray-400">-</span>'; } else if (valorBruto !== null && valorBruto !== '' && !isNaN(valorBruto)) {
-                                    let dias = Number(valorBruto); valorExibicao = '<span class="text-emerald-700 font-bold">' + dias + ' DIAS</span>'; } else { if (row.checkin && !isRecusada) { var diff = Math.ceil((new Date(row.checkin) - new Date()) / (1000*60*60*24)); if (diff >=0) valorExibicao = '<span class="text-emerald-700 font-bold">' + diff + ' DIAS</span>'; else valorExibicao = '<span class="text-gray-400">-</span>'; } else { valorExibicao = '<span class="text-gray-400">-</span>'; } }
+                            } else if (colLower === 'dias_restantes') { 
+                                if (isRecusada) { 
+                                    valorExibicao = '<span class="text-gray-400">-</span>'; 
+                                } else if (valorBruto !== null && valorBruto !== '' && !isNaN(valorBruto)) {
+                                    let dias = Number(valorBruto); valorExibicao = '<span class="text-emerald-700 font-bold">' + dias + ' DIAS</span>'; 
+                                } else { 
+                                    if (row.checkin && !isRecusada) { 
+                                        var diff = Math.ceil((new Date(row.checkin) - new Date()) / (1000*60*60*24)); 
+                                        if (diff >=0) valorExibicao = '<span class="text-emerald-700 font-bold">' + diff + ' DIAS</span>'; 
+                                        else valorExibicao = '<span class="text-gray-400">-</span>'; 
+                                    } else { 
+                                        valorExibicao = '<span class="text-gray-400">-</span>'; 
+                                    } 
+                                }
                             } else {
                                 valorExibicao = String(valorBruto).toUpperCase();
                             }
@@ -571,7 +597,6 @@
                 tbody.innerHTML = `<tr><td colspan="14" class="py-6 text-center text-red-500">ERRO: ${err.message}</td></tr>`;
             }
         }
-
 
         window.onload = () => {
             protegerPagina();
