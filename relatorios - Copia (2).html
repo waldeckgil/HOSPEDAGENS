@@ -309,14 +309,13 @@
             let container = document.getElementById('containerFiltroStatusReservas');
             if (!container) return;
             if (viewAtualSelecionada === 'vw_gestor_reservas_relatorio') {
-                container.style.display = 'flex';
                 container.classList.remove('hidden');
+                container.classList.add('flex');
             } else {
-                container.style.display = 'none';
+                container.classList.add('hidden');
+                container.classList.remove('flex');
             }
         }
-        // Chama no load também
-        document.addEventListener('DOMContentLoaded', () => { setTimeout(atualizarVisibilidadeFiltroStatus, 500); });
 
 
         function selecionarView(nomeView, tituloAmigavel, elementoCard) {
@@ -552,19 +551,10 @@
                             } else if (colLower === 'dias_restantes') {
                                 if (isRecusada) {
                                     valorExibicao = '<span class="text-gray-400">-</span>';
-                                } else if (valorBruto !== null && valorBruto !== '' && !isNaN(valorBruto)) {
+                                } else if (!isNaN(valorBruto)) {
                                 } else {
                                     let dias = Number(valorBruto);
-                                    if (!isNaN(dias) && dias >= 0) valorExibicao = `<span class="text-emerald-700 font-bold">${dias} DIAS</span>`;
-                                    else valorExibicao = '<span class="text-gray-400">-</span>';
-                                }
-                                } else if (colLower === 'dias_restantes') {
-                                    // Se view não trouxe dias, calcula pelo checkin
-                                    if (isRecusada) valorExibicao = '<span class="text-gray-400">-</span>';
-                                    else if (row.checkin) {
-                                        let diff = Math.ceil((new Date(row.checkin) - new Date()) / (1000*60*60*24));
-                                        valorExibicao = diff >=0 ? `<span class="text-emerald-700 font-bold">${diff} DIAS</span>` : '<span class="text-gray-400">-</span>';
-                                    }
+                                    valorExibicao = `<span class="text-emerald-700 font-bold">${dias} DIAS</span>`;
                                 }
                             } else {
                                 valorExibicao = String(valorBruto).toUpperCase();
