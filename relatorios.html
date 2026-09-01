@@ -495,32 +495,52 @@
                         .order('checkin', { ascending: true });
 
                     if (!errReservas && reservasDiretas) {
-                        // Mapa de quem recusou: busca nome/email das pousadas pelos IDs
+                        // LÓGICA MASTER COALESCE: Se nome nulo → traz email
                         let idsRecusadores = [...new Set(reservasDiretas.map(r => r.recusado_por).filter(id => id && String(id).length > 20))];
-                        let mapaPousadas = {};
+                        let mapaUsuarios = {}; // user_id -> nome_completo
+                        let mapaPousadas = {}; // id -> email_admin (login)
+                        
                         if (idsRecusadores.length > 0) {
+                            // 1º TENTA: tabela usuarios (nome_completo)
+                            const { data: usuariosRecusaram } = await supabaseClient
+                                .from('usuarios')
+                                .select('user_id, nome_completo')
+                                .in('user_id', idsRecusadores);
+                            if (usuariosRecusaram) {
+                                usuariosRecusaram.forEach(u => {
+                                    // Só guarda se não for vazio e não for 'Novo Gestor'
+                                    let nome = (u.nome_completo || '').trim();
+                                    if (nome && nome.toLowerCase() !== 'novo gestor') {
+                                        mapaUsuarios[u.user_id] = nome;
+                                    }
+                                });
+                            }
+                            // 2º TENTA: tabela pousadas (email_admin = login)
                             const { data: pousadasRecusaram } = await supabaseClient
                                 .from('pousadas')
-                                .select('id, nome, email_admin, slug')
+                                .select('id, nome, email_admin')
                                 .in('id', idsRecusadores);
                             if (pousadasRecusaram) {
                                 pousadasRecusaram.forEach(p => {
-                                    mapaPousadas[p.id] = p.email_admin || p.nome || p.slug || 'Gestor'; // LOGIN = email_admin
+                                    mapaPousadas[p.id] = p.email_admin || p.nome || '';
                                 });
                             }
                         }
-                        // Fallback: se não achou na tabela pousadas, usa o nome da pousada logada
+
                         let nomePousadaLogada = document.getElementById('nomePousadaLogada')?.innerText || nomePousadaAtual || 'Gestor';
 
                         registros = reservasDiretas.map(r => {
                             let idRecusador = r.recusado_por;
                             let nomeQuemRecusou = '-';
+                            
                             if (idRecusador) {
-                                if (mapaPousadas[idRecusador]) {
-                                    nomeQuemRecusou = mapaPousadas[idRecusador];
+                                // COALESCE: nome_completo → email_admin → nome pousada → id curto
+                                if (mapaUsuarios[idRecusador]) {
+                                    nomeQuemRecusou = mapaUsuarios[idRecusador]; // Prioridade 1: Waldeck Gil Castelo Branco
+                                } else if (mapaPousadas[idRecusador] && mapaPousadas[idRecusador].trim() !== '') {
+                                    nomeQuemRecusou = mapaPousadas[idRecusador]; // Prioridade 2: waldeckgil@gmail.com (se nome nulo)
                                 } else if (String(idRecusador).length > 20) {
-                                    // Se é UUID e não achou, mostra nome da pousada logada + 8 chars do ID
-                                    nomeQuemRecusou = nomePousadaLogada !== 'nossa pousada' ? nomePousadaLogada : mapaPousadas[idRecusador] || String(idRecusador).substring(0,8) + '...';
+                                    nomeQuemRecusou = nomePousadaLogada !== 'nossa pousada' ? nomePousadaLogada : (String(idRecusador).substring(0,8) + '...');
                                 } else {
                                     nomeQuemRecusou = String(idRecusador);
                                 }
