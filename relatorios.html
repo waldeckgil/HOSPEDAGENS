@@ -495,29 +495,61 @@
                         .order('checkin', { ascending: true });
 
                     if (!errReservas && reservasDiretas) {
-                        registros = reservasDiretas.map(r => ({
-                            pousada_id: usuarioIdAtual,
-                            hospede: r.hospede_nome,
-                            suite: r.suites?.nome || 'SUÍTE NÃO INFORMADA',
-                            checkin: r.checkin,
-                            checkout: r.checkout,
-                            diarias: calcularDiarias(r.checkin, r.checkout),
-                            valor_total: r.valor_total,
-                            status_reserva: r.status,
-                            status: r.status,
-                            status_fisico_suite: r.status === 'Recusada' ? 'RECUSADA' : 'RESERVA FUTURA',
-                            whatsapp: r.whatsapp_hospede,
-                            alerta_status_reserva: r.status === 'Recusada' 
-                                ? `<span class="inline-flex items-center gap-1 bg-red-100 text-red-700 border border-red-200 px-2.5 py-0.5 rounded-full font-extrabold text-[10px]"><i class="fa-solid fa-xmark"></i> RECUSADA</span>` 
-                                : (r.checkin ? `<span class="inline-flex items-center gap-1 bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-0.5 rounded-full font-bold text-[10px]">⏳ ${Math.ceil((new Date(r.checkin) - new Date())/(1000*60*60*24))} DIAS</span>` : '-'),
-                            cpf: r.cpf,
-                            email: r.email,
-                            criado_em: r.criado_em,
-                            motivo_recusa: r.motivo_recusa || r.observacao || '-',
-                            recusado_em: r.recusado_em || r.criado_em,
-                            recusado_por: r.recusado_por || '-',
-                            observacao: r.observacao
-                        }));
+                        // Mapa de quem recusou: busca nome/email das pousadas pelos IDs
+                        let idsRecusadores = [...new Set(reservasDiretas.map(r => r.recusado_por).filter(id => id && String(id).length > 20))];
+                        let mapaPousadas = {};
+                        if (idsRecusadores.length > 0) {
+                            const { data: pousadasRecusaram } = await supabaseClient
+                                .from('pousadas')
+                                .select('id, nome, email_admin, slug')
+                                .in('id', idsRecusadores);
+                            if (pousadasRecusaram) {
+                                pousadasRecusaram.forEach(p => {
+                                    mapaPousadas[p.id] = p.nome || p.email_admin || p.slug || 'Gestor';
+                                });
+                            }
+                        }
+                        // Fallback: se não achou na tabela pousadas, usa o nome da pousada logada
+                        let nomePousadaLogada = document.getElementById('nomePousadaLogada')?.innerText || nomePousadaAtual || 'Gestor';
+
+                        registros = reservasDiretas.map(r => {
+                            let idRecusador = r.recusado_por;
+                            let nomeQuemRecusou = '-';
+                            if (idRecusador) {
+                                if (mapaPousadas[idRecusador]) {
+                                    nomeQuemRecusou = mapaPousadas[idRecusador];
+                                } else if (String(idRecusador).length > 20) {
+                                    // Se é UUID e não achou, mostra nome da pousada logada + 8 chars do ID
+                                    nomeQuemRecusou = nomePousadaLogada !== 'nossa pousada' ? nomePousadaLogada : (String(idRecusador).substring(0,8) + '...');
+                                } else {
+                                    nomeQuemRecusou = String(idRecusador);
+                                }
+                            }
+
+                            return {
+                                pousada_id: usuarioIdAtual,
+                                hospede: r.hospede_nome,
+                                suite: r.suites?.nome || 'SUÍTE NÃO INFORMADA',
+                                checkin: r.checkin,
+                                checkout: r.checkout,
+                                diarias: calcularDiarias(r.checkin, r.checkout),
+                                valor_total: r.valor_total,
+                                status_reserva: r.status,
+                                status: r.status,
+                                status_fisico_suite: r.status === 'Recusada' ? 'RECUSADA' : 'RESERVA FUTURA',
+                                whatsapp: r.whatsapp_hospede,
+                                alerta_status_reserva: r.status === 'Recusada' 
+                                    ? `<span class="inline-flex items-center gap-1 bg-red-100 text-red-700 border border-red-200 px-2.5 py-0.5 rounded-full font-extrabold text-[10px]"><i class="fa-solid fa-xmark"></i> RECUSADA</span>` 
+                                    : (r.checkin ? `<span class="inline-flex items-center gap-1 bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-0.5 rounded-full font-bold text-[10px]">⏳ ${Math.ceil((new Date(r.checkin) - new Date())/(1000*60*60*24))} DIAS</span>` : '-'),
+                                cpf: r.cpf,
+                                email: r.email,
+                                criado_em: r.criado_em,
+                                motivo_recusa: r.motivo_recusa || r.observacao || '-',
+                                recusado_em: r.recusado_em || r.criado_em,
+                                recusado_por: nomeQuemRecusou,
+                                observacao: r.observacao
+                            };
+                        });
                     }
                     error = errReservas;
                 } else {
