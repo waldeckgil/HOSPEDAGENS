@@ -299,8 +299,16 @@
         }
 
 
+
         function alterarFiltroStatusReservas(valor) {
             filtroStatusReservasAtual = valor;
+            // Atualiza visual dos botões
+            var btnA = document.getElementById('btnAprovada');
+            var btnR = document.getElementById('btnRecusada');
+            var btnT = document.getElementById('btnTodas');
+            if (btnA) { btnA.className = (valor==='APROVADA' ? 'px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500 text-white shadow-sm' : 'px-3 py-1 rounded-full text-[11px] font-bold bg-white text-emerald-600 border border-emerald-200 hover:bg-emerald-50'); }
+            if (btnR) { btnR.className = (valor==='RECUSADA' ? 'px-3 py-1 rounded-full text-[11px] font-bold bg-red-500 text-white shadow-sm' : 'px-3 py-1 rounded-full text-[11px] font-bold bg-white text-red-600 border border-red-200 hover:bg-red-50'); }
+            if (btnT) { btnT.className = (valor==='TODAS' ? 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-800 text-white shadow-sm' : 'px-3 py-1 rounded-full text-[11px] font-bold bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'); }
             carregarDadosView();
         }
         function atualizarVisibilidadeFiltroStatus() {
@@ -312,6 +320,7 @@
                 container.style.display = 'none';
             }
         }
+
 
         function selecionarView(nomeView, tituloAmigavel, elementoCard) {
             viewAtualSelecionada = nomeView;
