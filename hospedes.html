@@ -135,9 +135,6 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let usuarioIdAtual = null;
-        let todasReservasCache = [];
-        let mapaSuites = {};
-        let pagamentosPorReserva = {};
 
         function mostrarToast(mensagem, tipo = 'sucesso') {
             const toast = document.getElementById('toast-notificacao');
@@ -236,16 +233,15 @@
             }
 
             const reservas = resReservas.data || [];
-            todasReservasCache = reservas;
             const pagamentos = resPagamentos.data || [];
             const suites = resSuites.data || [];
 
-            mapaSuites = {};
+            const mapaSuites = {};
             suites.forEach(s => {
                 mapaSuites[s.id] = s.nome || s.titulo || 'Suíte sem nome';
             });
 
-            pagamentosPorReserva = {};
+            const pagamentosPorReserva = {};
             pagamentos.forEach(p => {
                 if (p.reserva_id) {
                     if (!pagamentosPorReserva[p.reserva_id]) {
@@ -404,16 +400,11 @@
         async function reenviarWhatsappPDF(reservaId) {
             try {
                 mostrarToast("Processando... Buscando comprovante PDF...");
-                let rData = null;
-                try {
-                    if (typeof todasReservasCache !== 'undefined' && todasReservasCache && todasReservasCache.length > 0) {
-                        rData = todasReservasCache.find(r => r.id === reservaId);
-                    }
-                } catch(e){ console.log("cache não disponível", e); }
+                const reserva = todasReservasCache ? todasReservasCache.find(r => r.id === reservaId) : null;
                 // fallback busca direta no supabase se cache vazio
+                let rData = reserva;
                 if (!rData) {
-                    const { data, error } = await supabaseClient.from('reservas').select('*').eq('id', reservaId).single();
-                    if (error) throw error;
+                    const { data } = await supabaseClient.from('reservas').select('*').eq('id', reservaId).single();
                     rData = data;
                 }
                 if (!rData) { mostrarToast("Reserva não encontrada", 'erro'); return; }
@@ -475,12 +466,14 @@
                 const tituloPousadaEl = document.getElementById('titulo-pousada');
                 const pousadaNome = tituloPousadaEl ? tituloPousadaEl.innerText : 'Pousada';
 
-                let textoMensagem = `Olá ${nomeHospede}, sua reserva na ${pousadaNome} foi aprovada! 🎉\n`;
+                // >>> MENSAGEM DE REENVIO - DIFERENTE DA APROVAÇÃO
+                let textoMensagem = `Olá ${nomeHospede}, estamos reenviando o comprovante da sua reserva na ${pousadaNome} 😊\n\n`;
+                textoMensagem += `Reserva efetuada:\n`;
                 textoMensagem += `Check-in: ${formatarDataSimples(rData.checkin)} | Check-out: ${formatarDataSimples(rData.checkout)}\n`;
                 textoMensagem += `Suíte: ${suiteNome}\n`;
                 textoMensagem += `Valor: R$ ${valorTotal.toLocaleString('pt-BR',{minimumFractionDigits:2})}\n\n`;
                 textoMensagem += `Acesse o comprovante completo no link abaixo:\n${pdfPublicUrl}\n\n`;
-                textoMensagem += `Esperamos você!`;
+                textoMensagem += `Qualquer dúvida estamos à disposição!`;
 
                 let apenasNumeros = whatsappRaw.replace(/\D/g, '');
                 if (apenasNumeros.length <= 11 && !apenasNumeros.startsWith('55')) apenasNumeros = '55' + apenasNumeros;
