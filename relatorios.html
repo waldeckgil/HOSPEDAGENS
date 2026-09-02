@@ -581,7 +581,7 @@
             carregarDadosView();
         }
 
-
+        
         function atualizarVisibilidadeFiltroStatus() {
             var container = document.getElementById('containerFiltroStatusReservas');
             if (!container) return;
@@ -755,13 +755,14 @@
             carregarDadosView();
         }
 
-
-function formatarDataHoraBr(valor) {
+        function formatarDataHoraBr(valor) {
             if (!valor) return '-';
             try {
                 let str = String(valor).trim();
+                // Trata formato ISO 2026-09-02T21:05:52.852031+00:00
                 let dt = new Date(str);
                 if (isNaN(dt.getTime())) {
+                    // Tenta limpar milissegundos extras
                     let limpo = str.split('.')[0].replace('T',' ').replace('Z','').substring(0,19);
                     dt = new Date(limpo);
                 }
@@ -777,8 +778,7 @@ function formatarDataHoraBr(valor) {
                 return String(valor).toUpperCase();
             }
         }
- 
-        
+
         function formatarDataBr(valor) {
             if (!valor) return '-';
             let str = String(valor).trim();
