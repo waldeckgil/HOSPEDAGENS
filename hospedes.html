@@ -135,6 +135,10 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let usuarioIdAtual = null;
+        let todasReservasCache = [];
+        let mapaSuitesGlobal = {};
+        let pagamentosPorReservaGlobal = {};
+        let nomePousadaAtual = 'Pousada';
 
         function mostrarToast(mensagem, tipo = 'sucesso') {
             const toast = document.getElementById('toast-notificacao');
@@ -233,15 +237,18 @@
             }
 
             const reservas = resReservas.data || [];
+            todasReservasCache = reservas;
             const pagamentos = resPagamentos.data || [];
             const suites = resSuites.data || [];
 
-            const mapaSuites = {};
+            mapaSuitesGlobal = {};
+            const mapaSuites = mapaSuitesGlobal;
             suites.forEach(s => {
                 mapaSuites[s.id] = s.nome || s.titulo || 'Suíte sem nome';
             });
 
-            const pagamentosPorReserva = {};
+            pagamentosPorReservaGlobal = {};
+            const pagamentosPorReserva = pagamentosPorReservaGlobal;
             pagamentos.forEach(p => {
                 if (p.reserva_id) {
                     if (!pagamentosPorReserva[p.reserva_id]) {
@@ -396,11 +403,11 @@
         }
 
         // >>> FUNÇÃO REENVIO PDF + WHATSAPP - CENÁRIO B
-        let nomePousadaAtual = 'Pousada';
         async function reenviarWhatsappPDF(reservaId) {
             try {
                 mostrarToast("Processando... Buscando comprovante PDF...");
-                const reserva = todasReservasCache ? todasReservasCache.find(r => r.id === reservaId) : null;
+                let reserva = null;
+                try { if (typeof todasReservasCache !== 'undefined' && todasReservasCache && todasReservasCache.length > 0) { reserva = todasReservasCache.find(r => r.id === reservaId); } } catch(e) { console.log('cache não disponível', e); }
                 // fallback busca direta no supabase se cache vazio
                 let rData = reserva;
                 if (!rData) {
@@ -432,7 +439,7 @@
                     doc.setFontSize(11);
                     let y = 50;
                     const nomeHospede = rData.hospede_nome || 'Hóspede';
-                    const suiteNome = mapaSuites[rData.suite_id] || 'Suíte';
+                    const suiteNome = (typeof mapaSuitesGlobal !== 'undefined' && mapaSuitesGlobal[rData.suite_id]) ? mapaSuitesGlobal[rData.suite_id] : (typeof mapaSuites !== 'undefined' && mapaSuites[rData.suite_id] ? mapaSuites[rData.suite_id] : 'Suíte') || 'Suíte';
                     doc.text(`Hospede: ${nomeHospede}`, 15, y); y+=8;
                     doc.text(`Suite: ${suiteNome}`, 15, y); y+=8;
                     doc.text(`Check-in: ${formatarDataSimples(rData.checkin)}`, 15, y); y+=8;
@@ -462,7 +469,7 @@
                 const nomeHospede = rData.hospede_nome || 'Hóspede';
                 const whatsappRaw = rData.whatsapp_hospede || '';
                 const valorTotal = Number(rData.valor_total || 0);
-                const suiteNome = mapaSuites[rData.suite_id] || 'Suíte';
+                const suiteNome = (typeof mapaSuitesGlobal !== 'undefined' && mapaSuitesGlobal[rData.suite_id]) ? mapaSuitesGlobal[rData.suite_id] : (typeof mapaSuites !== 'undefined' && mapaSuites[rData.suite_id] ? mapaSuites[rData.suite_id] : 'Suíte') || 'Suíte';
                 const tituloPousadaEl = document.getElementById('titulo-pousada');
                 const pousadaNome = tituloPousadaEl ? tituloPousadaEl.innerText : 'Pousada';
 
