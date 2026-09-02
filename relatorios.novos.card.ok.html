@@ -171,6 +171,16 @@
                                     <span class="text-[11px] text-gray-500 font-medium group-hover:text-red-700">Check-Out Hoje</span>
                                 </div>
                             </div>
+                            <!-- Check-Out Amanhã - NOVO -->
+                            <div id="cardCheckOutAmanha" onclick="filtrarPorCardHoje('checkout_amanha')" title="Clique para filtrar apenas Check-Out de amanhã" class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3 min-w-[150px] cursor-pointer hover:shadow-md hover:border-orange-300 hover:bg-orange-50/50 transition-all group">
+                                <div class="w-10 h-10 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-sm shadow-sm group-hover:scale-110 transition">
+                                    <i class="fa-solid fa-calendar-check"></i>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span id="cardCheckOutAmanhaValor" class="text-lg font-extrabold text-gray-800 leading-none">0</span>
+                                    <span class="text-[11px] text-gray-500 font-medium group-hover:text-orange-700">Check-Out Amanhã</span>
+                                </div>
+                            </div>
                             <!-- Reservas -->
                             <div id="cardReservasHoje" onclick="filtrarPorCardHoje('reservas')" title="Clique para ver todas as reservas (remover filtro de hoje)" class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3 min-w-[150px] cursor-pointer hover:shadow-md hover:border-blue-300 hover:bg-blue-50/50 transition-all group">
                                 <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm shadow-sm group-hover:scale-110 transition">
@@ -449,6 +459,18 @@
                     .neq('status', 'Recusada')
                     .neq('status', 'Cancelada');
 
+                // Check-Out Amanhã: checkout = amanhã
+                const amanha = new Date(hoje);
+                amanha.setDate(amanha.getDate() + 1);
+                const amanhaStr = amanha.toISOString().split('T')[0];
+                const { count: countCheckOutAmanha, error: errOutAmanha } = await supabaseClient
+                    .from('reservas')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('pousada_id', usuarioIdAtual)
+                    .eq('checkout', amanhaStr)
+                    .neq('status', 'Recusada')
+                    .neq('status', 'Cancelada');
+
                 // Reservas: total de reservas (TODAS) OU novas hoje - conforme solicitado, mostra total de reservas do dia ou total geral
                 // Aqui usamos total de reservas com status Aprovada para hoje + futuras (ou total geral se preferir)
                 // Para bater com print "Reservas" (não "Reservas Futuras") vamos contar TODAS as reservas Aprovadas
@@ -463,11 +485,11 @@
 
                 const elIn = document.getElementById('cardCheckInHojeValor');
                 const elOut = document.getElementById('cardCheckOutHojeValor');
+                const elOutAmanha = document.getElementById('cardCheckOutAmanhaValor');
                 const elRes = document.getElementById('cardReservasHojeValor');
                 if (elIn) elIn.innerText = (errIn ? 0 : (countCheckIn || 0));
                 if (elOut) elOut.innerText = (errOut ? 0 : (countCheckOut || 0));
-                if (elIn) elIn.innerText = (errIn ? 0 : (countCheckIn || 0));
-                if (elOut) elOut.innerText = (errOut ? 0 : (countCheckOut || 0));
+                if (elOutAmanha) elOutAmanha.innerText = (errOutAmanha ? 0 : (countCheckOutAmanha || 0));
                 if (elRes) elRes.innerText = (errRes ? 0 : (countReservas || 0));
 
             } catch (e) {
@@ -484,14 +506,15 @@
                 filtroCheckTipoHoje = tipo;
             }
 
-            // Atualiza visual dos cards
+            // Atualiza visual dos cards - INCLUI CHECK-OUT AMANHÃ
             const cardIn = document.getElementById('cardCheckInHoje');
             const cardOut = document.getElementById('cardCheckOutHoje');
+            const cardOutAmanha = document.getElementById('cardCheckOutAmanha');
             const cardRes = document.getElementById('cardReservasHoje');
             
-            [cardIn, cardOut, cardRes].forEach(c => {
+            [cardIn, cardOut, cardOutAmanha, cardRes].forEach(c => {
                 if (c) {
-                    c.classList.remove('ring-2', 'ring-violet-500', 'ring-red-500', 'ring-blue-500', 'bg-violet-50', 'bg-red-50', 'bg-blue-50', 'border-violet-400', 'border-red-400', 'border-blue-400');
+                    c.classList.remove('ring-2', 'ring-violet-500', 'ring-red-500', 'ring-orange-500', 'ring-blue-500', 'bg-violet-50', 'bg-red-50', 'bg-orange-50', 'bg-blue-50', 'border-violet-400', 'border-red-400', 'border-orange-400', 'border-blue-400');
                 }
             });
 
@@ -499,6 +522,8 @@
                 cardIn.classList.add('ring-2', 'ring-violet-500', 'bg-violet-50', 'border-violet-400');
             } else if (filtroCheckTipoHoje === 'checkout' && cardOut) {
                 cardOut.classList.add('ring-2', 'ring-red-500', 'bg-red-50', 'border-red-400');
+            } else if (filtroCheckTipoHoje === 'checkout_amanha' && cardOutAmanha) {
+                cardOutAmanha.classList.add('ring-2', 'ring-orange-500', 'bg-orange-50', 'border-orange-400');
             } else if (filtroCheckTipoHoje === 'reservas' && cardRes) {
                 cardRes.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50', 'border-blue-400');
             }
@@ -799,9 +824,12 @@
                         return true; 
                     });
 
-                    // >>> FILTRO EXTRA - CARDS HOJE (Check-In / Check-Out)
+                    // >>> FILTRO EXTRA - CARDS HOJE (Check-In / Check-Out / Check-Out Amanhã)
                     if (filtroCheckTipoHoje) {
                         const hojeStr = hojeStrGlobal || new Date().toISOString().split('T')[0];
+                        const amanhaObj = new Date();
+                        amanhaObj.setDate(amanhaObj.getDate() + 1);
+                        const amanhaStr = amanhaObj.toISOString().split('T')[0];
                         if (filtroCheckTipoHoje === 'checkin') {
                             registrosFiltrados = registrosFiltrados.filter(row => {
                                 let chk = String(row.checkin || '').substring(0,10);
@@ -811,6 +839,11 @@
                             registrosFiltrados = registrosFiltrados.filter(row => {
                                 let chk = String(row.checkout || '').substring(0,10);
                                 return chk === hojeStr;
+                            });
+                        } else if (filtroCheckTipoHoje === 'checkout_amanha') {
+                            registrosFiltrados = registrosFiltrados.filter(row => {
+                                let chk = String(row.checkout || '').substring(0,10);
+                                return chk === amanhaStr;
                             });
                         }
                     }
