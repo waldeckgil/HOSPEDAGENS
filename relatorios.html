@@ -277,7 +277,7 @@
             const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', usuarioIdAtual).single();
             
             if (pousada && pousada.nome) {
-                labelPousada.textContent = `-> ${pousada.nome}`.toUpperCase();
+                labelPousada.textContent = `${pousada.nome}`.toUpperCase();
                 labelMenu.textContent = pousada.nome.toUpperCase();
             } else {
                 labelPousada.textContent = `POUSADA ID: ${usuarioIdAtual}`;
@@ -574,7 +574,10 @@
             if (c === 'forma_pagamento') return 'FORMA';
             if (c === 'observacao') return 'OBS';
             if (c === 'whatsapp') return 'WHATSAPP';
-            if (c === 'alerta_status_tarifa') return 'ALERTA VIGÊNCIA';
+            if (c === 'alerta_status_tarifa') return 'ALERTA STATUS';
+            if (c === 'alerta_vigencia') return 'ALERTA VIGÊNCIA';
+            if (c === 'dias_restantes_vigencia') return 'DIAS P/ VENCER';
+            if (c === 'alerta_vigencia_cor') return '';
             if (c === 'alerta_status_reserva') return 'ALERTA CHECK-IN';
             if (c === 'data_inicio' || c === 'vigencia_inicio') return 'INÍCIO VIGÊNCIA';
             if (c === 'data_fim' || c === 'vigencia_fim') return 'FIM VIGÊNCIA';
@@ -613,8 +616,49 @@
                         p_data_inicio: dataInicio || '2026-01-01',
                         p_data_fim: dataFim || '2027-12-31'
                     });
-                    registros = (response.data || []).filter(row => row.pousada_id === usuarioIdAtual);
+                    let dadosBrutos = (response.data || []).filter(row => row.pousada_id === usuarioIdAtual);
                     error = response.error;
+
+                    // >>> ALERTA VIGÊNCIA - CALCULA DIAS RESTANTES PARA EXPIRAÇÃO
+                    const hoje = new Date();
+                    hoje.setHours(0,0,0,0);
+                    registros = dadosBrutos.map(row => {
+                        let vigenciaFimStr = row.vigencia_fim || row.data_fim || row.fim || '';
+                        let diasRestantes = null;
+                        let alertaTexto = '-';
+                        let alertaCor = 'gray';
+                        
+                        if (vigenciaFimStr) {
+                            let dataFim = new Date(String(vigenciaFimStr).substring(0,10));
+                            dataFim.setHours(0,0,0,0);
+                            let diffMs = dataFim - hoje;
+                            diasRestantes = Math.ceil(diffMs / (1000*60*60*24));
+                            
+                            if (diasRestantes < 0) {
+                                alertaTexto = `VENCIDA há ${Math.abs(diasRestantes)} dias`;
+                                alertaCor = 'red';
+                            } else if (diasRestantes === 0) {
+                                alertaTexto = `VENCE HOJE`;
+                                alertaCor = 'red';
+                            } else if (diasRestantes <= 3) {
+                                alertaTexto = `VENCE EM ${diasRestantes} DIAS - URGENTE`;
+                                alertaCor = 'red';
+                            } else if (diasRestantes <= 7) {
+                                alertaTexto = `VENCE EM ${diasRestantes} DIAS`;
+                                alertaCor = 'amber';
+                            } else {
+                                alertaTexto = `${diasRestantes} DIAS RESTANTES`;
+                                alertaCor = 'emerald';
+                            }
+                        }
+                        
+                        return {
+                            ...row,
+                            dias_restantes_vigencia: diasRestantes,
+                            alerta_vigencia: alertaTexto,
+                            alerta_vigencia_cor: alertaCor
+                        };
+                    });
                 } else if (ehViewFinanceiro) {
                     const { data: pagamentosData, error: errPag } = await supabaseClient
                         .from('hospede_pagamentos')
@@ -842,7 +886,7 @@
                 } else if (ehViewHospedagens) {
                     colunas = ['status_ocupacao', 'suite', 'hospede', 'checkin', 'checkout', 'status'];
                 } else {
-                    colunas = Object.keys(registrosFiltrados[0] || {}).filter(k => k !== 'pousada_id' && k !== 'reserva_id' && !k.includes('login_original') && !k.includes('nome_original') && k !== 'nome_pousada_que_recusou' && k !== 'dia_semana' && k !== 'alerta_status_reserva');
+                    colunas = Object.keys(registrosFiltrados[0] || {}).filter(k => k !== 'pousada_id' && k !== 'reserva_id' && !k.includes('login_original') && !k.includes('nome_original') && k !== 'nome_pousada_que_recusou' && k !== 'dia_semana' && k !== 'alerta_status_reserva' && k !== 'alerta_vigencia_cor');
                 }
 
                 let htmlCabecalho = '';
@@ -874,7 +918,23 @@
                         let colLower = col.toLowerCase();
 
                         if (valorBruto !== null && valorBruto !== undefined && String(valorBruto).trim() !== '') {
-                            if (colLower.includes('alerta_check_in') || colLower.includes('alerta_status')) {
+                            if (colLower.includes('alerta_vigencia') && !colLower.includes('cor')) {
+                                let cor = String(row.alerta_vigencia_cor || 'gray').toLowerCase();
+                                let badgeClass = 'bg-gray-100 text-gray-700';
+                                if (cor === 'red') badgeClass = 'bg-red-100 text-red-700 border border-red-200 animate-pulse';
+                                else if (cor === 'amber') badgeClass = 'bg-amber-100 text-amber-700 border border-amber-200';
+                                else if (cor === 'emerald') badgeClass = 'bg-emerald-100 text-emerald-700 border border-emerald-200';
+                                valorExibicao = `<span class="px-2 py-1 rounded-full text-[10px] font-extrabold uppercase ${badgeClass}">${String(valorBruto).toUpperCase()}</span>`;
+                            } else if (colLower.includes('dias_restantes_vigencia')) {
+                                if (valorBruto === null || valorBruto === undefined) {
+                                    valorExibicao = '<span class="text-gray-400">-</span>';
+                                } else {
+                                    let dias = Number(valorBruto);
+                                    let cor = dias < 0 ? 'text-red-600' : dias === 0 ? 'text-red-600 font-extrabold' : dias <=3 ? 'text-red-600' : dias <=7 ? 'text-amber-600' : 'text-emerald-600';
+                                    let texto = dias < 0 ? `${Math.abs(dias)} DIAS ATRASADA` : dias === 0 ? 'HOJE' : `${dias} DIAS`;
+                                    valorExibicao = `<span class="font-bold ${cor}">${texto}</span>`;
+                                }
+                            } else if (colLower.includes('alerta_check_in') || colLower.includes('alerta_status')) {
                                 valorExibicao = valorBruto;
                             } else if (colLower.includes('criado_em') || colLower.includes('recusado_em')) {
                                 valorExibicao = formatarDataHoraBr(valorBruto);

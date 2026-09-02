@@ -40,14 +40,12 @@
             <div class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 sm:p-6">
                 <div class="w-full max-w-[98%] mx-auto">
                     
-                    <!-- Cabeçalho -->
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+                    <!-- Cabeçalho - SISTEMA DE CONSULTAS CENTRALIZADO -->
+                    <div class="flex flex-col items-center justify-center mb-6 gap-2 text-center">
                         <div>
-                            <h1 class="text-lg sm:text-xl font-bold text-gray-800">Sistema de Consultas </h1>
-                            <p id="nomePousadaLogada" class="text-xs font-semibold text-blue-600 mt-0.5">Carregando dados...</p>
-                        </div>
-                        <div class="text-[11px] text-gray-500 bg-white px-3 py-1 rounded-lg border border-gray-200 shadow-sm">
-                            Clique em um card para alternar a consulta
+                            <h1 class="text-xl sm:text-2xl font-extrabold text-gray-800 tracking-wide">Gestão completa de reservas, ocupação e financeiro</h1>
+                            <p id="nomePousadaLogada" class="text-sm font-bold text-blue-600 mt-1 uppercase tracking-wider">Carregando dados...</p>
+                            <p class="text-[11px] text-gray-500 mt-1">Sistema de Consultas detalhadas</p>
                         </div>
                     </div>
 
@@ -279,7 +277,7 @@
             const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', usuarioIdAtual).single();
             
             if (pousada && pousada.nome) {
-                labelPousada.textContent = `Pousada: ${pousada.nome}`.toUpperCase();
+                labelPousada.textContent = `${pousada.nome}`.toUpperCase();
                 labelMenu.textContent = pousada.nome.toUpperCase();
             } else {
                 labelPousada.textContent = `POUSADA ID: ${usuarioIdAtual}`;
@@ -702,13 +700,14 @@
                 let registrosFiltrados = registros;
 
                 if (ehViewReservas) {
+                    // >>> RESERVAS = SOMENTE RESERVAS (APROVADA/RECUSADA) COM DATAS FUTURAS - NÃO MOSTRA STATUS FÍSICO DA SUÍTE
                     registrosFiltrados = registrosFiltrados.filter(row => {
                         let status = String(row.status || row.status_reserva || '').toUpperCase();
-                        let statusFisico = String(row.status_fisico_suite || '').toUpperCase();
-                        let isRecusada = (status === 'RECUSADA' || statusFisico === 'RECUSADA');
-                        let isAprovada = (status === 'APROVADA' || statusFisico === 'APROVADA');
+                        // Considera apenas status da reserva, não status físico
+                        let isRecusada = (status === 'RECUSADA' || status === 'CANCELADA');
+                        let isAprovada = (status === 'APROVADA');
 
-                        if (filtroStatusReservasAtual === 'APROVADA') return isAprovada && !isRecusada;
+                        if (filtroStatusReservasAtual === 'APROVADA') return isAprovada;
                         if (filtroStatusReservasAtual === 'RECUSADA') return isRecusada;
                         return true; 
                     });
@@ -727,7 +726,6 @@
                                 return chk === hojeStr;
                             });
                         }
-                        // 'reservas' = mostra todas, sem filtro extra
                     }
                 } else if (!ehViewTarifas && !ehViewHospedagens) {
                     registrosFiltrados = registrosFiltrados.filter(row => {
@@ -840,7 +838,7 @@
 
                 let colunas = [];
                 if (ehViewReservas) {
-                    colunas = ['status', 'status_fisico_suite', 'suite', 'hospede', 'checkin', 'checkout', 'dias_restantes', 'alerta_check_in', 'whatsapp', 'cpf', 'email', 'criado_em', 'motivo_recusa', 'recusado_em', 'recusado_por', 'obs'];
+                    colunas = ['status', 'suite', 'hospede', 'checkin', 'checkout', 'dias_restantes', 'alerta_check_in', 'whatsapp', 'cpf', 'email', 'criado_em', 'motivo_recusa', 'recusado_em', 'recusado_por', 'obs'];
                 } else if (ehViewHospedagens) {
                     colunas = ['status_ocupacao', 'suite', 'hospede', 'checkin', 'checkout', 'status'];
                 } else {
