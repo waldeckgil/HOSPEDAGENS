@@ -6,7 +6,6 @@
     <title>Gestão de Hóspedes</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col md:flex-row" onload="inicializarPagina()">
@@ -108,7 +107,7 @@
                         </thead>
                         <tbody id="tabela-hospedes-corpo" class="divide-y divide-gray-100 text-sm text-gray-700">
                             <tr>
-                                <td colspan="8" class="p-8 text-center text-gray-500 italic">Carregando histórico de hóspedes...</td>
+                                <td colspan="7" class="p-8 text-center text-gray-500 italic">Carregando histórico de hóspedes...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -296,7 +295,7 @@
             document.getElementById('contador-resultados').innerText = `${filtrados.length} registro(s) encontrado(s)`;
 
             if (filtrados.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-gray-500 italic">Nenhum hóspede encontrado com os critérios informados.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-500 italic">Nenhum hóspede encontrado com os critérios informados.</td></tr>`;
                 return;
             }
 
@@ -310,13 +309,10 @@
 
                 const nomeSuite = mapaSuites[r.suite_id] || 'Suíte não informada';
 
-                // >>> WA.ME DIRETO + HOVER - CENÁRIO B
-                let whatsAppHtml = '<span class="text-gray-400 italic text-xs">Sem WhatsApp</span>';
+                let whatsAppHtml = 'Sem WhatsApp';
                 if (r.whatsapp_hospede) {
-                    let numeroLimpo = r.whatsapp_hospede.replace(/\D/g, '');
-                    if (numeroLimpo.length <= 11 && !numeroLimpo.startsWith('55')) numeroLimpo = '55' + numeroLimpo;
-                    else if (numeroLimpo.length > 11 && !numeroLimpo.startsWith('55')) numeroLimpo = '55' + numeroLimpo;
-                    whatsAppHtml = `<a href="https://wa.me/${numeroLimpo}" target="_blank" class="text-emerald-700 hover:text-emerald-900 font-bold flex items-center gap-1.5 transition hover:underline group" title="Falar com ${r.hospede_nome || 'hóspede'} no WhatsApp - Clique para abrir"><i class="fa-brands fa-whatsapp text-sm group-hover:scale-110 transition"></i> ${r.whatsapp_hospede} <span class="text-[10px] opacity-0 group-hover:opacity-100 transition">💬</span></a>`;
+                    const numeroLimpo = r.whatsapp_hospede.replace(/\D/g, '');
+                    whatsAppHtml = `<a href="https://wa.me/55${numeroLimpo}" target="_blank" class="text-emerald-700 hover:text-emerald-900 font-medium flex items-center gap-1 transition" title="Abrir WhatsApp"><i class="fa-brands fa-whatsapp text-sm"></i> ${r.whatsapp_hospede}</a>`;
                 }
 
                 const valorTotal = Number(r.valor_total || 0);
@@ -334,27 +330,6 @@
                     badgeQuitacao = `<span class="px-2 py-0.5 rounded text-[10px] bg-blue-100 text-blue-800 font-bold">Parcialmente Pago</span>`;
                 } else {
                     badgeQuitacao = `<span class="px-2 py-0.5 rounded text-[10px] bg-amber-100 text-amber-800 font-bold">Saldo Pendente</span>`;
-                }
-
-                // >>> COMPROVANTE - VER PDF + REENVIAR WHATSAPP - CENÁRIO B
-                let comprovanteHtml = '';
-                if (r.pdf_url) {
-                    comprovanteHtml = `
-                        <div class="flex flex-col gap-1.5 min-w-[130px]">
-                            <a href="${r.pdf_url}" target="_blank" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-2.5 py-1.5 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1.5 transition" title="Abrir PDF definitivo">
-                                📄 Ver PDF
-                            </a>
-                            <button onclick="reenviarWhatsappPDF('${r.id}')" class="bg-green-600 hover:bg-green-700 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1.5 transition shadow-sm" title="Reenviar comprovante via WhatsApp">
-                                📲 Reenviar WhatsApp
-                            </button>
-                        </div>
-                    `;
-                } else {
-                    if (r.status === 'Aprovada') {
-                        comprovanteHtml = `<button onclick="reenviarWhatsappPDF('${r.id}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300 px-2.5 py-1.5 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1 transition">⚠️ Gerar PDF</button>`;
-                    } else {
-                        comprovanteHtml = `<span class="text-[10px] text-gray-400 italic">Sem PDF<br/>(${r.status})</span>`;
-                    }
                 }
 
                 tbody.innerHTML += `
@@ -386,109 +361,10 @@
                         <td class="p-4 text-xs text-gray-500">
                             ${formatarDataHora(r.criado_em)}
                         </td>
-                        <td class="p-4">
-                            ${comprovanteHtml}
-                        </td>
                     </tr>
                 `;
             });
         }
-
-        // >>> FUNÇÃO REENVIO PDF + WHATSAPP - CENÁRIO B
-        async function reenviarWhatsappPDF(reservaId) {
-            try {
-                const toastDiv = document.createElement('div');
-                // usa mostrarToast se existir, senão alert
-                if (typeof mostrarToast === 'function') mostrarToast("Processando", "Buscando comprovante PDF... ⏳");
-                
-                const reserva = todasReservasCache.find(r => r.id === reservaId);
-                if (!reserva) {
-                    if (typeof mostrarToast === 'function') mostrarToast("Erro", "Reserva não encontrada no cache", true);
-                    else alert("Reserva não encontrada");
-                    return;
-                }
-
-                let pdfPublicUrl = reserva.pdf_url;
-
-                // Se não tem pdf_url mas está aprovada (caso antigo) - gera agora com jsPDF
-                if (!pdfPublicUrl && reserva.status === 'Aprovada') {
-                    if (typeof mostrarToast === 'function') mostrarToast("Gerando", "Gerando PDF agora (caso antigo)...");
-                    const { jsPDF } = window.jspdf;
-                    const doc = new jsPDF();
-                    doc.setFillColor(37, 99, 235);
-                    doc.rect(0, 0, 210, 25, 'F');
-                    doc.setTextColor(255,255,255);
-                    doc.setFontSize(16);
-                    doc.setFont(undefined, 'bold');
-                    doc.text((nomePousadaAtual || 'POUSADA').toUpperCase(), 105, 15, { align: 'center' });
-                    doc.setTextColor(0,0,0);
-                    doc.setFontSize(12);
-                    doc.setFont(undefined, 'bold');
-                    doc.text("COMPROVANTE DE RESERVA APROVADA", 105, 35, { align: 'center' });
-                    doc.setFont(undefined, 'normal');
-                    doc.setFontSize(11);
-                    let y = 50;
-                    const nomeHospede = reserva.hospede_nome || 'Hóspede';
-                    const suiteNome = mapaSuites[reserva.suite_id] || reserva.suites?.nome || 'Suíte';
-                    doc.text(`Hóspede: ${nomeHospede}`, 15, y); y+=8;
-                    doc.text(`Suíte: ${suiteNome}`, 15, y); y+=8;
-                    doc.text(`Check-in: ${formatarDataSimples(reserva.checkin)}`, 15, y); y+=8;
-                    doc.text(`Check-out: ${formatarDataSimples(reserva.checkout)}`, 15, y); y+=8;
-                    doc.text(`Valor Total: R$ ${Number(reserva.valor_total||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}`, 15, y); y+=8;
-                    doc.text(`WhatsApp: ${reserva.whatsapp_hospede||''}`, 15, y); y+=8;
-                    doc.text(`Status: APROVADA`, 15, y); y+=15;
-                    doc.setFontSize(10);
-                    doc.setTextColor(100,100,100);
-                    doc.text(`Reserva ID: ${reservaId}`, 15, y); y+=6;
-                    doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 15, y); y+=6;
-                    doc.text(`Pousada ID: ${usuarioIdAtual}`, 15, y);
-                    doc.setFontSize(9);
-                    doc.text("Obrigado pela preferência!", 105, 280, { align: 'center' });
-                    const pdfBlob = doc.output('blob');
-                    const filePath = `aprovadas/${usuarioIdAtual}/${reservaId}.pdf`;
-                    const { error: uploadError } = await supabaseClient.storage.from('comprovantes').upload(filePath, pdfBlob, { contentType: 'application/pdf', upsert: true });
-                    if (uploadError) throw uploadError;
-                    const { data: urlData } = supabaseClient.storage.from('comprovantes').getPublicUrl(filePath);
-                    pdfPublicUrl = urlData.publicUrl;
-                    await supabaseClient.from('reservas').update({ pdf_url: pdfPublicUrl }).eq('id', reservaId);
-                    reserva.pdf_url = pdfPublicUrl;
-                }
-
-                if (!pdfPublicUrl) {
-                    if (typeof mostrarToast === 'function') mostrarToast("Erro", "Esta reserva não possui PDF (não está aprovada)", true);
-                    return;
-                }
-
-                const nomeHospede = reserva.hospede_nome || 'Hóspede';
-                const whatsappRaw = reserva.whatsapp_hospede || '';
-                const valorTotal = Number(reserva.valor_total || 0);
-                const suiteNome = mapaSuites[reserva.suite_id] || reserva.suites?.nome || 'Suíte';
-
-                let textoMensagem = `Olá ${nomeHospede}, sua reserva na ${nomePousadaAtual} foi aprovada! 🎉\n`;
-                textoMensagem += `Check-in: ${formatarDataSimples(reserva.checkin)} | Check-out: ${formatarDataSimples(reserva.checkout)}\n`;
-                textoMensagem += `Suíte: ${suiteNome}\n`;
-                textoMensagem += `Valor: R$ ${valorTotal.toLocaleString('pt-BR',{minimumFractionDigits:2})}\n\n`;
-                textoMensagem += `Acesse o comprovante completo no link abaixo:\n${pdfPublicUrl}\n\n`;
-                textoMensagem += `Esperamos você!`;
-
-                let apenasNumeros = whatsappRaw.replace(/\D/g, '');
-                if (apenasNumeros.length <= 11 && !apenasNumeros.startsWith('55')) apenasNumeros = '55' + apenasNumeros;
-                else if (apenasNumeros.length > 11 && !apenasNumeros.startsWith('55')) apenasNumeros = '55' + apenasNumeros;
-
-                const urlWhatsapp = `https://wa.me/${apenasNumeros}?text=${encodeURIComponent(textoMensagem)}`;
-                if (typeof mostrarToast === 'function') mostrarToast("Sucesso", "Abrindo WhatsApp com comprovante... ✅");
-                window.open(urlWhatsapp, '_blank');
-                // recarrega lista para atualizar pdf_url se foi gerado agora
-                setTimeout(() => carregarHistoricoHospedes(), 1500);
-
-            } catch (err) {
-                console.error("Erro reenvio PDF:", err);
-                if (typeof mostrarToast === 'function') mostrarToast("Erro", "Falha: " + err.message, true);
-                else alert("Erro: " + err.message);
-            }
-        }
-
-        function limparFiltros() {
 
         function limparFiltros() {
             document.getElementById('filtro-texto').value = '';
@@ -507,6 +383,5 @@
             if (e.key === 'Enter') carregarHistoricoHospedes();
         });
     </script>
-<div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
 </body>
 </html>
