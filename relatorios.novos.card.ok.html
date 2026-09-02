@@ -1187,14 +1187,18 @@
                     classe = "bg-gray-100 text-gray-400 border border-gray-200 opacity-60";
                     tooltip = "Data passada";
                 } else if (estaOcupado) {
-                    classe = "bg-slate-700 text-white border border-slate-800 font-bold shadow-sm";
+                    classe = "bg-red-100 text-red-700 border border-red-200 font-bold shadow-sm relative overflow-hidden";
                     tooltip = "Ocupado - com reserva futura";
                 } else {
                     classe = "bg-emerald-100 text-emerald-800 border border-emerald-200 hover:bg-emerald-200 font-bold";
                     tooltip = "Livre - disponível para reserva";
                 }
                 const isHoje = dataIso === hojeStr ? 'ring-2 ring-blue-500' : '';
-                grid.innerHTML += `<div title="${tooltip} ${dataIso}" class="h-8 flex items-center justify-center rounded-lg text-[11px] ${classe} ${isHoje}">${dia}</div>`;
+                let conteudoDia = `${dia}`;
+                if (estaOcupado) {
+                    conteudoDia = `${dia}<span class="absolute inset-0 flex items-center justify-center text-white font-extrabold text-[16px] leading-none" style="text-shadow: 0 0 3px rgba(239,68,68,0.9);">✕</span>`;
+                }
+                grid.innerHTML += `<div title="${tooltip} ${dataIso}" class="h-8 flex items-center justify-center rounded-lg text-[11px] ${classe} ${isHoje} relative">${conteudoDia}</div>`;
             }
         }
 
@@ -1212,7 +1216,7 @@
                 <span class="text-xl">📅</span>
                 <h3 id="cal-suite-nome" class="text-lg font-bold text-gray-900">Calendário da Suíte</h3>
             </div>
-            <p class="text-xs text-gray-600 font-medium mb-4">Dias em <strong class="bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">verde</strong> livres. <strong class="bg-slate-700 text-white px-1.5 py-0.5 rounded">cinza escuro</strong> ocupados.</p>
+            <p class="text-xs text-gray-600 font-medium mb-4">Dias em <strong class="bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">verde</strong> livres. <strong class="bg-red-100 text-red-700 border border-red-200 px-1.5 py-0.5 rounded">vermelho claro com X</strong> ocupados.</p>
             <div class="flex justify-between items-center mb-4 bg-gray-50 p-2.5 rounded-xl border border-gray-200">
                 <button onclick="mudarMesCalendario(-1)" class="px-3 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-xs">◀ Mês Anterior</button>
                 <strong id="cal-mes-ano" class="text-xs sm:text-sm font-bold text-gray-800 uppercase">MÊS / ANO</strong>
@@ -1224,7 +1228,7 @@
             <div id="cal-grid-dias" class="grid grid-cols-7 gap-1.5 text-center text-xs"></div>
             <div class="mt-4 flex items-center justify-center gap-4 text-[10px]">
                 <span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-100 border border-emerald-200 rounded"></span> Livre</span>
-                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-slate-700 rounded"></span> Ocupado</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-red-100 border border-red-200 rounded relative flex items-center justify-center"><span class="text-[8px] text-red-600 font-bold">✕</span></span> Ocupado</span>
                 <span class="flex items-center gap-1"><span class="w-3 h-3 bg-gray-100 border rounded"></span> Passado</span>
             </div>
             <div class="mt-6 flex justify-end">
