@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-100 font-sans antialiased">
-
+    
     <div class="flex h-screen bg-gray-100 overflow-hidden">
         
         <!-- MENU LATERAL COMPACTADO -->
@@ -71,7 +71,7 @@
                                 </div>
                                 <span class="text-[9px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">HOSPEDAGENS</span>
                             </div>
-                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-emerald-700 transition">Ocupação das Suites</h3>
+                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-emerald-700 transition">Status Geral de Ocupação das Suites</h3>
                             <p class="text-[11px] text-gray-500 mt-0.5 truncate">Cruzamento de nomes e acomodações.</p>
                         </div>
 
@@ -136,6 +136,26 @@
                                 <div class="col-span-full py-4 text-center text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO OCUPAÇÃO...</div>
                             </div>
                         </div>
+
+                    <!-- DASHBOARD GRÁFICO DE OCUPAÇÃO POR SUÍTE - NOVO -->
+                    <div id="containerGraficoOcupacao" class="hidden mb-5">
+                        <div class="bg-white rounded-xl shadow-sm border border-amber-200 p-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-[11px] font-extrabold text-amber-700 uppercase tracking-widest flex items-center gap-2">
+                                    <i class="fa-solid fa-chart-bar"></i> DASHBOARD - SUÍTE MAIS OCUPADA NO PERÍODO (SÓ FINALIZADAS)
+                                    <span id="badgePeriodoGrafico" class="ml-2 bg-amber-600 text-white px-2 py-0.5 rounded-full text-[9px]">PERÍODO</span>
+                                </span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] text-gray-400">Respeita filtro DE/ATÉ acima</span>
+                                    <button onclick="toggleGraficoOcupacao()" class="text-[10px] text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 px-2.5 py-1 rounded-full"><i class="fa-solid fa-xmark mr-1"></i> Fechar</button>
+                                </div>
+                            </div>
+                            <div id="graficoBarrasOcupacao" class="space-y-3">
+                                <div class="py-8 text-center text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO GRÁFICO...</div>
+                            </div>
+                            <p class="text-[10px] text-gray-400 mt-3">Gráfico mostra total de diárias ocupadas por suíte no período filtrado (DE/ATÉ). Conta SOMENTE reservas com status <strong>Finalizada</strong> (checkout feito no dashboard). Suíte foi ocupada = Finalizada. Mais diárias = mais ocupada no período.</p>
+                        </div>
+                    </div>
                     </div>
 
                     <!-- FILTRO POR SUÍTE - VISÃO FINANCEIRA -->
@@ -587,6 +607,113 @@
             }
         }
 
+        // >>> DASHBOARD GRÁFICO DE OCUPAÇÃO - NOVO
+        let graficoVisivel = false;
+        function toggleGraficoOcupacao() {
+            const container = document.getElementById('containerGraficoOcupacao');
+            const card = document.getElementById('cardGraficoOcupacao');
+            if (!container) return;
+            graficoVisivel = !graficoVisivel;
+            if (graficoVisivel) {
+                container.classList.remove('hidden');
+                if (card) card.classList.add('ring-2', 'ring-amber-500', 'bg-amber-50', 'border-amber-500');
+                carregarGraficoOcupacao();
+            } else {
+                container.classList.add('hidden');
+                if (card) card.classList.remove('ring-2', 'ring-amber-500', 'bg-amber-50', 'border-amber-500');
+            }
+        }
+
+
+        
+        async function carregarGraficoOcupacao() {
+            const grid = document.getElementById('graficoBarrasOcupacao');
+            const badge = document.getElementById('badgePeriodoGrafico');
+            if (!grid) return;
+            grid.innerHTML = '<div class="py-4 text-center text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CALCULANDO OCUPAÇÃO REAL (SOBREPOSIÇÃO)...</div>';
+            try {
+                const dataInicio = document.getElementById('filtroDataInicio')?.value || document.getElementById('filtroDataInicioHosp')?.value || '';
+                const dataFim = document.getElementById('filtroDataFim')?.value || document.getElementById('filtroDataFimHosp')?.value || '';
+                if (badge) {
+                    if (dataInicio && dataFim) badge.textContent = `${dataInicio.split('-').reverse().join('/')} ATÉ ${dataFim.split('-').reverse().join('/')}`;
+                    else if (dataInicio) badge.textContent = `A PARTIR DE ${dataInicio.split('-').reverse().join('/')}`;
+                    else if (dataFim) badge.textContent = `ATÉ ${dataFim.split('-').reverse().join('/')}`;
+                    else badge.textContent = 'TODO PERÍODO';
+                }
+
+                // >>> REGRA DE NEGÓCIO FINAL - SÓ FINALIZADA NO PERÍODO = MAIS OCUPADA NO PERÍODO
+                // Você está certo, ADMINISTRADOR: só entra no dashboard se status = Finalizada (checkout feito no dashboard)
+                // Aprovada é futura, ainda não deu lucro. Finalizada é histórico real já pago e finalizado.
+                let query = supabaseClient.from('reservas').select('id, suite_id, checkin, checkout, status,  suites ( nome )').eq('pousada_id', usuarioIdAtual).eq('status', 'Finalizada');
+                if (dataInicio && dataFim) {
+                    query = query.lte('checkin', dataFim).gte('checkout', dataInicio);
+                } else if (dataInicio) {
+                    query = query.gte('checkout', dataInicio);
+                } else if (dataFim) {
+                    query = query.lte('checkin', dataFim);
+                }
+                const { data: reservas, error } = await query;
+                if (error) throw error;
+
+                const { data: todasSuites } = await supabaseClient.from('suites').select('id, nome').eq('pousada_id', usuarioIdAtual).order('nome');
+                const mapa = {};
+                (todasSuites || []).forEach(s => { mapa[s.id] = { nome: s.nome, diarias: 0, reservas: 0, detalhes: [] }; });
+
+                (reservas || []).forEach(r => {
+                    const id = r.suite_id;
+                    if (!mapa[id]) mapa[id] = { nome: r.suites?.nome || 'SUÍTE', diarias: 0, reservas: 0, detalhes: [] };
+                    let rCheckin = new Date(String(r.checkin).substring(0,10) + 'T00:00:00');
+                    let rCheckout = new Date(String(r.checkout).substring(0,10) + 'T00:00:00');
+                    let fInicio = dataInicio ? new Date(dataInicio + 'T00:00:00') : rCheckin;
+                    let fFim = dataFim ? new Date(dataFim + 'T00:00:00') : rCheckout;
+                    // Sobreposição: max(inicio) e min(fim)
+                    let overlapInicio = new Date(Math.max(rCheckin.getTime(), fInicio.getTime()));
+                    let overlapFim = new Date(Math.min(rCheckout.getTime(), fFim.getTime()));
+                    let diff = Math.ceil((overlapFim - overlapInicio) / (1000*60*60*24));
+                    if (isNaN(diff) || diff < 0) diff = 0;
+                    // Se não há filtro, conta tudo
+                    if (!dataInicio && !dataFim) {
+                        diff = Math.ceil((rCheckout - rCheckin) / (1000*60*60*24));
+                    }
+                    if (diff > 0) {
+                        mapa[id].diarias += diff;
+                        mapa[id].reservas += 1;
+                        mapa[id].detalhes.push(`${String(r.checkin).substring(0,10)} → ${String(r.checkout).substring(0,10)} (${diff}d) [${r.status}]`);
+                    }
+                });
+
+                const lista = Object.values(mapa).sort((a,b) => b.diarias - a.diarias);
+                if (lista.length === 0) { grid.innerHTML = '<div class="py-6 text-center text-gray-500 text-xs">NENHUMA SUÍTE CADASTRADA</div>'; return; }
+                const maxDiarias = Math.max(...lista.map(i => i.diarias), 1);
+                let htmlChart = '';
+                lista.forEach(item => {
+                    const perc = item.diarias === 0 ? 0 : Math.max(5, Math.round((item.diarias / maxDiarias) * 100));
+                    const cor = perc >= 70 ? 'bg-emerald-500' : perc >= 40 ? 'bg-blue-500' : perc >= 10 ? 'bg-amber-500' : 'bg-gray-200';
+                    const corTexto = perc >= 70 ? 'text-emerald-700' : perc >= 40 ? 'text-blue-700' : perc >= 10 ? 'text-amber-700' : 'text-gray-400';
+                    const tooltip = item.detalhes.join(' | ');
+                    htmlChart += `
+                        <div class="flex items-center gap-3 group" title="${tooltip}">
+                            <div class="w-32 sm:w-40 text-[11px] font-bold text-gray-700 uppercase truncate text-right">${item.nome}</div>
+                            <div class="flex-1 bg-gray-100 rounded-full h-6 relative overflow-hidden border border-gray-200">
+                                <div class="${cor} h-6 rounded-full transition-all duration-700 flex items-center justify-end pr-2" style="width: ${perc}%">
+                                    <span class="text-[10px] font-bold text-white">${item.diarias} diárias</span>
+                                </div>
+                            </div>
+                            <div class="w-20 text-[10px] ${corTexto} font-bold">${item.reservas} reserva(s)</div>
+                        </div>
+                    `;
+                });
+                grid.innerHTML = htmlChart;
+                
+                // Log para debug no console para você bater com SQL
+                console.log('GRAFICO DEBUG - Reservas consideradas:', reservas);
+                console.log('GRAFICO DEBUG - Mapa por suite:', mapa);
+            } catch (e) {
+                console.error('Erro grafico ocupacao', e);
+                grid.innerHTML = `<div class="py-4 text-center text-red-500 text-xs">ERRO: ${e.message}</div>`;
+            }
+        }
+
         function sincronizarFiltrosData(origem, valor) {
             // Sincroniza os 4 inputs de data (tabela + lateral)
             var ids = ['filtroDataInicio', 'filtroDataFim', 'filtroDataInicioHosp', 'filtroDataFimHosp'];
@@ -951,7 +1078,7 @@
                     let totalSuites = registros.length;
                     let ocupadas = registros.filter(r => r.status_ocupacao === 'OCUPADA / RESERVADA').length;
                     let disponiveis = totalSuites - ocupadas;
-                    // >>> LAYOUT COMPACTO LADO A LADO - CARDS PEQUENOS COMO RESERVAS - NÃO PRECISA ROLAR
+                    // >>> LAYOUT COMPACTO LADO A LADO - CARDS PEQUENOS + NOVO CARD GRÁFICO
                     containerKpis.className = "flex flex-wrap gap-3 mb-5";
                     containerKpis.innerHTML = `
                         <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3 min-w-[160px] hover:shadow-md transition">
@@ -973,6 +1100,13 @@
                             <div class="flex flex-col">
                                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Disponíveis</span>
                                 <span class="text-base font-extrabold text-emerald-600 leading-none">${disponiveis} SUÍTES</span>
+                            </div>
+                        </div>
+                        <div onclick="toggleGraficoOcupacao()" id="cardGraficoOcupacao" class="bg-white p-3 rounded-xl border-2 border-amber-300 shadow-sm flex items-center gap-3 min-w-[180px] hover:shadow-md hover:border-amber-500 hover:bg-amber-50/50 transition cursor-pointer group">
+                            <div class="w-10 h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-sm group-hover:scale-110 transition"><i class="fa-solid fa-chart-column"></i></div>
+                            <div class="flex flex-col">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-amber-700">Dashboard</span>
+                                <span class="text-[11px] font-extrabold text-gray-800 leading-none group-hover:text-amber-700">Suíte Mais Ocupada</span>
                             </div>
                         </div>
                     `;
