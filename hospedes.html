@@ -181,7 +181,8 @@
             document.getElementById('nome-pousada-sidebar').innerText = nomePousada;
             document.getElementById('titulo-pousada').innerText = nomePousada;
 
-            document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${user.id}`;
+            const linkVitrineEl = document.getElementById('link-ver-vitrine');
+            if (linkVitrineEl) linkVitrineEl.href = window.location.origin + `/vitrine.html?pousada_id=${user.id}`;
 
             carregarHistoricoHospedes();
         }
@@ -395,24 +396,23 @@
         }
 
         // >>> FUNÇÃO REENVIO PDF + WHATSAPP - CENÁRIO B
+        let nomePousadaAtual = 'Pousada';
         async function reenviarWhatsappPDF(reservaId) {
             try {
-                const toastDiv = document.createElement('div');
-                // usa mostrarToast se existir, senão alert
-                if (typeof mostrarToast === 'function') mostrarToast("Processando", "Buscando comprovante PDF... ⏳");
-                
-                const reserva = todasReservasCache.find(r => r.id === reservaId);
-                if (!reserva) {
-                    if (typeof mostrarToast === 'function') mostrarToast("Erro", "Reserva não encontrada no cache", true);
-                    else alert("Reserva não encontrada");
-                    return;
+                mostrarToast("Processando... Buscando comprovante PDF...");
+                const reserva = todasReservasCache ? todasReservasCache.find(r => r.id === reservaId) : null;
+                // fallback busca direta no supabase se cache vazio
+                let rData = reserva;
+                if (!rData) {
+                    const { data } = await supabaseClient.from('reservas').select('*').eq('id', reservaId).single();
+                    rData = data;
                 }
+                if (!rData) { mostrarToast("Reserva não encontrada", 'erro'); return; }
 
-                let pdfPublicUrl = reserva.pdf_url;
+                let pdfPublicUrl = rData.pdf_url;
 
-                // Se não tem pdf_url mas está aprovada (caso antigo) - gera agora com jsPDF
-                if (!pdfPublicUrl && reserva.status === 'Aprovada') {
-                    if (typeof mostrarToast === 'function') mostrarToast("Gerando", "Gerando PDF agora (caso antigo)...");
+                if (!pdfPublicUrl && rData.status === 'Aprovada') {
+                    mostrarToast("Gerando PDF agora (caso antigo)...");
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF();
                     doc.setFillColor(37, 99, 235);
@@ -420,7 +420,10 @@
                     doc.setTextColor(255,255,255);
                     doc.setFontSize(16);
                     doc.setFont(undefined, 'bold');
-                    doc.text((nomePousadaAtual || 'POUSADA').toUpperCase(), 105, 15, { align: 'center' });
+                    const nomePousadaEl = document.getElementById('titulo-pousada');
+                    const nomePousadaTxt = nomePousadaEl ? nomePousadaEl.innerText : 'Pousada';
+                    nomePousadaAtual = nomePousadaTxt;
+                    doc.text(nomePousadaTxt.toUpperCase(), 105, 15, { align: 'center' });
                     doc.setTextColor(0,0,0);
                     doc.setFontSize(12);
                     doc.setFont(undefined, 'bold');
@@ -428,14 +431,14 @@
                     doc.setFont(undefined, 'normal');
                     doc.setFontSize(11);
                     let y = 50;
-                    const nomeHospede = reserva.hospede_nome || 'Hóspede';
-                    const suiteNome = mapaSuites[reserva.suite_id] || reserva.suites?.nome || 'Suíte';
-                    doc.text(`Hóspede: ${nomeHospede}`, 15, y); y+=8;
-                    doc.text(`Suíte: ${suiteNome}`, 15, y); y+=8;
-                    doc.text(`Check-in: ${formatarDataSimples(reserva.checkin)}`, 15, y); y+=8;
-                    doc.text(`Check-out: ${formatarDataSimples(reserva.checkout)}`, 15, y); y+=8;
-                    doc.text(`Valor Total: R$ ${Number(reserva.valor_total||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}`, 15, y); y+=8;
-                    doc.text(`WhatsApp: ${reserva.whatsapp_hospede||''}`, 15, y); y+=8;
+                    const nomeHospede = rData.hospede_nome || 'Hóspede';
+                    const suiteNome = mapaSuites[rData.suite_id] || 'Suíte';
+                    doc.text(`Hospede: ${nomeHospede}`, 15, y); y+=8;
+                    doc.text(`Suite: ${suiteNome}`, 15, y); y+=8;
+                    doc.text(`Check-in: ${formatarDataSimples(rData.checkin)}`, 15, y); y+=8;
+                    doc.text(`Check-out: ${formatarDataSimples(rData.checkout)}`, 15, y); y+=8;
+                    doc.text(`Valor Total: R$ ${Number(rData.valor_total||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}`, 15, y); y+=8;
+                    doc.text(`WhatsApp: ${rData.whatsapp_hospede||''}`, 15, y); y+=8;
                     doc.text(`Status: APROVADA`, 15, y); y+=15;
                     doc.setFontSize(10);
                     doc.setTextColor(100,100,100);
@@ -443,7 +446,7 @@
                     doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 15, y); y+=6;
                     doc.text(`Pousada ID: ${usuarioIdAtual}`, 15, y);
                     doc.setFontSize(9);
-                    doc.text("Obrigado pela preferência!", 105, 280, { align: 'center' });
+                    doc.text("Obrigado pela preferencia!", 105, 280, { align: 'center' });
                     const pdfBlob = doc.output('blob');
                     const filePath = `aprovadas/${usuarioIdAtual}/${reservaId}.pdf`;
                     const { error: uploadError } = await supabaseClient.storage.from('comprovantes').upload(filePath, pdfBlob, { contentType: 'application/pdf', upsert: true });
@@ -451,21 +454,20 @@
                     const { data: urlData } = supabaseClient.storage.from('comprovantes').getPublicUrl(filePath);
                     pdfPublicUrl = urlData.publicUrl;
                     await supabaseClient.from('reservas').update({ pdf_url: pdfPublicUrl }).eq('id', reservaId);
-                    reserva.pdf_url = pdfPublicUrl;
+                    if (reserva) reserva.pdf_url = pdfPublicUrl;
                 }
 
-                if (!pdfPublicUrl) {
-                    if (typeof mostrarToast === 'function') mostrarToast("Erro", "Esta reserva não possui PDF (não está aprovada)", true);
-                    return;
-                }
+                if (!pdfPublicUrl) { mostrarToast("Esta reserva não possui PDF (não está aprovada)", 'erro'); return; }
 
-                const nomeHospede = reserva.hospede_nome || 'Hóspede';
-                const whatsappRaw = reserva.whatsapp_hospede || '';
-                const valorTotal = Number(reserva.valor_total || 0);
-                const suiteNome = mapaSuites[reserva.suite_id] || reserva.suites?.nome || 'Suíte';
+                const nomeHospede = rData.hospede_nome || 'Hóspede';
+                const whatsappRaw = rData.whatsapp_hospede || '';
+                const valorTotal = Number(rData.valor_total || 0);
+                const suiteNome = mapaSuites[rData.suite_id] || 'Suíte';
+                const tituloPousadaEl = document.getElementById('titulo-pousada');
+                const pousadaNome = tituloPousadaEl ? tituloPousadaEl.innerText : 'Pousada';
 
-                let textoMensagem = `Olá ${nomeHospede}, sua reserva na ${nomePousadaAtual} foi aprovada! 🎉\n`;
-                textoMensagem += `Check-in: ${formatarDataSimples(reserva.checkin)} | Check-out: ${formatarDataSimples(reserva.checkout)}\n`;
+                let textoMensagem = `Olá ${nomeHospede}, sua reserva na ${pousadaNome} foi aprovada! 🎉\n`;
+                textoMensagem += `Check-in: ${formatarDataSimples(rData.checkin)} | Check-out: ${formatarDataSimples(rData.checkout)}\n`;
                 textoMensagem += `Suíte: ${suiteNome}\n`;
                 textoMensagem += `Valor: R$ ${valorTotal.toLocaleString('pt-BR',{minimumFractionDigits:2})}\n\n`;
                 textoMensagem += `Acesse o comprovante completo no link abaixo:\n${pdfPublicUrl}\n\n`;
@@ -476,15 +478,13 @@
                 else if (apenasNumeros.length > 11 && !apenasNumeros.startsWith('55')) apenasNumeros = '55' + apenasNumeros;
 
                 const urlWhatsapp = `https://wa.me/${apenasNumeros}?text=${encodeURIComponent(textoMensagem)}`;
-                if (typeof mostrarToast === 'function') mostrarToast("Sucesso", "Abrindo WhatsApp com comprovante... ✅");
+                mostrarToast("Sucesso! Abrindo WhatsApp com comprovante...");
                 window.open(urlWhatsapp, '_blank');
-                // recarrega lista para atualizar pdf_url se foi gerado agora
                 setTimeout(() => carregarHistoricoHospedes(), 1500);
 
             } catch (err) {
                 console.error("Erro reenvio PDF:", err);
-                if (typeof mostrarToast === 'function') mostrarToast("Erro", "Falha: " + err.message, true);
-                else alert("Erro: " + err.message);
+                mostrarToast("Falha: " + err.message, 'erro');
             }
         }
 
@@ -505,6 +505,5 @@
             if (e.key === 'Enter') carregarHistoricoHospedes();
         });
     </script>
-<div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
 </body>
 </html>
