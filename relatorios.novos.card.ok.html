@@ -181,6 +181,33 @@
                                     <span class="text-[11px] text-gray-500 font-medium group-hover:text-blue-700">Reservas</span>
                                 </div>
                             </div>
+                            <!-- Suítes - NOVO CARD CORRIGIDO -->
+                            <div id="cardSuites" onclick="toggleSuites()" title="Ver suítes com reservas futuras e calendário" class="bg-white p-3 rounded-xl border border-amber-200 shadow-sm flex items-center gap-3 min-w-[130px] cursor-pointer hover:shadow-md hover:border-amber-400 hover:bg-amber-50/50 transition-all group">
+                                <div class="w-10 h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-sm shadow-sm group-hover:scale-110 transition">
+                                    <i class="fa-solid fa-bed"></i>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-lg font-extrabold text-gray-800 leading-none">Suítes</span>
+                                    <span class="text-[11px] text-gray-500 font-medium group-hover:text-amber-700">com Reserva</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PAINEL SUÍTES COM RESERVAS FUTURAS -->
+                    <div id="containerSuites" class="hidden mb-5">
+                        <div class="bg-white rounded-xl shadow-sm border border-amber-200 p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-[11px] font-extrabold text-amber-700 uppercase tracking-widest flex items-center gap-2">
+                                    <i class="fa-solid fa-bed"></i> SUÍTES COM RESERVAS FUTURAS
+                                    <span id="badgeSuites" class="ml-2 bg-amber-600 text-white px-2 py-0.5 rounded-full text-[9px]">0 SUÍTES</span>
+                                </span>
+                                <button onclick="toggleSuites()" class="text-[10px] text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 px-2.5 py-1 rounded-full"><i class="fa-solid fa-xmark mr-1"></i> Fechar</button>
+                            </div>
+                            <div id="gridSuites" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                <div class="col-span-full py-4 text-center text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO SUÍTES...</div>
+                            </div>
+                            <p class="text-[10px] text-gray-400 mt-3">Clique em uma suíte para abrir o calendário visual com as datas ocupadas</p>
                         </div>
                     </div>
 
@@ -988,10 +1015,222 @@
             }
         }
 
+
+        // >>> SUÍTES - CALENDÁRIO VISUAL - CORRIGIDO - FUNÇÕES GLOBAIS
+        let suitesVisivel = false;
+        let reservasFuturasCache = [];
+        let suiteCalId = null;
+        let suiteCalNome = "";
+        let calDataRef = new Date();
+
+        function toggleSuites() {
+            console.log('toggleSuites chamado');
+            const container = document.getElementById('containerSuites');
+            const card = document.getElementById('cardSuites');
+            if (!container) {
+                console.error('containerSuites não encontrado');
+                return;
+            }
+            
+            suitesVisivel = !suitesVisivel;
+            
+            if (suitesVisivel) {
+                container.classList.remove('hidden');
+                if (card) card.classList.add('ring-2', 'ring-amber-500', 'bg-amber-50', 'border-amber-400');
+                carregarSuitesComReservas();
+            } else {
+                container.classList.add('hidden');
+                if (card) card.classList.remove('ring-2', 'ring-amber-500', 'bg-amber-50', 'border-amber-400');
+            }
+        }
+
+        async function carregarSuitesComReservas() {
+            if (!usuarioIdAtual) {
+                console.error('usuarioIdAtual não definido');
+                return;
+            }
+            const grid = document.getElementById('gridSuites');
+            const badge = document.getElementById('badgeSuites');
+            if (!grid) return;
+            
+            grid.innerHTML = '<div class="col-span-full py-4 text-center text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i> BUSCANDO RESERVAS FUTURAS...</div>';
+            
+            try {
+                const hojeStr = new Date().toISOString().split('T')[0];
+                console.log('Buscando reservas futuras a partir de', hojeStr, 'pousada', usuarioIdAtual);
+                
+                const { data: reservasFuturas, error } = await supabaseClient
+                    .from('reservas')
+                    .select('id, suite_id, checkin, checkout, hospede_nome, status, suites ( nome )')
+                    .eq('pousada_id', usuarioIdAtual)
+                    .eq('status', 'Aprovada')
+                    .gte('checkout', hojeStr)
+                    .order('checkin', { ascending: true });
+                
+                if (error) throw error;
+                
+                reservasFuturasCache = reservasFuturas || [];
+                console.log('Reservas futuras encontradas', reservasFuturasCache.length);
+                
+                const suitesMap = {};
+                reservasFuturasCache.forEach(r => {
+                    const nomeSuite = r.suites?.nome || 'SUÍTE SEM NOME';
+                    const sId = r.suite_id;
+                    if (!suitesMap[sId]) {
+                        suitesMap[sId] = {
+                            suite_id: sId,
+                            nome: nomeSuite,
+                            reservas: [],
+                            total: 0
+                        };
+                    }
+                    suitesMap[sId].reservas.push(r);
+                    suitesMap[sId].total++;
+                });
+                
+                const suitesComReserva = Object.values(suitesMap);
+                
+                if (badge) badge.textContent = `${suitesComReserva.length} SUÍTES`;
+                
+                if (suitesComReserva.length === 0) {
+                    grid.innerHTML = '<div class="col-span-full py-6 text-center text-gray-500 text-xs">NENHUMA SUÍTE COM RESERVAS FUTURAS</div>';
+                    return;
+                }
+                
+                let htmlCards = '';
+                suitesComReserva.forEach(s => {
+                    const proximas = s.reservas.slice(0,2).map(r => {
+                        let chk = r.checkin ? String(r.checkin).substring(0,10).split('-').reverse().join('/') : '';
+                        return chk;
+                    }).join(', ');
+                    
+                    htmlCards += `
+                        <div onclick="abrirCalendarioSuite('${s.suite_id}', '${s.nome.replace(/'/g, "\'")}')" class="cursor-pointer border-2 border-amber-200 bg-white hover:bg-amber-50 hover:border-amber-400 p-3 rounded-xl shadow-sm transition group">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <div class="w-7 h-7 bg-amber-100 text-amber-700 rounded-lg flex items-center justify-center text-[11px]"><i class="fa-solid fa-bed"></i></div>
+                                <span class="text-[9px] font-bold bg-amber-600 text-white px-2 py-0.5 rounded-full">${s.total} RESERVA(S)</span>
+                            </div>
+                            <div class="font-bold text-[11px] text-gray-800 uppercase truncate group-hover:text-amber-700">${String(s.nome).toUpperCase()}</div>
+                            <div class="mt-1 text-[10px] text-gray-600 truncate"><i class="fa-solid fa-calendar mr-1"></i>${proximas}${s.total>2 ? '...' : ''}</div>
+                            <div class="mt-2 text-[9px] text-amber-600 font-bold group-hover:text-amber-700"><i class="fa-solid fa-calendar-days mr-1"></i>VER CALENDÁRIO</div>
+                        </div>
+                    `;
+                });
+                grid.innerHTML = htmlCards;
+                
+            } catch (e) {
+                console.error('Erro carregarSuitesComReservas', e);
+                grid.innerHTML = `<div class="col-span-full py-4 text-center text-red-500 text-xs">ERRO: ${e.message}</div>`;
+            }
+        }
+
+        function abrirCalendarioSuite(suiteId, suiteNome) {
+            suiteCalId = suiteId;
+            suiteCalNome = suiteNome;
+            calDataRef = new Date();
+            const titulo = document.getElementById('cal-suite-nome');
+            if (titulo) titulo.innerText = `Suíte: ${suiteNome}`;
+            renderizarCalendario();
+            const modal = document.getElementById('modal-calendario-suite');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function fecharCalendarioSuite() {
+            const modal = document.getElementById('modal-calendario-suite');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function mudarMesCalendario(dir) {
+            calDataRef.setMonth(calDataRef.getMonth() + dir);
+            renderizarCalendario();
+        }
+
+        function renderizarCalendario() {
+            const grid = document.getElementById('cal-grid-dias');
+            const label = document.getElementById('cal-mes-ano');
+            if (!grid || !label) return;
+            grid.innerHTML = '';
+            
+            const ano = calDataRef.getFullYear();
+            const mes = calDataRef.getMonth();
+            const nomesMeses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+            label.innerText = `${nomesMeses[mes]} de ${ano}`;
+            
+            const primeiroDiaSemana = new Date(ano, mes, 1).getDay();
+            const ultimoDiaMes = new Date(ano, mes+1, 0).getDate();
+            
+            const reservasDaSuite = reservasFuturasCache.filter(r => r.suite_id === suiteCalId);
+            const datasOcupadas = new Set();
+            reservasDaSuite.forEach(r => {
+                if (!r.checkin || !r.checkout) return;
+                let dCurr = new Date(String(r.checkin).substring(0,10) + 'T00:00:00');
+                const dFim = new Date(String(r.checkout).substring(0,10) + 'T00:00:00');
+                while (dCurr < dFim) {
+                    datasOcupadas.add(dCurr.toISOString().split('T')[0]);
+                    dCurr.setDate(dCurr.getDate() + 1);
+                }
+            });
+            
+            for (let i=0;i<primeiroDiaSemana;i++) grid.innerHTML += '<div></div>';
+            
+            const hojeStr = new Date().toISOString().split('T')[0];
+            
+            for (let dia=1; dia<=ultimoDiaMes; dia++) {
+                const mesStr = String(mes+1).padStart(2,'0');
+                const diaStr = String(dia).padStart(2,'0');
+                const dataIso = `${ano}-${mesStr}-${diaStr}`;
+                const estaOcupado = datasOcupadas.has(dataIso);
+                const ePassado = dataIso < hojeStr;
+                let classe = "";
+                let tooltip = "";
+                if (ePassado) {
+                    classe = "bg-gray-100 text-gray-400 border border-gray-200 opacity-60";
+                    tooltip = "Data passada";
+                } else if (estaOcupado) {
+                    classe = "bg-slate-700 text-white border border-slate-800 font-bold shadow-sm";
+                    tooltip = "Ocupado - com reserva futura";
+                } else {
+                    classe = "bg-emerald-100 text-emerald-800 border border-emerald-200 hover:bg-emerald-200 font-bold";
+                    tooltip = "Livre - disponível para reserva";
+                }
+                const isHoje = dataIso === hojeStr ? 'ring-2 ring-blue-500' : '';
+                grid.innerHTML += `<div title="${tooltip} ${dataIso}" class="h-8 flex items-center justify-center rounded-lg text-[11px] ${classe} ${isHoje}">${dia}</div>`;
+            }
+        }
+
         window.onload = () => {
             protegerPagina();
             setTimeout(() => { if (viewAtualSelecionada === 'vw_gestor_reservas_relatorio') carregarCardsControleHoje(); }, 800);
         };
     </script>
+
+    <!-- MODAL CALENDÁRIO SUÍTE - RELATÓRIOS - CORRIGIDO -->
+    <div id="modal-calendario-suite" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-[100]">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative">
+            <button onclick="fecharCalendarioSuite()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+            <div class="flex items-center gap-2 mb-1">
+                <span class="text-xl">📅</span>
+                <h3 id="cal-suite-nome" class="text-lg font-bold text-gray-900">Calendário da Suíte</h3>
+            </div>
+            <p class="text-xs text-gray-600 font-medium mb-4">Dias em <strong class="bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">verde</strong> livres. <strong class="bg-slate-700 text-white px-1.5 py-0.5 rounded">cinza escuro</strong> ocupados.</p>
+            <div class="flex justify-between items-center mb-4 bg-gray-50 p-2.5 rounded-xl border border-gray-200">
+                <button onclick="mudarMesCalendario(-1)" class="px-3 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-xs">◀ Mês Anterior</button>
+                <strong id="cal-mes-ano" class="text-xs sm:text-sm font-bold text-gray-800 uppercase">MÊS / ANO</strong>
+                <button onclick="mudarMesCalendario(1)" class="px-3 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-xs">Próximo Mês ▶</button>
+            </div>
+            <div class="grid grid-cols-7 gap-1 text-center font-bold text-[11px] text-gray-500 mb-2">
+                <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+            </div>
+            <div id="cal-grid-dias" class="grid grid-cols-7 gap-1.5 text-center text-xs"></div>
+            <div class="mt-4 flex items-center justify-center gap-4 text-[10px]">
+                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-100 border border-emerald-200 rounded"></span> Livre</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-slate-700 rounded"></span> Ocupado</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-gray-100 border rounded"></span> Passado</span>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button onclick="fecharCalendarioSuite()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold text-xs sm:text-sm py-2.5 rounded-xl transition">Fechar</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
