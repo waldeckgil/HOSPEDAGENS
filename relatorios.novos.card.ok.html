@@ -43,7 +43,7 @@
                     <!-- Cabeçalho -->
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
                         <div>
-                            <h1 class="text-lg sm:text-xl font-bold text-gray-800">Hub de Consultas por Views</h1>
+                            <h1 class="text-lg sm:text-xl font-bold text-gray-800">Sistema de Consultas </h1>
                             <p id="nomePousadaLogada" class="text-xs font-semibold text-blue-600 mt-0.5">Carregando dados...</p>
                         </div>
                         <div class="text-[11px] text-gray-500 bg-white px-3 py-1 rounded-lg border border-gray-200 shadow-sm">
@@ -104,6 +104,22 @@
 
                     <!-- CONTAINER DE KPIS FINANCEIROS OU GERAIS -->
                     <div id="containerKpis" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5"></div>
+
+                    <!-- CARDS DE OCUPAÇÃO POR SUÍTE - SOMENTE HOSPEDAGENS -->
+                    <div id="containerCardsOcupacaoSuites" class="hidden mb-5">
+                        <div class="bg-white rounded-xl shadow-sm border border-emerald-100 p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-[11px] font-extrabold text-emerald-700 uppercase tracking-widest flex items-center gap-2">
+                                    <i class="fa-solid fa-bed"></i> CONTROLE DE OCUPAÇÃO POR SUÍTE
+                                    <span id="badgeOcupacaoTotal" class="ml-2 bg-emerald-600 text-white px-2 py-0.5 rounded-full text-[9px]">4 SUÍTES</span>
+                                </span>
+                                <span class="text-[10px] text-gray-400">Clique em uma suíte para filtrar a tabela abaixo</span>
+                            </div>
+                            <div id="gridOcupacaoSuites" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                <div class="col-span-full py-4 text-center text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO OCUPAÇÃO...</div>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- FILTRO POR SUÍTE - VISÃO FINANCEIRA -->
                     <div id="containerFiltroSuites" class="hidden mb-5">
@@ -337,6 +353,30 @@
                 }
             }
             carregarDadosView();
+        }
+
+        function filtrarPorSuiteOcupacao(nomeSuite) {
+            const tbody = document.getElementById('tabelaCorpo');
+            if (!tbody) return;
+            const linhas = tbody.querySelectorAll('tr');
+            let filtroAtivo = nomeSuite ? nomeSuite.toUpperCase() : '';
+            linhas.forEach(tr => {
+                const texto = tr.innerText.toUpperCase();
+                if (!filtroAtivo || texto.includes(filtroAtivo)) {
+                    tr.style.display = '';
+                } else {
+                    tr.style.display = 'none';
+                }
+            });
+            if (filtroAtivo) {
+                // Highlight selected card
+                const grid = document.getElementById('gridOcupacaoSuites');
+                if (grid) {
+                    grid.querySelectorAll('div').forEach(card => {
+                        card.classList.remove('ring-2', 'ring-blue-500');
+                    });
+                }
+            }
         }
 
         async function logout() {
@@ -728,16 +768,18 @@
                     `;
                     renderizarFiltroSuites(registros);
                     document.getElementById('containerFiltroSuites').classList.remove('hidden');
+                    const contOcupFin = document.getElementById('containerCardsOcupacaoSuites');
+                    if (contOcupFin) contOcupFin.classList.add('hidden');
                 } else if (ehViewHospedagens) {
                     let totalSuites = registros.length;
                     let ocupadas = registros.filter(r => r.status_ocupacao === 'OCUPADA / RESERVADA').length;
                     let disponiveis = totalSuites - ocupadas;
                     containerKpis.innerHTML = `
-                        <div class="bg-white p-4 rounded-xl border border-emerald-200 shadow-sm flex flex-col gap-1">
+                        <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col gap-1">
                             <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total de Suítes Cadastradas</span>
                             <span class="text-lg font-extrabold text-slate-800">${totalSuites} SUÍTES</span>
                         </div>
-                        <div class="bg-white p-4 rounded-xl border border-emerald-200 shadow-sm flex flex-col gap-1">
+                        <div class="bg-white p-4 rounded-xl border border-blue-200 shadow-sm flex flex-col gap-1">
                             <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Suítes Ocupadas / Reservadas</span>
                             <span class="text-lg font-extrabold text-blue-600">${ocupadas} SUÍTES</span>
                         </div>
@@ -747,9 +789,47 @@
                         </div>
                     `;
                     document.getElementById('containerFiltroSuites').classList.add('hidden');
+                    
+                    // >>> SOMENTE HOSPEDAGENS - CARDS POR SUÍTE COM NOME ESPECÍFICO (NÃO MEXER EM FINANCEIRO)
+                    const containerOcupacao = document.getElementById('containerCardsOcupacaoSuites');
+                    const gridOcupacao = document.getElementById('gridOcupacaoSuites');
+                    const badgeTotal = document.getElementById('badgeOcupacaoTotal');
+                    if (containerOcupacao) containerOcupacao.classList.remove('hidden');
+                    if (badgeTotal) badgeTotal.textContent = `${totalSuites} SUÍTES`;
+                    
+                    if (gridOcupacao) {
+                        let htmlCards = '';
+                        registros.forEach(r => {
+                            const isOcupada = r.status_ocupacao === 'OCUPADA / RESERVADA';
+                            const nomeSuite = String(r.suite || 'SUÍTE SEM NOME').toUpperCase();
+                            const nomeHospede = String(r.hospede || 'NENHUM').toUpperCase();
+                            const checkin = r.checkin && r.checkin !== '-' ? formatarDataBr(r.checkin) : '-';
+                            const checkout = r.checkout && r.checkout !== '-' ? formatarDataBr(r.checkout) : '-';
+                            
+                            const borda = isOcupada ? 'border-blue-300 bg-blue-50/50 hover:bg-blue-50 hover:border-blue-400' : 'border-emerald-200 bg-white hover:bg-emerald-50 hover:border-emerald-300';
+                            const iconeBg = isOcupada ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700';
+                            const statusBadge = isOcupada ? '<span class="text-[8px] font-bold bg-blue-600 text-white px-2 py-0.5 rounded-full uppercase">OCUPADA</span>' : '<span class="text-[8px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full uppercase">DISPONÍVEL</span>';
+                            const hospedeInfo = isOcupada ? `<div class="mt-1.5 text-[10px] text-gray-600 truncate"><i class="fa-solid fa-user mr-1"></i>${nomeHospede}</div><div class="text-[9px] text-gray-500 mt-0.5">${checkin} até ${checkout}</div>` : `<div class="mt-1.5 text-[10px] text-emerald-600 font-medium">Livre para reserva</div>`;
+                            
+                            htmlCards += `
+                                <div onclick="filtrarPorSuiteOcupacao('${nomeSuite.replace(/'/g, "\\'")}')" title="Clique para filtrar esta suíte na tabela" class="cursor-pointer border-2 ${borda} p-3 rounded-xl shadow-sm transition group">
+                                    <div class="flex items-center justify-between mb-1.5">
+                                        <div class="w-7 h-7 ${iconeBg} rounded-lg flex items-center justify-center text-[11px]"><i class="fa-solid fa-bed"></i></div>
+                                        ${statusBadge}
+                                    </div>
+                                    <div class="font-bold text-[11px] text-gray-800 uppercase truncate group-hover:text-blue-700">${nomeSuite}</div>
+                                    ${hospedeInfo}
+                                    <div class="mt-2 text-[9px] text-gray-400 group-hover:text-blue-600">CLIQUE PARA FILTRAR</div>
+                                </div>
+                            `;
+                        });
+                        gridOcupacao.innerHTML = htmlCards;
+                    }
                 } else {
                     containerKpis.className = "hidden";
                     document.getElementById('containerFiltroSuites').classList.add('hidden');
+                    const contOcupElse = document.getElementById('containerCardsOcupacaoSuites');
+                    if (contOcupElse) contOcupElse.classList.add('hidden');
                 }
 
                 if (!registrosFiltrados || registrosFiltrados.length === 0) {
