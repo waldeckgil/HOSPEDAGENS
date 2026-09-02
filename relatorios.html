@@ -904,7 +904,7 @@
                 } else if (ehViewFinanceiro) {
                     const { data: pagamentosData, error: errPag } = await supabaseClient
                         .from('hospede_pagamentos')
-                        .select(`id, valor_pago, forma_pagamento, observacao, criado_em, reserva_id, reservas (hospede_nome, checkin, checkout,  suites ( nome ))`)
+                        .select(`id, valor_pago, forma_pagamento, observacao, criado_em, reserva_id, reservas (hospede_nome, checkin, checkout, valor_total, suites ( nome ))`)
                         .eq('pousada_id', usuarioIdAtual);
                     error = errPag;
                     if (pagamentosData) {
