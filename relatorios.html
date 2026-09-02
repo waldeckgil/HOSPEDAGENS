@@ -101,7 +101,26 @@
                     </div>
 
                     <!-- CONTAINER DE KPIS FINANCEIROS OU GERAIS -->
-                    <div id="containerKpis" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5"></div>
+                    <div id="wrapperTopoHospedagens" class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-5">
+                        <div id="containerKpis" class="flex flex-wrap gap-3"></div>
+                        <!-- FILTRO DATA AO LADO DOS CARDS DE OCUPAÇÃO - SÓ HOSPEDAGENS -->
+                        <div id="containerFiltroDataHospedagens" class="hidden flex flex-wrap items-center gap-2 bg-white p-2.5 rounded-xl border border-gray-200 shadow-sm">
+                            <div class="flex items-center gap-1.5 bg-gray-50 border border-gray-300 rounded-lg px-3 py-1.5">
+                                <span class="text-[10px] font-bold text-gray-500 uppercase">De:</span>
+                                <input type="date" id="filtroDataInicioHosp" onchange="sincronizarFiltrosData('inicio', this.value)" class="text-xs font-semibold text-gray-700 bg-transparent focus:outline-none">
+                            </div>
+                            <div class="flex items-center gap-1.5 bg-gray-50 border border-gray-300 rounded-lg px-3 py-1.5">
+                                <span class="text-[10px] font-bold text-gray-500 uppercase">Até:</span>
+                                <input type="date" id="filtroDataFimHosp" onchange="sincronizarFiltrosData('fim', this.value)" class="text-xs font-semibold text-gray-700 bg-transparent focus:outline-none">
+                            </div>
+                            <button onclick="carregarDadosView()" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-sm">
+                                <i class="fa-solid fa-filter"></i> Filtrar
+                            </button>
+                            <button onclick="carregarDadosView()" class="bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition shadow-sm" title="Atualizar">
+                                <i class="fa-solid fa-rotate-right"></i>
+                            </button>
+                        </div>
+                    </div>
 
                     <!-- CARDS DE OCUPAÇÃO POR SUÍTE - SOMENTE HOSPEDAGENS -->
                     <div id="containerCardsOcupacaoSuites" class="hidden mb-5">
@@ -229,14 +248,14 @@
                                 <h3 id="tituloViewAtiva" class="font-bold text-sm sm:text-base text-gray-800">CARREGANDO...</h3>
                             </div>
 
-                            <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+                            <div id="containerFiltroDataTabela" class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
                                 <div class="flex items-center gap-1.5 bg-white border border-gray-300 rounded-lg px-3 py-1.5 shadow-sm">
                                     <span class="text-[10px] font-bold text-gray-500 uppercase">De:</span>
-                                    <input type="date" id="filtroDataInicio" class="text-xs font-semibold text-gray-700 bg-transparent focus:outline-none">
+                                    <input type="date" id="filtroDataInicio" onchange="sincronizarFiltrosData('inicio_tabela', this.value)" class="text-xs font-semibold text-gray-700 bg-transparent focus:outline-none">
                                 </div>
                                 <div class="flex items-center gap-1.5 bg-white border border-gray-300 rounded-lg px-3 py-1.5 shadow-sm">
                                     <span class="text-[10px] font-bold text-gray-500 uppercase">Até:</span>
-                                    <input type="date" id="filtroDataFim" class="text-xs font-semibold text-gray-700 bg-transparent focus:outline-none">
+                                    <input type="date" id="filtroDataFim" onchange="sincronizarFiltrosData('fim_tabela', this.value)" class="text-xs font-semibold text-gray-700 bg-transparent focus:outline-none">
                                 </div>
                                 <button onclick="carregarDadosView()" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-sm">
                                     <i class="fa-solid fa-filter"></i> Filtrar
@@ -549,6 +568,36 @@
                 container.style.display = 'flex';
             } else {
                 container.style.display = 'none';
+            }
+            // >>> CONTROLE DO FILTRO DATA LATERAL - SÓ HOSPEDAGENS
+            var filtroLateral = document.getElementById('containerFiltroDataHospedagens');
+            var filtroTabela = document.getElementById('containerFiltroDataTabela');
+            if (filtroLateral && filtroTabela) {
+                if (viewAtualSelecionada === 'vw_gestor_hospedagens_relatorio') {
+                    filtroLateral.classList.remove('hidden');
+                    filtroLateral.classList.add('flex');
+                    filtroTabela.classList.add('hidden');
+                    filtroTabela.classList.remove('flex');
+                } else {
+                    filtroLateral.classList.add('hidden');
+                    filtroLateral.classList.remove('flex');
+                    filtroTabela.classList.remove('hidden');
+                    filtroTabela.classList.add('flex');
+                }
+            }
+        }
+
+        function sincronizarFiltrosData(origem, valor) {
+            // Sincroniza os 4 inputs de data (tabela + lateral)
+            var ids = ['filtroDataInicio', 'filtroDataFim', 'filtroDataInicioHosp', 'filtroDataFimHosp'];
+            if (origem === 'inicio' || origem === 'inicio_tabela') {
+                document.getElementById('filtroDataInicio').value = valor;
+                var elHosp = document.getElementById('filtroDataInicioHosp');
+                if (elHosp) elHosp.value = valor;
+            } else if (origem === 'fim' || origem === 'fim_tabela') {
+                document.getElementById('filtroDataFim').value = valor;
+                var elHospFim = document.getElementById('filtroDataFimHosp');
+                if (elHospFim) elHospFim.value = valor;
             }
         }
 
