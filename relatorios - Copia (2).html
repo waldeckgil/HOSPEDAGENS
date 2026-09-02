@@ -89,16 +89,16 @@
                             <p class="text-[11px] text-gray-500 mt-0.5 truncate">Valores e regras vigentes.</p>
                         </div>
 
-                        <div onclick="selecionarView('vw_gestor_reservas_relatorio', 'Reservas', this)" 
+                        <div onclick="selecionarView('vw_gestor_reservas_relatorio', 'Próximas Reservas Futuras', this)" 
                              class="card-view cursor-pointer bg-purple-50/40 p-4 rounded-xl shadow-sm border-2 border-purple-200 hover:border-purple-500 hover:shadow-md transition group">
                             <div class="flex items-center justify-between mb-2">
                                 <div class="w-8 h-8 bg-purple-100 text-purple-700 rounded-lg flex items-center justify-center text-sm shadow-sm">
                                     <i class="fa-solid fa-calendar-check"></i>
                                 </div>
-                                <span class="text-[9px] font-bold uppercase tracking-wider bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">RESERVAS</span>
+                                <span class="text-[9px] font-bold uppercase tracking-wider bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">FUTURAS</span>
                             </div>
-                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-purple-700 transition">Reservas</h3>
-                            <p class="text-[11px] text-gray-500 mt-0.5 truncate">Todas as reservas.</p>
+                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-purple-700 transition">Reservas Futuras</h3>
+                            <p class="text-[11px] text-gray-500 mt-0.5 truncate">Todas as reservas futuras.</p>
                         </div>
                     </div>
 
@@ -125,49 +125,13 @@
                     </div>
 
                     <!-- FILTRO RÁPIDO DE STATUS DE RESERVAS -->
-                                        <div id="containerFiltroStatusReservas" class="mb-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-                        <!-- FILTRO STATUS -->
-                        <div class="flex items-center gap-2 bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
-                            <span class="text-[10px] font-extrabold text-gray-500 uppercase tracking-widest mr-2">
-                                <i class="fa-solid fa-filter mr-1"></i> Status:
-                            </span>
-                            <button id="btnAprovada" onclick="alterarFiltroStatusReservas('APROVADA')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500 text-white shadow-sm">APROVADAS</button>
-                            <button id="btnRecusada" onclick="alterarFiltroStatusReservas('RECUSADA')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-white text-red-600 border border-red-200 hover:bg-red-50">RECUSADAS</button>
-                            <button id="btnTodas" onclick="alterarFiltroStatusReservas('TODAS')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-white text-gray-600 border border-gray-200 hover:bg-gray-50">TODAS</button>
-                        </div>
-                        <!-- CARDS CONTROLE HOJE - CENÁRIO C -->
-                        <div id="containerCardsControleHoje" class="flex flex-wrap items-center gap-3">
-                            <!-- Check-In Hoje -->
-                            <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3 min-w-[150px]">
-                                <div class="w-10 h-10 bg-violet-100 text-violet-600 rounded-full flex items-center justify-center text-sm shadow-sm">
-                                    <i class="fa-solid fa-calendar-days"></i>
-                                </div>
-                                <div class="flex flex-col">
-                                    <span id="cardCheckInHojeValor" class="text-lg font-extrabold text-gray-800 leading-none">0</span>
-                                    <span class="text-[11px] text-gray-500 font-medium">Check-In Hoje</span>
-                                </div>
-                            </div>
-                            <!-- Check-Out Hoje -->
-                            <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3 min-w-[150px]">
-                                <div class="w-10 h-10 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-sm shadow-sm">
-                                    <i class="fa-solid fa-laptop"></i>
-                                </div>
-                                <div class="flex flex-col">
-                                    <span id="cardCheckOutHojeValor" class="text-lg font-extrabold text-gray-800 leading-none">0</span>
-                                    <span class="text-[11px] text-gray-500 font-medium">Check-Out Hoje</span>
-                                </div>
-                            </div>
-                            <!-- Reservas Hoje -->
-                            <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3 min-w-[150px]">
-                                <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm shadow-sm">
-                                    <i class="fa-solid fa-money-bill"></i>
-                                </div>
-                                <div class="flex flex-col">
-                                    <span id="cardReservasHojeValor" class="text-lg font-extrabold text-gray-800 leading-none">0</span>
-                                    <span class="text-[11px] text-gray-500 font-medium">Reservas</span>
-                                </div>
-                            </div>
-                        </div>
+                    <div id="containerFiltroStatusReservas" style="display: none;" class="mb-4 flex items-center gap-2 bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
+                        <span class="text-[10px] font-extrabold text-gray-500 uppercase tracking-widest mr-2">
+                            <i class="fa-solid fa-filter mr-1"></i> Status:
+                        </span>
+                        <button id="btnAprovada" onclick="alterarFiltroStatusReservas('APROVADA')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500 text-white shadow-sm">APROVADAS</button>
+                        <button id="btnRecusada" onclick="alterarFiltroStatusReservas('RECUSADA')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-white text-red-600 border border-red-200 hover:bg-red-50">RECUSADAS</button>
+                        <button id="btnTodas" onclick="alterarFiltroStatusReservas('TODAS')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-white text-gray-600 border border-gray-200 hover:bg-gray-50">TODAS</button>
                     </div>
 
                     <!-- Área da Tabela -->
@@ -351,59 +315,6 @@
             if (btnR) { btnR.className = (valor==='RECUSADA' ? 'px-3 py-1 rounded-full text-[11px] font-bold bg-red-500 text-white shadow-sm' : 'px-3 py-1 rounded-full text-[11px] font-bold bg-white text-red-600 border border-red-200 hover:bg-red-50'); }
             if (btnT) { btnT.className = (valor==='TODAS' ? 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-800 text-white shadow-sm' : 'px-3 py-1 rounded-full text-[11px] font-bold bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'); }
             carregarDadosView();
-        }
-
-        // >>> CENÁRIO C - CARDS CONTROLE HOJE - CONSULTA DIRETA NO BANCO
-        async function carregarCardsControleHoje() {
-            if (!usuarioIdAtual) return;
-            try {
-                const hoje = new Date();
-                const hojeStr = hoje.toISOString().split('T')[0]; // YYYY-MM-DD
-                const inicioHoje = new Date(hoje);
-                inicioHoje.setHours(0,0,0,0);
-                const fimHoje = new Date(hoje);
-                fimHoje.setHours(23,59,59,999);
-
-                // Check-In Hoje: checkin = hoje e não recusada/cancelada
-                const { count: countCheckIn, error: errIn } = await supabaseClient
-                    .from('reservas')
-                    .select('id', { count: 'exact', head: true })
-                    .eq('pousada_id', usuarioIdAtual)
-                    .eq('checkin', hojeStr)
-                    .neq('status', 'Recusada')
-                    .neq('status', 'Cancelada');
-
-                // Check-Out Hoje: checkout = hoje
-                const { count: countCheckOut, error: errOut } = await supabaseClient
-                    .from('reservas')
-                    .select('id', { count: 'exact', head: true })
-                    .eq('pousada_id', usuarioIdAtual)
-                    .eq('checkout', hojeStr)
-                    .neq('status', 'Recusada')
-                    .neq('status', 'Cancelada');
-
-                // Reservas: total de reservas (TODAS) OU novas hoje - conforme solicitado, mostra total de reservas do dia ou total geral
-                // Aqui usamos total de reservas com status Aprovada para hoje + futuras (ou total geral se preferir)
-                // Para bater com print "Reservas" (não "Reservas Futuras") vamos contar TODAS as reservas Aprovadas
-                const { count: countReservas, error: errRes } = await supabaseClient
-                    .from('reservas')
-                    .select('id', { count: 'exact', head: true })
-                    .eq('pousada_id', usuarioIdAtual)
-                    .eq('status', 'Aprovada');
-
-                // Se quiser contar apenas novas reservas criadas hoje, descomente abaixo e comente acima:
-                // const { count: countReservas } = await supabaseClient.from('reservas').select('id', { count: 'exact', head: true }).eq('pousada_id', usuarioIdAtual).gte('criado_em', inicioHoje.toISOString()).lte('criado_em', fimHoje.toISOString());
-
-                const elIn = document.getElementById('cardCheckInHojeValor');
-                const elOut = document.getElementById('cardCheckOutHojeValor');
-                const elRes = document.getElementById('cardReservasHojeValor');
-                if (elIn) elIn.innerText = (errIn ? 0 : (countCheckIn || 0));
-                if (elOut) elOut.innerText = (errOut ? 0 : (countCheckOut || 0));
-                if (elRes) elRes.innerText = (errRes ? 0 : (countReservas || 0));
-
-            } catch (e) {
-                console.error('Erro carregarCardsControleHoje', e);
-            }
         }
 
         function atualizarVisibilidadeFiltroStatus() {
@@ -603,10 +514,6 @@
                     error = res.error;
                 }
 
-                if (viewAtualSelecionada === 'vw_gestor_reservas_relatorio') {
-                    carregarCardsControleHoje();
-                }
-
                 if (error) {
                     console.error("Erro:", error);
                     tbody.innerHTML = `<tr><td colspan="14" class="py-6 text-center text-red-500">ERRO: ${error.message}</td></tr>`;
@@ -789,7 +696,6 @@
 
         window.onload = () => {
             protegerPagina();
-            setTimeout(() => { if (viewAtualSelecionada === 'vw_gestor_reservas_relatorio') carregarCardsControleHoje(); }, 800);
         };
     </script>
 </body>
