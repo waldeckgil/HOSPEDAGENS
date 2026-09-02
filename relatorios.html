@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -754,21 +754,34 @@
 
             carregarDadosView();
         }
-
-        function formatarDataHoraBr(valor) {
-            if (!valor) return '-';
-            const dataObj = new Date(valor);
-            if (isNaN(dataObj.getTime())) return String(valor).toUpperCase();
-            const dia = String(dataObj.getDate()).padStart(2, '0');
-            const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
-            const ano = dataObj.getFullYear();
-            const hora = String(dataObj.getHours()).padStart(2, '0');
-            const min = String(dataObj.getMinutes()).padStart(2, '0');
-            const seg = String(dataObj.getSeconds()).padStart(2, '0');
-            return `${dia}/${mes}/${ano} às ${hora}:${min}:${seg}`;
+function formatarDataHoraBr(valor) {
+    if (!valor) return '-';
+    try {
+        let str = String(valor).trim();
+        let dt = new Date(str);
+        if (isNaN(dt.getTime())) {
+            let limpo = str.split('.')[0].replace('T',' ').replace('Z','').substring(0,19);
+            dt = new Date(limpo);
         }
-
-
+        if (isNaN(dt.getTime())) return str.toUpperCase();
+        
+        let ano = dt.getFullYear();
+        let mes = String(dt.getMonth() + 1).padStart(2, '0');
+        let dia = String(dt.getDate()).padStart(2, '0');
+        let hora = String(dt.getHours()).padStart(2, '0');
+        let minuto = String(dt.getMinutes()).padStart(2, '0');
+        let segundo = String(dt.getSeconds()).padStart(2, '0');
+        
+        // Formato com Ano na frente primeiro (AAAA/MM/DD HH:mm:ss)
+        return `${ano}/${mes}/${dia} ${hora}:${minuto}:${segundo}`;
+        
+        /* Se preferir o padrão brasileiro com o ano no final, descomente a linha abaixo: */
+        // return `${dia}/${mes}/${ano} ${hora}:${minuto}:${segundo}`;
+        
+    } catch(e) {
+        return String(valor).toUpperCase();
+    }
+}
         function formatarDataBr(valor) {
             if (!valor) return '-';
             let str = String(valor).trim();
