@@ -574,7 +574,10 @@
             if (c === 'forma_pagamento') return 'FORMA';
             if (c === 'observacao') return 'OBS';
             if (c === 'whatsapp') return 'WHATSAPP';
-            if (c === 'alerta_status_tarifa') return 'ALERTA VIGÊNCIA';
+            if (c === 'alerta_status_tarifa') return 'ALERTA STATUS';
+            if (c === 'alerta_vigencia') return 'ALERTA VIGÊNCIA';
+            if (c === 'dias_restantes_vigencia') return 'DIAS P/ VENCER';
+            if (c === 'alerta_vigencia_cor') return '';
             if (c === 'alerta_status_reserva') return 'ALERTA CHECK-IN';
             if (c === 'data_inicio' || c === 'vigencia_inicio') return 'INÍCIO VIGÊNCIA';
             if (c === 'data_fim' || c === 'vigencia_fim') return 'FIM VIGÊNCIA';
@@ -613,8 +616,65 @@
                         p_data_inicio: dataInicio || '2026-01-01',
                         p_data_fim: dataFim || '2027-12-31'
                     });
-                    registros = (response.data || []).filter(row => row.pousada_id === usuarioIdAtual);
+                    let dadosBrutos = (response.data || []).filter(row => row.pousada_id === usuarioIdAtual);
                     error = response.error;
+
+                    // >>> ALERTA VIGÊNCIA - CALCULA DIAS RESTANTES PARA EXPIRAÇÃO - CORRIGIDO TIMEZONE
+                    const hoje = new Date();
+                    hoje.setHours(0,0,0,0);
+                    registros = dadosBrutos.map(row => {
+                        let vigenciaFimStr = row.vigencia_fim || row.data_fim || row.fim || '';
+                        let diasRestantes = null;
+                        let alertaTexto = '-';
+                        let alertaCor = 'gray';
+                        
+                        if (vigenciaFimStr) {
+                            // CORREÇÃO: parse manual YYYY-MM-DD como data local para evitar bug de fuso UTC
+                            // Antes: new Date("2026-09-02") criava UTC e causava -1 dia no Brasil GMT-3
+                            let str = String(vigenciaFimStr).substring(0,10);
+                            let partes = str.split('-');
+                            let dataFim;
+                            if (partes.length === 3) {
+                                // Formato YYYY-MM-DD - cria como data local
+                                dataFim = new Date(Number(partes[0]), Number(partes[1])-1, Number(partes[2]), 0,0,0,0);
+                            } else {
+                                // Tenta DD/MM/YYYY
+                                let partesBr = String(vigenciaFimStr).split('/');
+                                if (partesBr.length === 3) {
+                                    dataFim = new Date(Number(partesBr[2]), Number(partesBr[1])-1, Number(partesBr[0]), 0,0,0,0);
+                                } else {
+                                    dataFim = new Date(str);
+                                    dataFim.setHours(0,0,0,0);
+                                }
+                            }
+                            let diffMs = dataFim - hoje;
+                            diasRestantes = Math.round(diffMs / (1000*60*60*24)); // Math.round para evitar erro de horário de verão
+                            
+                            if (diasRestantes < 0) {
+                                alertaTexto = `VENCIDA há ${Math.abs(diasRestantes)} dias`;
+                                alertaCor = 'red';
+                            } else if (diasRestantes === 0) {
+                                alertaTexto = `VENCE HOJE`;
+                                alertaCor = 'red';
+                            } else if (diasRestantes <= 3) {
+                                alertaTexto = `VENCE EM ${diasRestantes} DIAS - URGENTE`;
+                                alertaCor = 'red';
+                            } else if (diasRestantes <= 7) {
+                                alertaTexto = `VENCE EM ${diasRestantes} DIAS`;
+                                alertaCor = 'amber';
+                            } else {
+                                alertaTexto = `${diasRestantes} DIAS RESTANTES`;
+                                alertaCor = 'emerald';
+                            }
+                        }
+                        
+                        return {
+                            ...row,
+                            dias_restantes_vigencia: diasRestantes,
+                            alerta_vigencia: alertaTexto,
+                            alerta_vigencia_cor: alertaCor
+                        };
+                    });
                 } else if (ehViewFinanceiro) {
                     const { data: pagamentosData, error: errPag } = await supabaseClient
                         .from('hospede_pagamentos')
@@ -842,7 +902,7 @@
                 } else if (ehViewHospedagens) {
                     colunas = ['status_ocupacao', 'suite', 'hospede', 'checkin', 'checkout', 'status'];
                 } else {
-                    colunas = Object.keys(registrosFiltrados[0] || {}).filter(k => k !== 'pousada_id' && k !== 'reserva_id' && !k.includes('login_original') && !k.includes('nome_original') && k !== 'nome_pousada_que_recusou' && k !== 'dia_semana' && k !== 'alerta_status_reserva');
+                    colunas = Object.keys(registrosFiltrados[0] || {}).filter(k => k !== 'pousada_id' && k !== 'reserva_id' && !k.includes('login_original') && !k.includes('nome_original') && k !== 'nome_pousada_que_recusou' && k !== 'dia_semana' && k !== 'alerta_status_reserva' && k !== 'alerta_vigencia_cor');
                 }
 
                 let htmlCabecalho = '';
