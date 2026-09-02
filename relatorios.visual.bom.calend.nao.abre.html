@@ -1187,11 +1187,11 @@
                     classe = "bg-gray-100 text-gray-400 border border-gray-200 opacity-60";
                     tooltip = "Data passada";
                 } else if (estaOcupado) {
-                    classe = "bg-slate-700 text-white border border-slate-800 font-bold shadow-sm";
-                    tooltip = "Ocupado - com reserva futura";
+                    classe = "bg-red-100 text-red-700 border border-red-200 font-bold";
+                    tooltip = "Ocupada - com reserva futura";
                 } else {
-                    classe = "bg-emerald-100 text-emerald-800 border border-emerald-200 hover:bg-emerald-200 font-bold";
-                    tooltip = "Livre - disponível para reserva";
+                    classe = "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100";
+                    tooltip = "Livre";
                 }
                 const isHoje = dataIso === hojeStr ? 'ring-2 ring-blue-500' : '';
                 grid.innerHTML += `<div title="${tooltip} ${dataIso}" class="h-8 flex items-center justify-center rounded-lg text-[11px] ${classe} ${isHoje}">${dia}</div>`;
@@ -1203,34 +1203,5 @@
             setTimeout(() => { if (viewAtualSelecionada === 'vw_gestor_reservas_relatorio') carregarCardsControleHoje(); }, 800);
         };
     </script>
-
-    <!-- MODAL CALENDÁRIO SUÍTE - RELATÓRIOS - CORRIGIDO -->
-    <div id="modal-calendario-suite" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-[100]">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative">
-            <button onclick="fecharCalendarioSuite()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
-            <div class="flex items-center gap-2 mb-1">
-                <span class="text-xl">📅</span>
-                <h3 id="cal-suite-nome" class="text-lg font-bold text-gray-900">Calendário da Suíte</h3>
-            </div>
-            <p class="text-xs text-gray-600 font-medium mb-4">Dias em <strong class="bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">verde</strong> livres. <strong class="bg-slate-700 text-white px-1.5 py-0.5 rounded">cinza escuro</strong> ocupados.</p>
-            <div class="flex justify-between items-center mb-4 bg-gray-50 p-2.5 rounded-xl border border-gray-200">
-                <button onclick="mudarMesCalendario(-1)" class="px-3 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-xs">◀ Mês Anterior</button>
-                <strong id="cal-mes-ano" class="text-xs sm:text-sm font-bold text-gray-800 uppercase">MÊS / ANO</strong>
-                <button onclick="mudarMesCalendario(1)" class="px-3 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-xs">Próximo Mês ▶</button>
-            </div>
-            <div class="grid grid-cols-7 gap-1 text-center font-bold text-[11px] text-gray-500 mb-2">
-                <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
-            </div>
-            <div id="cal-grid-dias" class="grid grid-cols-7 gap-1.5 text-center text-xs"></div>
-            <div class="mt-4 flex items-center justify-center gap-4 text-[10px]">
-                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-100 border border-emerald-200 rounded"></span> Livre</span>
-                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-slate-700 rounded"></span> Ocupado</span>
-                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-gray-100 border rounded"></span> Passado</span>
-            </div>
-            <div class="mt-6 flex justify-end">
-                <button onclick="fecharCalendarioSuite()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold text-xs sm:text-sm py-2.5 rounded-xl transition">Fechar</button>
-            </div>
-        </div>
-    </div>
 </body>
 </html>
