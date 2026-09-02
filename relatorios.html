@@ -619,7 +619,7 @@
                     let dadosBrutos = (response.data || []).filter(row => row.pousada_id === usuarioIdAtual);
                     error = response.error;
 
-                    // >>> ALERTA VIGÊNCIA - CALCULA DIAS RESTANTES PARA EXPIRAÇÃO
+                    // >>> ALERTA VIGÊNCIA - CALCULA DIAS RESTANTES PARA EXPIRAÇÃO - CORRIGIDO TIMEZONE
                     const hoje = new Date();
                     hoje.setHours(0,0,0,0);
                     registros = dadosBrutos.map(row => {
@@ -629,10 +629,26 @@
                         let alertaCor = 'gray';
                         
                         if (vigenciaFimStr) {
-                            let dataFim = new Date(String(vigenciaFimStr).substring(0,10));
-                            dataFim.setHours(0,0,0,0);
+                            // CORREÇÃO: parse manual YYYY-MM-DD como data local para evitar bug de fuso UTC
+                            // Antes: new Date("2026-09-02") criava UTC e causava -1 dia no Brasil GMT-3
+                            let str = String(vigenciaFimStr).substring(0,10);
+                            let partes = str.split('-');
+                            let dataFim;
+                            if (partes.length === 3) {
+                                // Formato YYYY-MM-DD - cria como data local
+                                dataFim = new Date(Number(partes[0]), Number(partes[1])-1, Number(partes[2]), 0,0,0,0);
+                            } else {
+                                // Tenta DD/MM/YYYY
+                                let partesBr = String(vigenciaFimStr).split('/');
+                                if (partesBr.length === 3) {
+                                    dataFim = new Date(Number(partesBr[2]), Number(partesBr[1])-1, Number(partesBr[0]), 0,0,0,0);
+                                } else {
+                                    dataFim = new Date(str);
+                                    dataFim.setHours(0,0,0,0);
+                                }
+                            }
                             let diffMs = dataFim - hoje;
-                            diasRestantes = Math.ceil(diffMs / (1000*60*60*24));
+                            diasRestantes = Math.round(diffMs / (1000*60*60*24)); // Math.round para evitar erro de horário de verão
                             
                             if (diasRestantes < 0) {
                                 alertaTexto = `VENCIDA há ${Math.abs(diasRestantes)} dias`;
@@ -918,23 +934,7 @@
                         let colLower = col.toLowerCase();
 
                         if (valorBruto !== null && valorBruto !== undefined && String(valorBruto).trim() !== '') {
-                            if (colLower.includes('alerta_vigencia') && !colLower.includes('cor')) {
-                                let cor = String(row.alerta_vigencia_cor || 'gray').toLowerCase();
-                                let badgeClass = 'bg-gray-100 text-gray-700';
-                                if (cor === 'red') badgeClass = 'bg-red-100 text-red-700 border border-red-200 animate-pulse';
-                                else if (cor === 'amber') badgeClass = 'bg-amber-100 text-amber-700 border border-amber-200';
-                                else if (cor === 'emerald') badgeClass = 'bg-emerald-100 text-emerald-700 border border-emerald-200';
-                                valorExibicao = `<span class="px-2 py-1 rounded-full text-[10px] font-extrabold uppercase ${badgeClass}">${String(valorBruto).toUpperCase()}</span>`;
-                            } else if (colLower.includes('dias_restantes_vigencia')) {
-                                if (valorBruto === null || valorBruto === undefined) {
-                                    valorExibicao = '<span class="text-gray-400">-</span>';
-                                } else {
-                                    let dias = Number(valorBruto);
-                                    let cor = dias < 0 ? 'text-red-600' : dias === 0 ? 'text-red-600 font-extrabold' : dias <=3 ? 'text-red-600' : dias <=7 ? 'text-amber-600' : 'text-emerald-600';
-                                    let texto = dias < 0 ? `${Math.abs(dias)} DIAS ATRASADA` : dias === 0 ? 'HOJE' : `${dias} DIAS`;
-                                    valorExibicao = `<span class="font-bold ${cor}">${texto}</span>`;
-                                }
-                            } else if (colLower.includes('alerta_check_in') || colLower.includes('alerta_status')) {
+                            if (colLower.includes('alerta_check_in') || colLower.includes('alerta_status')) {
                                 valorExibicao = valorBruto;
                             } else if (colLower.includes('criado_em') || colLower.includes('recusado_em')) {
                                 valorExibicao = formatarDataHoraBr(valorBruto);
