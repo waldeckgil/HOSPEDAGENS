@@ -43,9 +43,9 @@
                     <!-- Cabeçalho - SISTEMA DE CONSULTAS CENTRALIZADO -->
                     <div class="flex flex-col items-center justify-center mb-6 gap-2 text-center">
                         <div>
-                            <h1 class="text-xl sm:text-2xl font-extrabold text-gray-800 tracking-wide">Sistema de Consultas da Pousada</h1>
+                            <h1 class="text-xl sm:text-2xl font-extrabold text-gray-800 tracking-wide">Gestão completa de reservas, ocupação e financeiro</h1>
                             <p id="nomePousadaLogada" class="text-sm font-bold text-blue-600 mt-1 uppercase tracking-wider">Carregando dados...</p>
-                            <p class="text-[11px] text-gray-500 mt-1">Gestão completa de reservas, ocupação e financeiro</p>
+                            <p class="text-[11px] text-gray-500 mt-1">Sistema de Consultas detalhadas</p>
                         </div>
                     </div>
 
@@ -277,7 +277,7 @@
             const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', usuarioIdAtual).single();
             
             if (pousada && pousada.nome) {
-                labelPousada.textContent = `Pousada: ${pousada.nome}`.toUpperCase();
+                labelPousada.textContent = `-> ${pousada.nome}`.toUpperCase();
                 labelMenu.textContent = pousada.nome.toUpperCase();
             } else {
                 labelPousada.textContent = `POUSADA ID: ${usuarioIdAtual}`;
