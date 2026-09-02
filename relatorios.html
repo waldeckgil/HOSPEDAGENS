@@ -386,6 +386,12 @@
             const dataInicio = document.getElementById('filtroDataInicio').value;
             const dataFim = document.getElementById('filtroDataFim').value;
 
+            let ehViewReservas = (viewAtualSelecionada === 'vw_gestor_reservas_relatorio');
+            let ehViewHospedagens = (viewAtualSelecionada === 'vw_gestor_hospedagens_relatorio');
+            let ehViewTarifas = (viewAtualSelecionada === 'vw_gestor_tarifas_relatorio');
+            let ehViewFinanceiro = (viewAtualSelecionada === 'vw_gestor_financeiro_relatorio');
+            let ehViewFinanceiroSuite = (viewAtualSelecionada === 'vw_gestor_financeiro_suite_relatorio');
+
             let dataInicioFormatada = dataInicio ? dataInicio.split('-').reverse().join('/') : 'INÍCIO';
             let dataFimFormatada = dataFim ? dataFim.split('-').reverse().join('/') : 'SEM LIMITE';
             
@@ -408,11 +414,6 @@
                 let registros = [];
                 let error = null;
 
-                let ehViewReservas = (viewAtualSelecionada === 'vw_gestor_reservas_relatorio');
-                let ehViewHospedagens = (viewAtualSelecionada === 'vw_gestor_hospedagens_relatorio');
-                let ehViewTarifas = (viewAtualSelecionada === 'vw_gestor_tarifas_relatorio');
-                let ehViewFinanceiro = (viewAtualSelecionada === 'vw_gestor_financeiro_relatorio');
-                let ehViewFinanceiroSuite = (viewAtualSelecionada === 'vw_gestor_financeiro_suite_relatorio');
 
                 if (ehViewTarifas) {
                     const response = await supabaseClient.rpc('fn_gestor_tarifas_relatorio', {
