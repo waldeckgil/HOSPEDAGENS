@@ -569,11 +569,11 @@
             } else {
                 container.style.display = 'none';
             }
-            // >>> CONTROLE DO FILTRO DATA LATERAL - SÓ HOSPEDAGENS
+            // >>> CONTROLE DO FILTRO DATA LATERAL - HOSPEDAGENS E FINANCEIRO AO LADO DOS CARDS
             var filtroLateral = document.getElementById('containerFiltroDataHospedagens');
             var filtroTabela = document.getElementById('containerFiltroDataTabela');
             if (filtroLateral && filtroTabela) {
-                if (viewAtualSelecionada === 'vw_gestor_hospedagens_relatorio') {
+                if (viewAtualSelecionada === 'vw_gestor_hospedagens_relatorio' || viewAtualSelecionada === 'vw_gestor_financeiro_relatorio') {
                     filtroLateral.classList.remove('hidden');
                     filtroLateral.classList.add('flex');
                     filtroTabela.classList.add('hidden');
@@ -915,23 +915,32 @@
                 // Renderiza KPI explicito no topo dependendo da View
                 containerKpis.classList.remove("hidden");
                 if (ehViewFinanceiro) {
-                    containerKpis.className = "grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5";
+                    containerKpis.className = "flex flex-wrap gap-3 mb-5";
                     let totalGeralBruto = registrosFiltrados.reduce((acc, r) => acc + Number(r.valor_total || 0), 0);
                     let totalJaPago = registrosFiltrados.reduce((acc, r) => acc + Number(r.valor_pago || 0), 0);
                     let saldoRestanteGeral = totalGeralBruto - totalJaPago;
 
                     containerKpis.innerHTML = `
-                        <div class="bg-white p-4 rounded-xl border border-blue-200 shadow-sm flex flex-col gap-1">
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Saldo Total Bruto (Reservas)</span>
-                            <span class="text-lg font-extrabold text-blue-700">${totalGeralBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                        <div class="bg-white p-3 rounded-xl border border-blue-200 shadow-sm flex items-center gap-3 min-w-[160px] hover:shadow-md transition">
+                            <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-sack-dollar"></i></div>
+                            <div class="flex flex-col">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Saldo Total Bruto</span>
+                                <span class="text-sm font-extrabold text-blue-700 leading-none">${totalGeralBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                            </div>
                         </div>
-                        <div class="bg-white p-4 rounded-xl border border-emerald-200 shadow-sm flex flex-col gap-1">
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Já Pago (Recebido)</span>
-                            <span class="text-lg font-extrabold text-emerald-600">${totalJaPago.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                        <div class="bg-white p-3 rounded-xl border border-emerald-200 shadow-sm flex items-center gap-3 min-w-[160px] hover:shadow-md transition">
+                            <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-check"></i></div>
+                            <div class="flex flex-col">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Já Pago</span>
+                                <span class="text-sm font-extrabold text-emerald-600 leading-none">${totalJaPago.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                            </div>
                         </div>
-                        <div class="bg-white p-4 rounded-xl border border-amber-200 shadow-sm flex flex-col gap-1">
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Saldo Restante a Receber</span>
-                            <span class="text-lg font-extrabold text-amber-600">${saldoRestanteGeral.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                        <div class="bg-white p-3 rounded-xl border border-amber-200 shadow-sm flex items-center gap-3 min-w-[160px] hover:shadow-md transition">
+                            <div class="w-10 h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-clock"></i></div>
+                            <div class="flex flex-col">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Saldo Restante a Receber</span>
+                                <span class="text-sm font-extrabold text-amber-600 leading-none">${saldoRestanteGeral.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                            </div>
                         </div>
                     `;
                     renderizarFiltroSuites(registros);
