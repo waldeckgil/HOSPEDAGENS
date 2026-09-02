@@ -1183,22 +1183,22 @@
                 const ePassado = dataIso < hojeStr;
                 let classe = "";
                 let tooltip = "";
-                let innerContent = `${dia}`;
                 if (ePassado) {
                     classe = "bg-gray-100 text-gray-400 border border-gray-200 opacity-60";
                     tooltip = "Data passada";
                 } else if (estaOcupado) {
-                    // VERMELHO CLARO CLARINHO COM X BRANCO TRAÇANDO A DATA
                     classe = "bg-red-100 text-red-700 border border-red-200 font-bold shadow-sm relative overflow-hidden";
                     tooltip = "Ocupado - com reserva futura";
-                    innerContent = `${dia}<span class="absolute inset-0 flex items-center justify-center text-white font-extrabold text-[18px] opacity-90" style="text-shadow: 0 0 2px rgba(220,38,38,0.8);">✕</span><span class="absolute inset-0 flex items-center justify-center"><span class="w-[1px] h-6 bg-white/80 rotate-45 absolute"></span><span class="w-[1px] h-6 bg-white/80 -rotate-45 absolute"></span></span>`;
                 } else {
                     classe = "bg-emerald-100 text-emerald-800 border border-emerald-200 hover:bg-emerald-200 font-bold";
                     tooltip = "Livre - disponível para reserva";
                 }
                 const isHoje = dataIso === hojeStr ? 'ring-2 ring-blue-500' : '';
-                const isHoje = dataIso === hojeStr ? 'ring-2 ring-blue-500' : '';
-                grid.innerHTML += `<div title="${tooltip} ${dataIso}" class="h-8 flex items-center justify-center rounded-lg text-[11px] ${classe} ${isHoje} relative">${innerContent}</div>`;
+                let conteudoDia = `${dia}`;
+                if (estaOcupado) {
+                    conteudoDia = `${dia}<span class="absolute inset-0 flex items-center justify-center text-white font-extrabold text-[16px] leading-none" style="text-shadow: 0 0 3px rgba(239,68,68,0.9);">✕</span>`;
+                }
+                grid.innerHTML += `<div title="${tooltip} ${dataIso}" class="h-8 flex items-center justify-center rounded-lg text-[11px] ${classe} ${isHoje} relative">${conteudoDia}</div>`;
             }
         }
 
