@@ -135,36 +135,36 @@
                             <button id="btnRecusada" onclick="alterarFiltroStatusReservas('RECUSADA')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-white text-red-600 border border-red-200 hover:bg-red-50">RECUSADAS</button>
                             <button id="btnTodas" onclick="alterarFiltroStatusReservas('TODAS')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-white text-gray-600 border border-gray-200 hover:bg-gray-50">TODAS</button>
                         </div>
-                        <!-- CARDS CONTROLE HOJE - CENÁRIO C - CLICÁVEIS COM FILTRO -->
+                        <!-- CARDS CONTROLE HOJE - CENÁRIO C -->
                         <div id="containerCardsControleHoje" class="flex flex-wrap items-center gap-3">
                             <!-- Check-In Hoje -->
-                            <div id="cardCheckInHoje" onclick="filtrarPorCardHoje('checkin')" title="Clique para filtrar apenas Check-In de hoje" class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3 min-w-[150px] cursor-pointer hover:shadow-md hover:border-violet-300 hover:bg-violet-50/50 transition-all group">
-                                <div class="w-10 h-10 bg-violet-100 text-violet-600 rounded-full flex items-center justify-center text-sm shadow-sm group-hover:scale-110 transition">
+                            <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3 min-w-[150px]">
+                                <div class="w-10 h-10 bg-violet-100 text-violet-600 rounded-full flex items-center justify-center text-sm shadow-sm">
                                     <i class="fa-solid fa-calendar-days"></i>
                                 </div>
                                 <div class="flex flex-col">
                                     <span id="cardCheckInHojeValor" class="text-lg font-extrabold text-gray-800 leading-none">0</span>
-                                    <span class="text-[11px] text-gray-500 font-medium group-hover:text-violet-700">Check-In Hoje</span>
+                                    <span class="text-[11px] text-gray-500 font-medium">Check-In Hoje</span>
                                 </div>
                             </div>
                             <!-- Check-Out Hoje -->
-                            <div id="cardCheckOutHoje" onclick="filtrarPorCardHoje('checkout')" title="Clique para filtrar apenas Check-Out de hoje" class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3 min-w-[150px] cursor-pointer hover:shadow-md hover:border-red-300 hover:bg-red-50/50 transition-all group">
-                                <div class="w-10 h-10 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-sm shadow-sm group-hover:scale-110 transition">
+                            <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3 min-w-[150px]">
+                                <div class="w-10 h-10 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-sm shadow-sm">
                                     <i class="fa-solid fa-laptop"></i>
                                 </div>
                                 <div class="flex flex-col">
                                     <span id="cardCheckOutHojeValor" class="text-lg font-extrabold text-gray-800 leading-none">0</span>
-                                    <span class="text-[11px] text-gray-500 font-medium group-hover:text-red-700">Check-Out Hoje</span>
+                                    <span class="text-[11px] text-gray-500 font-medium">Check-Out Hoje</span>
                                 </div>
                             </div>
-                            <!-- Reservas -->
-                            <div id="cardReservasHoje" onclick="filtrarPorCardHoje('reservas')" title="Clique para ver todas as reservas (remover filtro de hoje)" class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3 min-w-[150px] cursor-pointer hover:shadow-md hover:border-blue-300 hover:bg-blue-50/50 transition-all group">
-                                <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm shadow-sm group-hover:scale-110 transition">
+                            <!-- Reservas Hoje -->
+                            <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3 min-w-[150px]">
+                                <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm shadow-sm">
                                     <i class="fa-solid fa-money-bill"></i>
                                 </div>
                                 <div class="flex flex-col">
                                     <span id="cardReservasHojeValor" class="text-lg font-extrabold text-gray-800 leading-none">0</span>
-                                    <span class="text-[11px] text-gray-500 font-medium group-hover:text-blue-700">Reservas</span>
+                                    <span class="text-[11px] text-gray-500 font-medium">Reservas</span>
                                 </div>
                             </div>
                         </div>
@@ -218,9 +218,7 @@
 
         let usuarioIdAtual = null;
         let viewAtualSelecionada = 'vw_gestor_financeiro_relatorio';
-        var filtroStatusReservasAtual = 'APROVADA';
-        var filtroCheckTipoHoje = null; // 'checkin' | 'checkout' | 'reservas' | null
-        var hojeStrGlobal = new Date().toISOString().split('T')[0]; 
+        var filtroStatusReservasAtual = 'APROVADA'; 
         let suiteFiltroAtual = null;
         let suitesDaPousadaCache = []; 
         let tituloBaseAtual = 'Extrato Detalhado de Pagamentos';
@@ -401,55 +399,11 @@
                 const elRes = document.getElementById('cardReservasHojeValor');
                 if (elIn) elIn.innerText = (errIn ? 0 : (countCheckIn || 0));
                 if (elOut) elOut.innerText = (errOut ? 0 : (countCheckOut || 0));
-                if (elIn) elIn.innerText = (errIn ? 0 : (countCheckIn || 0));
-                if (elOut) elOut.innerText = (errOut ? 0 : (countCheckOut || 0));
                 if (elRes) elRes.innerText = (errRes ? 0 : (countReservas || 0));
 
             } catch (e) {
                 console.error('Erro carregarCardsControleHoje', e);
             }
-        }
-
-        // >>> CENÁRIO C - FILTRO AO CLICAR NOS CARDS HOJE
-        function filtrarPorCardHoje(tipo) {
-            // Se clicar no mesmo já ativo, remove filtro
-            if (filtroCheckTipoHoje === tipo) {
-                filtroCheckTipoHoje = null;
-            } else {
-                filtroCheckTipoHoje = tipo;
-            }
-
-            // Atualiza visual dos cards
-            const cardIn = document.getElementById('cardCheckInHoje');
-            const cardOut = document.getElementById('cardCheckOutHoje');
-            const cardRes = document.getElementById('cardReservasHoje');
-            
-            [cardIn, cardOut, cardRes].forEach(c => {
-                if (c) {
-                    c.classList.remove('ring-2', 'ring-violet-500', 'ring-red-500', 'ring-blue-500', 'bg-violet-50', 'bg-red-50', 'bg-blue-50', 'border-violet-400', 'border-red-400', 'border-blue-400');
-                }
-            });
-
-            if (filtroCheckTipoHoje === 'checkin' && cardIn) {
-                cardIn.classList.add('ring-2', 'ring-violet-500', 'bg-violet-50', 'border-violet-400');
-            } else if (filtroCheckTipoHoje === 'checkout' && cardOut) {
-                cardOut.classList.add('ring-2', 'ring-red-500', 'bg-red-50', 'border-red-400');
-            } else if (filtroCheckTipoHoje === 'reservas' && cardRes) {
-                cardRes.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50', 'border-blue-400');
-            }
-
-            // Se for 'reservas', mostra todas (remove filtro de hoje)
-            if (tipo === 'reservas' && filtroCheckTipoHoje === 'reservas') {
-                // Mostra todas - já está no comportamento padrão, mas força recarregar
-                filtroCheckTipoHoje = null;
-                // Remove seleção visual de reservas para indicar que é "ver todas"
-                if (cardRes) {
-                    cardRes.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50', 'border-blue-400');
-                }
-            }
-
-            // Recarrega dados com filtro
-            carregarDadosView();
         }
 
         function atualizarVisibilidadeFiltroStatus() {
@@ -672,23 +626,6 @@
                         if (filtroStatusReservasAtual === 'RECUSADA') return isRecusada;
                         return true; 
                     });
-
-                    // >>> FILTRO EXTRA - CARDS HOJE (Check-In / Check-Out)
-                    if (filtroCheckTipoHoje) {
-                        const hojeStr = hojeStrGlobal || new Date().toISOString().split('T')[0];
-                        if (filtroCheckTipoHoje === 'checkin') {
-                            registrosFiltrados = registrosFiltrados.filter(row => {
-                                let chk = String(row.checkin || '').substring(0,10);
-                                return chk === hojeStr;
-                            });
-                        } else if (filtroCheckTipoHoje === 'checkout') {
-                            registrosFiltrados = registrosFiltrados.filter(row => {
-                                let chk = String(row.checkout || '').substring(0,10);
-                                return chk === hojeStr;
-                            });
-                        }
-                        // 'reservas' = mostra todas, sem filtro extra
-                    }
                 } else if (!ehViewTarifas && !ehViewHospedagens) {
                     registrosFiltrados = registrosFiltrados.filter(row => {
                         let valData = row['data_pagamento'] || row['checkin'] || '';
