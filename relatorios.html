@@ -1674,6 +1674,74 @@ function formatarDataHoraBr(valor) {
             renderizarCalendarioGeralRelatorios();
         }
 
+
+        function abrirModalNovaReservaCalendario() {
+            const suite = calGeralRelSuitesCache[calGeralRelSuiteIndex];
+            if (!suite || !calGeralCheckinTemp || !calGeralCheckoutTemp) return;
+            document.getElementById('nova-reserva-titulo').innerText = `Criar Nova Reserva: ${suite.nome}`;
+            document.getElementById('nova-reserva-suite-id').value = suite.id;
+            document.getElementById('nova-reserva-checkin').value = calGeralCheckinTemp;
+            document.getElementById('nova-reserva-checkout').value = calGeralCheckoutTemp;
+            document.getElementById('nova-reserva-hospede').value = '';
+            document.getElementById('nova-reserva-whatsapp').value = '';
+            document.getElementById('nova-reserva-cpf').value = '';
+            document.getElementById('nova-reserva-rg').value = '';
+            document.getElementById('nova-reserva-endereco').value = '';
+            document.getElementById('nova-reserva-cep').value = '';
+            document.getElementById('nova-reserva-email').value = '';
+            document.getElementById('nova-reserva-valor-sinal').value = '';
+            document.getElementById('nova-reserva-observacao').value = '';
+            document.getElementById('nova-reserva-adultos').value = '2';
+            document.getElementById('nova-reserva-criancas').value = '0';
+            document.getElementById('nova-reserva-pet').value = 'false';
+            document.getElementById('modal-nova-reserva-calendario').classList.remove('hidden');
+            recalcularNovaReservaCalendario();
+        }
+        function fecharModalNovaReservaCalendario() { document.getElementById('modal-nova-reserva-calendario').classList.add('hidden'); }
+        function calcularDiariasCalendario(a,b){ if(!a||!b)return 0; return Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/(1000*60*60*24)); }
+        async function recalcularNovaReservaCalendario(){
+            const checkin=document.getElementById('nova-reserva-checkin').value; const checkout=document.getElementById('nova-reserva-checkout').value;
+            const suiteId=document.getElementById('nova-reserva-suite-id').value;
+            const adultos=parseInt(document.getElementById('nova-reserva-adultos').value)||2;
+            const criancas=parseInt(document.getElementById('nova-reserva-criancas').value)||0;
+            const pet=document.getElementById('nova-reserva-pet').value==='true';
+            const diarias=calcularDiariasCalendario(checkin, checkout);
+            const qtdEl=document.getElementById('nova-reserva-qtd-diarias');
+            if(qtdEl) qtdEl.innerText=`${diarias} diária(s)`;
+            let total=0;
+            try{ const {data}=await supabaseClient.rpc('calcular_total_reserva',{p_suite_id:suiteId,p_checkin:checkin,p_checkout:checkout,p_adultos:adultos,p_criancas:criancas,p_idades_criancas:'',p_pet:pet}); if(data!==null) total=Number(data); }catch(e){ const suite=calGeralRelSuitesCache.find(s=>s.id===suiteId); total=(suite?.valor_diaria||0)*diarias; if(pet) total+=50*diarias; }
+            const totalEl=document.getElementById('nova-reserva-valor-total');
+            if(totalEl) totalEl.innerText=total.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+            const sinal=Number(document.getElementById('nova-reserva-valor-sinal').value||0);
+            const saldoEl=document.getElementById('nova-reserva-saldo-restante');
+            if(saldoEl){ saldoEl.innerText=(total-sinal).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); saldoEl.dataset.valorTotal=total; }
+        }
+        async function salvarNovaReservaCalendario(){
+            const suiteId=document.getElementById('nova-reserva-suite-id').value;
+            const hospede=document.getElementById('nova-reserva-hospede').value.trim();
+            const whatsapp=document.getElementById('nova-reserva-whatsapp').value.trim();
+            const checkin=document.getElementById('nova-reserva-checkin').value;
+            const checkout=document.getElementById('nova-reserva-checkout').value;
+            if(!hospede||!whatsapp){ alert('Preencha nome e whatsapp'); return; }
+            const valorTotal=Number(document.getElementById('nova-reserva-saldo-restante').dataset.valorTotal||0);
+            const valorSinal=Number(document.getElementById('nova-reserva-valor-sinal').value||0);
+            const forma=document.getElementById('nova-reserva-forma-pagamento').value;
+            const obs=document.getElementById('nova-reserva-observacao').value;
+            const cpf=document.getElementById('nova-reserva-cpf').value;
+            const rg=document.getElementById('nova-reserva-rg').value;
+            const endereco=document.getElementById('nova-reserva-endereco').value;
+            const cep=document.getElementById('nova-reserva-cep').value;
+            const email=document.getElementById('nova-reserva-email').value;
+            try{
+                const {data:nova, error}=await supabaseClient.from('reservas').insert([{pousada_id:usuarioIdAtual, suite_id:suiteId, hospede_nome:hospede, whatsapp_hospede:whatsapp, cpf:cpf||null, rg:rg||null, endereco:endereco||null, cep:cep||null, email:email||null, checkin, checkout, adultos:parseInt(document.getElementById('nova-reserva-adultos').value)||2, criancas:parseInt(document.getElementById('nova-reserva-criancas').value)||0, pet:document.getElementById('nova-reserva-pet').value==='true', valor_total:valorTotal, status:'Aprovada', observacao:obs||null}]).select().single();
+                if(error) throw error;
+                if(valorSinal>0) await supabaseClient.from('hospede_pagamentos').insert([{pousada_id:usuarioIdAtual, reserva_id:nova.id, valor_pago:valorSinal, forma_pagamento:forma, observacao:'Sinal via calendário geral'}]);
+                alert('Reserva criada com sucesso!');
+                fecharModalNovaReservaCalendario(); fecharCalendarioGeralRelatorios(); calGeralCheckinTemp=null; calGeralCheckoutTemp=null; if(typeof carregarDadosView==='function') carregarDadosView();
+            }catch(e){ alert('Erro: '+(e.message||e)); }
+        }
+
+
         window.onload = () => {
             protegerPagina();
             setTimeout(() => { if (viewAtualSelecionada === 'vw_gestor_reservas_relatorio') carregarCardsControleHoje(); }, 800);
