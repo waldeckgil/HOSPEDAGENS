@@ -1699,23 +1699,86 @@ function formatarDataHoraBr(valor) {
         }
         function fecharModalNovaReservaCalendario() { document.getElementById('modal-nova-reserva-calendario').classList.add('hidden'); }
         function calcularDiariasCalendario(a,b){ if(!a||!b)return 0; return Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/(1000*60*60*24)); }
+
+        function renderizarInputsIdadesCriancasCalendario(qtdCriancas, idadesAtuais = []) {
+            const container = document.getElementById('nova-reserva-container-idades-criancas');
+            const lista = document.getElementById('nova-reserva-lista-idades-criancas');
+            if (!container || !lista) return;
+            if (qtdCriancas <= 0) { container.classList.add('hidden'); lista.innerHTML=''; return; }
+            container.classList.remove('hidden');
+            let html = '';
+            for (let i=0;i<qtdCriancas;i++) {
+                const idadeAtual = idadesAtuais[i] !== undefined ? idadesAtuais[i] : '';
+                html += `<div><label class="block text-[10px] font-bold text-gray-600 mb-1">Criança ${i+1} (Idade)</label><input type="number" min="0" max="17" value="${idadeAtual}" placeholder="0" class="nova-reserva-input-idade-crianca w-full p-2.5 border rounded-xl text-sm bg-white" oninput="recalcularNovaReservaCalendario()"></div>`;
+            }
+            lista.innerHTML = html;
+        }
+
         async function recalcularNovaReservaCalendario(){
-            const checkin=document.getElementById('nova-reserva-checkin').value; const checkout=document.getElementById('nova-reserva-checkout').value;
+            const checkin=document.getElementById('nova-reserva-checkin').value; 
+            const checkout=document.getElementById('nova-reserva-checkout').value;
             const suiteId=document.getElementById('nova-reserva-suite-id').value;
             const adultos=parseInt(document.getElementById('nova-reserva-adultos').value)||2;
             const criancas=parseInt(document.getElementById('nova-reserva-criancas').value)||0;
             const pet=document.getElementById('nova-reserva-pet').value==='true';
+            
+            // Capacidade real da suíte - igual dashboard
+            try {
+                const suite = calGeralRelSuitesCache.find(s=>s.id===suiteId);
+                if (suite) {
+                    const capMax = Number(suite.capacidade_hospedes) || 0;
+                    const inclusos = Number(suite.hospedes_inclusos) || 2;
+                    const totalOcup = (Number(adultos)||0)+(Number(criancas)||0);
+                    const capTextoEl = document.getElementById('nova-reserva-capacidade-texto');
+                    if (capTextoEl) {
+                        if (capMax>0) capTextoEl.innerHTML = `Capacidade real desta suíte: <strong>${capMax} pessoa(s)</strong> no total (adultos + crianças) | ${inclusos} incluso(s)`;
+                        else capTextoEl.innerHTML = `Capacidade não definida (defina em Configurar Pousada)`;
+                    }
+                    const avisoCap = document.getElementById('nova-reserva-aviso-capacidade');
+                    if (avisoCap) {
+                        if (capMax>0 && totalOcup>capMax) {
+                            avisoCap.className = 'mt-2 p-2.5 rounded-xl text-xs font-bold bg-red-50 border border-red-300 text-red-800';
+                            avisoCap.innerHTML = `⚠️ Capacidade excedida: esta suíte comporta no máximo ${capMax} pessoa(s). Você informou ${totalOcup} (${adultos} adultos + ${criancas} crianças).`;
+                            avisoCap.classList.remove('hidden');
+                        } else if (capMax>0) {
+                            avisoCap.className = 'mt-2 p-2.5 rounded-xl text-xs font-bold bg-green-50 border border-green-200 text-green-800';
+                            avisoCap.innerHTML = `✅ Ocupação OK: ${totalOcup}/${capMax} pessoa(s)`;
+                            avisoCap.classList.remove('hidden');
+                        } else {
+                            avisoCap.classList.add('hidden');
+                        }
+                    }
+                }
+            } catch(e){}
+
+            // Idades - igual dashboard
+            const inputsAntes = document.querySelectorAll('.nova-reserva-input-idade-crianca');
+            const idadesAntes = Array.from(inputsAntes).map(el=>el.value);
+            renderizarInputsIdadesCriancasCalendario(criancas, idadesAntes);
+            const inputsIdades = document.querySelectorAll('.nova-reserva-input-idade-crianca');
+            const idadesArr = Array.from(inputsIdades).map(el=>parseInt(el.value)||0);
+            const idadesStr = idadesArr.join(',');
+
             const diarias=calcularDiariasCalendario(checkin, checkout);
             const qtdEl=document.getElementById('nova-reserva-qtd-diarias');
             if(qtdEl) qtdEl.innerText=`${diarias} diária(s)`;
             let total=0;
-            try{ const {data}=await supabaseClient.rpc('calcular_total_reserva',{p_suite_id:suiteId,p_checkin:checkin,p_checkout:checkout,p_adultos:adultos,p_criancas:criancas,p_idades_criancas:'',p_pet:pet}); if(data!==null) total=Number(data); }catch(e){ const suite=calGeralRelSuitesCache.find(s=>s.id===suiteId); total=(suite?.valor_diaria||0)*diarias; if(pet) total+=50*diarias; }
+            try{ 
+                const {data, error} = await supabaseClient.rpc('calcular_total_reserva',{p_suite_id:suiteId,p_checkin:checkin,p_checkout:checkout,p_adultos:adultos,p_criancas:criancas,p_idades_criancas:idadesStr,p_pet:pet}); 
+                if(!error && data!==null) total=Number(data); 
+                else {
+                    // fallback sem idades
+                    const {data:fb} = await supabaseClient.rpc('calcular_total_reserva',{p_suite_id:suiteId,p_checkin:checkin,p_checkout:checkout,p_adultos:adultos,p_criancas:criancas,p_pet:pet});
+                    if(fb!==null) total=Number(fb);
+                }
+            }catch(e){ const suite=calGeralRelSuitesCache.find(s=>s.id===suiteId); total=(suite?.valor_diaria||0)*diarias; if(pet) total+=50*diarias; }
             const totalEl=document.getElementById('nova-reserva-valor-total');
             if(totalEl) totalEl.innerText=total.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
             const sinal=Number(document.getElementById('nova-reserva-valor-sinal').value||0);
             const saldoEl=document.getElementById('nova-reserva-saldo-restante');
             if(saldoEl){ saldoEl.innerText=(total-sinal).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); saldoEl.dataset.valorTotal=total; }
         }
+
         async function salvarNovaReservaCalendario(){
             const suiteId=document.getElementById('nova-reserva-suite-id').value;
             const hospede=document.getElementById('nova-reserva-hospede').value.trim();
@@ -1723,6 +1786,22 @@ function formatarDataHoraBr(valor) {
             const checkin=document.getElementById('nova-reserva-checkin').value;
             const checkout=document.getElementById('nova-reserva-checkout').value;
             if(!hospede||!whatsapp){ alert('Preencha nome e whatsapp'); return; }
+
+            // Capacidade
+            const suiteCap = calGeralRelSuitesCache.find(s=>s.id===suiteId);
+            if (suiteCap) {
+                const capMax = Number(suiteCap.capacidade_hospedes)||0;
+                const adultosVal = parseInt(document.getElementById('nova-reserva-adultos').value)||2;
+                const criancasVal = parseInt(document.getElementById('nova-reserva-criancas').value)||0;
+                if (capMax>0 && (adultosVal+criancasVal)>capMax) { alert(`Capacidade excedida: máximo ${capMax} pessoa(s)`); return; }
+            }
+
+            // Verificar conflito de datas - igual dashboard
+            try {
+                const {data:temConflito} = await supabaseClient.rpc('verificar_conflito_reserva',{p_suite_id:suiteId,p_checkin:checkin,p_checkout:checkout,p_reserva_id:null});
+                if (temConflito===true) { alert('Já existe uma reserva confirmada para esta suíte nestas datas!'); return; }
+            } catch(e){ console.warn('Erro verificar conflito',e); }
+
             const valorTotal=Number(document.getElementById('nova-reserva-saldo-restante').dataset.valorTotal||0);
             const valorSinal=Number(document.getElementById('nova-reserva-valor-sinal').value||0);
             const forma=document.getElementById('nova-reserva-forma-pagamento').value;
@@ -1732,13 +1811,40 @@ function formatarDataHoraBr(valor) {
             const endereco=document.getElementById('nova-reserva-endereco').value;
             const cep=document.getElementById('nova-reserva-cep').value;
             const email=document.getElementById('nova-reserva-email').value;
+            const adultos=parseInt(document.getElementById('nova-reserva-adultos').value)||2;
+            const criancas=parseInt(document.getElementById('nova-reserva-criancas').value)||0;
+            const pet=document.getElementById('nova-reserva-pet').value==='true';
+            const inputsIdades = document.querySelectorAll('.nova-reserva-input-idade-crianca');
+            const idadesStr = Array.from(inputsIdades).map(el=>parseInt(el.value)||0).join(',');
+
             try{
-                const {data:nova, error}=await supabaseClient.from('reservas').insert([{pousada_id:usuarioIdAtual, suite_id:suiteId, hospede_nome:hospede, whatsapp_hospede:whatsapp, cpf:cpf||null, rg:rg||null, endereco:endereco||null, cep:cep||null, email:email||null, checkin, checkout, adultos:parseInt(document.getElementById('nova-reserva-adultos').value)||2, criancas:parseInt(document.getElementById('nova-reserva-criancas').value)||0, pet:document.getElementById('nova-reserva-pet').value==='true', valor_total:valorTotal, status:'Aprovada', observacao:obs||null}]).select().single();
+                // COLUNAS CORRETAS: qtd_adultos, qtd_criancas, idades_criancas, tem_pet - IGUAL DASHBOARD
+                const dadosReserva = {
+                    pousada_id: usuarioIdAtual,
+                    suite_id: suiteId,
+                    hospede_nome: hospede,
+                    whatsapp_hospede: whatsapp,
+                    cpf: cpf||null,
+                    rg: rg||null,
+                    endereco: endereco||null,
+                    cep: cep||null,
+                    email: email||null,
+                    qtd_adultos: adultos,
+                    qtd_criancas: criancas,
+                    idades_criancas: idadesStr,
+                    tem_pet: pet,
+                    checkin: checkin,
+                    checkout: checkout,
+                    valor_total: valorTotal,
+                    status: 'Aprovada',
+                    observacao: obs||null
+                };
+                const {data:nova, error}=await supabaseClient.from('reservas').insert([dadosReserva]).select().single();
                 if(error) throw error;
-                if(valorSinal>0) await supabaseClient.from('hospede_pagamentos').insert([{pousada_id:usuarioIdAtual, reserva_id:nova.id, valor_pago:valorSinal, forma_pagamento:forma, observacao:'Sinal via calendário geral'}]);
+                if(valorSinal>0 && nova) await supabaseClient.from('hospede_pagamentos').insert([{pousada_id:usuarioIdAtual, reserva_id:nova.id, valor_pago:valorSinal, forma_pagamento:forma, observacao:'Sinal via calendário geral'}]);
                 alert('Reserva criada com sucesso!');
                 fecharModalNovaReservaCalendario(); fecharCalendarioGeralRelatorios(); calGeralCheckinTemp=null; calGeralCheckoutTemp=null; if(typeof carregarDadosView==='function') carregarDadosView();
-            }catch(e){ alert('Erro: '+(e.message||e)); }
+            }catch(e){ console.error(e); alert('Erro: '+(e.message||e)); }
         }
 
 
@@ -1842,6 +1948,7 @@ function formatarDataHoraBr(valor) {
             </div>
             <div class="space-y-3">
                 <input type="hidden" id="nova-reserva-suite-id">
+                <div id="nova-reserva-capacidade-info" class="mb-1 bg-blue-50 border border-blue-200 p-2.5 rounded-xl text-xs font-bold text-blue-900 flex items-center gap-2"><span>🏨</span> <span id="nova-reserva-capacidade-texto">Capacidade: carregando...</span></div>
                 <input type="text" id="nova-reserva-hospede" placeholder="Nome Hóspede *" class="w-full p-3 border rounded-xl text-sm">
                 <input type="text" id="nova-reserva-whatsapp" placeholder="WhatsApp *" class="w-full p-3 border rounded-xl text-sm">
                 <div class="grid grid-cols-2 gap-2"><input type="text" id="nova-reserva-cpf" placeholder="CPF (Opcional)" class="p-3 border rounded-xl text-sm"><input type="text" id="nova-reserva-rg" placeholder="RG (Opcional)" class="p-3 border rounded-xl text-sm"></div>
@@ -1852,6 +1959,12 @@ function formatarDataHoraBr(valor) {
                     <div><label class="block text-xs font-bold text-gray-700 mb-1">Crianças</label><input type="number" id="nova-reserva-criancas" min="0" value="0" class="w-full p-3 border rounded-xl text-sm" onchange="recalcularNovaReservaCalendario()" oninput="recalcularNovaReservaCalendario()"></div>
                     <div><label class="block text-xs font-bold text-gray-700 mb-1">Taxa de Pet</label><select id="nova-reserva-pet" class="w-full p-3 border rounded-xl text-sm font-bold" onchange="recalcularNovaReservaCalendario()"><option value="false">Não</option><option value="true">Sim</option></select></div>
                 </div>
+                <!-- IDADES DAS CRIANÇAS - IGUAL DASHBOARD -->
+                <div id="nova-reserva-container-idades-criancas" class="hidden bg-gray-50 border border-gray-200 p-3 rounded-xl space-y-2">
+                    <label class="block text-xs font-bold text-gray-700">Idade(s) da(s) Criança(s) (para cálculo e isenção):</label>
+                    <div id="nova-reserva-lista-idades-criancas" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+                </div>
+                <div id="nova-reserva-aviso-capacidade" class="hidden mt-2 p-2.5 rounded-xl text-xs font-bold"></div>
                 <div class="grid grid-cols-2 gap-3 pt-2">
                     <div><label class="block text-xs font-bold text-gray-700 mb-1">Check-in</label><input type="date" id="nova-reserva-checkin" readonly class="w-full p-3 border rounded-xl text-sm bg-blue-50/50 font-bold"></div>
                     <div><label class="block text-xs font-bold text-gray-700 mb-1">Check-out</label><input type="date" id="nova-reserva-checkout" readonly class="w-full p-3 border rounded-xl text-sm bg-blue-50/50 font-bold"></div>
