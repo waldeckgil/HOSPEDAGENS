@@ -1477,10 +1477,9 @@ function formatarDataHoraBr(valor) {
             if (!usuarioIdAtual) return;
             
             const modal = document.getElementById('modal-calendario-geral-relatorios');
-            document.getElementById('cal-geral-rel-suite-nome').innerText = 'Carregando suítes...';
+            document.getElementById('cal-geral-rel-suite-nome').innerText = 'Carregando...';
             
             try {
-                // Busca suítes e reservas
                 const { data: suites } = await supabaseClient.from('suites').select('id,nome').eq('pousada_id', usuarioIdAtual).order('nome');
                 const { data: reservas } = await supabaseClient.from('reservas').select('suite_id,checkin,checkout,status').eq('pousada_id', usuarioIdAtual).in('status', ['Aprovada','Ocupada','Reservado']);
                 
@@ -1494,6 +1493,7 @@ function formatarDataHoraBr(valor) {
                 
                 calGeralRelSuiteIndex = 0;
                 calGeralRelDataRef = new Date();
+                renderizarPainelSuitesRelatorios();
                 renderizarCalendarioGeralRelatorios();
                 modal.classList.remove('hidden');
             } catch(e) {
@@ -1505,11 +1505,40 @@ function formatarDataHoraBr(valor) {
             document.getElementById('modal-calendario-geral-relatorios').classList.add('hidden');
         }
 
-        function mudarSuiteGeralRelatorios(direcao) {
-            if (!calGeralRelSuitesCache.length) return;
-            calGeralRelSuiteIndex += direcao;
-            if (calGeralRelSuiteIndex < 0) calGeralRelSuiteIndex = calGeralRelSuitesCache.length - 1;
-            if (calGeralRelSuiteIndex >= calGeralRelSuitesCache.length) calGeralRelSuiteIndex = 0;
+        function renderizarPainelSuitesRelatorios() {
+            const container = document.getElementById('cal-geral-rel-painel-suites');
+            const totalEl = document.getElementById('cal-geral-rel-total');
+            if (!container) return;
+            
+            if (totalEl) totalEl.innerText = calGeralRelSuitesCache.length;
+            container.innerHTML = '';
+            
+            calGeralRelSuitesCache.forEach((suite, idx) => {
+                const isAtiva = idx === calGeralRelSuiteIndex;
+                const reservasSuite = calGeralRelReservasCache.filter(r => r.suite_id === suite.id).length;
+                const classeAtiva = isAtiva 
+                    ? 'bg-slate-900 text-amber-300 border-amber-400 shadow-md scale-[1.02]' 
+                    : 'bg-white text-gray-800 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50/50 hover:shadow-sm';
+                
+                const badgeOcup = reservasSuite > 0 ? `<span class="text-[9px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-bold">${reservasSuite} res.</span>` : `<span class="text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full">livre</span>`;
+                
+                container.innerHTML += `
+                    <div onclick="selecionarSuiteGeralRelatorios(${idx})" onmouseenter="if(${!isAtiva}) selecionarSuiteGeralRelatorios(${idx})" 
+                         class="cursor-pointer border-2 rounded-xl p-2.5 flex flex-col gap-1 transition-all duration-150 ${classeAtiva}">
+                        <div class="flex justify-between items-start">
+                            <i class="fa-solid fa-bed text-[11px] ${isAtiva ? 'text-amber-300' : 'text-indigo-500'}"></i>
+                            ${badgeOcup}
+                        </div>
+                        <span class="font-bold text-[11px] uppercase truncate leading-tight">${suite.nome}</span>
+                        <span class="text-[9px] ${isAtiva ? 'text-slate-300' : 'text-gray-500'}">${isAtiva ? 'VISUALIZANDO' : 'CLIQUE OU PASSE O MOUSE'}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function selecionarSuiteGeralRelatorios(index) {
+            calGeralRelSuiteIndex = index;
+            renderizarPainelSuitesRelatorios();
             renderizarCalendarioGeralRelatorios();
         }
 
@@ -1522,8 +1551,7 @@ function formatarDataHoraBr(valor) {
             const suite = calGeralRelSuitesCache[calGeralRelSuiteIndex];
             if (!suite) return;
 
-            document.getElementById('cal-geral-rel-suite-nome').innerText = `Suíte: ${suite.nome}`;
-            document.getElementById('cal-geral-rel-contador').innerText = `${calGeralRelSuiteIndex + 1} de ${calGeralRelSuitesCache.length}`;
+            document.getElementById('cal-geral-rel-suite-nome').innerText = `${suite.nome.toUpperCase()}`;
 
             const ano = calGeralRelDataRef.getFullYear();
             const mes = calGeralRelDataRef.getMonth();
@@ -1564,7 +1592,7 @@ function formatarDataHoraBr(valor) {
                 let classe = "";
                 let conteudo = dia;
                 if (ePassado) {
-                    classe = "bg-gray-100 text-gray-400 border border-gray-200 opacity-70";
+                    classe = "bg-gray-100 text-gray-400 border border-gray-200 opacity-60";
                 } else if (estaOcupado) {
                     classe = "bg-red-50 text-red-600 font-bold border border-red-200";
                     conteudo = `<span class="flex flex-col items-center justify-center leading-none"><span>${dia}</span><span class="text-[10px]">✕</span></span>`;
@@ -1624,14 +1652,15 @@ function formatarDataHoraBr(valor) {
                 </div>
             </div>
 
-            <!-- NAVEGAÇÃO DE SUÍTES NO TOPO -->
-            <div class="flex justify-between items-center mb-4 bg-slate-900 text-white p-3 rounded-2xl shadow-md">
-                <button onclick="mudarSuiteGeralRelatorios(-1)" class="w-9 h-9 rounded-xl bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition"><i class="fa-solid fa-chevron-left text-xs"></i></button>
-                <div class="text-center flex-1 px-3">
-                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest" id="cal-geral-rel-contador">1 de 4</p>
-                    <h4 id="cal-geral-rel-suite-nome" class="text-sm sm:text-base font-extrabold text-amber-300 mt-0.5">Suíte: Carregando...</h4>
+            <!-- PAINEL COM TODAS AS SUÍTES - VISIBILIDADE AMPLA -->
+            <div class="mb-4">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-[11px] font-extrabold text-slate-700 uppercase tracking-widest flex items-center gap-2"><i class="fa-solid fa-layer-group text-indigo-600"></i> TODAS AS SUÍTES (<span id="cal-geral-rel-total">0</span>) - PASSE O MOUSE OU CLIQUE</span>
+                    <span id="cal-geral-rel-suite-nome" class="text-[11px] font-bold bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full">Suíte: -</span>
                 </div>
-                <button onclick="mudarSuiteGeralRelatorios(1)" class="w-9 h-9 rounded-xl bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+                <div id="cal-geral-rel-painel-suites" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 max-h-[160px] overflow-y-auto p-2 bg-gray-50 rounded-2xl border border-gray-200">
+                    <!-- preenchido via JS com todas as suítes -->
+                </div>
             </div>
 
             <p class="text-[11px] text-emerald-700 font-medium mb-3 text-center">Dias em <span class="bg-emerald-100 px-1.5 py-0.5 rounded font-bold">verde</span> livres, <span class="bg-red-100 px-1.5 py-0.5 rounded font-bold text-red-700">vermelho claro com X</span> ocupados.</p>
