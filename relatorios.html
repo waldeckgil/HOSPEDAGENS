@@ -74,19 +74,6 @@
                             <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-emerald-700 transition">Status Geral de Ocupação das Suites</h3>
                             <p class="text-[11px] text-gray-500 mt-0.5 truncate">Cruzamento de nomes e acomodações.</p>
                         </div>
-                        </div>
-
-                        <div onclick="abrirCalendarioGeralRelatorios()" 
-                             class="card-view cursor-pointer bg-indigo-50/50 p-4 rounded-xl shadow-sm border-2 border-indigo-300 hover:border-indigo-600 hover:shadow-md transition group">
-                            <div class="flex items-center justify-between mb-2">
-                                <div class="w-8 h-8 bg-indigo-100 text-indigo-700 rounded-lg flex items-center justify-center text-sm shadow-sm">
-                                    <i class="fa-solid fa-calendar-days"></i>
-                                </div>
-                                <span class="text-[9px] font-bold uppercase tracking-wider bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full">CALENDÁRIO</span>
-                            </div>
-                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-indigo-700 transition">Calendário Geral das Suítes</h3>
-                            <p class="text-[11px] text-gray-500 mt-0.5 truncate">Clique p/ ver todas e criar reserva</p>
-                        </div>
 
                         <div onclick="abrirCalendarioGeralRelatorios()" 
                              class="card-view cursor-pointer bg-indigo-50/50 p-4 rounded-xl shadow-sm border-2 border-indigo-300 hover:border-indigo-600 hover:shadow-md transition group">
@@ -1485,6 +1472,8 @@ function formatarDataHoraBr(valor) {
         let calGeralRelDataRef = new Date();
         let calGeralRelReservasCache = [];
         let calGeralRelSuitesCache = [];
+        let calGeralCheckinTemp = null;
+        let calGeralCheckoutTemp = null;
 
         async function abrirCalendarioGeralRelatorios() {
             if (!usuarioIdAtual) return;
@@ -1601,319 +1590,39 @@ function formatarDataHoraBr(valor) {
                 const dataIso = `${ano}-${mesStr}-${diaStr}`;
                 const estaOcupado = datasOcupadas.has(dataIso);
                 const ePassado = dataIso < hojeStr;
+                const isCheckin = calGeralCheckinTemp === dataIso;
+                const isCheckout = calGeralCheckoutTemp === dataIso;
+                const isNoIntervalo = calGeralCheckinTemp && calGeralCheckoutTemp && dataIso > calGeralCheckinTemp && dataIso < calGeralCheckoutTemp;
 
                 let classe = "";
                 let conteudo = dia;
+                let onclick = "";
                 if (ePassado) {
                     classe = "bg-gray-100 text-gray-400 border border-gray-200 opacity-60";
                 } else if (estaOcupado) {
                     classe = "bg-red-50 text-red-600 font-bold border border-red-200";
                     conteudo = `<span class="flex flex-col items-center justify-center leading-none"><span>${dia}</span><span class="text-[10px]">✕</span></span>`;
                 } else {
-                    classe = "bg-emerald-100 text-emerald-800 font-extrabold border border-emerald-300 shadow-sm";
-                }
-
-                gridEl.innerHTML += `<div class="h-11 flex items-center justify-center rounded-xl text-[13px] ${classe}">${conteudo}</div>`;
-            }
-        }
-
-
-        // ==================== RESERVA DIRETA DO CALENDÁRIO GERAL ====================
-        let calGeralCheckinTemp = null;
-        let calGeralCheckoutTemp = null;
-
-        function selecionarDataCalendarioGeral(dataIso) {
-            // Só permite datas livres e futuras
-            const hojeStr = new Date().toLocaleDateString('sv-SE');
-            if (dataIso < hojeStr) return;
-            
-            const suite = calGeralRelSuitesCache[calGeralRelSuiteIndex];
-            const reservasDaSuite = calGeralRelReservasCache.filter(r => r.suite_id === suite.id);
-            const datasOcupadas = new Set();
-            reservasDaSuite.forEach(r => {
-                if (!r.checkin || !r.checkout) return;
-                let dCurr = new Date(r.checkin + 'T00:00:00');
-                const dFim = new Date(r.checkout + 'T00:00:00');
-                while (dCurr < dFim) {
-                    datasOcupadas.add(dCurr.toLocaleDateString('sv-SE'));
-                    dCurr.setDate(dCurr.getDate() + 1);
-                }
-            });
-            if (datasOcupadas.has(dataIso)) {
-                // Data ocupada não pode selecionar
-                return;
-            }
-
-            if (!calGeralCheckinTemp || (calGeralCheckinTemp && calGeralCheckoutTemp)) {
-                // Primeiro clique ou reset após seleção completa
-                calGeralCheckinTemp = dataIso;
-                calGeralCheckoutTemp = null;
-            } else {
-                // Segundo clique - define checkout
-                if (dataIso <= calGeralCheckinTemp) {
-                    // Se clicou antes do checkin, inverte
-                    calGeralCheckoutTemp = calGeralCheckinTemp;
-                    calGeralCheckinTemp = dataIso;
-                } else {
-                    // Verifica se há ocupação no intervalo
-                    let temOcupacaoNoIntervalo = false;
-                    let dCurr = new Date(calGeralCheckinTemp + 'T00:00:00');
-                    const dFim = new Date(dataIso + 'T00:00:00');
-                    while (dCurr < dFim) {
-                        const dStr = dCurr.toLocaleDateString('sv-SE');
-                        if (datasOcupadas.has(dStr)) { temOcupacaoNoIntervalo = true; break; }
-                        dCurr.setDate(dCurr.getDate() + 1);
+                    onclick = `onclick="selecionarDataCalendarioGeral('${dataIso}')"`;
+                    if (isCheckin || isCheckout) {
+                        classe = "bg-blue-600 text-white font-extrabold border-2 border-blue-800 shadow-md scale-105 cursor-pointer";
+                        conteudo = `<span class="flex flex-col items-center leading-none"><span>${dia}</span><span class="text-[7px]">${isCheckin ? 'IN' : 'OUT'}</span></span>`;
+                    } else if (isNoIntervalo) {
+                        classe = "bg-blue-100 text-blue-800 font-bold border border-blue-300 cursor-pointer";
+                    } else {
+                        classe = "bg-emerald-100 text-emerald-800 font-extrabold border border-emerald-300 shadow-sm hover:bg-emerald-200 cursor-pointer hover:scale-105 transition-all";
                     }
-                    if (temOcupacaoNoIntervalo) {
-                        alert('Existe data ocupada no intervalo selecionado. Escolha outro período livre.');
-                        return;
-                    }
-                    calGeralCheckoutTemp = dataIso;
                 }
 
-                // Se já tem checkin e checkout, abre modal de nova reserva
-                if (calGeralCheckinTemp && calGeralCheckoutTemp) {
-                    abrirModalNovaReservaCalendario();
-                    return;
-                }
-            }
-            renderizarCalendarioGeralRelatorios();
-        }
-
-        function abrirModalNovaReservaCalendario() {
-            const suite = calGeralRelSuitesCache[calGeralRelSuiteIndex];
-            if (!suite || !calGeralCheckinTemp || !calGeralCheckoutTemp) return;
-
-            document.getElementById('nova-reserva-titulo').innerText = `Criar Nova Reserva: ${suite.nome}`;
-            document.getElementById('nova-reserva-suite-id').value = suite.id;
-            document.getElementById('nova-reserva-checkin').value = calGeralCheckinTemp;
-            document.getElementById('nova-reserva-checkout').value = calGeralCheckoutTemp;
-            
-            // Busca capacidade da suíte
-            supabaseClient.from('suites').select('capacidade_hospedes,hospedes_inclusos,valor_diaria').eq('id', suite.id).single().then(({data}) => {
-                if (data) {
-                    const capMax = data.capacidade_hospedes || 4;
-                    const inclusos = data.hospedes_inclusos || 2;
-                    document.getElementById('nova-reserva-capacidade-texto').innerText = `Capacidade real desta suíte: ${capMax} pessoa(s) no total (adultos + crianças) | ${inclusos} incluso(s)`;
-                    document.getElementById('nova-reserva-capacidade-texto').dataset.valorDiaria = data.valor_diaria || 0;
-                    recalcularNovaReservaCalendario();
-                }
-            });
-
-            // Limpa campos
-            document.getElementById('nova-reserva-hospede').value = '';
-            document.getElementById('nova-reserva-whatsapp').value = '';
-            document.getElementById('nova-reserva-cpf').value = '';
-            document.getElementById('nova-reserva-rg').value = '';
-            document.getElementById('nova-reserva-endereco').value = '';
-            document.getElementById('nova-reserva-cep').value = '';
-            document.getElementById('nova-reserva-email').value = '';
-            document.getElementById('nova-reserva-valor-sinal').value = '';
-            document.getElementById('nova-reserva-observacao').value = '';
-            document.getElementById('nova-reserva-adultos').value = '2';
-            document.getElementById('nova-reserva-criancas').value = '0';
-            document.getElementById('nova-reserva-pet').value = 'false';
-
-            document.getElementById('modal-nova-reserva-calendario').classList.remove('hidden');
-        }
-
-        function fecharModalNovaReservaCalendario() {
-            document.getElementById('modal-nova-reserva-calendario').classList.add('hidden');
-        }
-
-        function calcularDiariasCalendario(checkin, checkout) {
-            if (!checkin || !checkout) return 0;
-            let d1 = new Date(checkin + 'T00:00:00');
-            let d2 = new Date(checkout + 'T00:00:00');
-            let diff = (d2 - d1) / (1000*60*60*24);
-            return diff > 0 ? diff : 0;
-        }
-
-        async function recalcularNovaReservaCalendario() {
-            const checkin = document.getElementById('nova-reserva-checkin').value;
-            const checkout = document.getElementById('nova-reserva-checkout').value;
-            const suiteId = document.getElementById('nova-reserva-suite-id').value;
-            const adultos = parseInt(document.getElementById('nova-reserva-adultos').value) || 2;
-            const criancas = parseInt(document.getElementById('nova-reserva-criancas').value) || 0;
-            const pet = document.getElementById('nova-reserva-pet').value === 'true';
-
-            const qtdDiarias = calcularDiariasCalendario(checkin, checkout);
-            document.getElementById('nova-reserva-qtd-diarias').innerText = `${qtdDiarias} diária(s)`;
-
-            let valorTotal = 0;
-            try {
-                const { data: valorCalculado } = await supabaseClient.rpc('calcular_total_reserva', {
-                    p_suite_id: suiteId,
-                    p_checkin: checkin,
-                    p_checkout: checkout,
-                    p_adultos: adultos,
-                    p_criancas: criancas,
-                    p_idades_criancas: '',
-                    p_pet: pet
-                });
-                if (valorCalculado !== null) valorTotal = Number(valorCalculado);
-            } catch(e) {
-                // Fallback: valor diária * diárias
-                const capTexto = document.getElementById('nova-reserva-capacidade-texto');
-                const valorDiaria = Number(capTexto?.dataset?.valorDiaria || 0);
-                valorTotal = valorDiaria * qtdDiarias;
-                if (pet) valorTotal += 50 * qtdDiarias; // taxa pet simples
+                gridEl.innerHTML += `<div ${onclick} class="h-11 flex items-center justify-center rounded-xl text-[13px] ${classe}">${conteudo}</div>`;
             }
 
-            document.getElementById('nova-reserva-valor-total').innerText = valorTotal.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
-            const sinal = Number(document.getElementById('nova-reserva-valor-sinal').value || 0);
-            const saldo = Math.max(0, valorTotal - sinal);
-            document.getElementById('nova-reserva-saldo-restante').innerText = saldo.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
-            document.getElementById('nova-reserva-saldo-restante').dataset.valorTotal = valorTotal;
-        }
-
-        // Recalcula saldo quando digita sinal
-        document.addEventListener('DOMContentLoaded', () => {
-            const elSinal = document.getElementById('nova-reserva-valor-sinal');
-            if (elSinal) {
-                elSinal.addEventListener('input', () => {
-                    const valorTotal = Number(document.getElementById('nova-reserva-saldo-restante').dataset.valorTotal || 0);
-                    const sinal = Number(elSinal.value || 0);
-                    const saldo = Math.max(0, valorTotal - sinal);
-                    document.getElementById('nova-reserva-saldo-restante').innerText = saldo.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
-                });
+            const instrucaoEl = document.getElementById('cal-geral-instrucao');
+            if (instrucaoEl) {
+                if (!calGeralCheckinTemp) instrucaoEl.innerText = 'Clique em uma data livre para definir CHECK-IN';
+                else if (!calGeralCheckoutTemp) instrucaoEl.innerText = `Check-in: ${calGeralCheckinTemp} → Agora clique na data de CHECK-OUT`;
+                else instrucaoEl.innerText = `Período: ${calGeralCheckinTemp} até ${calGeralCheckoutTemp} → Pronto!`;
             }
-        });
-
-        async function salvarNovaReservaCalendario() {
-            const suiteId = document.getElementById('nova-reserva-suite-id').value;
-            const hospede = document.getElementById('nova-reserva-hospede').value.trim();
-            const whatsapp = document.getElementById('nova-reserva-whatsapp').value.trim();
-            const checkin = document.getElementById('nova-reserva-checkin').value;
-            const checkout = document.getElementById('nova-reserva-checkout').value;
-            const adultos = parseInt(document.getElementById('nova-reserva-adultos').value) || 2;
-            const criancas = parseInt(document.getElementById('nova-reserva-criancas').value) || 0;
-            const pet = document.getElementById('nova-reserva-pet').value === 'true';
-            const valorSinal = Number(document.getElementById('nova-reserva-valor-sinal').value || 0);
-            const formaPagamento = document.getElementById('nova-reserva-forma-pagamento').value;
-            const observacao = document.getElementById('nova-reserva-observacao').value.trim();
-            const cpf = document.getElementById('nova-reserva-cpf').value.trim();
-            const rg = document.getElementById('nova-reserva-rg').value.trim();
-            const endereco = document.getElementById('nova-reserva-endereco').value.trim();
-            const cep = document.getElementById('nova-reserva-cep').value.trim();
-            const email = document.getElementById('nova-reserva-email').value.trim();
-
-            if (!hospede) { alert('Informe o nome do hóspede'); return; }
-            if (!whatsapp) { alert('Informe o WhatsApp'); return; }
-            if (!checkin || !checkout) { alert('Selecione check-in e check-out no calendário'); return; }
-
-            const valorTotal = Number(document.getElementById('nova-reserva-saldo-restante').dataset.valorTotal || 0);
-
-            try {
-                // Cria reserva
-                const { data: novaReserva, error } = await supabaseClient.from('reservas').insert([{
-                    pousada_id: usuarioIdAtual,
-                    suite_id: suiteId,
-                    hospede_nome: hospede,
-                    whatsapp_hospede: whatsapp,
-                    cpf: cpf || null,
-                    rg: rg || null,
-                    endereco: endereco || null,
-                    cep: cep || null,
-                    email: email || null,
-                    checkin: checkin,
-                    checkout: checkout,
-                    adultos: adultos,
-                    criancas: criancas,
-                    pet: pet,
-                    valor_total: valorTotal,
-                    status: 'Aprovada',
-                    observacao: observacao || null,
-                    criado_em: new Date().toISOString()
-                }]).select().single();
-
-                if (error) throw error;
-
-                // Se tem pagamento/sinal, registra
-                if (valorSinal > 0 && novaReserva) {
-                    await supabaseClient.from('hospede_pagamentos').insert([{
-                        pousada_id: usuarioIdAtual,
-                        reserva_id: novaReserva.id,
-                        valor_pago: valorSinal,
-                        forma_pagamento: formaPagamento,
-                        observacao: 'Sinal via calendário geral'
-                    }]);
-                }
-
-                alert('Reserva criada com sucesso!');
-                fecharModalNovaReservaCalendario();
-                fecharCalendarioGeralRelatorios();
-                // Limpa seleção
-                calGeralCheckinTemp = null;
-                calGeralCheckoutTemp = null;
-                // Recarrega dados do relatório
-                if (typeof carregarDadosView === 'function') carregarDadosView();
-
-            } catch(e) {
-                console.error('Erro ao salvar reserva', e);
-                alert('Erro ao salvar reserva: ' + (e.message || e));
-            }
-        }
-
-
-
-        // ==================== CALENDÁRIO GERAL COM PAINEL DE TODAS SUÍTES + RESERVA DIRETA - NÃO MEXER NA ESTRUTURA EXISTENTE ====================
-        let calGeralRelSuiteIndex = 0;
-        let calGeralRelDataRef = new Date();
-        let calGeralRelReservasCache = [];
-        let calGeralRelSuitesCache = [];
-        let calGeralCheckinTemp = null;
-        let calGeralCheckoutTemp = null;
-
-        async function abrirCalendarioGeralRelatorios() {
-            if (!usuarioIdAtual) return;
-            const modal = document.getElementById('modal-calendario-geral-relatorios');
-            document.getElementById('cal-geral-rel-suite-nome').innerText = 'Carregando...';
-            calGeralCheckinTemp = null; calGeralCheckoutTemp = null;
-            const btnCriar = document.getElementById('btn-criar-reserva-calendario');
-            if (btnCriar) btnCriar.classList.add('hidden');
-            try {
-                const { data: suites } = await supabaseClient.from('suites').select('id,nome,capacidade_hospedes,hospedes_inclusos,valor_diaria').eq('pousada_id', usuarioIdAtual).order('nome');
-                const { data: reservas } = await supabaseClient.from('reservas').select('suite_id,checkin,checkout,status').eq('pousada_id', usuarioIdAtual).in('status', ['Aprovada','Ocupada','Reservado']);
-                calGeralRelSuitesCache = suites || [];
-                calGeralRelReservasCache = reservas || [];
-                if (calGeralRelSuitesCache.length === 0) { alert('Nenhuma suíte cadastrada'); return; }
-                calGeralRelSuiteIndex = 0;
-                calGeralRelDataRef = new Date();
-                renderizarPainelSuitesRelatorios();
-                renderizarCalendarioGeralRelatorios();
-                modal.classList.remove('hidden');
-            } catch(e) { console.error('Erro calendário geral', e); alert('Erro ao carregar calendário'); }
-        }
-
-        function fecharCalendarioGeralRelatorios() {
-            document.getElementById('modal-calendario-geral-relatorios').classList.add('hidden');
-        }
-
-        function renderizarPainelSuitesRelatorios() {
-            const container = document.getElementById('cal-geral-rel-painel-suites');
-            const totalEl = document.getElementById('cal-geral-rel-total');
-            if (!container) return;
-            if (totalEl) totalEl.innerText = calGeralRelSuitesCache.length;
-            container.innerHTML = '';
-            calGeralRelSuitesCache.forEach((suite, idx) => {
-                const isAtiva = idx === calGeralRelSuiteIndex;
-                const reservasSuite = calGeralRelReservasCache.filter(r => r.suite_id === suite.id).length;
-                const classeAtiva = isAtiva ? 'bg-slate-900 text-amber-300 border-amber-400 shadow-md scale-[1.02]' : 'bg-white text-gray-800 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50/50 hover:shadow-sm';
-                const badgeOcup = reservasSuite > 0 ? `<span class="text-[9px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-bold">${reservasSuite} res.</span>` : `<span class="text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full">livre</span>`;
-                container.innerHTML += `<div onclick="selecionarSuiteGeralRelatorios(${idx})" onmouseenter="selecionarSuiteGeralRelatorios(${idx})" class="cursor-pointer border-2 rounded-xl p-2.5 flex flex-col gap-1 transition-all duration-150 ${classeAtiva}"><div class="flex justify-between items-start"><i class="fa-solid fa-bed text-[11px] ${isAtiva ? 'text-amber-300' : 'text-indigo-500'}"></i>${badgeOcup}</div><span class="font-bold text-[11px] uppercase truncate leading-tight">${suite.nome}</span><span class="text-[9px] ${isAtiva ? 'text-slate-300' : 'text-gray-500'}">${isAtiva ? 'VISUALIZANDO' : 'PASSE O MOUSE'}</span></div>`;
-            });
-        }
-
-        function selecionarSuiteGeralRelatorios(index) {
-            calGeralRelSuiteIndex = index;
-            renderizarPainelSuitesRelatorios();
-            renderizarCalendarioGeralRelatorios();
-        }
-
-        function mudarMesCalendarioGeralRelatorios(direcao) {
-            calGeralRelDataRef.setMonth(calGeralRelDataRef.getMonth() + direcao);
-            renderizarCalendarioGeralRelatorios();
         }
 
         function selecionarDataCalendarioGeral(dataIso) {
@@ -1926,23 +1635,34 @@ function formatarDataHoraBr(valor) {
                 if (!r.checkin || !r.checkout) return;
                 let dCurr = new Date(r.checkin + 'T00:00:00');
                 const dFim = new Date(r.checkout + 'T00:00:00');
-                while (dCurr < dFim) { datasOcupadas.add(dCurr.toLocaleDateString('sv-SE')); dCurr.setDate(dCurr.getDate() + 1); }
+                while (dCurr < dFim) {
+                    datasOcupadas.add(dCurr.toLocaleDateString('sv-SE'));
+                    dCurr.setDate(dCurr.getDate() + 1);
+                }
             });
             if (datasOcupadas.has(dataIso)) return;
 
             if (!calGeralCheckinTemp || (calGeralCheckinTemp && calGeralCheckoutTemp)) {
-                calGeralCheckinTemp = dataIso; calGeralCheckoutTemp = null;
+                calGeralCheckinTemp = dataIso;
+                calGeralCheckoutTemp = null;
                 const btn = document.getElementById('btn-criar-reserva-calendario');
                 if (btn) btn.classList.add('hidden');
             } else {
                 if (dataIso <= calGeralCheckinTemp) {
-                    calGeralCheckoutTemp = calGeralCheckinTemp; calGeralCheckinTemp = dataIso;
+                    calGeralCheckoutTemp = calGeralCheckinTemp;
+                    calGeralCheckinTemp = dataIso;
                 } else {
                     let temOcupacao = false;
                     let dCurr = new Date(calGeralCheckinTemp + 'T00:00:00');
                     const dFim = new Date(dataIso + 'T00:00:00');
-                    while (dCurr < dFim) { if (datasOcupadas.has(dCurr.toLocaleDateString('sv-SE'))) { temOcupacao = true; break; } dCurr.setDate(dCurr.getDate() + 1); }
-                    if (temOcupacao) { alert('Existe data ocupada no intervalo. Escolha outro período livre.'); return; }
+                    while (dCurr < dFim) {
+                        if (datasOcupadas.has(dCurr.toLocaleDateString('sv-SE'))) { temOcupacao = true; break; }
+                        dCurr.setDate(dCurr.getDate() + 1);
+                    }
+                    if (temOcupacao) {
+                        alert('Existe data ocupada no intervalo. Escolha outro período livre.');
+                        return;
+                    }
                     calGeralCheckoutTemp = dataIso;
                 }
                 if (calGeralCheckinTemp && calGeralCheckoutTemp) {
@@ -1953,156 +1673,6 @@ function formatarDataHoraBr(valor) {
             }
             renderizarCalendarioGeralRelatorios();
         }
-
-        function renderizarCalendarioGeralRelatorios() {
-            const suite = calGeralRelSuitesCache[calGeralRelSuiteIndex];
-            if (!suite) return;
-            document.getElementById('cal-geral-rel-suite-nome').innerText = `${suite.nome.toUpperCase()}`;
-            const ano = calGeralRelDataRef.getFullYear();
-            const mes = calGeralRelDataRef.getMonth();
-            const nomesMeses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-            document.getElementById('cal-geral-rel-mes-ano').innerText = `${nomesMeses[mes]} de ${ano}`.toUpperCase();
-            const gridEl = document.getElementById('cal-geral-rel-grid');
-            gridEl.innerHTML = '';
-            const primeiroDiaSemana = new Date(ano, mes, 1).getDay();
-            const ultimoDiaMes = new Date(ano, mes + 1, 0).getDate();
-            const reservasDaSuite = calGeralRelReservasCache.filter(r => r.suite_id === suite.id);
-            const datasOcupadas = new Set();
-            reservasDaSuite.forEach(r => {
-                if (!r.checkin || !r.checkout) return;
-                let dCurr = new Date(r.checkin + 'T00:00:00');
-                const dFim = new Date(r.checkout + 'T00:00:00');
-                while (dCurr < dFim) { datasOcupadas.add(dCurr.toLocaleDateString('sv-SE')); dCurr.setDate(dCurr.getDate() + 1); }
-            });
-            for (let i = 0; i < primeiroDiaSemana; i++) gridEl.innerHTML += `<div></div>`;
-            const hojeStr = new Date().toLocaleDateString('sv-SE');
-            for (let dia = 1; dia <= ultimoDiaMes; dia++) {
-                const mesStr = String(mes + 1).padStart(2, '0');
-                const diaStr = String(dia).padStart(2, '0');
-                const dataIso = `${ano}-${mesStr}-${diaStr}`;
-                const estaOcupado = datasOcupadas.has(dataIso);
-                const ePassado = dataIso < hojeStr;
-                const isCheckin = calGeralCheckinTemp === dataIso;
-                const isCheckout = calGeralCheckoutTemp === dataIso;
-                const isNoIntervalo = calGeralCheckinTemp && calGeralCheckoutTemp && dataIso > calGeralCheckinTemp && dataIso < calGeralCheckoutTemp;
-                let classe = ""; let conteudo = dia; let onclick = "";
-                if (ePassado) classe = "bg-gray-100 text-gray-400 border border-gray-200 opacity-60";
-                else if (estaOcupado) { classe = "bg-red-50 text-red-600 font-bold border border-red-200"; conteudo = `<span class="flex flex-col items-center justify-center leading-none"><span>${dia}</span><span class="text-[10px]">✕</span></span>`; }
-                else {
-                    onclick = `onclick="selecionarDataCalendarioGeral('${dataIso}')"`;
-                    if (isCheckin || isCheckout) { classe = "bg-blue-600 text-white font-extrabold border-2 border-blue-800 shadow-md scale-105 cursor-pointer"; conteudo = `<span class="flex flex-col items-center leading-none"><span>${dia}</span><span class="text-[7px]">${isCheckin ? 'IN' : 'OUT'}</span></span>`; }
-                    else if (isNoIntervalo) classe = "bg-blue-100 text-blue-800 font-bold border border-blue-300 cursor-pointer";
-                    else classe = "bg-emerald-100 text-emerald-800 font-extrabold border border-emerald-300 shadow-sm hover:bg-emerald-200 cursor-pointer hover:scale-105 transition-all";
-                }
-                gridEl.innerHTML += `<div ${onclick} class="h-11 flex items-center justify-center rounded-xl text-[13px] ${classe}">${conteudo}</div>`;
-            }
-            const instrucaoEl = document.getElementById('cal-geral-instrucao');
-            if (instrucaoEl) {
-                if (!calGeralCheckinTemp) instrucaoEl.innerText = 'Clique em uma data livre para definir CHECK-IN';
-                else if (!calGeralCheckoutTemp) instrucaoEl.innerText = `Check-in: ${calGeralCheckinTemp} → Agora clique na data de CHECK-OUT`;
-                else instrucaoEl.innerText = `Período: ${calGeralCheckinTemp} até ${calGeralCheckoutTemp} → Pronto para criar reserva!`;
-            }
-        }
-
-        function abrirModalNovaReservaCalendario() {
-            const suite = calGeralRelSuitesCache[calGeralRelSuiteIndex];
-            if (!suite || !calGeralCheckinTemp || !calGeralCheckoutTemp) return;
-            document.getElementById('nova-reserva-titulo').innerText = `Criar Nova Reserva: ${suite.nome}`;
-            document.getElementById('nova-reserva-suite-id').value = suite.id;
-            document.getElementById('nova-reserva-checkin').value = calGeralCheckinTemp;
-            document.getElementById('nova-reserva-checkout').value = calGeralCheckoutTemp;
-            const capMax = suite.capacidade_hospedes || 4;
-            const inclusos = suite.hospedes_inclusos || 2;
-            const valorDiaria = suite.valor_diaria || 0;
-            document.getElementById('nova-reserva-capacidade-texto').innerText = `Capacidade real desta suíte: ${capMax} pessoa(s) no total (adultos + crianças) | ${inclusos} incluso(s)`;
-            document.getElementById('nova-reserva-capacidade-texto').dataset.valorDiaria = valorDiaria;
-            document.getElementById('nova-reserva-hospede').value = '';
-            document.getElementById('nova-reserva-whatsapp').value = '';
-            document.getElementById('nova-reserva-cpf').value = '';
-            document.getElementById('nova-reserva-rg').value = '';
-            document.getElementById('nova-reserva-endereco').value = '';
-            document.getElementById('nova-reserva-cep').value = '';
-            document.getElementById('nova-reserva-email').value = '';
-            document.getElementById('nova-reserva-valor-sinal').value = '';
-            document.getElementById('nova-reserva-observacao').value = '';
-            document.getElementById('nova-reserva-adultos').value = '2';
-            document.getElementById('nova-reserva-criancas').value = '0';
-            document.getElementById('nova-reserva-pet').value = 'false';
-            document.getElementById('modal-nova-reserva-calendario').classList.remove('hidden');
-            recalcularNovaReservaCalendario();
-        }
-
-        function fecharModalNovaReservaCalendario() {
-            document.getElementById('modal-nova-reserva-calendario').classList.add('hidden');
-        }
-
-        function calcularDiariasCalendario(checkin, checkout) {
-            if (!checkin || !checkout) return 0;
-            let d1 = new Date(checkin + 'T00:00:00');
-            let d2 = new Date(checkout + 'T00:00:00');
-            let diff = (d2 - d1) / (1000*60*60*24);
-            return diff > 0 ? diff : 0;
-        }
-
-        async function recalcularNovaReservaCalendario() {
-            const checkin = document.getElementById('nova-reserva-checkin').value;
-            const checkout = document.getElementById('nova-reserva-checkout').value;
-            const suiteId = document.getElementById('nova-reserva-suite-id').value;
-            const adultos = parseInt(document.getElementById('nova-reserva-adultos').value) || 2;
-            const criancas = parseInt(document.getElementById('nova-reserva-criancas').value) || 0;
-            const pet = document.getElementById('nova-reserva-pet').value === 'true';
-            const qtdDiarias = calcularDiariasCalendario(checkin, checkout);
-            document.getElementById('nova-reserva-qtd-diarias').innerText = `${qtdDiarias} diária(s)`;
-            let valorTotal = 0;
-            try {
-                const { data: valorCalculado } = await supabaseClient.rpc('calcular_total_reserva', { p_suite_id: suiteId, p_checkin: checkin, p_checkout: checkout, p_adultos: adultos, p_criancas: criancas, p_idades_criancas: '', p_pet: pet });
-                if (valorCalculado !== null) valorTotal = Number(valorCalculado);
-            } catch(e) {
-                const valorDiaria = Number(document.getElementById('nova-reserva-capacidade-texto').dataset.valorDiaria || 0);
-                valorTotal = valorDiaria * qtdDiarias;
-                if (pet) valorTotal += 50 * qtdDiarias;
-            }
-            document.getElementById('nova-reserva-valor-total').innerText = valorTotal.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
-            const sinal = Number(document.getElementById('nova-reserva-valor-sinal').value || 0);
-            const saldo = Math.max(0, valorTotal - sinal);
-            document.getElementById('nova-reserva-saldo-restante').innerText = saldo.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
-            document.getElementById('nova-reserva-saldo-restante').dataset.valorTotal = valorTotal;
-        }
-
-        async function salvarNovaReservaCalendario() {
-            const suiteId = document.getElementById('nova-reserva-suite-id').value;
-            const hospede = document.getElementById('nova-reserva-hospede').value.trim();
-            const whatsapp = document.getElementById('nova-reserva-whatsapp').value.trim();
-            const checkin = document.getElementById('nova-reserva-checkin').value;
-            const checkout = document.getElementById('nova-reserva-checkout').value;
-            const adultos = parseInt(document.getElementById('nova-reserva-adultos').value) || 2;
-            const criancas = parseInt(document.getElementById('nova-reserva-criancas').value) || 0;
-            const pet = document.getElementById('nova-reserva-pet').value === 'true';
-            const valorSinal = Number(document.getElementById('nova-reserva-valor-sinal').value || 0);
-            const formaPagamento = document.getElementById('nova-reserva-forma-pagamento').value;
-            const observacao = document.getElementById('nova-reserva-observacao').value.trim();
-            const cpf = document.getElementById('nova-reserva-cpf').value.trim();
-            const rg = document.getElementById('nova-reserva-rg').value.trim();
-            const endereco = document.getElementById('nova-reserva-endereco').value.trim();
-            const cep = document.getElementById('nova-reserva-cep').value.trim();
-            const email = document.getElementById('nova-reserva-email').value.trim();
-            if (!hospede) { alert('Informe o nome do hóspede'); return; }
-            if (!whatsapp) { alert('Informe o WhatsApp'); return; }
-            const valorTotal = Number(document.getElementById('nova-reserva-saldo-restante').dataset.valorTotal || 0);
-            try {
-                const { data: novaReserva, error } = await supabaseClient.from('reservas').insert([{ pousada_id: usuarioIdAtual, suite_id: suiteId, hospede_nome: hospede, whatsapp_hospede: whatsapp, cpf: cpf || null, rg: rg || null, endereco: endereco || null, cep: cep || null, email: email || null, checkin: checkin, checkout: checkout, adultos: adultos, criancas: criancas, pet: pet, valor_total: valorTotal, status: 'Aprovada', observacao: observacao || null }]).select().single();
-                if (error) throw error;
-                if (valorSinal > 0 && novaReserva) {
-                    await supabaseClient.from('hospede_pagamentos').insert([{ pousada_id: usuarioIdAtual, reserva_id: novaReserva.id, valor_pago: valorSinal, forma_pagamento: formaPagamento, observacao: 'Sinal via calendário geral' }]);
-                }
-                alert('Reserva criada com sucesso!');
-                fecharModalNovaReservaCalendario();
-                fecharCalendarioGeralRelatorios();
-                calGeralCheckinTemp = null; calGeralCheckoutTemp = null;
-                if (typeof carregarDadosView === 'function') carregarDadosView();
-            } catch(e) { console.error('Erro ao salvar', e); alert('Erro ao salvar reserva: ' + (e.message || e)); }
-        }
-
 
         window.onload = () => {
             protegerPagina();
@@ -2163,7 +1733,7 @@ function formatarDataHoraBr(valor) {
                 </div>
             </div>
 
-            <p class="text-[11px] text-emerald-700 font-medium mb-1 text-center">Dias em <span class="bg-emerald-100 px-1.5 py-0.5 rounded font-bold">verde</span> livres, <span class="bg-red-100 px-1.5 py-0.5 rounded font-bold text-red-700">vermelho com X</span> ocupados. Azul = seleção.</p><p id="cal-geral-instrucao" class="text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-full px-3 py-1 text-center mb-3">Clique em uma data livre para definir CHECK-IN</p>
+            <p class="text-[11px] text-emerald-700 font-medium mb-1 text-center">Dias em <span class="bg-emerald-100 px-1.5 py-0.5 rounded font-bold">verde</span> livres, <span class="bg-red-100 px-1.5 py-0.5 rounded font-bold">vermelho com X</span> ocupados. Azul = seleção.</p><p id="cal-geral-instrucao" class="text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-full px-3 py-1.5 text-center mb-3">Clique em uma data livre para definir CHECK-IN</p>
 
             <!-- NAVEGAÇÃO DE MÊS -->
             <div class="flex justify-between items-center mb-4 bg-gray-50 p-2.5 rounded-xl border border-gray-200">
@@ -2191,169 +1761,40 @@ function formatarDataHoraBr(valor) {
     </div>
 
 
-    <!-- MODAL CRIAR NOVA RESERVA DIRETO DO CALENDÁRIO GERAL -->
+    <!-- MODAL NOVA RESERVA DIRETO DO CALENDÁRIO -->
     <div id="modal-nova-reserva-calendario" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-[70]">
         <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-7 relative max-h-[92vh] overflow-y-auto">
             <button onclick="fecharModalNovaReservaCalendario()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold">✕</button>
-            
-            <div class="flex items-center gap-2 mb-4 pr-8">
-                <span class="text-xl">✨</span>
-                <div>
-                    <h3 id="nova-reserva-titulo" class="text-lg font-extrabold text-blue-700">Criar Nova Reserva: Suíte</h3>
-                    <p class="text-[11px] text-gray-500">Datas preenchidas automaticamente pelo calendário geral</p>
-                </div>
-            </div>
-
-            <div id="nova-reserva-capacidade-info" class="mb-3 bg-blue-50 border border-blue-200 p-2.5 rounded-xl text-xs font-bold text-blue-900 flex items-center gap-2">
-                <span>🏨</span> <span id="nova-reserva-capacidade-texto">Capacidade: carregando...</span>
-            </div>
-
+            <h3 id="nova-reserva-titulo" class="text-lg font-extrabold text-blue-700 mb-1 pr-8">Criar Nova Reserva: Suíte</h3>
+            <p class="text-[11px] text-gray-500 mb-3">Datas preenchidas automaticamente pelo calendário geral</p>
             <div id="nova-reserva-resumo" class="bg-blue-50 border border-blue-200 p-3 rounded-xl space-y-1 text-xs text-blue-900 mb-4">
-                <div class="flex justify-between"><span>Qtd. Diárias Calculadas:</span><strong id="nova-reserva-qtd-diarias">1 diária(s)</strong></div>
-                <div class="flex justify-between"><span>Valor Total da Estadia (c/ Tarifas Especiais):</span><strong id="nova-reserva-valor-total">R$ 0,00</strong></div>
-                <div class="flex justify-between border-t border-blue-200 pt-1"><span>Saldo Restante Atualizado:</span><strong id="nova-reserva-saldo-restante" class="text-amber-700">R$ 0,00</strong></div>
+                <div class="flex justify-between"><span>Qtd. Diárias:</span><strong id="nova-reserva-qtd-diarias">0</strong></div>
+                <div class="flex justify-between"><span>Valor Total:</span><strong id="nova-reserva-valor-total">R$ 0,00</strong></div>
+                <div class="flex justify-between border-t border-blue-200 pt-1"><span>Saldo Restante:</span><strong id="nova-reserva-saldo-restante">R$ 0,00</strong></div>
             </div>
-
             <div class="space-y-3">
                 <input type="hidden" id="nova-reserva-suite-id">
-                <input type="text" id="nova-reserva-hospede" placeholder="Nome Hóspede *" class="w-full p-3 border rounded-xl text-sm font-medium" required>
+                <input type="text" id="nova-reserva-hospede" placeholder="Nome Hóspede *" class="w-full p-3 border rounded-xl text-sm">
                 <input type="text" id="nova-reserva-whatsapp" placeholder="WhatsApp *" class="w-full p-3 border rounded-xl text-sm">
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="text" id="nova-reserva-cpf" placeholder="CPF (Opcional)" class="p-3 border rounded-xl text-sm">
-                    <input type="text" id="nova-reserva-rg" placeholder="RG (Opcional)" class="p-3 border rounded-xl text-sm">
-                </div>
-                <input type="text" id="nova-reserva-endereco" placeholder="Endereço" class="w-full p-3 border rounded-xl text-sm">
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="text" id="nova-reserva-cep" placeholder="CEP" class="p-3 border rounded-xl text-sm">
-                    <input type="email" id="nova-reserva-email" placeholder="E-mail" class="w-full p-3 border rounded-xl text-sm">
-                </div>
-
-                <div class="grid grid-cols-3 gap-3 pt-2">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 mb-1">Adultos</label>
-                        <input type="number" id="nova-reserva-adultos" min="1" value="2" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="recalcularNovaReservaCalendario()" oninput="recalcularNovaReservaCalendario()">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 mb-1">Crianças</label>
-                        <input type="number" id="nova-reserva-criancas" min="0" value="0" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="recalcularNovaReservaCalendario()" oninput="recalcularNovaReservaCalendario()">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 mb-1">Taxa de Pet</label>
-                        <select id="nova-reserva-pet" class="w-full p-3 border rounded-xl bg-white text-sm font-bold" onchange="recalcularNovaReservaCalendario()">
-                            <option value="false">Não</option>
-                            <option value="true">Sim</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3 pt-2">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-in</label>
-                        <input type="date" id="nova-reserva-checkin" class="w-full p-3 border rounded-xl bg-white text-sm font-bold bg-blue-50/50" readonly>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-out</label>
-                        <input type="date" id="nova-reserva-checkout" class="w-full p-3 border rounded-xl bg-white text-sm font-bold bg-blue-50/50" readonly>
-                    </div>
-                </div>
-
-                <div class="pt-2 space-y-2">
-                    <div>
-                        <label class="block text-xs font-bold text-emerald-700 mb-1">Registrar Novo Pagamento / Sinal (R$)</label>
-                        <input type="number" step="0.01" id="nova-reserva-valor-sinal" placeholder="0.00" class="w-full p-3 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-emerald-900 text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-emerald-700 mb-1">Forma de Pagamento</label>
-                        <select id="nova-reserva-forma-pagamento" class="w-full p-3 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-emerald-900 text-sm">
-                            <option value="Pix / Sinal">Pix / Sinal</option>
-                            <option value="Dinheiro">Dinheiro</option>
-                            <option value="Cartão de Crédito">Cartão de Crédito</option>
-                            <option value="Cartão de Débito">Cartão de Débito</option>
-                            <option value="Transferência Bancária">Transferência Bancária</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-amber-700 mb-1">⚠️ Observação / Mensagem de Alerta Importante</label>
-                        <textarea id="nova-reserva-observacao" rows="2" placeholder="Ex: Hóspede solicitou late checkout, alergia a algo, etc." class="w-full p-3 border border-amber-300 bg-amber-50/40 rounded-xl text-sm font-medium text-amber-950"></textarea>
-                    </div>
-                </div>
-
-                <button onclick="salvarNovaReservaCalendario()" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold mt-4 transition text-sm">Salvar Alterações</button>
-                <button type="button" onclick="fecharModalNovaReservaCalendario()" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 p-3 rounded-xl font-bold mt-2 transition text-sm">Cancelar</button>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- MODAL CALENDÁRIO GERAL COM PAINEL DE TODAS SUÍTES + SELEÇÃO DE DATAS - PRESERVANDO ESTRUTURA -->
-    <div id="modal-calendario-geral-relatorios" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-[60]">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6 sm:p-7 relative max-h-[92vh] overflow-y-auto">
-            <button onclick="fecharCalendarioGeralRelatorios()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold">✕</button>
-            <div class="flex items-center gap-2 mb-4 pr-8">
-                <span class="text-xl">🗓️</span>
-                <div><h3 class="text-lg font-extrabold text-gray-900">Calendário Geral de Ocupação</h3><p class="text-[11px] text-gray-500">Passe o mouse nas suítes e clique nas datas verdes para reservar</p></div>
-            </div>
-            <div class="mb-4">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-[11px] font-extrabold text-slate-700 uppercase tracking-widest flex items-center gap-2"><i class="fa-solid fa-layer-group text-indigo-600"></i> TODAS AS SUÍTES (<span id="cal-geral-rel-total">0</span>) - PASSE O MOUSE OU CLIQUE</span>
-                    <span id="cal-geral-rel-suite-nome" class="text-[11px] font-bold bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full">Suíte: -</span>
-                </div>
-                <div id="cal-geral-rel-painel-suites" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 max-h-[160px] overflow-y-auto p-2 bg-gray-50 rounded-2xl border border-gray-200"></div>
-            </div>
-            <p class="text-[11px] text-emerald-700 font-medium mb-1 text-center">Dias em <span class="bg-emerald-100 px-1.5 py-0.5 rounded font-bold">verde</span> livres, <span class="bg-red-100 px-1.5 py-0.5 rounded font-bold text-red-700">vermelho com X</span> ocupados. Azul = seleção.</p>
-            <p id="cal-geral-instrucao" class="text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-full px-3 py-1.5 text-center mb-3">Clique em uma data livre para definir CHECK-IN</p>
-            <div class="flex justify-between items-center mb-4 bg-gray-50 p-2.5 rounded-xl border border-gray-200">
-                <button onclick="mudarMesCalendarioGeralRelatorios(-1)" class="px-3 py-1.5 bg-white hover:bg-gray-100 rounded-xl text-[11px] font-bold border shadow-xs flex items-center gap-1.5"><i class="fa-solid fa-chevron-left text-[10px]"></i> Mês Anterior</button>
-                <strong id="cal-geral-rel-mes-ano" class="text-xs sm:text-sm font-extrabold text-gray-800 uppercase tracking-wide">SETEMBRO DE 2026</strong>
-                <button onclick="mudarMesCalendarioGeralRelatorios(1)" class="px-3 py-1.5 bg-white hover:bg-gray-100 rounded-xl text-[11px] font-bold border shadow-xs flex items-center gap-1.5">Próximo Mês <i class="fa-solid fa-chevron-right text-[10px]"></i></button>
-            </div>
-            <div class="grid grid-cols-7 gap-1 text-center font-bold text-[11px] text-gray-500 mb-2"><div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div></div>
-            <div id="cal-geral-rel-grid" class="grid grid-cols-7 gap-1.5 text-center text-sm min-h-[240px]"></div>
-            <div class="mt-5 flex flex-wrap justify-center gap-3 text-[11px] font-bold"><span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-emerald-100 border border-emerald-300"></span> Livre</span><span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-red-100 border border-red-300 flex items-center justify-center text-[9px]">✕</span> Ocupado</span><span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-blue-600 border"></span> Selecionado</span></div>
-            <div class="mt-6 grid grid-cols-2 gap-2">
-                <button onclick="fecharCalendarioGeralRelatorios()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-3 rounded-xl transition text-sm">Fechar</button>
-                <button id="btn-criar-reserva-calendario" onclick="abrirModalNovaReservaCalendario()" class="hidden w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition text-sm">Criar Reserva →</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL CRIAR NOVA RESERVA DIRETO DO CALENDÁRIO - MANTENDO LÓGICA DO DASHBOARD -->
-    <div id="modal-nova-reserva-calendario" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-[70]">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-7 relative max-h-[92vh] overflow-y-auto">
-            <button onclick="fecharModalNovaReservaCalendario()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold">✕</button>
-            <div class="flex items-center gap-2 mb-4 pr-8">
-                <span class="text-xl">✨</span>
-                <div><h3 id="nova-reserva-titulo" class="text-lg font-extrabold text-blue-700">Criar Nova Reserva: Suíte</h3><p class="text-[11px] text-gray-500">Datas preenchidas automaticamente pelo calendário</p></div>
-            </div>
-            <div id="nova-reserva-capacidade-info" class="mb-3 bg-blue-50 border border-blue-200 p-2.5 rounded-xl text-xs font-bold text-blue-900 flex items-center gap-2"><span>🏨</span> <span id="nova-reserva-capacidade-texto">Capacidade: carregando...</span></div>
-            <div id="nova-reserva-resumo" class="bg-blue-50 border border-blue-200 p-3 rounded-xl space-y-1 text-xs text-blue-900 mb-4">
-                <div class="flex justify-between"><span>Qtd. Diárias Calculadas:</span><strong id="nova-reserva-qtd-diarias">1 diária(s)</strong></div>
-                <div class="flex justify-between"><span>Valor Total da Estadia (c/ Tarifas Especiais):</span><strong id="nova-reserva-valor-total">R$ 0,00</strong></div>
-                <div class="flex justify-between border-t border-blue-200 pt-1"><span>Saldo Restante Atualizado:</span><strong id="nova-reserva-saldo-restante" class="text-amber-700">R$ 0,00</strong></div>
-            </div>
-            <div class="space-y-3">
-                <input type="hidden" id="nova-reserva-suite-id">
-                <input type="text" id="nova-reserva-hospede" placeholder="Nome Hóspede *" class="w-full p-3 border rounded-xl text-sm font-medium">
-                <input type="text" id="nova-reserva-whatsapp" placeholder="WhatsApp * (ex: 21999999999)" class="w-full p-3 border rounded-xl text-sm">
                 <div class="grid grid-cols-2 gap-2"><input type="text" id="nova-reserva-cpf" placeholder="CPF (Opcional)" class="p-3 border rounded-xl text-sm"><input type="text" id="nova-reserva-rg" placeholder="RG (Opcional)" class="p-3 border rounded-xl text-sm"></div>
                 <input type="text" id="nova-reserva-endereco" placeholder="Endereço" class="w-full p-3 border rounded-xl text-sm">
-                <div class="grid grid-cols-2 gap-2"><input type="text" id="nova-reserva-cep" placeholder="CEP" class="p-3 border rounded-xl text-sm"><input type="email" id="nova-reserva-email" placeholder="E-mail" class="w-full p-3 border rounded-xl text-sm"></div>
+                <div class="grid grid-cols-2 gap-2"><input type="text" id="nova-reserva-cep" placeholder="CEP" class="p-3 border rounded-xl text-sm"><input type="email" id="nova-reserva-email" placeholder="E-mail" class="p-3 border rounded-xl text-sm"></div>
                 <div class="grid grid-cols-3 gap-3 pt-2">
-                    <div><label class="block text-xs font-bold text-gray-700 mb-1">Adultos</label><input type="number" id="nova-reserva-adultos" min="1" value="2" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="recalcularNovaReservaCalendario()" oninput="recalcularNovaReservaCalendario()"></div>
-                    <div><label class="block text-xs font-bold text-gray-700 mb-1">Crianças</label><input type="number" id="nova-reserva-criancas" min="0" value="0" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="recalcularNovaReservaCalendario()" oninput="recalcularNovaReservaCalendario()"></div>
-                    <div><label class="block text-xs font-bold text-gray-700 mb-1">Taxa de Pet</label><select id="nova-reserva-pet" class="w-full p-3 border rounded-xl bg-white text-sm font-bold" onchange="recalcularNovaReservaCalendario()"><option value="false">Não</option><option value="true">Sim</option></select></div>
+                    <div><label class="block text-xs font-bold text-gray-700 mb-1">Adultos</label><input type="number" id="nova-reserva-adultos" min="1" value="2" class="w-full p-3 border rounded-xl text-sm" onchange="recalcularNovaReservaCalendario()" oninput="recalcularNovaReservaCalendario()"></div>
+                    <div><label class="block text-xs font-bold text-gray-700 mb-1">Crianças</label><input type="number" id="nova-reserva-criancas" min="0" value="0" class="w-full p-3 border rounded-xl text-sm" onchange="recalcularNovaReservaCalendario()" oninput="recalcularNovaReservaCalendario()"></div>
+                    <div><label class="block text-xs font-bold text-gray-700 mb-1">Taxa de Pet</label><select id="nova-reserva-pet" class="w-full p-3 border rounded-xl text-sm font-bold" onchange="recalcularNovaReservaCalendario()"><option value="false">Não</option><option value="true">Sim</option></select></div>
                 </div>
                 <div class="grid grid-cols-2 gap-3 pt-2">
-                    <div><label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-in</label><input type="date" id="nova-reserva-checkin" class="w-full p-3 border rounded-xl bg-white text-sm font-bold bg-blue-50/50" readonly></div>
-                    <div><label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-out</label><input type="date" id="nova-reserva-checkout" class="w-full p-3 border rounded-xl bg-white text-sm font-bold bg-blue-50/50" readonly></div>
+                    <div><label class="block text-xs font-bold text-gray-700 mb-1">Check-in</label><input type="date" id="nova-reserva-checkin" readonly class="w-full p-3 border rounded-xl text-sm bg-blue-50/50 font-bold"></div>
+                    <div><label class="block text-xs font-bold text-gray-700 mb-1">Check-out</label><input type="date" id="nova-reserva-checkout" readonly class="w-full p-3 border rounded-xl text-sm bg-blue-50/50 font-bold"></div>
                 </div>
                 <div class="pt-2 space-y-2">
-                    <div><label class="block text-xs font-bold text-emerald-700 mb-1">Registrar Novo Pagamento / Sinal (R$)</label><input type="number" step="0.01" id="nova-reserva-valor-sinal" placeholder="0.00" class="w-full p-3 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-emerald-900 text-sm"></div>
-                    <div><label class="block text-xs font-bold text-emerald-700 mb-1">Forma de Pagamento</label><select id="nova-reserva-forma-pagamento" class="w-full p-3 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-emerald-900 text-sm"><option value="Pix / Sinal">Pix / Sinal</option><option value="Dinheiro">Dinheiro</option><option value="Cartão de Crédito">Cartão de Crédito</option><option value="Cartão de Débito">Cartão de Débito</option><option value="Transferência Bancária">Transferência Bancária</option></select></div>
-                    <div><label class="block text-xs font-bold text-amber-700 mb-1">⚠️ Observação / Mensagem de Alerta Importante</label><textarea id="nova-reserva-observacao" rows="2" placeholder="Ex: Hóspede solicitou late checkout, alergia a algo, etc." class="w-full p-3 border border-amber-300 bg-amber-50/40 rounded-xl text-sm font-medium text-amber-950"></textarea></div>
+                    <div><label class="block text-xs font-bold text-emerald-700 mb-1">Registrar Novo Pagamento / Sinal (R$)</label><input type="number" step="0.01" id="nova-reserva-valor-sinal" placeholder="0.00" class="w-full p-3 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-sm" oninput="recalcularNovaReservaCalendario()"></div>
+                    <div><label class="block text-xs font-bold text-emerald-700 mb-1">Forma de Pagamento</label><select id="nova-reserva-forma-pagamento" class="w-full p-3 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-sm"><option>Pix / Sinal</option><option>Dinheiro</option><option>Cartão de Crédito</option><option>Cartão de Débito</option><option>Transferência Bancária</option></select></div>
+                    <div><label class="block text-xs font-bold text-amber-700 mb-1">⚠️ Observação / Mensagem de Alerta Importante</label><textarea id="nova-reserva-observacao" rows="2" placeholder="Ex: Hóspede solicitou late checkout, etc." class="w-full p-3 border border-amber-300 bg-amber-50/40 rounded-xl text-sm"></textarea></div>
                 </div>
-                <button onclick="salvarNovaReservaCalendario()" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold mt-4 transition text-sm">Salvar Alterações</button>
-                <button type="button" onclick="fecharModalNovaReservaCalendario()" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 p-3 rounded-xl font-bold mt-2 transition text-sm">Cancelar</button>
+                <button onclick="salvarNovaReservaCalendario()" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold mt-4 text-sm">Salvar Alterações</button>
+                <button onclick="fecharModalNovaReservaCalendario()" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 p-3 rounded-xl font-bold mt-2 text-sm">Cancelar</button>
             </div>
         </div>
     </div>
