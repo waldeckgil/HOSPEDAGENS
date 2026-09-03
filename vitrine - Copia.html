@@ -237,44 +237,46 @@
             const params = new URLSearchParams(window.location.search);
             pousadaIdGlobal = params.get('pousada_id') || '2ce55615-0d32-467a-a412-f9868ec8c9cf';
 
-            // Chamada segura via RPC protegendo multi-tenant e bypassando RLS restritivo de tabelas
-            const { data: vitrineData, error } = await supabaseClient.rpc('fn_carregar_vitrine', { p_pousada_id: pousadaIdGlobal });
-
-            if (error || !vitrineData) {
-                console.error("Erro ao carregar dados da vitrine:", error);
-                document.getElementById('titulo-pousada').innerText = "Erro ao carregar dados da pousada";
-                return;
-            }
-
-            dadosPousadaGlobal = vitrineData.pousada || {};
-            cacheSuites = vitrineData.suites || [];
-            cacheTarifasEspeciais = vitrineData.tarifas || [];
-            cacheReservas = vitrineData.reservas || [];
-
+            const { data: pousada } = await supabaseClient.from('pousadas').select('*').eq('id', pousadaIdGlobal).single();
+            dadosPousadaGlobal = pousada || {};
             document.getElementById('titulo-pousada').innerText = dadosPousadaGlobal.nome || "Nossa Pousada";
             
             renderizarBarraInstitucional();
             verificarSecaoPetFiltro();
+
+            const { data: todasReservas } = await supabaseClient
+                .from('reservas')
+                .select('*')
+                .eq('pousada_id', pousadaIdGlobal)
+                .in('status', ['Aprovada', 'Pendente']);
+            cacheReservas = todasReservas || [];
+
+            const { data: todasTarifas } = await supabaseClient
+                .from('tarifas_especiais')
+                .select('*')
+                .eq('pousada_id', pousadaIdGlobal);
+            cacheTarifasEspeciais = todasTarifas || [];
+
             gerarCamposIdadeCriancas();
             filtrarSuitesDisponiveisPorPeriodo();
         }
         
-        function verificarSecaoPetFiltro() {
-            const secaoPet = document.getElementById('secao-pet-filtro');
-            const aceitaPet = dadosPousadaGlobal.aceita_pet === true || dadosPousadaGlobal.aceita_pet === 'true' || dadosPousadaGlobal.aceita_pet === 'Sim';
-            const valorPetNum = Number(dadosPousadaGlobal.valor_pet || dadosPousadaGlobal.taxa_pet || dadosPousadaGlobal.valor_taxa_pet || 0);
+  function verificarSecaoPetFiltro() {
+    const secaoPet = document.getElementById('secao-pet-filtro');
+    const aceitaPet = dadosPousadaGlobal.aceita_pet === true || dadosPousadaGlobal.aceita_pet === 'true' || dadosPousadaGlobal.aceita_pet === 'Sim';
+    const valorPetNum = Number(dadosPousadaGlobal.valor_pet || dadosPousadaGlobal.taxa_pet || dadosPousadaGlobal.valor_taxa_pet || 0);
 
-            if (aceitaPet) {
-                secaoPet.classList.remove('hidden');
-                if (valorPetNum > 0) {
-                    document.getElementById('label-valor-pet-filtro').innerText = `Taxa única de R$ ${valorPetNum.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-                } else {
-                    document.getElementById('label-valor-pet-filtro').innerText = `Pet permitido (Sem taxa adicional)`;
-                }
-            } else {
-                secaoPet.classList.add('hidden');
-            }
+    if (aceitaPet) {
+        secaoPet.classList.remove('hidden');
+        if (valorPetNum > 0) {
+            document.getElementById('label-valor-pet-filtro').innerText = `Taxa única de R$ ${valorPetNum.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+        } else {
+            document.getElementById('label-valor-pet-filtro').innerText = `Pet permitido (Sem taxa adicional)`;
         }
+    } else {
+        secaoPet.classList.add('hidden');
+    }
+}
 
         function renderizarBarraInstitucional() {
             const container = document.getElementById('container-institucional');
@@ -305,6 +307,7 @@
                 `;
             }
 
+            // REGIME DE PENSÃO - EXIBIÇÃO GLOBAL NA BARRA INSTITUCIONAL
             if (dadosPousadaGlobal.tipo_pensao) {
                 const tipoGlobal = String(dadosPousadaGlobal.tipo_pensao).toLowerCase();
                 let textoPensao = '';
@@ -327,6 +330,7 @@
 
         function abrirModalFotosPousada() {
             const grid = document.getElementById('grid-fotos-pousada');
+            // DESCRIÇÃO DA POUSADA NO TOPO DO MODAL
             const containerDescricao = document.getElementById('descricao-pousada-modal');
             if (containerDescricao) {
                 if (dadosPousadaGlobal.descricao_pousada) {
@@ -403,6 +407,8 @@
             container.innerHTML = html;
         }
 
+        // Função de cálculo individual do preço do dia considerando as tarifas especiais
+        // Função chamada ao mudar adultos/crianças para manter total <= capacidade máxima
         function atualizarFiltrosOcupantesDinamicos() {
             try {
                 if (!cacheSuites || cacheSuites.length === 0) return;
@@ -416,9 +422,14 @@
                 
                 const adultos = parseInt(selAdultos.value) || 0;
                 let criancas = parseInt(selCriancas.value) || 0;
+                
+                // Calcula máximo de crianças permitido
                 const maxCriancas = Math.max(0, limiteGeral - adultos);
                 
+                // Se crianças atual excede, ajusta e avisa
                 if (criancas > maxCriancas) {
+                    // Mantém valor mas vai gerar aviso no filtro principal
+                    // Remonta opções de crianças para refletir limite
                     const valorAtual = criancas;
                     selCriancas.innerHTML = '';
                     for (let c = 0; c <= valorAtual; c++) {
@@ -434,6 +445,7 @@
                     }
                     selCriancas.dataset.ultimoAdultos = adultos;
                 } else {
+                    // Remonta crianças até max permitido + margem
                     const valorAtual = criancas;
                     selCriancas.innerHTML = '';
                     const limiteExibir = Math.max(maxCriancas, valorAtual);
@@ -450,12 +462,13 @@
             } catch (e) { console.warn(e); }
         }
 
+
         function calcularPrecoDiaSuite(dataObj, suiteId, precoBaseSuite) {
             const ano = dataObj.getFullYear();
             const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
             const dia = String(dataObj.getDate()).padStart(2, '0');
             const dataStrYYYYMMDD = `${ano}-${mes}-${dia}`;
-            const diaSemana = dataObj.getDay();
+            const diaSemana = dataObj.getDay(); // 0 = Dom, 6 = Sáb
 
             let precoFinal = precoBaseSuite;
             const tarifasDaSuite = cacheTarifasEspeciais.filter(t => t.suite_id === null || t.suite_id === suiteId);
@@ -498,7 +511,7 @@
             const checkout = new Date(checkoutStr + 'T00:00:00');
             const qtdNoites = Math.round((checkout - checkin) / (1000 * 60 * 60 * 24));
             
-            const suiteData = cacheSuites.find(s => s.id === suiteId) || {};
+            const { data: suiteData } = await supabaseClient.from('suites').select('*').eq('id', suiteId).single();
             const hospedesInclusos = suiteData?.hospedes_inclusos || 2;
             
             const idadeLimite = Number(dadosPousadaGlobal.idade_limite_crianca) || 5;
@@ -605,20 +618,29 @@
 
             estadoMesCalendario = {};
 
-            if (!cacheSuites || cacheSuites.length === 0) {
+            // 👉 CONSULTA ATUALIZADA: Filtra apenas as suítes ativas para a vitrine pública
+            const { data: suitesBrutas } = await supabaseClient
+                .from('suites')
+                .select('*')
+                .eq('pousada_id', pousadaIdGlobal)
+                .eq('ativa', true);
+
+            if (!suitesBrutas || suitesBrutas.length === 0) {
                 container.innerHTML = '<p class="text-center bg-black/40 p-6 rounded-xl">Nenhuma suíte disponível no momento.</p>';
                 return;
             }
 
-            const suitesBrutas = cacheSuites.filter(s => {
+            cacheSuites = suitesBrutas.filter(s => {
                 const nomeLower = (s.nome || '').toLowerCase();
                 if (nomeLower.includes('teste')) return false;
                 if (!s.nome) return false;
                 return true;
             });
 
+            // >>> FILTROS DINÂMICOS: capacidade máxima lida da tabela suites (GESTOR)
+            // Adultos + Crianças <= capacidade_maxima
             try {
-                const capacidades = suitesBrutas.map(s => Number(s.capacidade_hospedes) || 0).filter(n => n > 0);
+                const capacidades = cacheSuites.map(s => Number(s.capacidade_hospedes) || 0).filter(n => n > 0);
                 const capacidadeMaximaGeral = capacidades.length > 0 ? Math.max(...capacidades) : 0;
                 const limiteAdultos = capacidadeMaximaGeral > 0 ? Math.min(capacidadeMaximaGeral, 20) : 10;
                 const selAdultos = document.getElementById('filtro-adultos');
@@ -642,6 +664,7 @@
                     }
                     selAdultos.dataset.dinamicoInicial = '1';
                 }
+                // Atualiza crianças baseado em adultos atuais
                 if (selAdultos && selCriancas) {
                     const ad = parseInt(selAdultos.value) || 2;
                     const maxCri = Math.max(0, (capacidadeMaximaGeral || 10) - ad);
@@ -662,10 +685,21 @@
                 }
             } catch (e) { console.warn(e); }
 
+            let criancasExtrasBusca = 0;
+            const idadeLimite = Number(dadosPousadaGlobal.idade_limite_crianca) || 5;
+            for (let i = 1; i <= qtdCriancas; i++) {
+                const el = document.getElementById(`idade-crianca-${i}`);
+                if (el && parseInt(el.value) > idadeLimite) {
+                    criancasExtrasBusca++;
+                }
+            }
+
             const novoInicio = new Date(checkinFiltro + 'T00:00:00');
             const novoFim = new Date(checkoutFiltro + 'T00:00:00');
 
-            const suitesComStatus = suitesBrutas.map(suite => {
+            const suitesComStatus = cacheSuites.map(suite => {
+                // REGRA DE NEGÓCIO: capacidade_hospedes da tabela suites soma ADULTO + CRIANÇA (inclusive grátis)
+                // Ex: Suíte Standard Luxo capacidade 4 -> 2 adultos + 2 crianças = 4 OK, 5 adultos + 4 crianças = 9 NÃO ATENDE
                 const capacidadeMax = suite.capacidade_hospedes ? Number(suite.capacidade_hospedes) : 99;
                 const totalOcupantes = (Number(qtdAdultos) || 0) + (Number(qtdCriancas) || 0);
                 const atendeCapacidade = totalOcupantes <= capacidadeMax;
@@ -726,6 +760,7 @@
                 const calc = await calcularValorTotalEstadiaCompleto(suite.id, checkinFiltro, checkoutFiltro, precoBase, qtdAdultos, qtdCriancas);
                 const temConflitoNoPeriodo = suite.temConflitoNoPeriodo;
 
+                // REGIME DE PENSÃO DEFINIDO PELO GESTOR - EXIBE NO CARD DA SUÍTE
                 let regimePensaoBadge = '';
                 let descricaoPensaoTexto = '';
                 if (dadosPousadaGlobal.tipo_pensao) {
@@ -826,6 +861,7 @@
                 }
 
                 detalhamentoOcupantesHTML += `</div>`;
+
                 const valorTotalComPet = calc.valorTotalGeral + valorPetTotal;
 
                 container.innerHTML += `
@@ -1065,7 +1101,7 @@
         }
 
         async function atualizarResumoModal(suiteId, checkinVal, checkoutVal, qtdAdultos, qtdCriancas) {
-            const suiteData = cacheSuites.find(s => s.id === suiteId) || {};
+            const { data: suiteData } = await supabaseClient.from('suites').select('*').eq('id', suiteId).single();
             const precoBase = suiteData ? (suiteData.valor_diaria || suiteData.preco || 150.00) : 150.00;
             const calc = await calcularValorTotalEstadiaCompleto(suiteId, checkinVal, checkoutVal, precoBase, qtdAdultos, qtdCriancas);
 
@@ -1122,6 +1158,7 @@
             const qtdAdultos = parseInt(document.getElementById('filtro-adultos').value) || 2;
             const qtdCriancas = parseInt(document.getElementById('filtro-criancas').value) || 0;
 
+            // Captura idades das crianças informadas
             let idadesCriancasArr = [];
             for (let i = 1; i <= qtdCriancas; i++) {
                 const elIdade = document.getElementById(`idade-crianca-${i}`);
@@ -1131,7 +1168,7 @@
             }
             const idadesCriancasStr = idadesCriancasArr.join(', ');
 
-            const suiteData = cacheSuites.find(s => s.id === suiteId) || {};
+            const { data: suiteData } = await supabaseClient.from('suites').select('*').eq('id', suiteId).single();
             const precoBase = suiteData ? (suiteData.valor_diaria || suiteData.preco || 150.00) : 150.00;
             const calc = await calcularValorTotalEstadiaCompleto(suiteId, checkinVal, checkoutVal, precoBase, qtdAdultos, qtdCriancas);
 
@@ -1159,6 +1196,7 @@
                 endereco: document.getElementById('endereco-hospede').value,
                 checkin: checkinVal,
                 checkout: checkoutVal,
+                // Novos campos adicionados:
                 qtd_adultos: qtdAdultos,
                 qtd_criancas: qtdCriancas,
                 idades_criancas: idadesCriancasStr,
