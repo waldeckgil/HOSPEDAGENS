@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -75,18 +75,6 @@
                             <p class="text-[11px] text-gray-500 mt-0.5 truncate">Cruzamento de nomes e acomodações.</p>
                         </div>
 
-                        <div onclick="abrirCalendarioGeralRelatorios()" 
-                             class="card-view cursor-pointer bg-indigo-50/50 p-4 rounded-xl shadow-sm border-2 border-indigo-300 hover:border-indigo-600 hover:shadow-md transition group">
-                            <div class="flex items-center justify-between mb-2">
-                                <div class="w-8 h-8 bg-indigo-100 text-indigo-700 rounded-lg flex items-center justify-center text-sm shadow-sm">
-                                    <i class="fa-solid fa-calendar-days"></i>
-                                </div>
-                                <span class="text-[9px] font-bold uppercase tracking-wider bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full">CALENDÁRIO</span>
-                            </div>
-                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-indigo-700 transition">Calendário Geral das Suítes</h3>
-                            <p class="text-[11px] text-gray-500 mt-0.5 truncate">Ocupação mês a mês por suíte.</p>
-                        </div>
-
                         <div onclick="selecionarView('vw_gestor_tarifas_relatorio', 'Auditoria de Tarifas Especiais', this)" 
                              class="card-view cursor-pointer bg-amber-50/40 p-4 rounded-xl shadow-sm border-2 border-amber-200 hover:border-amber-500 hover:shadow-md transition group">
                             <div class="flex items-center justify-between mb-2">
@@ -109,6 +97,19 @@
                             </div>
                             <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-purple-700 transition">Reservas</h3>
                             <p class="text-[11px] text-gray-500 mt-0.5 truncate">Todas as reservas.</p>
+                        </div>
+
+                        <!-- CARD CALENDÁRIO GERAL DE SUÍTES -->
+                        <div onclick="abrirCalendarioGeralSuites()" 
+                             class="card-view cursor-pointer bg-indigo-50/40 p-4 rounded-xl shadow-sm border-2 border-indigo-200 hover:border-indigo-500 hover:shadow-md transition group">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="w-8 h-8 bg-indigo-100 text-indigo-700 rounded-lg flex items-center justify-center text-sm shadow-sm">
+                                    <i class="fa-solid fa-calendar-days"></i>
+                                </div>
+                                <span class="text-[9px] font-bold uppercase tracking-wider bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full">CALENDÁRIO</span>
+                            </div>
+                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-indigo-700 transition">Calendário Geral de Suítes</h3>
+                            <p class="text-[11px] text-gray-500 mt-0.5 truncate">Navegação dupla por suítes e meses.</p>
                         </div>
                     </div>
 
@@ -190,7 +191,7 @@
                     </div>
 
                     <!-- FILTRO RÁPIDO DE STATUS DE RESERVAS -->
-                                        <div id="containerFiltroStatusReservas" class="mb-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                    <div id="containerFiltroStatusReservas" class="mb-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
                         <!-- FILTRO STATUS -->
                         <div class="flex items-center gap-2 bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
                             <span class="text-[10px] font-extrabold text-gray-500 uppercase tracking-widest mr-2">
@@ -311,6 +312,114 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- MODAL DO CALENDÁRIO VISUAL POR SUÍTE (EXISTENTE) -->
+    <div id="modal-calendario-suite" class="hidden fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-200">
+            <div class="bg-slate-800 text-white px-5 py-4 flex items-center justify-between">
+                <div>
+                    <h3 id="cal-suite-nome" class="font-bold text-base uppercase tracking-wider">SUÍTE</h3>
+                    <p class="text-[11px] text-slate-300">Calendário de Ocupação</p>
+                </div>
+                <button onclick="fecharCalendarioSuite()" class="text-slate-300 hover:text-white bg-slate-700 hover:bg-slate-600 w-8 h-8 rounded-full flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-5">
+                <div class="flex items-center justify-between mb-4 bg-gray-50 p-3 rounded-xl border border-gray-200">
+                    <button onclick="mudarMesCalendario(-1)" class="w-8 h-8 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-700 font-bold transition shadow-sm">
+                        <i class="fa-solid fa-chevron-left text-xs"></i>
+                    </button>
+                    <span id="cal-mes-ano" class="font-extrabold text-sm text-gray-800 uppercase">MÊS DE ANO</span>
+                    <button onclick="mudarMesCalendario(1)" class="w-8 h-8 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-700 font-bold transition shadow-sm">
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
+                    </button>
+                </div>
+                <div class="grid grid-cols-7 gap-1.5 text-center mb-2">
+                    <span class="text-[10px] font-extrabold text-red-500">DOM</span>
+                    <span class="text-[10px] font-extrabold text-gray-600">SEG</span>
+                    <span class="text-[10px] font-extrabold text-gray-600">TER</span>
+                    <span class="text-[10px] font-extrabold text-gray-600">QUA</span>
+                    <span class="text-[10px] font-extrabold text-gray-600">QUI</span>
+                    <span class="text-[10px] font-extrabold text-gray-600">SEX</span>
+                    <span class="text-[10px] font-extrabold text-indigo-500">SÁB</span>
+                </div>
+                <div id="cal-grid-dias" class="grid grid-cols-7 gap-1.5 text-center">
+                    <!-- Dias inseridos via JS -->
+                </div>
+                <div class="flex items-center justify-center gap-4 mt-5 pt-3 border-t border-gray-200 text-[11px]">
+                    <div class="flex items-center gap-1.5"><span class="w-3 h-3 bg-emerald-500 rounded-full inline-block"></span> Disponível</div>
+                    <div class="flex items-center gap-1.5"><span class="w-3 h-3 bg-red-500 rounded-full inline-block"></span> Ocupada</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DO CALENDÁRIO GERAL DE SUÍTES COM NAVEGAÇÃO DUPLA FLUIDA -->
+    <div id="modalCalendarioGeralSuites" class="hidden fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden border border-gray-200">
+            <!-- Cabeçalho do Modal Geral com Navegação de Suítes (Acima) -->
+            <div class="bg-slate-900 text-white px-5 py-4 flex flex-col gap-3">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] font-extrabold text-indigo-400 uppercase tracking-widest"><i class="fa-solid fa-calendar-days mr-1"></i> Calendário Geral de Suítes</span>
+                        <h3 class="font-bold text-sm text-gray-200">Navegue entre suítes e meses</h3>
+                    </div>
+                    <button onclick="fecharCalendarioGeralSuites()" class="text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 w-8 h-8 rounded-full flex items-center justify-center transition">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <!-- Setinha / Navegação entre as Suítes Existentes -->
+                <div class="flex items-center justify-between bg-slate-800/80 px-3 py-2 rounded-xl border border-slate-700">
+                    <button onclick="mudarSuiteGeral(-1)" class="w-7 h-7 bg-slate-700 hover:bg-slate-600 text-indigo-300 rounded-lg flex items-center justify-center font-bold transition shadow-sm" title="Suíte Anterior">
+                        <i class="fa-solid fa-chevron-left text-xs"></i>
+                    </button>
+                    <div class="text-center">
+                        <span class="text-[9px] uppercase tracking-wider text-slate-400 block">Suíte Atual</span>
+                        <span id="lblSuiteGeralNome" class="font-extrabold text-sm text-amber-400 uppercase tracking-wide">CARREGANDO...</span>
+                    </div>
+                    <button onclick="mudarSuiteGeral(1)" class="w-7 h-7 bg-slate-700 hover:bg-slate-600 text-indigo-300 rounded-lg flex items-center justify-center font-bold transition shadow-sm" title="Próxima Suíte">
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-5">
+                <!-- Navegação entre os Meses (Abaixo das suítes) -->
+                <div class="flex items-center justify-between mb-4 bg-gray-50 p-3 rounded-xl border border-gray-200">
+                    <button onclick="mudarMesGeral(-1)" class="w-8 h-8 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-700 font-bold transition shadow-sm" title="Mês Anterior">
+                        <i class="fa-solid fa-chevron-left text-xs"></i>
+                    </button>
+                    <span id="lblMesAnoGeral" class="font-extrabold text-sm text-gray-800 uppercase">MÊS DE ANO</span>
+                    <button onclick="mudarMesGeral(1)" class="w-8 h-8 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-700 font-bold transition shadow-sm" title="Próximo Mês">
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
+                    </button>
+                </div>
+
+                <!-- Dias da Semana -->
+                <div class="grid grid-cols-7 gap-1.5 text-center mb-2">
+                    <span class="text-[10px] font-extrabold text-red-500">DOM</span>
+                    <span class="text-[10px] font-extrabold text-gray-600">SEG</span>
+                    <span class="text-[10px] font-extrabold text-gray-600">TER</span>
+                    <span class="text-[10px] font-extrabold text-gray-600">QUA</span>
+                    <span class="text-[10px] font-extrabold text-gray-600">QUI</span>
+                    <span class="text-[10px] font-extrabold text-gray-600">SEX</span>
+                    <span class="text-[10px] font-extrabold text-indigo-500">SÁB</span>
+                </div>
+
+                <!-- Grid de Dias do Calendário Geral -->
+                <div id="gridDiasCalendarioGeral" class="grid grid-cols-7 gap-1.5 text-center">
+                    <!-- Dias gerados via JS -->
+                </div>
+
+                <!-- Legenda -->
+                <div class="flex items-center justify-center gap-4 mt-5 pt-3 border-t border-gray-200 text-[11px]">
+                    <div class="flex items-center gap-1.5"><span class="w-3 h-3 bg-emerald-500 rounded-full inline-block"></span> Disponível</div>
+                    <div class="flex items-center gap-1.5"><span class="w-3 h-3 bg-red-500 rounded-full inline-block"></span> Ocupada</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -455,7 +564,6 @@
                 }
             });
             if (filtroAtivo) {
-                // Highlight selected card
                 const grid = document.getElementById('gridOcupacaoSuites');
                 if (grid) {
                     grid.querySelectorAll('div').forEach(card => {
@@ -481,19 +589,13 @@
             carregarDadosView();
         }
 
-        // >>> CENÁRIO C - CARDS CONTROLE HOJE - CONSULTA DIRETA NO BANCO
         async function carregarCardsControleHoje() {
             if (!usuarioIdAtual) return;
             try {
                 const hoje = new Date();
-                const hojeStr = hoje.toISOString().split('T')[0]; // YYYY-MM-DD
-                const inicioHoje = new Date(hoje);
-                inicioHoje.setHours(0,0,0,0);
-                const fimHoje = new Date(hoje);
-                fimHoje.setHours(23,59,59,999);
+                const hojeStr = hoje.toISOString().split('T')[0];
 
-                // Check-In Hoje: checkin = hoje e não recusada/cancelada
-                const { count: countCheckIn, error: errIn } = await supabaseClient
+                const { count: countCheckIn } = await supabaseClient
                     .from('reservas')
                     .select('id', { count: 'exact', head: true })
                     .eq('pousada_id', usuarioIdAtual)
@@ -501,8 +603,7 @@
                     .neq('status', 'Recusada')
                     .neq('status', 'Cancelada');
 
-                // Check-Out Hoje: checkout = hoje
-                const { count: countCheckOut, error: errOut } = await supabaseClient
+                const { count: countCheckOut } = await supabaseClient
                     .from('reservas')
                     .select('id', { count: 'exact', head: true })
                     .eq('pousada_id', usuarioIdAtual)
@@ -510,11 +611,10 @@
                     .neq('status', 'Recusada')
                     .neq('status', 'Cancelada');
 
-                // Check-Out Amanhã: checkout = amanhã
                 const amanha = new Date(hoje);
                 amanha.setDate(amanha.getDate() + 1);
                 const amanhaStr = amanha.toISOString().split('T')[0];
-                const { count: countCheckOutAmanha, error: errOutAmanha } = await supabaseClient
+                const { count: countCheckOutAmanha } = await supabaseClient
                     .from('reservas')
                     .select('id', { count: 'exact', head: true })
                     .eq('pousada_id', usuarioIdAtual)
@@ -522,42 +622,33 @@
                     .neq('status', 'Recusada')
                     .neq('status', 'Cancelada');
 
-                // Reservas: total de reservas (TODAS) OU novas hoje - conforme solicitado, mostra total de reservas do dia ou total geral
-                // Aqui usamos total de reservas com status Aprovada para hoje + futuras (ou total geral se preferir)
-                // Para bater com print "Reservas" (não "Reservas Futuras") vamos contar TODAS as reservas Aprovadas
-                const { count: countReservas, error: errRes } = await supabaseClient
+                const { count: countReservas } = await supabaseClient
                     .from('reservas')
                     .select('id', { count: 'exact', head: true })
                     .eq('pousada_id', usuarioIdAtual)
                     .eq('status', 'Aprovada');
 
-                // Se quiser contar apenas novas reservas criadas hoje, descomente abaixo e comente acima:
-                // const { count: countReservas } = await supabaseClient.from('reservas').select('id', { count: 'exact', head: true }).eq('pousada_id', usuarioIdAtual).gte('criado_em', inicioHoje.toISOString()).lte('criado_em', fimHoje.toISOString());
-
                 const elIn = document.getElementById('cardCheckInHojeValor');
                 const elOut = document.getElementById('cardCheckOutHojeValor');
                 const elOutAmanha = document.getElementById('cardCheckOutAmanhaValor');
                 const elRes = document.getElementById('cardReservasHojeValor');
-                if (elIn) elIn.innerText = (errIn ? 0 : (countCheckIn || 0));
-                if (elOut) elOut.innerText = (errOut ? 0 : (countCheckOut || 0));
-                if (elOutAmanha) elOutAmanha.innerText = (errOutAmanha ? 0 : (countCheckOutAmanha || 0));
-                if (elRes) elRes.innerText = (errRes ? 0 : (countReservas || 0));
+                if (elIn) elIn.innerText = (countCheckIn || 0);
+                if (elOut) elOut.innerText = (countCheckOut || 0);
+                if (elOutAmanha) elOutAmanha.innerText = (countCheckOutAmanha || 0);
+                if (elRes) elRes.innerText = (countReservas || 0);
 
             } catch (e) {
                 console.error('Erro carregarCardsControleHoje', e);
             }
         }
 
-        // >>> CENÁRIO C - FILTRO AO CLICAR NOS CARDS HOJE
         function filtrarPorCardHoje(tipo) {
-            // Se clicar no mesmo já ativo, remove filtro
             if (filtroCheckTipoHoje === tipo) {
                 filtroCheckTipoHoje = null;
             } else {
                 filtroCheckTipoHoje = tipo;
             }
 
-            // Atualiza visual dos cards - INCLUI CHECK-OUT AMANHÃ
             const cardIn = document.getElementById('cardCheckInHoje');
             const cardOut = document.getElementById('cardCheckOutHoje');
             const cardOutAmanha = document.getElementById('cardCheckOutAmanha');
@@ -579,21 +670,16 @@
                 cardRes.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50', 'border-blue-400');
             }
 
-            // Se for 'reservas', mostra todas (remove filtro de hoje)
             if (tipo === 'reservas' && filtroCheckTipoHoje === 'reservas') {
-                // Mostra todas - já está no comportamento padrão, mas força recarregar
                 filtroCheckTipoHoje = null;
-                // Remove seleção visual de reservas para indicar que é "ver todas"
                 if (cardRes) {
                     cardRes.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50', 'border-blue-400');
                 }
             }
 
-            // Recarrega dados com filtro
             carregarDadosView();
         }
 
-        
         function atualizarVisibilidadeFiltroStatus() {
             var container = document.getElementById('containerFiltroStatusReservas');
             if (!container) return;
@@ -602,7 +688,6 @@
             } else {
                 container.style.display = 'none';
             }
-            // >>> CONTROLE DO FILTRO DATA LATERAL - HOSPEDAGENS E FINANCEIRO AO LADO DOS CARDS
             var filtroLateral = document.getElementById('containerFiltroDataHospedagens');
             var filtroTabela = document.getElementById('containerFiltroDataTabela');
             if (filtroLateral && filtroTabela) {
@@ -620,7 +705,6 @@
             }
         }
 
-        // >>> DASHBOARD GRÁFICO DE OCUPAÇÃO - NOVO
         let graficoVisivel = false;
         function toggleGraficoOcupacao() {
             const container = document.getElementById('containerGraficoOcupacao');
@@ -637,7 +721,6 @@
             }
         }
 
-        
         async function carregarGraficoOcupacao() {
             const grid = document.getElementById('graficoBarrasOcupacao');
             const badge = document.getElementById('badgePeriodoGrafico');
@@ -653,9 +736,6 @@
                     else badge.textContent = 'TODO PERÍODO';
                 }
 
-                // >>> REGRA DE NEGÓCIO FINAL - SÓ FINALIZADA NO PERÍODO = MAIS OCUPADA NO PERÍODO
-                // Você está certo, ADMINISTRADOR: só entra no dashboard se status = Finalizada (checkout feito no dashboard)
-                // Aprovada é futura, ainda não deu lucro. Finalizada é histórico real já pago e finalizado.
                 let query = supabaseClient.from('reservas').select('id, suite_id, checkin, checkout, status,  suites ( nome )').eq('pousada_id', usuarioIdAtual).eq('status', 'Finalizada');
                 if (dataInicio && dataFim) {
                     query = query.lte('checkin', dataFim).gte('checkout', dataInicio);
@@ -678,12 +758,10 @@
                     let rCheckout = new Date(String(r.checkout).substring(0,10) + 'T00:00:00');
                     let fInicio = dataInicio ? new Date(dataInicio + 'T00:00:00') : rCheckin;
                     let fFim = dataFim ? new Date(dataFim + 'T00:00:00') : rCheckout;
-                    // Sobreposição: max(inicio) e min(fim)
                     let overlapInicio = new Date(Math.max(rCheckin.getTime(), fInicio.getTime()));
                     let overlapFim = new Date(Math.min(rCheckout.getTime(), fFim.getTime()));
                     let diff = Math.ceil((overlapFim - overlapInicio) / (1000*60*60*24));
                     if (isNaN(diff) || diff < 0) diff = 0;
-                    // Se não há filtro, conta tudo
                     if (!dataInicio && !dataFim) {
                         diff = Math.ceil((rCheckout - rCheckin) / (1000*60*60*24));
                     }
@@ -716,10 +794,6 @@
                     `;
                 });
                 grid.innerHTML = htmlChart;
-                
-                // Log para debug no console para você bater com SQL
-                console.log('GRAFICO DEBUG - Reservas consideradas:', reservas);
-                console.log('GRAFICO DEBUG - Mapa por suite:', mapa);
             } catch (e) {
                 console.error('Erro grafico ocupacao', e);
                 grid.innerHTML = `<div class="py-4 text-center text-red-500 text-xs">ERRO: ${e.message}</div>`;
@@ -727,8 +801,6 @@
         }
 
         function sincronizarFiltrosData(origem, valor) {
-            // Sincroniza os 4 inputs de data (tabela + lateral)
-            var ids = ['filtroDataInicio', 'filtroDataFim', 'filtroDataInicioHosp', 'filtroDataFimHosp'];
             if (origem === 'inicio' || origem === 'inicio_tabela') {
                 document.getElementById('filtroDataInicio').value = valor;
                 var elHosp = document.getElementById('filtroDataInicioHosp');
@@ -745,10 +817,11 @@
             tituloBaseAtual = tituloAmigavel;
 
             document.querySelectorAll('.card-view').forEach(card => {
-                card.classList.remove('border-blue-500', 'border-amber-500', 'border-purple-500', 'border-emerald-500', 'shadow-md');
+                card.classList.remove('border-blue-500', 'border-amber-500', 'border-purple-500', 'border-emerald-500', 'border-indigo-500', 'shadow-md');
                 if (card.onclick.toString().includes('financeiro')) card.classList.add('border-blue-200');
                 else if (card.onclick.toString().includes('hospedagens')) card.classList.add('border-emerald-200');
                 else if (card.onclick.toString().includes('tarifas')) card.classList.add('border-amber-200');
+                else if (card.onclick.toString().includes('abrirCalendarioGeralSuites')) card.classList.add('border-indigo-200');
                 else card.classList.add('border-purple-200');
             });
 
@@ -766,34 +839,31 @@
 
             carregarDadosView();
         }
-function formatarDataHoraBr(valor) {
-    if (!valor) return '-';
-    try {
-        let str = String(valor).trim();
-        let dt = new Date(str);
-        if (isNaN(dt.getTime())) {
-            let limpo = str.split('.')[0].replace('T',' ').replace('Z','').substring(0,19);
-            dt = new Date(limpo);
+
+        function formatarDataHoraBr(valor) {
+            if (!valor) return '-';
+            try {
+                let str = String(valor).trim();
+                let dt = new Date(str);
+                if (isNaN(dt.getTime())) {
+                    let limpo = str.split('.')[0].replace('T',' ').replace('Z','').substring(0,19);
+                    dt = new Date(limpo);
+                }
+                if (isNaN(dt.getTime())) return str.toUpperCase();
+                
+                let ano = dt.getFullYear();
+                let mes = String(dt.getMonth() + 1).padStart(2, '0');
+                let dia = String(dt.getDate()).padStart(2, '0');
+                let hora = String(dt.getHours()).padStart(2, '0');
+                let minuto = String(dt.getMinutes()).padStart(2, '0');
+                let segundo = String(dt.getSeconds()).padStart(2, '0');
+                
+                return `${ano}/${mes}/${dia} ${hora}:${minuto}:${segundo}`;
+            } catch(e) {
+                return String(valor).toUpperCase();
+            }
         }
-        if (isNaN(dt.getTime())) return str.toUpperCase();
-        
-        let ano = dt.getFullYear();
-        let mes = String(dt.getMonth() + 1).padStart(2, '0');
-        let dia = String(dt.getDate()).padStart(2, '0');
-        let hora = String(dt.getHours()).padStart(2, '0');
-        let minuto = String(dt.getMinutes()).padStart(2, '0');
-        let segundo = String(dt.getSeconds()).padStart(2, '0');
-        
-        // Formato com Ano na frente primeiro (AAAA/MM/DD HH:mm:ss)
-        return `${ano}/${mes}/${dia} ${hora}:${minuto}:${segundo}`;
-        
-        /* Se preferir o padrão brasileiro com o ano no final, descomente a linha abaixo: */
-        // return `${dia}/${mes}/${ano} ${hora}:${minuto}:${segundo}`;
-        
-    } catch(e) {
-        return String(valor).toUpperCase();
-    }
-}
+
         function formatarDataBr(valor) {
             if (!valor) return '-';
             let str = String(valor).trim();
@@ -874,7 +944,6 @@ function formatarDataHoraBr(valor) {
                     let dadosBrutos = (response.data || []).filter(row => row.pousada_id === usuarioIdAtual);
                     error = response.error;
 
-                    // >>> ALERTA VIGÊNCIA - CALCULA DIAS RESTANTES PARA EXPIRAÇÃO - CORRIGIDO TIMEZONE
                     const hoje = new Date();
                     hoje.setHours(0,0,0,0);
                     registros = dadosBrutos.map(row => {
@@ -884,16 +953,12 @@ function formatarDataHoraBr(valor) {
                         let alertaCor = 'gray';
                         
                         if (vigenciaFimStr) {
-                            // CORREÇÃO: parse manual YYYY-MM-DD como data local para evitar bug de fuso UTC
-                            // Antes: new Date("2026-09-02") criava UTC e causava -1 dia no Brasil GMT-3
                             let str = String(vigenciaFimStr).substring(0,10);
                             let partes = str.split('-');
                             let dataFim;
                             if (partes.length === 3) {
-                                // Formato YYYY-MM-DD - cria como data local
                                 dataFim = new Date(Number(partes[0]), Number(partes[1])-1, Number(partes[2]), 0,0,0,0);
                             } else {
-                                // Tenta DD/MM/YYYY
                                 let partesBr = String(vigenciaFimStr).split('/');
                                 if (partesBr.length === 3) {
                                     dataFim = new Date(Number(partesBr[2]), Number(partesBr[1])-1, Number(partesBr[0]), 0,0,0,0);
@@ -903,7 +968,7 @@ function formatarDataHoraBr(valor) {
                                 }
                             }
                             let diffMs = dataFim - hoje;
-                            diasRestantes = Math.round(diffMs / (1000*60*60*24)); // Math.round para evitar erro de horário de verão
+                            diasRestantes = Math.round(diffMs / (1000*60*60*24));
                             
                             if (diasRestantes < 0) {
                                 alertaTexto = `VENCIDA há ${Math.abs(diasRestantes)} dias`;
@@ -952,7 +1017,6 @@ function formatarDataHoraBr(valor) {
                         }));
                     }
                 } else if (ehViewHospedagens) {
-                    // TRATAMENTO EXCLUSIVO PARA GARANTIR TODAS AS SUÍTES DA TABELA CADASTRADAS (Disponíveis e Ocupadas)
                     const { data: todasSuites, error: errSuites } = await supabaseClient
                         .from('suites')
                         .select('id, nome')
@@ -965,10 +1029,7 @@ function formatarDataHoraBr(valor) {
                     if (errSuites) {
                         error = errSuites;
                     } else {
-                        // Cruzamento robusto cobrindo 100% das suítes cadastradas na tabela
-                        let hojeStr = new Date().toISOString().split('T')[0];
                         registros = todasSuites.map(suite => {
-                            // Procura reserva ativa para esta suíte na data de hoje ou futura próxima
                             let reservaEncontrada = reservasAtivasView.find(r => 
                                 String(r.suite || '').trim().toUpperCase() === String(suite.nome || '').trim().toUpperCase() &&
                                 String(r.status || r.status_reserva || '').toUpperCase() === 'APROVADA'
@@ -1015,10 +1076,8 @@ function formatarDataHoraBr(valor) {
                 let registrosFiltrados = registros;
 
                 if (ehViewReservas) {
-                    // >>> RESERVAS = SOMENTE RESERVAS (APROVADA/RECUSADA) COM DATAS FUTURAS - NÃO MOSTRA STATUS FÍSICO DA SUÍTE
                     registrosFiltrados = registrosFiltrados.filter(row => {
                         let status = String(row.status || row.status_reserva || '').toUpperCase();
-                        // Considera apenas status da reserva, não status físico
                         let isRecusada = (status === 'RECUSADA' || status === 'CANCELADA');
                         let isAprovada = (status === 'APROVADA');
 
@@ -1027,7 +1086,6 @@ function formatarDataHoraBr(valor) {
                         return true; 
                     });
 
-                    // >>> FILTRO EXTRA - CARDS HOJE (Check-In / Check-Out / Check-Out Amanhã)
                     if (filtroCheckTipoHoje) {
                         const hojeStr = hojeStrGlobal || new Date().toISOString().split('T')[0];
                         const amanhaObj = new Date();
@@ -1066,7 +1124,6 @@ function formatarDataHoraBr(valor) {
                     registrosFiltrados = registrosFiltrados.filter(r => String(r.suite || '').trim().toUpperCase() === String(suiteFiltroAtual).trim().toUpperCase());
                 }
 
-                // Renderiza KPI explicito no topo dependendo da View
                 containerKpis.classList.remove("hidden");
                 if (ehViewFinanceiro) {
                     containerKpis.className = "flex flex-wrap gap-3 mb-5";
@@ -1105,7 +1162,6 @@ function formatarDataHoraBr(valor) {
                     let totalSuites = registros.length;
                     let ocupadas = registros.filter(r => r.status_ocupacao === 'OCUPADA / RESERVADA').length;
                     let disponiveis = totalSuites - ocupadas;
-                    // >>> LAYOUT COMPACTO LADO A LADO - CARDS PEQUENOS + NOVO CARD GRÁFICO
                     containerKpis.className = "flex flex-wrap gap-3 mb-5";
                     containerKpis.innerHTML = `
                         <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3 min-w-[160px] hover:shadow-md transition">
@@ -1139,7 +1195,6 @@ function formatarDataHoraBr(valor) {
                     `;
                     document.getElementById('containerFiltroSuites').classList.add('hidden');
                     
-                    // >>> SOMENTE HOSPEDAGENS - CARDS POR SUÍTE COM NOME ESPECÍFICO (NÃO MEXER EM FINANCEIRO)
                     const containerOcupacao = document.getElementById('containerCardsOcupacaoSuites');
                     const gridOcupacao = document.getElementById('gridOcupacaoSuites');
                     const badgeTotal = document.getElementById('badgeOcupacaoTotal');
@@ -1279,8 +1334,7 @@ function formatarDataHoraBr(valor) {
             }
         }
 
-
-        // >>> SUÍTES - CALENDÁRIO VISUAL - CORRIGIDO - FUNÇÕES GLOBAIS
+        // >>> SUÍTES - CALENDÁRIO VISUAL (MODAL ANTIGO)
         let suitesVisivel = false;
         let reservasFuturasCache = [];
         let suiteCalId = null;
@@ -1288,16 +1342,11 @@ function formatarDataHoraBr(valor) {
         let calDataRef = new Date();
 
         function toggleSuites() {
-            console.log('toggleSuites chamado');
             const container = document.getElementById('containerSuites');
             const card = document.getElementById('cardSuites');
-            if (!container) {
-                console.error('containerSuites não encontrado');
-                return;
-            }
+            if (!container) return;
             
             suitesVisivel = !suitesVisivel;
-            
             if (suitesVisivel) {
                 container.classList.remove('hidden');
                 if (card) card.classList.add('ring-2', 'ring-amber-500', 'bg-amber-50', 'border-amber-400');
@@ -1309,10 +1358,7 @@ function formatarDataHoraBr(valor) {
         }
 
         async function carregarSuitesComReservas() {
-            if (!usuarioIdAtual) {
-                console.error('usuarioIdAtual não definido');
-                return;
-            }
+            if (!usuarioIdAtual) return;
             const grid = document.getElementById('gridSuites');
             const badge = document.getElementById('badgeSuites');
             if (!grid) return;
@@ -1321,8 +1367,6 @@ function formatarDataHoraBr(valor) {
             
             try {
                 const hojeStr = new Date().toISOString().split('T')[0];
-                console.log('Buscando reservas futuras a partir de', hojeStr, 'pousada', usuarioIdAtual);
-                
                 const { data: reservasFuturas, error } = await supabaseClient
                     .from('reservas')
                     .select('id, suite_id, checkin, checkout, hospede_nome, status, suites ( nome )')
@@ -1332,28 +1376,20 @@ function formatarDataHoraBr(valor) {
                     .order('checkin', { ascending: true });
                 
                 if (error) throw error;
-                
                 reservasFuturasCache = reservasFuturas || [];
-                console.log('Reservas futuras encontradas', reservasFuturasCache.length);
                 
                 const suitesMap = {};
                 reservasFuturasCache.forEach(r => {
                     const nomeSuite = r.suites?.nome || 'SUÍTE SEM NOME';
                     const sId = r.suite_id;
                     if (!suitesMap[sId]) {
-                        suitesMap[sId] = {
-                            suite_id: sId,
-                            nome: nomeSuite,
-                            reservas: [],
-                            total: 0
-                        };
+                        suitesMap[sId] = { suite_id: sId, nome: nomeSuite, reservas: [], total: 0 };
                     }
                     suitesMap[sId].reservas.push(r);
                     suitesMap[sId].total++;
                 });
                 
                 const suitesComReserva = Object.values(suitesMap);
-                
                 if (badge) badge.textContent = `${suitesComReserva.length} SUÍTES`;
                 
                 if (suitesComReserva.length === 0) {
@@ -1369,7 +1405,7 @@ function formatarDataHoraBr(valor) {
                     }).join(', ');
                     
                     htmlCards += `
-                        <div onclick="abrirCalendarioSuite('${s.suite_id}', '${s.nome.replace(/'/g, "\'")}')" class="cursor-pointer border-2 border-amber-200 bg-white hover:bg-amber-50 hover:border-amber-400 p-3 rounded-xl shadow-sm transition group">
+                        <div onclick="abrirCalendarioSuite('${s.suite_id}', '${s.nome.replace(/'/g, "\\'")}')" class="cursor-pointer border-2 border-amber-200 bg-white hover:bg-amber-50 hover:border-amber-400 p-3 rounded-xl shadow-sm transition group">
                             <div class="flex items-center justify-between mb-1.5">
                                 <div class="w-7 h-7 bg-amber-100 text-amber-700 rounded-lg flex items-center justify-center text-[11px]"><i class="fa-solid fa-bed"></i></div>
                                 <span class="text-[9px] font-bold bg-amber-600 text-white px-2 py-0.5 rounded-full">${s.total} RESERVA(S)</span>
@@ -1381,7 +1417,6 @@ function formatarDataHoraBr(valor) {
                     `;
                 });
                 grid.innerHTML = htmlCards;
-                
             } catch (e) {
                 console.error('Erro carregarSuitesComReservas', e);
                 grid.innerHTML = `<div class="col-span-full py-4 text-center text-red-500 text-xs">ERRO: ${e.message}</div>`;
@@ -1435,231 +1470,149 @@ function formatarDataHoraBr(valor) {
                 }
             });
             
-            for (let i=0;i<primeiroDiaSemana;i++) grid.innerHTML += '<div></div>';
-            
-            const hojeStr = new Date().toISOString().split('T')[0];
+            for (let i=0; i<primeiroDiaSemana; i++) {
+                grid.innerHTML += `<div></div>`;
+            }
             
             for (let dia=1; dia<=ultimoDiaMes; dia++) {
-                const mesStr = String(mes+1).padStart(2,'0');
-                const diaStr = String(dia).padStart(2,'0');
-                const dataIso = `${ano}-${mesStr}-${diaStr}`;
-                const estaOcupado = datasOcupadas.has(dataIso);
-                const ePassado = dataIso < hojeStr;
-                let classe = "";
-                let tooltip = "";
-                if (ePassado) {
-                    classe = "bg-gray-100 text-gray-400 border border-gray-200 opacity-60";
-                    tooltip = "Data passada";
-                } else if (estaOcupado) {
-                    classe = "bg-red-100 text-red-700 border border-red-200 font-bold shadow-sm relative overflow-hidden";
-                    tooltip = "Ocupado - com reserva futura";
-                } else {
-                    classe = "bg-emerald-100 text-emerald-800 border border-emerald-200 hover:bg-emerald-200 font-bold";
-                    tooltip = "Livre - disponível para reserva";
-                }
-                const isHoje = dataIso === hojeStr ? 'ring-2 ring-blue-500' : '';
-                let conteudoDia = `${dia}`;
-                if (estaOcupado) {
-                    conteudoDia = `${dia}<span class="absolute inset-0 flex items-center justify-center text-white font-extrabold text-[16px] leading-none" style="text-shadow: 0 0 3px rgba(239,68,68,0.9);">✕</span>`;
-                }
-                grid.innerHTML += `<div title="${tooltip} ${dataIso}" class="h-8 flex items-center justify-center rounded-lg text-[11px] ${classe} ${isHoje} relative">${conteudoDia}</div>`;
+                let mStr = String(mes + 1).padStart(2, '0');
+                let dStr = String(dia).padStart(2, '0');
+                let dataIso = `${ano}-${mStr}-${dStr}`;
+                
+                let isOcupada = datasOcupadas.has(dataIso);
+                let corClasse = isOcupada 
+                    ? 'bg-red-500 text-white font-bold shadow-sm' 
+                    : 'bg-emerald-500 text-white font-bold shadow-sm';
+                
+                grid.innerHTML += `<div class="h-8 rounded-lg flex items-center justify-center text-xs ${corClasse}" title="${dataIso}: ${isOcupada ? 'Ocupada' : 'Disponível'}">${dia}</div>`;
             }
         }
 
+        // >>> NOVO: CALENDÁRIO GERAL DE SUÍTES COM NAVEGAÇÃO DUPLA (SUÍTES + MESES)
+        let indiceSuiteGeral = 0;
+        let calGeralDataRef = new Date();
+        let todasReservasGeralCache = [];
 
-        // ==================== CALENDÁRIO GERAL NO RELATÓRIOS ====================
-        let calGeralRelSuiteIndex = 0;
-        let calGeralRelDataRef = new Date();
-        let calGeralRelReservasCache = [];
-        let calGeralRelSuitesCache = [];
+        async function abrirCalendarioGeralSuites() {
+            const modal = document.getElementById('modalCalendarioGeralSuites');
+            if (!modal) return;
+            
+            // Garante que temos as suítes da pousada
+            if (!suitesDaPousadaCache || suitesDaPousadaCache.length === 0) {
+                await carregarSuitesParaFiltro();
+            }
+            if (!suitesDaPousadaCache || suitesDaPousadaCache.length === 0) {
+                alert('Nenhuma suíte encontrada para exibir no calendário.');
+                return;
+            }
 
-        async function abrirCalendarioGeralRelatorios() {
+            indiceSuiteGeral = 0;
+            calGeralDataRef = new Date();
+            modal.classList.remove('hidden');
+            
+            await carregarReservasGeralCache();
+            renderizarCalendarioGeral();
+        }
+
+        function fecharCalendarioGeralSuites() {
+            const modal = document.getElementById('modalCalendarioGeralSuites');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        async function carregarReservasGeralCache() {
             if (!usuarioIdAtual) return;
-            
-            const modal = document.getElementById('modal-calendario-geral-relatorios');
-            document.getElementById('cal-geral-rel-suite-nome').innerText = 'Carregando suítes...';
-            
             try {
-                // Busca suítes e reservas
-                const { data: suites } = await supabaseClient.from('suites').select('id,nome').eq('pousada_id', usuarioIdAtual).order('nome');
-                const { data: reservas } = await supabaseClient.from('reservas').select('suite_id,checkin,checkout,status').eq('pousada_id', usuarioIdAtual).in('status', ['Aprovada','Ocupada','Reservado']);
+                const { data, error } = await supabaseClient
+                    .from('reservas')
+                    .select('id, suite_id, checkin, checkout, hospede_nome, status, suites ( nome )')
+                    .eq('pousada_id', usuarioIdAtual)
+                    .neq('status', 'Recusada')
+                    .neq('status', 'Cancelada');
                 
-                calGeralRelSuitesCache = suites || [];
-                calGeralRelReservasCache = reservas || [];
-                
-                if (calGeralRelSuitesCache.length === 0) {
-                    alert('Nenhuma suíte cadastrada');
-                    return;
+                if (!error && data) {
+                    todasReservasGeralCache = data;
                 }
-                
-                calGeralRelSuiteIndex = 0;
-                calGeralRelDataRef = new Date();
-                renderizarCalendarioGeralRelatorios();
-                modal.classList.remove('hidden');
-            } catch(e) {
-                console.error('Erro calendário geral', e);
+            } catch (e) {
+                console.error('Erro ao carregar reservas para o calendário geral:', e);
             }
         }
 
-        function fecharCalendarioGeralRelatorios() {
-            document.getElementById('modal-calendario-geral-relatorios').classList.add('hidden');
+        function mudarSuiteGeral(dir) {
+            if (!suitesDaPousadaCache || suitesDaPousadaCache.length === 0) return;
+            indiceSuiteGeral += dir;
+            if (indiceSuiteGeral < 0) {
+                indiceSuiteGeral = suitesDaPousadaCache.length - 1;
+            } else if (indiceSuiteGeral >= suitesDaPousadaCache.length) {
+                indiceSuiteGeral = 0;
+            }
+            renderizarCalendarioGeral();
         }
 
-        function mudarSuiteGeralRelatorios(direcao) {
-            if (!calGeralRelSuitesCache.length) return;
-            calGeralRelSuiteIndex += direcao;
-            if (calGeralRelSuiteIndex < 0) calGeralRelSuiteIndex = calGeralRelSuitesCache.length - 1;
-            if (calGeralRelSuiteIndex >= calGeralRelSuitesCache.length) calGeralRelSuiteIndex = 0;
-            renderizarCalendarioGeralRelatorios();
+        function mudarMesGeral(dir) {
+            calGeralDataRef.setMonth(calGeralDataRef.getMonth() + dir);
+            renderizarCalendarioGeral();
         }
 
-        function mudarMesCalendarioGeralRelatorios(direcao) {
-            calGeralRelDataRef.setMonth(calGeralRelDataRef.getMonth() + direcao);
-            renderizarCalendarioGeralRelatorios();
-        }
+        function renderizarCalendarioGeral() {
+            const lblSuite = document.getElementById('lblSuiteGeralNome');
+            const lblMesAno = document.getElementById('lblMesAnoGeral');
+            const gridDias = document.getElementById('gridDiasCalendarioGeral');
+            
+            if (!lblSuite || !lblMesAno || !gridDias) return;
 
-        function renderizarCalendarioGeralRelatorios() {
-            const suite = calGeralRelSuitesCache[calGeralRelSuiteIndex];
-            if (!suite) return;
+            if (!suitesDaPousadaCache || suitesDaPousadaCache.length === 0) {
+                lblSuite.textContent = 'NENHUMA SUÍTE';
+                gridDias.innerHTML = '<div class="col-span-full py-4 text-center text-gray-400 text-xs">Sem suítes cadastradas</div>';
+                return;
+            }
 
-            document.getElementById('cal-geral-rel-suite-nome').innerText = `Suíte: ${suite.nome}`;
-            document.getElementById('cal-geral-rel-contador').innerText = `${calGeralRelSuiteIndex + 1} de ${calGeralRelSuitesCache.length}`;
+            const suiteAtual = suitesDaPousadaCache[indiceSuiteGeral];
+            lblSuite.textContent = suiteAtual.nome.toUpperCase();
 
-            const ano = calGeralRelDataRef.getFullYear();
-            const mes = calGeralRelDataRef.getMonth();
+            const ano = calGeralDataRef.getFullYear();
+            const mes = calGeralDataRef.getMonth();
             const nomesMeses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-            document.getElementById('cal-geral-rel-mes-ano').innerText = `${nomesMeses[mes]} de ${ano}`.toUpperCase();
-
-            const gridEl = document.getElementById('cal-geral-rel-grid');
-            gridEl.innerHTML = '';
+            lblMesAno.innerText = `${nomesMeses[mes]} de ${ano}`;
 
             const primeiroDiaSemana = new Date(ano, mes, 1).getDay();
-            const ultimoDiaMes = new Date(ano, mes + 1, 0).getDate();
+            const ultimoDiaMes = new Date(ano, mes+1, 0).getDate();
 
-            const reservasDaSuite = calGeralRelReservasCache.filter(r => r.suite_id === suite.id);
+            // Mapeia datas ocupadas para a suíte atual
             const datasOcupadas = new Set();
+            const reservasDaSuite = todasReservasGeralCache.filter(r => r.suite_id === suiteAtual.id);
+
             reservasDaSuite.forEach(r => {
                 if (!r.checkin || !r.checkout) return;
-                let dCurr = new Date(r.checkin + 'T00:00:00');
-                const dFim = new Date(r.checkout + 'T00:00:00');
+                let dCurr = new Date(String(r.checkin).substring(0,10) + 'T00:00:00');
+                const dFim = new Date(String(r.checkout).substring(0,10) + 'T00:00:00');
                 while (dCurr < dFim) {
-                    datasOcupadas.add(dCurr.toLocaleDateString('sv-SE'));
+                    datasOcupadas.add(dCurr.toISOString().split('T')[0]);
                     dCurr.setDate(dCurr.getDate() + 1);
                 }
             });
 
-            for (let i = 0; i < primeiroDiaSemana; i++) {
-                gridEl.innerHTML += `<div></div>`;
+            gridDias.innerHTML = '';
+            for (let i=0; i<primeiroDiaSemana; i++) {
+                gridDias.innerHTML += `<div></div>`;
             }
 
-            const hojeStr = new Date().toLocaleDateString('sv-SE');
+            for (let dia=1; dia<=ultimoDiaMes; dia++) {
+                let mStr = String(mes + 1).padStart(2, '0');
+                let dStr = String(dia).padStart(2, '0');
+                let dataIso = `${ano}-${mStr}-${dStr}`;
 
-            for (let dia = 1; dia <= ultimoDiaMes; dia++) {
-                const mesStr = String(mes + 1).padStart(2, '0');
-                const diaStr = String(dia).padStart(2, '0');
-                const dataIso = `${ano}-${mesStr}-${diaStr}`;
-                const estaOcupado = datasOcupadas.has(dataIso);
-                const ePassado = dataIso < hojeStr;
+                let isOcupada = datasOcupadas.has(dataIso);
+                let corClasse = isOcupada 
+                    ? 'bg-red-500 text-white font-bold shadow-sm' 
+                    : 'bg-emerald-500 text-white font-bold shadow-sm';
 
-                let classe = "";
-                let conteudo = dia;
-                if (ePassado) {
-                    classe = "bg-gray-100 text-gray-400 border border-gray-200 opacity-70";
-                } else if (estaOcupado) {
-                    classe = "bg-red-50 text-red-600 font-bold border border-red-200";
-                    conteudo = `<span class="flex flex-col items-center justify-center leading-none"><span>${dia}</span><span class="text-[10px]">✕</span></span>`;
-                } else {
-                    classe = "bg-emerald-100 text-emerald-800 font-extrabold border border-emerald-300 shadow-sm";
-                }
-
-                gridEl.innerHTML += `<div class="h-11 flex items-center justify-center rounded-xl text-[13px] ${classe}">${conteudo}</div>`;
+                gridDias.innerHTML += `<div class="h-8 rounded-lg flex items-center justify-center text-xs ${corClasse}" title="${dataIso} - ${suiteAtual.nome}: ${isOcupada ? 'Ocupada' : 'Disponível'}">${dia}</div>`;
             }
         }
 
-        window.onload = () => {
+        window.onload = function() {
             protegerPagina();
-            setTimeout(() => { if (viewAtualSelecionada === 'vw_gestor_reservas_relatorio') carregarCardsControleHoje(); }, 800);
         };
     </script>
-
-    <!-- MODAL CALENDÁRIO SUÍTE - RELATÓRIOS - CORRIGIDO -->
-    <div id="modal-calendario-suite" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-[100]">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative">
-            <button onclick="fecharCalendarioSuite()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
-            <div class="flex items-center gap-2 mb-1">
-                <span class="text-xl">📅</span>
-                <h3 id="cal-suite-nome" class="text-lg font-bold text-gray-900">Calendário da Suíte</h3>
-            </div>
-            <p class="text-xs text-gray-600 font-medium mb-4">Dias em <strong class="bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">verde</strong> livres. <strong class="bg-red-100 text-red-700 border border-red-200 px-1.5 py-0.5 rounded">vermelho claro com X</strong> ocupados.</p>
-            <div class="flex justify-between items-center mb-4 bg-gray-50 p-2.5 rounded-xl border border-gray-200">
-                <button onclick="mudarMesCalendario(-1)" class="px-3 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-xs">◀ Mês Anterior</button>
-                <strong id="cal-mes-ano" class="text-xs sm:text-sm font-bold text-gray-800 uppercase">MÊS / ANO</strong>
-                <button onclick="mudarMesCalendario(1)" class="px-3 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-xs">Próximo Mês ▶</button>
-            </div>
-            <div class="grid grid-cols-7 gap-1 text-center font-bold text-[11px] text-gray-500 mb-2">
-                <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
-            </div>
-            <div id="cal-grid-dias" class="grid grid-cols-7 gap-1.5 text-center text-xs"></div>
-            <div class="mt-4 flex items-center justify-center gap-4 text-[10px]">
-                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-100 border border-emerald-200 rounded"></span> Livre</span>
-                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-red-100 border border-red-200 rounded relative flex items-center justify-center"><span class="text-[8px] text-red-600 font-bold">✕</span></span> Ocupado</span>
-                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-gray-100 border rounded"></span> Passado</span>
-            </div>
-            <div class="mt-6 flex justify-end">
-                <button onclick="fecharCalendarioSuite()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold text-xs sm:text-sm py-2.5 rounded-xl transition">Fechar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL CALENDÁRIO GERAL DAS SUÍTES - NOVO -->
-    <div id="modal-calendario-geral-relatorios" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-[60]">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6 sm:p-7 relative max-h-[92vh] overflow-y-auto">
-            <button onclick="fecharCalendarioGeralRelatorios()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold">✕</button>
-            
-            <div class="flex items-center gap-2 mb-4 pr-8">
-                <span class="text-xl">🗓️</span>
-                <div>
-                    <h3 class="text-lg font-extrabold text-gray-900">Calendário Geral de Ocupação</h3>
-                    <p class="text-[11px] text-gray-500">Navegue entre suítes (seta topo) e meses (seta baixo)</p>
-                </div>
-            </div>
-
-            <!-- NAVEGAÇÃO DE SUÍTES NO TOPO -->
-            <div class="flex justify-between items-center mb-4 bg-slate-900 text-white p-3 rounded-2xl shadow-md">
-                <button onclick="mudarSuiteGeralRelatorios(-1)" class="w-9 h-9 rounded-xl bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition"><i class="fa-solid fa-chevron-left text-xs"></i></button>
-                <div class="text-center flex-1 px-3">
-                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest" id="cal-geral-rel-contador">1 de 4</p>
-                    <h4 id="cal-geral-rel-suite-nome" class="text-sm sm:text-base font-extrabold text-amber-300 mt-0.5">Suíte: Carregando...</h4>
-                </div>
-                <button onclick="mudarSuiteGeralRelatorios(1)" class="w-9 h-9 rounded-xl bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition"><i class="fa-solid fa-chevron-right text-xs"></i></button>
-            </div>
-
-            <p class="text-[11px] text-emerald-700 font-medium mb-3 text-center">Dias em <span class="bg-emerald-100 px-1.5 py-0.5 rounded font-bold">verde</span> livres, <span class="bg-red-100 px-1.5 py-0.5 rounded font-bold text-red-700">vermelho claro com X</span> ocupados.</p>
-
-            <!-- NAVEGAÇÃO DE MÊS -->
-            <div class="flex justify-between items-center mb-4 bg-gray-50 p-2.5 rounded-xl border border-gray-200">
-                <button onclick="mudarMesCalendarioGeralRelatorios(-1)" class="px-3 py-1.5 bg-white hover:bg-gray-100 rounded-xl text-[11px] font-bold border shadow-xs flex items-center gap-1.5"><i class="fa-solid fa-chevron-left text-[10px]"></i> Mês Anterior</button>
-                <strong id="cal-geral-rel-mes-ano" class="text-xs sm:text-sm font-extrabold text-gray-800 uppercase tracking-wide">SETEMBRO DE 2026</strong>
-                <button onclick="mudarMesCalendarioGeralRelatorios(1)" class="px-3 py-1.5 bg-white hover:bg-gray-100 rounded-xl text-[11px] font-bold border shadow-xs flex items-center gap-1.5">Próximo Mês <i class="fa-solid fa-chevron-right text-[10px]"></i></button>
-            </div>
-
-            <div class="grid grid-cols-7 gap-1 text-center font-bold text-[11px] text-gray-500 mb-2">
-                <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
-            </div>
-
-            <div id="cal-geral-rel-grid" class="grid grid-cols-7 gap-1.5 text-center text-sm min-h-[240px]"></div>
-
-            <div class="mt-5 flex flex-wrap justify-center gap-3 text-[11px] font-bold">
-                <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-emerald-100 border border-emerald-300"></span> Livre</span>
-                <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-red-100 border border-red-300 flex items-center justify-center text-[9px]">✕</span> Ocupado</span>
-                <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-gray-100 border border-gray-200"></span> Passado</span>
-            </div>
-
-            <div class="mt-6">
-                <button onclick="fecharCalendarioGeralRelatorios()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-3 rounded-xl transition text-sm">Fechar</button>
-            </div>
-        </div>
-    </div>
-
 </body>
 </html>
