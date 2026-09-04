@@ -113,7 +113,7 @@
                 </a>
             </div>
 
-            <!-- HUB DE NAVEGAÇÃO E FILTRO CONSOLIDADO POR SUÍTE -->
+            <!-- NOVO: HUB DE NAVEGAÇÃO E FILTRO CONSOLIDADO POR SUÍTE -->
             <div id="container-filtro-suites-topo" class="mb-6 bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-200">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
                     <div>
@@ -127,7 +127,7 @@
                     </button>
                 </div>
                 <div id="grid-seletor-suites-dash" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-                    <!-- Cards dinâmicos renderizados via JS -->
+                    <!-- Cards dinâmicos com cores únicas renderizados via JS -->
                 </div>
             </div>
 
@@ -247,7 +247,7 @@
                         <input type="email" id="edit-email" placeholder="E-mail" class="p-3 border rounded-xl text-sm">
                     </div>
 
-                    <!-- DETALHES DA ESTADIA COM CÁLCULO DINÂMICO -->
+                    <!-- DETALHES DA ESTADIA (ADULTOS, CRIANÇAS E PET) COM CÁLCULO DINÂMICO -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Adultos</label>
@@ -266,7 +266,7 @@
                         </div>
                     </div>
 
-                    <!-- IDADES DAS CRIANÇAS -->
+                    <!-- CONTAINER DINÂMICO PARA IDADES DAS CRIANÇAS E CÁLCULO -->
                     <div id="container-idades-criancas" class="hidden bg-gray-50 border border-gray-200 p-3 rounded-xl space-y-2">
                         <label class="block text-xs font-bold text-gray-700">Idade(s) da(s) Criança(s) (para cálculo e isenção):</label>
                         <div id="lista-idades-criancas" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
@@ -322,7 +322,9 @@
             </div>
             <p id="modal-tarifa-suite-nome" class="text-xs text-blue-600 font-bold mb-4 uppercase tracking-wider"></p>
 
-            <div id="modal-tarifa-conteudo" class="space-y-3"></div>
+            <div id="modal-tarifa-conteudo" class="space-y-3">
+                <!-- Conteúdo injetado via JS -->
+            </div>
 
             <div class="mt-6 flex justify-end">
                 <button onclick="fecharModalTarifaEspecial()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition">Fechar</button>
@@ -341,17 +343,22 @@
             </div>
             <p class="text-xs text-emerald-700 font-medium mb-4">Dias em <strong class="bg-emerald-100 px-1 rounded">verde</strong> estão livres para novas reservas.</p>
 
+            <!-- Cabeçalho do Mês e Navegação -->
             <div class="flex justify-between items-center mb-4 bg-gray-50 p-2.5 rounded-xl border border-gray-200">
                 <button onclick="mudarMesCalendario(-1)" class="px-3 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-xs">◀ Mês Anterior</button>
                 <strong id="cal-mes-ano-atual" class="text-xs sm:text-sm font-bold text-gray-800 uppercase">MÊS / ANO</strong>
                 <button onclick="mudarMesCalendario(1)" class="px-3 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-xs">Próximo Mês ▶</button>
             </div>
 
+            <!-- Grade dos Dias da Semana -->
             <div class="grid grid-cols-7 gap-1 text-center font-bold text-[11px] text-gray-500 mb-2">
                 <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sexta</div><div>Sáb</div>
             </div>
 
-            <div id="cal-grid-dias" class="grid grid-cols-7 gap-1.5 text-center text-xs"></div>
+            <!-- Grade Dinâmica dos Dias -->
+            <div id="cal-grid-dias" class="grid grid-cols-7 gap-1.5 text-center text-xs">
+                <!-- Preenchido via JS -->
+            </div>
 
             <div class="mt-6 flex justify-end">
                 <button onclick="fecharModalCalendario()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold text-xs sm:text-sm py-2.5 rounded-xl transition">Fechar</button>
@@ -420,7 +427,7 @@
         let pousadaAceitaPetCache = false;
 
         // =========================================================================
-        // PALETA DINÂMICA DE CORES EXCLUSIVAS POR SUÍTE
+        // PALETA DINÂMICA DE CORES EXCLUSIVAS POR SUÍTE (MESMA LÓGICA DO RELATÓRIO)
         // =========================================================================
         const PALETA_SUITES = [
             { nome: 'indigo', border: 'border-indigo-300', borderHover: 'hover:border-indigo-500', borderActive: 'border-indigo-600', bgLight: 'bg-indigo-50/60', bgActive: 'bg-indigo-100', iconBg: 'bg-indigo-100', iconText: 'text-indigo-700', badgeBg: 'bg-indigo-600', textGroupHover: 'group-hover:text-indigo-700', barBg: 'bg-indigo-500' },
@@ -453,7 +460,10 @@
             return PALETA_SUITES[indice];
         }
 
+        // Variável de controle do filtro por suíte no dashboard
         let suiteFiltroDashboard = null;
+
+        // Variáveis globais para o Modal de Calendário
         let calSuiteIdAtual = null;
         let calSuiteNomeAtual = "";
         let calDataReferencia = new Date();
@@ -650,18 +660,18 @@
 
         function obterIndicadorCheckout(checkoutStr) {
             const dias = calcularDiasRestantes(checkoutStr);
-            if (dias < 0) return { texto: `Checkout vencido há ${Math.abs(dias)}d`, classe: 'bg-red-100 text-red-700 border-red-300' };
-            if (dias === 0) return { texto: `🔥 Saída HOJE!`, classe: 'bg-orange-100 text-orange-800 border-orange-300 font-bold' };
-            if (dias === 1) return { texto: `⏳ Saída amanhã`, classe: 'bg-yellow-100 text-yellow-800 border-yellow-300' };
-            return { texto: `Saída em ${dias} dias`, classe: 'bg-slate-200 text-slate-800 border-slate-300' };
+            if (dias < 0) return { texto: `⚠️ Checkout vencido há ${Math.abs(dias)} dia(s)`, classe: 'bg-red-100 text-red-700 border-red-300' };
+            if (dias === 0) return { texto: `🔥 Checkout HOJE!`, classe: 'bg-orange-100 text-orange-800 border-orange-300 font-bold' };
+            if (dias === 1) return { texto: `⏳ Checkout amanhã`, classe: 'bg-yellow-100 text-yellow-800 border-yellow-300' };
+            return { texto: `Saída em ${dias} dias`, classe: 'bg-blue-50 text-blue-700 border-blue-200' };
         }
 
         function obterIndicadorProximaEstada(checkinStr) {
             const dias = calcularDiasRestantes(checkinStr);
             if (dias < 0) return { texto: `Em andamento`, classe: 'bg-gray-100 text-gray-600 border-gray-200' };
             if (dias === 0) return { texto: `🚀 Chegada HOJE!`, classe: 'bg-green-100 text-green-800 border-green-300 font-bold' };
-            if (dias === 1) return { texto: `🔔 Chegada amanhã`, classe: 'bg-indigo-100 text-indigo-800 border-indigo-300' };
-            return { texto: `Chegada em ${dias} dias`, classe: 'bg-blue-100 text-blue-800 border-blue-200' };
+            if (dias === 1) return { texto: `🔔 Próxima estada amanhã`, classe: 'bg-indigo-100 text-indigo-800 border-indigo-300' };
+            return { texto: `Chegada em ${dias} dias`, classe: 'bg-purple-50 text-purple-700 border-purple-200' };
         }
 
         async function carregarPousada() {
@@ -870,6 +880,7 @@
                 }
             }
 
+            // Banner de estado filtrado
             if (suiteFiltroDashboard && bannerFiltrada && textoFiltrada) {
                 const sObj = suitesGlobaisCache.find(s => s.id === suiteFiltroDashboard);
                 if (sObj) {
@@ -889,6 +900,7 @@
                 const isAtiva = suiteFiltroDashboard === suite.id;
                 const tema = obterTemaSuite(suite.id || suite.nome);
                 
+                // Levantamento operacional rápido para o badge do card
                 const reservasDaSuite = reservasGlobaisCache.filter(r => r.suite_id === suite.id && r.status !== 'Cancelada' && r.status !== 'Recusada' && r.status !== 'Finalizada');
                 const pendentes = reservasDaSuite.filter(r => r.status === 'Pendente');
                 const aprovadas = reservasDaSuite.filter(r => r.status === 'Aprovada');
@@ -898,7 +910,7 @@
                 if (pendentes.length > 0) {
                     badgeInfo = `<span class="text-[9px] bg-amber-100 text-amber-900 border border-amber-300 font-extrabold px-1.5 py-0.5 rounded-full">${pendentes.length} pend.</span>`;
                 } else if (ocupadaAgora) {
-                    badgeInfo = `<span class="text-[9px] bg-slate-800 text-white font-extrabold px-1.5 py-0.5 rounded-full">Ocupada</span>`;
+                    badgeInfo = `<span class="text-[9px] bg-red-100 text-red-700 border border-red-200 font-extrabold px-1.5 py-0.5 rounded-full">Ocupada</span>`;
                 } else if (aprovadas.length > 0) {
                     badgeInfo = `<span class="text-[9px] bg-blue-100 text-blue-800 border border-blue-200 font-extrabold px-1.5 py-0.5 rounded-full">${aprovadas.length} res.</span>`;
                 } else {
@@ -1000,6 +1012,7 @@
                 return;
             }
 
+            // Aplica filtro por suíte se selecionada no seletor do topo
             const suitesParaExibir = suiteFiltroDashboard 
                 ? suitesGlobaisCache.filter(s => s.id === suiteFiltroDashboard) 
                 : suitesGlobaisCache;
@@ -1017,6 +1030,7 @@
                 const estaAtiva = suite.ativa !== false && suite.ativa !== 'false';
                 const tagPausadaHtml = !estaAtiva ? `<span class="bg-slate-700 text-slate-200 text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">⏸️ Pausada</span>` : '';
                 
+                // Tema exclusivo da suíte (Garante cor única e constante)
                 const temaSuite = obterTemaSuite(suite.id || suite.nome);
 
                 const reservasDaSuite = reservasGlobaisCache.filter(r => r.suite_id === suite.id && r.status !== 'Cancelada' && r.status !== 'Recusada' && r.status !== 'Finalizada');
@@ -1037,10 +1051,10 @@
                 });
                 
                 const htmlTarifaBadge = temTarifaEspecial 
-                    ? `<button onclick="abrirModalTarifaEspecial('${suite.id}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 text-[11px] font-bold px-2 py-0.5 rounded-md transition flex items-center gap-1 cursor-pointer"><span>⚡ Tarifa Especial</span></button>` 
+                    ? `<button onclick="abrirModalTarifaEspecial('${suite.id}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 text-[11px] font-bold px-2 py-0.5 rounded-md transition flex items-center gap-1 cursor-pointer"><span>⚡ Com Tarifa Especial</span></button>` 
                     : '';
 
-                const htmlBotaoCalendario = `<button onclick="abrirCalendarioSuite('${suite.id}', '${suite.nome}')" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-[11px] font-bold px-2.5 py-0.5 rounded-md transition flex items-center gap-1 cursor-pointer"><span>📅 Calendário</span></button>`;
+                const htmlBotaoCalendario = `<button onclick="abrirCalendarioSuite('${suite.id}', '${suite.nome}')" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-[11px] font-bold px-2.5 py-0.5 rounded-md transition flex items-center gap-1 cursor-pointer"><span>📅 Ver Calendário</span></button>`;
 
                 if (aprovadasDaSuite.length > 0) {
                     for (let index = 0; index < aprovadasDaSuite.length; index++) {
@@ -1048,23 +1062,14 @@
                         const isFutura = aprovada.checkin > hojeStr;
                         const statusParaModal = isFutura ? 'Reservado' : 'Ocupada';
                         const badgeText = isFutura ? 'Reserva Futura' : 'Ocupada';
-                        
-                        // COR DE FUNDO DOS CARDS CONFORME ESPECIFICADO:
-                        // Reserva Futura = Azul Claro
-                        // Ocupada = Cinza mais escuro / Ardósia
-                        const bgCardClasses = isFutura 
-                            ? 'bg-blue-50 border-2 border-blue-300 text-blue-950' 
-                            : 'bg-slate-200 border-2 border-slate-400 text-slate-900';
-                        
-                        const badgeClasses = isFutura 
-                            ? 'bg-blue-200 text-blue-900 border border-blue-300' 
-                            : 'bg-slate-700 text-white font-extrabold';
+                        const badgeClasses = isFutura ? 'bg-blue-200 text-blue-900' : 'bg-gray-200 text-red-600 font-bold';
+                        const bgCardClasses = isFutura ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50 border border-gray-300';
                         
                         const indicador = isFutura ? obterIndicadorProximaEstada(aprovada.checkin) : obterIndicadorCheckout(aprovada.checkout);
                         const linkZap = gerarLinkWhatsApp(aprovada.whatsapp_hospede, aprovada.hospede_nome, aprovada.checkin, aprovada.checkout);
                         
                         const sufixoTitulo = aprovadasDaSuite.length > 1 ? ` (${index + 1})` : '';
-                        const nomeHospedeExibicao = aprovada.hospede_nome ? ` - <span class="font-normal text-gray-800 text-sm sm:text-base">${aprovada.hospede_nome}</span>` : '';
+                        const nomeHospedeExibicao = aprovada.hospede_nome ? ` - <span class="font-normal text-gray-700 text-sm sm:text-base">${aprovada.hospede_nome}</span>` : '';
                         
                         const qtdDiarias = calcularQuantidadeDiarias(aprovada.checkin, aprovada.checkout);
                         
@@ -1095,31 +1100,13 @@
                         const totalPago = pagamentosDestaReserva.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
                         const saldoRestante = valorTotal - totalPago;
 
-                        // INFORMAÇÕES DE DATA/PRAZO EXIBIDAS LOGO AO LADO DO NOME NA CAPA DO CARD
-                        let tagDataPrazoTopo = '';
-                        if (isFutura) {
-                            tagDataPrazoTopo = `
-                                <span class="inline-flex items-center gap-1.5 bg-blue-100 text-blue-900 border border-blue-300 text-[11px] font-extrabold px-2.5 py-0.5 rounded-lg shadow-xs">
-                                    <i class="fa-solid fa-calendar-days text-blue-700"></i> Check-in: ${formatarDataSimples(aprovada.checkin)} 
-                                    <span class="bg-blue-600 text-white text-[9px] px-1.5 py-0.5 rounded-md font-bold uppercase">${indicador.texto}</span>
-                                </span>
-                            `;
-                        } else {
-                            tagDataPrazoTopo = `
-                                <span class="inline-flex items-center gap-1.5 bg-slate-100 text-slate-900 border border-slate-400 text-[11px] font-extrabold px-2.5 py-0.5 rounded-lg shadow-xs">
-                                    <i class="fa-solid fa-person-walking-dashed-line-arrow-right text-slate-700"></i> Check-out: ${formatarDataSimples(aprovada.checkout)} 
-                                    <span class="bg-slate-800 text-white text-[9px] px-1.5 py-0.5 rounded-md font-bold uppercase">${indicador.texto}</span>
-                                </span>
-                            `;
-                        }
-
                         let htmlAlertaTopo = '';
                         if (aprovada.observacao && aprovada.observacao.trim() !== '') {
                             htmlAlertaTopo = `
-                                <div class="mt-2 bg-amber-100 border-l-4 border-amber-500 p-2.5 rounded-xl text-amber-950 text-xs font-semibold flex items-start gap-2 shadow-xs">
-                                    <span>⚠️</span>
+                                <div class="mt-3 bg-amber-100 border-l-4 border-amber-500 p-3 rounded-xl text-amber-950 text-xs sm:text-sm font-semibold flex items-start gap-2 shadow-xs">
+                                    <span class="text-base">⚠️</span>
                                     <div>
-                                        <strong class="block text-amber-900 uppercase text-[9px]">Aviso:</strong>
+                                        <strong class="block text-amber-900 uppercase text-[10px] tracking-wide">Aviso Importante:</strong>
                                         <span>${aprovada.observacao}</span>
                                     </div>
                                 </div>
@@ -1127,61 +1114,41 @@
                         }
 
                         container.innerHTML += `
-                            <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md ${bgCardClasses} border-l-4 ${temaSuite.borderActive} flex flex-col justify-between transition hover:shadow-lg">
+                            <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md ${bgCardClasses} border-l-4 ${temaSuite.borderActive} text-gray-900 flex flex-col justify-between transition hover:shadow-lg">
                                 <div>
-                                    <!-- CABEÇALHO DO CARD -->
-                                    <div class="flex justify-between items-start mb-2 gap-2">
-                                        <div class="flex-1">
-                                            <div class="flex flex-wrap items-center gap-2 mb-1">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <div>
+                                            <div class="flex items-center gap-2 mb-1">
                                                 <div class="w-6 h-6 ${temaSuite.iconBg} ${temaSuite.iconText} rounded-lg flex items-center justify-center text-[10px] flex-shrink-0">
                                                     <i class="fa-solid fa-bed"></i>
                                                 </div>
-                                                <h2 class="text-base font-bold text-gray-900">${suite.nome}${sufixoTitulo}${nomeHospedeExibicao}</h2>
+                                                <h2 class="text-base sm:text-lg font-bold text-gray-900">${suite.nome}${sufixoTitulo}${nomeHospedeExibicao}</h2>
                                                 ${tagPausadaHtml}
                                             </div>
-                                            <!-- DATA E PRAZO LOGO AO LADO DO NOME -->
-                                            <div class="mt-1 flex flex-wrap items-center gap-1.5">
-                                                ${tagDataPrazoTopo}
+                                            <div class="flex flex-wrap items-center gap-2 mt-1">
+                                                <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md">Diária Padrão (2 Ad.): ${formatarMoeda(suite.valor_diaria)}</span>
+                                                ${htmlTarifaBadge}
+                                                ${htmlBotaoCalendario}
                                             </div>
                                         </div>
-                                        <div class="flex items-center gap-2 flex-shrink-0">
-                                            <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-xs ${badgeClasses}">
+                                        <div class="flex items-center gap-2">
+                                            <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm ${badgeClasses}">
                                                 ${badgeText}
                                             </span>
-                                            <span class="icone-seta text-gray-500 text-sm transition-transform duration-300">▼</span>
-                                        </div>
-                                    </div>
-
-                                    <!-- DIÁRIA PADRÃO, TARIFAS E CALENDÁRIO -->
-                                    <div class="flex flex-wrap items-center gap-2 mt-2">
-                                        <span class="text-[11px] font-bold text-slate-700 bg-white/70 px-2 py-0.5 rounded-md border border-black/5">Diária (2 Ad.): ${formatarMoeda(suite.valor_diaria)}</span>
-                                        ${htmlTarifaBadge}
-                                        ${htmlBotaoCalendario}
-                                    </div>
-
-                                    <!-- SALDO RESTANTE E RESUMO FINANCEIRO DIRETO NA CAPA (SEM EXPANDIR) -->
-                                    <div class="mt-3 p-2.5 rounded-xl bg-white/80 border border-black/10 shadow-2xs flex flex-wrap items-center justify-between gap-2">
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-[10px] uppercase font-bold text-gray-500">Saldo Restante:</span>
-                                            <strong class="text-xs sm:text-sm font-extrabold ${saldoRestante > 0 ? 'text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200' : 'text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200'}">
-                                                ${formatarMoeda(saldoRestante)}
-                                            </strong>
-                                        </div>
-                                        <div class="text-[10px] text-gray-600 font-medium flex items-center gap-2">
-                                            <span>Pago: <strong class="text-emerald-700 font-bold">${formatarMoeda(totalPago)}</strong></span>
-                                            <span>•</span>
-                                            <span>Total: <strong class="text-blue-800 font-bold">${formatarMoeda(valorTotal)}</strong></span>
+                                            <span class="icone-seta text-gray-400 text-sm transition-transform duration-300">▼</span>
                                         </div>
                                     </div>
 
                                     ${htmlAlertaTopo}
 
-                                    <!-- DETALHES COMPLEMENTARES EXPANSÍVEIS -->
                                     <div class="card-detalhes hidden mt-3 pt-3 border-t border-black/10 text-xs sm:text-sm space-y-1.5">
+                                        <div class="mb-2">
+                                            <div class="inline-block px-3 py-1 rounded-lg border text-xs font-semibold ${indicador.classe}">${indicador.texto}</div>
+                                        </div>
                                         <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">Hóspede:</span> <span class="font-bold text-gray-900">${aprovada.hospede_nome}</span></p>
                                         <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">WhatsApp:</span> <a href="${linkZap}" target="_blank" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${aprovada.whatsapp_hospede || 'Não informado'}</a></p>
                                         
-                                        <div class="grid grid-cols-3 gap-2 bg-white/90 p-2.5 rounded-xl border border-black/5 text-xs mt-2">
+                                        <div class="grid grid-cols-3 gap-2 bg-white/80 p-2.5 rounded-xl border border-black/5 text-xs mt-2">
                                             <div>
                                                 <span class="text-gray-500 block text-[10px] uppercase font-bold">Adultos</span>
                                                 <strong class="text-gray-900">${qtdAdultos}</strong>
@@ -1196,15 +1163,30 @@
                                             </div>
                                         </div>
 
-                                        <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-black/10 text-xs">
-                                            <p><span class="text-gray-600">Entrada:</span> <strong class="text-gray-900">${formatarDataSimples(aprovada.checkin)}</strong></p>
-                                            <p><span class="text-gray-600">Saída:</span> <strong class="text-gray-900">${formatarDataSimples(aprovada.checkout)}</strong></p>
+                                        <div class="flex items-center justify-between pt-1 border-t border-black/5 mt-2">
+                                            <span class="text-xs font-semibold text-gray-700">Estadia: <strong class="text-gray-900">${qtdDiarias} diária(s)</strong></span>
+                                            <span class="text-xs font-extrabold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">Total: ${formatarMoeda(valorTotal)}</span>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-2 bg-white/80 p-2.5 rounded-xl border border-black/5 text-xs mt-2">
+                                            <div>
+                                                <span class="text-gray-500 block text-[10px] uppercase font-bold">Pago / Sinal</span>
+                                                <strong class="text-emerald-700">${formatarMoeda(totalPago)}</strong>
+                                            </div>
+                                            <div>
+                                                <span class="text-gray-500 block text-[10px] uppercase font-bold">Saldo Restante</span>
+                                                <strong class="${saldoRestante > 0 ? 'text-amber-700' : 'text-emerald-600'}">${formatarMoeda(saldoRestante)}</strong>
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-black/5 text-xs">
+                                            <p><span class="text-gray-500">Check-in:</span> <strong class="text-gray-900">${formatarDataSimples(aprovada.checkin)}</strong></p>
+                                            <p><span class="text-gray-500">Check-out:</span> <strong class="text-gray-900">${formatarDataSimples(aprovada.checkout)}</strong></p>
                                         </div>
                                     </div>
                                     
-                                    <!-- AÇÕES DO CARD -->
                                     <div class="mt-4 pt-3 flex justify-between items-center border-t border-black/10">
-                                        <button type="button" onclick="alternarExpandirCard(this)" class="text-xs font-bold text-gray-700 hover:text-gray-900 underline">
+                                        <button type="button" onclick="alternarExpandirCard(this)" class="text-xs font-bold text-gray-600 hover:text-gray-900 underline">
                                             Expandir Detalhes ▾
                                         </button>
                                         <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', '${statusParaModal}', '${aprovada.id}')" class="text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 px-3.5 py-2 rounded-xl transition shadow-xs">
@@ -1216,53 +1198,40 @@
                     }
                 } 
                 
-                // CASO DISPONÍVEL OU LIMPEZA (SEM RESERVAS ATIVAS)
                 if (aprovadasDaSuite.length === 0 && pendentesDaSuite.length === 0) {
-                    const isDisponivel = suite.status === 'Disponível';
-                    
-                    // CORES DE FUNDO ESPECIFICADAS:
-                    // Livre / Disponível = Totalmente Verde
-                    // Limpeza = Rosa
-                    const bgCardClasses = isDisponivel 
-                        ? 'bg-emerald-100 border-2 border-emerald-400 text-emerald-950' 
-                        : 'bg-pink-100 border-2 border-pink-300 text-pink-950';
-                    
-                    const badgeClasses = isDisponivel 
-                        ? 'bg-emerald-600 text-white font-extrabold' 
-                        : 'bg-pink-600 text-white font-extrabold';
+                    const corClasses = {
+                        'Disponível': 'bg-green-50 border border-green-200 text-green-900', 
+                        'Limpeza': 'bg-red-50 border border-red-200 text-red-900', 
+                    };
                     
                     container.innerHTML += `
-                        <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md ${bgCardClasses} border-l-4 ${temaSuite.borderActive} flex flex-col justify-between transition hover:shadow-lg">
+                        <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md ${corClasses[suite.status] || 'bg-white border border-gray-200'} border-l-4 ${temaSuite.borderActive} flex flex-col justify-between transition hover:shadow-lg">
                             <div>
-                                <div class="flex justify-between items-start mb-2 gap-2">
+                                <div class="flex justify-between items-start mb-2">
                                     <div>
-                                        <div class="flex flex-wrap items-center gap-2 mb-1">
+                                        <div class="flex items-center gap-2 mb-1">
                                             <div class="w-6 h-6 ${temaSuite.iconBg} ${temaSuite.iconText} rounded-lg flex items-center justify-center text-[10px] flex-shrink-0">
                                                 <i class="fa-solid fa-bed"></i>
                                             </div>
                                             <h2 class="text-base sm:text-lg font-bold text-gray-900">${suite.nome}</h2>
                                             ${tagPausadaHtml}
                                         </div>
-                                        <div class="mt-1">
-                                            <span class="inline-flex items-center gap-1.5 ${isDisponivel ? 'bg-emerald-200/80 text-emerald-950 border border-emerald-300' : 'bg-pink-200/80 text-pink-950 border border-pink-300'} text-[11px] font-extrabold px-2.5 py-0.5 rounded-lg">
-                                                ${isDisponivel ? '✅ Pronto para receber hóspedes' : '🧹 Acomodação em processo de higienização'}
-                                            </span>
+                                        <div class="flex flex-wrap items-center gap-2 mt-1">
+                                            <span class="text-[11px] font-bold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md">Diária Padrão (2 Ad.): ${formatarMoeda(suite.valor_diaria)}</span>
+                                            ${htmlTarifaBadge}
+                                            ${htmlBotaoCalendario}
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-2 flex-shrink-0">
-                                        <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-xs ${badgeClasses}">
+                                    <div class="flex items-center gap-2">
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm ${
+                                            suite.status === 'Disponível' ? 'bg-green-200 text-green-900' : 'bg-red-200 text-red-900'
+                                        }">
                                             ${suite.status}
                                         </span>
                                     </div>
                                 </div>
-
-                                <div class="flex flex-wrap items-center gap-2 mt-3">
-                                    <span class="text-[11px] font-bold text-slate-700 bg-white/70 px-2 py-0.5 rounded-md border border-black/5">Diária (2 Ad.): ${formatarMoeda(suite.valor_diaria)}</span>
-                                    ${htmlTarifaBadge}
-                                    ${htmlBotaoCalendario}
-                                </div>
                                 
-                                <div class="mt-6 pt-3 border-t border-black/10 flex justify-end">
+                                <div class="mt-4 pt-3 border-t border-black/10 flex justify-end">
                                     <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', '${suite.status}')" class="text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 px-3.5 py-2 rounded-xl transition shadow-xs">
                                         Gerenciar / Adicionar &rarr;
                                     </button>
@@ -1271,7 +1240,6 @@
                         </div>`;
                 }
 
-                // RESERVAS PENDENTES DA SUÍTE
                 for (let index = 0; index < pendentesDaSuite.length; index++) {
                     const pend = pendentesDaSuite[index];
                     const linkZapPend = gerarLinkWhatsApp(pend.whatsapp_hospede, pend.hospede_nome, pend.checkin, pend.checkout);
@@ -1301,7 +1269,7 @@
                     }
 
                     const sufixoTituloPend = pendentesDaSuite.length > 1 ? ` (${index + 1})` : '';
-                    const nomeHospedePendExibicao = pend.hospede_nome ? ` - <span class="font-normal text-amber-950 text-sm sm:text-base">${pend.hospede_nome}</span>` : '';
+                    const nomeHospedePendExibicao = pend.hospede_nome ? ` - <span class="font-normal text-amber-950/80 text-sm sm:text-base">${pend.hospede_nome}</span>` : '';
                     const temPetPend = petPendVal ? 'Sim' : 'Não';
 
                     const pagamentosPend = pagamentosGlobaisCache.filter(p => p.reserva_id === pend.id);
@@ -1311,10 +1279,10 @@
                     let htmlAlertaTopoPend = '';
                     if (pend.observacao && pend.observacao.trim() !== '') {
                         htmlAlertaTopoPend = `
-                            <div class="mt-2 bg-amber-200/80 border-l-4 border-amber-600 p-2.5 rounded-xl text-amber-950 text-xs font-semibold flex items-start gap-2 shadow-xs">
-                                <span>⚠️</span>
+                            <div class="mt-3 bg-amber-200/80 border-l-4 border-amber-600 p-3 rounded-xl text-amber-950 text-xs sm:text-sm font-semibold flex items-start gap-2 shadow-xs">
+                                <span class="text-base">⚠️</span>
                                 <div>
-                                    <strong class="block text-amber-900 uppercase text-[9px]">Aviso:</strong>
+                                    <strong class="block text-amber-900 uppercase text-[10px] tracking-wide">Aviso Importante:</strong>
                                     <span>${pend.observacao}</span>
                                 </div>
                             </div>
@@ -1322,57 +1290,36 @@
                     }
 
                     container.innerHTML += `
-                        <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md bg-amber-100 border-2 border-amber-400 border-l-4 ${temaSuite.borderActive} text-amber-950 flex flex-col justify-between transition hover:shadow-lg">
+                        <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md bg-amber-50 border border-amber-200 border-l-4 ${temaSuite.borderActive} flex flex-col justify-between transition hover:shadow-lg">
                             <div>
-                                <div class="flex justify-between items-start mb-2 gap-2">
-                                    <div class="flex-1">
-                                        <div class="flex flex-wrap items-center gap-2 mb-1">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
                                             <div class="w-6 h-6 ${temaSuite.iconBg} ${temaSuite.iconText} rounded-lg flex items-center justify-center text-[10px] flex-shrink-0">
                                                 <i class="fa-solid fa-bed"></i>
                                             </div>
                                             <h2 class="text-base sm:text-lg font-bold text-amber-950">${suite.nome}${sufixoTituloPend}${nomeHospedePendExibicao}</h2>
                                             ${tagPausadaHtml}
                                         </div>
-                                        <!-- DATAS DA SOLICITAÇÃO NA CAPA DO CARD -->
-                                        <div class="mt-1 flex flex-wrap items-center gap-1.5">
-                                            <span class="inline-flex items-center gap-1.5 bg-amber-200 text-amber-950 border border-amber-300 text-[11px] font-extrabold px-2.5 py-0.5 rounded-lg shadow-xs">
-                                                <i class="fa-solid fa-clock text-amber-700"></i> Período: ${formatarDataSimples(pend.checkin)} a ${formatarDataSimples(pend.checkout)} (${qtdDiariasPend}d)
-                                            </span>
+                                        <div class="flex flex-wrap items-center gap-2 mt-1">
+                                            <span class="text-[11px] font-bold text-amber-900/80 bg-amber-200/60 px-2 py-0.5 rounded-md">Diária Padrão (2 Ad.): ${formatarMoeda(suite.valor_diaria)}</span>
+                                            ${htmlTarifaBadge}
+                                            ${htmlBotaoCalendario}
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-2 flex-shrink-0">
-                                        <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-xs bg-amber-300 text-amber-950 border border-amber-400">Pendente</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm bg-amber-200 text-amber-900">Pendente</span>
                                         <span class="icone-seta text-amber-700 text-sm transition-transform duration-300">▼</span>
                                     </div>
                                 </div>
-
-                                <div class="flex flex-wrap items-center gap-2 mt-2">
-                                    <span class="text-[11px] font-bold text-amber-900 bg-white/70 px-2 py-0.5 rounded-md border border-amber-200">Diária (2 Ad.): ${formatarMoeda(suite.valor_diaria)}</span>
-                                    ${htmlTarifaBadge}
-                                    ${htmlBotaoCalendario}
-                                </div>
                                 
-                                <!-- SALDO RESTANTE VISÍVEL NA CAPA -->
-                                <div class="mt-3 p-2.5 rounded-xl bg-white/80 border border-amber-300 shadow-2xs flex flex-wrap items-center justify-between gap-2">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-[10px] uppercase font-bold text-amber-800">Saldo Restante:</span>
-                                        <strong class="text-xs sm:text-sm font-extrabold text-amber-900 bg-amber-200/70 px-2 py-0.5 rounded-md border border-amber-300">
-                                            ${formatarMoeda(saldoRestantePend)}
-                                        </strong>
-                                    </div>
-                                    <div class="text-[10px] text-amber-900 font-medium">
-                                        Total da Estadia: <strong class="text-blue-900 font-bold">${formatarMoeda(valorTotalPend)}</strong>
-                                    </div>
-                                </div>
-
                                 ${htmlAlertaTopoPend}
 
-                                <!-- DETALHES COMPLEMENTARES EXPANSÍVEIS -->
                                 <div class="card-detalhes hidden mt-3 pt-3 border-t border-amber-200 text-xs sm:text-sm space-y-1.5">
                                     <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">Hóspede:</span> <span class="font-bold text-gray-900">${pend.hospede_nome || 'Não informado'}</span></p>
                                     <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">WhatsApp:</span> <a href="${linkZapPend}" target="_blank" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${pend.whatsapp_hospede || 'Não informado'}</a></p>
                                     
-                                    <div class="grid grid-cols-3 gap-2 bg-white/90 p-2.5 rounded-xl border border-amber-200 text-xs mt-2">
+                                    <div class="grid grid-cols-3 gap-2 bg-white/80 p-2.5 rounded-xl border border-amber-200 text-xs mt-2">
                                         <div>
                                             <span class="text-gray-500 block text-[10px] uppercase font-bold">Adultos</span>
                                             <strong class="text-gray-900">${qtdAdultosPend}</strong>
@@ -1386,8 +1333,24 @@
                                             <strong class="text-gray-900">${temPetPend}</strong>
                                         </div>
                                     </div>
+
+                                    <div class="flex items-center justify-between pt-1 border-t border-amber-200 mt-2">
+                                        <span class="text-xs font-semibold text-amber-900">Estadia: <strong class="text-gray-900">${qtdDiariasPend} diária(s)</strong></span>
+                                        <span class="text-xs font-extrabold text-blue-700 bg-white px-2.5 py-1 rounded-lg border border-amber-200">Total: ${formatarMoeda(valorTotalPend)}</span>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-2 bg-white/80 p-2.5 rounded-xl border border-amber-200 text-xs mt-2">
+                                        <div>
+                                            <span class="text-gray-500 block text-[10px] uppercase font-bold">Pago / Sinal</span>
+                                            <strong class="text-emerald-700">${formatarMoeda(totalPagoPend)}</strong>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-500 block text-[10px] uppercase font-bold">Saldo Restante</span>
+                                            <strong class="text-amber-700">${formatarMoeda(saldoRestantePend)}</strong>
+                                        </div>
+                                    </div>
                                     
-                                    <div class="bg-white/80 border border-amber-200 p-3 rounded-xl mt-3 space-y-1 text-xs text-amber-900 shadow-sm">
+                                    <div class="bg-white/70 border border-amber-200 p-3 rounded-xl mt-3 space-y-1 text-xs text-amber-900 shadow-sm">
                                         <p><span class="font-semibold text-gray-600">CPF:</span> ${pend.cpf || 'Não informado'}</p>
                                         <p><span class="font-semibold text-gray-600">RG:</span> ${pend.rg || 'Não informado'}</p>
                                         <p><span class="font-semibold text-gray-600">Endereço:</span> ${pend.endereco || 'Não informado'}</p>
@@ -1397,14 +1360,18 @@
                                             <span>🕒</span> <span>Solicitado em: <strong>${dataSolicitacaoFormatada}</strong></span>
                                         </div>
                                     </div>
+
+                                    <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-amber-200 text-xs">
+                                        <p><span class="text-amber-800">Check-in:</span> <strong class="text-gray-900">${formatarDataSimples(pend.checkin)}</strong></p>
+                                        <p><span class="text-amber-800">Check-out:</span> <strong class="text-gray-900">${formatarDataSimples(pend.checkout)}</strong></p>
+                                    </div>
                                 </div>
 
-                                <!-- AÇÕES DE APROVAÇÃO / RECUSA -->
-                                <div class="mt-3 bg-amber-200/60 border border-amber-300 rounded-xl p-2 flex gap-2 shadow-xs">
-                                    <button onclick="mudarStatusReserva('${pend.id}', 'Aprovada')" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-extrabold py-2.5 px-3 rounded-xl shadow-xs text-sm transition flex items-center justify-center gap-1.5">
+                                <div class="mt-3 bg-amber-100 border-2 border-amber-500 rounded-xl p-2.5 flex gap-2 shadow-sm">
+                                    <button onclick="mudarStatusReserva('${pend.id}', 'Aprovada')" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-extrabold py-3 px-3 rounded-xl shadow-md text-sm transition flex items-center justify-center gap-1.5">
                                         ✔ Aprovar
                                     </button>
-                                    <button onclick="abrirModalRecusa('${pend.id}', '${(pend.hospede_nome || 'hóspede').replace(/'/g, '').replace(/"/g, '')}')" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-extrabold py-2.5 px-3 rounded-xl shadow-xs text-sm transition flex items-center justify-center gap-1.5">
+                                    <button onclick="abrirModalRecusa('${pend.id}', '${(pend.hospede_nome || 'hóspede').replace(/'/g, '').replace(/"/g, '')}')" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-extrabold py-3 px-3 rounded-xl shadow-md text-sm transition flex items-center justify-center gap-1.5">
                                         ✖ Recusar
                                     </button>
                                 </div>
