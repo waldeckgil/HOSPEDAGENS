@@ -113,39 +113,6 @@
                 </a>
             </div>
 
-            <!-- NOVO: HUB DE NAVEGAÇÃO E FILTRO CONSOLIDADO POR SUÍTE -->
-            <div id="container-filtro-suites-topo" class="mb-6 bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-200">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
-                    <div>
-                        <h3 class="text-xs sm:text-sm font-extrabold text-gray-800 uppercase tracking-wider flex items-center gap-2">
-                            <i class="fa-solid fa-layer-group text-blue-600"></i> Navegação por Suíte - Clique para Focar ou Veja Todas
-                        </h3>
-                        <p class="text-[11px] text-gray-500 mt-0.5">Cada suíte possui uma cor exclusiva. Clique no card para ver apenas os registros dela ou escolha ver todas.</p>
-                    </div>
-                    <button id="btn-ver-todas-suites-dash" onclick="filtrarDashboardPorSuite(null)" class="text-[11px] font-bold bg-slate-900 hover:bg-black text-white px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1.5 ring-2 ring-blue-500">
-                        <i class="fa-solid fa-border-all"></i> Ver Todas as Suítes
-                    </button>
-                </div>
-                <div id="grid-seletor-suites-dash" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-                    <!-- Cards dinâmicos com cores únicas renderizados via JS -->
-                </div>
-            </div>
-
-            <!-- BANNER INFORMATIVO CASO UMA SUÍTE ESTEJA FILTRADA -->
-            <div id="banner-suite-filtrada" class="hidden mb-5 p-3.5 rounded-2xl flex items-center justify-between shadow-xs border transition-all">
-                <div class="flex items-center gap-2.5">
-                    <span class="text-lg">🎯</span>
-                    <div>
-                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-gray-500 block">Modo de Visualização Focada</span>
-                        <h4 id="texto-suite-filtrada" class="text-xs sm:text-sm font-bold text-gray-900">Mostrando apenas: Suíte</h4>
-                    </div>
-                </div>
-                <button onclick="filtrarDashboardPorSuite(null)" class="text-[10px] font-bold bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 px-3 py-1.5 rounded-xl shadow-xs transition">
-                    <i class="fa-solid fa-xmark mr-1"></i> Mostrar Todas
-                </button>
-            </div>
-
-            <!-- GRID PRINCIPAL DE CARDS DE SUÍTES -->
             <div id="suites-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </main>
     </div>
@@ -366,6 +333,7 @@
         </div>
     </div>
 
+    
     <!-- MODAL PROFISSIONAL DE RECUSA COM MOTIVO OBRIGATÓRIO -->
     <div id="modal-recusa-profissional" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-[70]">
         <div class="bg-white p-6 sm:p-7 rounded-3xl w-full max-w-md shadow-2xl border border-gray-100 transform transition-all">
@@ -385,6 +353,7 @@
                 </div>
             </div>
             
+            <!-- CAMPO OBRIGATÓRIO MOTIVO DA RECUSA -->
             <div class="mt-5">
                 <label class="block text-xs font-extrabold text-red-700 uppercase tracking-wider mb-1.5">
                     <i class="fa-solid fa-pen-to-square mr-1"></i> Motivo da recusa <span class="text-red-600">*</span> (obrigatório)
@@ -424,44 +393,7 @@
         let pagamentosGlobaisCache = [];
         let tarifasEspeciaisGlobaisCache = [];
         let camposLimposParaNovaReserva = false;
-        let pousadaAceitaPetCache = false;
-
-        // =========================================================================
-        // PALETA DINÂMICA DE CORES EXCLUSIVAS POR SUÍTE (MESMA LÓGICA DO RELATÓRIO)
-        // =========================================================================
-        const PALETA_SUITES = [
-            { nome: 'indigo', border: 'border-indigo-300', borderHover: 'hover:border-indigo-500', borderActive: 'border-indigo-600', bgLight: 'bg-indigo-50/60', bgActive: 'bg-indigo-100', iconBg: 'bg-indigo-100', iconText: 'text-indigo-700', badgeBg: 'bg-indigo-600', textGroupHover: 'group-hover:text-indigo-700', barBg: 'bg-indigo-500' },
-            { nome: 'amber', border: 'border-amber-300', borderHover: 'hover:border-amber-500', borderActive: 'border-amber-600', bgLight: 'bg-amber-50/60', bgActive: 'bg-amber-100', iconBg: 'bg-amber-100', iconText: 'text-amber-700', badgeBg: 'bg-amber-600', textGroupHover: 'group-hover:text-amber-700', barBg: 'bg-amber-500' },
-            { nome: 'emerald', border: 'border-emerald-300', borderHover: 'hover:border-emerald-500', borderActive: 'border-emerald-600', bgLight: 'bg-emerald-50/60', bgActive: 'bg-emerald-100', iconBg: 'bg-emerald-100', iconText: 'text-emerald-700', badgeBg: 'bg-emerald-600', textGroupHover: 'group-hover:text-emerald-700', barBg: 'bg-emerald-500' },
-            { nome: 'violet', border: 'border-violet-300', borderHover: 'hover:border-violet-500', borderActive: 'border-violet-600', bgLight: 'bg-violet-50/60', bgActive: 'bg-violet-100', iconBg: 'bg-violet-100', iconText: 'text-violet-700', badgeBg: 'bg-violet-600', textGroupHover: 'group-hover:text-violet-700', barBg: 'bg-violet-500' },
-            { nome: 'sky', border: 'border-sky-300', borderHover: 'hover:border-sky-500', borderActive: 'border-sky-600', bgLight: 'bg-sky-50/60', bgActive: 'bg-sky-100', iconBg: 'bg-sky-100', iconText: 'text-sky-700', badgeBg: 'bg-sky-600', textGroupHover: 'group-hover:text-sky-700', barBg: 'bg-sky-500' },
-            { nome: 'rose', border: 'border-rose-300', borderHover: 'hover:border-rose-500', borderActive: 'border-rose-600', bgLight: 'bg-rose-50/60', bgActive: 'bg-rose-100', iconBg: 'bg-rose-100', iconText: 'text-rose-700', badgeBg: 'bg-rose-600', textGroupHover: 'group-hover:text-rose-700', barBg: 'bg-rose-500' },
-            { nome: 'orange', border: 'border-orange-300', borderHover: 'hover:border-orange-500', borderActive: 'border-orange-600', bgLight: 'bg-orange-50/60', bgActive: 'bg-orange-100', iconBg: 'bg-orange-100', iconText: 'text-orange-700', badgeBg: 'bg-orange-600', textGroupHover: 'group-hover:text-orange-700', barBg: 'bg-orange-500' },
-            { nome: 'teal', border: 'border-teal-300', borderHover: 'hover:border-teal-500', borderActive: 'border-teal-600', bgLight: 'bg-teal-50/60', bgActive: 'bg-teal-100', iconBg: 'bg-teal-100', iconText: 'text-teal-700', badgeBg: 'bg-teal-600', textGroupHover: 'group-hover:text-teal-700', barBg: 'bg-teal-500' },
-            { nome: 'fuchsia', border: 'border-fuchsia-300', borderHover: 'hover:border-fuchsia-500', borderActive: 'border-fuchsia-600', bgLight: 'bg-fuchsia-50/60', bgActive: 'bg-fuchsia-100', iconBg: 'bg-fuchsia-100', iconText: 'text-fuchsia-700', badgeBg: 'bg-fuchsia-600', textGroupHover: 'group-hover:text-fuchsia-700', barBg: 'bg-fuchsia-500' },
-            { nome: 'cyan', border: 'border-cyan-300', borderHover: 'hover:border-cyan-500', borderActive: 'border-cyan-600', bgLight: 'bg-cyan-50/60', bgActive: 'bg-cyan-100', iconBg: 'bg-cyan-100', iconText: 'text-cyan-700', badgeBg: 'bg-cyan-600', textGroupHover: 'group-hover:text-cyan-700', barBg: 'bg-cyan-500' },
-            { nome: 'purple', border: 'border-purple-300', borderHover: 'hover:border-purple-500', borderActive: 'border-purple-600', bgLight: 'bg-purple-50/60', bgActive: 'bg-purple-100', iconBg: 'bg-purple-100', iconText: 'text-purple-700', badgeBg: 'bg-purple-600', textGroupHover: 'group-hover:text-purple-700', barBg: 'bg-purple-500' },
-            { nome: 'lime', border: 'border-lime-300', borderHover: 'hover:border-lime-500', borderActive: 'border-lime-600', bgLight: 'bg-lime-50/60', bgActive: 'bg-lime-100', iconBg: 'bg-lime-100', iconText: 'text-lime-700', badgeBg: 'bg-lime-600', textGroupHover: 'group-hover:text-lime-700', barBg: 'bg-lime-500' },
-            { nome: 'blue', border: 'border-blue-300', borderHover: 'hover:border-blue-500', borderActive: 'border-blue-600', bgLight: 'bg-blue-50/60', bgActive: 'bg-blue-100', iconBg: 'bg-blue-100', iconText: 'text-blue-700', badgeBg: 'bg-blue-600', textGroupHover: 'group-hover:text-blue-700', barBg: 'bg-blue-500' },
-            { nome: 'pink', border: 'border-pink-300', borderHover: 'hover:border-pink-500', borderActive: 'border-pink-600', bgLight: 'bg-pink-50/60', bgActive: 'bg-pink-100', iconBg: 'bg-pink-100', iconText: 'text-pink-700', badgeBg: 'bg-pink-600', textGroupHover: 'group-hover:text-pink-700', barBg: 'bg-pink-500' },
-            { nome: 'yellow', border: 'border-yellow-300', borderHover: 'hover:border-yellow-500', borderActive: 'border-yellow-600', bgLight: 'bg-yellow-50/60', bgActive: 'bg-yellow-100', iconBg: 'bg-yellow-100', iconText: 'text-yellow-700', badgeBg: 'bg-yellow-600', textGroupHover: 'group-hover:text-yellow-700', barBg: 'bg-yellow-500' },
-            { nome: 'slate', border: 'border-slate-300', borderHover: 'hover:border-slate-500', borderActive: 'border-slate-600', bgLight: 'bg-slate-50/60', bgActive: 'bg-slate-100', iconBg: 'bg-slate-100', iconText: 'text-slate-700', badgeBg: 'bg-slate-600', textGroupHover: 'group-hover:text-slate-700', barBg: 'bg-slate-500' }
-        ];
-
-        function obterTemaSuite(idOuNome) {
-            if (!idOuNome) return PALETA_SUITES[0];
-            const str = String(idOuNome).trim().toLowerCase();
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                hash = (hash << 5) - hash + str.charCodeAt(i);
-                hash |= 0;
-            }
-            const indice = Math.abs(hash) % PALETA_SUITES.length;
-            return PALETA_SUITES[indice];
-        }
-
-        // Variável de controle do filtro por suíte no dashboard
-        let suiteFiltroDashboard = null;
+        let pousadaAceitaPetCache = false; // Controle de exibição Taxa de Pet conforme pousadas.aceita_pet
 
         // Variáveis globais para o Modal de Calendário
         let calSuiteIdAtual = null;
@@ -689,6 +621,7 @@
             document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`;
         }
 
+        // Regra: só exibir Taxa de Pet se pousadas.aceita_pet = true (id = auth.uid())
         function aplicarVisibilidadeTaxaPet() {
             const container = document.getElementById('container-taxa-pet');
             if (!container) return;
@@ -853,105 +786,6 @@
             document.getElementById('modal-tarifa-especial').classList.add('hidden');
         }
 
-        // =========================================================================
-        // HUB CONSOLIDADO - SELETOR DE SUÍTES COM CORES EXCLUSIVAS
-        // =========================================================================
-        function renderizarSeletorSuitesTopo() {
-            const grid = document.getElementById('grid-seletor-suites-dash');
-            const btnTodas = document.getElementById('btn-ver-todas-suites-dash');
-            const bannerFiltrada = document.getElementById('banner-suite-filtrada');
-            const textoFiltrada = document.getElementById('texto-suite-filtrada');
-            if (!grid) return;
-
-            if (!suitesGlobaisCache || suitesGlobaisCache.length === 0) {
-                grid.innerHTML = '<div class="col-span-full py-3 text-center text-gray-400 text-xs font-medium">Nenhuma suíte cadastrada</div>';
-                return;
-            }
-
-            const totalSuites = suitesGlobaisCache.length;
-
-            if (btnTodas) {
-                if (!suiteFiltroDashboard) {
-                    btnTodas.className = "text-[11px] font-bold bg-slate-900 text-amber-300 px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1.5 ring-2 ring-amber-400";
-                    btnTodas.innerHTML = `<i class="fa-solid fa-border-all"></i> Vendo Todas (${totalSuites})`;
-                } else {
-                    btnTodas.className = "text-[11px] font-bold bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1.5";
-                    btnTodas.innerHTML = `<i class="fa-solid fa-border-all"></i> Ver Todas as Suítes`;
-                }
-            }
-
-            // Banner de estado filtrado
-            if (suiteFiltroDashboard && bannerFiltrada && textoFiltrada) {
-                const sObj = suitesGlobaisCache.find(s => s.id === suiteFiltroDashboard);
-                if (sObj) {
-                    const temaObj = obterTemaSuite(sObj.id || sObj.nome);
-                    bannerFiltrada.className = `mb-5 p-3.5 rounded-2xl flex items-center justify-between shadow-xs border-2 ${temaObj.border} ${temaObj.bgLight} transition-all`;
-                    textoFiltrada.innerHTML = `Mostrando apenas: <strong class="uppercase ${temaObj.iconText}">${sObj.nome}</strong>`;
-                    bannerFiltrada.classList.remove('hidden');
-                }
-            } else if (bannerFiltrada) {
-                bannerFiltrada.classList.add('hidden');
-            }
-
-            const hojeStr = new Date().toLocaleDateString('sv-SE');
-            let html = '';
-
-            suitesGlobaisCache.forEach(suite => {
-                const isAtiva = suiteFiltroDashboard === suite.id;
-                const tema = obterTemaSuite(suite.id || suite.nome);
-                
-                // Levantamento operacional rápido para o badge do card
-                const reservasDaSuite = reservasGlobaisCache.filter(r => r.suite_id === suite.id && r.status !== 'Cancelada' && r.status !== 'Recusada' && r.status !== 'Finalizada');
-                const pendentes = reservasDaSuite.filter(r => r.status === 'Pendente');
-                const aprovadas = reservasDaSuite.filter(r => r.status === 'Aprovada');
-                const ocupadaAgora = aprovadas.some(r => r.checkin <= hojeStr && r.checkout > hojeStr);
-
-                let badgeInfo = '';
-                if (pendentes.length > 0) {
-                    badgeInfo = `<span class="text-[9px] bg-amber-100 text-amber-900 border border-amber-300 font-extrabold px-1.5 py-0.5 rounded-full">${pendentes.length} pend.</span>`;
-                } else if (ocupadaAgora) {
-                    badgeInfo = `<span class="text-[9px] bg-red-100 text-red-700 border border-red-200 font-extrabold px-1.5 py-0.5 rounded-full">Ocupada</span>`;
-                } else if (aprovadas.length > 0) {
-                    badgeInfo = `<span class="text-[9px] bg-blue-100 text-blue-800 border border-blue-200 font-extrabold px-1.5 py-0.5 rounded-full">${aprovadas.length} res.</span>`;
-                } else {
-                    badgeInfo = `<span class="text-[9px] bg-emerald-100 text-emerald-800 border border-emerald-200 font-extrabold px-1.5 py-0.5 rounded-full">Livre</span>`;
-                }
-
-                const estiloCard = isAtiva 
-                    ? `border-2 ${tema.borderActive} ${tema.bgActive} ring-2 ring-offset-1 ${tema.borderActive} shadow-md scale-[1.02]` 
-                    : `border-2 ${tema.border} ${tema.borderHover} bg-white hover:${tema.bgLight} shadow-xs`;
-
-                html += `
-                    <div onclick="filtrarDashboardPorSuite('${suite.id}')" class="cursor-pointer p-2.5 rounded-xl transition-all group flex flex-col justify-between gap-1.5 ${estiloCard}">
-                        <div class="flex items-center justify-between">
-                            <div class="w-6 h-6 ${tema.iconBg} ${tema.iconText} rounded-lg flex items-center justify-center text-[10px]">
-                                <i class="fa-solid fa-bed"></i>
-                            </div>
-                            ${badgeInfo}
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-[11px] text-gray-900 uppercase truncate ${tema.textGroupHover}">${suite.nome}</h4>
-                            <p class="text-[10px] text-gray-500 truncate">${formatarMoeda(suite.valor_diaria)}/dia</p>
-                        </div>
-                        <span class="text-[9px] font-bold ${isAtiva ? tema.iconText : 'text-gray-400 group-hover:' + tema.iconText}">
-                            ${isAtiva ? '● SELECIONADA' : 'CLIQUE P/ FOCAR'}
-                        </span>
-                    </div>
-                `;
-            });
-
-            grid.innerHTML = html;
-        }
-
-        function filtrarDashboardPorSuite(suiteId) {
-            if (suiteFiltroDashboard === suiteId) {
-                suiteFiltroDashboard = null;
-            } else {
-                suiteFiltroDashboard = suiteId;
-            }
-            carregarDashboard();
-        }
-
         async function carregarDashboard() {
             await carregarPousada();
 
@@ -990,7 +824,6 @@
 
             await verificarReservasPendentesDashboard();
             atualizarRadarEKPIs();
-            renderizarSeletorSuitesTopo();
 
             const suitesPausadas = suitesGlobaisCache.filter(s => s.ativa === false || s.ativa === 'false');
             const cardAvisoPausadas = document.getElementById('card-aviso-pausadas');
@@ -1012,26 +845,9 @@
                 return;
             }
 
-            // Aplica filtro por suíte se selecionada no seletor do topo
-            const suitesParaExibir = suiteFiltroDashboard 
-                ? suitesGlobaisCache.filter(s => s.id === suiteFiltroDashboard) 
-                : suitesGlobaisCache;
-
-            if (suitesParaExibir.length === 0) {
-                container.innerHTML = `
-                    <div class="col-span-full py-8 text-center bg-white rounded-2xl border border-gray-200 p-6">
-                        <p class="text-gray-500 text-sm font-medium">Nenhum registro encontrado para esta acomodação.</p>
-                        <button onclick="filtrarDashboardPorSuite(null)" class="mt-3 text-xs font-bold bg-blue-600 text-white px-4 py-2 rounded-xl">Ver Todas as Suítes</button>
-                    </div>`;
-                return;
-            }
-
-            for (const suite of suitesParaExibir) {
+            for (const suite of suitesGlobaisCache) {
                 const estaAtiva = suite.ativa !== false && suite.ativa !== 'false';
                 const tagPausadaHtml = !estaAtiva ? `<span class="bg-slate-700 text-slate-200 text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">⏸️ Pausada</span>` : '';
-                
-                // Tema exclusivo da suíte (Garante cor única e constante)
-                const temaSuite = obterTemaSuite(suite.id || suite.nome);
 
                 const reservasDaSuite = reservasGlobaisCache.filter(r => r.suite_id === suite.id && r.status !== 'Cancelada' && r.status !== 'Recusada' && r.status !== 'Finalizada');
                 const aprovadasDaSuite = reservasDaSuite.filter(r => r.status === 'Aprovada');
@@ -1073,6 +889,7 @@
                         
                         const qtdDiarias = calcularQuantidadeDiarias(aprovada.checkin, aprovada.checkout);
                         
+                        // Garante o cálculo dinâmico do valor total caso venha zerado do banco
                         let valorTotal = Number(aprovada.valor_total || 0);
                         const qtdAdultos = aprovada.adultos !== undefined && aprovada.adultos !== null ? aprovada.adultos : (aprovada.qtd_adultos || 2);
                         const qtdCriancas = aprovada.criancas !== undefined && aprovada.criancas !== null ? aprovada.criancas : (aprovada.crianca || aprovada.qtd_criancas || 0);
@@ -1114,14 +931,11 @@
                         }
 
                         container.innerHTML += `
-                            <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md ${bgCardClasses} border-l-4 ${temaSuite.borderActive} text-gray-900 flex flex-col justify-between transition hover:shadow-lg">
+                            <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md ${bgCardClasses} text-gray-900 flex flex-col justify-between transition hover:shadow-lg">
                                 <div>
                                     <div class="flex justify-between items-start mb-2">
                                         <div>
                                             <div class="flex items-center gap-2 mb-1">
-                                                <div class="w-6 h-6 ${temaSuite.iconBg} ${temaSuite.iconText} rounded-lg flex items-center justify-center text-[10px] flex-shrink-0">
-                                                    <i class="fa-solid fa-bed"></i>
-                                                </div>
                                                 <h2 class="text-base sm:text-lg font-bold text-gray-900">${suite.nome}${sufixoTitulo}${nomeHospedeExibicao}</h2>
                                                 ${tagPausadaHtml}
                                             </div>
@@ -1205,14 +1019,11 @@
                     };
                     
                     container.innerHTML += `
-                        <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md ${corClasses[suite.status] || 'bg-white border border-gray-200'} border-l-4 ${temaSuite.borderActive} flex flex-col justify-between transition hover:shadow-lg">
+                        <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md ${corClasses[suite.status] || 'bg-white border border-gray-200'} flex flex-col justify-between transition hover:shadow-lg">
                             <div>
                                 <div class="flex justify-between items-start mb-2">
                                     <div>
                                         <div class="flex items-center gap-2 mb-1">
-                                            <div class="w-6 h-6 ${temaSuite.iconBg} ${temaSuite.iconText} rounded-lg flex items-center justify-center text-[10px] flex-shrink-0">
-                                                <i class="fa-solid fa-bed"></i>
-                                            </div>
                                             <h2 class="text-base sm:text-lg font-bold text-gray-900">${suite.nome}</h2>
                                             ${tagPausadaHtml}
                                         </div>
@@ -1290,14 +1101,11 @@
                     }
 
                     container.innerHTML += `
-                        <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md bg-amber-50 border border-amber-200 border-l-4 ${temaSuite.borderActive} flex flex-col justify-between transition hover:shadow-lg">
+                        <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md bg-amber-50 border border-amber-200 flex flex-col justify-between transition hover:shadow-lg">
                             <div>
                                 <div class="flex justify-between items-start mb-2">
                                     <div>
                                         <div class="flex items-center gap-2 mb-1">
-                                            <div class="w-6 h-6 ${temaSuite.iconBg} ${temaSuite.iconText} rounded-lg flex items-center justify-center text-[10px] flex-shrink-0">
-                                                <i class="fa-solid fa-bed"></i>
-                                            </div>
                                             <h2 class="text-base sm:text-lg font-bold text-amber-950">${suite.nome}${sufixoTituloPend}${nomeHospedePendExibicao}</h2>
                                             ${tagPausadaHtml}
                                         </div>
@@ -1365,8 +1173,12 @@
                                         <p><span class="text-amber-800">Check-in:</span> <strong class="text-gray-900">${formatarDataSimples(pend.checkin)}</strong></p>
                                         <p><span class="text-amber-800">Check-out:</span> <strong class="text-gray-900">${formatarDataSimples(pend.checkout)}</strong></p>
                                     </div>
+
+                                    <div class="mt-4 pt-3 border-t border-amber-200 flex gap-2 hidden sm:flex">
+                                        </div>
                                 </div>
 
+                                <!-- BOTÕES ÚNICOS - APROVAR/RECUSAR COM PDF + WHATSAPP -->
                                 <div class="mt-3 bg-amber-100 border-2 border-amber-500 rounded-xl p-2.5 flex gap-2 shadow-sm">
                                     <button onclick="mudarStatusReserva('${pend.id}', 'Aprovada')" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-extrabold py-3 px-3 rounded-xl shadow-md text-sm transition flex items-center justify-center gap-1.5">
                                         ✔ Aprovar
@@ -1446,9 +1258,10 @@
                 document.getElementById('edit-checkin').value = reserva.checkin || '';
                 document.getElementById('edit-checkout').value = reserva.checkout || '';
                 document.getElementById('edit-observacao').value = reserva.observacao || '';
-                
+                // Renderizar idades das crianças vindas do banco (TEXT "5,7" ou array)
                 const qtdCriancasReserva = reserva.criancas !== undefined && reserva.criancas !== null ? reserva.criancas : (reserva.crianca || reserva.qtd_criancas || 0);
                 const idadesReserva = reserva.idades_criancas || '';
+                // Primeiro mostra modal para garantir que DOM exista
                 document.getElementById('modal-edicao').classList.remove('hidden');
                 aplicarVisibilidadeTaxaPet();
                 await verificarStatusModal();
@@ -1478,8 +1291,10 @@
             await recalcularValoresModalEdicao();
         }
 
-        async function mudarStatusReserva(reservaId, novoStatus, motivoRecusa = null) {
+                async function mudarStatusReserva(reservaId, novoStatus, motivoRecusa = null) {
+            // >>> CENÁRIO B - APROVAÇÃO COM PDF + WHATSAPP (Produção OK)
             if (novoStatus !== 'Aprovada') {
+                // Recusada ou outros status mantém fluxo original + motivo
                 let payload = { status: novoStatus };
                 if (novoStatus === 'Recusada' && motivoRecusa) {
                     payload.motivo_recusa = motivoRecusa;
@@ -1493,6 +1308,7 @@
             try {
                 mostrarToast("Processando", "Gerando comprovante PDF e preparando WhatsApp... ⏳");
                 
+                // 1. Busca dados completos da reserva + suíte
                 const { data: reserva, error: errReserva } = await supabaseClient.from('reservas').select('*, suites(nome)').eq('id', reservaId).single();
                 if (errReserva || !reserva) throw new Error("Reserva não encontrada");
                 
@@ -1504,9 +1320,11 @@
                 const suiteNome = reserva.suites?.nome || 'Suíte';
                 const pousadaNome = nomePousadaAtual || 'Pousada';
 
+                // 2. SE JÁ TEM pdf_url, reutiliza (reenvio) - não gera PDF novo
                 let pdfPublicUrl = reserva.pdf_url || null;
 
                 if (!pdfPublicUrl) {
+                    // GERA PDF DEFINITIVO (equivale a OpenPDF/PDFBox do Java)
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF();
                     
@@ -1561,9 +1379,11 @@
                         pdf_url: pdfPublicUrl
                     }).eq('id', reservaId);
                 } else {
+                    // Já tem PDF, só atualiza status se ainda não estiver aprovada
                     await supabaseClient.from('reservas').update({ status: 'Aprovada' }).eq('id', reservaId);
                 }
 
+                // MONTA TEXTO OFICIAL COM LINK DEFINITIVO
                 let textoMensagem = `Olá ${nomeHospede}, sua reserva na ${pousadaNome} foi aprovada! 🎉\n`;
                 textoMensagem += `Check-in: ${formatarDataSimples(checkin)} | Check-out: ${formatarDataSimples(checkout)}\n`;
                 textoMensagem += `Suíte: ${suiteNome}\n`;
@@ -1593,12 +1413,15 @@
             const container = document.getElementById('container-idades-criancas');
             const lista = document.getElementById('lista-idades-criancas');
             
+            // Preservar valores existentes quando idadesAtuais vier vazio (ex: mudança de Adulto/Pet)
             let idadesNorm = [];
             if (typeof idadesAtuais === 'string' && idadesAtuais.trim() !== '') {
+                // Vem do banco como TEXT "5,7,2"
                 idadesNorm = idadesAtuais.split(',').map(s => s.trim()).filter(s => s !== '').map(v => parseInt(v) || 5);
             } else if (Array.isArray(idadesAtuais) && idadesAtuais.length > 0) {
                 idadesNorm = idadesAtuais.map(v => parseInt(v) || 5);
             } else {
+                // Tentar reaproveitar o que já está digitado no DOM
                 const existentes = document.querySelectorAll('.input-idade-crianca');
                 if (existentes.length > 0) {
                     idadesNorm = Array.from(existentes).map(el => parseInt(el.value) || 5);
@@ -1615,7 +1438,12 @@
             container.classList.remove('hidden');
             let html = '';
             for (let i = 0; i < qtdCriancas; i++) {
-                let idadeVal = idadesNorm[i] !== undefined ? idadesNorm[i] : 5;
+                let idadeVal;
+                if (idadesNorm[i] !== undefined) {
+                    idadeVal = idadesNorm[i];
+                } else {
+                    idadeVal = 5;
+                }
                 html += `
                     <div>
                         <label class="block text-[11px] font-bold text-gray-600 mb-0.5">Criança ${i + 1} (Idade)</label>
@@ -1684,7 +1512,6 @@
             let checkoutStr = document.getElementById('edit-checkout').value;
             const adultosVal = parseInt(document.getElementById('edit-adultos').value) || 2;
             const criancasVal = parseInt(document.getElementById('edit-criancas').value) || 0;
-            
             try {
                 const suiteCap = suitesGlobaisCache.find(s => s.id === suiteId);
                 if (suiteCap) {
@@ -1711,15 +1538,17 @@
                     }
                 }
             } catch(e) { console.warn(e); }
-
+            // Defensivo: aceitar true/false, Sim/Não, 1/0 + regra pousadas.aceita_pet
             const petRaw = document.getElementById('edit-pet').value;
             let petVal = (petRaw === 'true' || petRaw === true || String(petRaw).toLowerCase() === 'sim' || petRaw === '1' || petRaw === 1);
             if (pousadaAceitaPetCache !== true) petVal = false;
 
+            // Coletar idades atuais antes de re-renderizar para preservar
             const inputsAntes = document.querySelectorAll('.input-idade-crianca');
             const idadesAntes = Array.from(inputsAntes).map(el => el.value);
             renderizarInputsIdadesCriancas(criancasVal, idadesAntes.length ? idadesAntes : []);
 
+            // Após render, coletar idades finais para enviar à RPC
             const inputsIdadesFinais = document.querySelectorAll('.input-idade-crianca');
             const idadesArr = Array.from(inputsIdadesFinais).map(input => {
                 const v = parseInt(input.value);
@@ -1757,11 +1586,14 @@
                     p_idades_criancas: idadesStr,
                     p_pet: petVal
                 });
+                // Ignorar respostas antigas se usuário digitou rápido
                 if (chamadaAtualId !== _ultimaChamadaRecalculoId) return;
                 
                 if (!erroRpc && valorCalculado !== null) {
                     valorTotal = Number(valorCalculado);
                 } else if (erroRpc) {
+                    console.error("Erro RPC calcular_total_reserva (com idades):", erroRpc);
+                    // Fallback compatibilidade: tentar sem idades caso função antiga
                     try {
                         const { data: valorFallback, error: erroFallback } = await supabaseClient.rpc('calcular_total_reserva', {
                             p_suite_id: suiteId,
@@ -1774,7 +1606,9 @@
                         if (!erroFallback && valorFallback !== null) {
                             valorTotal = Number(valorFallback);
                         }
-                    } catch (e2) {}
+                    } catch (e2) {
+                        console.error("Fallback RPC também falhou:", e2);
+                    }
                 }
             } catch (err) {
                 console.error("Erro ao recalcular via RPC:", err);
@@ -2113,6 +1947,7 @@
         
         protegerPagina();
 
+        // >>> AUTO-REFRESH PROFISSIONAL - SEM PRECISAR F5
         let intervaloAutoRefresh = null;
         let canalRealtime = null;
         function iniciarAutoRefresh() {
@@ -2165,6 +2000,7 @@
         setTimeout(() => { iniciarAutoRefresh(); iniciarRealtime(); atualizarHorarioUltimaAtualizacao(); }, 2000);
         window.atualizarAgora = function() { carregarDashboard(); atualizarHorarioUltimaAtualizacao(); mostrarToast('Atualizado', 'Painel atualizado agora!'); }
 
+        // >>> MODAL PROFISSIONAL DE RECUSA COM MOTIVO OBRIGATÓRIO
         let reservaIdParaRecusar = null;
         function abrirModalRecusa(reservaId, nomeHospede) {
             reservaIdParaRecusar = reservaId;
@@ -2204,7 +2040,7 @@
             await mudarStatusReserva(reservaIdParaRecusar, 'Recusada', motivo);
             fecharModalRecusa();
         }
-
+        // Contador e esconde erro ao digitar
         document.addEventListener('DOMContentLoaded', () => {
             const input = document.getElementById('motivo-recusa-input');
             const contador = document.getElementById('contador-motivo');
@@ -2218,7 +2054,8 @@
             }
         });
 
-        // DRAGGABLE MODAL
+    
+        // >>> DRAGGABLE MODAL: permitir arrastar card na tela para ver outros cards
         (function() {
             const modal = document.getElementById('modal-edicao');
             const card = document.getElementById('modal-edicao-card');
@@ -2233,7 +2070,7 @@
             }
 
             function onMouseDown(e) {
-                if (e.target.closest('button')) return;
+                if (e.target.closest('button')) return; // não arrasta ao clicar no X
                 isDragging = true;
                 card.style.transition = 'none';
                 const pos = getCardPosition();
@@ -2241,6 +2078,7 @@
                 initialTop = pos.top;
                 startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
                 startY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+                // Centraliza transform para posicionamento absoluto durante drag
                 card.style.position = 'fixed';
                 card.style.left = initialLeft + 'px';
                 card.style.top = initialTop + 'px';
@@ -2257,6 +2095,7 @@
                 const dy = clientY - startY;
                 let newLeft = initialLeft + dx;
                 let newTop = initialTop + dy;
+                // Limites para não sair totalmente da tela
                 const maxLeft = window.innerWidth - 100;
                 const maxTop = window.innerHeight - 100;
                 newLeft = Math.min(Math.max(newLeft, -card.offsetWidth + 100), maxLeft);
@@ -2279,6 +2118,7 @@
             window.addEventListener('mouseup', onMouseUp);
             window.addEventListener('touchend', onMouseUp);
 
+            // Reset posição ao fechar/abrir
             const origFechar = window.fecharModal;
             window.fecharModal = function() {
                 card.style.position = '';
