@@ -228,7 +228,7 @@
                                 </div>
                             </div>
                             <!-- Check-Out Amanhã -->
-                            <div id="cardCheckOutAmanha" onclick="filtrarPorCardHoje('checkout_amanha')" title="Clique para filtrar apenas Check-Out de amanhã" class="bg-white p-3 rounded-xl border border-orange-300 shadow-sm flex items-center gap-3 min-w-[150px] cursor-pointer hover:shadow-md hover:border-orange-400 hover:bg-orange-50/50 transition-all group">
+                            <div id="cardCheckOutAmanha" onclick="filtrarPorCardHoje('checkout_amanha')" title="Clique para filtrar apenas Check-Out de amanhã" class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3 min-w-[150px] cursor-pointer hover:shadow-md hover:border-orange-300 hover:bg-orange-50/50 transition-all group">
                                 <div class="w-10 h-10 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-sm shadow-sm group-hover:scale-110 transition">
                                     <i class="fa-solid fa-calendar-check"></i>
                                 </div>
@@ -333,7 +333,7 @@
         let tituloBaseAtual = 'Extrato Detalhado de Pagamentos';
 
         // =========================================================================
-        // PALETA DINÂMICA DE CORES EXCLUSIVAS POR SUÍTE
+        // PALETA DINÂMICA DE CORES EXCLUSIVAS POR SUÍTE (BASEADA EM HASH DETERMINÍSTICO)
         // =========================================================================
         const PALETA_SUITES = [
             { nome: 'indigo', border: 'border-indigo-300', borderHover: 'hover:border-indigo-500', borderActive: 'border-indigo-600', bgLight: 'bg-indigo-50/60', bgActive: 'bg-indigo-100', iconBg: 'bg-indigo-100', iconText: 'text-indigo-700', badgeBg: 'bg-indigo-600', textGroupHover: 'group-hover:text-indigo-700', barBg: 'bg-indigo-500' },
@@ -447,6 +447,7 @@
                 let isAtiva = suiteFiltroAtual && String(suiteFiltroAtual).trim().toUpperCase() === nomeUpper;
                 let qtd = contagemPorSuite[nomeUpper] || 0;
                 
+                // Aplica cor única e exclusiva da suíte
                 const tema = obterTemaSuite(suite.id || suite.nome);
                 let borda = isAtiva 
                     ? `${tema.borderActive} ${tema.bgActive} shadow-md` 
@@ -531,6 +532,10 @@
             try {
                 const hoje = new Date();
                 const hojeStr = hoje.toISOString().split('T')[0];
+                const inicioHoje = new Date(hoje);
+                inicioHoje.setHours(0,0,0,0);
+                const fimHoje = new Date(hoje);
+                fimHoje.setHours(23,59,59,999);
 
                 const { count: countCheckIn, error: errIn } = await supabaseClient
                     .from('reservas')
@@ -715,6 +720,8 @@
                 let htmlChart = '';
                 lista.forEach(item => {
                     const perc = item.diarias === 0 ? 0 : Math.max(5, Math.round((item.diarias / maxDiarias) * 100));
+                    
+                    // Aplica a cor exclusiva da suíte na barra do gráfico
                     const tema = obterTemaSuite(item.id || item.nome);
                     const cor = item.diarias === 0 ? 'bg-gray-200' : tema.barBg;
                     const corTexto = item.diarias === 0 ? 'text-gray-400' : tema.iconText;
@@ -797,7 +804,7 @@
                 let minuto = String(dt.getMinutes()).padStart(2, '0');
                 let segundo = String(dt.getSeconds()).padStart(2, '0');
                 
-                return `${dia}/${mes}/${ano} ${hora}:${minuto}`;
+                return `${ano}/${mes}/${dia} ${hora}:${minuto}:${segundo}`;
             } catch(e) {
                 return String(valor).toUpperCase();
             }
@@ -827,33 +834,25 @@
         function obterApelidoColuna(col) {
             let c = col.toLowerCase();
             if (c === 'hospede') return 'HÓSPEDE';
-            if (c === 'suite') return 'SUÍTE ATUAL';
-            if (c === 'suite_origem') return 'SUÍTE ORIGEM';
-            if (c === 'transferido_em') return 'TRANSFERIDO EM';
-            if (c === 'motivo_transferencia') return 'MOTIVO TRANSF.';
+            if (c === 'suite') return 'SUÍTE';
             if (c === 'checkin') return 'CHECK-IN';
             if (c === 'checkout') return 'CHECK-OUT';
             if (c === 'diarias') return 'DIÁRIAS';
             if (c === 'valor_total') return 'TOTAL';
             if (c === 'valor_pago') return 'PAGO';
             if (c === 'saldo_restante') return 'SALDO';
-            if (c === 'ocupacao') return 'HÓSPEDES (AD/CR)';
-            if (c === 'tem_pet') return 'PET';
             if (c === 'data_pagamento') return 'DATA/HORA';
             if (c === 'forma_pagamento') return 'FORMA';
-            if (c === 'observacao' || c === 'obs') return 'OBS';
+            if (c === 'observacao') return 'OBS';
             if (c === 'whatsapp') return 'WHATSAPP';
             if (c === 'alerta_status_tarifa') return 'ALERTA STATUS';
             if (c === 'alerta_vigencia') return 'ALERTA VIGÊNCIA';
             if (c === 'dias_restantes_vigencia') return 'DIAS P/ VENCER';
             if (c === 'alerta_vigencia_cor') return '';
-            if (c === 'alerta_status_reserva' || c === 'alerta_check_in') return 'ALERTA CHECK-IN';
+            if (c === 'alerta_status_reserva') return 'ALERTA CHECK-IN';
             if (c === 'data_inicio' || c === 'vigencia_inicio') return 'INÍCIO VIGÊNCIA';
             if (c === 'data_fim' || c === 'vigencia_fim') return 'FIM VIGÊNCIA';
             if (c === 'status_ocupacao') return 'STATUS OCUPAÇÃO';
-            if (c === 'motivo_recusa') return 'MOTIVO RECUSA';
-            if (c === 'recusado_em') return 'RECUSADO EM';
-            if (c === 'recusado_por') return 'RECUSADO POR';
             return col.replace(/_/g, ' ').toUpperCase();
         }
 
@@ -872,7 +871,7 @@
             let tituloCompleto = `${tituloBaseAtual} (DE ${dataInicioFormatada} ATÉ ${dataFimFormatada})`;
             document.getElementById('tituloViewAtiva').textContent = tituloCompleto.toUpperCase();
 
-            tbody.innerHTML = `<tr><td colspan="20" class="py-6 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO DADOS...</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="14" class="py-6 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO DADOS...</td></tr>`;
 
             try {
                 let ehViewReservas = (viewAtualSelecionada === 'vw_gestor_reservas_relatorio');
@@ -1003,69 +1002,6 @@
                             }
                         });
                     }
-                } else if (ehViewReservas) {
-                    // =========================================================================
-                    // CONSULTA ENRIQUECIDA COM AUDITORIA DE TRANSFERÊNCIA E COMPOSIÇÃO DE HÓSPEDES
-                    // =========================================================================
-                    let query = supabaseClient
-                        .from('reservas')
-                        .select(`
-                            *,
-                            suites:suite_id ( id, nome ),
-                            suite_origem:suite_origem_id ( id, nome )
-                        `)
-                        .eq('pousada_id', usuarioIdAtual);
-
-                    if (dataInicio) query = query.gte('checkin', dataInicio);
-                    if (dataFim) query = query.lte('checkin', dataFim);
-                    query = query.order('checkin', { ascending: true, nullsFirst: true });
-                    const res = await query;
-                    error = res.error;
-
-                    // Busca pagamentos de forma agrupada para calcular saldo exato por reserva
-                    const { data: pagamentosRes } = await supabaseClient
-                        .from('hospede_pagamentos')
-                        .select('reserva_id, valor_pago')
-                        .eq('pousada_id', usuarioIdAtual);
-
-                    const mapaPagamentos = {};
-                    (pagamentosRes || []).forEach(p => {
-                        if (p.reserva_id) {
-                            mapaPagamentos[p.reserva_id] = (mapaPagamentos[p.reserva_id] || 0) + Number(p.valor_pago || 0);
-                        }
-                    });
-
-                    registros = (res.data || []).map(r => {
-                        const totalPago = mapaPagamentos[r.id] !== undefined ? mapaPagamentos[r.id] : Number(r.valor_sinal || 0);
-                        const valorTotal = Number(r.valor_total || 0);
-                        const saldo = valorTotal - totalPago;
-
-                        let detalhesOcup = `${r.qtd_adultos || 2} Ad.`;
-                        if (r.qtd_criancas && Number(r.qtd_criancas) > 0) {
-                            detalhesOcup += ` + ${r.qtd_criancas} Cr.`;
-                            if (r.idades_criancas) {
-                                detalhesOcup += ` (${r.idades_criancas}a)`;
-                            }
-                        }
-
-                        return {
-                            ...r,
-                            suite: r.suites?.nome || 'SUÍTE',
-                            suite_id: r.suite_id,
-                            suite_origem: r.suite_origem?.nome || null,
-                            suite_origem_id: r.suite_origem_id,
-                            transferido_em: r.transferido_em || null,
-                            motivo_transferencia: r.motivo_transferencia || null,
-                            hospede: r.hospede_nome || 'HÓSPEDE NÃO INFORMADO',
-                            whatsapp: r.whatsapp_hospede || '-',
-                            valor_total: valorTotal,
-                            valor_pago: totalPago,
-                            saldo_restante: saldo,
-                            ocupacao: detalhesOcup,
-                            tem_pet: r.tem_pet === true || r.tem_pet === 'true' || r.taxa_pet > 0,
-                            obs: r.observacao || '-'
-                        };
-                    });
                 } else {
                     let query = supabaseClient.from(viewAtualSelecionada).select('*').eq('pousada_id', usuarioIdAtual);
                     if (dataInicio) query = query.gte('checkin', dataInicio);
@@ -1082,7 +1018,7 @@
 
                 if (error) {
                     console.error("Erro:", error);
-                    tbody.innerHTML = `<tr><td colspan="20" class="py-6 text-center text-red-500">ERRO: ${error.message}</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="14" class="py-6 text-center text-red-500">ERRO: ${error.message}</td></tr>`;
                     return;
                 }
 
@@ -1209,6 +1145,7 @@
                     `;
                     document.getElementById('containerFiltroSuites').classList.add('hidden');
                     
+                    // CARDS POR SUÍTE COM COR ÚNICA E EXCLUSIVA
                     const containerOcupacao = document.getElementById('containerCardsOcupacaoSuites');
                     const gridOcupacao = document.getElementById('gridOcupacaoSuites');
                     const badgeTotal = document.getElementById('badgeOcupacaoTotal');
@@ -1224,6 +1161,7 @@
                             const checkin = r.checkin && r.checkin !== '-' ? formatarDataBr(r.checkin) : '-';
                             const checkout = r.checkout && r.checkout !== '-' ? formatarDataBr(r.checkout) : '-';
                             
+                            // Tema dinâmico e exclusivo para a suíte
                             const tema = obterTemaSuite(r.suite_id || r.suite);
                             const borda = isOcupada 
                                 ? `${tema.border} bg-white hover:${tema.bgLight} border-2` 
@@ -1259,39 +1197,17 @@
 
                 if (!registrosFiltrados || registrosFiltrados.length === 0) {
                     thead.innerHTML = `<th class="py-3 px-4">INFORMAÇÃO</th>`;
-                    tbody.innerHTML = `<tr><td colspan="20" class="py-6 text-center text-gray-500">NENHUM REGISTRO ENCONTRADO.</td></tr>`;
+                    tbody.innerHTML = `<tr><td class="py-6 text-center text-gray-500">NENHUM REGISTRO ENCONTRADO.</td></tr>`;
                     return;
                 }
 
                 let colunas = [];
                 if (ehViewReservas) {
-                    // COLUNAS ESTRATÉGICAS COM AUDITORIA DE TRANSFERÊNCIA, FINANCEIRO E DETALHES
-                    colunas = [
-                        'status', 
-                        'suite', 
-                        'suite_origem', 
-                        'transferido_em', 
-                        'motivo_transferencia', 
-                        'hospede', 
-                        'whatsapp', 
-                        'checkin', 
-                        'checkout', 
-                        'dias_restantes', 
-                        'valor_total', 
-                        'valor_pago', 
-                        'saldo_restante', 
-                        'ocupacao', 
-                        'tem_pet', 
-                        'cpf', 
-                        'email', 
-                        'criado_em', 
-                        'motivo_recusa', 
-                        'obs'
-                    ];
+                    colunas = ['status', 'suite', 'hospede', 'checkin', 'checkout', 'dias_restantes', 'alerta_check_in', 'whatsapp', 'cpf', 'email', 'criado_em', 'motivo_recusa', 'recusado_em', 'recusado_por', 'obs'];
                 } else if (ehViewHospedagens) {
                     colunas = ['status_ocupacao', 'suite', 'hospede', 'checkin', 'checkout', 'status'];
                 } else {
-                    colunas = Object.keys(registrosFiltrados[0] || {}).filter(k => k !== 'pousada_id' && k !== 'reserva_id' && k !== 'suite_id' && k !== 'suite_origem_id' && k !== 'transferido_por' && !k.includes('login_original') && !k.includes('nome_original') && k !== 'nome_pousada_que_recusou' && k !== 'dia_semana' && k !== 'alerta_status_reserva' && k !== 'alerta_vigencia_cor');
+                    colunas = Object.keys(registrosFiltrados[0] || {}).filter(k => k !== 'pousada_id' && k !== 'reserva_id' && k !== 'suite_id' && !k.includes('login_original') && !k.includes('nome_original') && k !== 'nome_pousada_que_recusou' && k !== 'dia_semana' && k !== 'alerta_status_reserva' && k !== 'alerta_vigencia_cor');
                 }
 
                 let htmlCabecalho = '';
@@ -1303,7 +1219,8 @@
                 let htmlLinhas = '';
                 registrosFiltrados.forEach((row, index) => {
                     let statusRow = String(row.status || row.status_reserva || '').toUpperCase();
-                    let isRecusada = (statusRow === 'RECUSADA' || statusRow === 'CANCELADA');
+                    let statusFisicoRow = String(row.status_fisico_suite || '').toUpperCase();
+                    let isRecusada = (statusRow === 'RECUSADA' || statusFisicoRow === 'RECUSADA');
                     let isAprovada = (statusRow === 'APROVADA');
                     let classeCorFundo = ''; 
                     
@@ -1322,30 +1239,7 @@
                         let colLower = col.toLowerCase();
 
                         if (valorBruto !== null && valorBruto !== undefined && String(valorBruto).trim() !== '') {
-                            if (colLower === 'suite_origem') {
-                                valorExibicao = `<span class="inline-flex items-center gap-1 bg-purple-100 text-purple-900 border border-purple-300 px-2 py-0.5 rounded-md font-extrabold text-[10px]"><i class="fa-solid fa-arrows-rotate text-purple-700"></i> ${String(valorBruto).toUpperCase()}</span>`;
-                            } else if (colLower === 'transferido_em') {
-                                valorExibicao = `<span class="text-purple-950 font-bold text-[11px]">${formatarDataHoraBr(valorBruto)}</span>`;
-                            } else if (colLower === 'motivo_transferencia') {
-                                valorExibicao = `<span class="font-bold text-purple-900 bg-purple-50 px-2 py-0.5 rounded border border-purple-200 text-[11px]">${String(valorBruto).toUpperCase()}</span>`;
-                            } else if (colLower === 'suite') {
-                                const tema = obterTemaSuite(row.suite_id || valorBruto);
-                                valorExibicao = `<span class="inline-flex items-center gap-1.5 font-extrabold ${tema.iconText}"><i class="fa-solid fa-bed text-[11px]"></i> ${String(valorBruto).toUpperCase()}</span>`;
-                            } else if (colLower === 'whatsapp') {
-                                let apenasNum = String(valorBruto).replace(/\D/g, '');
-                                if (apenasNum.length <= 11 && !apenasNum.startsWith('55')) apenasNum = '55' + apenasNum;
-                                valorExibicao = `<a href="https://wa.me/${apenasNum}" target="_blank" class="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-900 font-bold bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded-md border border-emerald-200 transition"><i class="fa-brands fa-whatsapp text-emerald-600"></i> ${valorBruto}</a>`;
-                            } else if (colLower === 'tem_pet') {
-                                valorExibicao = (valorBruto === true || valorBruto === 'true' || String(valorBruto).toLowerCase() === 'sim') 
-                                    ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300">🐶 SIM</span>' 
-                                    : '<span class="text-gray-400 text-[10px] font-medium">NÃO</span>';
-                            } else if (colLower === 'ocupacao') {
-                                valorExibicao = `<span class="font-bold text-slate-800 text-[11px] bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">${valorBruto}</span>`;
-                            } else if (colLower === 'status') {
-                                if (isAprovada) valorExibicao = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">APROVADA</span>';
-                                else if (isRecusada) valorExibicao = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-red-100 text-red-800 border border-red-300">RECUSADA</span>';
-                                else valorExibicao = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-gray-100 text-gray-800 border border-gray-300">${String(valorBruto).toUpperCase()}</span>`;
-                            } else if (colLower.includes('alerta_check_in') || colLower.includes('alerta_status')) {
+                            if (colLower.includes('alerta_check_in') || colLower.includes('alerta_status')) {
                                 valorExibicao = valorBruto;
                             } else if (colLower.includes('criado_em') || colLower.includes('recusado_em')) {
                                 valorExibicao = formatarDataHoraBr(valorBruto);
@@ -1354,31 +1248,30 @@
                             } else if (colLower === 'dias_restantes') { 
                                 if (isRecusada) { 
                                     valorExibicao = '<span class="text-gray-400">-</span>'; 
-                                } else if (row.checkin) {
-                                    const hoje0 = new Date(); hoje0.setHours(0,0,0,0);
-                                    const chk0 = new Date(String(row.checkin).substring(0,10) + 'T00:00:00');
-                                    var diff = Math.round((chk0 - hoje0) / (1000*60*60*24));
-                                    if (diff === 0) valorExibicao = '<span class="bg-emerald-600 text-white px-2 py-0.5 rounded-full text-[9px] font-extrabold shadow-2xs">HOJE</span>';
-                                    else if (diff === 1) valorExibicao = '<span class="bg-blue-600 text-white px-2 py-0.5 rounded-full text-[9px] font-extrabold shadow-2xs">AMANHÃ</span>';
-                                    else if (diff > 1) valorExibicao = '<span class="text-emerald-700 font-extrabold">' + diff + ' DIAS</span>';
-                                    else valorExibicao = '<span class="text-gray-400 text-[10px]">EM ANDAMENTO</span>';
+                                } else if (valorBruto !== null && valorBruto !== '' && !isNaN(valorBruto)) {
+                                    let dias = Number(valorBruto); valorExibicao = '<span class="text-emerald-700 font-bold">' + dias + ' DIAS</span>'; 
                                 } else { 
-                                    valorExibicao = '<span class="text-gray-400">-</span>'; 
+                                    if (row.checkin && !isRecusada) { 
+                                        var diff = Math.ceil((new Date(row.checkin) - new Date()) / (1000*60*60*24)); 
+                                        if (diff >=0) valorExibicao = '<span class="text-emerald-700 font-bold">' + diff + ' DIAS</span>'; 
+                                        else valorExibicao = '<span class="text-gray-400">-</span>'; 
+                                    } else { 
+                                        valorExibicao = '<span class="text-gray-400">-</span>'; 
+                                    } 
                                 }
                             } else {
                                 valorExibicao = String(valorBruto).toUpperCase();
                             }
                         }
 
-                        if ((colLower === 'valor_total' || colLower === 'valor_pago' || colLower === 'saldo_restante') && !isNaN(valorBruto)) {
-                            let num = Number(valorBruto);
-                            let corTexto = 'text-gray-800';
-                            if (colLower === 'saldo_restante') {
-                                corTexto = num > 0 ? 'text-amber-700 font-extrabold bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200' : 'text-emerald-700 font-bold';
-                            } else if (colLower === 'valor_pago') {
-                                corTexto = 'text-emerald-700 font-bold';
-                            }
-                            valorExibicao = `<span class="${corTexto}">${num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>`;
+                        if (colLower === 'recusado_por' && isRecusada) {
+                            if (row.recusado_por_nome_original) valorExibicao = `<span class="font-bold text-blue-700">${String(row.recusado_por_nome_original).toUpperCase()}</span>`;
+                            else valorExibicao = `<span class="font-bold text-blue-700">${valorExibicao}</span>`;
+                        }
+
+                        if ((colLower.includes('valor_total') || colLower.includes('valor_pago') || colLower.includes('saldo_restante')) && !isNaN(valorBruto)) {
+                            let corTexto = colLower.includes('saldo_restante') && Number(valorBruto) > 0 ? 'text-amber-600' : 'text-gray-800';
+                            valorExibicao = `<span class="font-bold ${corTexto}">${Number(valorBruto).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>`;
                         }
 
                         if (colLower === 'status_ocupacao') {
@@ -1396,7 +1289,7 @@
                 tbody.innerHTML = htmlLinhas;
             } catch (err) {
                 console.error("Erro geral:", err);
-                tbody.innerHTML = `<tr><td colspan="20" class="py-6 text-center text-red-500">ERRO: ${err.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="14" class="py-6 text-center text-red-500">ERRO: ${err.message}</td></tr>`;
             }
         }
 
@@ -1481,6 +1374,7 @@
                         return chk;
                     }).join(', ');
                     
+                    // Aplica cor única e exclusiva da suíte
                     const tema = obterTemaSuite(s.suite_id || s.nome);
 
                     htmlCards += `
@@ -1635,6 +1529,7 @@
                 const isAtiva = idx === calGeralRelSuiteIndex;
                 const reservasSuite = calGeralRelReservasCache.filter(r => r.suite_id === suite.id).length;
                 
+                // Aplica cor única e exclusiva da suíte no painel geral
                 const tema = obterTemaSuite(suite.id || suite.nome);
                 const classeAtiva = isAtiva 
                     ? `bg-slate-900 text-white ${tema.borderActive} shadow-md scale-[1.02]` 
@@ -2088,4 +1983,5 @@
     </div>
 
 </body>
-</html> 
+</html>
+ 
