@@ -795,7 +795,6 @@
                 let dia = String(dt.getDate()).padStart(2, '0');
                 let hora = String(dt.getHours()).padStart(2, '0');
                 let minuto = String(dt.getMinutes()).padStart(2, '0');
-                let segundo = String(dt.getSeconds()).padStart(2, '0');
                 
                 return `${dia}/${mes}/${ano} ${hora}:${minuto}`;
             } catch(e) {
@@ -1005,15 +1004,16 @@
                     }
                 } else if (ehViewReservas) {
                     // =========================================================================
-                    // CONSULTA ENRIQUECIDA COM AUDITORIA DE TRANSFERÊNCIA E COMPOSIÇÃO DE HÓSPEDES
+                    // CONSULTA DIRETA E SEGURA NA TABELA RESERVAS (SEM ERRO 400 DE SCHEMA CACHE)
                     // =========================================================================
+                    if (!suitesDaPousadaCache || suitesDaPousadaCache.length === 0) {
+                        const { data: suData } = await supabaseClient.from('suites').select('id,nome').eq('pousada_id', usuarioIdAtual).order('nome');
+                        if (suData) suitesDaPousadaCache = suData;
+                    }
+
                     let query = supabaseClient
                         .from('reservas')
-                        .select(`
-                            *,
-                            suites:suite_id ( id, nome ),
-                            suite_origem:suite_origem_id ( id, nome )
-                        `)
+                        .select('*')
                         .eq('pousada_id', usuarioIdAtual);
 
                     if (dataInicio) query = query.gte('checkin', dataInicio);
@@ -1048,11 +1048,15 @@
                             }
                         }
 
+                        // Localização segura dos nomes de suíte em memória
+                        const suiteAtual = (suitesDaPousadaCache || []).find(s => s.id === r.suite_id);
+                        const suiteOrigem = (suitesDaPousadaCache || []).find(s => s.id === r.suite_origem_id);
+
                         return {
                             ...r,
-                            suite: r.suites?.nome || 'SUÍTE',
+                            suite: suiteAtual ? suiteAtual.nome : (r.suite || 'SUÍTE'),
                             suite_id: r.suite_id,
-                            suite_origem: r.suite_origem?.nome || null,
+                            suite_origem: suiteOrigem ? suiteOrigem.nome : (r.suite_origem_id ? 'OUTRA SUÍTE' : null),
                             suite_origem_id: r.suite_origem_id,
                             transferido_em: r.transferido_em || null,
                             motivo_transferencia: r.motivo_transferencia || null,
@@ -1265,7 +1269,6 @@
 
                 let colunas = [];
                 if (ehViewReservas) {
-                    // COLUNAS ESTRATÉGICAS COM AUDITORIA DE TRANSFERÊNCIA, FINANCEIRO E DETALHES
                     colunas = [
                         'status', 
                         'suite', 
@@ -1374,7 +1377,7 @@
                             let num = Number(valorBruto);
                             let corTexto = 'text-gray-800';
                             if (colLower === 'saldo_restante') {
-                                corTexto = num > 0 ? 'text-amber-700 font-extrabold bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200' : 'text-emerald-700 font-bold';
+                                corTexto = num > 0 ? 'text-amber-700 font-extrabold bg-amber-50 px-1.5 py-0.5 rounded-md border border-amber-200' : 'text-emerald-700 font-bold';
                             } else if (colLower === 'valor_pago') {
                                 corTexto = 'text-emerald-700 font-bold';
                             }
@@ -2088,4 +2091,5 @@
     </div>
 
 </body>
-</html> 
+</html>
+--- END OF FILE relatorios.html ---
