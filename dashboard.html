@@ -1,32 +1,3 @@
-Aqui está o arquivo dashboard.html completo e atualizado com as duas novas
-implementações:
-
-🚀 O que foi integrado:
-
-1.  Identificação Nominal de Conflito de Datas (1 ou Múltiplos Hóspedes):
-      - Ao detectar conflito de datas, o sistema varre o período e lista
-        exatamente quem está ocupando ou reservou a suíte.
-      - Se for 1 hóspede: mostra o nome e o período.
-      - Se forem 2 ou mais hóspedes: lista com marcadores (•) cada um dos
-        hóspedes e suas respectivas datas de entrada e saída.
-2.  Transferência de Quarto / Suíte no Modal de Edição:
-      - O modal de edição agora conta com o seletor de Acomodação / Suíte.
-      - Ao selecionar outra suíte, o sistema ativa o modo de transferência:
-          - Exibe o alerta: 🔄 Transferência: [Suíte Atual] ➔ [Nova Suíte];
-          - Recalcula o valor total e o saldo com base na diária e tarifas
-            especiais da nova suíte;
-          - Valida a capacidade máxima da nova suíte;
-          - Valida se a suíte de destino está livre (e se estiver ocupada, lista
-            quem está nela);
-          - Disponibiliza campo para justificativa (Upgrade, Pedido do Hóspede,
-            Manutenção);
-          - Ao salvar, grava no banco as colunas criadas (suite_origem_id,
-            transferido_em, motivo_transferencia, transferido_por), atualiza a
-            reserva e remaneja os status físicos das suítes.
-3.  Selo Visual de Transferência no Card:
-      - Reservas que foram transferidas exibem no card a tag: 🔄 Transferido de:
-        [Nome da Suíte de Origem].
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
