@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -40,7 +40,7 @@
             <div class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 sm:p-6">
                 <div class="w-full max-w-[98%] mx-auto">
                     
-                <!-- Cabeçalho - SISTEMA DE CONSULTAS CENTRALIZADO -->
+  <!-- Cabeçalho - SISTEMA DE CONSULTAS CENTRALIZADO -->
                 <div class="flex flex-col items-center justify-center mb-6 gap-2 text-center">
                     <div>
                         <h1 class="text-xl sm:text-2xl font-extrabold text-gray-800 tracking-wide">Gestão completa de reservas, ocupação e financeiro</h1>
@@ -51,7 +51,9 @@
 
                 <!-- Cards de Seleção de Views -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
-                    <!-- Card 1: Financeiro -->
+                  
+
+                    <!-- Card 1: Financeiro (Amarelo / Dourado com ícone de dinheiro) -->
                     <div onclick="selecionarView('vw_gestor_financeiro_relatorio', 'Extrato Detalhado de Pagamentos', this)" 
                          class="card-view cursor-pointer bg-slate-50 p-4 rounded-xl shadow-md border-2 border-amber-400 hover:border-amber-600 hover:shadow-lg transition group">
                         <div class="flex items-center justify-between mb-2">
@@ -64,7 +66,8 @@
                         <p class="text-[11px] text-gray-500 mt-0.5 truncate">Histórico detalhado de sinais e pagamentos.</p>
                     </div>
 
-                    <!-- Card 2: Hospedagens -->
+
+                    <!-- Card 2: Hospedagens (Verde Esmeralda) -->
                     <div onclick="selecionarView('vw_gestor_hospedagens_relatorio', 'Hospedagens, Suítes e Movimentações', this)" 
                          class="card-view cursor-pointer bg-slate-50 p-4 rounded-xl shadow-md border-2 border-emerald-400 hover:border-emerald-600 hover:shadow-lg transition group">
                         <div class="flex items-center justify-between mb-2">
@@ -77,7 +80,7 @@
                         <p class="text-[11px] text-gray-500 mt-0.5 truncate">Cruzamento de nomes e acomodações.</p>
                     </div>
 
-                    <!-- Card 3: Calendário -->
+                    <!-- Card 3: Calendário (Índigo Executivo) -->
                     <div onclick="abrirCalendarioGeralRelatorios()" 
                          class="card-view cursor-pointer bg-slate-50 p-4 rounded-xl shadow-md border-2 border-indigo-400 hover:border-indigo-600 hover:shadow-lg transition group">
                         <div class="flex items-center justify-between mb-2">
@@ -86,11 +89,11 @@
                             </div>
                             <span class="text-[9px] font-bold uppercase tracking-wider bg-indigo-100 text-indigo-900 border border-indigo-300 px-2 py-0.5 rounded-full">CALENDÁRIO</span>
                         </div>
-                        <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-indigo-800 transition">Criar Nova Reserva</h3>
+                        <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-indigo-800 transition"> Criar Nova Reserva </h3>
                         <p class="text-[11px] text-gray-500 mt-0.5 truncate">Ocupação mês a mês por suíte.</p>
                     </div>
 
-                    <!-- Card 4: Tarifas -->
+                    <!-- Card 4: Tarifas (Âmbar / Laranja Queimado) -->
                     <div onclick="selecionarView('vw_gestor_tarifas_relatorio', 'Auditoria de Tarifas Especiais', this)" 
                          class="card-view cursor-pointer bg-slate-50 p-4 rounded-xl shadow-md border-2 border-amber-400 hover:border-amber-600 hover:shadow-lg transition group">
                         <div class="flex items-center justify-between mb-2">
@@ -103,7 +106,7 @@
                         <p class="text-[11px] text-gray-500 mt-0.5 truncate">Valores e regras vigentes.</p>
                     </div>
 
-                    <!-- Card 5: Reservas -->
+                    <!-- Card 5: Reservas (Rosa / Fúcsia) -->
                     <div onclick="selecionarView('vw_gestor_reservas_relatorio', 'Reservas', this)" 
                          class="card-view cursor-pointer bg-slate-50 p-4 rounded-xl shadow-md border-2 border-pink-400 hover:border-pink-600 hover:shadow-lg transition group">
                         <div class="flex items-center justify-between mb-2">
@@ -154,7 +157,7 @@
                             </div>
                         </div>
 
-                    <!-- DASHBOARD GRÁFICO DE OCUPAÇÃO POR SUÍTE -->
+                    <!-- DASHBOARD GRÁFICO DE OCUPAÇÃO POR SUÍTE - NOVO -->
                     <div id="containerGraficoOcupacao" class="hidden mb-5">
                         <div class="bg-white rounded-xl shadow-sm border border-amber-200 p-4">
                             <div class="flex items-center justify-between mb-4">
@@ -195,7 +198,7 @@
                     </div>
 
                     <!-- FILTRO RÁPIDO DE STATUS DE RESERVAS -->
-                    <div id="containerFiltroStatusReservas" class="mb-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                                        <div id="containerFiltroStatusReservas" class="mb-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
                         <!-- FILTRO STATUS -->
                         <div class="flex items-center gap-2 bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
                             <span class="text-[10px] font-extrabold text-gray-500 uppercase tracking-widest mr-2">
@@ -205,7 +208,7 @@
                             <button id="btnRecusada" onclick="alterarFiltroStatusReservas('RECUSADA')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-white text-red-600 border border-red-200 hover:bg-red-50">RECUSADAS</button>
                             <button id="btnTodas" onclick="alterarFiltroStatusReservas('TODAS')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-white text-gray-600 border border-gray-200 hover:bg-gray-50">TODAS</button>
                         </div>
-                        <!-- CARDS CONTROLE HOJE -->
+                        <!-- CARDS CONTROLE HOJE - CENÁRIO C - CLICÁVEIS COM FILTRO -->
                         <div id="containerCardsControleHoje" class="flex flex-wrap items-center gap-3">
                             <!-- Check-In Hoje -->
                             <div id="cardCheckInHoje" onclick="filtrarPorCardHoje('checkin')" title="Clique para filtrar apenas Check-In de hoje" class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3 min-w-[150px] cursor-pointer hover:shadow-md hover:border-violet-300 hover:bg-violet-50/50 transition-all group">
@@ -227,7 +230,7 @@
                                     <span class="text-[11px] text-gray-500 font-medium group-hover:text-red-700">Check-Out Hoje</span>
                                 </div>
                             </div>
-                            <!-- Check-Out Amanhã -->
+                            <!-- Check-Out Amanhã - NOVO -->
                             <div id="cardCheckOutAmanha" onclick="filtrarPorCardHoje('checkout_amanha')" title="Clique para filtrar apenas Check-Out de amanhã" class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3 min-w-[150px] cursor-pointer hover:shadow-md hover:border-orange-300 hover:bg-orange-50/50 transition-all group">
                                 <div class="w-10 h-10 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-sm shadow-sm group-hover:scale-110 transition">
                                     <i class="fa-solid fa-calendar-check"></i>
@@ -247,7 +250,7 @@
                                     <span class="text-[11px] text-gray-500 font-medium group-hover:text-blue-700">Reservas</span>
                                 </div>
                             </div>
-                            <!-- Suítes -->
+                            <!-- Suítes - NOVO CARD CORRIGIDO -->
                             <div id="cardSuites" onclick="toggleSuites()" title="Ver suítes com reservas futuras e calendário" class="bg-white p-3 rounded-xl border border-amber-200 shadow-sm flex items-center gap-3 min-w-[130px] cursor-pointer hover:shadow-md hover:border-amber-400 hover:bg-amber-50/50 transition-all group">
                                 <div class="w-10 h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-sm shadow-sm group-hover:scale-110 transition">
                                     <i class="fa-solid fa-bed"></i>
@@ -332,40 +335,6 @@
         let suitesDaPousadaCache = []; 
         let tituloBaseAtual = 'Extrato Detalhado de Pagamentos';
 
-        // =========================================================================
-        // PALETA DINÂMICA DE CORES EXCLUSIVAS POR SUÍTE (BASEADA EM HASH DETERMINÍSTICO)
-        // =========================================================================
-        const PALETA_SUITES = [
-            { nome: 'indigo', border: 'border-indigo-300', borderHover: 'hover:border-indigo-500', borderActive: 'border-indigo-600', bgLight: 'bg-indigo-50/60', bgActive: 'bg-indigo-100', iconBg: 'bg-indigo-100', iconText: 'text-indigo-700', badgeBg: 'bg-indigo-600', textGroupHover: 'group-hover:text-indigo-700', barBg: 'bg-indigo-500' },
-            { nome: 'amber', border: 'border-amber-300', borderHover: 'hover:border-amber-500', borderActive: 'border-amber-600', bgLight: 'bg-amber-50/60', bgActive: 'bg-amber-100', iconBg: 'bg-amber-100', iconText: 'text-amber-700', badgeBg: 'bg-amber-600', textGroupHover: 'group-hover:text-amber-700', barBg: 'bg-amber-500' },
-            { nome: 'emerald', border: 'border-emerald-300', borderHover: 'hover:border-emerald-500', borderActive: 'border-emerald-600', bgLight: 'bg-emerald-50/60', bgActive: 'bg-emerald-100', iconBg: 'bg-emerald-100', iconText: 'text-emerald-700', badgeBg: 'bg-emerald-600', textGroupHover: 'group-hover:text-emerald-700', barBg: 'bg-emerald-500' },
-            { nome: 'violet', border: 'border-violet-300', borderHover: 'hover:border-violet-500', borderActive: 'border-violet-600', bgLight: 'bg-violet-50/60', bgActive: 'bg-violet-100', iconBg: 'bg-violet-100', iconText: 'text-violet-700', badgeBg: 'bg-violet-600', textGroupHover: 'group-hover:text-violet-700', barBg: 'bg-violet-500' },
-            { nome: 'sky', border: 'border-sky-300', borderHover: 'hover:border-sky-500', borderActive: 'border-sky-600', bgLight: 'bg-sky-50/60', bgActive: 'bg-sky-100', iconBg: 'bg-sky-100', iconText: 'text-sky-700', badgeBg: 'bg-sky-600', textGroupHover: 'group-hover:text-sky-700', barBg: 'bg-sky-500' },
-            { nome: 'rose', border: 'border-rose-300', borderHover: 'hover:border-rose-500', borderActive: 'border-rose-600', bgLight: 'bg-rose-50/60', bgActive: 'bg-rose-100', iconBg: 'bg-rose-100', iconText: 'text-rose-700', badgeBg: 'bg-rose-600', textGroupHover: 'group-hover:text-rose-700', barBg: 'bg-rose-500' },
-            { nome: 'orange', border: 'border-orange-300', borderHover: 'hover:border-orange-500', borderActive: 'border-orange-600', bgLight: 'bg-orange-50/60', bgActive: 'bg-orange-100', iconBg: 'bg-orange-100', iconText: 'text-orange-700', badgeBg: 'bg-orange-600', textGroupHover: 'group-hover:text-orange-700', barBg: 'bg-orange-500' },
-            { nome: 'teal', border: 'border-teal-300', borderHover: 'hover:border-teal-500', borderActive: 'border-teal-600', bgLight: 'bg-teal-50/60', bgActive: 'bg-teal-100', iconBg: 'bg-teal-100', iconText: 'text-teal-700', badgeBg: 'bg-teal-600', textGroupHover: 'group-hover:text-teal-700', barBg: 'bg-teal-500' },
-            { nome: 'fuchsia', border: 'border-fuchsia-300', borderHover: 'hover:border-fuchsia-500', borderActive: 'border-fuchsia-600', bgLight: 'bg-fuchsia-50/60', bgActive: 'bg-fuchsia-100', iconBg: 'bg-fuchsia-100', iconText: 'text-fuchsia-700', badgeBg: 'bg-fuchsia-600', textGroupHover: 'group-hover:text-fuchsia-700', barBg: 'bg-fuchsia-500' },
-            { nome: 'cyan', border: 'border-cyan-300', borderHover: 'hover:border-cyan-500', borderActive: 'border-cyan-600', bgLight: 'bg-cyan-50/60', bgActive: 'bg-cyan-100', iconBg: 'bg-cyan-100', iconText: 'text-cyan-700', badgeBg: 'bg-cyan-600', textGroupHover: 'group-hover:text-cyan-700', barBg: 'bg-cyan-500' },
-            { nome: 'purple', border: 'border-purple-300', borderHover: 'hover:border-purple-500', borderActive: 'border-purple-600', bgLight: 'bg-purple-50/60', bgActive: 'bg-purple-100', iconBg: 'bg-purple-100', iconText: 'text-purple-700', badgeBg: 'bg-purple-600', textGroupHover: 'group-hover:text-purple-700', barBg: 'bg-purple-500' },
-            { nome: 'lime', border: 'border-lime-300', borderHover: 'hover:border-lime-500', borderActive: 'border-lime-600', bgLight: 'bg-lime-50/60', bgActive: 'bg-lime-100', iconBg: 'bg-lime-100', iconText: 'text-lime-700', badgeBg: 'bg-lime-600', textGroupHover: 'group-hover:text-lime-700', barBg: 'bg-lime-500' },
-            { nome: 'blue', border: 'border-blue-300', borderHover: 'hover:border-blue-500', borderActive: 'border-blue-600', bgLight: 'bg-blue-50/60', bgActive: 'bg-blue-100', iconBg: 'bg-blue-100', iconText: 'text-blue-700', badgeBg: 'bg-blue-600', textGroupHover: 'group-hover:text-blue-700', barBg: 'bg-blue-500' },
-            { nome: 'pink', border: 'border-pink-300', borderHover: 'hover:border-pink-500', borderActive: 'border-pink-600', bgLight: 'bg-pink-50/60', bgActive: 'bg-pink-100', iconBg: 'bg-pink-100', iconText: 'text-pink-700', badgeBg: 'bg-pink-600', textGroupHover: 'group-hover:text-pink-700', barBg: 'bg-pink-500' },
-            { nome: 'yellow', border: 'border-yellow-300', borderHover: 'hover:border-yellow-500', borderActive: 'border-yellow-600', bgLight: 'bg-yellow-50/60', bgActive: 'bg-yellow-100', iconBg: 'bg-yellow-100', iconText: 'text-yellow-700', badgeBg: 'bg-yellow-600', textGroupHover: 'group-hover:text-yellow-700', barBg: 'bg-yellow-500' },
-            { nome: 'slate', border: 'border-slate-300', borderHover: 'hover:border-slate-500', borderActive: 'border-slate-600', bgLight: 'bg-slate-50/60', bgActive: 'bg-slate-100', iconBg: 'bg-slate-100', iconText: 'text-slate-700', badgeBg: 'bg-slate-600', textGroupHover: 'group-hover:text-slate-700', barBg: 'bg-slate-500' }
-        ];
-
-        function obterTemaSuite(idOuNome) {
-            if (!idOuNome) return PALETA_SUITES[0];
-            const str = String(idOuNome).trim().toLowerCase();
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                hash = (hash << 5) - hash + str.charCodeAt(i);
-                hash |= 0;
-            }
-            const indice = Math.abs(hash) % PALETA_SUITES.length;
-            return PALETA_SUITES[indice];
-        }
-
         function inicializarFiltroDatas() {
             const hoje = new Date();
             const formatarDataInput = (d) => {
@@ -446,22 +415,14 @@
                 let nomeUpper = suite.nome.trim().toUpperCase();
                 let isAtiva = suiteFiltroAtual && String(suiteFiltroAtual).trim().toUpperCase() === nomeUpper;
                 let qtd = contagemPorSuite[nomeUpper] || 0;
-                
-                // Aplica cor única e exclusiva da suíte
-                const tema = obterTemaSuite(suite.id || suite.nome);
-                let borda = isAtiva 
-                    ? `${tema.borderActive} ${tema.bgActive} shadow-md` 
-                    : `${tema.border} ${tema.borderHover} bg-white hover:${tema.bgLight}`;
-                let badge = qtd > 0 
-                    ? `<span class="text-[9px] ${tema.iconBg} ${tema.iconText} px-1.5 py-0.5 rounded-full font-bold">${qtd}</span>` 
-                    : `<span class="text-[9px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">0</span>`;
-                
+                let borda = isAtiva ? 'border-blue-500 bg-blue-50 shadow-md' : 'border-gray-200 hover:border-blue-300 bg-white hover:bg-blue-50/40';
+                let badge = qtd > 0 ? `<span class="text-[9px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-bold">${qtd}</span>` : `<span class="text-[9px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">0</span>`;
                 html += `<div onclick="filtrarPorSuite('${suite.nome.replace(/'/g, "\\'")}')" class="cursor-pointer ${borda} border-2 p-3 rounded-xl transition group flex flex-col gap-1.5">
                     <div class="flex items-center justify-between">
-                        <div class="w-7 h-7 ${tema.iconBg} ${tema.iconText} rounded-lg flex items-center justify-center text-[11px]"><i class="fa-solid fa-bed"></i></div>
+                        <div class="w-7 h-7 bg-indigo-100 text-indigo-700 rounded-lg flex items-center justify-center text-[11px]"><i class="fa-solid fa-bed"></i></div>
                         ${badge}
                     </div>
-                    <span class="font-bold text-[11px] text-gray-800 uppercase truncate ${tema.textGroupHover}">${suite.nome.toUpperCase()}</span>
+                    <span class="font-bold text-[11px] text-gray-800 uppercase truncate group-hover:text-blue-700">${suite.nome.toUpperCase()}</span>
                     <span class="text-[10px] text-gray-500 truncate">${isAtiva ? 'FILTRADA' : 'CLIQUE PARA FILTRAR'}</span>
                 </div>`;
             });
@@ -502,6 +463,7 @@
                 }
             });
             if (filtroAtivo) {
+                // Highlight selected card
                 const grid = document.getElementById('gridOcupacaoSuites');
                 if (grid) {
                     grid.querySelectorAll('div').forEach(card => {
@@ -527,16 +489,18 @@
             carregarDadosView();
         }
 
+        // >>> CENÁRIO C - CARDS CONTROLE HOJE - CONSULTA DIRETA NO BANCO
         async function carregarCardsControleHoje() {
             if (!usuarioIdAtual) return;
             try {
                 const hoje = new Date();
-                const hojeStr = hoje.toISOString().split('T')[0];
+                const hojeStr = hoje.toISOString().split('T')[0]; // YYYY-MM-DD
                 const inicioHoje = new Date(hoje);
                 inicioHoje.setHours(0,0,0,0);
                 const fimHoje = new Date(hoje);
                 fimHoje.setHours(23,59,59,999);
 
+                // Check-In Hoje: checkin = hoje e não recusada/cancelada
                 const { count: countCheckIn, error: errIn } = await supabaseClient
                     .from('reservas')
                     .select('id', { count: 'exact', head: true })
@@ -545,6 +509,7 @@
                     .neq('status', 'Recusada')
                     .neq('status', 'Cancelada');
 
+                // Check-Out Hoje: checkout = hoje
                 const { count: countCheckOut, error: errOut } = await supabaseClient
                     .from('reservas')
                     .select('id', { count: 'exact', head: true })
@@ -553,6 +518,7 @@
                     .neq('status', 'Recusada')
                     .neq('status', 'Cancelada');
 
+                // Check-Out Amanhã: checkout = amanhã
                 const amanha = new Date(hoje);
                 amanha.setDate(amanha.getDate() + 1);
                 const amanhaStr = amanha.toISOString().split('T')[0];
@@ -564,11 +530,17 @@
                     .neq('status', 'Recusada')
                     .neq('status', 'Cancelada');
 
+                // Reservas: total de reservas (TODAS) OU novas hoje - conforme solicitado, mostra total de reservas do dia ou total geral
+                // Aqui usamos total de reservas com status Aprovada para hoje + futuras (ou total geral se preferir)
+                // Para bater com print "Reservas" (não "Reservas Futuras") vamos contar TODAS as reservas Aprovadas
                 const { count: countReservas, error: errRes } = await supabaseClient
                     .from('reservas')
                     .select('id', { count: 'exact', head: true })
                     .eq('pousada_id', usuarioIdAtual)
                     .eq('status', 'Aprovada');
+
+                // Se quiser contar apenas novas reservas criadas hoje, descomente abaixo e comente acima:
+                // const { count: countReservas } = await supabaseClient.from('reservas').select('id', { count: 'exact', head: true }).eq('pousada_id', usuarioIdAtual).gte('criado_em', inicioHoje.toISOString()).lte('criado_em', fimHoje.toISOString());
 
                 const elIn = document.getElementById('cardCheckInHojeValor');
                 const elOut = document.getElementById('cardCheckOutHojeValor');
@@ -584,13 +556,16 @@
             }
         }
 
+        // >>> CENÁRIO C - FILTRO AO CLICAR NOS CARDS HOJE
         function filtrarPorCardHoje(tipo) {
+            // Se clicar no mesmo já ativo, remove filtro
             if (filtroCheckTipoHoje === tipo) {
                 filtroCheckTipoHoje = null;
             } else {
                 filtroCheckTipoHoje = tipo;
             }
 
+            // Atualiza visual dos cards - INCLUI CHECK-OUT AMANHÃ
             const cardIn = document.getElementById('cardCheckInHoje');
             const cardOut = document.getElementById('cardCheckOutHoje');
             const cardOutAmanha = document.getElementById('cardCheckOutAmanha');
@@ -612,16 +587,21 @@
                 cardRes.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50', 'border-blue-400');
             }
 
+            // Se for 'reservas', mostra todas (remove filtro de hoje)
             if (tipo === 'reservas' && filtroCheckTipoHoje === 'reservas') {
+                // Mostra todas - já está no comportamento padrão, mas força recarregar
                 filtroCheckTipoHoje = null;
+                // Remove seleção visual de reservas para indicar que é "ver todas"
                 if (cardRes) {
                     cardRes.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50', 'border-blue-400');
                 }
             }
 
+            // Recarrega dados com filtro
             carregarDadosView();
         }
 
+        
         function atualizarVisibilidadeFiltroStatus() {
             var container = document.getElementById('containerFiltroStatusReservas');
             if (!container) return;
@@ -630,6 +610,7 @@
             } else {
                 container.style.display = 'none';
             }
+            // >>> CONTROLE DO FILTRO DATA LATERAL - HOSPEDAGENS E FINANCEIRO AO LADO DOS CARDS
             var filtroLateral = document.getElementById('containerFiltroDataHospedagens');
             var filtroTabela = document.getElementById('containerFiltroDataTabela');
             if (filtroLateral && filtroTabela) {
@@ -647,6 +628,7 @@
             }
         }
 
+        // >>> DASHBOARD GRÁFICO DE OCUPAÇÃO - NOVO
         let graficoVisivel = false;
         function toggleGraficoOcupacao() {
             const container = document.getElementById('containerGraficoOcupacao');
@@ -663,6 +645,7 @@
             }
         }
 
+        
         async function carregarGraficoOcupacao() {
             const grid = document.getElementById('graficoBarrasOcupacao');
             const badge = document.getElementById('badgePeriodoGrafico');
@@ -678,7 +661,10 @@
                     else badge.textContent = 'TODO PERÍODO';
                 }
 
-                let query = supabaseClient.from('reservas').select('id, suite_id, checkin, checkout, status, suites ( nome )').eq('pousada_id', usuarioIdAtual).eq('status', 'Finalizada');
+                // >>> REGRA DE NEGÓCIO FINAL - SÓ FINALIZADA NO PERÍODO = MAIS OCUPADA NO PERÍODO
+                // Você está certo, ADMINISTRADOR: só entra no dashboard se status = Finalizada (checkout feito no dashboard)
+                // Aprovada é futura, ainda não deu lucro. Finalizada é histórico real já pago e finalizado.
+                let query = supabaseClient.from('reservas').select('id, suite_id, checkin, checkout, status,  suites ( nome )').eq('pousada_id', usuarioIdAtual).eq('status', 'Finalizada');
                 if (dataInicio && dataFim) {
                     query = query.lte('checkin', dataFim).gte('checkout', dataInicio);
                 } else if (dataInicio) {
@@ -691,19 +677,21 @@
 
                 const { data: todasSuites } = await supabaseClient.from('suites').select('id, nome').eq('pousada_id', usuarioIdAtual).order('nome');
                 const mapa = {};
-                (todasSuites || []).forEach(s => { mapa[s.id] = { id: s.id, nome: s.nome, diarias: 0, reservas: 0, detalhes: [] }; });
+                (todasSuites || []).forEach(s => { mapa[s.id] = { nome: s.nome, diarias: 0, reservas: 0, detalhes: [] }; });
 
                 (reservas || []).forEach(r => {
                     const id = r.suite_id;
-                    if (!mapa[id]) mapa[id] = { id: id, nome: r.suites?.nome || 'SUÍTE', diarias: 0, reservas: 0, detalhes: [] };
+                    if (!mapa[id]) mapa[id] = { nome: r.suites?.nome || 'SUÍTE', diarias: 0, reservas: 0, detalhes: [] };
                     let rCheckin = new Date(String(r.checkin).substring(0,10) + 'T00:00:00');
                     let rCheckout = new Date(String(r.checkout).substring(0,10) + 'T00:00:00');
                     let fInicio = dataInicio ? new Date(dataInicio + 'T00:00:00') : rCheckin;
                     let fFim = dataFim ? new Date(dataFim + 'T00:00:00') : rCheckout;
+                    // Sobreposição: max(inicio) e min(fim)
                     let overlapInicio = new Date(Math.max(rCheckin.getTime(), fInicio.getTime()));
                     let overlapFim = new Date(Math.min(rCheckout.getTime(), fFim.getTime()));
                     let diff = Math.ceil((overlapFim - overlapInicio) / (1000*60*60*24));
                     if (isNaN(diff) || diff < 0) diff = 0;
+                    // Se não há filtro, conta tudo
                     if (!dataInicio && !dataFim) {
                         diff = Math.ceil((rCheckout - rCheckin) / (1000*60*60*24));
                     }
@@ -720,16 +708,12 @@
                 let htmlChart = '';
                 lista.forEach(item => {
                     const perc = item.diarias === 0 ? 0 : Math.max(5, Math.round((item.diarias / maxDiarias) * 100));
-                    
-                    // Aplica a cor exclusiva da suíte na barra do gráfico
-                    const tema = obterTemaSuite(item.id || item.nome);
-                    const cor = item.diarias === 0 ? 'bg-gray-200' : tema.barBg;
-                    const corTexto = item.diarias === 0 ? 'text-gray-400' : tema.iconText;
+                    const cor = perc >= 70 ? 'bg-emerald-500' : perc >= 40 ? 'bg-blue-500' : perc >= 10 ? 'bg-amber-500' : 'bg-gray-200';
+                    const corTexto = perc >= 70 ? 'text-emerald-700' : perc >= 40 ? 'text-blue-700' : perc >= 10 ? 'text-amber-700' : 'text-gray-400';
                     const tooltip = item.detalhes.join(' | ');
-
                     htmlChart += `
                         <div class="flex items-center gap-3 group" title="${tooltip}">
-                            <div class="w-32 sm:w-40 text-[11px] font-bold text-gray-700 uppercase truncate text-right ${tema.textGroupHover}">${item.nome}</div>
+                            <div class="w-32 sm:w-40 text-[11px] font-bold text-gray-700 uppercase truncate text-right">${item.nome}</div>
                             <div class="flex-1 bg-gray-100 rounded-full h-6 relative overflow-hidden border border-gray-200">
                                 <div class="${cor} h-6 rounded-full transition-all duration-700 flex items-center justify-end pr-2" style="width: ${perc}%">
                                     <span class="text-[10px] font-bold text-white">${item.diarias} diárias</span>
@@ -740,6 +724,10 @@
                     `;
                 });
                 grid.innerHTML = htmlChart;
+                
+                // Log para debug no console para você bater com SQL
+                console.log('GRAFICO DEBUG - Reservas consideradas:', reservas);
+                console.log('GRAFICO DEBUG - Mapa por suite:', mapa);
             } catch (e) {
                 console.error('Erro grafico ocupacao', e);
                 grid.innerHTML = `<div class="py-4 text-center text-red-500 text-xs">ERRO: ${e.message}</div>`;
@@ -747,6 +735,7 @@
         }
 
         function sincronizarFiltrosData(origem, valor) {
+            // Sincroniza os 4 inputs de data (tabela + lateral)
             var ids = ['filtroDataInicio', 'filtroDataFim', 'filtroDataInicioHosp', 'filtroDataFimHosp'];
             if (origem === 'inicio' || origem === 'inicio_tabela') {
                 document.getElementById('filtroDataInicio').value = valor;
@@ -785,31 +774,34 @@
 
             carregarDadosView();
         }
-
-        function formatarDataHoraBr(valor) {
-            if (!valor) return '-';
-            try {
-                let str = String(valor).trim();
-                let dt = new Date(str);
-                if (isNaN(dt.getTime())) {
-                    let limpo = str.split('.')[0].replace('T',' ').replace('Z','').substring(0,19);
-                    dt = new Date(limpo);
-                }
-                if (isNaN(dt.getTime())) return str.toUpperCase();
-                
-                let ano = dt.getFullYear();
-                let mes = String(dt.getMonth() + 1).padStart(2, '0');
-                let dia = String(dt.getDate()).padStart(2, '0');
-                let hora = String(dt.getHours()).padStart(2, '0');
-                let minuto = String(dt.getMinutes()).padStart(2, '0');
-                let segundo = String(dt.getSeconds()).padStart(2, '0');
-                
-                return `${ano}/${mes}/${dia} ${hora}:${minuto}:${segundo}`;
-            } catch(e) {
-                return String(valor).toUpperCase();
-            }
+function formatarDataHoraBr(valor) {
+    if (!valor) return '-';
+    try {
+        let str = String(valor).trim();
+        let dt = new Date(str);
+        if (isNaN(dt.getTime())) {
+            let limpo = str.split('.')[0].replace('T',' ').replace('Z','').substring(0,19);
+            dt = new Date(limpo);
         }
-
+        if (isNaN(dt.getTime())) return str.toUpperCase();
+        
+        let ano = dt.getFullYear();
+        let mes = String(dt.getMonth() + 1).padStart(2, '0');
+        let dia = String(dt.getDate()).padStart(2, '0');
+        let hora = String(dt.getHours()).padStart(2, '0');
+        let minuto = String(dt.getMinutes()).padStart(2, '0');
+        let segundo = String(dt.getSeconds()).padStart(2, '0');
+        
+        // Formato com Ano na frente primeiro (AAAA/MM/DD HH:mm:ss)
+        return `${ano}/${mes}/${dia} ${hora}:${minuto}:${segundo}`;
+        
+        /* Se preferir o padrão brasileiro com o ano no final, descomente a linha abaixo: */
+        // return `${dia}/${mes}/${ano} ${hora}:${minuto}:${segundo}`;
+        
+    } catch(e) {
+        return String(valor).toUpperCase();
+    }
+}
         function formatarDataBr(valor) {
             if (!valor) return '-';
             let str = String(valor).trim();
@@ -890,6 +882,7 @@
                     let dadosBrutos = (response.data || []).filter(row => row.pousada_id === usuarioIdAtual);
                     error = response.error;
 
+                    // >>> ALERTA VIGÊNCIA - CALCULA DIAS RESTANTES PARA EXPIRAÇÃO - CORRIGIDO TIMEZONE
                     const hoje = new Date();
                     hoje.setHours(0,0,0,0);
                     registros = dadosBrutos.map(row => {
@@ -899,12 +892,16 @@
                         let alertaCor = 'gray';
                         
                         if (vigenciaFimStr) {
+                            // CORREÇÃO: parse manual YYYY-MM-DD como data local para evitar bug de fuso UTC
+                            // Antes: new Date("2026-09-02") criava UTC e causava -1 dia no Brasil GMT-3
                             let str = String(vigenciaFimStr).substring(0,10);
                             let partes = str.split('-');
                             let dataFim;
                             if (partes.length === 3) {
+                                // Formato YYYY-MM-DD - cria como data local
                                 dataFim = new Date(Number(partes[0]), Number(partes[1])-1, Number(partes[2]), 0,0,0,0);
                             } else {
+                                // Tenta DD/MM/YYYY
                                 let partesBr = String(vigenciaFimStr).split('/');
                                 if (partesBr.length === 3) {
                                     dataFim = new Date(Number(partesBr[2]), Number(partesBr[1])-1, Number(partesBr[0]), 0,0,0,0);
@@ -914,7 +911,7 @@
                                 }
                             }
                             let diffMs = dataFim - hoje;
-                            diasRestantes = Math.round(diffMs / (1000*60*60*24));
+                            diasRestantes = Math.round(diffMs / (1000*60*60*24)); // Math.round para evitar erro de horário de verão
                             
                             if (diasRestantes < 0) {
                                 alertaTexto = `VENCIDA há ${Math.abs(diasRestantes)} dias`;
@@ -944,14 +941,13 @@
                 } else if (ehViewFinanceiro) {
                     const { data: pagamentosData, error: errPag } = await supabaseClient
                         .from('hospede_pagamentos')
-                        .select(`id, valor_pago, forma_pagamento, observacao, criado_em, reserva_id, reservas (hospede_nome, checkin, checkout, valor_total, suite_id, suites ( nome ))`)
+                        .select(`id, valor_pago, forma_pagamento, observacao, criado_em, reserva_id, reservas (hospede_nome, checkin, checkout, valor_total, suites ( nome ))`)
                         .eq('pousada_id', usuarioIdAtual);
                     error = errPag;
                     if (pagamentosData) {
                         registros = pagamentosData.map(p => ({
                             hospede: p.reservas?.hospede_nome || 'HÓSPEDE NÃO IDENTIFICADO',
                             suite: p.reservas?.suites?.nome || 'SUÍTE NÃO INFORMADA',
-                            suite_id: p.reservas?.suite_id || null,
                             checkin: p.reservas?.checkin || '',
                             checkout: p.reservas?.checkout || '',
                             diarias: calcularDiarias(p.reservas?.checkin, p.reservas?.checkout),
@@ -964,6 +960,7 @@
                         }));
                     }
                 } else if (ehViewHospedagens) {
+                    // TRATAMENTO EXCLUSIVO PARA GARANTIR TODAS AS SUÍTES DA TABELA CADASTRADAS (Disponíveis e Ocupadas)
                     const { data: todasSuites, error: errSuites } = await supabaseClient
                         .from('suites')
                         .select('id, nome')
@@ -976,7 +973,10 @@
                     if (errSuites) {
                         error = errSuites;
                     } else {
+                        // Cruzamento robusto cobrindo 100% das suítes cadastradas na tabela
+                        let hojeStr = new Date().toISOString().split('T')[0];
                         registros = todasSuites.map(suite => {
+                            // Procura reserva ativa para esta suíte na data de hoje ou futura próxima
                             let reservaEncontrada = reservasAtivasView.find(r => 
                                 String(r.suite || '').trim().toUpperCase() === String(suite.nome || '').trim().toUpperCase() &&
                                 String(r.status || r.status_reserva || '').toUpperCase() === 'APROVADA'
@@ -986,14 +986,12 @@
                                 return {
                                     ...reservaEncontrada,
                                     status_ocupacao: 'OCUPADA / RESERVADA',
-                                    suite: suite.nome,
-                                    suite_id: suite.id
+                                    suite: suite.nome
                                 };
                             } else {
                                 return {
                                     status_ocupacao: 'DISPONÍVEL',
                                     suite: suite.nome,
-                                    suite_id: suite.id,
                                     hospede: 'NENHUM (DISPONÍVEL)',
                                     checkin: '-',
                                     checkout: '-',
@@ -1025,8 +1023,10 @@
                 let registrosFiltrados = registros;
 
                 if (ehViewReservas) {
+                    // >>> RESERVAS = SOMENTE RESERVAS (APROVADA/RECUSADA) COM DATAS FUTURAS - NÃO MOSTRA STATUS FÍSICO DA SUÍTE
                     registrosFiltrados = registrosFiltrados.filter(row => {
                         let status = String(row.status || row.status_reserva || '').toUpperCase();
+                        // Considera apenas status da reserva, não status físico
                         let isRecusada = (status === 'RECUSADA' || status === 'CANCELADA');
                         let isAprovada = (status === 'APROVADA');
 
@@ -1035,6 +1035,7 @@
                         return true; 
                     });
 
+                    // >>> FILTRO EXTRA - CARDS HOJE (Check-In / Check-Out / Check-Out Amanhã)
                     if (filtroCheckTipoHoje) {
                         const hojeStr = hojeStrGlobal || new Date().toISOString().split('T')[0];
                         const amanhaObj = new Date();
@@ -1073,6 +1074,7 @@
                     registrosFiltrados = registrosFiltrados.filter(r => String(r.suite || '').trim().toUpperCase() === String(suiteFiltroAtual).trim().toUpperCase());
                 }
 
+                // Renderiza KPI explicito no topo dependendo da View
                 containerKpis.classList.remove("hidden");
                 if (ehViewFinanceiro) {
                     containerKpis.className = "flex flex-wrap gap-3 mb-5";
@@ -1111,7 +1113,7 @@
                     let totalSuites = registros.length;
                     let ocupadas = registros.filter(r => r.status_ocupacao === 'OCUPADA / RESERVADA').length;
                     let disponiveis = totalSuites - ocupadas;
-                    
+                    // >>> LAYOUT COMPACTO LADO A LADO - CARDS PEQUENOS + NOVO CARD GRÁFICO
                     containerKpis.className = "flex flex-wrap gap-3 mb-5";
                     containerKpis.innerHTML = `
                         <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3 min-w-[160px] hover:shadow-md transition">
@@ -1145,7 +1147,7 @@
                     `;
                     document.getElementById('containerFiltroSuites').classList.add('hidden');
                     
-                    // CARDS POR SUÍTE COM COR ÚNICA E EXCLUSIVA
+                    // >>> SOMENTE HOSPEDAGENS - CARDS POR SUÍTE COM NOME ESPECÍFICO (NÃO MEXER EM FINANCEIRO)
                     const containerOcupacao = document.getElementById('containerCardsOcupacaoSuites');
                     const gridOcupacao = document.getElementById('gridOcupacaoSuites');
                     const badgeTotal = document.getElementById('badgeOcupacaoTotal');
@@ -1161,18 +1163,10 @@
                             const checkin = r.checkin && r.checkin !== '-' ? formatarDataBr(r.checkin) : '-';
                             const checkout = r.checkout && r.checkout !== '-' ? formatarDataBr(r.checkout) : '-';
                             
-                            // Tema dinâmico e exclusivo para a suíte
-                            const tema = obterTemaSuite(r.suite_id || r.suite);
-                            const borda = isOcupada 
-                                ? `${tema.border} bg-white hover:${tema.bgLight} border-2` 
-                                : `${tema.border} bg-white hover:${tema.bgLight} border-2`;
-                            const iconeBg = `${tema.iconBg} ${tema.iconText}`;
-                            const statusBadge = isOcupada 
-                                ? '<span class="text-[8px] font-bold bg-blue-600 text-white px-2 py-0.5 rounded-full uppercase shadow-xs">OCUPADA</span>' 
-                                : '<span class="text-[8px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full uppercase shadow-xs">DISPONÍVEL</span>';
-                            const hospedeInfo = isOcupada 
-                                ? `<div class="mt-1.5 text-[10px] text-gray-600 truncate"><i class="fa-solid fa-user mr-1"></i>${nomeHospede}</div><div class="text-[9px] text-gray-500 mt-0.5">${checkin} até ${checkout}</div>` 
-                                : `<div class="mt-1.5 text-[10px] text-emerald-600 font-medium">Livre para reserva</div>`;
+                            const borda = isOcupada ? 'border-blue-300 bg-blue-50/50 hover:bg-blue-50 hover:border-blue-400' : 'border-emerald-200 bg-white hover:bg-emerald-50 hover:border-emerald-300';
+                            const iconeBg = isOcupada ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700';
+                            const statusBadge = isOcupada ? '<span class="text-[8px] font-bold bg-blue-600 text-white px-2 py-0.5 rounded-full uppercase">OCUPADA</span>' : '<span class="text-[8px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full uppercase">DISPONÍVEL</span>';
+                            const hospedeInfo = isOcupada ? `<div class="mt-1.5 text-[10px] text-gray-600 truncate"><i class="fa-solid fa-user mr-1"></i>${nomeHospede}</div><div class="text-[9px] text-gray-500 mt-0.5">${checkin} até ${checkout}</div>` : `<div class="mt-1.5 text-[10px] text-emerald-600 font-medium">Livre para reserva</div>`;
                             
                             htmlCards += `
                                 <div onclick="filtrarPorSuiteOcupacao('${nomeSuite.replace(/'/g, "\\'")}')" title="Clique para filtrar esta suíte na tabela" class="cursor-pointer border-2 ${borda} p-3 rounded-xl shadow-sm transition group">
@@ -1180,9 +1174,9 @@
                                         <div class="w-7 h-7 ${iconeBg} rounded-lg flex items-center justify-center text-[11px]"><i class="fa-solid fa-bed"></i></div>
                                         ${statusBadge}
                                     </div>
-                                    <div class="font-bold text-[11px] text-gray-800 uppercase truncate ${tema.textGroupHover}">${nomeSuite}</div>
+                                    <div class="font-bold text-[11px] text-gray-800 uppercase truncate group-hover:text-blue-700">${nomeSuite}</div>
                                     ${hospedeInfo}
-                                    <div class="mt-2 text-[9px] text-gray-400 ${tema.textGroupHover}">CLIQUE PARA FILTRAR</div>
+                                    <div class="mt-2 text-[9px] text-gray-400 group-hover:text-blue-600">CLIQUE PARA FILTRAR</div>
                                 </div>
                             `;
                         });
@@ -1207,7 +1201,7 @@
                 } else if (ehViewHospedagens) {
                     colunas = ['status_ocupacao', 'suite', 'hospede', 'checkin', 'checkout', 'status'];
                 } else {
-                    colunas = Object.keys(registrosFiltrados[0] || {}).filter(k => k !== 'pousada_id' && k !== 'reserva_id' && k !== 'suite_id' && !k.includes('login_original') && !k.includes('nome_original') && k !== 'nome_pousada_que_recusou' && k !== 'dia_semana' && k !== 'alerta_status_reserva' && k !== 'alerta_vigencia_cor');
+                    colunas = Object.keys(registrosFiltrados[0] || {}).filter(k => k !== 'pousada_id' && k !== 'reserva_id' && !k.includes('login_original') && !k.includes('nome_original') && k !== 'nome_pousada_que_recusou' && k !== 'dia_semana' && k !== 'alerta_status_reserva' && k !== 'alerta_vigencia_cor');
                 }
 
                 let htmlCabecalho = '';
@@ -1293,9 +1287,8 @@
             }
         }
 
-        // =========================================================================
-        // SUÍTES - CALENDÁRIO VISUAL
-        // =========================================================================
+
+        // >>> SUÍTES - CALENDÁRIO VISUAL - CORRIGIDO - FUNÇÕES GLOBAIS
         let suitesVisivel = false;
         let reservasFuturasCache = [];
         let suiteCalId = null;
@@ -1303,9 +1296,13 @@
         let calDataRef = new Date();
 
         function toggleSuites() {
+            console.log('toggleSuites chamado');
             const container = document.getElementById('containerSuites');
             const card = document.getElementById('cardSuites');
-            if (!container) return;
+            if (!container) {
+                console.error('containerSuites não encontrado');
+                return;
+            }
             
             suitesVisivel = !suitesVisivel;
             
@@ -1320,7 +1317,10 @@
         }
 
         async function carregarSuitesComReservas() {
-            if (!usuarioIdAtual) return;
+            if (!usuarioIdAtual) {
+                console.error('usuarioIdAtual não definido');
+                return;
+            }
             const grid = document.getElementById('gridSuites');
             const badge = document.getElementById('badgeSuites');
             if (!grid) return;
@@ -1329,6 +1329,7 @@
             
             try {
                 const hojeStr = new Date().toISOString().split('T')[0];
+                console.log('Buscando reservas futuras a partir de', hojeStr, 'pousada', usuarioIdAtual);
                 
                 const { data: reservasFuturas, error } = await supabaseClient
                     .from('reservas')
@@ -1341,6 +1342,7 @@
                 if (error) throw error;
                 
                 reservasFuturasCache = reservasFuturas || [];
+                console.log('Reservas futuras encontradas', reservasFuturasCache.length);
                 
                 const suitesMap = {};
                 reservasFuturasCache.forEach(r => {
@@ -1374,18 +1376,15 @@
                         return chk;
                     }).join(', ');
                     
-                    // Aplica cor única e exclusiva da suíte
-                    const tema = obterTemaSuite(s.suite_id || s.nome);
-
                     htmlCards += `
-                        <div onclick="abrirCalendarioSuite('${s.suite_id}', '${s.nome.replace(/'/g, "\\'")}')" class="cursor-pointer border-2 ${tema.border} bg-white hover:${tema.bgLight} ${tema.borderHover} p-3 rounded-xl shadow-sm transition group">
+                        <div onclick="abrirCalendarioSuite('${s.suite_id}', '${s.nome.replace(/'/g, "\'")}')" class="cursor-pointer border-2 border-amber-200 bg-white hover:bg-amber-50 hover:border-amber-400 p-3 rounded-xl shadow-sm transition group">
                             <div class="flex items-center justify-between mb-1.5">
-                                <div class="w-7 h-7 ${tema.iconBg} ${tema.iconText} rounded-lg flex items-center justify-center text-[11px]"><i class="fa-solid fa-bed"></i></div>
-                                <span class="text-[9px] font-bold ${tema.badgeBg} text-white px-2 py-0.5 rounded-full">${s.total} RESERVA(S)</span>
+                                <div class="w-7 h-7 bg-amber-100 text-amber-700 rounded-lg flex items-center justify-center text-[11px]"><i class="fa-solid fa-bed"></i></div>
+                                <span class="text-[9px] font-bold bg-amber-600 text-white px-2 py-0.5 rounded-full">${s.total} RESERVA(S)</span>
                             </div>
-                            <div class="font-bold text-[11px] text-gray-800 uppercase truncate ${tema.textGroupHover}">${String(s.nome).toUpperCase()}</div>
+                            <div class="font-bold text-[11px] text-gray-800 uppercase truncate group-hover:text-amber-700">${String(s.nome).toUpperCase()}</div>
                             <div class="mt-1 text-[10px] text-gray-600 truncate"><i class="fa-solid fa-calendar mr-1"></i>${proximas}${s.total>2 ? '...' : ''}</div>
-                            <div class="mt-2 text-[9px] ${tema.iconText} font-bold ${tema.textGroupHover}"><i class="fa-solid fa-calendar-days mr-1"></i>VER CALENDÁRIO</div>
+                            <div class="mt-2 text-[9px] text-amber-600 font-bold group-hover:text-amber-700"><i class="fa-solid fa-calendar-days mr-1"></i>VER CALENDÁRIO</div>
                         </div>
                     `;
                 });
@@ -1475,9 +1474,8 @@
             }
         }
 
-        // =========================================================================
-        // CALENDÁRIO GERAL NO RELATÓRIOS
-        // =========================================================================
+
+        // ==================== CALENDÁRIO GERAL NO RELATÓRIOS ====================
         let calGeralRelSuiteIndex = 0;
         let calGeralRelDataRef = new Date();
         let calGeralRelReservasCache = [];
@@ -1528,12 +1526,9 @@
             calGeralRelSuitesCache.forEach((suite, idx) => {
                 const isAtiva = idx === calGeralRelSuiteIndex;
                 const reservasSuite = calGeralRelReservasCache.filter(r => r.suite_id === suite.id).length;
-                
-                // Aplica cor única e exclusiva da suíte no painel geral
-                const tema = obterTemaSuite(suite.id || suite.nome);
                 const classeAtiva = isAtiva 
-                    ? `bg-slate-900 text-white ${tema.borderActive} shadow-md scale-[1.02]` 
-                    : `bg-white text-gray-800 ${tema.border} ${tema.borderHover} hover:${tema.bgLight} hover:shadow-sm`;
+                    ? 'bg-slate-900 text-amber-300 border-amber-400 shadow-md scale-[1.02]' 
+                    : 'bg-white text-gray-800 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50/50 hover:shadow-sm';
                 
                 const badgeOcup = reservasSuite > 0 ? `<span class="text-[9px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-bold">${reservasSuite} res.</span>` : `<span class="text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full">livre</span>`;
                 
@@ -1541,10 +1536,10 @@
                     <div onclick="selecionarSuiteGeralRelatorios(${idx})" onmouseenter="if(${!isAtiva}) selecionarSuiteGeralRelatorios(${idx})" 
                          class="cursor-pointer border-2 rounded-xl p-2.5 flex flex-col gap-1 transition-all duration-150 ${classeAtiva}">
                         <div class="flex justify-between items-start">
-                            <i class="fa-solid fa-bed text-[11px] ${isAtiva ? 'text-amber-300' : tema.iconText}"></i>
+                            <i class="fa-solid fa-bed text-[11px] ${isAtiva ? 'text-amber-300' : 'text-indigo-500'}"></i>
                             ${badgeOcup}
                         </div>
-                        <span class="font-bold text-[11px] uppercase truncate leading-tight ${isAtiva ? '' : tema.textGroupHover}">${suite.nome}</span>
+                        <span class="font-bold text-[11px] uppercase truncate leading-tight">${suite.nome}</span>
                         <span class="text-[9px] ${isAtiva ? 'text-slate-300' : 'text-gray-500'}">${isAtiva ? 'VISUALIZANDO' : 'CLIQUE OU PASSE O MOUSE'}</span>
                     </div>
                 `;
@@ -1687,6 +1682,7 @@
             renderizarCalendarioGeralRelatorios();
         }
 
+
         function abrirModalNovaReservaCalendario() {
             const suite = calGeralRelSuitesCache[calGeralRelSuiteIndex];
             if (!suite || !calGeralCheckinTemp || !calGeralCheckoutTemp) return;
@@ -1709,7 +1705,6 @@
             document.getElementById('modal-nova-reserva-calendario').classList.remove('hidden');
             recalcularNovaReservaCalendario();
         }
-
         function fecharModalNovaReservaCalendario() { document.getElementById('modal-nova-reserva-calendario').classList.add('hidden'); }
         function calcularDiariasCalendario(a,b){ if(!a||!b)return 0; return Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/(1000*60*60*24)); }
 
@@ -1735,6 +1730,7 @@
             const criancas=parseInt(document.getElementById('nova-reserva-criancas').value)||0;
             const pet=document.getElementById('nova-reserva-pet').value==='true';
             
+            // Capacidade real da suíte - igual dashboard
             try {
                 const suite = calGeralRelSuitesCache.find(s=>s.id===suiteId);
                 if (suite) {
@@ -1763,6 +1759,7 @@
                 }
             } catch(e){}
 
+            // Idades - igual dashboard
             const inputsAntes = document.querySelectorAll('.nova-reserva-input-idade-crianca');
             const idadesAntes = Array.from(inputsAntes).map(el=>el.value);
             renderizarInputsIdadesCriancasCalendario(criancas, idadesAntes);
@@ -1778,6 +1775,7 @@
                 const {data, error} = await supabaseClient.rpc('calcular_total_reserva',{p_suite_id:suiteId,p_checkin:checkin,p_checkout:checkout,p_adultos:adultos,p_criancas:criancas,p_idades_criancas:idadesStr,p_pet:pet}); 
                 if(!error && data!==null) total=Number(data); 
                 else {
+                    // fallback sem idades
                     const {data:fb} = await supabaseClient.rpc('calcular_total_reserva',{p_suite_id:suiteId,p_checkin:checkin,p_checkout:checkout,p_adultos:adultos,p_criancas:criancas,p_pet:pet});
                     if(fb!==null) total=Number(fb);
                 }
@@ -1797,6 +1795,7 @@
             const checkout=document.getElementById('nova-reserva-checkout').value;
             if(!hospede||!whatsapp){ alert('Preencha nome e whatsapp'); return; }
 
+            // Capacidade
             const suiteCap = calGeralRelSuitesCache.find(s=>s.id===suiteId);
             if (suiteCap) {
                 const capMax = Number(suiteCap.capacidade_hospedes)||0;
@@ -1805,6 +1804,7 @@
                 if (capMax>0 && (adultosVal+criancasVal)>capMax) { alert(`Capacidade excedida: máximo ${capMax} pessoa(s)`); return; }
             }
 
+            // Verificar conflito de datas - igual dashboard
             try {
                 const {data:temConflito} = await supabaseClient.rpc('verificar_conflito_reserva',{p_suite_id:suiteId,p_checkin:checkin,p_checkout:checkout,p_reserva_id:null});
                 if (temConflito===true) { alert('Já existe uma reserva confirmada para esta suíte nestas datas!'); return; }
@@ -1826,6 +1826,7 @@
             const idadesStr = Array.from(inputsIdades).map(el=>parseInt(el.value)||0).join(',');
 
             try{
+                // COLUNAS CORRETAS: qtd_adultos, qtd_criancas, idades_criancas, tem_pet - IGUAL DASHBOARD
                 const dadosReserva = {
                     pousada_id: usuarioIdAtual,
                     suite_id: suiteId,
@@ -1854,13 +1855,14 @@
             }catch(e){ console.error(e); alert('Erro: '+(e.message||e)); }
         }
 
+
         window.onload = () => {
             protegerPagina();
             setTimeout(() => { if (viewAtualSelecionada === 'vw_gestor_reservas_relatorio') carregarCardsControleHoje(); }, 800);
         };
     </script>
 
-    <!-- MODAL CALENDÁRIO SUÍTE -->
+    <!-- MODAL CALENDÁRIO SUÍTE - RELATÓRIOS - CORRIGIDO -->
     <div id="modal-calendario-suite" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-[100]">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative">
             <button onclick="fecharCalendarioSuite()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
@@ -1889,7 +1891,7 @@
         </div>
     </div>
 
-    <!-- MODAL CALENDÁRIO GERAL DAS SUÍTES -->
+    <!-- MODAL CALENDÁRIO GERAL DAS SUÍTES - NOVO -->
     <div id="modal-calendario-geral-relatorios" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-[60]">
         <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6 sm:p-7 relative max-h-[92vh] overflow-y-auto">
             <button onclick="fecharCalendarioGeralRelatorios()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold">✕</button>
@@ -1902,13 +1904,15 @@
                 </div>
             </div>
 
-            <!-- PAINEL COM TODAS AS SUÍTES -->
+            <!-- PAINEL COM TODAS AS SUÍTES - VISIBILIDADE AMPLA -->
             <div class="mb-4">
                 <div class="flex justify-between items-center mb-2">
                     <span class="text-[11px] font-extrabold text-slate-700 uppercase tracking-widest flex items-center gap-2"><i class="fa-solid fa-layer-group text-indigo-600"></i> TODAS AS SUÍTES (<span id="cal-geral-rel-total">0</span>) - PASSE O MOUSE OU CLIQUE</span>
                     <span id="cal-geral-rel-suite-nome" class="text-[11px] font-bold bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full">Suíte: -</span>
                 </div>
-                <div id="cal-geral-rel-painel-suites" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 max-h-[160px] overflow-y-auto p-2 bg-gray-50 rounded-2xl border border-gray-200"></div>
+                <div id="cal-geral-rel-painel-suites" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 max-h-[160px] overflow-y-auto p-2 bg-gray-50 rounded-2xl border border-gray-200">
+                    <!-- preenchido via JS com todas as suítes -->
+                </div>
             </div>
 
             <p class="text-[11px] text-emerald-700 font-medium mb-1 text-center">Dias em <span class="bg-emerald-100 px-1.5 py-0.5 rounded font-bold">verde</span> livres, <span class="bg-red-100 px-1.5 py-0.5 rounded font-bold">vermelho com X</span> ocupados. Azul = seleção.</p><p id="cal-geral-instrucao" class="text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-full px-3 py-1.5 text-center mb-3">Clique em uma data livre para definir CHECK-IN</p>
@@ -1938,6 +1942,7 @@
         </div>
     </div>
 
+
     <!-- MODAL NOVA RESERVA DIRETO DO CALENDÁRIO -->
     <div id="modal-nova-reserva-calendario" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-[70]">
         <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-7 relative max-h-[92vh] overflow-y-auto">
@@ -1962,6 +1967,7 @@
                     <div><label class="block text-xs font-bold text-gray-700 mb-1">Crianças</label><input type="number" id="nova-reserva-criancas" min="0" value="0" class="w-full p-3 border rounded-xl text-sm" onchange="recalcularNovaReservaCalendario()" oninput="recalcularNovaReservaCalendario()"></div>
                     <div><label class="block text-xs font-bold text-gray-700 mb-1">Taxa de Pet</label><select id="nova-reserva-pet" class="w-full p-3 border rounded-xl text-sm font-bold" onchange="recalcularNovaReservaCalendario()"><option value="false">Não</option><option value="true">Sim</option></select></div>
                 </div>
+                <!-- IDADES DAS CRIANÇAS - IGUAL DASHBOARD -->
                 <div id="nova-reserva-container-idades-criancas" class="hidden bg-gray-50 border border-gray-200 p-3 rounded-xl space-y-2">
                     <label class="block text-xs font-bold text-gray-700">Idade(s) da(s) Criança(s) (para cálculo e isenção):</label>
                     <div id="nova-reserva-lista-idades-criancas" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
@@ -1984,4 +1990,3 @@
 
 </body>
 </html>
- 
