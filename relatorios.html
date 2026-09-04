@@ -40,78 +40,83 @@
             <div class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 sm:p-6">
                 <div class="w-full max-w-[98%] mx-auto">
                     
-                    <!-- Cabeçalho - SISTEMA DE CONSULTAS CENTRALIZADO -->
-                    <div class="flex flex-col items-center justify-center mb-6 gap-2 text-center">
-                        <div>
-                            <h1 class="text-xl sm:text-2xl font-extrabold text-gray-800 tracking-wide">Gestão completa de reservas, ocupação e financeiro</h1>
-                            <p id="nomePousadaLogada" class="text-sm font-bold text-blue-600 mt-1 uppercase tracking-wider">Carregando dados...</p>
-                            <p class="text-[11px] text-gray-500 mt-1">Sistema de Consultas detalhadas</p>
+  <!-- Cabeçalho - SISTEMA DE CONSULTAS CENTRALIZADO -->
+                <div class="flex flex-col items-center justify-center mb-6 gap-2 text-center">
+                    <div>
+                        <h1 class="text-xl sm:text-2xl font-extrabold text-gray-800 tracking-wide">Gestão completa de reservas, ocupação e financeiro</h1>
+                        <p id="nomePousadaLogada" class="text-sm font-bold text-blue-600 mt-1 uppercase tracking-wider">Carregando dados...</p>
+                        <p class="text-[11px] text-gray-500 mt-1">Sistema de Consultas detalhadas</p>
+                    </div>
+                </div>
+
+                <!-- Cards de Seleção de Views -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
+                    <!-- Card 1: Financeiro (Azul Profissional) -->
+                    <div onclick="selecionarView('vw_gestor_financeiro_relatorio', 'Extrato Detalhado de Pagamentos', this)" 
+                         class="card-view cursor-pointer bg-slate-50 p-4 rounded-xl shadow-md border-2 border-blue-400 hover:border-blue-600 hover:shadow-lg transition group">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="w-8 h-8 bg-blue-700 text-white rounded-lg flex items-center justify-center text-sm shadow-sm">
+                                <i class="fa-solid fa-wallet"></i>
+                            </div>
+                            <span class="text-[9px] font-bold uppercase tracking-wider bg-blue-100 text-blue-900 px-2 py-0.5 rounded-full border border-blue-300">FINANCEIRO</span>
                         </div>
+                        <h3 class="font-bold text-gray-900 text-xs sm:text-sm group-hover:text-blue-800 transition">Visão Financeira (Extrato)</h3>
+                        <p class="text-[11px] text-gray-500 mt-0.5 truncate">Histórico detalhado de sinais e pagamentos.</p>
                     </div>
 
-                    <!-- Cards de Seleção de Views -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
-                        <div onclick="selecionarView('vw_gestor_financeiro_relatorio', 'Extrato Detalhado de Pagamentos', this)" 
-                             class="card-view cursor-pointer bg-blue-50 p-4 rounded-xl shadow-md border-2 border-blue-300 hover:border-blue-500 hover:shadow-lg transition group">
-                            <div class="flex items-center justify-between mb-2">
-                                <div class="w-8 h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center text-sm shadow-sm">
-                                    <i class="fa-solid fa-wallet"></i>
-                                </div>
-                                <span class="text-[9px] font-bold uppercase tracking-wider bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full border border-blue-200">FINANCEIRO</span>
+                    <!-- Card 2: Hospedagens (Verde Esmeralda) -->
+                    <div onclick="selecionarView('vw_gestor_hospedagens_relatorio', 'Hospedagens, Suítes e Movimentações', this)" 
+                         class="card-view cursor-pointer bg-slate-50 p-4 rounded-xl shadow-md border-2 border-emerald-400 hover:border-emerald-600 hover:shadow-lg transition group">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="w-8 h-8 bg-emerald-700 text-white rounded-lg flex items-center justify-center text-sm shadow-sm">
+                                <i class="fa-solid fa-bed"></i>
                             </div>
-                            <h3 class="font-bold text-gray-900 text-xs sm:text-sm group-hover:text-blue-700 transition">Visão Financeira (Extrato)</h3>
-                            <p class="text-[11px] text-gray-500 mt-0.5 truncate">Histórico detalhado de sinais e pagamentos.</p>
+                            <span class="text-[9px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded-full border border-emerald-300">HOSPEDAGENS</span>
                         </div>
-
-                        <div onclick="selecionarView('vw_gestor_hospedagens_relatorio', 'Hospedagens, Suítes e Movimentações', this)" 
-                             class="card-view cursor-pointer bg-emerald-50 p-4 rounded-xl shadow-md border-2 border-emerald-300 hover:border-emerald-500 hover:shadow-lg transition group">
-                            <div class="flex items-center justify-between mb-2">
-                                <div class="w-8 h-8 bg-emerald-600 text-white rounded-lg flex items-center justify-center text-sm shadow-sm">
-                                    <i class="fa-solid fa-bed"></i>
-                                </div>
-                                <span class="text-[9px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-200">HOSPEDAGENS</span>
-                            </div>
-                            <h3 class="font-bold text-gray-900 text-xs sm:text-sm group-hover:text-emerald-700 transition">Status Geral de Ocupação das Suites</h3>
-                            <p class="text-[11px] text-gray-500 mt-0.5 truncate">Cruzamento de nomes e acomodações.</p>
-                        </div>
-
-                        <div onclick="abrirCalendarioGeralRelatorios()" 
-                             class="card-view cursor-pointer bg-violet-50 p-4 rounded-xl shadow-md border-2 border-violet-300 hover:border-violet-500 hover:shadow-lg transition group">
-                            <div class="flex items-center justify-between mb-2">
-                                <div class="w-8 h-8 bg-violet-600 text-white rounded-lg flex items-center justify-center text-sm shadow-sm">
-                                    <i class="fa-solid fa-calendar-days"></i>
-                                </div>
-                                <span class="text-[9px] font-bold uppercase tracking-wider bg-violet-100 text-violet-800 border border-violet-200 px-2 py-0.5 rounded-full">CALENDÁRIO</span>
-                            </div>
-                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-indigo-700 transition"> Criar Nova Reserva </h3>
-                            <p class="text-[11px] text-gray-500 mt-0.5 truncate">Ocupação mês a mês por suíte.</p>
-                        </div>
-
-                        <div onclick="selecionarView('vw_gestor_tarifas_relatorio', 'Auditoria de Tarifas Especiais', this)" 
-                             class="card-view cursor-pointer bg-amber-50 p-4 rounded-xl shadow-md border-2 border-amber-300 hover:border-amber-500 hover:shadow-lg transition group">
-                            <div class="flex items-center justify-between mb-2">
-                                <div class="w-8 h-8 bg-amber-500 text-white rounded-lg flex items-center justify-center text-sm shadow-sm">
-                                    <i class="fa-solid fa-tags"></i>
-                                </div>
-                                <span class="text-[9px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full border border-amber-200">TARIFAS</span>
-                            </div>
-                            <h3 class="font-bold text-gray-900 text-xs sm:text-sm group-hover:text-amber-700 transition">Tarifas Aplicadas por Suíte</h3>
-                            <p class="text-[11px] text-gray-500 mt-0.5 truncate">Valores e regras vigentes.</p>
-                        </div>
-
-                        <div onclick="selecionarView('vw_gestor_reservas_relatorio', 'Reservas', this)" 
-                             class="card-view cursor-pointer bg-purple-50 p-4 rounded-xl shadow-md border-2 border-purple-400 hover:border-purple-600 hover:shadow-lg transition group">
-                            <div class="flex items-center justify-between mb-2">
-                                <div class="w-8 h-8 bg-purple-600 text-white rounded-lg flex items-center justify-center text-sm shadow-sm">
-                                    <i class="fa-solid fa-calendar-check"></i>
-                                </div>
-                                <span class="text-[9px] font-bold uppercase tracking-wider bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">RESERVAS</span>
-                            </div>
-                            <h3 class="font-bold text-gray-900 text-xs sm:text-sm group-hover:text-purple-700 transition">Reservas</h3>
-                            <p class="text-[11px] text-gray-500 mt-0.5 truncate">Todas as reservas.</p>
-                        </div>
+                        <h3 class="font-bold text-gray-900 text-xs sm:text-sm group-hover:text-emerald-800 transition">Status Geral de Ocupação das Suites</h3>
+                        <p class="text-[11px] text-gray-500 mt-0.5 truncate">Cruzamento de nomes e acomodações.</p>
                     </div>
 
+                    <!-- Card 3: Calendário (Índigo Executivo) -->
+                    <div onclick="abrirCalendarioGeralRelatorios()" 
+                         class="card-view cursor-pointer bg-slate-50 p-4 rounded-xl shadow-md border-2 border-indigo-400 hover:border-indigo-600 hover:shadow-lg transition group">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="w-8 h-8 bg-indigo-700 text-white rounded-lg flex items-center justify-center text-sm shadow-sm">
+                                <i class="fa-solid fa-calendar-days"></i>
+                            </div>
+                            <span class="text-[9px] font-bold uppercase tracking-wider bg-indigo-100 text-indigo-900 border border-indigo-300 px-2 py-0.5 rounded-full">CALENDÁRIO</span>
+                        </div>
+                        <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-indigo-800 transition"> Criar Nova Reserva </h3>
+                        <p class="text-[11px] text-gray-500 mt-0.5 truncate">Ocupação mês a mês por suíte.</p>
+                    </div>
+
+                    <!-- Card 4: Tarifas (Âmbar / Laranja Queimado) -->
+                    <div onclick="selecionarView('vw_gestor_tarifas_relatorio', 'Auditoria de Tarifas Especiais', this)" 
+                         class="card-view cursor-pointer bg-slate-50 p-4 rounded-xl shadow-md border-2 border-amber-400 hover:border-amber-600 hover:shadow-lg transition group">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="w-8 h-8 bg-amber-600 text-white rounded-lg flex items-center justify-center text-sm shadow-sm">
+                                <i class="fa-solid fa-tags"></i>
+                            </div>
+                            <span class="text-[9px] font-bold uppercase tracking-wider bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full border border-amber-300">TARIFAS</span>
+                        </div>
+                        <h3 class="font-bold text-gray-900 text-xs sm:text-sm group-hover:text-amber-800 transition">Tarifas Aplicadas por Suíte</h3>
+                        <p class="text-[11px] text-gray-500 mt-0.5 truncate">Valores e regras vigentes.</p>
+                    </div>
+
+                    <!-- Card 5: Reservas (Rosa / Fúcsia) -->
+                    <div onclick="selecionarView('vw_gestor_reservas_relatorio', 'Reservas', this)" 
+                         class="card-view cursor-pointer bg-slate-50 p-4 rounded-xl shadow-md border-2 border-pink-400 hover:border-pink-600 hover:shadow-lg transition group">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="w-8 h-8 bg-pink-600 text-white rounded-lg flex items-center justify-center text-sm shadow-sm">
+                                <i class="fa-solid fa-calendar-check"></i>
+                            </div>
+                            <span class="text-[9px] font-bold uppercase tracking-wider bg-pink-100 text-pink-900 px-2 py-0.5 rounded-full border border-pink-300">RESERVAS</span>
+                        </div>
+                        <h3 class="font-bold text-gray-900 text-xs sm:text-sm group-hover:text-pink-800 transition">Reservas</h3>
+                        <p class="text-[11px] text-gray-500 mt-0.5 truncate">Todas as reservas.</p>
+                    </div>
+                </div>
+                
                     <!-- CONTAINER DE KPIS FINANCEIROS OU GERAIS -->
                     <div id="wrapperTopoHospedagens" class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-5">
                         <div id="containerKpis" class="flex flex-wrap gap-3"></div>
