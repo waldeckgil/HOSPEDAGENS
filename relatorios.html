@@ -120,7 +120,7 @@
                     <!-- CONTAINER DE KPIS FINANCEIROS OU GERAIS -->
                     <div id="wrapperTopoHospedagens" class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-5">
                         <div id="containerKpis" class="flex flex-wrap gap-3"></div>
-                        <!-- FILTRO DATA AO LADO DOS CARDS DE OCUPAÇÃO - SÓ HOSPEDAGENS -->
+                        <!-- FILTRO DATA AO LADO DOS CARDS DE OCUPAÇÃO -->
                         <div id="containerFiltroDataHospedagens" class="hidden flex flex-wrap items-center gap-2 bg-white p-2.5 rounded-xl border border-gray-200 shadow-sm">
                             <div class="flex items-center gap-1.5 bg-gray-50 border border-gray-300 rounded-lg px-3 py-1.5">
                                 <span class="text-[10px] font-bold text-gray-500 uppercase">De:</span>
@@ -826,7 +826,7 @@
         function obterApelidoColuna(col) {
             let c = col.toLowerCase();
             if (c === 'hospede') return 'HÓSPEDE';
-            if (c === 'suite') return 'SUÍTE ATUAL';
+            if (c === 'suite') return 'SUÍTE';
             if (c === 'suite_origem') return 'SUÍTE ORIGEM';
             if (c === 'transferido_em') return 'TRANSFERIDO EM';
             if (c === 'motivo_transferencia') return 'MOTIVO TRANSF.';
@@ -942,27 +942,80 @@
                         };
                     });
                 } else if (ehViewFinanceiro) {
-                    const { data: pagamentosData, error: errPag } = await supabaseClient
-                        .from('hospede_pagamentos')
-                        .select(`id, valor_pago, forma_pagamento, observacao, criado_em, reserva_id, reservas (hospede_nome, checkin, checkout, valor_total, suite_id, suites ( nome ))`)
-                        .eq('pousada_id', usuarioIdAtual);
-                    error = errPag;
-                    if (pagamentosData) {
-                        registros = pagamentosData.map(p => ({
-                            hospede: p.reservas?.hospede_nome || 'HÓSPEDE NÃO IDENTIFICADO',
-                            suite: p.reservas?.suites?.nome || 'SUÍTE NÃO INFORMADA',
-                            suite_id: p.reservas?.suite_id || null,
-                            checkin: p.reservas?.checkin || '',
-                            checkout: p.reservas?.checkout || '',
-                            diarias: calcularDiarias(p.reservas?.checkin, p.reservas?.checkout),
-                            valor_total: Number(p.reservas?.valor_total || 0),
-                            data_pagamento: p.criado_em,
-                            valor_pago: Number(p.valor_pago || 0),
-                            saldo_restante: Number(p.reservas?.valor_total || 0) - Number(p.valor_pago || 0),
-                            forma_pagamento: p.forma_pagamento || '-',
-                            observacao: p.observacao || '-'
-                        }));
+                    // =========================================================================
+                    // VISÃO FINANCEIRA CONSOLIDADA (INCLUI ESTADIAS COM R$ 0,00 PAGO E DEVEDORAS)
+                    // =========================================================================
+                    if (!suitesDaPousadaCache || suitesDaPousadaCache.length === 0) {
+                        const { data: suData } = await supabaseClient.from('suites').select('id,nome').eq('pousada_id', usuarioIdAtual).order('nome');
+                        if (suData) suitesDaPousadaCache = suData;
                     }
+
+                    // 1. Busca todas as reservas ativas da pousada no período
+                    let queryRes = supabaseClient
+                        .from('reservas')
+                        .select('*')
+                        .eq('pousada_id', usuarioIdAtual)
+                        .neq('status', 'Cancelada')
+                        .neq('status', 'Recusada');
+
+                    if (dataInicio) queryRes = queryRes.gte('checkout', dataInicio);
+                    if (dataFim) queryRes = queryRes.lte('checkin', dataFim);
+                    queryRes = queryRes.order('checkin', { ascending: true, nullsFirst: true });
+
+                    const { data: reservasFin, error: errResFin } = await queryRes;
+                    error = errResFin;
+
+                    // 2. Busca pagamentos já lançados da pousada
+                    const { data: pagamentosFin } = await supabaseClient
+                        .from('hospede_pagamentos')
+                        .select('*')
+                        .eq('pousada_id', usuarioIdAtual);
+
+                    // 3. Mapeia os pagamentos por reserva_id
+                    const pagamentosPorReserva = {};
+                    (pagamentosFin || []).forEach(p => {
+                        if (p.reserva_id) {
+                            if (!pagamentosPorReserva[p.reserva_id]) {
+                                pagamentosPorReserva[p.reserva_id] = [];
+                            }
+                            pagamentosPorReserva[p.reserva_id].push(p);
+                        }
+                    });
+
+                    // 4. Monta as linhas financeiras (todas as estadias e seus saldos)
+                    registros = (reservasFin || []).map(r => {
+                        const suiteObj = (suitesDaPousadaCache || []).find(s => s.id === r.suite_id);
+                        const nomeSuite = suiteObj ? suiteObj.nome : (r.suite || 'SUÍTE');
+                        
+                        const pags = pagamentosPorReserva[r.id] || [];
+                        const totalPago = pags.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
+                        const valorTotal = Number(r.valor_total || 0);
+                        const saldoRestante = valorTotal - totalPago;
+
+                        let formasPag = pags.map(p => p.forma_pagamento).filter(Boolean).join(', ');
+                        if (!formasPag) {
+                            formasPag = totalPago === 0 ? 'Pendente / No Checkout' : '-';
+                        }
+
+                        let dataUltimoPag = pags.length > 0 ? pags[pags.length - 1].criado_em : r.criado_em;
+                        let obsPag = pags.map(p => p.observacao).filter(Boolean).join(' | ') || r.observacao || '-';
+
+                        return {
+                            hospede: r.hospede_nome || 'HÓSPEDE NÃO IDENTIFICADO',
+                            suite: nomeSuite,
+                            suite_id: r.suite_id,
+                            checkin: r.checkin || '',
+                            checkout: r.checkout || '',
+                            diarias: calcularDiarias(r.checkin, r.checkout),
+                            valor_total: valorTotal,
+                            data_pagamento: dataUltimoPag,
+                            valor_pago: totalPago,
+                            saldo_restante: saldoRestante,
+                            forma_pagamento: formasPag,
+                            observacao: obsPag,
+                            status: r.status || '-'
+                        };
+                    });
                 } else if (ehViewHospedagens) {
                     const { data: todasSuites, error: errSuites } = await supabaseClient
                         .from('suites')
@@ -1004,7 +1057,7 @@
                     }
                 } else if (ehViewReservas) {
                     // =========================================================================
-                    // CONSULTA DIRETA E SEGURA NA TABELA RESERVAS (SEM ERRO 400 DE SCHEMA CACHE)
+                    // CONSULTA DIRETA E SEGURA NA TABELA RESERVAS
                     // =========================================================================
                     if (!suitesDaPousadaCache || suitesDaPousadaCache.length === 0) {
                         const { data: suData } = await supabaseClient.from('suites').select('id,nome').eq('pousada_id', usuarioIdAtual).order('nome');
@@ -1022,7 +1075,6 @@
                     const res = await query;
                     error = res.error;
 
-                    // Busca pagamentos de forma agrupada para calcular saldo exato por reserva
                     const { data: pagamentosRes } = await supabaseClient
                         .from('hospede_pagamentos')
                         .select('reserva_id, valor_pago')
@@ -1048,7 +1100,6 @@
                             }
                         }
 
-                        // Localização segura dos nomes de suíte em memória
                         const suiteAtual = (suitesDaPousadaCache || []).find(s => s.id === r.suite_id);
                         const suiteOrigem = (suitesDaPousadaCache || []).find(s => s.id === r.suite_origem_id);
 
@@ -1125,6 +1176,17 @@
                             });
                         }
                     }
+                } else if (ehViewFinanceiro) {
+                    // Respeita filtro de período de estadia no extrato
+                    registrosFiltrados = registrosFiltrados.filter(row => {
+                        let chk = String(row.checkin || '').substring(0, 10);
+                        let out = String(row.checkout || '').substring(0, 10);
+                        if (!chk) return true;
+                        if (dataInicio && dataFim) return (chk <= dataFim && out >= dataInicio);
+                        else if (dataInicio) return out >= dataInicio;
+                        else if (dataFim) return chk <= dataFim;
+                        return true;
+                    });
                 } else if (!ehViewTarifas && !ehViewHospedagens) {
                     registrosFiltrados = registrosFiltrados.filter(row => {
                         let valData = row['data_pagamento'] || row['checkin'] || '';
@@ -2032,7 +2094,7 @@
                 <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
             </div>
 
-            <div id="cal-geral-rel-grid" class="grid grid-cols-7 gap-1.5 text-center text-sm min-h-[240px]"></div>
+            <div id="cal-grid-dias" class="grid grid-cols-7 gap-1.5 text-center text-sm min-h-[240px]"></div>
 
             <div class="mt-5 flex flex-wrap justify-center gap-3 text-[11px] font-bold">
                 <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-emerald-100 border border-emerald-300"></span> Livre</span>
