@@ -1,32 +1,3 @@
-Aqui está o arquivo dashboard.html completo e atualizado com as duas novas
-implementações:
-
-🚀 O que foi integrado:
-
-1.  Identificação Nominal de Conflito de Datas (1 ou Múltiplos Hóspedes):
-      - Ao detectar conflito de datas, o sistema varre o período e lista
-        exatamente quem está ocupando ou reservou a suíte.
-      - Se for 1 hóspede: mostra o nome e o período.
-      - Se forem 2 ou mais hóspedes: lista com marcadores (•) cada um dos
-        hóspedes e suas respectivas datas de entrada e saída.
-2.  Transferência de Quarto / Suíte no Modal de Edição:
-      - O modal de edição agora conta com o seletor de Acomodação / Suíte.
-      - Ao selecionar outra suíte, o sistema ativa o modo de transferência:
-          - Exibe o alerta: 🔄 Transferência: [Suíte Atual] ➔ [Nova Suíte];
-          - Recalcula o valor total e o saldo com base na diária e tarifas
-            especiais da nova suíte;
-          - Valida a capacidade máxima da nova suíte;
-          - Valida se a suíte de destino está livre (e se estiver ocupada, lista
-            quem está nela);
-          - Disponibiliza campo para justificativa (Upgrade, Pedido do Hóspede,
-            Manutenção);
-          - Ao salvar, grava no banco as colunas criadas (suite_origem_id,
-            transferido_em, motivo_transferencia, transferido_por), atualiza a
-            reserva e remaneja os status físicos das suítes.
-3.  Selo Visual de Transferência no Card:
-      - Reservas que foram transferidas exibem no card a tag: 🔄 Transferido de:
-        [Nome da Suíte de Origem].
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -205,7 +176,7 @@ implementações:
         </div>
     </div>
 
-    <!-- MODAL DE CONFIRMAÇÃO DE ANTECIPAÇÃO DE CHECK-IN -->
+    <!-- NOVO: MODAL DE CONFIRMAÇÃO DE ANTECIPAÇÃO DE CHECK-IN -->
     <div id="modal-confirmacao-antecipacao" class="hidden fixed inset-0 bg-black bg-opacity-65 flex items-center justify-center p-4 z-[75]">
         <div class="bg-white p-6 sm:p-7 rounded-3xl w-full max-w-md shadow-2xl space-y-4 border border-blue-100">
             <div class="flex items-center gap-3">
@@ -267,48 +238,16 @@ implementações:
                 </div>
             </div>
             
-            <!-- ALERTA DE ERRO COM SUPORTE A LISTAGEM DE CONFLITOS -->
-            <div id="modal-erro-alerta" class="hidden mb-4 bg-red-50 border-l-4 border-red-500 p-3.5 rounded-xl text-red-900 text-xs sm:text-sm font-semibold flex items-start gap-2 shadow-xs">
-                <span class="text-base">⚠️</span>
-                <div id="modal-erro-texto" class="flex-1 leading-relaxed">Mensagem de erro aqui</div>
+            <div id="modal-erro-alerta" class="hidden mb-4 bg-red-50 border-l-4 border-red-500 p-3 rounded-xl text-red-900 text-xs sm:text-sm font-bold flex items-center gap-2">
+                <span>⚠️</span>
+                <span id="modal-erro-texto">Mensagem de erro aqui</span>
             </div>
 
             <form id="form-edicao" class="space-y-3">
-                <input type="hidden" id="edit-suite-id-original">
+                <input type="hidden" id="edit-suite-id">
                 <input type="hidden" id="edit-status-original">
                 <input type="hidden" id="edit-reserva-id">
                 
-                <!-- SELETOR DE SUÍTE COM RECURSO DE TRANSFERÊNCIA DE QUARTO -->
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1 flex items-center justify-between">
-                        <span>Acomodação / Suíte</span>
-                        <span id="badge-transferencia-topo" class="hidden text-[10px] bg-purple-100 text-purple-800 px-2 py-0.5 rounded-md font-extrabold uppercase">🔄 Transferência</span>
-                    </label>
-                    <select id="edit-suite-id" class="w-full p-3 border-2 border-blue-200 focus:border-blue-600 rounded-xl font-bold bg-white text-sm" onchange="aoMudarSuiteModal()">
-                        <!-- Preenchido via JS com as suítes -->
-                    </select>
-                </div>
-
-                <!-- PAINEL DE AVISO E JUSTIFICATIVA DE TRANSFERÊNCIA -->
-                <div id="container-transferencia-suite" class="hidden bg-purple-50 border-2 border-purple-300 p-3.5 rounded-xl space-y-2 text-xs text-purple-950">
-                    <div class="flex items-center gap-2 font-bold text-purple-900">
-                        <i class="fa-solid fa-arrows-rotate text-sm"></i>
-                        <span id="texto-resumo-transferencia">Transferindo hóspede de quarto</span>
-                    </div>
-                    <p class="text-[11px] text-purple-800 leading-snug">
-                        Todos os dados cadastrais e pagamentos já realizados acompanharão a nova reserva. A diária e o saldo serão recalculados pela nova suíte.
-                    </p>
-                    <div>
-                        <label class="block text-[10px] font-bold uppercase tracking-wider text-purple-900 mb-1">Motivo da Transferência (Opcional):</label>
-                        <input type="text" id="edit-motivo-transferencia" placeholder="Ex: Upgrade, pedido do cliente, manutenção no ar..." class="w-full p-2.5 border border-purple-300 rounded-xl text-xs bg-white">
-                        <div class="mt-1.5 flex flex-wrap gap-1.5">
-                            <button type="button" onclick="document.getElementById('edit-motivo-transferencia').value='Upgrade de quarto'; aoMudarMotiveTransfer();" class="text-[9px] bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-200 px-2 py-0.5 rounded-md font-bold">Upgrade</button>
-                            <button type="button" onclick="document.getElementById('edit-motivo-transferencia').value='Solicitação do hóspede'; aoMudarMotiveTransfer();" class="text-[9px] bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-200 px-2 py-0.5 rounded-md font-bold">Pedido do Hóspede</button>
-                            <button type="button" onclick="document.getElementById('edit-motivo-transferencia').value='Manutenção no quarto anterior'; aoMudarMotiveTransfer();" class="text-[9px] bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-200 px-2 py-0.5 rounded-md font-bold">Manutenção</button>
-                        </div>
-                    </div>
-                </div>
-
                 <div>
                     <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Status Físico da Suíte</label>
                     <select id="edit-status" class="w-full p-3 border rounded-xl font-bold bg-gray-50 text-sm" onchange="(async () => { await verificarStatusModal(); })()">
@@ -697,10 +636,10 @@ implementações:
             setTimeout(() => { toast.classList.add('translate-y-24', 'opacity-0'); }, 3500);
         }
 
-        function mostrarErroModal(mensagemHtml) {
+        function mostrarErroModal(mensagem) {
             const alertaEl = document.getElementById('modal-erro-alerta');
             const textoEl = document.getElementById('modal-erro-texto');
-            textoEl.innerHTML = mensagemHtml;
+            textoEl.innerText = mensagem;
             alertaEl.classList.remove('hidden');
             alertaEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
@@ -779,48 +718,6 @@ implementações:
             if (dias === 0) return { texto: `🚀 Chegada HOJE!`, classe: 'bg-green-100 text-green-800 border-green-300 font-bold' };
             if (dias === 1) return { texto: `🔔 Chegada amanhã`, classe: 'bg-indigo-100 text-indigo-800 border-indigo-300' };
             return { texto: `Chegada em ${dias} dias`, classe: 'bg-blue-100 text-blue-800 border-blue-200' };
-        }
-
-        // =========================================================================
-        // LOCALIZADOR DETALHADO DE CONFLITOS DE DATAS (NOMINAL)
-        // =========================================================================
-        function obterConflitosDatas(suiteId, checkin, checkout, reservaIdIgnorar = null) {
-            if (!suiteId || !checkin || !checkout) return [];
-            return reservasGlobaisCache.filter(r => {
-                if (r.suite_id !== suiteId) return false;
-                if (reservaIdIgnorar && r.id === reservaIdIgnorar) return false;
-                if (r.status === 'Cancelada' || r.status === 'Recusada' || r.status === 'Finalizada') return false;
-                // Sobreposição de intervalos: (A_in < B_out) e (A_out > B_in)
-                return (checkin < r.checkout && checkout > r.checkin);
-            });
-        }
-
-        function gerarMensagemErroConflito(conflitos, nomeSuite = '') {
-            if (!conflitos || conflitos.length === 0) {
-                return `Já existe uma reserva confirmada para esta acomodação nestas datas!`;
-            }
-
-            const prefixoSuite = nomeSuite ? `na acomodação <strong>${nomeSuite.toUpperCase()}</strong>` : `para esta suíte`;
-
-            if (conflitos.length === 1) {
-                const c = conflitos[0];
-                const nomeHosp = c.hospede_nome ? `<strong>${c.hospede_nome.toUpperCase()}</strong>` : 'outro hóspede';
-                return `⚠️ <strong>Conflito de Datas:</strong> Já existe uma reserva confirmada ${prefixoSuite} para o hóspede ${nomeHosp} no período de <strong>${formatarDataSimples(c.checkin)} até ${formatarDataSimples(c.checkout)}</strong>!`;
-            }
-
-            // 2 ou mais hóspedes em conflito
-            let listaHtml = conflitos.map(c => {
-                const nomeH = c.hospede_nome ? `<strong>${c.hospede_nome.toUpperCase()}</strong>` : 'Hóspede não identificado';
-                return `<div class="mt-1 pl-2 border-l-2 border-red-400">• ${nomeH}: de ${formatarDataSimples(c.checkin)} a ${formatarDataSimples(c.checkout)} (${c.status})</div>`;
-            }).join('');
-
-            return `
-                <div>
-                    <strong>⚠️ Conflito de Datas Múltiplo:</strong> Já existem <strong>${conflitos.length} reservas confirmadas</strong> ${prefixoSuite} no período informado:
-                    <div class="mt-1.5 space-y-0.5 text-xs bg-red-100/70 p-2 rounded-lg border border-red-200">${listaHtml}</div>
-                    <div class="mt-1 text-[11px] text-red-700">Ajuste as datas ou selecione outra acomodação livre antes de prosseguir.</div>
-                </div>
-            `;
         }
 
         async function carregarPousada() {
@@ -1053,6 +950,7 @@ implementações:
                 const aprovadas = reservasDaSuite.filter(r => r.status === 'Aprovada');
                 const ocupadaAgora = aprovadas.some(r => r.checkin <= hojeStr && r.checkout > hojeStr);
 
+                // CHECAGEM DE TARIFA ESPECIAL VIGENTE NO TOPO
                 const temTarifaEspecialTopo = tarifasEspeciaisGlobaisCache.some(t => {
                     const atendeSuite = (t.suite_id === suite.id || !t.suite_id);
                     const dentroDaVigencia = t.data_inicio && t.data_fim && hojeStr >= t.data_inicio && hojeStr <= t.data_fim;
@@ -1267,18 +1165,6 @@ implementações:
                         const totalPago = pagamentosDestaReserva.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
                         const saldoRestante = valorTotal - totalPago;
 
-                        // SELO DE TRANSFERÊNCIA DE SUÍTE
-                        let tagTransferenciaHtml = '';
-                        if (aprovada.suite_origem_id) {
-                            const suiteOrigemObj = suitesGlobaisCache.find(s => s.id === aprovada.suite_origem_id);
-                            const nomeSuiteOrigem = suiteOrigemObj ? suiteOrigemObj.nome : 'Outra Suíte';
-                            tagTransferenciaHtml = `
-                                <span class="inline-flex items-center gap-1 bg-purple-100 text-purple-900 border border-purple-300 text-[10px] font-extrabold px-2 py-0.5 rounded-md" title="Transferido em ${formatarDataHora(aprovada.transferido_em)}: ${aprovada.motivo_transferencia || 'Sem motivo'}">
-                                    <i class="fa-solid fa-arrows-rotate text-purple-700"></i> Transf. de: ${nomeSuiteOrigem}
-                                </span>
-                            `;
-                        }
-
                         let tagDataPrazoTopo = '';
                         if (isFutura) {
                             tagDataPrazoTopo = `
@@ -1312,7 +1198,6 @@ implementações:
                         container.innerHTML += `
                             <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md ${bgCardClasses} border-l-4 ${temaSuite.borderActive} flex flex-col justify-between transition hover:shadow-lg">
                                 <div>
-                                    <!-- CABEÇALHO DO CARD -->
                                     <div class="flex justify-between items-start mb-2 gap-2">
                                         <div class="flex-1">
                                             <div class="flex flex-wrap items-center gap-2 mb-1">
@@ -1321,9 +1206,7 @@ implementações:
                                                 </div>
                                                 <h2 class="text-base font-bold text-gray-900">${suite.nome}${sufixoTitulo}${nomeHospedeExibicao}</h2>
                                                 ${tagPausadaHtml}
-                                                ${tagTransferenciaHtml}
                                             </div>
-                                            <!-- DATA E PRAZO LOGO AO LADO DO NOME -->
                                             <div class="mt-1 flex flex-wrap items-center gap-1.5">
                                                 ${tagDataPrazoTopo}
                                             </div>
@@ -1336,14 +1219,12 @@ implementações:
                                         </div>
                                     </div>
 
-                                    <!-- DIÁRIA PADRÃO, TARIFAS E CALENDÁRIO -->
                                     <div class="flex flex-wrap items-center gap-2 mt-2">
                                         <span class="text-[11px] font-bold text-slate-700 bg-white/70 px-2 py-0.5 rounded-md border border-black/5">Diária (2 Ad.): ${formatarMoeda(suite.valor_diaria)}</span>
                                         ${htmlTarifaBadge}
                                         ${htmlBotaoCalendario}
                                     </div>
 
-                                    <!-- SALDO RESTANTE DIRETO NA CAPA -->
                                     <div class="mt-3 p-2.5 rounded-xl bg-white/80 border border-black/10 shadow-2xs flex flex-wrap items-center justify-between gap-2">
                                         <div class="flex items-center gap-2">
                                             <span class="text-[10px] uppercase font-bold text-gray-500">Saldo Restante:</span>
@@ -1360,7 +1241,6 @@ implementações:
 
                                     ${htmlAlertaTopo}
 
-                                    <!-- DETALHES COMPLEMENTARES EXPANSÍVEIS -->
                                     <div class="card-detalhes hidden mt-3 pt-3 border-t border-black/10 text-xs sm:text-sm space-y-1.5">
                                         <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">Hóspede:</span> <span class="font-bold text-gray-900">${aprovada.hospede_nome}</span></p>
                                         <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">WhatsApp:</span> <a href="${linkZap}" target="_blank" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${aprovada.whatsapp_hospede || 'Não informado'}</a></p>
@@ -1386,7 +1266,6 @@ implementações:
                                         </div>
                                     </div>
                                     
-                                    <!-- AÇÕES DO CARD -->
                                     <div class="mt-4 pt-3 flex justify-between items-center border-t border-black/10">
                                         <button type="button" onclick="alternarExpandirCard(this)" class="text-xs font-bold text-gray-700 hover:text-gray-900 underline">
                                             Expandir Detalhes ▾
@@ -1400,7 +1279,6 @@ implementações:
                     }
                 } 
                 
-                // CASO DISPONÍVEL OU LIMPEZA
                 if (aprovadasDaSuite.length === 0 && pendentesDaSuite.length === 0) {
                     const isDisponivel = suite.status === 'Disponível';
                     
@@ -1452,7 +1330,6 @@ implementações:
                         </div>`;
                 }
 
-                // RESERVAS PENDENTES
                 for (let index = 0; index < pendentesDaSuite.length; index++) {
                     const pend = pendentesDaSuite[index];
                     const linkZapPend = gerarLinkWhatsApp(pend.whatsapp_hospede, pend.hospede_nome, pend.checkin, pend.checkout);
@@ -1604,32 +1481,13 @@ implementações:
             camposLimposParaNovaReserva = false;
             limparErroModal();
             aplicarVisibilidadeTaxaPet();
-
-            // POPULA O SELETOR DE SUÍTES PARA PERMITIR TRANSFERÊNCIA
-            const selectSuites = document.getElementById('edit-suite-id');
-            selectSuites.innerHTML = '';
-            suitesGlobaisCache.forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s.id;
-                opt.textContent = s.nome.toUpperCase();
-                selectSuites.appendChild(opt);
-            });
-            selectSuites.value = id;
-            document.getElementById('edit-suite-id-original').value = id;
-
-            // Reset painel transferência
-            document.getElementById('container-transferencia-suite').classList.add('hidden');
-            document.getElementById('badge-transferencia-topo').classList.add('hidden');
-            const elMotivo = document.getElementById('edit-motivo-transferencia');
-            if (elMotivo) elMotivo.value = '';
-
+            document.getElementById('edit-suite-id').value = id;
             document.getElementById('edit-status').value = status;
             document.getElementById('edit-status-original').value = status;
             document.getElementById('edit-valor-sinal').value = '';
             document.getElementById('edit-forma-pagamento').value = 'Pix / Sinal';
             document.getElementById('edit-observacao').value = '';
             document.getElementById('modal-titulo').innerText = "Gerenciar Suíte: " + nome;
-            
             try {
                 const suiteDados = suitesGlobaisCache.find(s => s.id === id);
                 if (suiteDados) {
@@ -1705,51 +1563,6 @@ implementações:
             aplicarVisibilidadeTaxaPet();
             await verificarStatusModal();
             await recalcularValoresModalEdicao();
-        }
-
-        // =========================================================================
-        // HANDLER DE TROCA DE SUÍTE NO MODAL (TRANSFERÊNCIA)
-        // =========================================================================
-        async function aoMudarSuiteModal() {
-            limparErroModal();
-            const suiteIdAtual = document.getElementById('edit-suite-id').value;
-            const suiteIdOrig = document.getElementById('edit-suite-id-original').value;
-            const reservaId = document.getElementById('edit-reserva-id').value;
-            const containerTransf = document.getElementById('container-transferencia-suite');
-            const badgeTransf = document.getElementById('badge-transferencia-topo');
-            const textoResumo = document.getElementById('texto-resumo-transferencia');
-
-            const suiteNovaObj = suitesGlobaisCache.find(s => s.id === suiteIdAtual);
-            const suiteAntigaObj = suitesGlobaisCache.find(s => s.id === suiteIdOrig);
-
-            // Se for uma reserva existente e o quarto foi trocado
-            if (reservaId && suiteIdAtual !== suiteIdOrig) {
-                containerTransf.classList.remove('hidden');
-                badgeTransf.classList.remove('hidden');
-                textoResumo.innerHTML = `Transferindo: <strong class="text-purple-950">${suiteAntigaObj?.nome || 'Suíte Antiga'}</strong> ➔ <strong class="text-blue-900">${suiteNovaObj?.nome || 'Nova Suíte'}</strong>`;
-            } else {
-                containerTransf.classList.add('hidden');
-                badgeTransf.classList.add('hidden');
-            }
-
-            // Atualiza capacidade informativa
-            const capInfoEl = document.getElementById('info-capacidade-suite');
-            if (capInfoEl && suiteNovaObj) {
-                const capMax = Number(suiteNovaObj.capacidade_hospedes) || 0;
-                const inclusos = Number(suiteNovaObj.hospedes_inclusos) || 2;
-                if (capMax > 0) {
-                    capInfoEl.innerHTML = `<span>🏨 Capacidade real desta suíte: <strong>${capMax} pessoa(s)</strong> no total (adultos + crianças) | ${inclusos} incluso(s)</span>`;
-                } else {
-                    capInfoEl.innerHTML = `<span>🏨 Capacidade não definida (defina em Configurar Pousada)</span>`;
-                }
-            }
-
-            // Recalcula valores de acordo com a nova suíte
-            await recalcularValoresModalEdicao();
-        }
-
-        function aoMudarMotiveTransfer() {
-            // Auxiliar para preenchimento rápido
         }
 
         async function mudarStatusReserva(reservaId, novoStatus, motivoRecusa = null) {
@@ -2170,7 +1983,6 @@ implementações:
 
         async function executarSalvamento(suiteId, status) {
             const reservaIdEditada = document.getElementById('edit-reserva-id').value;
-            const suiteIdOriginal = document.getElementById('edit-suite-id-original').value;
             const campoSinalStr = document.getElementById('edit-valor-sinal').value.trim();
             const valorSinalInformado = parseFloat(campoSinalStr) || 0;
             const formaPagamentoSelecionada = document.getElementById('edit-forma-pagamento').value || 'Pix / Sinal';
@@ -2202,7 +2014,6 @@ implementações:
                 document.getElementById('edit-checkout').value = checkoutVal;
             }
 
-            // Validação de capacidade da suíte escolhida
             try {
                 const suiteCapSave = suitesGlobaisCache.find(s => s.id === suiteId);
                 if (suiteCapSave) {
@@ -2215,18 +2026,22 @@ implementações:
                 }
             } catch(e) { console.warn(e); }
 
-            // =========================================================================
-            // CHECAGEM DE CONFLITO NOMINAL DETALHADA (1 OU MÚLTIPLOS HÓSPEDES)
-            // =========================================================================
-            const conflitosDetectados = obterConflitosDatas(suiteId, checkinVal, checkoutVal, reservaIdEditada);
-            if (conflitosDetectados.length > 0) {
-                const suiteAlvoObj = suitesGlobaisCache.find(s => s.id === suiteId);
-                const msgErro = gerarMensagemErroConflito(conflitosDetectados, suiteAlvoObj?.nome || '');
-                mostrarErroModal(msgErro);
-                return;
+            try {
+                const { data: temConflito, error: erroConflito } = await supabaseClient.rpc('verificar_conflito_reserva', { 
+                    p_suite_id: suiteId, 
+                    p_checkin: checkinVal, 
+                    p_checkout: checkoutVal,
+                    p_reserva_id: reservaIdEditada ? reservaIdEditada : null
+                });
+                
+                if (!erroConflito && temConflito === true) {
+                    mostrarErroModal("Já existe uma reserva confirmada para esta suíte nestas datas!");
+                    return; 
+                }
+            } catch (err) {
+                console.error("Erro ao verificar conflito de reservas:", err);
             }
 
-            // Dados da reserva preparados
             const dadosReserva = {
                 pousada_id: usuarioIdAtual,
                 suite_id: suiteId,
@@ -2246,15 +2061,6 @@ implementações:
                 observacao: observacaoInformada,
                 status: status === 'Checkout' ? 'Finalizada' : 'Aprovada'
             };
-
-            // SE HOUVE TRANSFERÊNCIA DE SUÍTE: GRAVA CAMPOS DE AUDITORIA
-            const houveTransferencia = (reservaIdEditada && suiteIdOriginal && suiteId !== suiteIdOriginal);
-            if (houveTransferencia) {
-                dadosReserva.suite_origem_id = suiteIdOriginal;
-                dadosReserva.transferido_em = new Date().toISOString();
-                dadosReserva.motivo_transferencia = document.getElementById('edit-motivo-transferencia')?.value?.trim() || 'Transferência de acomodação';
-                dadosReserva.transferido_por = usuarioIdAtual;
-            }
 
             let valorTotalCalculado = 0;
             try {
@@ -2300,16 +2106,7 @@ implementações:
                 statusDestino = 'Disponível';
             }
 
-            // Atualiza suíte de destino
             await supabaseClient.from('suites').update({ status: statusDestino }).eq('id', suiteId);
-
-            // Se transferiu quarto ocupado de imediato, libera suíte anterior para Limpeza
-            if (houveTransferencia) {
-                const hojeStr = new Date().toLocaleDateString('sv-SE');
-                if (checkinVal <= hojeStr && checkoutVal > hojeStr) {
-                    await supabaseClient.from('suites').update({ status: 'Limpeza' }).eq('id', suiteIdOriginal);
-                }
-            }
 
             if (status === 'Reservado' || status === 'Ocupada' || status === 'Aprovada' || status === 'Checkout') {
                 if (reservaIdEditada) {
@@ -2343,7 +2140,7 @@ implementações:
                     reserva_id: reservaIdFinal,
                     valor_pago: valorSinalInformado,
                     forma_pagamento: formaPagamentoSelecionada,
-                    observacao: status === 'Checkout' ? 'Quitado no encerramento (Checkout)' : (houveTransferencia ? 'Lançado após transferência de suíte' : 'Lançado via painel de gestão')
+                    observacao: status === 'Checkout' ? 'Quitado no encerramento (Checkout)' : 'Lançado via painel de gestão'
                 }]);
 
                 if (errPag) {
@@ -2353,8 +2150,7 @@ implementações:
 
             fecharModal();
             carregarDashboard();
-            const msgSucesso = houveTransferencia ? "Hóspede transferido de suíte com sucesso!" : "Dados salvos com sucesso!";
-            mostrarToast("Sucesso", msgSucesso);
+            mostrarToast("Sucesso", "Dados salvos com sucesso!");
         }
 
         document.getElementById('form-edicao').onsubmit = async (e) => {
@@ -2364,7 +2160,6 @@ implementações:
             const status = document.getElementById('edit-status').value;
             const statusOriginal = document.getElementById('edit-status-original').value;
             const suiteId = document.getElementById('edit-suite-id').value;
-            const suiteIdOriginal = document.getElementById('edit-suite-id-original').value;
             const reservaIdEditada = document.getElementById('edit-reserva-id').value;
             const checkinInformado = document.getElementById('edit-checkin').value;
             const checkoutInformado = document.getElementById('edit-checkout').value;
@@ -2373,17 +2168,7 @@ implementações:
             const suiteObj = suitesGlobaisCache.find(s => s.id === suiteId);
             const estaPausada = suiteObj && (suiteObj.ativa === false || suiteObj.ativa === 'false');
             if (estaPausada && status !== 'Limpeza' && status !== 'Checkout') {
-                mostrarErroModal("A suíte selecionada está pausada! Os únicos status permitidos para uma suíte pausada são Limpeza ou Checkout.");
-                return;
-            }
-
-            // =========================================================================
-            // VERIFICAÇÃO PRÉVIA DE CONFLITOS NOMINAIS (1 OU MÚLTIPLOS)
-            // =========================================================================
-            const conflitosPrevios = obterConflitosDatas(suiteId, checkinInformado, checkoutInformado, reservaIdEditada);
-            if (conflitosPrevios.length > 0) {
-                const msgErro = gerarMensagemErroConflito(conflitosPrevios, suiteObj?.nome || '');
-                mostrarErroModal(msgErro);
+                mostrarErroModal("A suíte está pausada! Para poder alterar o status para outras opções, você precisa ativar a suíte na tela de Configuração de Suíte. Os únicos status permitidos para uma suíte pausada no momento são Limpeza ou Checkout.");
                 return;
             }
 
@@ -2420,6 +2205,7 @@ implementações:
                 reservaOriginalObj = reservasGlobaisCache.find(r => r.id === reservaIdEditada);
                 if (reservaOriginalObj && reservaOriginalObj.checkin) {
                     const checkinOriginal = reservaOriginalObj.checkin;
+                    // Se o novo check-in é anterior ao original, OU se era Reserva Futura e virou Ocupada com check-in hoje
                     if (checkinInformado < checkinOriginal || (statusOriginal === 'Reservado' && status === 'Ocupada' && checkinOriginal > hojeStr)) {
                         houveAntecipacao = true;
                     }
@@ -2427,6 +2213,7 @@ implementações:
             }
 
             if (houveAntecipacao && reservaOriginalObj) {
+                // Garante valores recalculados na tela
                 await recalcularValoresModalEdicao();
                 
                 const nomeHospede = document.getElementById('edit-hospede').value || reservaOriginalObj.hospede_nome || 'Hóspede';
