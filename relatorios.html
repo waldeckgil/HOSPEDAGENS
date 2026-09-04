@@ -238,7 +238,7 @@
                                 </div>
                             </div>
                             <!-- Reservas -->
-                            <div id="cardReservasHoje" onclick="filtrarPorCardHoje('reservas')" title="Clique para ver todas as reservas (remover filtro de hoje)" class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3 min-w-[150px] cursor-pointer hover:shadow-md hover:border-blue-300 hover:bg-blue-50/50 transition-all group">
+                            <div id="cardReservasHoje" onclick="filtrarPorCardHoje('reservas')" title="Clique para ver todas as reservas (remover filtro de hoje)" class="bg-white p-3 rounded-xl border border-blue-200 shadow-sm flex items-center gap-3 min-w-[150px] cursor-pointer hover:shadow-md hover:border-blue-300 hover:bg-blue-50/50 transition-all group">
                                 <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm shadow-sm group-hover:scale-110 transition">
                                     <i class="fa-solid fa-money-bill"></i>
                                 </div>
@@ -942,15 +942,11 @@
                         };
                     });
                 } else if (ehViewFinanceiro) {
-                    // =========================================================================
-                    // VISÃO FINANCEIRA CONSOLIDADA (INCLUI ESTADIAS COM R$ 0,00 PAGO E DEVEDORAS)
-                    // =========================================================================
                     if (!suitesDaPousadaCache || suitesDaPousadaCache.length === 0) {
                         const { data: suData } = await supabaseClient.from('suites').select('id,nome').eq('pousada_id', usuarioIdAtual).order('nome');
                         if (suData) suitesDaPousadaCache = suData;
                     }
 
-                    // 1. Busca todas as reservas ativas da pousada no período
                     let queryRes = supabaseClient
                         .from('reservas')
                         .select('*')
@@ -965,13 +961,11 @@
                     const { data: reservasFin, error: errResFin } = await queryRes;
                     error = errResFin;
 
-                    // 2. Busca pagamentos já lançados da pousada
                     const { data: pagamentosFin } = await supabaseClient
                         .from('hospede_pagamentos')
                         .select('*')
                         .eq('pousada_id', usuarioIdAtual);
 
-                    // 3. Mapeia os pagamentos por reserva_id
                     const pagamentosPorReserva = {};
                     (pagamentosFin || []).forEach(p => {
                         if (p.reserva_id) {
@@ -982,7 +976,6 @@
                         }
                     });
 
-                    // 4. Monta as linhas financeiras (todas as estadias e seus saldos)
                     registros = (reservasFin || []).map(r => {
                         const suiteObj = (suitesDaPousadaCache || []).find(s => s.id === r.suite_id);
                         const nomeSuite = suiteObj ? suiteObj.nome : (r.suite || 'SUÍTE');
@@ -1056,9 +1049,6 @@
                         });
                     }
                 } else if (ehViewReservas) {
-                    // =========================================================================
-                    // CONSULTA DIRETA E SEGURA NA TABELA RESERVAS
-                    // =========================================================================
                     if (!suitesDaPousadaCache || suitesDaPousadaCache.length === 0) {
                         const { data: suData } = await supabaseClient.from('suites').select('id,nome').eq('pousada_id', usuarioIdAtual).order('nome');
                         if (suData) suitesDaPousadaCache = suData;
@@ -1177,7 +1167,6 @@
                         }
                     }
                 } else if (ehViewFinanceiro) {
-                    // Respeita filtro de período de estadia no extrato
                     registrosFiltrados = registrosFiltrados.filter(row => {
                         let chk = String(row.checkin || '').substring(0, 10);
                         let out = String(row.checkout || '').substring(0, 10);
@@ -1647,7 +1636,7 @@
         }
 
         // =========================================================================
-        // CALENDÁRIO GERAL NO RELATÓRIOS
+        // CALENDÁRIO GERAL NO RELATÓRIOS (BLINDAGEM CONTRA ERRO DE INNERHTML)
         // =========================================================================
         let calGeralRelSuiteIndex = 0;
         let calGeralRelDataRef = new Date();
@@ -1660,7 +1649,13 @@
             if (!usuarioIdAtual) return;
             
             const modal = document.getElementById('modal-calendario-geral-relatorios');
-            document.getElementById('cal-geral-rel-suite-nome').innerText = 'Carregando...';
+            if (!modal) {
+                console.error('Modal modal-calendario-geral-relatorios não encontrado no DOM!');
+                return;
+            }
+
+            const elSuiteNome = document.getElementById('cal-geral-rel-suite-nome');
+            if (elSuiteNome) elSuiteNome.innerText = 'Carregando...';
             
             try {
                 const { data: suites } = await supabaseClient.from('suites').select('id,nome').eq('pousada_id', usuarioIdAtual).order('nome');
@@ -1676,16 +1671,20 @@
                 
                 calGeralRelSuiteIndex = 0;
                 calGeralRelDataRef = new Date();
+                
+                // Exibe o modal primeiro para garantir que os elementos estejam ativos no DOM
+                modal.classList.remove('hidden');
+
                 renderizarPainelSuitesRelatorios();
                 renderizarCalendarioGeralRelatorios();
-                modal.classList.remove('hidden');
             } catch(e) {
                 console.error('Erro calendário geral', e);
             }
         }
 
         function fecharCalendarioGeralRelatorios() {
-            document.getElementById('modal-calendario-geral-relatorios').classList.add('hidden');
+            const modal = document.getElementById('modal-calendario-geral-relatorios');
+            if (modal) modal.classList.add('hidden');
         }
 
         function renderizarPainelSuitesRelatorios() {
@@ -1736,14 +1735,29 @@
             const suite = calGeralRelSuitesCache[calGeralRelSuiteIndex];
             if (!suite) return;
 
-            document.getElementById('cal-geral-rel-suite-nome').innerText = `${suite.nome.toUpperCase()}`;
+            const elSuiteNome = document.getElementById('cal-geral-rel-suite-nome');
+            if (elSuiteNome) elSuiteNome.innerText = `${suite.nome.toUpperCase()}`;
 
             const ano = calGeralRelDataRef.getFullYear();
             const mes = calGeralRelDataRef.getMonth();
             const nomesMeses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-            document.getElementById('cal-geral-rel-mes-ano').innerText = `${nomesMeses[mes]} de ${ano}`.toUpperCase();
+            const elMesAno = document.getElementById('cal-geral-rel-mes-ano');
+            if (elMesAno) elMesAno.innerText = `${nomesMeses[mes]} de ${ano}`.toUpperCase();
 
-            const gridEl = document.getElementById('cal-geral-rel-grid');
+            // Busca defensiva e resiliente da grade de dias
+            let gridEl = document.getElementById('cal-geral-rel-grid');
+            if (!gridEl) {
+                const modalEl = document.getElementById('modal-calendario-geral-relatorios');
+                if (modalEl) {
+                    gridEl = modalEl.querySelector('#cal-geral-rel-grid') || modalEl.querySelector('.grid-cols-7:last-of-type');
+                }
+            }
+
+            if (!gridEl) {
+                console.error("Container cal-geral-rel-grid não foi encontrado no DOM!");
+                return;
+            }
+
             gridEl.innerHTML = '';
 
             const primeiroDiaSemana = new Date(ano, mes, 1).getDay();
@@ -1880,7 +1894,11 @@
             recalcularNovaReservaCalendario();
         }
 
-        function fecharModalNovaReservaCalendario() { document.getElementById('modal-nova-reserva-calendario').classList.add('hidden'); }
+        function fecharModalNovaReservaCalendario() { 
+            const modal = document.getElementById('modal-nova-reserva-calendario');
+            if (modal) modal.classList.add('hidden'); 
+        }
+        
         function calcularDiariasCalendario(a,b){ if(!a||!b)return 0; return Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/(1000*60*60*24)); }
 
         function renderizarInputsIdadesCriancasCalendario(qtdCriancas, idadesAtuais = []) {
@@ -2094,7 +2112,7 @@
                 <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
             </div>
 
-            <div id="cal-grid-dias" class="grid grid-cols-7 gap-1.5 text-center text-sm min-h-[240px]"></div>
+            <div id="cal-geral-rel-grid" class="grid grid-cols-7 gap-1.5 text-center text-sm min-h-[240px]"></div>
 
             <div class="mt-5 flex flex-wrap justify-center gap-3 text-[11px] font-bold">
                 <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-emerald-100 border border-emerald-300"></span> Livre</span>
