@@ -229,7 +229,7 @@
 
     <!-- Modal de Edição -->
     <div id="modal-edicao" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-hidden">
-        <div id="modal-edicao-card" class="bg-white p-5 sm:p-8 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto relative cursor-default" style="-webkit-overflow-scrolling: touch; overscroll-behavior-y: contain;">
+        <div id="modal-edicao-card" class="bg-white p-6 sm:p-8 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto relative cursor-default select-none" style="touch-action:none;">
             <div id="modal-drag-handle" class="flex justify-between items-center mb-4 cursor-move select-none">
                 <h2 id="modal-titulo" class="text-xl sm:text-2xl font-bold text-blue-600 m-0">Gerenciar Suíte</h2>
                 <div class="flex items-center gap-2">
@@ -388,15 +388,8 @@
                     </div>
                 </div>
 
-                <!-- RODAPÉ FIXO DE AÇÕES COM ALTA ACESSIBILIDADE MOBILE -->
-                <div class="sticky bottom-0 bg-white pt-3 pb-2 mt-4 border-t border-gray-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.04)] space-y-2 z-10">
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold transition text-sm shadow-md flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-check"></i> Salvar Alterações
-                    </button>
-                    <button type="button" onclick="fecharModal()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 p-3 rounded-xl font-bold transition text-sm">
-                        Cancelar
-                    </button>
-                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold mt-4 transition text-sm">Salvar Alterações</button>
+                <button type="button" onclick="fecharModal()" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 p-3 rounded-xl font-bold mt-2 transition text-sm">Cancelar</button>
             </form>
         </div>
     </div>
@@ -2588,7 +2581,7 @@
             }
         });
 
-        // DRAGGABLE MODAL (EXCLUSIVO PARA DESKTOP / MOUSE)
+        // DRAGGABLE MODAL
         (function() {
             const modal = document.getElementById('modal-edicao');
             const card = document.getElementById('modal-edicao-card');
@@ -2603,16 +2596,14 @@
             }
 
             function onMouseDown(e) {
-                // Em dispositivos móveis não ativamos arraste para priorizar o scroll natural
-                if (window.innerWidth < 768) return;
                 if (e.target.closest('button')) return;
                 isDragging = true;
                 card.style.transition = 'none';
                 const pos = getCardPosition();
                 initialLeft = pos.left;
                 initialTop = pos.top;
-                startX = e.clientX;
-                startY = e.clientY;
+                startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                startY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
                 card.style.position = 'fixed';
                 card.style.left = initialLeft + 'px';
                 card.style.top = initialTop + 'px';
@@ -2623,8 +2614,10 @@
 
             function onMouseMove(e) {
                 if (!isDragging) return;
-                const dx = e.clientX - startX;
-                const dy = e.clientY - startY;
+                const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+                const dx = clientX - startX;
+                const dy = clientY - startY;
                 let newLeft = initialLeft + dx;
                 let newTop = initialTop + dy;
                 const maxLeft = window.innerWidth - 100;
@@ -2643,8 +2636,11 @@
             }
 
             handle.addEventListener('mousedown', onMouseDown);
+            handle.addEventListener('touchstart', onMouseDown, {passive:false});
             window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('touchmove', onMouseMove, {passive:false});
             window.addEventListener('mouseup', onMouseUp);
+            window.addEventListener('touchend', onMouseUp);
 
             const origFechar = window.fecharModal;
             window.fecharModal = function() {
