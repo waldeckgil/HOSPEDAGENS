@@ -1077,7 +1077,8 @@
                 let textoValorClasses = '';
                 let textoAcaoClasses = '';
 
-             if (estado === 'Ocupada') {
+             
+                if (estado === 'Ocupada') {
                     // Cinza claro e limpo
                     cardClasses = isAtiva
                         ? 'bg-slate-100 border-2 border-slate-400 ring-2 ring-blue-500 shadow-md scale-[1.02]'
@@ -1088,8 +1089,6 @@
                     textoValorClasses = 'text-slate-600';
                     textoAcaoClasses = isAtiva ? 'text-blue-600 font-bold' : 'text-slate-500 group-hover:text-slate-700';
                 } else if (estado === 'Reserva') {
-
-
 
                     // Exceção: Reserva iminente (dentro da diária mínima exigida)
                     const labelReserva = diasAteProxima === 1 ? 'Reserva Amanhã' : `Reserva (${diasAteProxima}d)`;
