@@ -1261,14 +1261,19 @@
                         const statusParaModal = isFutura ? 'Reservado' : 'Ocupada';
                         const badgeText = isFutura ? 'Reserva Futura' : 'Ocupada';
                         
-                        const bgCardClasses = isFutura 
-                            ? 'bg-blue-50/70 border-2 border-blue-200 text-blue-950' 
-                            : 'bg-gray-50 border-2 border-gray-200 text-gray-900';
-                          
-                        
-                        const badgeClasses = isFutura 
-                            ? 'bg-blue-200 text-blue-900 border border-blue-300 font-extrabold' 
-                            : 'bg-slate-700 text-white font-extrabold';
+                      
+
+
+
+const bgCardClasses = isFutura 
+                    ? 'bg-blue-50/70 border-2 border-blue-200 text-blue-950' 
+                    : 'bg-gray-50 border-2 border-gray-200 text-gray-900';
+                 
+                const badgeClasses = isFutura 
+                    ? 'bg-blue-200 text-blue-900 border border-blue-300 font-extrabold' 
+                    : 'bg-red-100 text-red-800 border border-red-300 font-extrabold';
+
+
                         
                         const indicador = isFutura ? obterIndicadorProximaEstada(aprovada.checkin) : obterIndicadorCheckout(aprovada.checkout);
                         const linkZap = gerarLinkWhatsApp(aprovada.whatsapp_hospede, aprovada.hospede_nome, aprovada.checkin, aprovada.checkout);
