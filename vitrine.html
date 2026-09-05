@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- FontAwesome para ícones de WhatsApp e Redes Sociais -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <title>Nossas Suítes</title>
     <style>
         .bg-pousada {
@@ -22,8 +24,8 @@
     <div class="max-w-5xl mx-auto">
         <h1 id="titulo-pousada" class="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-2 text-center drop-shadow-lg px-2">Carregando Pousada...</h1>
         
-        <!-- BANNERS INSTITUCIONAIS / HORÁRIOS E BOTÕES CONDICIONAIS -->
-        <div id="container-institucional" class="flex flex-wrap justify-center items-center gap-2 sm:gap-4 mb-4 text-xs sm:text-sm font-semibold">
+        <!-- BANNERS INSTITUCIONAIS / HORÁRIOS / REDES SOCIAIS E BOTÕES -->
+        <div id="container-institucional" class="flex flex-wrap justify-center items-center gap-2 sm:gap-3 mb-4 text-xs sm:text-sm font-semibold">
             <!-- Injetado dinamicamente via JS -->
         </div>
 
@@ -92,6 +94,11 @@
                 <p class="font-bold text-sm sm:text-base mt-2 text-gray-800">Selecione as datas e filtros acima.</p>
             </div>
         </div>
+
+        <!-- RODAPÉ DE CREDIBILIDADE FISCAL -->
+        <footer id="rodape-vitrine" class="mt-10 text-center text-xs text-white/80 space-y-1 pb-8">
+            <!-- Injetado dinamicamente via JS -->
+        </footer>
     </div>
 
     <!-- MODAL DE GALERIA DE FOTOS DA POUSADA -->
@@ -125,6 +132,11 @@
             
             <div id="aviso-cadastro-encontrado" class="text-xs text-center text-emerald-700 bg-emerald-50 border border-emerald-200 p-2 rounded-xl font-semibold mb-4 hidden">
                 ✨ CPF encontrado! Seus dados foram preenchidos automaticamente.
+            </div>
+
+            <!-- AVISO DE DOCUMENTO OBRIGATÓRIO (QUANDO HABILITADO PELA POUSADA) -->
+            <div id="aviso-documento-obrigatorio" class="hidden text-xs text-center text-amber-900 bg-amber-50 border border-amber-200 p-2.5 rounded-xl font-semibold mb-4 flex items-center justify-center gap-2">
+                <span>⚠️</span> <span>A pousada exige o preenchimento de documento oficial de identificação (RG).</span>
             </div>
             
             <div id="feedback-sucesso" class="hidden mb-4 p-3 sm:p-4 bg-green-100 border border-green-400 text-green-700 rounded-xl text-center font-semibold text-sm">
@@ -163,8 +175,9 @@
                         <input type="text" id="whatsapp-hospede" placeholder="(DDD+Número)" required class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
                     </div>
 
+                    <!-- CAMPO DE DOCUMENTO DINÂMICO (OBRIGATÓRIO OU OPCIONAL CONFORME POUSADAS.EXIGIR_DOCUMENTO) -->
                     <div>
-                        <label class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">RG (Opcional)</label>
+                        <label id="label-documento-hospede" class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">RG (Opcional)</label>
                         <input type="text" id="rg-hospede" placeholder="Documento" class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
                     </div>
 
@@ -237,7 +250,6 @@
             const params = new URLSearchParams(window.location.search);
             pousadaIdGlobal = params.get('pousada_id') || '2ce55615-0d32-467a-a412-f9868ec8c9cf';
 
-            // Chamada segura via RPC protegendo multi-tenant e bypassando RLS restritivo de tabelas
             const { data: vitrineData, error } = await supabaseClient.rpc('fn_carregar_vitrine', { p_pousada_id: pousadaIdGlobal });
 
             if (error || !vitrineData) {
@@ -254,6 +266,7 @@
             document.getElementById('titulo-pousada').innerText = dadosPousadaGlobal.nome || "Nossa Pousada";
             
             renderizarBarraInstitucional();
+            renderizarRodape();
             verificarSecaoPetFiltro();
             gerarCamposIdadeCriancas();
             filtrarSuitesDisponiveisPorPeriodo();
@@ -276,6 +289,9 @@
             }
         }
 
+        // =========================================================================
+        // RENDERIZAÇÃO DA BARRA INSTITUCIONAL COM CANAIS DE CONTATO E REDES SOCIAIS
+        // =========================================================================
         function renderizarBarraInstitucional() {
             const container = document.getElementById('container-institucional');
             let html = '';
@@ -286,6 +302,40 @@
                         🕒 Check-in: <span class="font-extrabold">${dadosPousadaGlobal.horario_checkin || '14:00'}</span> | 
                         Check-out: <span class="font-extrabold">${dadosPousadaGlobal.horario_checkout || '12:00'}</span>
                     </div>
+                `;
+            }
+
+            // BOTÃO DE WHATSAPP OFICIAL DA POUSADA
+            if (dadosPousadaGlobal.whatsapp_contato) {
+                let zapNum = String(dadosPousadaGlobal.whatsapp_contato).replace(/\D/g, '');
+                if (zapNum.length <= 11 && !zapNum.startsWith('55')) zapNum = '55' + zapNum;
+                const msg = encodeURIComponent(`Olá! Estou na vitrine da ${dadosPousadaGlobal.nome || 'pousada'} e gostaria de tirar uma dúvida.`);
+                html += `
+                    <a href="https://wa.me/${zapNum}?text=${msg}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-xl shadow transition flex items-center gap-1.5 font-bold">
+                        <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp
+                    </a>
+                `;
+            }
+
+            // BOTÃO DE INSTAGRAM DA POUSADA
+            if (dadosPousadaGlobal.instagram) {
+                let insta = String(dadosPousadaGlobal.instagram).trim();
+                let urlInsta = insta.startsWith('http') ? insta : `https://instagram.com/${insta.replace('@', '').trim()}`;
+                html += `
+                    <a href="${urlInsta}" target="_blank" class="bg-gradient-to-r from-pink-600 to-purple-600 hover:opacity-90 text-white px-3.5 py-1.5 rounded-xl shadow transition flex items-center gap-1.5 font-bold">
+                        <i class="fa-brands fa-instagram text-sm"></i> Instagram
+                    </a>
+                `;
+            }
+
+            // BOTÃO DE FACEBOOK DA POUSADA
+            if (dadosPousadaGlobal.facebook) {
+                let fb = String(dadosPousadaGlobal.facebook).trim();
+                let urlFb = fb.startsWith('http') ? fb : (fb.startsWith('/') ? `https://facebook.com${fb}` : `https://facebook.com/${fb}`);
+                html += `
+                    <a href="${urlFb}" target="_blank" class="bg-blue-700 hover:bg-blue-800 text-white px-3.5 py-1.5 rounded-xl shadow transition flex items-center gap-1.5 font-bold">
+                        <i class="fa-brands fa-facebook text-sm"></i> Facebook
+                    </a>
                 `;
             }
 
@@ -323,6 +373,24 @@
             }
 
             container.innerHTML = html;
+        }
+
+        // =========================================================================
+        // RODAPÉ INSTITUCIONAL E FISCAL (CNPJ/CPF)
+        // =========================================================================
+        function renderizarRodape() {
+            const footer = document.getElementById('rodape-vitrine');
+            if (!footer) return;
+
+            let textoDoc = '';
+            if (dadosPousadaGlobal.cnpj_cpf) {
+                textoDoc = `<p class="font-bold text-white/90">CNPJ / CPF: <span class="tracking-wide">${dadosPousadaGlobal.cnpj_cpf}</span></p>`;
+            }
+
+            footer.innerHTML = `
+                ${textoDoc}
+                <p class="text-[11px] text-white/60">© ${new Date().getFullYear()} ${dadosPousadaGlobal.nome || 'Pousada'} • Todos os direitos reservados.</p>
+            `;
         }
 
         function abrirModalFotosPousada() {
@@ -1055,6 +1123,24 @@
             document.getElementById('checkin').value = checkinFiltro;
             document.getElementById('checkout').value = checkoutFiltro;
 
+            // =========================================================================
+            // AJUSTE CONDICIONAL DO DOCUMENTO (OBRIGATÓRIO OU OPCIONAL)
+            // =========================================================================
+            const exigirDoc = dadosPousadaGlobal.exigir_documento === true || dadosPousadaGlobal.exigir_documento === 'true';
+            const labelDoc = document.getElementById('label-documento-hospede');
+            const inputDoc = document.getElementById('rg-hospede');
+            const avisoDoc = document.getElementById('aviso-documento-obrigatorio');
+
+            if (exigirDoc) {
+                if (labelDoc) labelDoc.innerHTML = `RG / Documento Oficial <span class="text-red-600 font-extrabold">*</span>`;
+                if (inputDoc) { inputDoc.required = true; inputDoc.placeholder = "Documento obrigatório"; }
+                if (avisoDoc) avisoDoc.classList.remove('hidden');
+            } else {
+                if (labelDoc) labelDoc.innerHTML = `RG (Opcional)`;
+                if (inputDoc) { inputDoc.required = false; inputDoc.placeholder = "Documento (opcional)"; }
+                if (avisoDoc) avisoDoc.classList.add('hidden');
+            }
+
             await atualizarResumoModal(sId, checkinFiltro, checkoutFiltro, qtdAdultos, qtdCriancas);
 
             document.getElementById('feedback-sucesso').classList.add('hidden');
@@ -1113,6 +1199,17 @@
             const msgErro = document.getElementById('feedback-erro');
             
             msgErro.classList.add('hidden');
+
+            const exigirDoc = dadosPousadaGlobal.exigir_documento === true || dadosPousadaGlobal.exigir_documento === 'true';
+            const rgVal = document.getElementById('rg-hospede').value.trim();
+
+            if (exigirDoc && !rgVal) {
+                msgErro.innerText = "Por favor, informe seu documento oficial (RG) conforme exigido pela pousada.";
+                msgErro.classList.remove('hidden');
+                document.getElementById('rg-hospede').focus();
+                return;
+            }
+
             btnEnviar.disabled = true;
             btnEnviar.innerText = "Enviando...";
 
@@ -1154,7 +1251,7 @@
                 email: document.getElementById('email-hospede').value,
                 whatsapp_hospede: document.getElementById('whatsapp-hospede').value,
                 cpf: document.getElementById('cpf-hospede').value,
-                rg: document.getElementById('rg-hospede').value || null,
+                rg: rgVal || null,
                 cep: document.getElementById('cep-hospede').value || null,
                 endereco: document.getElementById('endereco-hospede').value,
                 checkin: checkinVal,
@@ -1188,4 +1285,4 @@
         });
     </script>
 </body>
-</html>
+</html> 
