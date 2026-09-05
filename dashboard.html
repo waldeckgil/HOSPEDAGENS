@@ -1077,17 +1077,20 @@
                 let textoValorClasses = '';
                 let textoAcaoClasses = '';
 
-                if (estado === 'Ocupada') {
-                    // Cinza bem escuro com alto contraste
+             if (estado === 'Ocupada') {
+                    // Cinza claro e limpo
                     cardClasses = isAtiva
-                        ? 'bg-slate-900 border-2 border-slate-600 ring-2 ring-blue-500 shadow-md scale-[1.02]'
-                        : 'bg-slate-800 hover:bg-slate-900 border-2 border-slate-700 shadow-xs';
-                    iconeClasses = 'bg-slate-700 text-slate-300';
-                    badgeHtml = `<span class="text-[9px] bg-slate-700 text-slate-200 border border-slate-600 font-extrabold px-1.5 py-0.5 rounded-full">Ocupada</span>`;
-                    textoTituloClasses = 'text-white group-hover:text-slate-200';
-                    textoValorClasses = 'text-slate-400';
-                    textoAcaoClasses = isAtiva ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-300';
+                        ? 'bg-slate-100 border-2 border-slate-400 ring-2 ring-blue-500 shadow-md scale-[1.02]'
+                        : 'bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 shadow-xs';
+                    iconeClasses = 'bg-slate-200 text-slate-700';
+                    badgeHtml = `<span class="text-[9px] bg-slate-200 text-slate-800 border border-slate-300 font-extrabold px-1.5 py-0.5 rounded-full">Ocupada</span>`;
+                    textoTituloClasses = 'text-slate-900 group-hover:text-slate-950';
+                    textoValorClasses = 'text-slate-600';
+                    textoAcaoClasses = isAtiva ? 'text-blue-600 font-bold' : 'text-slate-500 group-hover:text-slate-700';
                 } else if (estado === 'Reserva') {
+
+
+
                     // Exceção: Reserva iminente (dentro da diária mínima exigida)
                     const labelReserva = diasAteProxima === 1 ? 'Reserva Amanhã' : `Reserva (${diasAteProxima}d)`;
                     cardClasses = isAtiva
