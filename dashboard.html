@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
@@ -113,21 +113,21 @@
                 </a>
             </div>
 
-            <!-- HUB DE NAVEGAÇÃO E FILTRO CONSOLIDADO POR SUÍTE COM TARIFA ESPECIAL -->
+            <!-- HUB DE NAVEGAÇÃO E FILTRO CONSOLIDADO POR SUÍTE -->
             <div id="container-filtro-suites-topo" class="mb-6 bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-200">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
                     <div>
                         <h3 class="text-xs sm:text-sm font-extrabold text-gray-800 uppercase tracking-wider flex items-center gap-2">
                             <i class="fa-solid fa-layer-group text-blue-600"></i> Navegação por Suíte - Clique para Focar ou Veja Todas
                         </h3>
-                        <p class="text-[11px] text-gray-500 mt-0.5">Cada suíte possui uma cor exclusiva. As acomodações com tarifas especiais ativas contam com o selo dourado ⚡.</p>
+                        <p class="text-[11px] text-gray-500 mt-0.5">Cards em <strong class="text-slate-800">cinza escuro</strong> indicam suítes ocupadas e em <strong class="text-emerald-700">verde claro</strong> indicam suítes livres para novas estadias.</p>
                     </div>
                     <button id="btn-ver-todas-suites-dash" onclick="filtrarDashboardPorSuite(null)" class="text-[11px] font-bold bg-slate-900 hover:bg-black text-white px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1.5 ring-2 ring-blue-500">
                         <i class="fa-solid fa-border-all"></i> Ver Todas as Suítes
                     </button>
                 </div>
                 <div id="grid-seletor-suites-dash" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-                    <!-- Cards dinâmicos renderizados via JS -->
+                    <!-- Cards dinâmicos renderizados via JS com as cores de estado solicitadas -->
                 </div>
             </div>
 
@@ -502,6 +502,7 @@
 
         let usuarioIdAtual = null;
         let nomePousadaAtual = "nossa pousada";
+        let diariaMinimaPousadaCache = 1;
         let reservasGlobaisCache = [];
         let suitesGlobaisCache = [];
         let pagamentosGlobaisCache = [];
@@ -510,7 +511,7 @@
         let pousadaAceitaPetCache = false;
 
         // =========================================================================
-        // PALETA DINÂMICA DE CORES EXCLUSIVAS POR SUÍTE
+        // PALETA DINÂMICA DE CORES EXCLUSIVAS POR SUÍTE (PARA OS CARDS PRINCIPAIS)
         // =========================================================================
         const PALETA_SUITES = [
             { nome: 'indigo', border: 'border-indigo-300', borderHover: 'hover:border-indigo-500', borderActive: 'border-indigo-600', bgLight: 'bg-indigo-50/60', bgActive: 'bg-indigo-100', iconBg: 'bg-indigo-100', iconText: 'text-indigo-700', badgeBg: 'bg-indigo-600', textGroupHover: 'group-hover:text-indigo-700', barBg: 'bg-indigo-500' },
@@ -801,8 +802,10 @@
 
         async function carregarPousada() {
             if (!usuarioIdAtual) return;
-            const { data: pousada } = await supabaseClient.from('pousadas').select('nome, aceita_pet').eq('id', usuarioIdAtual).single();
+            const { data: pousada } = await supabaseClient.from('pousadas').select('nome, aceita_pet, diaria_minima').eq('id', usuarioIdAtual).single();
             pousadaAceitaPetCache = pousada?.aceita_pet === true;
+            diariaMinimaPousadaCache = Number(pousada?.diaria_minima) > 0 ? Number(pousada.diaria_minima) : 1;
+
             if (pousada && pousada.nome) {
                 nomePousadaAtual = pousada.nome;
                 document.getElementById('titulo-pousada').innerText = pousada.nome;
@@ -982,7 +985,7 @@
         }
 
         // =========================================================================
-        // HUB CONSOLIDADO - SELETOR DE SUÍTES COM TARIFA ESPECIAL VIGENTE
+        // HUB CONSOLIDADO - SELETOR DE SUÍTES COM CORES DE ESTADO (OCUPADA / LIVRE)
         // =========================================================================
         function renderizarSeletorSuitesTopo() {
             const grid = document.getElementById('grid-seletor-suites-dash');
@@ -1011,9 +1014,8 @@
             if (suiteFiltroDashboard && bannerFiltrada && textoFiltrada) {
                 const sObj = suitesGlobaisCache.find(s => s.id === suiteFiltroDashboard);
                 if (sObj) {
-                    const temaObj = obterTemaSuite(sObj.id || sObj.nome);
-                    bannerFiltrada.className = `mb-5 p-3.5 rounded-2xl flex items-center justify-between shadow-xs border-2 ${temaObj.border} ${temaObj.bgLight} transition-all`;
-                    textoFiltrada.innerHTML = `Mostrando apenas: <strong class="uppercase ${temaObj.iconText}">${sObj.nome}</strong>`;
+                    bannerFiltrada.className = `mb-5 p-3.5 rounded-2xl flex items-center justify-between shadow-xs border-2 border-slate-300 bg-slate-100 transition-all`;
+                    textoFiltrada.innerHTML = `Mostrando apenas: <strong class="uppercase text-slate-900">${sObj.nome}</strong>`;
                     bannerFiltrada.classList.remove('hidden');
                 }
             } else if (bannerFiltrada) {
@@ -1025,12 +1027,33 @@
 
             suitesGlobaisCache.forEach(suite => {
                 const isAtiva = suiteFiltroDashboard === suite.id;
-                const tema = obterTemaSuite(suite.id || suite.nome);
-                
+
                 const reservasDaSuite = reservasGlobaisCache.filter(r => r.suite_id === suite.id && r.status !== 'Cancelada' && r.status !== 'Recusada' && r.status !== 'Finalizada');
-                const pendentes = reservasDaSuite.filter(r => r.status === 'Pendente');
                 const aprovadas = reservasDaSuite.filter(r => r.status === 'Aprovada');
-                const ocupadaAgora = aprovadas.some(r => r.checkin <= hojeStr && r.checkout > hojeStr);
+                
+                // 1. Está ocupada hoje?
+                const ocupadaHoje = suite.status === 'Ocupada' || aprovadas.some(r => r.checkin <= hojeStr && r.checkout > hojeStr);
+
+                // 2. Próxima reserva futura aprovada
+                const futuras = aprovadas
+                    .filter(r => r.checkin > hojeStr)
+                    .sort((a, b) => a.checkin.localeCompare(b.checkin));
+                
+                const proximaReserva = futuras.length > 0 ? futuras[0] : null;
+                const diasAteProxima = proximaReserva ? calcularDiasRestantes(proximaReserva.checkin) : 999;
+
+                // Exceção de diária mínima: livre hoje, porém tem reserva iminente cujo intervalo é menor ou igual à diária mínima
+                const temReservaIminente = !ocupadaHoje && proximaReserva && (diasAteProxima <= diariaMinimaPousadaCache);
+
+                // Definição do estado operacional
+                let estado = 'Livre';
+                if (ocupadaHoje) {
+                    estado = 'Ocupada';
+                } else if (temReservaIminente) {
+                    estado = 'Reserva';
+                } else {
+                    estado = 'Livre';
+                }
 
                 const temTarifaEspecialTopo = tarifasEspeciaisGlobaisCache.some(t => {
                     const atendeSuite = (t.suite_id === suite.id || !t.suite_id);
@@ -1041,41 +1064,66 @@
                 let badgeTarifaTopo = '';
                 if (temTarifaEspecialTopo) {
                     badgeTarifaTopo = `
-                        <button type="button" onclick="event.stopPropagation(); abrirModalTarifaEspecial('${suite.id}')" title="Clique para ver regras da Tarifa Especial" class="mt-1 inline-flex items-center gap-1 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 text-[9px] font-extrabold px-1.5 py-0.5 rounded-md transition shadow-2xs">
+                        <button type="button" onclick="event.stopPropagation(); abrirModalTarifaEspecial('${suite.id}')" title="Clique para ver regras da Tarifa Especial" class="mt-1 inline-flex items-center gap-1 bg-amber-200 hover:bg-amber-300 text-amber-950 border border-amber-400 text-[9px] font-extrabold px-1.5 py-0.5 rounded-md transition shadow-2xs">
                             <span>⚡ Tarifa Especial</span>
                         </button>
                     `;
                 }
 
-                let badgeInfo = '';
-                if (pendentes.length > 0) {
-                    badgeInfo = `<span class="text-[9px] bg-amber-100 text-amber-900 border border-amber-300 font-extrabold px-1.5 py-0.5 rounded-full">${pendentes.length} pend.</span>`;
-                } else if (ocupadaAgora) {
-                    badgeInfo = `<span class="text-[9px] bg-slate-800 text-white font-extrabold px-1.5 py-0.5 rounded-full">Ocupada</span>`;
-                } else if (aprovadas.length > 0) {
-                    badgeInfo = `<span class="text-[9px] bg-blue-100 text-blue-800 border border-blue-200 font-extrabold px-1.5 py-0.5 rounded-full">${aprovadas.length} res.</span>`;
+                let cardClasses = '';
+                let badgeHtml = '';
+                let iconeClasses = '';
+                let textoTituloClasses = '';
+                let textoValorClasses = '';
+                let textoAcaoClasses = '';
+
+                if (estado === 'Ocupada') {
+                    // Cinza bem escuro com alto contraste
+                    cardClasses = isAtiva
+                        ? 'bg-slate-900 border-2 border-slate-600 ring-2 ring-blue-500 shadow-md scale-[1.02]'
+                        : 'bg-slate-800 hover:bg-slate-900 border-2 border-slate-700 shadow-xs';
+                    iconeClasses = 'bg-slate-700 text-slate-300';
+                    badgeHtml = `<span class="text-[9px] bg-slate-700 text-slate-200 border border-slate-600 font-extrabold px-1.5 py-0.5 rounded-full">Ocupada</span>`;
+                    textoTituloClasses = 'text-white group-hover:text-slate-200';
+                    textoValorClasses = 'text-slate-400';
+                    textoAcaoClasses = isAtiva ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-300';
+                } else if (estado === 'Reserva') {
+                    // Exceção: Reserva iminente (dentro da diária mínima exigida)
+                    const labelReserva = diasAteProxima === 1 ? 'Reserva Amanhã' : `Reserva (${diasAteProxima}d)`;
+                    cardClasses = isAtiva
+                        ? 'bg-blue-100 border-2 border-blue-500 ring-2 ring-blue-500 shadow-md scale-[1.02]'
+                        : 'bg-blue-50 hover:bg-blue-100 border-2 border-blue-300 shadow-xs';
+                    iconeClasses = 'bg-blue-200 text-blue-800';
+                    badgeHtml = `<span class="text-[9px] bg-blue-200 text-blue-900 border border-blue-300 font-extrabold px-1.5 py-0.5 rounded-full">${labelReserva}</span>`;
+                    textoTituloClasses = 'text-blue-950 group-hover:text-blue-900';
+                    textoValorClasses = 'text-blue-700';
+                    textoAcaoClasses = isAtiva ? 'text-blue-800 font-extrabold' : 'text-blue-600 group-hover:text-blue-800';
                 } else {
-                    badgeInfo = `<span class="text-[9px] bg-emerald-100 text-emerald-800 border border-emerald-200 font-extrabold px-1.5 py-0.5 rounded-full">Livre</span>`;
+                    // Verde Claro para Livre
+                    cardClasses = isAtiva
+                        ? 'bg-emerald-100 border-2 border-emerald-500 ring-2 ring-blue-500 shadow-md scale-[1.02]'
+                        : 'bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-300 shadow-xs';
+                    iconeClasses = 'bg-emerald-200 text-emerald-800';
+                    badgeHtml = `<span class="text-[9px] bg-emerald-200 text-emerald-900 border border-emerald-400 font-extrabold px-1.5 py-0.5 rounded-full">Livre</span>`;
+                    textoTituloClasses = 'text-emerald-950 group-hover:text-emerald-900';
+                    textoValorClasses = 'text-emerald-700';
+                    textoAcaoClasses = isAtiva ? 'text-emerald-800 font-extrabold' : 'text-emerald-600 group-hover:text-emerald-800';
                 }
 
-                const estiloCard = isAtiva 
-                    ? `border-2 ${tema.borderActive} ${tema.bgActive} ring-2 ring-offset-1 ${tema.borderActive} shadow-md scale-[1.02]` 
-                    : `border-2 ${tema.border} ${tema.borderHover} bg-white hover:${tema.bgLight} shadow-xs`;
-
                 html += `
-                    <div onclick="filtrarDashboardPorSuite('${suite.id}')" class="cursor-pointer p-2.5 rounded-xl transition-all group flex flex-col justify-between gap-1.5 ${estiloCard}">
+                    <div onclick="filtrarDashboardPorSuite('${suite.id}')" class="cursor-pointer p-2.5 rounded-xl transition-all group flex flex-col justify-between gap-1.5 ${cardClasses}">
                         <div class="flex items-center justify-between">
-                            <div class="w-6 h-6 ${tema.iconBg} ${tema.iconText} rounded-lg flex items-center justify-center text-[10px]">
+                            <div class="w-6 h-6 ${iconeClasses} rounded-lg flex items-center justify-center text-[10px]">
                                 <i class="fa-solid fa-bed"></i>
                             </div>
-                            ${badgeInfo}
+                            ${badgeHtml}
                         </div>
                         <div>
-                            <h4 class="font-bold text-[11px] text-gray-900 uppercase truncate ${tema.textGroupHover}">${suite.nome}</h4>
-                            <p class="text-[10px] text-gray-500 truncate">${formatarMoeda(suite.valor_diaria)}/dia</p>
+                            <h4 class="font-bold text-[11px] uppercase truncate ${textoTituloClasses}">${suite.nome}</h4>
+                            <p class="text-[10px] truncate ${textoValorClasses}">${formatarMoeda(suite.valor_diaria)}/dia</p>
                             ${badgeTarifaTopo}
                         </div>
-                        <span class="text-[9px] font-bold ${isAtiva ? tema.iconText : 'text-gray-400 group-hover:' + tema.iconText}">
+                        <span class="text-[9px] font-bold ${textoAcaoClasses}">
                             ${isAtiva ? '● SELECIONADA' : 'CLIQUE P/ FOCAR'}
                         </span>
                     </div>
@@ -1170,7 +1218,6 @@
             for (const suite of suitesParaExibir) {
                 const estaAtiva = suite.ativa !== false && suite.ativa !== 'false';
                 
-                // Selo de pausada com design elegante agrupável
                 const tagPausadaHtml = !estaAtiva 
                     ? `<span class="bg-slate-800 text-slate-200 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border border-slate-600 shadow-2xs flex-shrink-0">⏸️ Pausada</span>` 
                     : '';
@@ -1297,7 +1344,6 @@
                         container.innerHTML += `
                             <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-sm ${bgCardClasses} border-l-4 ${temaSuite.borderActive} flex flex-col justify-between transition hover:shadow-md">
                                 <div>
-                                    <!-- 1. CABEÇALHO DO CARD -->
                                     <div class="flex justify-between items-start gap-2 mb-2">
                                         <div class="flex items-center gap-2.5 min-w-0 flex-1">
                                             <div class="w-8 h-8 ${temaSuite.iconBg} ${temaSuite.iconText} rounded-xl flex items-center justify-center text-xs flex-shrink-0 shadow-2xs">
@@ -1312,7 +1358,6 @@
                                             </div>
                                         </div>
                                         
-                                        <!-- CLUSTER DE STATUS E PAUSADA -->
                                         <div class="flex items-center gap-1.5 flex-shrink-0">
                                             ${tagPausadaHtml}
                                             <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-2xs ${badgeClasses}">
@@ -1322,7 +1367,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- 2. RÉGUA OPERACIONAL: PRAZO + ATALHOS -->
                                     <div class="mt-2.5 flex flex-wrap items-center justify-between gap-1.5 pt-2 border-t border-black/5">
                                         <div class="flex items-center gap-1.5 flex-wrap">
                                             ${tagDataPrazoTopo}
@@ -1333,7 +1377,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- 3. PAINEL FINANCEIRO EM 3 COLUNAS (ALTA LEGIBILIDADE) -->
                                     <div class="mt-3 p-2.5 rounded-xl bg-white/85 border border-black/10 shadow-2xs">
                                         <div class="grid grid-cols-3 gap-2 text-center divide-x divide-black/5">
                                             <div class="px-1">
@@ -1360,9 +1403,7 @@
 
                                     ${htmlAlertaTopo}
 
-                                    <!-- 4. DETALHES EXPANDIDOS (QUANDO ABERTO) -->
                                     <div class="card-detalhes hidden mt-3 pt-3 border-t border-black/10 text-xs space-y-2">
-                                        <!-- WhatsApp / Contato Rápido -->
                                         <div class="flex items-center justify-between bg-white/80 p-2 rounded-xl border border-black/5">
                                             <div class="flex items-center gap-1.5 truncate">
                                                 <span class="text-gray-500 font-medium">WhatsApp:</span>
@@ -1373,7 +1414,6 @@
                                             </a>
                                         </div>
 
-                                        <!-- Ocupação -->
                                         <div class="grid grid-cols-3 gap-2 bg-white/80 p-2 rounded-xl border border-black/5 text-center">
                                             <div>
                                                 <span class="text-gray-500 block text-[10px] uppercase font-bold">Adultos</span>
@@ -1389,7 +1429,6 @@
                                             </div>
                                         </div>
 
-                                        <!-- Datas Completas -->
                                         <div class="grid grid-cols-2 gap-2 bg-white/80 p-2 rounded-xl border border-black/5 text-[11px]">
                                             <div>
                                                 <span class="text-gray-500 block text-[10px]">Entrada (Check-in):</span>
@@ -1405,7 +1444,6 @@
                                         ${tagTransferenciaHtml}
                                     </div>
                                     
-                                    <!-- 5. RODAPÉ DE AÇÕES -->
                                     <div class="mt-3.5 pt-2.5 flex justify-between items-center border-t border-black/10">
                                         <button type="button" onclick="alternarExpandirCard(this)" class="text-xs font-bold text-gray-700 hover:text-gray-900 underline flex items-center gap-1">
                                             <span class="label-expandir">Expandir Detalhes</span> ▾
@@ -1563,7 +1601,6 @@
                                     </div>
                                 </div>
                                 
-                                <!-- PAINEL FINANCEIRO DE RESERVA PENDENTE -->
                                 <div class="mt-3 p-2.5 rounded-xl bg-white/85 border border-amber-300 shadow-2xs">
                                     <div class="grid grid-cols-3 gap-2 text-center divide-x divide-amber-200">
                                         <div class="px-1">
@@ -1586,7 +1623,6 @@
 
                                 ${htmlAlertaTopoPend}
 
-                                <!-- DETALHES COMPLEMENTARES EXPANSÍVEIS -->
                                 <div class="card-detalhes hidden mt-3 pt-3 border-t border-amber-200 text-xs space-y-2">
                                     <div class="flex items-center justify-between bg-white/80 p-2 rounded-xl border border-amber-200">
                                         <div class="flex items-center gap-1.5 truncate">
@@ -1622,7 +1658,6 @@
                                     </div>
                                 </div>
 
-                                <!-- AÇÕES DE APROVAÇÃO / RECUSA -->
                                 <div class="mt-3 bg-amber-200/70 border border-amber-300 rounded-xl p-2 flex gap-2 shadow-2xs">
                                     <button onclick="mudarStatusReserva('${pend.id}', 'Aprovada')" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-extrabold py-2 px-3 rounded-xl shadow-xs text-xs sm:text-sm transition flex items-center justify-center gap-1.5">
                                         ✔ Aprovar
@@ -2603,7 +2638,6 @@
             }
 
             function onMouseDown(e) {
-                // Em dispositivos móveis não ativamos arraste para priorizar o scroll natural
                 if (window.innerWidth < 768) return;
                 if (e.target.closest('button')) return;
                 isDragging = true;
