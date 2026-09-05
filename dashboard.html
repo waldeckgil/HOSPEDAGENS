@@ -1,3 +1,32 @@
+Aqui está o arquivo dashboard.html completo e atualizado com o layout dos cards
+totalmente redesenhado e profissionalizado.
+
+✨ Principais Melhorias no Layout dos Cards:
+
+1.  Topo Limpo e Hierárquico:
+      - O selo ⏸️ PAUSADA agora fica elegantemente agrupado no canto superior
+        direito junto ao badge de status (RESERVA FUTURA ou OCUPADA), sem
+        quebrar linhas no meio do card.
+      - O nome da acomodação e o nome do hóspede ganharam tipografia distinta e
+        organizada com ícones temáticos.
+2.  Régua Operacional em Linha Única:
+      - A data de Check-in/Check-out e a contagem de dias ficam em uma pílula de
+        alto contraste à esquerda.
+      - Os botões ⚡ Tarifa Especial e 📅 Calendário ficam alinhados à direita,
+        sem amontoar.
+3.  Mini-Painel Financeiro em 3 Colunas (Sem Precisar Expandir):
+      - Total da Estadia (com referência da diária padrão abaixo);
+      - Já Pago / Sinal (em verde);
+      - Saldo Restante a Receber (com destaque em cor e indicação visual ●
+        Pendente ou ✓ Quitado).
+4.  Área Expandida com Padrão Hoteleiro (PMS Executivo):
+      - Botão direto do WhatsApp para conversa rápida com o hóspede;
+      - Mini-cards organizados de ocupação (Adultos, Crianças e Pet);
+      - Datas detalhadas com total de diárias calculadas;
+      - Se houver transferência, selo roxo discreto com suíte de origem e
+        motivo;
+      - Se houver observações, caixa de aviso com ícone ⚠️ bem estruturada.
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -761,7 +790,6 @@
                 if (r.suite_id !== suiteId) return false;
                 if (reservaIdIgnorar && r.id === reservaIdIgnorar) return false;
                 if (r.status === 'Cancelada' || r.status === 'Recusada' || r.status === 'Finalizada') return false;
-                // Sobreposição de intervalos: (A_in < B_out) e (A_out > B_in)
                 return (checkin < r.checkout && checkout > r.checkin);
             });
         }
@@ -779,7 +807,6 @@
                 return `⚠️ <strong>Conflito de Datas:</strong> Já existe uma reserva confirmada ${prefixoSuite} para o hóspede ${nomeHosp} no período de <strong>${formatarDataSimples(c.checkin)} até ${formatarDataSimples(c.checkout)}</strong>!`;
             }
 
-            // 2 ou mais hóspedes em conflito
             let listaHtml = conflitos.map(c => {
                 const nomeH = c.hospede_nome ? `<strong>${c.hospede_nome.toUpperCase()}</strong>` : 'Hóspede não identificado';
                 return `<div class="mt-1 pl-2 border-l-2 border-red-400">• ${nomeH}: de ${formatarDataSimples(c.checkin)} a ${formatarDataSimples(c.checkout)} (${c.status})</div>`;
@@ -909,15 +936,18 @@
             const card = btnElement.closest('.card-suite');
             const detalhes = card.querySelector('.card-detalhes');
             const iconeSeta = card.querySelector('.icone-seta');
+            const labelTexto = btnElement.querySelector('.label-expandir');
             
             if (detalhes.classList.contains('hidden')) {
                 detalhes.classList.remove('hidden');
                 if (iconeSeta) iconeSeta.style.transform = 'rotate(180deg)';
-                btnElement.innerText = 'Recolher ▴';
+                if (labelTexto) labelTexto.innerText = 'Recolher';
+                else btnElement.innerText = 'Recolher ▴';
             } else {
                 detalhes.classList.add('hidden');
                 if (iconeSeta) iconeSeta.style.transform = 'rotate(0deg)';
-                btnElement.innerText = 'Expandir Detalhes ▾';
+                if (labelTexto) labelTexto.innerText = 'Expandir Detalhes';
+                else btnElement.innerText = 'Expandir Detalhes ▾';
             }
         }
 
@@ -1161,7 +1191,11 @@
 
             for (const suite of suitesParaExibir) {
                 const estaAtiva = suite.ativa !== false && suite.ativa !== 'false';
-                const tagPausadaHtml = !estaAtiva ? `<span class="bg-slate-700 text-slate-200 text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">⏸️ Pausada</span>` : '';
+                
+                // Selo de pausada com design elegante agrupável
+                const tagPausadaHtml = !estaAtiva 
+                    ? `<span class="bg-slate-800 text-slate-200 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border border-slate-600 shadow-2xs flex-shrink-0">⏸️ Pausada</span>` 
+                    : '';
                 
                 const temaSuite = obterTemaSuite(suite.id || suite.nome);
 
@@ -1183,11 +1217,14 @@
                 });
                 
                 const htmlTarifaBadge = temTarifaEspecial 
-                    ? `<button onclick="abrirModalTarifaEspecial('${suite.id}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 text-[11px] font-bold px-2 py-0.5 rounded-md transition flex items-center gap-1 cursor-pointer"><span>⚡ Tarifa Especial</span></button>` 
+                    ? `<button onclick="abrirModalTarifaEspecial('${suite.id}')" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 text-[10px] font-extrabold px-2 py-0.5 rounded-lg transition flex items-center gap-1 cursor-pointer shadow-2xs"><span>⚡ Tarifa Especial</span></button>` 
                     : '';
 
-                const htmlBotaoCalendario = `<button onclick="abrirCalendarioSuite('${suite.id}', '${suite.nome}')" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-[11px] font-bold px-2.5 py-0.5 rounded-md transition flex items-center gap-1 cursor-pointer"><span>📅 Calendário</span></button>`;
+                const htmlBotaoCalendario = `<button onclick="abrirCalendarioSuite('${suite.id}', '${suite.nome}')" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300 text-[10px] font-extrabold px-2 py-0.5 rounded-lg transition flex items-center gap-1 cursor-pointer shadow-2xs"><span>📅 Calendário</span></button>`;
 
+                // =========================================================================
+                // 1. CARDS COM RESERVAS APROVADAS (OCUPADA OU RESERVA FUTURA)
+                // =========================================================================
                 if (aprovadasDaSuite.length > 0) {
                     for (let index = 0; index < aprovadasDaSuite.length; index++) {
                         const aprovada = aprovadasDaSuite[index];
@@ -1196,19 +1233,16 @@
                         const badgeText = isFutura ? 'Reserva Futura' : 'Ocupada';
                         
                         const bgCardClasses = isFutura 
-                            ? 'bg-blue-50 border-2 border-blue-300 text-blue-950' 
-                            : 'bg-slate-200 border-2 border-slate-400 text-slate-900';
+                            ? 'bg-blue-50/70 border-2 border-blue-200 text-blue-950' 
+                            : 'bg-slate-200/90 border-2 border-slate-400 text-slate-900';
                         
                         const badgeClasses = isFutura 
-                            ? 'bg-blue-200 text-blue-900 border border-blue-300' 
+                            ? 'bg-blue-200 text-blue-900 border border-blue-300 font-extrabold' 
                             : 'bg-slate-700 text-white font-extrabold';
                         
                         const indicador = isFutura ? obterIndicadorProximaEstada(aprovada.checkin) : obterIndicadorCheckout(aprovada.checkout);
                         const linkZap = gerarLinkWhatsApp(aprovada.whatsapp_hospede, aprovada.hospede_nome, aprovada.checkin, aprovada.checkout);
-                        
                         const sufixoTitulo = aprovadasDaSuite.length > 1 ? ` (${index + 1})` : '';
-                        const nomeHospedeExibicao = aprovada.hospede_nome ? ` - <span class="font-normal text-gray-800 text-sm sm:text-base">${aprovada.hospede_nome}</span>` : '';
-                        
                         const qtdDiarias = calcularQuantidadeDiarias(aprovada.checkin, aprovada.checkout);
                         
                         let valorTotal = Number(aprovada.valor_total || 0);
@@ -1238,42 +1272,44 @@
                         const totalPago = pagamentosDestaReserva.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
                         const saldoRestante = valorTotal - totalPago;
 
-                        // SELO DE TRANSFERÊNCIA DE SUÍTE
                         let tagTransferenciaHtml = '';
                         if (aprovada.suite_origem_id) {
                             const suiteOrigemObj = suitesGlobaisCache.find(s => s.id === aprovada.suite_origem_id);
                             const nomeSuiteOrigem = suiteOrigemObj ? suiteOrigemObj.nome : 'Outra Suíte';
                             tagTransferenciaHtml = `
-                                <span class="inline-flex items-center gap-1 bg-purple-100 text-purple-900 border border-purple-300 text-[10px] font-extrabold px-2 py-0.5 rounded-md" title="Transferido em ${formatarDataHora(aprovada.transferido_em)}: ${aprovada.motivo_transferencia || 'Sem motivo'}">
-                                    <i class="fa-solid fa-arrows-rotate text-purple-700"></i> Transf. de: ${nomeSuiteOrigem}
-                                </span>
+                                <div class="mt-2 p-2 rounded-xl bg-purple-50 border border-purple-200 text-purple-900 flex items-center justify-between gap-1 text-[10px]">
+                                    <span class="font-bold flex items-center gap-1"><i class="fa-solid fa-arrows-rotate text-purple-600"></i> Transf. de: ${nomeSuiteOrigem}</span>
+                                    <span class="text-purple-700 truncate">${aprovada.motivo_transferencia || ''}</span>
+                                </div>
                             `;
                         }
 
                         let tagDataPrazoTopo = '';
                         if (isFutura) {
                             tagDataPrazoTopo = `
-                                <span class="inline-flex items-center gap-1.5 bg-blue-100 text-blue-900 border border-blue-300 text-[11px] font-extrabold px-2.5 py-0.5 rounded-lg shadow-xs">
-                                    <i class="fa-solid fa-calendar-days text-blue-700"></i> Check-in: ${formatarDataSimples(aprovada.checkin)} 
-                                    <span class="bg-blue-600 text-white text-[9px] px-1.5 py-0.5 rounded-md font-bold uppercase">${indicador.texto}</span>
-                                </span>
+                                <div class="inline-flex items-center gap-1.5 bg-blue-100 text-blue-900 border border-blue-300 text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-2xs">
+                                    <i class="fa-solid fa-calendar-days text-blue-700 text-xs"></i>
+                                    <span>In: <strong>${formatarDataSimples(aprovada.checkin)}</strong></span>
+                                    <span class="bg-blue-600 text-white text-[9px] px-1.5 py-0.5 rounded-md font-extrabold uppercase ml-0.5">${indicador.texto}</span>
+                                </div>
                             `;
                         } else {
                             tagDataPrazoTopo = `
-                                <span class="inline-flex items-center gap-1.5 bg-slate-100 text-slate-900 border border-slate-400 text-[11px] font-extrabold px-2.5 py-0.5 rounded-lg shadow-xs">
-                                    <i class="fa-solid fa-person-walking-dashed-line-arrow-right text-slate-700"></i> Check-out: ${formatarDataSimples(aprovada.checkout)} 
-                                    <span class="bg-slate-800 text-white text-[9px] px-1.5 py-0.5 rounded-md font-bold uppercase">${indicador.texto}</span>
-                                </span>
+                                <div class="inline-flex items-center gap-1.5 bg-slate-100 text-slate-900 border border-slate-300 text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-2xs">
+                                    <i class="fa-solid fa-door-open text-slate-700 text-xs"></i>
+                                    <span>Out: <strong>${formatarDataSimples(aprovada.checkout)}</strong></span>
+                                    <span class="bg-slate-800 text-white text-[9px] px-1.5 py-0.5 rounded-md font-extrabold uppercase ml-0.5">${indicador.texto}</span>
+                                </div>
                             `;
                         }
 
                         let htmlAlertaTopo = '';
                         if (aprovada.observacao && aprovada.observacao.trim() !== '') {
                             htmlAlertaTopo = `
-                                <div class="mt-2 bg-amber-100 border-l-4 border-amber-500 p-2.5 rounded-xl text-amber-950 text-xs font-semibold flex items-start gap-2 shadow-xs">
-                                    <span>⚠️</span>
-                                    <div>
-                                        <strong class="block text-amber-900 uppercase text-[9px]">Aviso:</strong>
+                                <div class="mt-2.5 bg-amber-100 border-l-4 border-amber-500 p-2.5 rounded-xl text-amber-950 text-xs font-semibold flex items-start gap-2 shadow-2xs">
+                                    <span class="text-amber-700">⚠️</span>
+                                    <div class="leading-snug">
+                                        <strong class="block text-amber-900 uppercase text-[9px] tracking-wider">Aviso:</strong>
                                         <span>${aprovada.observacao}</span>
                                     </div>
                                 </div>
@@ -1281,89 +1317,123 @@
                         }
 
                         container.innerHTML += `
-                            <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md ${bgCardClasses} border-l-4 ${temaSuite.borderActive} flex flex-col justify-between transition hover:shadow-lg">
+                            <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-sm ${bgCardClasses} border-l-4 ${temaSuite.borderActive} flex flex-col justify-between transition hover:shadow-md">
                                 <div>
-                                    <!-- CABEÇALHO DO CARD -->
-                                    <div class="flex justify-between items-start mb-2 gap-2">
-                                        <div class="flex-1">
-                                            <div class="flex flex-wrap items-center gap-2 mb-1">
-                                                <div class="w-6 h-6 ${temaSuite.iconBg} ${temaSuite.iconText} rounded-lg flex items-center justify-center text-[10px] flex-shrink-0">
-                                                    <i class="fa-solid fa-bed"></i>
-                                                </div>
-                                                <h2 class="text-base font-bold text-gray-900">${suite.nome}${sufixoTitulo}${nomeHospedeExibicao}</h2>
-                                                ${tagPausadaHtml}
-                                                ${tagTransferenciaHtml}
+                                    <!-- 1. CABEÇALHO DO CARD -->
+                                    <div class="flex justify-between items-start gap-2 mb-2">
+                                        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                                            <div class="w-8 h-8 ${temaSuite.iconBg} ${temaSuite.iconText} rounded-xl flex items-center justify-center text-xs flex-shrink-0 shadow-2xs">
+                                                <i class="fa-solid fa-bed"></i>
                                             </div>
-                                            <!-- DATA E PRAZO LOGO AO LADO DO NOME -->
-                                            <div class="mt-1 flex flex-wrap items-center gap-1.5">
-                                                ${tagDataPrazoTopo}
+                                            <div class="min-w-0">
+                                                <h2 class="text-sm sm:text-base font-extrabold text-gray-900 truncate leading-tight">${suite.nome}${sufixoTitulo}</h2>
+                                                <p class="text-xs text-gray-600 font-medium truncate flex items-center gap-1 mt-0.5">
+                                                    <i class="fa-solid fa-user text-[10px] text-gray-400"></i>
+                                                    <span class="font-bold text-gray-800">${aprovada.hospede_nome || 'Hóspede'}</span>
+                                                </p>
                                             </div>
                                         </div>
-                                        <div class="flex items-center gap-2 flex-shrink-0">
-                                            <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-xs ${badgeClasses}">
+                                        
+                                        <!-- CLUSTER DE STATUS E PAUSADA -->
+                                        <div class="flex items-center gap-1.5 flex-shrink-0">
+                                            ${tagPausadaHtml}
+                                            <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-2xs ${badgeClasses}">
                                                 ${badgeText}
                                             </span>
-                                            <span class="icone-seta text-gray-500 text-sm transition-transform duration-300">▼</span>
+                                            <span class="icone-seta text-gray-500 text-xs ml-0.5 transition-transform duration-300">▼</span>
                                         </div>
                                     </div>
 
-                                    <!-- DIÁRIA PADRÃO, TARIFAS E CALENDÁRIO -->
-                                    <div class="flex flex-wrap items-center gap-2 mt-2">
-                                        <span class="text-[11px] font-bold text-slate-700 bg-white/70 px-2 py-0.5 rounded-md border border-black/5">Diária (2 Ad.): ${formatarMoeda(suite.valor_diaria)}</span>
-                                        ${htmlTarifaBadge}
-                                        ${htmlBotaoCalendario}
+                                    <!-- 2. RÉGUA OPERACIONAL: PRAZO + ATALHOS -->
+                                    <div class="mt-2.5 flex flex-wrap items-center justify-between gap-1.5 pt-2 border-t border-black/5">
+                                        <div class="flex items-center gap-1.5 flex-wrap">
+                                            ${tagDataPrazoTopo}
+                                        </div>
+                                        <div class="flex items-center gap-1.5 flex-wrap ml-auto">
+                                            ${htmlTarifaBadge}
+                                            ${htmlBotaoCalendario}
+                                        </div>
                                     </div>
 
-                                    <!-- SALDO RESTANTE DIRETO NA CAPA -->
-                                    <div class="mt-3 p-2.5 rounded-xl bg-white/80 border border-black/10 shadow-2xs flex flex-wrap items-center justify-between gap-2">
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-[10px] uppercase font-bold text-gray-500">Saldo Restante:</span>
-                                            <strong class="text-xs sm:text-sm font-extrabold ${saldoRestante > 0 ? 'text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200' : 'text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200'}">
-                                                ${formatarMoeda(saldoRestante)}
-                                            </strong>
-                                        </div>
-                                        <div class="text-[10px] text-gray-600 font-medium flex items-center gap-2">
-                                            <span>Pago: <strong class="text-emerald-700 font-bold">${formatarMoeda(totalPago)}</strong></span>
-                                            <span>•</span>
-                                            <span>Total: <strong class="text-blue-800 font-bold">${formatarMoeda(valorTotal)}</strong></span>
+                                    <!-- 3. PAINEL FINANCEIRO EM 3 COLUNAS (ALTA LEGIBILIDADE) -->
+                                    <div class="mt-3 p-2.5 rounded-xl bg-white/85 border border-black/10 shadow-2xs">
+                                        <div class="grid grid-cols-3 gap-2 text-center divide-x divide-black/5">
+                                            <div class="px-1">
+                                                <span class="text-[9px] uppercase font-bold text-gray-500 block">Total Estadia</span>
+                                                <strong class="text-xs sm:text-sm font-extrabold text-gray-900 block leading-tight">${formatarMoeda(valorTotal)}</strong>
+                                                <span class="text-[9px] text-gray-400 block truncate mt-0.5">Diária: ${formatarMoeda(suite.valor_diaria)}</span>
+                                            </div>
+                                            <div class="px-1">
+                                                <span class="text-[9px] uppercase font-bold text-gray-500 block">Total Pago</span>
+                                                <strong class="text-xs sm:text-sm font-extrabold text-emerald-700 block leading-tight">${formatarMoeda(totalPago)}</strong>
+                                                <span class="text-[9px] text-emerald-600 block mt-0.5 font-medium">${totalPago > 0 ? '✓ Sinal pago' : 'Sem sinal'}</span>
+                                            </div>
+                                            <div class="px-1">
+                                                <span class="text-[9px] uppercase font-bold text-gray-500 block">Saldo Restante</span>
+                                                <strong class="text-xs sm:text-sm font-extrabold block leading-tight ${saldoRestante > 0 ? 'text-amber-700' : 'text-emerald-600'}">
+                                                    ${formatarMoeda(saldoRestante)}
+                                                </strong>
+                                                <span class="text-[9px] font-bold block mt-0.5 ${saldoRestante > 0 ? 'text-amber-600' : 'text-emerald-600'}">
+                                                    ${saldoRestante > 0 ? '● Pendente' : '✓ Quitado'}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
 
                                     ${htmlAlertaTopo}
 
-                                    <!-- DETALHES COMPLEMENTARES EXPANSÍVEIS -->
-                                    <div class="card-detalhes hidden mt-3 pt-3 border-t border-black/10 text-xs sm:text-sm space-y-1.5">
-                                        <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">Hóspede:</span> <span class="font-bold text-gray-900">${aprovada.hospede_nome}</span></p>
-                                        <p class="flex items-center gap-1.5"><span class="font-semibold text-gray-700">WhatsApp:</span> <a href="${linkZap}" target="_blank" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${aprovada.whatsapp_hospede || 'Não informado'}</a></p>
-                                        
-                                        <div class="grid grid-cols-3 gap-2 bg-white/90 p-2.5 rounded-xl border border-black/5 text-xs mt-2">
+                                    <!-- 4. DETALHES EXPANDIDOS (QUANDO ABERTO) -->
+                                    <div class="card-detalhes hidden mt-3 pt-3 border-t border-black/10 text-xs space-y-2">
+                                        <!-- WhatsApp / Contato Rápido -->
+                                        <div class="flex items-center justify-between bg-white/80 p-2 rounded-xl border border-black/5">
+                                            <div class="flex items-center gap-1.5 truncate">
+                                                <span class="text-gray-500 font-medium">WhatsApp:</span>
+                                                <span class="font-bold text-gray-800">${aprovada.whatsapp_hospede || 'Não informado'}</span>
+                                            </div>
+                                            <a href="${linkZap}" target="_blank" class="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-800 font-extrabold bg-emerald-100 hover:bg-emerald-200 px-2.5 py-1 rounded-lg border border-emerald-300 text-[11px] transition shadow-2xs flex-shrink-0">
+                                                <i class="fa-brands fa-whatsapp text-emerald-600"></i> Conversar
+                                            </a>
+                                        </div>
+
+                                        <!-- Ocupação -->
+                                        <div class="grid grid-cols-3 gap-2 bg-white/80 p-2 rounded-xl border border-black/5 text-center">
                                             <div>
                                                 <span class="text-gray-500 block text-[10px] uppercase font-bold">Adultos</span>
-                                                <strong class="text-gray-900">${qtdAdultos}</strong>
+                                                <strong class="text-gray-900 text-xs">${qtdAdultos}</strong>
                                             </div>
                                             <div>
                                                 <span class="text-gray-500 block text-[10px] uppercase font-bold">Crianças</span>
-                                                <strong class="text-gray-900">${qtdCriancas}</strong>
+                                                <strong class="text-gray-900 text-xs">${qtdCriancas}</strong>
                                             </div>
                                             <div>
                                                 <span class="text-gray-500 block text-[10px] uppercase font-bold">Taxa Pet</span>
-                                                <strong class="text-gray-900">${temPet}</strong>
+                                                <strong class="text-gray-900 text-xs">${temPet}</strong>
                                             </div>
                                         </div>
 
-                                        <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-black/10 text-xs">
-                                            <p><span class="text-gray-600">Entrada:</span> <strong class="text-gray-900">${formatarDataSimples(aprovada.checkin)}</strong></p>
-                                            <p><span class="text-gray-600">Saída:</span> <strong class="text-gray-900">${formatarDataSimples(aprovada.checkout)}</strong></p>
+                                        <!-- Datas Completas -->
+                                        <div class="grid grid-cols-2 gap-2 bg-white/80 p-2 rounded-xl border border-black/5 text-[11px]">
+                                            <div>
+                                                <span class="text-gray-500 block text-[10px]">Entrada (Check-in):</span>
+                                                <strong class="text-gray-900">${formatarDataSimples(aprovada.checkin)}</strong>
+                                            </div>
+                                            <div>
+                                                <span class="text-gray-500 block text-[10px]">Saída (Check-out):</span>
+                                                <strong class="text-gray-900">${formatarDataSimples(aprovada.checkout)}</strong>
+                                                <span class="text-gray-500 text-[10px]">(${qtdDiarias}d)</span>
+                                            </div>
                                         </div>
+
+                                        ${tagTransferenciaHtml}
                                     </div>
                                     
-                                    <!-- AÇÕES DO CARD -->
-                                    <div class="mt-4 pt-3 flex justify-between items-center border-t border-black/10">
-                                        <button type="button" onclick="alternarExpandirCard(this)" class="text-xs font-bold text-gray-700 hover:text-gray-900 underline">
-                                            Expandir Detalhes ▾
+                                    <!-- 5. RODAPÉ DE AÇÕES -->
+                                    <div class="mt-3.5 pt-2.5 flex justify-between items-center border-t border-black/10">
+                                        <button type="button" onclick="alternarExpandirCard(this)" class="text-xs font-bold text-gray-700 hover:text-gray-900 underline flex items-center gap-1">
+                                            <span class="label-expandir">Expandir Detalhes</span> ▾
                                         </button>
-                                        <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', '${statusParaModal}', '${aprovada.id}')" class="text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 px-3.5 py-2 rounded-xl transition shadow-xs">
-                                            Editar Card &rarr;
+                                        <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', '${statusParaModal}', '${aprovada.id}')" class="text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1">
+                                            <span>Editar Card</span> &rarr;
                                         </button>
                                     </div>
                                 </div>
@@ -1371,7 +1441,9 @@
                     }
                 } 
                 
-                // CASO DISPONÍVEL OU LIMPEZA
+                // =========================================================================
+                // 2. CASO DISPONÍVEL OU LIMPEZA (SEM RESERVAS ATIVAS)
+                // =========================================================================
                 if (aprovadasDaSuite.length === 0 && pendentesDaSuite.length === 0) {
                     const isDisponivel = suite.status === 'Disponível';
                     
@@ -1384,46 +1456,51 @@
                         : 'bg-pink-600 text-white font-extrabold';
                     
                     container.innerHTML += `
-                        <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md ${bgCardClasses} border-l-4 ${temaSuite.borderActive} flex flex-col justify-between transition hover:shadow-lg">
+                        <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-sm ${bgCardClasses} border-l-4 ${temaSuite.borderActive} flex flex-col justify-between transition hover:shadow-md">
                             <div>
-                                <div class="flex justify-between items-start mb-2 gap-2">
-                                    <div>
-                                        <div class="flex flex-wrap items-center gap-2 mb-1">
-                                            <div class="w-6 h-6 ${temaSuite.iconBg} ${temaSuite.iconText} rounded-lg flex items-center justify-center text-[10px] flex-shrink-0">
-                                                <i class="fa-solid fa-bed"></i>
-                                            </div>
-                                            <h2 class="text-base sm:text-lg font-bold text-gray-900">${suite.nome}</h2>
-                                            ${tagPausadaHtml}
+                                <div class="flex justify-between items-start gap-2 mb-2">
+                                    <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                                        <div class="w-8 h-8 ${temaSuite.iconBg} ${temaSuite.iconText} rounded-xl flex items-center justify-center text-xs flex-shrink-0 shadow-2xs">
+                                            <i class="fa-solid fa-bed"></i>
                                         </div>
-                                        <div class="mt-1">
-                                            <span class="inline-flex items-center gap-1.5 ${isDisponivel ? 'bg-emerald-200/80 text-emerald-950 border border-emerald-300' : 'bg-pink-200/80 text-pink-950 border border-pink-300'} text-[11px] font-extrabold px-2.5 py-0.5 rounded-lg">
-                                                ${isDisponivel ? '✅ Pronto para receber hóspedes' : '🧹 Acomodação em processo de higienização'}
-                                            </span>
+                                        <div class="min-w-0">
+                                            <h2 class="text-sm sm:text-base font-extrabold text-gray-900 truncate leading-tight">${suite.nome}</h2>
+                                            <p class="text-xs font-semibold ${isDisponivel ? 'text-emerald-800' : 'text-pink-800'} truncate mt-0.5">
+                                                ${isDisponivel ? '✅ Pronto para receber hóspedes' : '🧹 Em processo de higienização'}
+                                            </p>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-2 flex-shrink-0">
-                                        <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-xs ${badgeClasses}">
+
+                                    <div class="flex items-center gap-1.5 flex-shrink-0">
+                                        ${tagPausadaHtml}
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-2xs ${badgeClasses}">
                                             ${suite.status}
                                         </span>
                                     </div>
                                 </div>
 
-                                <div class="flex flex-wrap items-center gap-2 mt-3">
-                                    <span class="text-[11px] font-bold text-slate-700 bg-white/70 px-2 py-0.5 rounded-md border border-black/5">Diária (2 Ad.): ${formatarMoeda(suite.valor_diaria)}</span>
-                                    ${htmlTarifaBadge}
-                                    ${htmlBotaoCalendario}
+                                <div class="mt-3 flex flex-wrap items-center justify-between gap-1.5 pt-2 border-t border-black/5">
+                                    <span class="text-[11px] font-bold text-slate-700 bg-white/75 px-2.5 py-1 rounded-lg border border-black/5 shadow-2xs">
+                                        Diária (2 Ad.): ${formatarMoeda(suite.valor_diaria)}
+                                    </span>
+                                    <div class="flex items-center gap-1.5 ml-auto">
+                                        ${htmlTarifaBadge}
+                                        ${htmlBotaoCalendario}
+                                    </div>
                                 </div>
                                 
-                                <div class="mt-6 pt-3 border-t border-black/10 flex justify-end">
-                                    <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', '${suite.status}')" class="text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 px-3.5 py-2 rounded-xl transition shadow-xs">
-                                        Gerenciar / Adicionar &rarr;
+                                <div class="mt-5 pt-2.5 border-t border-black/10 flex justify-end">
+                                    <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', '${suite.status}')" class="text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1">
+                                        <span>Gerenciar / Adicionar</span> &rarr;
                                     </button>
                                 </div>
                             </div>
                         </div>`;
                 }
 
-                // RESERVAS PENDENTES
+                // =========================================================================
+                // 3. RESERVAS PENDENTES DA SUÍTE
+                // =========================================================================
                 for (let index = 0; index < pendentesDaSuite.length; index++) {
                     const pend = pendentesDaSuite[index];
                     const linkZapPend = gerarLinkWhatsApp(pend.whatsapp_hospede, pend.hospede_nome, pend.checkin, pend.checkout);
@@ -1453,7 +1530,6 @@
                     }
 
                     const sufixoTituloPend = pendentesDaSuite.length > 1 ? ` (${index + 1})` : '';
-                    const nomeHospedePendExibicao = pend.hospede_nome ? ` - <span class="font-normal text-amber-950 text-sm sm:text-base">${pend.hospede_nome}</span>` : '';
                     const temPetPend = petPendVal ? 'Sim' : 'Não';
 
                     const pagamentosPend = pagamentosGlobaisCache.filter(p => p.reserva_id === pend.id);
@@ -1463,10 +1539,10 @@
                     let htmlAlertaTopoPend = '';
                     if (pend.observacao && pend.observacao.trim() !== '') {
                         htmlAlertaTopoPend = `
-                            <div class="mt-2 bg-amber-200/80 border-l-4 border-amber-600 p-2.5 rounded-xl text-amber-950 text-xs font-semibold flex items-start gap-2 shadow-xs">
-                                <span>⚠️</span>
-                                <div>
-                                    <strong class="block text-amber-900 uppercase text-[9px]">Aviso:</strong>
+                            <div class="mt-2.5 bg-amber-200/80 border-l-4 border-amber-600 p-2.5 rounded-xl text-amber-950 text-xs font-semibold flex items-start gap-2 shadow-2xs">
+                                <span class="text-amber-700">⚠️</span>
+                                <div class="leading-snug">
+                                    <strong class="block text-amber-900 uppercase text-[9px] tracking-wider">Aviso:</strong>
                                     <span>${pend.observacao}</span>
                                 </div>
                             </div>
@@ -1474,95 +1550,116 @@
                     }
 
                     container.innerHTML += `
-                        <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-md bg-amber-100 border-2 border-amber-400 border-l-4 ${temaSuite.borderActive} text-amber-950 flex flex-col justify-between transition hover:shadow-lg">
+                        <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-sm bg-amber-100 border-2 border-amber-400 border-l-4 ${temaSuite.borderActive} text-amber-950 flex flex-col justify-between transition hover:shadow-md">
                             <div>
-                                <div class="flex justify-between items-start mb-2 gap-2">
-                                    <div class="flex-1">
-                                        <div class="flex flex-wrap items-center gap-2 mb-1">
-                                            <div class="w-6 h-6 ${temaSuite.iconBg} ${temaSuite.iconText} rounded-lg flex items-center justify-center text-[10px] flex-shrink-0">
-                                                <i class="fa-solid fa-bed"></i>
-                                            </div>
-                                            <h2 class="text-base sm:text-lg font-bold text-amber-950">${suite.nome}${sufixoTituloPend}${nomeHospedePendExibicao}</h2>
-                                            ${tagPausadaHtml}
+                                <div class="flex justify-between items-start gap-2 mb-2">
+                                    <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                                        <div class="w-8 h-8 ${temaSuite.iconBg} ${temaSuite.iconText} rounded-xl flex items-center justify-center text-xs flex-shrink-0 shadow-2xs">
+                                            <i class="fa-solid fa-bed"></i>
                                         </div>
-                                        <div class="mt-1 flex flex-wrap items-center gap-1.5">
-                                            <span class="inline-flex items-center gap-1.5 bg-amber-200 text-amber-950 border border-amber-300 text-[11px] font-extrabold px-2.5 py-0.5 rounded-lg shadow-xs">
-                                                <i class="fa-solid fa-clock text-amber-700"></i> Período: ${formatarDataSimples(pend.checkin)} a ${formatarDataSimples(pend.checkout)} (${qtdDiariasPend}d)
-                                            </span>
+                                        <div class="min-w-0">
+                                            <h2 class="text-sm sm:text-base font-extrabold text-amber-950 truncate leading-tight">${suite.nome}${sufixoTituloPend}</h2>
+                                            <p class="text-xs text-amber-900 font-medium truncate flex items-center gap-1 mt-0.5">
+                                                <i class="fa-solid fa-user text-[10px] text-amber-700"></i>
+                                                <span class="font-bold text-amber-950">${pend.hospede_nome || 'Hóspede Solicitante'}</span>
+                                            </p>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-2 flex-shrink-0">
-                                        <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-xs bg-amber-300 text-amber-950 border border-amber-400">Pendente</span>
-                                        <span class="icone-seta text-amber-700 text-sm transition-transform duration-300">▼</span>
+
+                                    <div class="flex items-center gap-1.5 flex-shrink-0">
+                                        ${tagPausadaHtml}
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-2xs bg-amber-300 text-amber-950 border border-amber-400">
+                                            Pendente
+                                        </span>
+                                        <span class="icone-seta text-amber-700 text-xs ml-0.5 transition-transform duration-300">▼</span>
                                     </div>
                                 </div>
 
-                                <div class="flex flex-wrap items-center gap-2 mt-2">
-                                    <span class="text-[11px] font-bold text-amber-900 bg-white/70 px-2 py-0.5 rounded-md border border-amber-200">Diária (2 Ad.): ${formatarMoeda(suite.valor_diaria)}</span>
-                                    ${htmlTarifaBadge}
-                                    ${htmlBotaoCalendario}
+                                <div class="mt-2.5 flex flex-wrap items-center justify-between gap-1.5 pt-2 border-t border-amber-200">
+                                    <span class="inline-flex items-center gap-1.5 bg-amber-200 text-amber-950 border border-amber-300 text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-2xs">
+                                        <i class="fa-solid fa-clock text-amber-800"></i> Solicitado: <strong>${formatarDataSimples(pend.checkin)} a ${formatarDataSimples(pend.checkout)}</strong> (${qtdDiariasPend}d)
+                                    </span>
+                                    <div class="flex items-center gap-1.5 ml-auto">
+                                        ${htmlTarifaBadge}
+                                        ${htmlBotaoCalendario}
+                                    </div>
                                 </div>
                                 
-                                <div class="mt-3 p-2.5 rounded-xl bg-white/80 border border-amber-300 shadow-2xs flex flex-wrap items-center justify-between gap-2">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-[10px] uppercase font-bold text-amber-800">Saldo Restante:</span>
-                                        <strong class="text-xs sm:text-sm font-extrabold text-amber-900 bg-amber-200/70 px-2 py-0.5 rounded-md border border-amber-300">
-                                            ${formatarMoeda(saldoRestantePend)}
-                                        </strong>
-                                    </div>
-                                    <div class="text-[10px] text-amber-900 font-medium">
-                                        Total da Estadia: <strong class="text-blue-900 font-bold">${formatarMoeda(valorTotalPend)}</strong>
+                                <!-- PAINEL FINANCEIRO DE RESERVA PENDENTE -->
+                                <div class="mt-3 p-2.5 rounded-xl bg-white/85 border border-amber-300 shadow-2xs">
+                                    <div class="grid grid-cols-3 gap-2 text-center divide-x divide-amber-200">
+                                        <div class="px-1">
+                                            <span class="text-[9px] uppercase font-bold text-amber-800 block">Total Estadia</span>
+                                            <strong class="text-xs sm:text-sm font-extrabold text-blue-900 block leading-tight">${formatarMoeda(valorTotalPend)}</strong>
+                                            <span class="text-[9px] text-amber-800/80 block mt-0.5">Diária: ${formatarMoeda(suite.valor_diaria)}</span>
+                                        </div>
+                                        <div class="px-1">
+                                            <span class="text-[9px] uppercase font-bold text-amber-800 block">Sinal Pago</span>
+                                            <strong class="text-xs sm:text-sm font-extrabold text-emerald-700 block leading-tight">${formatarMoeda(totalPagoPend)}</strong>
+                                            <span class="text-[9px] text-emerald-700 block mt-0.5">${totalPagoPend > 0 ? '✓ Pago' : 'Sem sinal'}</span>
+                                        </div>
+                                        <div class="px-1">
+                                            <span class="text-[9px] uppercase font-bold text-amber-800 block">A Receber</span>
+                                            <strong class="text-xs sm:text-sm font-extrabold text-amber-900 block leading-tight">${formatarMoeda(saldoRestantePend)}</strong>
+                                            <span class="text-[9px] font-bold text-amber-700 block mt-0.5">● Aguardando</span>
+                                        </div>
                                     </div>
                                 </div>
 
                                 ${htmlAlertaTopoPend}
 
-                                <div class="card-detalhes hidden mt-3 pt-3 border-t border-amber-200 text-xs sm:text-sm space-y-1.5">
-                                    <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">Hóspede:</span> <span class="font-bold text-gray-900">${pend.hospede_nome || 'Não informado'}</span></p>
-                                    <p class="flex items-center gap-1.5"><span class="font-semibold text-amber-900">WhatsApp:</span> <a href="${linkZapPend}" target="_blank" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">💬 ${pend.whatsapp_hospede || 'Não informado'}</a></p>
+                                <!-- DETALHES COMPLEMENTARES EXPANSÍVEIS -->
+                                <div class="card-detalhes hidden mt-3 pt-3 border-t border-amber-200 text-xs space-y-2">
+                                    <div class="flex items-center justify-between bg-white/80 p-2 rounded-xl border border-amber-200">
+                                        <div class="flex items-center gap-1.5 truncate">
+                                            <span class="text-gray-500 font-medium">WhatsApp:</span>
+                                            <span class="font-bold text-gray-800">${pend.whatsapp_hospede || 'Não informado'}</span>
+                                        </div>
+                                        <a href="${linkZapPend}" target="_blank" class="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-800 font-extrabold bg-emerald-100 hover:bg-emerald-200 px-2.5 py-1 rounded-lg border border-emerald-300 text-[11px] transition shadow-2xs flex-shrink-0">
+                                            <i class="fa-brands fa-whatsapp text-emerald-600"></i> Conversar
+                                        </a>
+                                    </div>
                                     
-                                    <div class="grid grid-cols-3 gap-2 bg-white/90 p-2.5 rounded-xl border border-amber-200 text-xs mt-2">
+                                    <div class="grid grid-cols-3 gap-2 bg-white/90 p-2 rounded-xl border border-amber-200 text-center">
                                         <div>
                                             <span class="text-gray-500 block text-[10px] uppercase font-bold">Adultos</span>
-                                            <strong class="text-gray-900">${qtdAdultosPend}</strong>
+                                            <strong class="text-gray-900 text-xs">${qtdAdultosPend}</strong>
                                         </div>
                                         <div>
                                             <span class="text-gray-500 block text-[10px] uppercase font-bold">Crianças</span>
-                                            <strong class="text-gray-900">${qtdCriancasPend}</strong>
+                                            <strong class="text-gray-900 text-xs">${qtdCriancasPend}</strong>
                                         </div>
                                         <div>
                                             <span class="text-gray-500 block text-[10px] uppercase font-bold">Taxa Pet</span>
-                                            <strong class="text-gray-900">${temPetPend}</strong>
+                                            <strong class="text-gray-900 text-xs">${temPetPend}</strong>
                                         </div>
                                     </div>
                                     
-                                    <div class="bg-white/80 border border-amber-200 p-3 rounded-xl mt-3 space-y-1 text-xs text-amber-900 shadow-sm">
-                                        <p><span class="font-semibold text-gray-600">CPF:</span> ${pend.cpf || 'Não informado'}</p>
-                                        <p><span class="font-semibold text-gray-600">RG:</span> ${pend.rg || 'Não informado'}</p>
-                                        <p><span class="font-semibold text-gray-600">Endereço:</span> ${pend.endereco || 'Não informado'}</p>
-                                        <p><span class="font-semibold text-gray-600">CEP:</span> ${pend.cep || 'Não informado'}</p>
-                                        <p><span class="font-semibold text-gray-600">E-mail:</span> ${pend.email || 'Não informado'}</p>
-                                        <div class="pt-1.5 border-t border-amber-100 flex items-center gap-1 text-gray-500 font-medium">
+                                    <div class="bg-white/85 border border-amber-200 p-2.5 rounded-xl space-y-0.5 text-xs text-amber-900 shadow-2xs">
+                                        <p><span class="text-gray-500">CPF:</span> <strong>${pend.cpf || 'Não informado'}</strong></p>
+                                        <p><span class="text-gray-500">E-mail:</span> <strong>${pend.email || 'Não informado'}</strong></p>
+                                        <div class="pt-1 border-t border-amber-100 flex items-center gap-1 text-gray-500 text-[10px]">
                                             <span>🕒</span> <span>Solicitado em: <strong>${dataSolicitacaoFormatada}</strong></span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="mt-3 bg-amber-200/60 border border-amber-300 rounded-xl p-2 flex gap-2 shadow-xs">
-                                    <button onclick="mudarStatusReserva('${pend.id}', 'Aprovada')" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-extrabold py-2.5 px-3 rounded-xl shadow-xs text-sm transition flex items-center justify-center gap-1.5">
+                                <!-- AÇÕES DE APROVAÇÃO / RECUSA -->
+                                <div class="mt-3 bg-amber-200/70 border border-amber-300 rounded-xl p-2 flex gap-2 shadow-2xs">
+                                    <button onclick="mudarStatusReserva('${pend.id}', 'Aprovada')" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-extrabold py-2 px-3 rounded-xl shadow-xs text-xs sm:text-sm transition flex items-center justify-center gap-1.5">
                                         ✔ Aprovar
                                     </button>
-                                    <button onclick="abrirModalRecusa('${pend.id}', '${(pend.hospede_nome || 'hóspede').replace(/'/g, '').replace(/"/g, '')}')" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-extrabold py-2.5 px-3 rounded-xl shadow-xs text-sm transition flex items-center justify-center gap-1.5">
+                                    <button onclick="abrirModalRecusa('${pend.id}', '${(pend.hospede_nome || 'hóspede').replace(/'/g, '').replace(/"/g, '')}')" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-extrabold py-2 px-3 rounded-xl shadow-xs text-xs sm:text-sm transition flex items-center justify-center gap-1.5">
                                         ✖ Recusar
                                     </button>
                                 </div>
 
-                                <div class="mt-3 pt-3 flex justify-between items-center border-t border-amber-200">
-                                    <button type="button" onclick="alternarExpandirCard(this)" class="text-xs font-bold text-amber-900 hover:text-amber-950 underline">
-                                        Ver detalhes / WhatsApp ▾
+                                <div class="mt-3.5 pt-2.5 flex justify-between items-center border-t border-amber-200">
+                                    <button type="button" onclick="alternarExpandirCard(this)" class="text-xs font-bold text-amber-900 hover:text-amber-950 underline flex items-center gap-1">
+                                        <span class="label-expandir">Ver Detalhes</span> ▾
                                     </button>
-                                    <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', 'Pendente', '${pend.id}')" class="text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 px-3.5 py-2 rounded-xl transition shadow-xs">
-                                        Editar Card &rarr;
+                                    <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', 'Pendente', '${pend.id}')" class="text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1">
+                                        <span>Editar Card</span> &rarr;
                                     </button>
                                 </div>
                             </div>
@@ -1576,7 +1673,6 @@
             limparErroModal();
             aplicarVisibilidadeTaxaPet();
 
-            // POPULA O SELETOR DE SUÍTES PARA PERMITIR TRANSFERÊNCIA
             const selectSuites = document.getElementById('edit-suite-id');
             selectSuites.innerHTML = '';
             suitesGlobaisCache.forEach(s => {
@@ -1588,7 +1684,6 @@
             selectSuites.value = id;
             document.getElementById('edit-suite-id-original').value = id;
 
-            // Reset painel transferência
             document.getElementById('container-transferencia-suite').classList.add('hidden');
             document.getElementById('badge-transferencia-topo').classList.add('hidden');
             const elMotivo = document.getElementById('edit-motivo-transferencia');
@@ -1693,7 +1788,6 @@
             const suiteNovaObj = suitesGlobaisCache.find(s => s.id === suiteIdAtual);
             const suiteAntigaObj = suitesGlobaisCache.find(s => s.id === suiteIdOrig);
 
-            // Se for uma reserva existente e o quarto foi trocado
             if (reservaId && suiteIdAtual !== suiteIdOrig) {
                 containerTransf.classList.remove('hidden');
                 badgeTransf.classList.remove('hidden');
@@ -1703,7 +1797,6 @@
                 badgeTransf.classList.add('hidden');
             }
 
-            // Atualiza capacidade informativa
             const capInfoEl = document.getElementById('info-capacidade-suite');
             if (capInfoEl && suiteNovaObj) {
                 const capMax = Number(suiteNovaObj.capacidade_hospedes) || 0;
@@ -1715,13 +1808,10 @@
                 }
             }
 
-            // Recalcula valores de acordo com a nova suíte
             await recalcularValoresModalEdicao();
         }
 
-        function aoMudarMotiveTransfer() {
-            // Auxiliar para preenchimento rápido
-        }
+        function aoMudarMotiveTransfer() {}
 
         async function mudarStatusReserva(reservaId, novoStatus, motivoRecusa = null) {
             if (novoStatus !== 'Aprovada') {
@@ -2173,7 +2263,6 @@
                 document.getElementById('edit-checkout').value = checkoutVal;
             }
 
-            // Validação de capacidade da suíte escolhida
             try {
                 const suiteCapSave = suitesGlobaisCache.find(s => s.id === suiteId);
                 if (suiteCapSave) {
@@ -2186,9 +2275,6 @@
                 }
             } catch(e) { console.warn(e); }
 
-            // =========================================================================
-            // CHECAGEM DE CONFLITO NOMINAL DETALHADA (1 OU MÚLTIPLOS HÓSPEDES)
-            // =========================================================================
             const conflitosDetectados = obterConflitosDatas(suiteId, checkinVal, checkoutVal, reservaIdEditada);
             if (conflitosDetectados.length > 0) {
                 const suiteAlvoObj = suitesGlobaisCache.find(s => s.id === suiteId);
@@ -2197,7 +2283,6 @@
                 return;
             }
 
-            // Dados da reserva preparados
             const dadosReserva = {
                 pousada_id: usuarioIdAtual,
                 suite_id: suiteId,
@@ -2218,7 +2303,6 @@
                 status: status === 'Checkout' ? 'Finalizada' : 'Aprovada'
             };
 
-            // SE HOUVE TRANSFERÊNCIA DE SUÍTE: GRAVA CAMPOS DE AUDITORIA
             const houveTransferencia = (reservaIdEditada && suiteIdOriginal && suiteId !== suiteIdOriginal);
             if (houveTransferencia) {
                 dadosReserva.suite_origem_id = suiteIdOriginal;
@@ -2271,10 +2355,8 @@
                 statusDestino = 'Disponível';
             }
 
-            // Atualiza suíte de destino
             await supabaseClient.from('suites').update({ status: statusDestino }).eq('id', suiteId);
 
-            // Se transferiu quarto ocupado de imediato, libera suíte anterior para Limpeza
             if (houveTransferencia) {
                 const hojeStr = new Date().toLocaleDateString('sv-SE');
                 if (checkinVal <= hojeStr && checkoutVal > hojeStr) {
@@ -2348,9 +2430,6 @@
                 return;
             }
 
-            // =========================================================================
-            // VERIFICAÇÃO PRÉVIA DE CONFLITOS NOMINAIS (1 OU MÚLTIPLOS)
-            // =========================================================================
             const conflitosPrevios = obterConflitosDatas(suiteId, checkinInformado, checkoutInformado, reservaIdEditada);
             if (conflitosPrevios.length > 0) {
                 const msgErro = gerarMensagemErroConflito(conflitosPrevios, suiteObj?.nome || '');
@@ -2370,7 +2449,6 @@
                 return;
             }
 
-            // Confirmação para Saída / Limpeza
             if (statusOriginal === 'Ocupada' && (status === 'Limpeza' || status === 'Checkout')) {
                 fecharModal(); 
                 document.getElementById('modal-confirmacao').classList.remove('hidden');
@@ -2381,9 +2459,6 @@
                 return;
             }
 
-            // =========================================================================
-            // DETECÇÃO DE ANTECIPAÇÃO DE CHECK-IN COM CONFIRMAÇÃO DE NOVO VALOR
-            // =========================================================================
             let houveAntecipacao = false;
             let reservaOriginalObj = null;
 
