@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão de Tarifas e Valores</title>
+    <title>Gestão de Tarifas e Regras</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -19,6 +19,12 @@
             <nav class="mt-4 md:mt-0 space-y-1.5 sm:space-y-2 flex flex-wrap md:flex-col gap-1.5 md:gap-0">
                 <a href="dashboard.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
                     <span>🏠</span> <span class="hidden sm:inline">Painel Principal</span><span class="sm:hidden">Suítes</span>
+                </a>
+                <a href="relatorios.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
+                    <span>📋</span> <span class="hidden sm:inline">Gestão Completa</span><span class="sm:hidden">Relatórios</span>
+                </a>
+                <a href="configurar-pousada.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
+                    <span>⚙️</span> <span class="hidden sm:inline">Configuração de Suítes</span><span class="sm:hidden">Suítes</span>
                 </a>
                 <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl transition shadow text-xs sm:text-sm flex items-center justify-center gap-2 mt-1">
                     <i class="fa-solid fa-right-from-bracket"></i> Sair
@@ -44,105 +50,179 @@
         <main class="p-4 sm:p-6 md:p-8 flex-1 overflow-y-auto">
             <div class="max-w-7xl mx-auto space-y-6">
                 
-                <!-- GRID SUPERIOR: REGRAS GERAIS E SUÍTES (Lado a Lado em Telas Grandes) -->
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    
-                    <!-- SEÇÃO 0: REGRAS GERAIS DA POUSADA (Ocupa 5 colunas no LG) -->
-                    <div class="lg:col-span-5 bg-white p-5 sm:p-6 rounded-3xl shadow-md border border-gray-200 flex flex-col justify-between">
+                <!-- SEÇÃO 1: REGRAS GERAIS, CANAIS E POLÍTICAS DA POUSADA -->
+                <div class="bg-white p-5 sm:p-8 rounded-3xl shadow-md border border-gray-200">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2 border-b border-gray-100 pb-3">
                         <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <h2 class="text-base sm:text-lg font-bold text-blue-600 flex items-center gap-2">
-                                    <i class="fa-solid fa-hotel"></i> Regras da Pousada
-                                </h2>
-                            </div>
-                            <p class="text-xs text-gray-500 mb-4">Políticas gerais, taxas globais e mídias do estabelecimento.</p>
-                            
-                            <div class="grid grid-cols-2 gap-3 bg-gray-50 p-4 rounded-2xl border border-gray-200 mb-4">
-                                <div>
-                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Check-in</label>
-                                    <input type="time" id="pousada-checkin" class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs sm:text-sm">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Check-out</label>
-                                    <input type="time" id="pousada-checkout" class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs sm:text-sm">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Diária Mín.</label>
-                                    <input type="number" min="1" id="pousada-diaria-minima" placeholder="Ex: 1" class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs sm:text-sm">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Idade Criança Grátis</label>
-                                    <input type="number" min="0" max="18" id="pousada-idade-crianca" placeholder="Ex: 5" class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs sm:text-sm" title="Até que idade a criança não paga?">
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Aceita Pet?</label>
-                                    <select id="pousada-aceita-pet" onchange="alternarCampoPet()" class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs sm:text-sm">
-                                        <option value="nao">Não</option>
-                                        <option value="sim">Sim</option>
-                                    </select>
-                                </div>
-                                <div id="container-valor-pet" class="hidden col-span-2">
-                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Valor Adicional Pet (R$)</label>
-                                    <input type="number" step="0.01" id="pousada-valor-pet" placeholder="Ex: 40.00" class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs sm:text-sm">
-                                </div>
-                                <div class="col-span-2">
-                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Hóspede Extra Global (R$)</label>
-                                    <input type="number" step="0.01" id="pousada-valor-hospede-extra" placeholder="Ex: 50.00" class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs sm:text-sm">
+                            <h2 class="text-base sm:text-xl font-extrabold text-blue-600 flex items-center gap-2">
+                                <i class="fa-solid fa-hotel"></i> Regras da Pousada, Políticas e Canais de Contato
+                            </h2>
+                            <p class="text-xs text-gray-500 mt-0.5">Defina horários, redes sociais, políticas de estadias e mídias exibidas na vitrine.</p>
+                        </div>
+                        <button type="button" onclick="salvarRegrasPousada()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl transition text-xs sm:text-sm shadow-md flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i> Salvar Regras da Pousada
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-5">
+                        
+                        <!-- SUB-BLOCO ESQUERDO: HORÁRIOS, POLÍTICAS E REGRAS OPERACIONAIS (6 COLUNAS) -->
+                        <div class="lg:col-span-6 space-y-4">
+                            <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-200 space-y-3">
+                                <span class="block text-xs font-extrabold text-blue-900 uppercase tracking-wider mb-2 flex items-center gap-2">
+                                    <i class="fa-solid fa-clock text-blue-600"></i> Horários e Regras de Entrada/Saída
+                                </span>
+                                
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Check-in Padrão</label>
+                                        <input type="time" id="pousada-checkin" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Check-out Padrão</label>
+                                        <input type="time" id="pousada-checkout" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Diária Mínima</label>
+                                        <input type="number" min="1" id="pousada-diaria-minima" placeholder="Ex: 1" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Criança Grátis Até</label>
+                                        <input type="number" min="0" max="18" id="pousada-idade-crianca" placeholder="Ex: 5" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm" title="Até que idade a criança não paga?">
+                                    </div>
                                 </div>
 
-                                <!-- REGIME DE PENSÃO - GESTOR ESCOLHE 1 OPÇÃO -->
-                                <div class="col-span-2 pt-3 border-t border-gray-200 mt-2">
-                                    <span class="block text-[10px] font-extrabold text-blue-700 uppercase tracking-widest mb-2">🍽️ Regime de Pensão / Café</span>
+                                <div class="pt-2 border-t border-gray-200">
+                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Hóspede Extra Global (R$) / noite</label>
+                                    <input type="number" step="0.01" id="pousada-valor-hospede-extra" placeholder="Ex: 50.00" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm">
                                 </div>
-                                <div class="col-span-2">
+
+                                <!-- POLÍTICA DE PET -->
+                                <div class="pt-2 border-t border-gray-200 space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <label class="block text-[11px] font-bold text-gray-700 uppercase">Aceita Pet na Pousada?</label>
+                                        <select id="pousada-aceita-pet" onchange="alternarCampoPet()" class="p-2 border rounded-xl font-bold bg-white text-xs">
+                                            <option value="nao">Não</option>
+                                            <option value="sim">Sim</option>
+                                        </select>
+                                    </div>
+                                    <div id="container-valor-pet" class="hidden">
+                                        <label class="block text-[11px] font-bold text-amber-800 uppercase mb-1">Valor Taxa Única de Pet (R$)</label>
+                                        <input type="number" step="0.01" id="pousada-valor-pet" placeholder="Ex: 50.00" class="w-full p-2.5 border border-amber-300 rounded-xl font-bold bg-amber-50/50 text-xs sm:text-sm">
+                                    </div>
+                                </div>
+
+                                <!-- EXIGÊNCIA DE DOCUMENTO NA FICHA DE RESERVA -->
+                                <div class="pt-3 border-t border-gray-200">
+                                    <label class="flex items-start gap-2.5 cursor-pointer bg-white p-3 rounded-xl border border-blue-200 shadow-2xs hover:bg-blue-50/40 transition">
+                                        <input type="checkbox" id="pousada-exigir-documento" class="w-4 h-4 text-blue-600 rounded mt-0.5">
+                                        <div>
+                                            <span class="text-xs font-extrabold text-blue-950 block">Exigir Documento do Hóspede na Vitrine</span>
+                                            <span class="text-[11px] text-gray-500 leading-tight block mt-0.5">
+                                                Se marcado, o hóspede será obrigado a preencher/enviar documento oficial ao solicitar reserva na vitrine.
+                                            </span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- REGIME DE PENSÃO E REFEIÇÕES -->
+                            <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-200 space-y-3">
+                                <span class="block text-xs font-extrabold text-blue-900 uppercase tracking-wider mb-1 flex items-center gap-2">
+                                    <i class="fa-solid fa-utensils text-blue-600"></i> Regime de Alimentação / Café
+                                </span>
+                                <div>
                                     <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Qual regime a pousada oferece?</label>
-                                    <select id="pousada-tipo-pensao" class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs sm:text-sm">
+                                    <select id="pousada-tipo-pensao" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm">
                                         <option value="">Selecione o regime</option>
                                         <option value="sem_cafe">🚫 Sem café</option>
-                                        <option value="cafe_completo">☕ Café da manhã Completo</option>
+                                        <option value="cafe_completo">☕ Café da manhã Completo Incluso</option>
                                         <option value="meia_pensao">🍽️ Meia pensão</option>
                                         <option value="pensao_completa">🍽️ Pensão completa</option>
                                     </select>
-                                    <p class="text-[10px] text-gray-500 mt-1">Será exibido no card de cada suíte na vitrine do hóspede.</p>
                                 </div>
-                                <div class="col-span-2">
-                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Descrição do regime (opcional - aparece na vitrine)</label>
-                                    <textarea id="pousada-descricao-pensao" rows="2" placeholder="Ex: Meia pensão inclui café da manhã e jantar. Pensão completa inclui 3 refeições..." class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs sm:text-sm"></textarea>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Descrição do Regime (Opcional - Exibido na vitrine)</label>
+                                    <textarea id="pousada-descricao-pensao" rows="2" placeholder="Ex: Café colonial servido das 08h às 10h com produtos artesanais..." class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs"></textarea>
                                 </div>
+                            </div>
+                        </div>
 
-                                <!-- DESCRIÇÃO INSTITUCIONAL DA POUSADA -->
-                                <div class="col-span-2 pt-3 border-t border-gray-200 mt-2">
-                                    <span class="block text-[10px] font-extrabold text-blue-700 uppercase tracking-widest mb-2">📝 Descrição da Pousada (Vitrine)</span>
+                        <!-- SUB-BLOCO DIREITO: CANAIS DE ATENDIMENTO, REDES, TEXTOS E FOTOS (6 COLUNAS) -->
+                        <div class="lg:col-span-6 space-y-4">
+                            <!-- CANAIS DE ATENDIMENTO, REDES SOCIAIS E CNPJ -->
+                            <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-200 space-y-3">
+                                <span class="block text-xs font-extrabold text-blue-900 uppercase tracking-wider mb-1 flex items-center gap-2">
+                                    <i class="fa-solid fa-share-nodes text-blue-600"></i> Canais Oficiais de Contato e Redes
+                                </span>
+                                <p class="text-[11px] text-gray-500">Exibidos na vitrine pública do hóspede para contato e credibilidade.</p>
+                                
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-emerald-800 uppercase mb-1 flex items-center gap-1">
+                                            <i class="fa-brands fa-whatsapp text-emerald-600"></i> WhatsApp de Atendimento
+                                        </label>
+                                        <input type="text" id="pousada-whatsapp-contato" placeholder="Ex: 21999999999" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1 flex items-center gap-1">
+                                            <i class="fa-solid fa-file-invoice text-gray-500"></i> CNPJ ou CPF da Pousada
+                                        </label>
+                                        <input type="text" id="pousada-cnpj-cpf" placeholder="Ex: 00.000.000/0001-00" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-pink-800 uppercase mb-1 flex items-center gap-1">
+                                            <i class="fa-brands fa-instagram text-pink-600"></i> Instagram da Pousada
+                                        </label>
+                                        <input type="text" id="pousada-instagram" placeholder="Ex: @minhapousada" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-blue-800 uppercase mb-1 flex items-center gap-1">
+                                            <i class="fa-brands fa-facebook text-blue-600"></i> Facebook da Pousada
+                                        </label>
+                                        <input type="text" id="pousada-facebook" placeholder="Ex: /minhapousada" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm">
+                                    </div>
                                 </div>
-                                <div class="col-span-2">
-                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Descreva sua pousada - aparece no topo das fotos</label>
-                                    <textarea id="pousada-descricao-pousada" rows="5" placeholder="Ex: Você desfruta de um ambiente ideal para descanso e lazer da família, combinando hospitalidade, diversão e experiências que ficarão para sempre na memória. Rodeado pelas montanhas e o verde da Mata Atlântica..." class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs sm:text-sm"></textarea>
-                                    <p class="text-[10px] text-gray-500 mt-1">Esse texto aparece quando o hóspede clica em 'Conheça a Pousada' na vitrine.</p>
-                                </div>
+                            </div>
 
-                                <!-- BLOCO: HABILITAR FOTOS DA POUSADA -->
-                                <div class="col-span-2 pt-2 border-t border-gray-200">
-                                    <label class="flex items-center gap-2 cursor-pointer font-bold text-xs text-gray-700 mb-2">
+                            <!-- DESCRIÇÃO INSTITUCIONAL DA POUSADA -->
+                            <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-200 space-y-2">
+                                <span class="block text-xs font-extrabold text-blue-900 uppercase tracking-wider flex items-center gap-2">
+                                    <i class="fa-solid fa-pen-nib text-blue-600"></i> Descrição da Pousada (Vitrine)
+                                </span>
+                                <textarea id="pousada-descricao-pousada" rows="3" placeholder="Ex: Você desfruta de um ambiente ideal para descanso e lazer da família, combinando hospitalidade, diversão e natureza..." class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs"></textarea>
+                                <p class="text-[10px] text-gray-500">Exibido quando o cliente clica em 'Conheça a Pousada' na vitrine pública.</p>
+                            </div>
+
+                            <!-- MÍDIAS: FOTOS E ATRAÇÕES -->
+                            <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-200 space-y-3">
+                                <span class="block text-xs font-extrabold text-blue-900 uppercase tracking-wider flex items-center gap-2">
+                                    <i class="fa-solid fa-images text-blue-600"></i> Galerias e Mídias
+                                </span>
+
+                                <!-- Fotos da Pousada -->
+                                <div>
+                                    <label class="flex items-center gap-2 cursor-pointer font-bold text-xs text-gray-800 mb-1">
                                         <input type="checkbox" id="check-exibir-fotos" class="w-4 h-4 text-blue-600 rounded" onchange="toggleSecaoFotos()">
                                         Habilitar Fotos da Pousada na Vitrine
                                     </label>
                                     <div id="container-upload-fotos" class="hidden space-y-2 mt-2 bg-white p-3 rounded-xl border border-gray-200">
                                         <div id="lista-fotos-salvas-pousada"></div>
-                                        <label class="block text-[10px] font-bold text-gray-500 uppercase mt-2">Adicionar novos arquivos de fotos:</label>
+                                        <label class="block text-[10px] font-bold text-gray-500 uppercase">Adicionar novas fotos da pousada:</label>
                                         <input type="file" id="input-fotos-pousada" multiple accept="image/*" class="w-full text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700" onchange="gerarCamposDescricaoFotos('pousada')">
                                         <div id="lista-descricoes-fotos" class="space-y-1.5 mt-2"></div>
                                     </div>
                                 </div>
 
-                                <!-- BLOCO: HABILITAR ATRAÇÕES TURÍSTICAS -->
-                                <div class="col-span-2 pt-2 border-t border-gray-200">
-                                    <label class="flex items-center gap-2 cursor-pointer font-bold text-xs text-gray-700 mb-2">
+                                <!-- Atrações Turísticas -->
+                                <div class="pt-2 border-t border-gray-200">
+                                    <label class="flex items-center gap-2 cursor-pointer font-bold text-xs text-gray-800 mb-1">
                                         <input type="checkbox" id="check-exibir-atracoes" class="w-4 h-4 text-blue-600 rounded" onchange="toggleSecaoAtracoes()">
-                                        Habilitar Atrações Turísticas na Vitrine
+                                        Habilitar Atrações Turísticas da Região
                                     </label>
                                     <div id="container-upload-atracoes" class="hidden space-y-2 mt-2 bg-white p-3 rounded-xl border border-gray-200">
                                         <div id="lista-fotos-salvas-atracoes"></div>
-                                        <label class="block text-[10px] font-bold text-gray-500 uppercase mt-2">Adicionar novas fotos das atrações:</label>
+                                        <label class="block text-[10px] font-bold text-gray-500 uppercase">Adicionar novas fotos de atrações:</label>
                                         <input type="file" id="input-fotos-atracoes" multiple accept="image/*" class="w-full text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700" onchange="gerarCamposDescricaoFotos('atracoes')">
                                         <div id="lista-descricoes-atracoes" class="space-y-1.5 mt-2"></div>
                                     </div>
@@ -150,40 +230,28 @@
                             </div>
                         </div>
 
-                        <button type="button" onclick="salvarRegrasPousada()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl transition text-xs sm:text-sm shadow-md">
-                            Salvar Regras da Pousada
-                        </button>
                     </div>
-
-                    <!-- SEÇÃO 1: VALOR DA DIÁRIA E REGRAS POR SUÍTE (Ocupa 7 colunas no LG) -->
-                    <div class="lg:col-span-7 bg-white p-5 sm:p-6 rounded-3xl shadow-md border border-gray-200">
-                        <h2 class="text-base sm:text-lg font-bold text-blue-600 mb-1 flex items-center gap-2">
-                            <i class="fa-solid fa-tag"></i> Tarifas e Capacidade por Suíte
-                        </h2>
-                        <p class="text-xs text-gray-500 mb-4">Ajuste valores, capacidade e regras de hóspedes extras por quarto.</p>
-                        
-                        <div id="lista-suites-tarifas" class="space-y-4 max-h-[500px] overflow-y-auto pr-1">
-                            <p class="text-gray-500 text-sm">Carregando suítes...</p>
-                        </div>
-                    </div>
-
                 </div>
 
-                <!-- SEÇÃO 2: TARIFAS ESPECIAIS (Largura Total abaixo) -->
+                <!-- SEÇÃO 2: MOTOR DE TARIFAS ESPECIAIS E SAZONALIDADE (LARGURA TOTAL) -->
                 <div class="bg-white p-5 sm:p-8 rounded-3xl shadow-md border border-gray-200">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2">
-                        <h2 id="titulo-form-regra" class="text-base sm:text-xl font-bold text-blue-600 flex items-center gap-2">
-                            <i class="fa-solid fa-sliders"></i> Regras de Tarifas e Percentuais Especiais
-                        </h2>
-                        <button id="btn-cancelar-edicao" onclick="cancelarEdicao()" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1.5 px-4 rounded-xl text-xs transition">Cancelar Edição</button>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2 border-b border-gray-100 pb-3">
+                        <div>
+                            <h2 id="titulo-form-regra" class="text-base sm:text-xl font-extrabold text-blue-600 flex items-center gap-2">
+                                <i class="fa-solid fa-sliders"></i> Regras de Tarifas Especiais e Sazonalidade
+                            </h2>
+                            <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Defina acréscimos percentuais (%) ou valores fixos (R$) para feriados, pacotes ou fins de semana.</p>
+                        </div>
+                        <button id="btn-cancelar-edicao" onclick="cancelarEdicao()" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1.5 px-4 rounded-xl text-xs transition">
+                            Cancelar Edição
+                        </button>
                     </div>
-                    <p class="text-xs sm:text-sm text-gray-600 mb-6">Defina acréscimos percentuais ou valores fixos para períodos ou dias específicos.</p>
                     
-                    <form id="form-tarifa-especial" class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-200 mb-6">
+                    <form id="form-tarifa-especial" class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-200 my-4">
                         <input type="hidden" id="tarifa-editando-id" value="">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Aplicar a:</label>
-                            <select id="select-suite-tarifa" class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm">
+                            <select id="select-suite-tarifa" class="campo-editavel w-full p-3 border rounded-xl font-bold bg-white text-sm">
                                 <option value="">Todas as Suítes da Pousada (Geral)</option>
                             </select>
                         </div>
@@ -197,21 +265,21 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tipo de Ajuste</label>
-                            <select id="tipo-ajuste" onchange="alternarTipoAjuste()" class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm">
+                            <select id="tipo-ajuste" onchange="alternarTipoAjuste()" class="campo-editavel w-full p-3 border rounded-xl font-bold bg-white text-sm">
                                 <option value="percentual">Acréscimo Percentual (%)</option>
                                 <option value="fixo">Valor Fixo em Reais (R$)</option>
                             </select>
                         </div>
                         <div>
                             <label id="label-valor-ajuste" class="block text-xs font-bold text-gray-700 uppercase mb-1">Percentual a mais (%)</label>
-                            <input type="number" step="0.01" id="tarifa-valor" placeholder="Ex: 20" required class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm">
+                            <input type="number" step="0.01" id="tarifa-valor" placeholder="Ex: 20" required class="campo-editavel w-full p-3 border rounded-xl font-bold bg-white text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Descrição / Motivo</label>
-                            <input type="text" id="tarifa-descricao" placeholder="Ex: Fim de Semana" required class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm">
+                            <input type="text" id="tarifa-descricao" placeholder="Ex: Fim de Semana / Alta Temporada" required class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm">
                         </div>
                         <div class="md:col-span-3 bg-white p-4 rounded-xl border border-gray-200">
-                            <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Dias da semana (Opcional):</label>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Dias da semana aplicáveis (Opcional - se vazio aplica a todos):</label>
                             <div class="flex flex-wrap gap-4 text-xs sm:text-sm font-medium text-gray-700">
                                 <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="0" class="w-4 h-4 text-blue-600 rounded"> Domingo</label>
                                 <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="1" class="w-4 h-4 text-blue-600 rounded"> Segunda</label>
@@ -229,11 +297,11 @@
                         </div>
                     </form>
 
-                    <h3 class="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wide">Regras Cadastradas Atuais</h3>
+                    <h3 class="font-extrabold text-gray-800 mb-3 text-sm uppercase tracking-wide">Regras Cadastradas Atuais</h3>
                     <div id="lista-tarifas-especiais" class="overflow-x-auto">
                         <table class="w-full text-left border-collapse min-w-[600px]">
                             <thead>
-                                <tr class="border-b text-xs text-gray-500 uppercase">
+                                <tr class="border-b text-xs text-gray-500 uppercase bg-gray-50">
                                     <th class="p-3">Descrição</th>
                                     <th class="p-3">Aplicável a</th>
                                     <th class="p-3">Período</th>
@@ -257,7 +325,7 @@
         <div id="toast-content" class="bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
             <span id="toast-icone" class="text-xl">✨</span>
             <div>
-                <h4 class="font-bold text-sm">Sucesso</h4>
+                <h4 id="toast-titulo" class="font-bold text-sm">Sucesso</h4>
                 <p id="toast-mensagem" class="text-xs text-gray-300">Alterações salvas com sucesso!</p>
             </div>
         </div>
@@ -384,7 +452,7 @@
             }
 
             let html = `<div class="mb-3 p-2.5 bg-blue-50 rounded-xl border border-blue-100">
-                <span class="block text-[10px] font-bold text-blue-700 uppercase mb-2">Fotos já salvas no banco (${listaFotos.length}):</span>
+                <span class="block text-[10px] font-bold text-blue-700 uppercase mb-2">Fotos salvas no banco (${listaFotos.length}):</span>
                 <div class="space-y-1.5">`;
 
             listaFotos.forEach((foto, idx) => {
@@ -412,17 +480,6 @@
                 listaFotos.splice(index, 1);
                 renderizarFotosSalvas(tipo, listaFotos);
             } catch (e) {}
-        }
-
-        function toggleAdicionalCustomizado(suiteId) {
-            const container = document.getElementById(`container-customizado-${suiteId}`);
-            const checkbox = document.getElementById(`chk-customizado-${suiteId}`);
-            if (checkbox.checked) {
-                container.classList.remove('hidden');
-            } else {
-                container.classList.add('hidden');
-                document.getElementById(`valor-customizado-${suiteId}`).value = '';
-            }
         }
 
         async function protegerPagina() {
@@ -459,7 +516,14 @@
                 }
                 document.getElementById('pousada-valor-hospede-extra').value = pousada.valor_hospede_extra || '';
 
-                // REGIME DE PENSÃO - carregamento
+                // CARREGAMENTO DOS NOVOS CAMPOS INSTITUCIONAIS
+                document.getElementById('pousada-whatsapp-contato').value = pousada.whatsapp_contato || '';
+                document.getElementById('pousada-cnpj-cpf').value = pousada.cnpj_cpf || '';
+                document.getElementById('pousada-instagram').value = pousada.instagram || '';
+                document.getElementById('pousada-facebook').value = pousada.facebook || '';
+                document.getElementById('pousada-exigir-documento').checked = pousada.exigir_documento === true || pousada.exigir_documento === 'true';
+
+                // REGIME DE PENSÃO E DESCRIÇÃO
                 document.getElementById('pousada-tipo-pensao').value = pousada.tipo_pensao || '';
                 document.getElementById('pousada-descricao-pensao').value = pousada.descricao_pensao || '';
                 document.getElementById('pousada-descricao-pousada').value = pousada.descricao_pousada || '';
@@ -479,7 +543,6 @@
         async function salvarRegrasPousada() {
             const nomeAtualPousada = document.getElementById('titulo-pousada').innerText || "Minha Pousada";
 
-            // Recuperar fotos já salvas que foram mantidas/editadas
             let fotosPousadaArray = [];
             try {
                 const containerPousada = document.getElementById('lista-fotos-salvas-pousada');
@@ -488,7 +551,6 @@
                 }
             } catch (e) {}
 
-            // Processar upload de novas fotos da pousada selecionadas via input
             const inputFotos = document.getElementById('input-fotos-pousada');
             if (inputFotos && inputFotos.files && inputFotos.files.length > 0) {
                 const inputsDesc = document.querySelectorAll('.input-desc-pousada');
@@ -508,7 +570,6 @@
                 }
             }
 
-            // Recuperar fotos de atrações turísticas já salvas que foram mantidas/editadas
             let fotosAtracoesArray = [];
             try {
                 const containerAtracoes = document.getElementById('lista-fotos-salvas-atracoes');
@@ -517,7 +578,6 @@
                 }
             } catch (e) {}
 
-            // Processar upload de novas fotos de atrações turísticas selecionadas via input
             const inputAtracoes = document.getElementById('input-fotos-atracoes');
             if (inputAtracoes && inputAtracoes.files && inputAtracoes.files.length > 0) {
                 const inputsDescAtra = document.querySelectorAll('.input-desc-atracoes');
@@ -547,7 +607,15 @@
                 aceita_pet: document.getElementById('pousada-aceita-pet').value === 'sim',
                 valor_pet: document.getElementById('pousada-aceita-pet').value === 'sim' ? (Number(document.getElementById('pousada-valor-pet').value) || 0) : null,
                 valor_hospede_extra: Number(document.getElementById('pousada-valor-hospede-extra').value) || 0,
-                // REGIME DE PENSÃO
+                
+                // GRAVAÇÃO DOS NOVOS CAMPOS INSTITUCIONAIS
+                whatsapp_contato: document.getElementById('pousada-whatsapp-contato').value.trim() || null,
+                cnpj_cpf: document.getElementById('pousada-cnpj-cpf').value.trim() || null,
+                instagram: document.getElementById('pousada-instagram').value.trim() || null,
+                facebook: document.getElementById('pousada-facebook').value.trim() || null,
+                exigir_documento: document.getElementById('pousada-exigir-documento').checked,
+
+                // REGIME DE PENSÃO E MÍDIAS
                 tipo_pensao: document.getElementById('pousada-tipo-pensao').value || null,
                 descricao_pensao: document.getElementById('pousada-descricao-pensao').value || null,
                 descricao_pousada: document.getElementById('pousada-descricao-pousada').value || null,
@@ -560,98 +628,26 @@
             const { error } = await supabaseClient.from('pousadas').upsert(dadosAtualizacao, { onConflict: 'id' });
             if (error) { alert("Erro ao salvar regras da pousada: " + error.message); return; }
             
-            mostrarToast("Regras gerais e mídias da pousada salvas com sucesso!");
+            mostrarToast("Regras da pousada, canais de contato e mídias salvos com sucesso!");
             protegerPagina();
         }
 
         async function carregarSuitesETarifas() {
-            let { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', usuarioIdAtual);
+            let { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', usuarioIdAtual).order('nome');
             if (!suites || suites.length === 0) {
-                const resAlt = await supabaseClient.from('suites').select('*').eq('id', usuarioIdAtual);
+                const resAlt = await supabaseClient.from('suites').select('*').eq('id', usuarioIdAtual).order('nome');
                 if (resAlt.data) suites = resAlt.data;
             }
 
             suitesCache = suites || [];
-            const containerSuites = document.getElementById('lista-suites-tarifas');
             const selectSuiteTarifa = document.getElementById('select-suite-tarifa');
-            
-            containerSuites.innerHTML = '';
             selectSuiteTarifa.innerHTML = '<option value="">Todas as Suítes da Pousada (Geral)</option>';
-
-            if (suitesCache.length === 0) {
-                containerSuites.innerHTML = '<p class="text-gray-500 text-sm">Nenhuma suíte encontrada.</p>';
-                return;
-            }
 
             suitesCache.forEach(suite => {
                 selectSuiteTarifa.innerHTML += `<option value="${suite.id}">${suite.nome || 'Suíte'}</option>`;
-
-                const usaCustom = suite.usa_adicional_customizado ? 'checked' : '';
-                const hiddenClass = suite.usa_adicional_customizado ? '' : 'hidden';
-
-                containerSuites.innerHTML += `
-                    <div class="p-4 bg-gray-50 rounded-2xl border border-gray-200 space-y-3">
-                        <div class="flex justify-between items-center">
-                            <h4 class="font-bold text-gray-900 text-sm sm:text-base">${suite.nome || 'Suíte'}</h4>
-                            <span class="text-[11px] text-gray-500 bg-white px-2.5 py-1 rounded-lg border">Status: ${suite.status || 'Disponível'}</span>
-                        </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white p-3 rounded-xl border border-gray-200">
-                            <div>
-                                <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Diária (R$)</label>
-                                <input type="number" step="0.01" id="valor-suite-${suite.id}" value="${suite.valor_diaria || ''}" placeholder="0.00" class="p-2 w-full border rounded-xl font-bold bg-white text-xs sm:text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Máx. Hóspedes</label>
-                                <input type="number" min="1" id="capacidade-suite-${suite.id}" value="${suite.capacidade_hospedes || ''}" placeholder="Ex: 4" class="p-2 w-full border rounded-xl font-medium bg-white text-xs sm:text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Inclusos Base</label>
-                                <input type="number" min="1" id="inclusos-suite-${suite.id}" value="${suite.hospedes_inclusos || 2}" placeholder="Ex: 2" class="p-2 w-full border rounded-xl font-medium bg-white text-xs sm:text-sm">
-                            </div>
-                        </div>
-
-                        <div class="space-y-1.5">
-                            <label class="flex items-center gap-2 cursor-pointer text-[11px] font-bold text-blue-600 hover:text-blue-800 w-fit">
-                                <input type="checkbox" id="chk-customizado-${suite.id}" ${usaCustom} onchange="toggleAdicionalCustomizado('${suite.id}')" class="w-3.5 h-3.5 text-blue-600 rounded">
-                                <span>Usar adicional extra customizado para esta suíte</span>
-                            </label>
-
-                            <div id="container-customizado-${suite.id}" class="${hiddenClass}">
-                                <input type="number" step="0.01" id="valor-customizado-${suite.id}" value="${suite.valor_hospede_extra_customizado || ''}" placeholder="Valor adicional extra (R$)" class="p-2 w-full sm:w-1/2 border rounded-xl font-medium bg-white text-xs sm:text-sm">
-                            </div>
-                        </div>
-
-                        <div class="flex justify-end pt-1 border-t border-gray-200">
-                            <button onclick="salvarRegrasSuite('${suite.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition shadow-sm">
-                                Salvar Suíte
-                            </button>
-                        </div>
-                    </div>
-                `;
             });
 
             carregarTabelaTarifasEspeciais();
-        }
-
-        async function salvarRegrasSuite(suiteId) {
-            const novoValorDiaria = Number(document.getElementById(`valor-suite-${suiteId}`).value) || 0;
-            const capacidadeHospedes = Number(document.getElementById(`capacidade-suite-${suiteId}`).value) || null;
-            const hospedesInclusos = Number(document.getElementById(`inclusos-suite-${suiteId}`).value) || 2;
-            const usaCustom = document.getElementById(`chk-customizado-${suiteId}`).checked;
-            const valorCustom = usaCustom ? (Number(document.getElementById(`valor-customizado-${suiteId}`).value) || null) : null;
-
-            const dadosSuite = {
-                valor_diaria: novoValorDiaria,
-                capacidade_hospedes: capacidadeHospedes,
-                hospedes_inclusos: hospedesInclusos,
-                usa_adicional_customizado: usaCustom,
-                valor_hospede_extra_customizado: valorCustom
-            };
-
-            const { error } = await supabaseClient.from('suites').update(dadosSuite).eq('id', suiteId);
-            if (error) { alert("Erro ao salvar suíte: " + error.message); return; }
-            mostrarToast("Configurações da suíte salvas com sucesso!");
         }
 
         async function carregarTabelaTarifasEspeciais() {
@@ -666,12 +662,14 @@
             }
 
             const nomesDias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-            const hoje = '2026-08-26';
+            
+            // DATA DINÂMICA REAL (substitui o valor fixo antigo)
+            const hoje = new Date().toISOString().split('T')[0];
 
             const regrasGerais = tarifasCache.filter(t => !t.suite_id && hoje >= t.data_inicio.split('T')[0] && hoje <= t.data_fim.split('T')[0]);
 
             tarifasCache.forEach(t => {
-                let nomeSuiteObj = "Todas as Suítes";
+                let nomeSuiteObj = "Todas as Suítes (Geral)";
                 let ehEspecifica = false;
                 if (t.suite_id) {
                     const found = suitesCache.find(s => s.id === t.suite_id);
@@ -725,12 +723,12 @@
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-50">
                         <td class="p-3 font-semibold text-gray-900">${t.descricao || 'Especial'}</td>
-                        <td class="p-3 text-gray-600">${nomeSuiteObj} ${iconeInfo}</td>
+                        <td class="p-3 text-gray-700 font-bold">${nomeSuiteObj} ${iconeInfo}</td>
                         <td class="p-3 text-gray-600">${dInicioBR} até ${dFimBR} ${statusBadge}</td>
                         <td class="p-3 font-bold text-blue-600">${textoRegra}</td>
                         <td class="p-3 text-right space-x-2">
-                            <button onclick="prepararEdicaoTarifa('${t.id}')" class="text-blue-600 font-bold text-xs bg-blue-50 px-3 py-1.5 rounded-lg">Editar</button>
-                            <button onclick="abrirModalExclusao('${t.id}')" class="text-red-600 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-lg">Excluir</button>
+                            <button onclick="prepararEdicaoTarifa('${t.id}')" class="text-blue-600 hover:text-blue-800 font-bold text-xs bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 transition">Editar</button>
+                            <button onclick="abrirModalExclusao('${t.id}')" class="text-red-600 hover:text-red-800 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-lg border border-red-100 transition">Excluir</button>
                         </td>
                     </tr>
                 `;
@@ -787,7 +785,7 @@
             document.getElementById('form-tarifa-especial').reset();
             document.getElementById('tarifa-editando-id').value = '';
             alternarTipoAjuste();
-            document.getElementById('titulo-form-regra').innerText = "Regras de Tarifas e Percentuais Especiais";
+            document.getElementById('titulo-form-regra').innerText = "Regras de Tarifas Especiais e Sazonalidade";
             document.getElementById('btn-submit-regra').innerText = "+ Salvar Regra de Tarifa Especial";
             document.getElementById('btn-cancelar-edicao').classList.add('hidden');
         }
@@ -837,7 +835,7 @@
                 error = res.error;
             }
 
-            if (error) { alert("Error ao salvar regra: " + error.message); return; }
+            if (error) { alert("Erro ao salvar regra: " + error.message); return; }
             cancelarEdicao();
             mostrarToast("Regra de tarifa salva com sucesso!");
             carregarTabelaTarifasEspeciais();
@@ -850,3 +848,8 @@
     </script>
 </body>
 </html>
+--- END OF FILE tarifas.html ---
+
+Quando você testar o tarifas.html, me avise para prosseguirmos com o Passo 3 no
+vitrine.html (exibindo os botões de redes sociais/WhatsApp e a regra condicional
+do documento na ficha do hóspede)!
