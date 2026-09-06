@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Master SaaS - Controle de Assinantes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-100 min-h-screen flex flex-col md:flex-row text-slate-800 font-sans" onload="inicializarMaster()">
+
+    <!-- BARRA LATERAL -->
+    <aside class="w-full md:w-72 bg-slate-950 text-slate-300 flex flex-col shadow-2xl border-r border-slate-800 shrink-0">
+        <div class="p-6 border-b border-slate-800">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-lg border border-amber-500/30">
+                    <i class="fa-solid fa-crown"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-extrabold text-white tracking-wide">MASTER SAAS</h1>
+                    <p class="text-[10px] text-slate-400 uppercase tracking-widest font-semibold">Controle da Plataforma</p>
+                </div>
+            </div>
+            <div class="mt-4 bg-slate-900 p-3 rounded-xl border border-slate-800">
+                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Super Administrador</p>
+                <p id="admin-email" class="text-xs text-amber-300 font-semibold truncate mt-0.5">Carregando...</p>
+            </div>
+        </div>
+
+        <nav class="flex-1 p-4 space-y-1.5 overflow-y-auto">
+            <a href="#sec-dashboard" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-600 text-white font-bold text-xs shadow-lg shadow-blue-600/20">
+                <i class="fa-solid fa-chart-line text-sm w-4"></i> Visão Geral & Métricas
+            </a>
+            <a href="#sec-pousadas" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-900 text-slate-400 hover:text-slate-200 font-bold text-xs transition">
+                <i class="fa-solid fa-hotel text-sm w-4"></i> Pousadas Assinantes
+            </a>
+            <a href="#sec-configuracoes" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-900 text-slate-400 hover:text-slate-200 font-bold text-xs transition">
+                <i class="fa-solid fa-sliders text-sm w-4"></i> Lembrete & Planos
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-slate-800">
+            <button onclick="fazerLogout()" class="w-full bg-red-600/10 hover:bg-red-600 border border-red-600/20 hover:border-red-600 text-red-400 hover:text-white font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-right-from-bracket"></i> Encerrar Sessão
+            </button>
+        </div>
+    </aside>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="flex-1 flex flex-col min-w-0">
+        <header class="bg-white border-b border-slate-200 p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h2 class="text-xl font-extrabold text-slate-900">Gestão de Assinantes & Planos</h2>
+                <p class="text-xs text-slate-500 mt-0.5">Audite o volume de suítes, controle vencimentos e ative pousadas após o pagamento.</p>
+            </div>
+            <button onclick="carregarDados()" class="bg-slate-900 hover:bg-black text-white px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-sm">
+                <i class="fa-solid fa-rotate"></i> Atualizar Dados
+            </button>
+        </header>
+
+        <main class="p-4 sm:p-6 md:p-8 flex-1 overflow-y-auto space-y-8">
+            
+            <!-- KPIS MÉTRICAS SAAS -->
+            <div id="sec-dashboard" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+                    <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total de Pousadas</p>
+                    <p id="kpi-total" class="text-3xl font-extrabold text-slate-900 mt-1">0</p>
+                    <span class="text-[10px] text-slate-400">Cadastradas no sistema</span>
+                </div>
+                <div class="bg-emerald-50/80 p-5 rounded-2xl border border-emerald-200 shadow-xs">
+                    <p class="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Ativas (Em Dia)</p>
+                    <p id="kpi-ativas" class="text-3xl font-extrabold text-emerald-900 mt-1">0</p>
+                    <span class="text-[10px] text-emerald-700">Acesso liberado</span>
+                </div>
+                <div class="bg-red-50/80 p-5 rounded-2xl border border-red-200 shadow-xs">
+                    <p class="text-[11px] font-bold text-red-800 uppercase tracking-wider">Inadimplentes / Bloq.</p>
+                    <p id="kpi-bloqueadas" class="text-3xl font-extrabold text-red-900 mt-1">0</p>
+                    <span class="text-[10px] text-red-700">Somente leitura</span>
+                </div>
+                <div class="bg-blue-50/80 p-5 rounded-2xl border border-blue-200 shadow-xs">
+                    <p class="text-[11px] font-bold text-blue-800 uppercase tracking-wider">MRR Previsto (Mês)</p>
+                    <p id="kpi-mrr" class="text-2xl sm:text-3xl font-extrabold text-blue-900 mt-1">R$ 0,00</p>
+                    <span class="text-[10px] text-blue-700">Receita recorrente</span>
+                </div>
+            </div>
+
+            <!-- REGRA DE ANTECEDÊNCIA DE LEMBRETE (NOVO!) -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h4 class="font-extrabold text-slate-900 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-bell text-amber-500"></i> Antecedência do Lembrete de Pagamento
+                    </h4>
+                    <p class="text-xs text-slate-500 mt-0.5">Defina com quantos dias de antecedência o gestor começará a ver a mensagem de cobrança no login.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <label class="text-xs font-bold text-slate-600">Avisar com:</label>
+                    <input type="number" id="input-dias-aviso" value="5" min="1" max="30" class="w-16 p-2 border rounded-xl text-xs font-extrabold text-center bg-slate-50">
+                    <span class="text-xs font-bold text-slate-600">dias antes</span>
+                    <button onclick="salvarDiasAviso()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-xl text-xs font-bold transition shadow-xs">
+                        Salvar
+                    </button>
+                </div>
+            </div>
+
+            <!-- TABELA DE POUSADAS -->
+            <div id="sec-pousadas" class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+                <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div>
+                        <h3 class="font-extrabold text-slate-900 text-base">Pousadas Clientes</h3>
+                        <p class="text-xs text-slate-500">Auditoria de suítes ativas e ação rápida de cobrança.</p>
+                    </div>
+                    <div class="w-full sm:w-72 relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                        <input id="busca-pousada" oninput="filtrarTabela()" placeholder="Buscar por nome, telefone..." class="border rounded-xl pl-9 pr-4 py-2 text-xs w-full bg-slate-50 outline-none focus:border-blue-500 font-medium">
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[950px]">
+                        <thead>
+                            <tr class="bg-slate-50 text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b">
+                                <th class="p-4">Pousada & Contato</th>
+                                <th class="p-4">Suítes Ativas (Auditoria)</th>
+                                <th class="p-4">Plano & Valor</th>
+                                <th class="p-4">Vencimento</th>
+                                <th class="p-4">Status</th>
+                                <th class="p-4 text-center">Ações de Gestão</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-pousadas" class="divide-y divide-slate-100 text-xs font-medium">
+                            <tr><td colspan="6" class="p-8 text-center text-slate-400">Carregando dados...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TABELA DE PREÇOS EDITÁVEL (CONFIG_FAIXAS_PRECO) -->
+            <div id="sec-configuracoes" class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 sm:p-6">
+                <div class="border-b border-slate-100 pb-4 mb-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <div>
+                        <h3 class="font-extrabold text-slate-900 text-base flex items-center gap-2">
+                            <i class="fa-solid fa-tags text-amber-500"></i> Tabela de Preços por Quantidade de Suítes
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">O sistema calcula o valor de cada pousada automaticamente baseado nas suítes ativas.</p>
+                    </div>
+                    <button onclick="salvarFaixasPreco()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1">
+                        <i class="fa-solid fa-floppy-disk"></i> Salvar Tabela de Preços
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="container-faixas">
+                    <!-- Injetado via JS -->
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- MODAL DE ALTERAÇÃO INDIVIDUAL -->
+    <div id="modal-editar-pousada" class="fixed inset-0 bg-slate-900/60 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-200">
+            <h3 class="text-lg font-extrabold text-slate-900 mb-0.5">Ajustar Assinatura</h3>
+            <p id="modal-nome-pousada" class="text-xs text-blue-600 font-bold mb-4"></p>
+
+            <form id="form-edicao-pousada" onsubmit="salvarAjustePousada(event)" class="space-y-4">
+                <input type="hidden" id="edit-pousada-id">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Data de Vencimento</label>
+                    <input type="date" id="edit-data-vencimento" required class="w-full p-2.5 border rounded-xl font-bold text-xs bg-slate-50">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Valor Mensalidade (R$)</label>
+                    <input type="number" step="0.01" id="edit-plano-valor" required class="w-full p-2.5 border rounded-xl font-bold text-xs bg-slate-50">
+                </div>
+                <div class="flex justify-end gap-2 pt-3">
+                    <button type="button" onclick="fecharModalEdicao()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100">Cancelar</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-md">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let pousadasCache = [];
+        let faixasPreco = [];
+
+        async function inicializarMaster(){
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if(!user){ window.location.href = 'index.html'; return; }
+            document.getElementById('admin-email').innerText = user.email;
+
+            await carregarConfigSistema();
+            await carregarFaixas();
+            await carregarDados();
+        }
+
+        async function carregarConfigSistema(){
+            try {
+                const { data } = await supabaseClient.from('config_sistema').select('dias_aviso_vencimento').eq('id', 1).maybeSingle();
+                if(data && data.dias_aviso_vencimento){
+                    document.getElementById('input-dias-aviso').value = data.dias_aviso_vencimento;
+                }
+            } catch(e){}
+        }
+
+        async function salvarDiasAviso(){
+            const dias = Number(document.getElementById('input-dias-aviso').value) || 5;
+            const { error } = await supabaseClient.from('config_sistema').upsert({ id: 1, dias_aviso_vencimento: dias });
+            if(error) alert("Erro ao salvar configuração: " + error.message);
+            else alert("Configuração salva com sucesso! Os gestores verão aviso no login com " + dias + " dias de antecedência.");
+        }
+
+        async function carregarFaixas(){
+            const { data, error } = await supabaseClient.from('config_faixas_preco').select('*').order('min_suites');
+            if(!error && data && data.length > 0){
+                faixasPreco = data;
+            } else {
+                faixasPreco = [
+                    { id: 'f1', min_suites: 1, max_suites: 10, valor_mensal: 149.90, descricao: 'Até 10 suítes' },
+                    { id: 'f2', min_suites: 11, max_suites: null, valor_mensal: 249.90, descricao: 'Acima de 10 suítes' }
+                ];
+            }
+            renderizarFaixas();
+        }
+
+        function renderizarFaixas(){
+            const c = document.getElementById('container-faixas');
+            c.innerHTML = '';
+            faixasPreco.forEach((f, idx)=>{
+                c.innerHTML += `
+                <div class="border border-slate-200 bg-slate-50 p-4 rounded-2xl">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[10px] font-extrabold uppercase bg-white border border-slate-200 px-2 py-0.5 rounded-md text-slate-700">Faixa ${idx+1}</span>
+                    </div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Descrição</label>
+                    <input id="desc-${idx}" value="${f.descricao||''}" class="w-full p-2.5 border rounded-xl text-xs font-bold bg-white mb-3">
+                    <div class="grid grid-cols-3 gap-2">
+                        <div><label class="block text-[10px] font-bold uppercase">Mín</label><input id="min-${idx}" type="number" value="${f.min_suites}" class="w-full p-2 border rounded-xl text-xs font-bold bg-white"></div>
+                        <div><label class="block text-[10px] font-bold uppercase">Máx</label><input id="max-${idx}" type="number" value="${f.max_suites||''}" placeholder="∞" class="w-full p-2 border rounded-xl text-xs font-bold bg-white"></div>
+                        <div><label class="block text-[10px] font-bold uppercase">Valor R$</label><input id="valor-${idx}" type="number" step="0.01" value="${f.valor_mensal}" class="w-full p-2 border border-blue-300 rounded-xl text-xs font-extrabold text-blue-700 bg-blue-50/50"></div>
+                    </div>
+                </div>`;
+            });
+        }
+
+        async function salvarFaixasPreco(){
+            const novas = [];
+            for(let i=0; i<faixasPreco.length; i++){
+                novas.push({
+                    min_suites: Number(document.getElementById(`min-${i}`).value),
+                    max_suites: document.getElementById(`max-${i}`).value ? Number(document.getElementById(`max-${i}`).value) : null,
+                    valor_mensal: Number(document.getElementById(`valor-${i}`).value),
+                    descricao: document.getElementById(`desc-${i}`).value
+                });
+            }
+            try {
+                await supabaseClient.from('config_faixas_preco').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+                for(let f of novas){ await supabaseClient.from('config_faixas_preco').insert([f]); }
+                alert('Tabela de preços salva com sucesso!');
+                carregarFaixas();
+                carregarDados();
+            } catch(e){
+                alert('Erro ao salvar no banco: ' + e.message);
+            }
+        }
+
+        function calcularFaixaPorSuites(totalAtivas){
+            for(let f of faixasPreco){
+                if(totalAtivas >= f.min_suites && (f.max_suites === null || f.max_suites === '' || totalAtivas <= f.max_suites)){
+                    return f;
+                }
+            }
+            return faixasPreco[faixasPreco.length-1];
+        }
+
+        async function carregarDados(){
+            const { data: pousadas, error } = await supabaseClient
+                .from('pousadas')
+                .select('id, nome, status, whatsapp_contato, telefone_contato, data_vencimento, plano_valor')
+                .order('nome');
+
+            if(error){
+                document.getElementById('lista-pousadas').innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-600 font-bold">Erro: ${error.message}</td></tr>`;
+                return;
+            }
+
+            const { data: suites } = await supabaseClient.from('suites').select('pousada_id, ativa');
+
+            pousadasCache = pousadas.map(p => {
+                const totalSuitesAtivas = suites ? suites.filter(s => s.pousada_id === p.id && s.ativa).length : 0;
+                const faixaCalculada = calcularFaixaPorSuites(totalSuitesAtivas);
+                const valorFinal = p.plano_valor || (faixaCalculada ? faixaCalculada.valor_mensal : 149.90);
+                return { ...p, totalSuitesAtivas, faixaCalculada, valorFinal };
+            });
+
+            atualizarKPIs();
+            renderizarTabela(pousadasCache);
+        }
+
+        function atualizarKPIs(){
+            const total = pousadasCache.length;
+            const ativas = pousadasCache.filter(p => p.status === 'active').length;
+            const bloqueadas = pousadasCache.filter(p => p.status === 'blocked' || p.status === 'pending').length;
+            const mrr = pousadasCache.filter(p => p.status === 'active').reduce((acc, curr) => acc + Number(curr.valorFinal), 0);
+
+            document.getElementById('kpi-total').innerText = total;
+            document.getElementById('kpi-ativas').innerText = ativas;
+            document.getElementById('kpi-bloqueadas').innerText = bloqueadas;
+            document.getElementById('kpi-mrr').innerText = 'R$ ' + mrr.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        }
+
+        function renderizarTabela(lista){
+            const tbody = document.getElementById('lista-pousadas');
+            if(lista.length === 0){
+                tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400">Nenhuma pousada encontrada.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            const hoje = new Date(); hoje.setHours(0,0,0,0);
+
+            lista.forEach(p => {
+                const limiteMax = p.faixaCalculada ? p.faixaCalculada.max_suites : null;
+                const extrapolou = limiteMax !== null && p.totalSuitesAtivas > limiteMax;
+                
+                const badgeSuites = extrapolou 
+                    ? `<span class="bg-red-100 text-red-700 border border-red-200 px-2.5 py-1 rounded-full font-bold text-[10px]" title="Excedeu o limite da faixa!">⚠️ ${p.totalSuitesAtivas} ativas</span>`
+                    : `<span class="bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-full font-bold text-[10px]">${p.totalSuitesAtivas} ativas</span>`;
+
+                let vencTexto = 'Sem data';
+                let vencBadgeClass = 'text-slate-500';
+                if(p.data_vencimento){
+                    const dVenc = new Date(p.data_vencimento + 'T12:00:00');
+                    const diffDias = Math.ceil((dVenc - hoje) / (1000 * 60 * 60 * 24));
+                    vencTexto = dVenc.toLocaleDateString('pt-BR');
+                    if(diffDias < 0) vencBadgeClass = 'text-red-600 font-extrabold';
+                    else if(diffDias <= 5) vencBadgeClass = 'text-amber-600 font-bold';
+                }
+
+                const statusHtml = p.status === 'active' 
+                    ? '<span class="bg-emerald-100 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full text-[10px] font-bold">ATIVA</span>'
+                    : (p.status === 'pending' 
+                        ? '<span class="bg-amber-100 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-full text-[10px] font-bold">PENDENTE</span>'
+                        : '<span class="bg-red-100 text-red-700 border border-red-200 px-2.5 py-1 rounded-full text-[10px] font-bold">BLOQUEADA</span>');
+
+                const whatsLink = p.whatsapp_contato ? `https://wa.me/55${p.whatsapp_contato.replace(/\D/g,'')}` : '#';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="p-4">
+                            <div class="font-extrabold text-slate-900">${p.nome}</div>
+                            <div class="text-[11px] text-slate-500 mt-0.5">
+                                ${p.whatsapp_contato ? `<a href="${whatsLink}" target="_blank" class="text-emerald-600 hover:underline font-bold mr-2"><i class="fa-brands fa-whatsapp"></i> ${p.whatsapp_contato}</a>` : ''}
+                                ${p.telefone_contato ? `<span>${p.telefone_contato}</span>` : ''}
+                            </div>
+                        </td>
+                        <td class="p-4">${badgeSuites}</td>
+                        <td class="p-4">
+                            <div class="font-bold text-slate-800">${p.faixaCalculada ? p.faixaCalculada.descricao : 'Personalizado'}</div>
+                            <div class="text-[11px] text-blue-600 font-extrabold">R$ ${Number(p.valorFinal).toFixed(2)}/mês</div>
+                        </td>
+                        <td class="p-4">
+                            <span class="${vencBadgeClass}">${vencTexto}</span>
+                        </td>
+                        <td class="p-4">${statusHtml}</td>
+                        <td class="p-4 text-center">
+                            <div class="inline-flex items-center gap-1.5">
+                                <button onclick="renovar30Dias('${p.id}', '${p.data_vencimento}')" title="Confirmar Pagamento (+30 dias)" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-xs">
+                                    <i class="fa-solid fa-plus"></i> 30d
+                                </button>
+                                <button onclick="alternarStatus('${p.id}', '${p.status === 'active' ? 'blocked' : 'active'}')" title="${p.status === 'active' ? 'Bloquear Pousada' : 'Ativar Pousada'}" class="${p.status === 'active' ? 'bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border border-red-200' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white border border-emerald-200'} px-2.5 py-1.5 rounded-lg text-xs font-bold transition">
+                                    <i class="fa-solid ${p.status === 'active' ? 'fa-ban' : 'fa-check'}"></i>
+                                </button>
+                                <button onclick="abrirModalEdicao('${p.id}')" title="Ajustar Vencimento ou Valor" class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function renovar30Dias(id, vencimentoAtual){
+            let novaData = new Date();
+            if(vencimentoAtual){
+                const dAtual = new Date(vencimentoAtual + 'T12:00:00');
+                if(dAtual > novaData) novaData = dAtual;
+            }
+            novaData.setDate(novaData.getDate() + 30);
+            const dataFinalStr = novaData.toISOString().split('T')[0];
+
+            if(!confirm(`Confirma o pagamento? A pousada será ATIVADA com vencimento em ${novaData.toLocaleDateString('pt-BR')}.`)) return;
+
+            const { error } = await supabaseClient.from('pousadas').update({
+                status: 'active',
+                data_vencimento: dataFinalStr
+            }).eq('id', id);
+
+            if(error) alert("Erro ao renovar: " + error.message);
+            else carregarDados();
+        }
+
+        async function alternarStatus(id, novoStatus){
+            const acao = novoStatus === 'active' ? 'ATIVAR' : 'BLOQUEAR';
+            if(!confirm(`Deseja realmente ${acao} esta pousada?`)) return;
+
+            const { error } = await supabaseClient.from('pousadas').update({ status: novoStatus }).eq('id', id);
+            if(error) alert("Erro: " + error.message);
+            else carregarDados();
+        }
+
+        function abrirModalEdicao(id){
+            const p = pousadasCache.find(item => item.id === id);
+            if(!p) return;
+
+            document.getElementById('edit-pousada-id').value = p.id;
+            document.getElementById('modal-nome-pousada').innerText = p.nome;
+            document.getElementById('edit-data-vencimento').value = p.data_vencimento || '';
+            document.getElementById('edit-plano-valor').value = p.valorFinal || 149.90;
+
+            document.getElementById('modal-editar-pousada').classList.remove('hidden');
+        }
+
+        function fecharModalEdicao(){
+            document.getElementById('modal-editar-pousada').classList.add('hidden');
+        }
+
+        async function salvarAjustePousada(e){
+            e.preventDefault();
+            const id = document.getElementById('edit-pousada-id').value;
+            const data_vencimento = document.getElementById('edit-data-vencimento').value;
+            const plano_valor = Number(document.getElementById('edit-plano-valor').value);
+
+            const { error } = await supabaseClient.from('pousadas').update({
+                data_vencimento,
+                plano_valor
+            }).eq('id', id);
+
+            if(error) alert("Erro ao salvar: " + error.message);
+            else {
+                fecharModalEdicao();
+                carregarDados();
+            }
+        }
+
+        function filtrarTabela(){
+            const q = document.getElementById('busca-pousada').value.toLowerCase();
+            const filtradas = pousadasCache.filter(p => 
+                p.nome.toLowerCase().includes(q) || 
+                (p.whatsapp_contato && p.whatsapp_contato.includes(q)) ||
+                (p.telefone_contato && p.telefone_contato.includes(q))
+            );
+            renderizarTabela(filtradas);
+        }
+
+        async function fazerLogout(){
+            await supabaseClient.auth.signOut();
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
