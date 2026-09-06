@@ -10,7 +10,7 @@
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col md:flex-row text-slate-800">
 
-    <!-- MENU LATERAL -->
+    <!-- MENU LATERAL COMPLETO E DESTRAVADO -->
     <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl shrink-0">
         <div class="p-4 sm:p-6">
             <div class="flex justify-between items-center md:block mb-4 md:mb-6">
@@ -21,18 +21,18 @@
             </div>
             <nav class="space-y-1.5 flex flex-wrap md:flex-col gap-1 md:gap-0">
                 <a href="dashboard.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition font-medium text-xs sm:text-sm">
-                    <i class="fa-solid fa-hotel w-4 text-center"></i> <span>Painel Principal</span>
+                    <span>🏠</span> <span>Painel Principal</span>
                 </a>
                 <a href="relatorios.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition font-medium text-xs sm:text-sm">
-                    <i class="fa-solid fa-chart-pie w-4 text-center"></i> <span>Gestão Completa</span>
+                    <span>📋</span> <span>Gestão Completa</span>
                 </a>
                 <a href="configurar-pousada.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition font-medium text-xs sm:text-sm">
-                    <i class="fa-solid fa-door-open w-4 text-center"></i> <span>Suítes & Fotos</span>
+                    <span>⚙️</span> <span>Configuração de Suítes</span>
                 </a>
                 <a href="tarifas.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-xs sm:text-sm shadow-md">
-                    <i class="fa-solid fa-tags w-4 text-center"></i> <span>Tarifas & Assinatura</span>
+                    <span>🏷️</span> <span>Tarifas & Assinatura</span>
                 </a>
-                <button type="button" onclick="fazerLogout()" class="w-full bg-red-600/20 hover:bg-red-600 border border-red-500/30 text-red-300 hover:text-white font-bold py-2.5 px-3 rounded-xl transition shadow text-xs sm:text-sm flex items-center justify-center gap-2 mt-3 cursor-pointer">
+                <button type="button" onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-3 rounded-xl transition shadow text-xs sm:text-sm flex items-center justify-center gap-2 mt-3 cursor-pointer">
                     <i class="fa-solid fa-right-from-bracket"></i> Sair
                 </button>
             </nav>
@@ -58,20 +58,20 @@
             <div class="max-w-7xl mx-auto space-y-6">
                 
                 <!-- ============================================================== -->
-                <!-- CARD DINÂMICO DE ASSINATURA (CONECTADO 100% AO ADMIN MASTER)  -->
+                <!-- CARD DE ASSINATURA DINÂMICO (REFLETE 100% O ADMIN-MASTER)      -->
                 <!-- ============================================================== -->
                 <div id="card-minha-assinatura" class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 p-6 rounded-3xl shadow-xl border border-slate-800 text-white relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-48 h-48 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
                     <div class="flex flex-col lg:flex-row justify-between gap-6 relative z-10">
-                        <!-- COLUNA ESQUERDA: DADOS REAIS DO SUPABASE -->
+                        <!-- COLUNA ESQUERDA: DADOS REAIS DO PLANO -->
                         <div class="flex-1">
                             <div class="flex items-center gap-2 mb-3">
                                 <span class="bg-amber-400 text-slate-950 px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase flex items-center gap-1 shadow">
                                     <i class="fa-solid fa-crown"></i> Minha Assinatura
                                 </span>
                                 <span id="assinatura-badge" class="px-3 py-0.5 rounded-full text-[10px] font-extrabold border bg-slate-800 text-slate-300 border-slate-700">
-                                    Carregando status...
+                                    Consultando...
                                 </span>
                             </div>
 
@@ -79,7 +79,7 @@
                                 Plano: <span id="assinatura-plano-nome" class="text-amber-300">Carregando...</span>
                             </h3>
 
-                            <!-- MÉTRICAS DO PLANO (LIDAS DO BANCO) -->
+                            <!-- MÉTRICAS DO PLANO (LIDAS DO SUPABASE) -->
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4 text-xs">
                                 <div class="bg-white/5 border border-white/10 p-3.5 rounded-2xl backdrop-blur-xs">
                                     <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Suítes Ativas</p>
@@ -117,7 +117,7 @@
                 </div>
 
                 <!-- ============================================================== -->
-                <!-- SEÇÃO 1: TODAS AS REGRAS DA POUSADA DA VERSÃO ANTERIOR         -->
+                <!-- SEÇÃO 1: TODAS AS REGRAS DA POUSADA DA VERSÃO ORIGINAL         -->
                 <!-- ============================================================== -->
                 <div class="bg-white p-5 sm:p-8 rounded-3xl shadow-md border border-gray-200">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2 border-b border-gray-100 pb-3">
