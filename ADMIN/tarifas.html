@@ -8,9 +8,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row text-slate-800" onload="protegerPagina()">
+<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row text-slate-800">
 
-    <!-- MENU LATERAL RESPONSIVO -->
+    <!-- MENU LATERAL -->
     <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl shrink-0">
         <div class="p-4 sm:p-6">
             <div class="flex justify-between items-center md:block mb-4 md:mb-6">
@@ -32,7 +32,7 @@
                 <a href="tarifas.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-xs sm:text-sm shadow-md">
                     <i class="fa-solid fa-tags w-4 text-center"></i> <span>Tarifas & Assinatura</span>
                 </a>
-                <button onclick="fazerLogout()" class="w-full bg-red-600/20 hover:bg-red-600 border border-red-500/30 text-red-300 hover:text-white font-bold py-2.5 px-3 rounded-xl transition shadow text-xs sm:text-sm flex items-center justify-center gap-2 mt-3">
+                <button type="button" onclick="fazerLogout()" class="w-full bg-red-600/20 hover:bg-red-600 border border-red-500/30 text-red-300 hover:text-white font-bold py-2.5 px-3 rounded-xl transition shadow text-xs sm:text-sm flex items-center justify-center gap-2 mt-3 cursor-pointer">
                     <i class="fa-solid fa-right-from-bracket"></i> Sair
                 </button>
             </nav>
@@ -41,7 +41,6 @@
 
     <!-- CONTEÚDO PRINCIPAL -->
     <div class="flex-1 flex flex-col min-w-0">
-        
         <!-- CABEÇALHO -->
         <header class="bg-white border-b border-gray-200 p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
@@ -53,11 +52,11 @@
             </a>
         </header>
 
-        <!-- CORPO -->
+        <!-- CORPO DA PÁGINA -->
         <main class="p-4 sm:p-6 md:p-8 flex-1 overflow-y-auto space-y-6">
             <div class="max-w-7xl mx-auto space-y-6">
                 
-                <!-- SEÇÃO 0: PAINEL DINÂMICO DE ASSINATURA SAAS (SINCRONIZADO COM ADMIN MASTER) -->
+                <!-- SEÇÃO 0: STATUS DO PLANO DE ASSINATURA SAAS (CONTROLE ADMIN MASTER) -->
                 <div id="card-plano-assinatura" class="bg-white p-5 sm:p-6 rounded-3xl shadow-sm border border-gray-200">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-gray-100 pb-4 mb-4">
                         <div class="flex items-center gap-3">
@@ -74,7 +73,7 @@
                         </div>
                     </div>
 
-                    <!-- GRID DE DETALHES DO PLANO -->
+                    <!-- GRID DE DETALHES -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200">
                             <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Status do Acesso</span>
@@ -108,7 +107,7 @@
                         </div>
                     </div>
 
-                    <!-- ALERTA DE COBRANÇA OU BLOQUEIO CASO EXISTA -->
+                    <!-- BANNER DE AVISO / BLOQUEIO -->
                     <div id="alerta-cobranca" class="hidden mt-4 p-4 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                         <div class="flex items-center gap-3">
                             <div id="alerta-icone" class="text-2xl">⚠️</div>
@@ -192,7 +191,7 @@
                                         <div>
                                             <span class="text-xs font-extrabold text-blue-950 block">Exigir Documento do Hóspede na Vitrine</span>
                                             <span class="text-[11px] text-gray-500 leading-tight block mt-0.5">
-                                                Se marcado, o hóspede será obrigado a preencher documento ao solicitar reserva.
+                                                Se marcado, o hóspede será obrigado a preencher documento ao solicitar reserva na vitrine.
                                             </span>
                                         </div>
                                     </label>
@@ -303,7 +302,7 @@
                     </div>
                 </div>
 
-                <!-- SEÇÃO 2: TARIFAS ESPECIAIS E SAZONALIDADE -->
+                <!-- SEÇÃO 2: MOTOR DE TARIFAS ESPECIAIS E SAZONALIDADE -->
                 <div class="bg-white p-5 sm:p-8 rounded-3xl shadow-sm border border-gray-200">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2 border-b border-gray-100 pb-3">
                         <div>
@@ -312,7 +311,7 @@
                             </h2>
                             <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Defina acréscimos percentuais (%) ou valores fixos (R$) para feriados, pacotes ou fins de semana.</p>
                         </div>
-                        <button id="btn-cancelar-edicao" onclick="cancelarEdicao()" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1.5 px-4 rounded-xl text-xs transition">
+                        <button type="button" id="btn-cancelar-edicao" onclick="cancelarEdicao()" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1.5 px-4 rounded-xl text-xs transition">
                             Cancelar Edição
                         </button>
                     </div>
@@ -346,10 +345,10 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Descrição / Motivo</label>
-                            <input type="text" id="tarifa-descricao" placeholder="Ex: Alta Temporada / Fim de Semana" required class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm">
+                            <input type="text" id="tarifa-descricao" placeholder="Ex: Fim de Semana / Alta Temporada" required class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm">
                         </div>
                         <div class="md:col-span-3 bg-white p-4 rounded-xl border border-gray-200">
-                            <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Dias da semana aplicáveis (Opcional - deixe vazio para todos):</label>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Dias da semana aplicáveis (Opcional - se vazio aplica a todos):</label>
                             <div class="flex flex-wrap gap-4 text-xs sm:text-sm font-medium text-gray-700">
                                 <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="0" class="w-4 h-4 text-blue-600 rounded"> Domingo</label>
                                 <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="1" class="w-4 h-4 text-blue-600 rounded"> Segunda</label>
@@ -407,7 +406,7 @@
             <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto text-xl font-bold">⚠️</div>
             <div>
                 <h3 class="text-xl font-bold text-gray-900 mb-2">Excluir Regra</h3>
-                <p id="modal-texto-exclusao" class="text-sm text-gray-600">Deseja realmente remover esta regra de tarifa?</p>
+                <p id="modal-texto-exclusao" class="text-sm text-gray-600">Deseja realmente remover esta regra?</p>
             </div>
             <div class="flex justify-center gap-3 pt-2">
                 <button type="button" onclick="fecharModalExclusao()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-5 py-2.5 rounded-xl text-sm">Cancelar</button>
@@ -446,77 +445,83 @@
             setTimeout(() => { toast.classList.add('translate-y-24', 'opacity-0'); }, 3000);
         }
 
-        async function protegerPagina() {
-            supabaseClient.auth.onAuthStateChange((event, session) => {
-                if (event === 'SIGNED_OUT' || !session) window.location.href = 'index.html';
-            });
+        // INICIALIZAÇÃO LIMPA E SEM CONCORRÊNCIA COM EXTENSÕES
+        window.addEventListener('DOMContentLoaded', async () => {
+            await inicializarPagina();
+        });
 
-            const { data: { session }, error } = await supabaseClient.auth.getSession();
-            if (error || !session) {
-                window.location.href = 'index.html';
-                return;
-            }
-
-            usuarioIdAtual = session.user.id;
-
-            // Busca os dados da pousada
-            const { data: pousada, error: erroPousada } = await supabaseClient
-                .from('pousadas')
-                .select('*')
-                .eq('id', usuarioIdAtual)
-                .maybeSingle();
-
-            pousadaCache = pousada || {};
-            const nomePousada = pousadaCache.nome || "Minha Pousada";
-
-            document.getElementById('titulo-pousada').innerText = nomePousada;
-            document.getElementById('nome-pousada-sidebar').innerText = nomePousada;
-
-            // Carrega e calcula os dados da Assinatura SaaS
-            await carregarPainelAssinatura(pousadaCache);
-
-            // Popula os dados das regras da pousada
-            if (pousadaCache) {
-                document.getElementById('pousada-checkin').value = pousadaCache.horario_checkin || '';
-                document.getElementById('pousada-checkout').value = pousadaCache.horario_checkout || '';
-                document.getElementById('pousada-diaria-minima').value = pousadaCache.diaria_minima || '';
-                document.getElementById('pousada-idade-crianca').value = pousadaCache.idade_limite_crianca || '';
-                
-                const aceitaPetVal = pousadaCache.aceita_pet ? 'sim' : 'nao';
-                document.getElementById('pousada-aceita-pet').value = aceitaPetVal;
-                alternarCampoPet();
-                
-                if (pousadaCache.aceita_pet) {
-                    document.getElementById('pousada-valor-pet').value = pousadaCache.valor_pet || '';
+        async function inicializarPagina() {
+            try {
+                const { data: { session }, error } = await supabaseClient.auth.getSession();
+                if (error || !session) {
+                    window.location.href = 'index.html';
+                    return;
                 }
-                document.getElementById('pousada-valor-hospede-extra').value = pousadaCache.valor_hospede_extra || '';
 
-                // Redes e Documentos
-                document.getElementById('pousada-whatsapp-contato').value = pousadaCache.whatsapp_contato || '';
-                document.getElementById('pousada-cnpj-cpf').value = pousadaCache.cnpj_cpf || '';
-                document.getElementById('pousada-instagram').value = pousadaCache.instagram || '';
-                document.getElementById('pousada-facebook').value = pousadaCache.facebook || '';
-                document.getElementById('pousada-exigir-documento').checked = pousadaCache.exigir_documento === true || pousadaCache.exigir_documento === 'true';
+                usuarioIdAtual = session.user.id;
 
-                // Pensão e Descrição
-                document.getElementById('pousada-tipo-pensao').value = pousadaCache.tipo_pensao || '';
-                document.getElementById('pousada-descricao-pensao').value = pousadaCache.descricao_pensao || '';
-                document.getElementById('pousada-descricao-pousada').value = pousadaCache.descricao_pousada || '';
+                // Busca dados da pousada
+                const { data: pousada, error: erroPousada } = await supabaseClient
+                    .from('pousadas')
+                    .select('*')
+                    .eq('id', usuarioIdAtual)
+                    .maybeSingle();
 
-                document.getElementById('check-exibir-fotos').checked = pousadaCache.exibir_fotos_pousada || false;
-                toggleSecaoFotos();
-                renderizarFotosSalvas('pousada', pousadaCache.fotos_pousada);
+                pousadaCache = pousada || {};
+                const nomePousada = pousadaCache.nome || "Minha Pousada";
 
-                document.getElementById('check-exibir-atracoes').checked = pousadaCache.exibir_atracoes || false;
-                toggleSecaoAtracoes();
-                renderizarFotosSalvas('atracoes', pousadaCache.atracoes_turisticas);
+                document.getElementById('titulo-pousada').innerText = nomePousada;
+                document.getElementById('nome-pousada-sidebar').innerText = nomePousada;
+
+                // Carrega o plano de assinatura SaaS vindo do Admin Master
+                await carregarPainelAssinatura(pousadaCache);
+
+                // Carrega as regras operacionais da pousada
+                if (pousadaCache) {
+                    document.getElementById('pousada-checkin').value = pousadaCache.horario_checkin || '';
+                    document.getElementById('pousada-checkout').value = pousadaCache.horario_checkout || '';
+                    document.getElementById('pousada-diaria-minima').value = pousadaCache.diaria_minima || '';
+                    document.getElementById('pousada-idade-crianca').value = pousadaCache.idade_limite_crianca || '';
+                    
+                    const aceitaPetVal = pousadaCache.aceita_pet ? 'sim' : 'nao';
+                    document.getElementById('pousada-aceita-pet').value = aceitaPetVal;
+                    alternarCampoPet();
+                    
+                    if (pousadaCache.aceita_pet) {
+                        document.getElementById('pousada-valor-pet').value = pousadaCache.valor_pet || '';
+                    }
+                    document.getElementById('pousada-valor-hospede-extra').value = pousadaCache.valor_hospede_extra || '';
+
+                    // Contatos e redes
+                    document.getElementById('pousada-whatsapp-contato').value = pousadaCache.whatsapp_contato || '';
+                    document.getElementById('pousada-cnpj-cpf').value = pousadaCache.cnpj_cpf || '';
+                    document.getElementById('pousada-instagram').value = pousadaCache.instagram || '';
+                    document.getElementById('pousada-facebook').value = pousadaCache.facebook || '';
+                    document.getElementById('pousada-exigir-documento').checked = pousadaCache.exigir_documento === true || pousadaCache.exigir_documento === 'true';
+
+                    // Pensão e descrições
+                    document.getElementById('pousada-tipo-pensao').value = pousadaCache.tipo_pensao || '';
+                    document.getElementById('pousada-descricao-pensao').value = pousadaCache.descricao_pensao || '';
+                    document.getElementById('pousada-descricao-pousada').value = pousadaCache.descricao_pousada || '';
+
+                    document.getElementById('check-exibir-fotos').checked = pousadaCache.exibir_fotos_pousada || false;
+                    toggleSecaoFotos();
+                    renderizarFotosSalvas('pousada', pousadaCache.fotos_pousada);
+
+                    document.getElementById('check-exibir-atracoes').checked = pousadaCache.exibir_atracoes || false;
+                    toggleSecaoAtracoes();
+                    renderizarFotosSalvas('atracoes', pousadaCache.atracoes_turisticas);
+                }
+
+                await carregarSuitesETarifas();
+
+            } catch (err) {
+                console.error("Erro na inicialização da página:", err);
             }
-
-            await carregarSuitesETarifas();
         }
 
         async function carregarPainelAssinatura(pousada) {
-            // Busca a contagem de suítes ativas
+            // Contagem de suítes ativas
             const { data: suites } = await supabaseClient
                 .from('suites')
                 .select('id, ativa')
@@ -525,7 +530,7 @@
             const totalAtivas = suites ? suites.filter(s => s.ativa === true).length : 0;
             document.getElementById('info-suites-ativas').innerText = `${totalAtivas} suítes ativas`;
 
-            // Busca as faixas de preço para saber a descrição do plano
+            // Faixas de preço do sistema
             let faixaEncontrada = null;
             try {
                 const { data: faixas } = await supabaseClient.from('config_faixas_preco').select('*').order('min_suites');
@@ -539,7 +544,7 @@
                 }
             } catch(e) {}
 
-            // Busca dias de aviso configurados no Admin Master
+            // Dias de aviso configurados no Master
             let diasAviso = 5;
             try {
                 const { data: config } = await supabaseClient.from('config_sistema').select('dias_aviso_vencimento').eq('id', 1).maybeSingle();
@@ -550,7 +555,7 @@
             document.getElementById('info-valor-mensal').innerText = 'R$ ' + Number(valorFinal).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
             document.getElementById('info-descricao-faixa').innerText = faixaEncontrada ? faixaEncontrada.descricao : 'Plano Personalizado';
 
-            // Cálculo da Data e Dias Restantes
+            // Datas e status
             const hoje = new Date();
             hoje.setHours(0,0,0,0);
 
@@ -563,12 +568,12 @@
             const alertaDesc = document.getElementById('alerta-descricao');
             const alertaIcone = document.getElementById('alerta-icone');
 
-            const whatsSuporte = pousada.whatsapp_contato ? pousada.whatsapp_contato.replace(/\D/g,'') : '5521999999999';
-            document.getElementById('btn-contato-master').href = `https://wa.me/${whatsSuporte}?text=Ol%C3%A1%2C%20gostaria%20de%20regularizar%20a%20assinatura%20da%20minha%20pousada%20(${encodeURIComponent(pousada.nome || '')})`;
+            const whatsContatoPousada = pousada.whatsapp_contato ? pousada.whatsapp_contato.replace(/\D/g,'') : '5521999999999';
+            document.getElementById('btn-contato-master').href = `https://wa.me/${whatsContatoPousada}?text=Ol%C3%A1%2C%20gostaria%20de%20verificar%20o%20pagamento%20da%20minha%20assinatura%20(${encodeURIComponent(pousada.nome || '')})`;
 
             if (!pousada.data_vencimento) {
                 textoVenc.innerText = "Sem data cadastrada";
-                textoDias.innerText = "Aguardando liberação";
+                textoDias.innerText = "Aguardando ativação pelo Master";
                 badgeStatus.innerHTML = '<span class="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full text-xs font-bold">EM ANÁLISE</span>';
                 textoStatus.innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Pendente de Ativação';
                 return;
@@ -581,40 +586,34 @@
             if (pousada.status === 'blocked' || diffDias < 0) {
                 // BLOQUEADO OU VENCIDO
                 contaBloqueada = true;
-                badgeStatus.innerHTML = '<span class="bg-red-100 text-red-800 border border-red-300 px-3 py-1 rounded-full text-xs font-bold animate-pulse">ASSINATURA EXPIRADA</span>';
-                textoStatus.innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-red-600"></span> Acesso Restrito';
+                badgeStatus.innerHTML = '<span class="bg-red-100 text-red-800 border border-red-300 px-3 py-1 rounded-full text-xs font-bold animate-pulse">ASSINATURA VENCIDA</span>';
+                textoStatus.innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-red-600"></span> Acesso Bloqueado';
                 textoDias.innerText = `Venceu há ${Math.abs(diffDias)} dia(s)`;
                 textoDias.className = "text-[11px] text-red-600 font-bold block mt-0.5";
 
                 alertaDiv.className = "mt-4 p-4 rounded-2xl border border-red-300 bg-red-50 text-red-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3";
                 alertaIcone.innerText = "🚨";
-                alertaTitulo.innerText = "Assinatura Vencida ou Bloqueada";
-                alertaDesc.innerText = "Seu acesso à edição e criação de novas tarifas está temporariamente congelado pelo Admin Master. Entre em contato para renovar.";
+                alertaTitulo.innerText = "Assinatura Vencida / Bloqueada";
+                alertaDesc.innerText = "A renovação deste mês está pendente. Entre em contato com a administração da plataforma para reativar seu plano.";
                 alertaDiv.classList.remove('hidden');
 
-                // Desativa botões de inserção para evitar conflito com RLS
-                document.getElementById('btn-salvar-regras-pousada').classList.add('opacity-50', 'cursor-not-allowed');
-                document.getElementById('btn-salvar-regras-pousada').title = "Assinatura bloqueada no momento";
-                document.getElementById('btn-submit-regra').classList.add('opacity-50', 'cursor-not-allowed');
-                document.getElementById('btn-submit-regra').title = "Assinatura bloqueada no momento";
-
             } else if (diffDias <= diasAviso) {
-                // PERÍODO DE AVISO (PRESTES A VENCER)
+                // AVISO DE FATURA PRÓXIMA
                 badgeStatus.innerHTML = '<span class="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full text-xs font-bold">VENCE EM BREVE</span>';
-                textoStatus.innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Em Dia (Aviso de Fatura)';
+                textoStatus.innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Regular (Aviso de Fatura)';
                 textoDias.innerText = `Vence em ${diffDias} dia(s)`;
                 textoDias.className = "text-[11px] text-amber-700 font-bold block mt-0.5";
 
                 alertaDiv.className = "mt-4 p-4 rounded-2xl border border-amber-300 bg-amber-50 text-amber-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3";
                 alertaIcone.innerText = "⏳";
-                alertaTitulo.innerText = `Fatura Próxima do Vencimento (${diffDias} dias)`;
-                alertaDesc.innerText = "Evite pausas no sistema antecipando a renovação da sua assinatura mensal.";
+                alertaTitulo.innerText = `Fatura vence em ${diffDias} dia(s)`;
+                alertaDesc.innerText = "Sua próxima mensalidade está próxima do vencimento. Antecipe para evitar qualquer pausa nos serviços.";
                 alertaDiv.classList.remove('hidden');
 
             } else {
-                // ATIVA E REGULAR
+                // REGULAR
                 badgeStatus.innerHTML = '<span class="bg-emerald-100 text-emerald-800 border border-emerald-300 px-3 py-1 rounded-full text-xs font-bold">PLANO ATIVO</span>';
-                textoStatus.innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Regular';
+                textoStatus.innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Em Dia';
                 textoDias.innerText = `Restam ${diffDias} dias de acesso`;
                 textoDias.className = "text-[11px] text-emerald-700 font-medium block mt-0.5";
                 alertaDiv.classList.add('hidden');
@@ -731,7 +730,7 @@
 
         async function salvarRegrasPousada() {
             if (contaBloqueada) {
-                alert("Sua assinatura está suspensa ou vencida. Entre em contato com o suporte para reativar seu plano antes de salvar alterações.");
+                alert("Atenção: A assinatura da sua pousada está vencida ou bloqueada. Regularize seu plano no painel de suporte para salvar alterações.");
                 return;
             }
 
@@ -824,7 +823,7 @@
             }
             
             mostrarToast("Regras e canais da pousada atualizados com sucesso!");
-            protegerPagina();
+            await inicializarPagina();
         }
 
         async function carregarSuitesETarifas() {
@@ -853,12 +852,12 @@
             tbody.innerHTML = '';
 
             if (error) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-600">Erro ao carregar tarifas: ${error.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-600 font-bold">Erro ao carregar tarifas: ${error.message}</td></tr>`;
                 return;
             }
 
             if (!tarifasCache || tarifasCache.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">Nenhuma regra especial cadastrada no momento.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">Nenhuma regra especial cadastrada.</td></tr>`;
                 return;
             }
 
@@ -896,14 +895,14 @@
                 }
 
                 tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50 transition">
+                    <tr class="hover:bg-gray-50">
                         <td class="p-3 font-semibold text-gray-900">${t.descricao || 'Especial'}</td>
                         <td class="p-3 text-gray-700 font-bold">${nomeSuiteObj}</td>
                         <td class="p-3 text-gray-600">${dInicioBR} até ${dFimBR} ${statusBadge}</td>
                         <td class="p-3 font-bold text-blue-600">${textoRegra}</td>
                         <td class="p-3 text-right space-x-2">
-                            <button onclick="prepararEdicaoTarifa('${t.id}')" class="text-blue-600 hover:text-blue-800 font-bold text-xs bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 transition">Editar</button>
-                            <button onclick="abrirModalExclusao('${t.id}')" class="text-red-600 hover:text-red-800 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-lg border border-red-100 transition">Excluir</button>
+                            <button type="button" onclick="prepararEdicaoTarifa('${t.id}')" class="text-blue-600 hover:text-blue-800 font-bold text-xs bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 transition">Editar</button>
+                            <button type="button" onclick="abrirModalExclusao('${t.id}')" class="text-red-600 hover:text-red-800 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-lg border border-red-100 transition">Excluir</button>
                         </td>
                     </tr>
                 `;
@@ -967,14 +966,14 @@
             const { error } = await supabaseClient.from('tarifas_especiais').delete().eq('id', idParaExcluir);
             fecharModalExclusao();
             if (error) { alert("Erro ao excluir: " + error.message); return; }
-            mostrarToast("Regra de tarifa removida com sucesso!");
-            carregarTabelaTarifasEspeciais();
+            mostrarToast("Regra removida com sucesso!");
+            await carregarTabelaTarifasEspeciais();
         };
 
         document.getElementById('form-tarifa-especial').onsubmit = async (e) => {
             e.preventDefault();
             if (contaBloqueada) {
-                alert("Acesso restrito: Sua conta está bloqueada no painel Master SaaS. Regularize sua assinatura para cadastrar tarifas.");
+                alert("Atenção: Sua conta está com assinatura vencida/bloqueada. Regularize para cadastrar tarifas.");
                 return;
             }
 
@@ -1009,12 +1008,15 @@
 
             cancelarEdicao();
             mostrarToast("Regra de tarifa salva com sucesso!");
-            carregarTabelaTarifasEspeciais();
+            await carregarTabelaTarifasEspeciais();
         };
 
         async function fazerLogout() { 
-            await supabaseClient.auth.signOut(); 
-            window.location.href = 'index.html'; 
+            try {
+                await supabaseClient.auth.signOut();
+            } finally {
+                window.location.href = 'index.html';
+            }
         }
     </script>
 </body>
