@@ -15,6 +15,7 @@
 
     <div class="flex h-screen bg-gray-100 overflow-hidden">
         
+        
         <!-- MENU LATERAL COMPACTADO -->
         <aside class="w-52 bg-slate-800 text-white flex flex-col shadow-lg flex-shrink-0">
             <div class="p-4 border-b border-slate-700">
@@ -40,6 +41,20 @@
             <div class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 sm:p-6">
                 <div class="w-full max-w-[98%] mx-auto">
                     
+                <!-- FAIXA INTELIGENTE DE STATUS DA ASSINATURA (SÓ APARECE SE VENCIDA OU BLOQUEADA) -->
+                <div id="banner-assinatura-relatorios" class="hidden mb-5 p-3.5 sm:p-4 rounded-2xl shadow-xs border flex items-center justify-between gap-3 transition-all">
+                    <div class="flex items-center gap-3">
+                        <span id="banner-assinatura-icone" class="text-xl sm:text-2xl">⚠️</span>
+                        <div>
+                            <h4 id="banner-assinatura-titulo" class="text-xs sm:text-sm font-extrabold leading-tight"></h4>
+                            <p id="banner-assinatura-sub" class="text-[11px] mt-0.5 font-medium"></p>
+                        </div>
+                    </div>
+                    <a href="tarifas.html" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white/90 hover:bg-white text-slate-800 border border-black/10 shadow-xs transition shrink-0">
+                        Ver Assinatura &rarr;
+                    </a>
+                </div>
+
                 <!-- Cabeçalho - SISTEMA DE CONSULTAS CENTRALIZADO -->
                 <div class="flex flex-col items-center justify-center mb-6 gap-2 text-center">
                     <div>
@@ -99,7 +114,7 @@
                             </div>
                             <span class="text-[9px] font-bold uppercase tracking-wider bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full border border-amber-300">TARIFAS</span>
                         </div>
-                        <h3 class="font-bold text-gray-900 text-xs sm:text-sm group-hover:text-amber-800 transition">Tarifas  Aplicadas /h3>
+                        <h3 class="font-bold text-gray-900 text-xs sm:text-sm group-hover:text-amber-800 transition">Tarifas Aplicadas</h3>
                         <p class="text-[11px] text-gray-500 mt-0.5 truncate">Valores e regras vigentes.</p>
                     </div>
 
@@ -170,7 +185,7 @@
                             <div id="graficoBarrasOcupacao" class="space-y-3">
                                 <div class="py-8 text-center text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO GRÁFICO...</div>
                             </div>
-                            <p class="text-[10px] text-gray-400 mt-3">Gráfico mostra total de diárias ocupadas por suíte no período filtrado (DE/ATÉ). Conta SOMENTE reservas com status <strong>Finalizada</strong> (checkout feito no dashboard). Suíte foi ocupada = Finalizada. Mais diárias = mais ocupada no período.</p>
+                            <p class="text-[10px] text-gray-400 mt-3">Gráfico mostra total de diárias ocupadas por suíte no período filtrado (DE/ATÉ). Conta SOMENTE reservas com status <strong>Finalizada</strong>.</p>
                         </div>
                     </div>
                     </div>
@@ -190,13 +205,12 @@
                             <div id="gridSuitesFiltro" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
                                 <div class="col-span-full py-4 text-center text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO SUÍTES...</div>
                             </div>
-                            <p class="text-[10px] text-gray-400 mt-2.5">Clique em uma suíte para ver apenas o extrato dela no período selecionado. Clique em VER TODAS para voltar.</p>
+                            <p class="text-[10px] text-gray-400 mt-2.5">Clique em uma suíte para ver apenas o extrato dela no período selecionado.</p>
                         </div>
                     </div>
 
                     <!-- FILTRO RÁPIDO DE STATUS DE RESERVAS -->
                     <div id="containerFiltroStatusReservas" class="mb-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-                        <!-- FILTRO STATUS -->
                         <div class="flex items-center gap-2 bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
                             <span class="text-[10px] font-extrabold text-gray-500 uppercase tracking-widest mr-2">
                                 <i class="fa-solid fa-filter mr-1"></i> Status:
@@ -205,57 +219,26 @@
                             <button id="btnRecusada" onclick="alterarFiltroStatusReservas('RECUSADA')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-white text-red-600 border border-red-200 hover:bg-red-50">RECUSADAS</button>
                             <button id="btnTodas" onclick="alterarFiltroStatusReservas('TODAS')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-white text-gray-600 border border-gray-200 hover:bg-gray-50">TODAS</button>
                         </div>
-                        <!-- CARDS CONTROLE HOJE -->
                         <div id="containerCardsControleHoje" class="flex flex-wrap items-center gap-3">
-                            <!-- Check-In Hoje -->
-                            <div id="cardCheckInHoje" onclick="filtrarPorCardHoje('checkin')" title="Clique para filtrar apenas Check-In de hoje" class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3 min-w-[150px] cursor-pointer hover:shadow-md hover:border-violet-300 hover:bg-violet-50/50 transition-all group">
-                                <div class="w-10 h-10 bg-violet-100 text-violet-600 rounded-full flex items-center justify-center text-sm shadow-sm group-hover:scale-110 transition">
-                                    <i class="fa-solid fa-calendar-days"></i>
-                                </div>
-                                <div class="flex flex-col">
-                                    <span id="cardCheckInHojeValor" class="text-lg font-extrabold text-gray-800 leading-none">0</span>
-                                    <span class="text-[11px] text-gray-500 font-medium group-hover:text-violet-700">Check-In Hoje</span>
-                                </div>
+                            <div id="cardCheckInHoje" onclick="filtrarPorCardHoje('checkin')" class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3 min-w-[150px] cursor-pointer hover:shadow-md hover:border-violet-300 transition-all group">
+                                <div class="w-10 h-10 bg-violet-100 text-violet-600 rounded-full flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-calendar-days"></i></div>
+                                <div class="flex flex-col"><span id="cardCheckInHojeValor" class="text-lg font-extrabold text-gray-800 leading-none">0</span><span class="text-[11px] text-gray-500 font-medium">Check-In Hoje</span></div>
                             </div>
-                            <!-- Check-Out Hoje -->
-                            <div id="cardCheckOutHoje" onclick="filtrarPorCardHoje('checkout')" title="Clique para filtrar apenas Check-Out de hoje" class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3 min-w-[150px] cursor-pointer hover:shadow-md hover:border-red-300 hover:bg-red-50/50 transition-all group">
-                                <div class="w-10 h-10 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-sm shadow-sm group-hover:scale-110 transition">
-                                    <i class="fa-solid fa-laptop"></i>
-                                </div>
-                                <div class="flex flex-col">
-                                    <span id="cardCheckOutHojeValor" class="text-lg font-extrabold text-gray-800 leading-none">0</span>
-                                    <span class="text-[11px] text-gray-500 font-medium group-hover:text-red-700">Check-Out Hoje</span>
-                                </div>
+                            <div id="cardCheckOutHoje" onclick="filtrarPorCardHoje('checkout')" class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3 min-w-[150px] cursor-pointer hover:shadow-md hover:border-red-300 transition-all group">
+                                <div class="w-10 h-10 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-laptop"></i></div>
+                                <div class="flex flex-col"><span id="cardCheckOutHojeValor" class="text-lg font-extrabold text-gray-800 leading-none">0</span><span class="text-[11px] text-gray-500 font-medium">Check-Out Hoje</span></div>
                             </div>
-                            <!-- Check-Out Amanhã -->
-                            <div id="cardCheckOutAmanha" onclick="filtrarPorCardHoje('checkout_amanha')" title="Clique para filtrar apenas Check-Out de amanhã" class="bg-white p-3 rounded-xl border border-orange-300 shadow-sm flex items-center gap-3 min-w-[150px] cursor-pointer hover:shadow-md hover:border-orange-400 hover:bg-orange-50/50 transition-all group">
-                                <div class="w-10 h-10 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-sm shadow-sm group-hover:scale-110 transition">
-                                    <i class="fa-solid fa-calendar-check"></i>
-                                </div>
-                                <div class="flex flex-col">
-                                    <span id="cardCheckOutAmanhaValor" class="text-lg font-extrabold text-gray-800 leading-none">0</span>
-                                    <span class="text-[11px] text-gray-500 font-medium group-hover:text-orange-700">Check-Out Amanhã</span>
-                                </div>
+                            <div id="cardCheckOutAmanha" onclick="filtrarPorCardHoje('checkout_amanha')" class="bg-white p-3 rounded-xl border border-orange-300 shadow-sm flex items-center gap-3 min-w-[150px] cursor-pointer hover:shadow-md hover:border-orange-400 transition-all group">
+                                <div class="w-10 h-10 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-calendar-check"></i></div>
+                                <div class="flex flex-col"><span id="cardCheckOutAmanhaValor" class="text-lg font-extrabold text-gray-800 leading-none">0</span><span class="text-[11px] text-gray-500 font-medium">Check-Out Amanhã</span></div>
                             </div>
-                            <!-- Reservas -->
-                            <div id="cardReservasHoje" onclick="filtrarPorCardHoje('reservas')" title="Clique para ver todas as reservas (remover filtro de hoje)" class="bg-white p-3 rounded-xl border border-blue-200 shadow-sm flex items-center gap-3 min-w-[150px] cursor-pointer hover:shadow-md hover:border-blue-300 hover:bg-blue-50/50 transition-all group">
-                                <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm shadow-sm group-hover:scale-110 transition">
-                                    <i class="fa-solid fa-money-bill"></i>
-                                </div>
-                                <div class="flex flex-col">
-                                    <span id="cardReservasHojeValor" class="text-lg font-extrabold text-gray-800 leading-none">0</span>
-                                    <span class="text-[11px] text-gray-500 font-medium group-hover:text-blue-700">Reservas</span>
-                                </div>
+                            <div id="cardReservasHoje" onclick="filtrarPorCardHoje('reservas')" class="bg-white p-3 rounded-xl border border-blue-200 shadow-sm flex items-center gap-3 min-w-[150px] cursor-pointer hover:shadow-md hover:border-blue-300 transition-all group">
+                                <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-money-bill"></i></div>
+                                <div class="flex flex-col"><span id="cardReservasHojeValor" class="text-lg font-extrabold text-gray-800 leading-none">0</span><span class="text-[11px] text-gray-500 font-medium">Reservas</span></div>
                             </div>
-                            <!-- Suítes -->
-                            <div id="cardSuites" onclick="toggleSuites()" title="Ver suítes com reservas futuras e calendário" class="bg-white p-3 rounded-xl border border-amber-200 shadow-sm flex items-center gap-3 min-w-[130px] cursor-pointer hover:shadow-md hover:border-amber-400 hover:bg-amber-50/50 transition-all group">
-                                <div class="w-10 h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-sm shadow-sm group-hover:scale-110 transition">
-                                    <i class="fa-solid fa-bed"></i>
-                                </div>
-                                <div class="flex flex-col">
-                                    <span class="text-lg font-extrabold text-gray-800 leading-none">Suítes</span>
-                                    <span class="text-[11px] text-gray-500 font-medium group-hover:text-amber-700">com Reserva</span>
-                                </div>
+                            <div id="cardSuites" onclick="toggleSuites()" class="bg-white p-3 rounded-xl border border-amber-200 shadow-sm flex items-center gap-3 min-w-[130px] cursor-pointer hover:shadow-md hover:border-amber-400 transition-all group">
+                                <div class="w-10 h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-bed"></i></div>
+                                <div class="flex flex-col"><span class="text-lg font-extrabold text-gray-800 leading-none">Suítes</span><span class="text-[11px] text-gray-500 font-medium">com Reserva</span></div>
                             </div>
                         </div>
                     </div>
@@ -273,7 +256,6 @@
                             <div id="gridSuites" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                                 <div class="col-span-full py-4 text-center text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO SUÍTES...</div>
                             </div>
-                            <p class="text-[10px] text-gray-400 mt-3">Clique em uma suíte para abrir o calendário visual com as datas ocupadas</p>
                         </div>
                     </div>
 
@@ -318,6 +300,33 @@
         </main>
     </div>
 
+    <!-- MODAL ELEGANTE DE MODO SOMENTE LEITURA -->
+    <div id="modal-modo-leitura" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-[999]">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-red-100 text-center space-y-4">
+            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto text-2xl font-bold shadow-inner">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <div>
+                <h3 class="text-lg sm:text-xl font-extrabold text-slate-900">Modo Somente Leitura</h3>
+                <p class="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
+                    A criação de novas reservas está temporariamente pausada devido a uma pendência na assinatura da pousada.
+                </p>
+                <div class="mt-3 bg-amber-50 border border-amber-200 p-3 rounded-xl text-[11px] text-amber-900 font-medium text-left flex items-start gap-2">
+                    <span class="text-amber-600 text-base">💡</span>
+                    <span>Seus relatórios e histórico continuam 100% disponíveis. Para reativar a criação de reservas, regularize seu plano.</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <button onclick="fecharModalModoLeitura()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 px-4 rounded-xl transition text-xs">
+                    Entendido
+                </button>
+                <a href="tarifas.html" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl transition text-xs shadow-md flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-crown text-amber-300"></i> Ver Assinatura
+                </a>
+            </div>
+        </div>
+    </div>
+
     <script>
         const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
@@ -326,15 +335,23 @@
         let usuarioIdAtual = null;
         let viewAtualSelecionada = 'vw_gestor_financeiro_relatorio';
         var filtroStatusReservasAtual = 'APROVADA';
-        var filtroCheckTipoHoje = null; // 'checkin' | 'checkout' | 'reservas' | null
+        var filtroCheckTipoHoje = null;
         var hojeStrGlobal = new Date().toISOString().split('T')[0]; 
         let suiteFiltroAtual = null;
         let suitesDaPousadaCache = []; 
         let tituloBaseAtual = 'Extrato Detalhado de Pagamentos';
+        let pousadaEmDiaCache = true;
 
-        // =========================================================================
-        // PALETA DINÂMICA DE CORES EXCLUSIVAS POR SUÍTE
-        // =========================================================================
+        function abrirModalModoLeitura() {
+            const m = document.getElementById('modal-modo-leitura');
+            if (m) m.classList.remove('hidden');
+        }
+
+        function fecharModalModoLeitura() {
+            const m = document.getElementById('modal-modo-leitura');
+            if (m) m.classList.add('hidden');
+        }
+
         const PALETA_SUITES = [
             { nome: 'indigo', border: 'border-indigo-300', borderHover: 'hover:border-indigo-500', borderActive: 'border-indigo-600', bgLight: 'bg-indigo-50/60', bgActive: 'bg-indigo-100', iconBg: 'bg-indigo-100', iconText: 'text-indigo-700', badgeBg: 'bg-indigo-600', textGroupHover: 'group-hover:text-indigo-700', barBg: 'bg-indigo-500' },
             { nome: 'amber', border: 'border-amber-300', borderHover: 'hover:border-amber-500', borderActive: 'border-amber-600', bgLight: 'bg-amber-50/60', bgActive: 'bg-amber-100', iconBg: 'bg-amber-100', iconText: 'text-amber-700', badgeBg: 'bg-amber-600', textGroupHover: 'group-hover:text-amber-700', barBg: 'bg-amber-500' },
@@ -343,15 +360,7 @@
             { nome: 'sky', border: 'border-sky-300', borderHover: 'hover:border-sky-500', borderActive: 'border-sky-600', bgLight: 'bg-sky-50/60', bgActive: 'bg-sky-100', iconBg: 'bg-sky-100', iconText: 'text-sky-700', badgeBg: 'bg-sky-600', textGroupHover: 'group-hover:text-sky-700', barBg: 'bg-sky-500' },
             { nome: 'rose', border: 'border-rose-300', borderHover: 'hover:border-rose-500', borderActive: 'border-rose-600', bgLight: 'bg-rose-50/60', bgActive: 'bg-rose-100', iconBg: 'bg-rose-100', iconText: 'text-rose-700', badgeBg: 'bg-rose-600', textGroupHover: 'group-hover:text-rose-700', barBg: 'bg-rose-500' },
             { nome: 'orange', border: 'border-orange-300', borderHover: 'hover:border-orange-500', borderActive: 'border-orange-600', bgLight: 'bg-orange-50/60', bgActive: 'bg-orange-100', iconBg: 'bg-orange-100', iconText: 'text-orange-700', badgeBg: 'bg-orange-600', textGroupHover: 'group-hover:text-orange-700', barBg: 'bg-orange-500' },
-            { nome: 'teal', border: 'border-teal-300', borderHover: 'hover:border-teal-500', borderActive: 'border-teal-600', bgLight: 'bg-teal-50/60', bgActive: 'bg-teal-100', iconBg: 'bg-teal-100', iconText: 'text-teal-700', badgeBg: 'bg-teal-600', textGroupHover: 'group-hover:text-teal-700', barBg: 'bg-teal-500' },
-            { nome: 'fuchsia', border: 'border-fuchsia-300', borderHover: 'hover:border-fuchsia-500', borderActive: 'border-fuchsia-600', bgLight: 'bg-fuchsia-50/60', bgActive: 'bg-fuchsia-100', iconBg: 'bg-fuchsia-100', iconText: 'text-fuchsia-700', badgeBg: 'bg-fuchsia-600', textGroupHover: 'group-hover:text-fuchsia-700', barBg: 'bg-fuchsia-500' },
-            { nome: 'cyan', border: 'border-cyan-300', borderHover: 'hover:border-cyan-500', borderActive: 'border-cyan-600', bgLight: 'bg-cyan-50/60', bgActive: 'bg-cyan-100', iconBg: 'bg-cyan-100', iconText: 'text-cyan-700', badgeBg: 'bg-cyan-600', textGroupHover: 'group-hover:text-cyan-700', barBg: 'bg-cyan-500' },
-            { nome: 'purple', border: 'border-purple-300', borderHover: 'hover:border-purple-500', borderActive: 'border-purple-600', bgLight: 'bg-purple-50/60', bgActive: 'bg-purple-100', iconBg: 'bg-purple-100', iconText: 'text-purple-700', badgeBg: 'bg-purple-600', textGroupHover: 'group-hover:text-purple-700', barBg: 'bg-purple-500' },
-            { nome: 'lime', border: 'border-lime-300', borderHover: 'hover:border-lime-500', borderActive: 'border-lime-600', bgLight: 'bg-lime-50/60', bgActive: 'bg-lime-100', iconBg: 'bg-lime-100', iconText: 'text-lime-700', badgeBg: 'bg-lime-600', textGroupHover: 'group-hover:text-lime-700', barBg: 'bg-lime-500' },
-            { nome: 'blue', border: 'border-blue-300', borderHover: 'hover:border-blue-500', borderActive: 'border-blue-600', bgLight: 'bg-blue-50/60', bgActive: 'bg-blue-100', iconBg: 'bg-blue-100', iconText: 'text-blue-700', badgeBg: 'bg-blue-600', textGroupHover: 'group-hover:text-blue-700', barBg: 'bg-blue-500' },
-            { nome: 'pink', border: 'border-pink-300', borderHover: 'hover:border-pink-500', borderActive: 'border-pink-600', bgLight: 'bg-pink-50/60', bgActive: 'bg-pink-100', iconBg: 'bg-pink-100', iconText: 'text-pink-700', badgeBg: 'bg-pink-600', textGroupHover: 'group-hover:text-pink-700', barBg: 'bg-pink-500' },
-            { nome: 'yellow', border: 'border-yellow-300', borderHover: 'hover:border-yellow-500', borderActive: 'border-yellow-600', bgLight: 'bg-yellow-50/60', bgActive: 'bg-yellow-100', iconBg: 'bg-yellow-100', iconText: 'text-yellow-700', badgeBg: 'bg-yellow-600', textGroupHover: 'group-hover:text-yellow-700', barBg: 'bg-yellow-500' },
-            { nome: 'slate', border: 'border-slate-300', borderHover: 'hover:border-slate-500', borderActive: 'border-slate-600', bgLight: 'bg-slate-50/60', bgActive: 'bg-slate-100', iconBg: 'bg-slate-100', iconText: 'text-slate-700', badgeBg: 'bg-slate-600', textGroupHover: 'group-hover:text-slate-700', barBg: 'bg-slate-500' }
+            { nome: 'teal', border: 'border-teal-300', borderHover: 'hover:border-teal-500', borderActive: 'border-teal-600', bgLight: 'bg-teal-50/60', bgActive: 'bg-teal-100', iconBg: 'bg-teal-100', iconText: 'text-teal-700', badgeBg: 'bg-teal-600', textGroupHover: 'group-hover:text-teal-700', barBg: 'bg-teal-500' }
         ];
 
         function obterTemaSuite(idOuNome) {
@@ -374,7 +383,6 @@
                 let day = String(d.getDate()).padStart(2, '0');
                 return `${y}-${m}-${day}`;
             };
-            
             document.getElementById('filtroDataInicio').value = formatarDataInput(hoje);
             document.getElementById('filtroDataFim').value = '';
         }
@@ -401,7 +409,11 @@
             const labelPousada = document.getElementById('nomePousadaLogada');
             const labelMenu = document.getElementById('nomePousadaMenu');
             
-            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', usuarioIdAtual).single();
+            const { data: pousada } = await supabaseClient
+                .from('pousadas')
+                .select('nome, status, data_vencimento')
+                .eq('id', usuarioIdAtual)
+                .single();
             
             if (pousada && pousada.nome) {
                 labelPousada.textContent = `${pousada.nome}`.toUpperCase();
@@ -410,6 +422,51 @@
                 labelPousada.textContent = `POUSADA ID: ${usuarioIdAtual}`;
                 labelMenu.textContent = "PAINEL ADMINISTRATIVO";
             }
+
+            // CHECAGEM DE ASSINATURA E EXIBIÇÃO DA FAIXA INTELIGENTE
+            try {
+                let diasAviso = 5;
+                try {
+                    const { data: config } = await supabaseClient.from('config_sistema').select('dias_aviso_vencimento').eq('id', 1).maybeSingle();
+                    if (config && config.dias_aviso_vencimento) diasAviso = Number(config.dias_aviso_vencimento);
+                } catch (e) {}
+
+                if (pousada) {
+                    const banner = document.getElementById('banner-assinatura-relatorios');
+                    const tit = document.getElementById('banner-assinatura-titulo');
+                    const sub = document.getElementById('banner-assinatura-sub');
+                    const icone = document.getElementById('banner-assinatura-icone');
+
+                    let diasRest = null;
+                    let dVenc = null;
+                    if (pousada.data_vencimento) {
+                        dVenc = new Date(pousada.data_vencimento + 'T12:00:00');
+                        const hoje = new Date(); hoje.setHours(0,0,0,0);
+                        diasRest = Math.ceil((dVenc - hoje) / (1000 * 60 * 60 * 24));
+                    }
+
+                    const st = (pousada.status || 'active').toLowerCase();
+
+                    if (st === 'blocked' || (diasRest !== null && diasRest < 0)) {
+                        pousadaEmDiaCache = false;
+                        banner.className = "mb-5 p-3.5 sm:p-4 rounded-2xl shadow-xs border-2 border-red-300 bg-red-50 text-red-950 flex items-center justify-between gap-3";
+                        icone.innerText = "🚫";
+                        tit.innerText = "Plano Suspenso por Inadimplência (Modo Somente Leitura)";
+                        sub.innerText = `Sua assinatura venceu em ${dVenc ? dVenc.toLocaleDateString('pt-BR') : 'data anterior'}. Novas reservas estão travadas.`;
+                        banner.classList.remove('hidden');
+                    } else if (diasRest !== null && diasRest <= diasAviso) {
+                        pousadaEmDiaCache = true;
+                        banner.className = "mb-5 p-3.5 sm:p-4 rounded-2xl shadow-xs border-2 border-amber-300 bg-amber-50 text-amber-950 flex items-center justify-between gap-3";
+                        icone.innerText = "⚠️";
+                        tit.innerText = `Atenção: Seu plano vence em ${diasRest === 0 ? 'HOJE' : diasRest + ' dia(s)'}!`;
+                        sub.innerText = `Vencimento: ${dVenc.toLocaleDateString('pt-BR')}. Confirme o pagamento para manter reservas liberadas.`;
+                        banner.classList.remove('hidden');
+                    } else {
+                        pousadaEmDiaCache = true;
+                        banner.classList.add('hidden');
+                    }
+                }
+            } catch(e) { console.warn(e); }
 
             await carregarSuitesParaFiltro();
             carregarDadosView();
@@ -478,11 +535,9 @@
             suiteFiltroAtual = nomeSuite ? String(nomeSuite).trim() : null;
             const btnTodas = document.getElementById('btnVerTodasSuites');
             if (btnTodas) {
-                if (!suiteFiltroAtual) {
-                    btnTodas.className = "text-[10px] font-bold bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg transition shadow-sm flex items-center gap-1.5";
-                } else {
-                    btnTodas.className = "text-[10px] font-bold bg-slate-800 hover:bg-slate-900 text-white px-3.5 py-1.5 rounded-lg transition shadow-sm flex items-center gap-1.5";
-                }
+                btnTodas.className = !suiteFiltroAtual 
+                    ? "text-[10px] font-bold bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg transition shadow-sm flex items-center gap-1.5"
+                    : "text-[10px] font-bold bg-slate-800 hover:bg-slate-900 text-white px-3.5 py-1.5 rounded-lg transition shadow-sm flex items-center gap-1.5";
             }
             carregarDadosView();
         }
@@ -494,20 +549,8 @@
             let filtroAtivo = nomeSuite ? nomeSuite.toUpperCase() : '';
             linhas.forEach(tr => {
                 const texto = tr.innerText.toUpperCase();
-                if (!filtroAtivo || texto.includes(filtroAtivo)) {
-                    tr.style.display = '';
-                } else {
-                    tr.style.display = 'none';
-                }
+                tr.style.display = (!filtroAtivo || texto.includes(filtroAtivo)) ? '' : 'none';
             });
-            if (filtroAtivo) {
-                const grid = document.getElementById('gridOcupacaoSuites');
-                if (grid) {
-                    grid.querySelectorAll('div').forEach(card => {
-                        card.classList.remove('ring-2', 'ring-blue-500');
-                    });
-                }
-            }
         }
 
         async function logout() {
@@ -520,9 +563,9 @@
             var btnA = document.getElementById('btnAprovada');
             var btnR = document.getElementById('btnRecusada');
             var btnT = document.getElementById('btnTodas');
-            if (btnA) { btnA.className = (valor==='APROVADA' ? 'px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500 text-white shadow-sm' : 'px-3 py-1 rounded-full text-[11px] font-bold bg-white text-emerald-600 border border-emerald-200 hover:bg-emerald-50'); }
-            if (btnR) { btnR.className = (valor==='RECUSADA' ? 'px-3 py-1 rounded-full text-[11px] font-bold bg-red-500 text-white shadow-sm' : 'px-3 py-1 rounded-full text-[11px] font-bold bg-white text-red-600 border border-red-200 hover:bg-red-50'); }
-            if (btnT) { btnT.className = (valor==='TODAS' ? 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-800 text-white shadow-sm' : 'px-3 py-1 rounded-full text-[11px] font-bold bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'); }
+            if (btnA) btnA.className = (valor==='APROVADA' ? 'px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500 text-white shadow-sm' : 'px-3 py-1 rounded-full text-[11px] font-bold bg-white text-emerald-600 border border-emerald-200 hover:bg-emerald-50');
+            if (btnR) btnR.className = (valor==='RECUSADA' ? 'px-3 py-1 rounded-full text-[11px] font-bold bg-red-500 text-white shadow-sm' : 'px-3 py-1 rounded-full text-[11px] font-bold bg-white text-red-600 border border-red-200 hover:bg-red-50');
+            if (btnT) btnT.className = (valor==='TODAS' ? 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-800 text-white shadow-sm' : 'px-3 py-1 rounded-full text-[11px] font-bold bg-white text-gray-600 border border-gray-200 hover:bg-gray-50');
             carregarDadosView();
         }
 
@@ -533,37 +576,23 @@
                 const hojeStr = hoje.toISOString().split('T')[0];
 
                 const { count: countCheckIn, error: errIn } = await supabaseClient
-                    .from('reservas')
-                    .select('id', { count: 'exact', head: true })
-                    .eq('pousada_id', usuarioIdAtual)
-                    .eq('checkin', hojeStr)
-                    .neq('status', 'Recusada')
-                    .neq('status', 'Cancelada');
+                    .from('reservas').select('id', { count: 'exact', head: true })
+                    .eq('pousada_id', usuarioIdAtual).eq('checkin', hojeStr).neq('status', 'Recusada').neq('status', 'Cancelada');
 
                 const { count: countCheckOut, error: errOut } = await supabaseClient
-                    .from('reservas')
-                    .select('id', { count: 'exact', head: true })
-                    .eq('pousada_id', usuarioIdAtual)
-                    .eq('checkout', hojeStr)
-                    .neq('status', 'Recusada')
-                    .neq('status', 'Cancelada');
+                    .from('reservas').select('id', { count: 'exact', head: true })
+                    .eq('pousada_id', usuarioIdAtual).eq('checkout', hojeStr).neq('status', 'Recusada').neq('status', 'Cancelada');
 
                 const amanha = new Date(hoje);
                 amanha.setDate(amanha.getDate() + 1);
                 const amanhaStr = amanha.toISOString().split('T')[0];
                 const { count: countCheckOutAmanha, error: errOutAmanha } = await supabaseClient
-                    .from('reservas')
-                    .select('id', { count: 'exact', head: true })
-                    .eq('pousada_id', usuarioIdAtual)
-                    .eq('checkout', amanhaStr)
-                    .neq('status', 'Recusada')
-                    .neq('status', 'Cancelada');
+                    .from('reservas').select('id', { count: 'exact', head: true })
+                    .eq('pousada_id', usuarioIdAtual).eq('checkout', amanhaStr).neq('status', 'Recusada').neq('status', 'Cancelada');
 
                 const { count: countReservas, error: errRes } = await supabaseClient
-                    .from('reservas')
-                    .select('id', { count: 'exact', head: true })
-                    .eq('pousada_id', usuarioIdAtual)
-                    .eq('status', 'Aprovada');
+                    .from('reservas').select('id', { count: 'exact', head: true })
+                    .eq('pousada_id', usuarioIdAtual).eq('status', 'Aprovada');
 
                 const elIn = document.getElementById('cardCheckInHojeValor');
                 const elOut = document.getElementById('cardCheckOutHojeValor');
@@ -573,46 +602,23 @@
                 if (elOut) elOut.innerText = (errOut ? 0 : (countCheckOut || 0));
                 if (elOutAmanha) elOutAmanha.innerText = (errOutAmanha ? 0 : (countCheckOutAmanha || 0));
                 if (elRes) elRes.innerText = (errRes ? 0 : (countReservas || 0));
-
-            } catch (e) {
-                console.error('Erro carregarCardsControleHoje', e);
-            }
+            } catch (e) { console.error(e); }
         }
 
         function filtrarPorCardHoje(tipo) {
-            if (filtroCheckTipoHoje === tipo) {
-                filtroCheckTipoHoje = null;
-            } else {
-                filtroCheckTipoHoje = tipo;
-            }
-
+            filtroCheckTipoHoje = (filtroCheckTipoHoje === tipo) ? null : tipo;
             const cardIn = document.getElementById('cardCheckInHoje');
             const cardOut = document.getElementById('cardCheckOutHoje');
             const cardOutAmanha = document.getElementById('cardCheckOutAmanha');
             const cardRes = document.getElementById('cardReservasHoje');
             
             [cardIn, cardOut, cardOutAmanha, cardRes].forEach(c => {
-                if (c) {
-                    c.classList.remove('ring-2', 'ring-violet-500', 'ring-red-500', 'ring-orange-500', 'ring-blue-500', 'bg-violet-50', 'bg-red-50', 'bg-orange-50', 'bg-blue-50', 'border-violet-400', 'border-red-400', 'border-orange-400', 'border-blue-400');
-                }
+                if (c) c.classList.remove('ring-2', 'ring-violet-500', 'ring-red-500', 'ring-orange-500', 'ring-blue-500', 'bg-violet-50', 'bg-red-50', 'bg-orange-50', 'bg-blue-50');
             });
 
-            if (filtroCheckTipoHoje === 'checkin' && cardIn) {
-                cardIn.classList.add('ring-2', 'ring-violet-500', 'bg-violet-50', 'border-violet-400');
-            } else if (filtroCheckTipoHoje === 'checkout' && cardOut) {
-                cardOut.classList.add('ring-2', 'ring-red-500', 'bg-red-50', 'border-red-400');
-            } else if (filtroCheckTipoHoje === 'checkout_amanha' && cardOutAmanha) {
-                cardOutAmanha.classList.add('ring-2', 'ring-orange-500', 'bg-orange-50', 'border-orange-400');
-            } else if (filtroCheckTipoHoje === 'reservas' && cardRes) {
-                cardRes.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50', 'border-blue-400');
-            }
-
-            if (tipo === 'reservas' && filtroCheckTipoHoje === 'reservas') {
-                filtroCheckTipoHoje = null;
-                if (cardRes) {
-                    cardRes.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50', 'border-blue-400');
-                }
-            }
+            if (filtroCheckTipoHoje === 'checkin' && cardIn) cardIn.classList.add('ring-2', 'ring-violet-500', 'bg-violet-50');
+            else if (filtroCheckTipoHoje === 'checkout' && cardOut) cardOut.classList.add('ring-2', 'ring-red-500', 'bg-red-50');
+            else if (filtroCheckTipoHoje === 'checkout_amanha' && cardOutAmanha) cardOutAmanha.classList.add('ring-2', 'ring-orange-500', 'bg-orange-50');
 
             carregarDadosView();
         }
@@ -620,11 +626,8 @@
         function atualizarVisibilidadeFiltroStatus() {
             var container = document.getElementById('containerFiltroStatusReservas');
             if (!container) return;
-            if (viewAtualSelecionada === 'vw_gestor_reservas_relatorio') {
-                container.style.display = 'flex';
-            } else {
-                container.style.display = 'none';
-            }
+            container.style.display = (viewAtualSelecionada === 'vw_gestor_reservas_relatorio') ? 'flex' : 'none';
+            
             var filtroLateral = document.getElementById('containerFiltroDataHospedagens');
             var filtroTabela = document.getElementById('containerFiltroDataTabela');
             if (filtroLateral && filtroTabela) {
@@ -632,12 +635,9 @@
                     filtroLateral.classList.remove('hidden');
                     filtroLateral.classList.add('flex');
                     filtroTabela.classList.add('hidden');
-                    filtroTabela.classList.remove('flex');
                 } else {
                     filtroLateral.classList.add('hidden');
-                    filtroLateral.classList.remove('flex');
                     filtroTabela.classList.remove('hidden');
-                    filtroTabela.classList.add('flex');
                 }
             }
         }
@@ -662,50 +662,37 @@
             const grid = document.getElementById('graficoBarrasOcupacao');
             const badge = document.getElementById('badgePeriodoGrafico');
             if (!grid) return;
-            grid.innerHTML = '<div class="py-4 text-center text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CALCULANDO OCUPAÇÃO REAL (SOBREPOSIÇÃO)...</div>';
+            grid.innerHTML = '<div class="py-4 text-center text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CALCULANDO OCUPAÇÃO...</div>';
             try {
                 const dataInicio = document.getElementById('filtroDataInicio')?.value || document.getElementById('filtroDataInicioHosp')?.value || '';
                 const dataFim = document.getElementById('filtroDataFim')?.value || document.getElementById('filtroDataFimHosp')?.value || '';
                 if (badge) {
                     if (dataInicio && dataFim) badge.textContent = `${dataInicio.split('-').reverse().join('/')} ATÉ ${dataFim.split('-').reverse().join('/')}`;
                     else if (dataInicio) badge.textContent = `A PARTIR DE ${dataInicio.split('-').reverse().join('/')}`;
-                    else if (dataFim) badge.textContent = `ATÉ ${dataFim.split('-').reverse().join('/')}`;
                     else badge.textContent = 'TODO PERÍODO';
                 }
 
                 let query = supabaseClient.from('reservas').select('id, suite_id, checkin, checkout, status, suites ( nome )').eq('pousada_id', usuarioIdAtual).eq('status', 'Finalizada');
-                if (dataInicio && dataFim) {
-                    query = query.lte('checkin', dataFim).gte('checkout', dataInicio);
-                } else if (dataInicio) {
-                    query = query.gte('checkout', dataInicio);
-                } else if (dataFim) {
-                    query = query.lte('checkin', dataFim);
-                }
+                if (dataInicio && dataFim) query = query.lte('checkin', dataFim).gte('checkout', dataInicio);
+                else if (dataInicio) query = query.gte('checkout', dataInicio);
+                else if (dataFim) query = query.lte('checkin', dataFim);
+                
                 const { data: reservas, error } = await query;
                 if (error) throw error;
 
                 const { data: todasSuites } = await supabaseClient.from('suites').select('id, nome').eq('pousada_id', usuarioIdAtual).order('nome');
                 const mapa = {};
-                (todasSuites || []).forEach(s => { mapa[s.id] = { id: s.id, nome: s.nome, diarias: 0, reservas: 0, detalhes: [] }; });
+                (todasSuites || []).forEach(s => { mapa[s.id] = { id: s.id, nome: s.nome, diarias: 0, reservas: 0 }; });
 
                 (reservas || []).forEach(r => {
                     const id = r.suite_id;
-                    if (!mapa[id]) mapa[id] = { id: id, nome: r.suites?.nome || 'SUÍTE', diarias: 0, reservas: 0, detalhes: [] };
+                    if (!mapa[id]) mapa[id] = { id: id, nome: r.suites?.nome || 'SUÍTE', diarias: 0, reservas: 0 };
                     let rCheckin = new Date(String(r.checkin).substring(0,10) + 'T00:00:00');
                     let rCheckout = new Date(String(r.checkout).substring(0,10) + 'T00:00:00');
-                    let fInicio = dataInicio ? new Date(dataInicio + 'T00:00:00') : rCheckin;
-                    let fFim = dataFim ? new Date(dataFim + 'T00:00:00') : rCheckout;
-                    let overlapInicio = new Date(Math.max(rCheckin.getTime(), fInicio.getTime()));
-                    let overlapFim = new Date(Math.min(rCheckout.getTime(), fFim.getTime()));
-                    let diff = Math.ceil((overlapFim - overlapInicio) / (1000*60*60*24));
-                    if (isNaN(diff) || diff < 0) diff = 0;
-                    if (!dataInicio && !dataFim) {
-                        diff = Math.ceil((rCheckout - rCheckin) / (1000*60*60*24));
-                    }
+                    let diff = Math.ceil((rCheckout - rCheckin) / (1000*60*60*24));
                     if (diff > 0) {
                         mapa[id].diarias += diff;
                         mapa[id].reservas += 1;
-                        mapa[id].detalhes.push(`${String(r.checkin).substring(0,10)} → ${String(r.checkout).substring(0,10)} (${diff}d) [${r.status}]`);
                     }
                 });
 
@@ -717,30 +704,25 @@
                     const perc = item.diarias === 0 ? 0 : Math.max(5, Math.round((item.diarias / maxDiarias) * 100));
                     const tema = obterTemaSuite(item.id || item.nome);
                     const cor = item.diarias === 0 ? 'bg-gray-200' : tema.barBg;
-                    const corTexto = item.diarias === 0 ? 'text-gray-400' : tema.iconText;
-                    const tooltip = item.detalhes.join(' | ');
-
                     htmlChart += `
-                        <div class="flex items-center gap-3 group" title="${tooltip}">
-                            <div class="w-32 sm:w-40 text-[11px] font-bold text-gray-700 uppercase truncate text-right ${tema.textGroupHover}">${item.nome}</div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-32 sm:w-40 text-[11px] font-bold text-gray-700 uppercase truncate text-right">${item.nome}</div>
                             <div class="flex-1 bg-gray-100 rounded-full h-6 relative overflow-hidden border border-gray-200">
                                 <div class="${cor} h-6 rounded-full transition-all duration-700 flex items-center justify-end pr-2" style="width: ${perc}%">
                                     <span class="text-[10px] font-bold text-white">${item.diarias} diárias</span>
                                 </div>
                             </div>
-                            <div class="w-20 text-[10px] ${corTexto} font-bold">${item.reservas} reserva(s)</div>
+                            <div class="w-20 text-[10px] text-gray-600 font-bold">${item.reservas} reserva(s)</div>
                         </div>
                     `;
                 });
                 grid.innerHTML = htmlChart;
             } catch (e) {
-                console.error('Erro grafico ocupacao', e);
                 grid.innerHTML = `<div class="py-4 text-center text-red-500 text-xs">ERRO: ${e.message}</div>`;
             }
         }
 
         function sincronizarFiltrosData(origem, valor) {
-            var ids = ['filtroDataInicio', 'filtroDataFim', 'filtroDataInicioHosp', 'filtroDataFimHosp'];
             if (origem === 'inicio' || origem === 'inicio_tabela') {
                 document.getElementById('filtroDataInicio').value = valor;
                 var elHosp = document.getElementById('filtroDataInicioHosp');
@@ -755,51 +737,25 @@
         function selecionarView(nomeView, tituloAmigavel, elementoCard) {
             viewAtualSelecionada = nomeView;
             tituloBaseAtual = tituloAmigavel;
-
-            document.querySelectorAll('.card-view').forEach(card => {
-                card.classList.remove('border-blue-500', 'border-amber-500', 'border-purple-500', 'border-emerald-500', 'shadow-md');
-                if (card.onclick.toString().includes('financeiro')) card.classList.add('border-blue-200');
-                else if (card.onclick.toString().includes('hospedagens')) card.classList.add('border-emerald-200');
-                else if (card.onclick.toString().includes('tarifas')) card.classList.add('border-amber-200');
-                else card.classList.add('border-purple-200');
-            });
-
-            if (nomeView.includes('financeiro')) elementoCard.classList.replace('border-blue-200', 'border-blue-500');
-            else if (nomeView.includes('hospedagens')) elementoCard.classList.replace('border-emerald-200', 'border-emerald-500');
-            else if (nomeView.includes('tarifas')) elementoCard.classList.replace('border-amber-200', 'border-amber-500');
-            else elementoCard.classList.replace('border-purple-200', 'border-purple-500');
-            
+            document.querySelectorAll('.card-view').forEach(card => card.classList.remove('border-blue-500', 'border-amber-500', 'border-purple-500', 'border-emerald-500', 'shadow-md'));
             elementoCard.classList.add('shadow-md');
             atualizarVisibilidadeFiltroStatus();
-
-            if (!nomeView.includes('financeiro')) {
-                suiteFiltroAtual = null;
-            }
-
+            if (!nomeView.includes('financeiro')) suiteFiltroAtual = null;
             carregarDadosView();
         }
 
         function formatarDataHoraBr(valor) {
             if (!valor) return '-';
             try {
-                let str = String(valor).trim();
-                let dt = new Date(str);
-                if (isNaN(dt.getTime())) {
-                    let limpo = str.split('.')[0].replace('T',' ').replace('Z','').substring(0,19);
-                    dt = new Date(limpo);
-                }
-                if (isNaN(dt.getTime())) return str.toUpperCase();
-                
-                let ano = dt.getFullYear();
-                let mes = String(dt.getMonth() + 1).padStart(2, '0');
+                let dt = new Date(String(valor).trim());
+                if (isNaN(dt.getTime())) return String(valor).toUpperCase();
                 let dia = String(dt.getDate()).padStart(2, '0');
+                let mes = String(dt.getMonth() + 1).padStart(2, '0');
+                let ano = dt.getFullYear();
                 let hora = String(dt.getHours()).padStart(2, '0');
                 let minuto = String(dt.getMinutes()).padStart(2, '0');
-                
                 return `${dia}/${mes}/${ano} ${hora}:${minuto}`;
-            } catch(e) {
-                return String(valor).toUpperCase();
-            }
+            } catch(e) { return String(valor).toUpperCase(); }
         }
 
         function formatarDataBr(valor) {
@@ -807,19 +763,14 @@
             let str = String(valor).trim();
             if (str.length >= 10 && str.includes('-')) {
                 let partes = str.substring(0, 10).split('-');
-                if (partes.length === 3 && partes[0].length === 4) {
-                    return `${partes[2]}/${partes[1]}/${partes[0]}`;
-                }
+                if (partes.length === 3 && partes[0].length === 4) return `${partes[2]}/${partes[1]}/${partes[0]}`;
             }
             return str.toUpperCase();
         }
 
         function calcularDiarias(checkin, checkout) {
             if (!checkin || !checkout) return 0;
-            let d1 = new Date(checkin);
-            let d2 = new Date(checkout);
-            let diffTime = d2 - d1;
-            let diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+            let diffDays = Math.round((new Date(checkout) - new Date(checkin)) / (1000 * 60 * 60 * 24));
             return diffDays > 0 ? diffDays : 1;
         }
 
@@ -827,9 +778,6 @@
             let c = col.toLowerCase();
             if (c === 'hospede') return 'HÓSPEDE';
             if (c === 'suite') return 'SUÍTE';
-            if (c === 'suite_origem') return 'SUÍTE ORIGEM';
-            if (c === 'transferido_em') return 'TRANSFERIDO EM';
-            if (c === 'motivo_transferencia') return 'MOTIVO TRANSF.';
             if (c === 'checkin') return 'CHECK-IN';
             if (c === 'checkout') return 'CHECK-OUT';
             if (c === 'diarias') return 'DIÁRIAS';
@@ -842,23 +790,11 @@
             if (c === 'forma_pagamento') return 'FORMA';
             if (c === 'observacao' || c === 'obs') return 'OBS';
             if (c === 'whatsapp') return 'WHATSAPP';
-            if (c === 'alerta_status_tarifa') return 'ALERTA STATUS';
-            if (c === 'alerta_vigencia') return 'ALERTA VIGÊNCIA';
-            if (c === 'dias_restantes_vigencia') return 'DIAS P/ VENCER';
-            if (c === 'alerta_vigencia_cor') return '';
-            if (c === 'alerta_status_reserva' || c === 'alerta_check_in') return 'ALERTA CHECK-IN';
-            if (c === 'data_inicio' || c === 'vigencia_inicio') return 'INÍCIO VIGÊNCIA';
-            if (c === 'data_fim' || c === 'vigencia_fim') return 'FIM VIGÊNCIA';
-            if (c === 'status_ocupacao') return 'STATUS OCUPAÇÃO';
-            if (c === 'motivo_recusa') return 'MOTIVO RECUSA';
-            if (c === 'recusado_em') return 'RECUSADO EM';
-            if (c === 'recusado_por') return 'RECUSADO POR';
             return col.replace(/_/g, ' ').toUpperCase();
         }
 
         async function carregarDadosView() {
             if (!usuarioIdAtual) return;
-
             const tbody = document.getElementById('tabelaCorpo');
             const thead = document.getElementById('tabelaCabecalho');
             const containerKpis = document.getElementById('containerKpis');
@@ -867,449 +803,123 @@
 
             let dataInicioFormatada = dataInicio ? dataInicio.split('-').reverse().join('/') : 'INÍCIO';
             let dataFimFormatada = dataFim ? dataFim.split('-').reverse().join('/') : 'SEM LIMITE';
-            
-            let tituloCompleto = `${tituloBaseAtual} (DE ${dataInicioFormatada} ATÉ ${dataFimFormatada})`;
-            document.getElementById('tituloViewAtiva').textContent = tituloCompleto.toUpperCase();
-
+            document.getElementById('tituloViewAtiva').textContent = `${tituloBaseAtual} (DE ${dataInicioFormatada} ATÉ ${dataFimFormatada})`.toUpperCase();
             tbody.innerHTML = `<tr><td colspan="20" class="py-6 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO DADOS...</td></tr>`;
 
             try {
                 let ehViewReservas = (viewAtualSelecionada === 'vw_gestor_reservas_relatorio');
                 let ehViewHospedagens = (viewAtualSelecionada === 'vw_gestor_hospedagens_relatorio');
-                let ehViewTarifas = (viewAtualSelecionada === 'vw_gestor_tarifas_relatorio');
                 let ehViewFinanceiro = (viewAtualSelecionada === 'vw_gestor_financeiro_relatorio');
-
                 let registros = [];
                 let error = null;
 
-                if (ehViewTarifas) {
-                    const response = await supabaseClient.rpc('fn_gestor_tarifas_relatorio', {
-                        p_data_inicio: dataInicio || '2026-01-01',
-                        p_data_fim: dataFim || '2027-12-31'
-                    });
-                    let dadosBrutos = (response.data || []).filter(row => row.pousada_id === usuarioIdAtual);
-                    error = response.error;
-
-                    const hoje = new Date();
-                    hoje.setHours(0,0,0,0);
-                    registros = dadosBrutos.map(row => {
-                        let vigenciaFimStr = row.vigencia_fim || row.data_fim || row.fim || '';
-                        let diasRestantes = null;
-                        let alertaTexto = '-';
-                        let alertaCor = 'gray';
-                        
-                        if (vigenciaFimStr) {
-                            let str = String(vigenciaFimStr).substring(0,10);
-                            let partes = str.split('-');
-                            let dataFim;
-                            if (partes.length === 3) {
-                                dataFim = new Date(Number(partes[0]), Number(partes[1])-1, Number(partes[2]), 0,0,0,0);
-                            } else {
-                                let partesBr = String(vigenciaFimStr).split('/');
-                                if (partesBr.length === 3) {
-                                    dataFim = new Date(Number(partesBr[2]), Number(partesBr[1])-1, Number(partesBr[0]), 0,0,0,0);
-                                } else {
-                                    dataFim = new Date(str);
-                                    dataFim.setHours(0,0,0,0);
-                                }
-                            }
-                            let diffMs = dataFim - hoje;
-                            diasRestantes = Math.round(diffMs / (1000*60*60*24));
-                            
-                            if (diasRestantes < 0) {
-                                alertaTexto = `VENCIDA há ${Math.abs(diasRestantes)} dias`;
-                                alertaCor = 'red';
-                            } else if (diasRestantes === 0) {
-                                alertaTexto = `VENCE HOJE`;
-                                alertaCor = 'red';
-                            } else if (diasRestantes <= 3) {
-                                alertaTexto = `VENCE EM ${diasRestantes} DIAS - URGENTE`;
-                                alertaCor = 'red';
-                            } else if (diasRestantes <= 7) {
-                                alertaTexto = `VENCE EM ${diasRestantes} DIAS`;
-                                alertaCor = 'amber';
-                            } else {
-                                alertaTexto = `${diasRestantes} DIAS RESTANTES`;
-                                alertaCor = 'emerald';
-                            }
-                        }
-                        
-                        return {
-                            ...row,
-                            dias_restantes_vigencia: diasRestantes,
-                            alerta_vigencia: alertaTexto,
-                            alerta_vigencia_cor: alertaCor
-                        };
-                    });
-                } else if (ehViewFinanceiro) {
-                    if (!suitesDaPousadaCache || suitesDaPousadaCache.length === 0) {
-                        const { data: suData } = await supabaseClient.from('suites').select('id,nome').eq('pousada_id', usuarioIdAtual).order('nome');
-                        if (suData) suitesDaPousadaCache = suData;
-                    }
-
-                    let queryRes = supabaseClient
-                        .from('reservas')
-                        .select('*')
-                        .eq('pousada_id', usuarioIdAtual)
-                        .neq('status', 'Cancelada')
-                        .neq('status', 'Recusada');
-
+                if (ehViewFinanceiro) {
+                    let queryRes = supabaseClient.from('reservas').select('*').eq('pousada_id', usuarioIdAtual).neq('status', 'Cancelada').neq('status', 'Recusada');
                     if (dataInicio) queryRes = queryRes.gte('checkout', dataInicio);
                     if (dataFim) queryRes = queryRes.lte('checkin', dataFim);
-                    queryRes = queryRes.order('checkin', { ascending: true, nullsFirst: true });
-
-                    const { data: reservasFin, error: errResFin } = await queryRes;
+                    const { data: reservasFin, error: errResFin } = await queryRes.order('checkin', { ascending: true });
                     error = errResFin;
 
-                    const { data: pagamentosFin } = await supabaseClient
-                        .from('hospede_pagamentos')
-                        .select('*')
-                        .eq('pousada_id', usuarioIdAtual);
-
+                    const { data: pagamentosFin } = await supabaseClient.from('hospede_pagamentos').select('*').eq('pousada_id', usuarioIdAtual);
                     const pagamentosPorReserva = {};
                     (pagamentosFin || []).forEach(p => {
                         if (p.reserva_id) {
-                            if (!pagamentosPorReserva[p.reserva_id]) {
-                                pagamentosPorReserva[p.reserva_id] = [];
-                            }
+                            if (!pagamentosPorReserva[p.reserva_id]) pagamentosPorReserva[p.reserva_id] = [];
                             pagamentosPorReserva[p.reserva_id].push(p);
                         }
                     });
 
                     registros = (reservasFin || []).map(r => {
                         const suiteObj = (suitesDaPousadaCache || []).find(s => s.id === r.suite_id);
-                        const nomeSuite = suiteObj ? suiteObj.nome : (r.suite || 'SUÍTE');
-                        
                         const pags = pagamentosPorReserva[r.id] || [];
                         const totalPago = pags.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
                         const valorTotal = Number(r.valor_total || 0);
-                        const saldoRestante = valorTotal - totalPago;
-
-                        let formasPag = pags.map(p => p.forma_pagamento).filter(Boolean).join(', ');
-                        if (!formasPag) {
-                            formasPag = totalPago === 0 ? 'Pendente / No Checkout' : '-';
-                        }
-
-                        let dataUltimoPag = pags.length > 0 ? pags[pags.length - 1].criado_em : r.criado_em;
-                        let obsPag = pags.map(p => p.observacao).filter(Boolean).join(' | ') || r.observacao || '-';
-
                         return {
-                            hospede: r.hospede_nome || 'HÓSPEDE NÃO IDENTIFICADO',
-                            suite: nomeSuite,
-                            suite_id: r.suite_id,
+                            hospede: r.hospede_nome || 'HÓSPEDE',
+                            suite: suiteObj ? suiteObj.nome : 'SUÍTE',
                             checkin: r.checkin || '',
                             checkout: r.checkout || '',
                             diarias: calcularDiarias(r.checkin, r.checkout),
                             valor_total: valorTotal,
-                            data_pagamento: dataUltimoPag,
                             valor_pago: totalPago,
-                            saldo_restante: saldoRestante,
-                            forma_pagamento: formasPag,
-                            observacao: obsPag,
+                            saldo_restante: valorTotal - totalPago,
+                            forma_pagamento: pags.map(p => p.forma_pagamento).filter(Boolean).join(', ') || 'Pendente',
                             status: r.status || '-'
                         };
                     });
                 } else if (ehViewHospedagens) {
-                    const { data: todasSuites, error: errSuites } = await supabaseClient
-                        .from('suites')
-                        .select('id, nome')
-                        .eq('pousada_id', usuarioIdAtual)
-                        .order('nome');
-
-                    const resView = await supabaseClient.from(viewAtualSelecionada).select('*').eq('pousada_id', usuarioIdAtual);
-                    let reservasAtivasView = resView.data || [];
-
-                    if (errSuites) {
-                        error = errSuites;
-                    } else {
-                        registros = todasSuites.map(suite => {
-                            let reservaEncontrada = reservasAtivasView.find(r => 
-                                String(r.suite || '').trim().toUpperCase() === String(suite.nome || '').trim().toUpperCase() &&
-                                String(r.status || r.status_reserva || '').toUpperCase() === 'APROVADA'
-                            );
-
-                            if (reservaEncontrada) {
-                                return {
-                                    ...reservaEncontrada,
-                                    status_ocupacao: 'OCUPADA / RESERVADA',
-                                    suite: suite.nome,
-                                    suite_id: suite.id
-                                };
-                            } else {
-                                return {
-                                    status_ocupacao: 'DISPONÍVEL',
-                                    suite: suite.nome,
-                                    suite_id: suite.id,
-                                    hospede: 'NENHUM (DISPONÍVEL)',
-                                    checkin: '-',
-                                    checkout: '-',
-                                    status: 'DISPONÍVEL'
-                                };
-                            }
-                        });
-                    }
-                } else if (ehViewReservas) {
-                    if (!suitesDaPousadaCache || suitesDaPousadaCache.length === 0) {
-                        const { data: suData } = await supabaseClient.from('suites').select('id,nome').eq('pousada_id', usuarioIdAtual).order('nome');
-                        if (suData) suitesDaPousadaCache = suData;
-                    }
-
-                    let query = supabaseClient
-                        .from('reservas')
-                        .select('*')
-                        .eq('pousada_id', usuarioIdAtual);
-
-                    if (dataInicio) query = query.gte('checkin', dataInicio);
-                    if (dataFim) query = query.lte('checkin', dataFim);
-                    query = query.order('checkin', { ascending: true, nullsFirst: true });
-                    const res = await query;
-                    error = res.error;
-
-                    const { data: pagamentosRes } = await supabaseClient
-                        .from('hospede_pagamentos')
-                        .select('reserva_id, valor_pago')
-                        .eq('pousada_id', usuarioIdAtual);
-
-                    const mapaPagamentos = {};
-                    (pagamentosRes || []).forEach(p => {
-                        if (p.reserva_id) {
-                            mapaPagamentos[p.reserva_id] = (mapaPagamentos[p.reserva_id] || 0) + Number(p.valor_pago || 0);
-                        }
-                    });
-
-                    registros = (res.data || []).map(r => {
-                        const totalPago = mapaPagamentos[r.id] !== undefined ? mapaPagamentos[r.id] : Number(r.valor_sinal || 0);
-                        const valorTotal = Number(r.valor_total || 0);
-                        const saldo = valorTotal - totalPago;
-
-                        let detalhesOcup = `${r.qtd_adultos || 2} Ad.`;
-                        if (r.qtd_criancas && Number(r.qtd_criancas) > 0) {
-                            detalhesOcup += ` + ${r.qtd_criancas} Cr.`;
-                            if (r.idades_criancas) {
-                                detalhesOcup += ` (${r.idades_criancas}a)`;
-                            }
-                        }
-
-                        const suiteAtual = (suitesDaPousadaCache || []).find(s => s.id === r.suite_id);
-                        const suiteOrigem = (suitesDaPousadaCache || []).find(s => s.id === r.suite_origem_id);
-
+                    const { data: todasSuites } = await supabaseClient.from('suites').select('id, nome').eq('pousada_id', usuarioIdAtual).order('nome');
+                    const { data: reservasAtivas } = await supabaseClient.from('reservas').select('*').eq('pousada_id', usuarioIdAtual).eq('status', 'Aprovada');
+                    
+                    registros = (todasSuites || []).map(suite => {
+                        let res = (reservasAtivas || []).find(r => r.suite_id === suite.id);
                         return {
-                            ...r,
-                            suite: suiteAtual ? suiteAtual.nome : (r.suite || 'SUÍTE'),
-                            suite_id: r.suite_id,
-                            suite_origem: suiteOrigem ? suiteOrigem.nome : (r.suite_origem_id ? 'OUTRA SUÍTE' : null),
-                            suite_origem_id: r.suite_origem_id,
-                            transferido_em: r.transferido_em || null,
-                            motivo_transferencia: r.motivo_transferencia || null,
-                            hospede: r.hospede_nome || 'HÓSPEDE NÃO INFORMADO',
-                            whatsapp: r.whatsapp_hospede || '-',
-                            valor_total: valorTotal,
-                            valor_pago: totalPago,
-                            saldo_restante: saldo,
-                            ocupacao: detalhesOcup,
-                            tem_pet: r.tem_pet === true || r.tem_pet === 'true' || r.taxa_pet > 0,
-                            obs: r.observacao || '-'
+                            status_ocupacao: res ? 'OCUPADA / RESERVADA' : 'DISPONÍVEL',
+                            suite: suite.nome,
+                            hospede: res ? (res.hospede_nome || 'Hóspede') : 'NENHUM (DISPONÍVEL)',
+                            checkin: res ? res.checkin : '-',
+                            checkout: res ? res.checkout : '-',
+                            status: res ? res.status : 'DISPONÍVEL'
                         };
                     });
-                } else {
-                    let query = supabaseClient.from(viewAtualSelecionada).select('*').eq('pousada_id', usuarioIdAtual);
+                } else if (ehViewReservas) {
+                    let query = supabaseClient.from('reservas').select('*').eq('pousada_id', usuarioIdAtual);
                     if (dataInicio) query = query.gte('checkin', dataInicio);
                     if (dataFim) query = query.lte('checkin', dataFim);
-                    query = query.order('checkin', { ascending: true, nullsFirst: true });
-                    const res = await query;
+                    const res = await query.order('checkin', { ascending: true });
+                    error = res.error;
+                    registros = (res.data || []).map(r => ({
+                        status: r.status,
+                        suite: r.suite_id,
+                        hospede: r.hospede_nome,
+                        whatsapp: r.whatsapp_hospede,
+                        checkin: r.checkin,
+                        checkout: r.checkout,
+                        valor_total: r.valor_total,
+                        valor_pago: r.valor_sinal || 0,
+                        saldo_restante: (r.valor_total || 0) - (r.valor_sinal || 0),
+                        ocupacao: `${r.qtd_adultos || 2} Ad.`,
+                        tem_pet: r.tem_pet ? 'Sim' : 'Não'
+                    }));
+                } else {
+                    const res = await supabaseClient.from(viewAtualSelecionada).select('*').eq('pousada_id', usuarioIdAtual);
                     registros = res.data || [];
                     error = res.error;
                 }
 
-                if (viewAtualSelecionada === 'vw_gestor_reservas_relatorio') {
-                    carregarCardsControleHoje();
-                }
+                if (viewAtualSelecionada === 'vw_gestor_reservas_relatorio') carregarCardsControleHoje();
 
                 if (error) {
-                    console.error("Erro:", error);
                     tbody.innerHTML = `<tr><td colspan="20" class="py-6 text-center text-red-500">ERRO: ${error.message}</td></tr>`;
                     return;
                 }
 
                 let registrosFiltrados = registros;
-
                 if (ehViewReservas) {
                     registrosFiltrados = registrosFiltrados.filter(row => {
-                        let status = String(row.status || row.status_reserva || '').toUpperCase();
-                        let isRecusada = (status === 'RECUSADA' || status === 'CANCELADA');
-                        let isAprovada = (status === 'APROVADA');
-
-                        if (filtroStatusReservasAtual === 'APROVADA') return isAprovada;
-                        if (filtroStatusReservasAtual === 'RECUSADA') return isRecusada;
-                        return true; 
-                    });
-
-                    if (filtroCheckTipoHoje) {
-                        const hojeStr = hojeStrGlobal || new Date().toISOString().split('T')[0];
-                        const amanhaObj = new Date();
-                        amanhaObj.setDate(amanhaObj.getDate() + 1);
-                        const amanhaStr = amanhaObj.toISOString().split('T')[0];
-                        if (filtroCheckTipoHoje === 'checkin') {
-                            registrosFiltrados = registrosFiltrados.filter(row => {
-                                let chk = String(row.checkin || '').substring(0,10);
-                                return chk === hojeStr;
-                            });
-                        } else if (filtroCheckTipoHoje === 'checkout') {
-                            registrosFiltrados = registrosFiltrados.filter(row => {
-                                let chk = String(row.checkout || '').substring(0,10);
-                                return chk === hojeStr;
-                            });
-                        } else if (filtroCheckTipoHoje === 'checkout_amanha') {
-                            registrosFiltrados = registrosFiltrados.filter(row => {
-                                let chk = String(row.checkout || '').substring(0,10);
-                                return chk === amanhaStr;
-                            });
-                        }
-                    }
-                } else if (ehViewFinanceiro) {
-                    registrosFiltrados = registrosFiltrados.filter(row => {
-                        let chk = String(row.checkin || '').substring(0, 10);
-                        let out = String(row.checkout || '').substring(0, 10);
-                        if (!chk) return true;
-                        if (dataInicio && dataFim) return (chk <= dataFim && out >= dataInicio);
-                        else if (dataInicio) return out >= dataInicio;
-                        else if (dataFim) return chk <= dataFim;
+                        let st = String(row.status || '').toUpperCase();
+                        if (filtroStatusReservasAtual === 'APROVADA') return st === 'APROVADA';
+                        if (filtroStatusReservasAtual === 'RECUSADA') return st === 'RECUSADA' || st === 'CANCELADA';
                         return true;
                     });
-                } else if (!ehViewTarifas && !ehViewHospedagens) {
-                    registrosFiltrados = registrosFiltrados.filter(row => {
-                        let valData = row['data_pagamento'] || row['checkin'] || '';
-                        if (!valData) return true;
-                        let dataStr = String(valData).substring(0, 10);
-                        if (dataInicio && dataFim) return dataStr >= dataInicio && dataStr <= dataFim;
-                        else if (dataInicio) return dataStr >= dataInicio;
-                        else if (dataFim) return dataStr <= dataFim;
-                        return true;
-                    });
-                }
-
-                if (ehViewFinanceiro && suiteFiltroAtual) {
-                    registrosFiltrados = registrosFiltrados.filter(r => String(r.suite || '').trim().toUpperCase() === String(suiteFiltroAtual).trim().toUpperCase());
                 }
 
                 containerKpis.classList.remove("hidden");
                 if (ehViewFinanceiro) {
-                    containerKpis.className = "flex flex-wrap gap-3 mb-5";
                     let totalGeralBruto = registrosFiltrados.reduce((acc, r) => acc + Number(r.valor_total || 0), 0);
                     let totalJaPago = registrosFiltrados.reduce((acc, r) => acc + Number(r.valor_pago || 0), 0);
-                    let saldoRestanteGeral = totalGeralBruto - totalJaPago;
-
                     containerKpis.innerHTML = `
-                        <div class="bg-white p-3 rounded-xl border border-blue-200 shadow-sm flex items-center gap-3 min-w-[160px] hover:shadow-md transition">
+                        <div class="bg-white p-3 rounded-xl border border-blue-200 shadow-sm flex items-center gap-3 min-w-[160px]">
                             <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-sack-dollar"></i></div>
-                            <div class="flex flex-col">
-                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Saldo Total Bruto</span>
-                                <span class="text-sm font-extrabold text-blue-700 leading-none">${totalGeralBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-                            </div>
+                            <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-400 uppercase">Total Bruto</span><span class="text-sm font-extrabold text-blue-700">${totalGeralBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span></div>
                         </div>
-                        <div class="bg-white p-3 rounded-xl border border-emerald-200 shadow-sm flex items-center gap-3 min-w-[160px] hover:shadow-md transition">
+                        <div class="bg-white p-3 rounded-xl border border-emerald-200 shadow-sm flex items-center gap-3 min-w-[160px]">
                             <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-check"></i></div>
-                            <div class="flex flex-col">
-                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Já Pago</span>
-                                <span class="text-sm font-extrabold text-emerald-600 leading-none">${totalJaPago.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-                            </div>
-                        </div>
-                        <div class="bg-white p-3 rounded-xl border border-amber-200 shadow-sm flex items-center gap-3 min-w-[160px] hover:shadow-md transition">
-                            <div class="w-10 h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-clock"></i></div>
-                            <div class="flex flex-col">
-                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Saldo Restante a Receber</span>
-                                <span class="text-sm font-extrabold text-amber-600 leading-none">${saldoRestanteGeral.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-                            </div>
+                            <div class="flex flex-col"><span class="text-[10px] font-bold text-gray-400 uppercase">Total Pago</span><span class="text-sm font-extrabold text-emerald-600">${totalJaPago.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span></div>
                         </div>
                     `;
-                    renderizarFiltroSuites(registros);
-                    document.getElementById('containerFiltroSuites').classList.remove('hidden');
-                    const contOcupFin = document.getElementById('containerCardsOcupacaoSuites');
-                    if (contOcupFin) contOcupFin.classList.add('hidden');
-                } else if (ehViewHospedagens) {
-                    let totalSuites = registros.length;
-                    let ocupadas = registros.filter(r => r.status_ocupacao === 'OCUPADA / RESERVADA').length;
-                    let disponiveis = totalSuites - ocupadas;
-                    
-                    containerKpis.className = "flex flex-wrap gap-3 mb-5";
-                    containerKpis.innerHTML = `
-                        <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3 min-w-[160px] hover:shadow-md transition">
-                            <div class="w-10 h-10 bg-slate-100 text-slate-600 rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-layer-group"></i></div>
-                            <div class="flex flex-col">
-                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Cadastradas</span>
-                                <span class="text-base font-extrabold text-slate-800 leading-none">${totalSuites} SUÍTES</span>
-                            </div>
-                        </div>
-                        <div class="bg-white p-3 rounded-xl border border-blue-200 shadow-sm flex items-center gap-3 min-w-[160px] hover:shadow-md transition">
-                            <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-bed"></i></div>
-                            <div class="flex flex-col">
-                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Ocupadas / Reservadas</span>
-                                <span class="text-base font-extrabold text-blue-600 leading-none">${ocupadas} SUÍTES</span>
-                            </div>
-                        </div>
-                        <div class="bg-white p-3 rounded-xl border border-emerald-200 shadow-sm flex items-center gap-3 min-w-[160px] hover:shadow-md transition">
-                            <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-door-open"></i></div>
-                            <div class="flex flex-col">
-                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Disponíveis</span>
-                                <span class="text-base font-extrabold text-emerald-600 leading-none">${disponiveis} SUÍTES</span>
-                            </div>
-                        </div>
-                        <div onclick="toggleGraficoOcupacao()" id="cardGraficoOcupacao" class="bg-white p-3 rounded-xl border-2 border-amber-300 shadow-sm flex items-center gap-3 min-w-[180px] hover:shadow-md hover:border-amber-500 hover:bg-amber-50/50 transition cursor-pointer group">
-                            <div class="w-10 h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-sm group-hover:scale-110 transition"><i class="fa-solid fa-chart-column"></i></div>
-                            <div class="flex flex-col">
-                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-amber-700">Dashboard</span>
-                                <span class="text-[11px] font-extrabold text-gray-800 leading-none group-hover:text-amber-700">Suíte Mais Ocupada</span>
-                            </div>
-                        </div>
-                    `;
-                    document.getElementById('containerFiltroSuites').classList.add('hidden');
-                    
-                    const containerOcupacao = document.getElementById('containerCardsOcupacaoSuites');
-                    const gridOcupacao = document.getElementById('gridOcupacaoSuites');
-                    const badgeTotal = document.getElementById('badgeOcupacaoTotal');
-                    if (containerOcupacao) containerOcupacao.classList.remove('hidden');
-                    if (badgeTotal) badgeTotal.textContent = `${totalSuites} SUÍTES`;
-                    
-                    if (gridOcupacao) {
-                        let htmlCards = '';
-                        registros.forEach(r => {
-                            const isOcupada = r.status_ocupacao === 'OCUPADA / RESERVADA';
-                            const nomeSuite = String(r.suite || 'SUÍTE SEM NOME').toUpperCase();
-                            const nomeHospede = String(r.hospede || 'NENHUM').toUpperCase();
-                            const checkin = r.checkin && r.checkin !== '-' ? formatarDataBr(r.checkin) : '-';
-                            const checkout = r.checkout && r.checkout !== '-' ? formatarDataBr(r.checkout) : '-';
-                            
-                            const tema = obterTemaSuite(r.suite_id || r.suite);
-                            const borda = isOcupada 
-                                ? `${tema.border} bg-white hover:${tema.bgLight} border-2` 
-                                : `${tema.border} bg-white hover:${tema.bgLight} border-2`;
-                            const iconeBg = `${tema.iconBg} ${tema.iconText}`;
-                            const statusBadge = isOcupada 
-                                ? '<span class="text-[8px] font-bold bg-blue-600 text-white px-2 py-0.5 rounded-full uppercase shadow-xs">OCUPADA</span>' 
-                                : '<span class="text-[8px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full uppercase shadow-xs">DISPONÍVEL</span>';
-                            const hospedeInfo = isOcupada 
-                                ? `<div class="mt-1.5 text-[10px] text-gray-600 truncate"><i class="fa-solid fa-user mr-1"></i>${nomeHospede}</div><div class="text-[9px] text-gray-500 mt-0.5">${checkin} até ${checkout}</div>` 
-                                : `<div class="mt-1.5 text-[10px] text-emerald-600 font-medium">Livre para reserva</div>`;
-                            
-                            htmlCards += `
-                                <div onclick="filtrarPorSuiteOcupacao('${nomeSuite.replace(/'/g, "\\'")}')" title="Clique para filtrar esta suíte na tabela" class="cursor-pointer border-2 ${borda} p-3 rounded-xl shadow-sm transition group">
-                                    <div class="flex items-center justify-between mb-1.5">
-                                        <div class="w-7 h-7 ${iconeBg} rounded-lg flex items-center justify-center text-[11px]"><i class="fa-solid fa-bed"></i></div>
-                                        ${statusBadge}
-                                    </div>
-                                    <div class="font-bold text-[11px] text-gray-800 uppercase truncate ${tema.textGroupHover}">${nomeSuite}</div>
-                                    ${hospedeInfo}
-                                    <div class="mt-2 text-[9px] text-gray-400 ${tema.textGroupHover}">CLIQUE PARA FILTRAR</div>
-                                </div>
-                            `;
-                        });
-                        gridOcupacao.innerHTML = htmlCards;
-                    }
                 } else {
                     containerKpis.className = "hidden";
-                    document.getElementById('containerFiltroSuites').classList.add('hidden');
-                    const contOcupElse = document.getElementById('containerCardsOcupacaoSuites');
-                    if (contOcupElse) contOcupElse.classList.add('hidden');
                 }
 
                 if (!registrosFiltrados || registrosFiltrados.length === 0) {
@@ -1318,138 +928,20 @@
                     return;
                 }
 
-                let colunas = [];
-                if (ehViewReservas) {
-                    colunas = [
-                        'status', 
-                        'suite', 
-                        'suite_origem', 
-                        'transferido_em', 
-                        'motivo_transferencia', 
-                        'hospede', 
-                        'whatsapp', 
-                        'checkin', 
-                        'checkout', 
-                        'dias_restantes', 
-                        'valor_total', 
-                        'valor_pago', 
-                        'saldo_restante', 
-                        'ocupacao', 
-                        'tem_pet', 
-                        'cpf', 
-                        'email', 
-                        'criado_em', 
-                        'motivo_recusa', 
-                        'obs'
-                    ];
-                } else if (ehViewHospedagens) {
-                    colunas = ['status_ocupacao', 'suite', 'hospede', 'checkin', 'checkout', 'status'];
-                } else {
-                    colunas = Object.keys(registrosFiltrados[0] || {}).filter(k => k !== 'pousada_id' && k !== 'reserva_id' && k !== 'suite_id' && k !== 'suite_origem_id' && k !== 'transferido_por' && !k.includes('login_original') && !k.includes('nome_original') && k !== 'nome_pousada_que_recusou' && k !== 'dia_semana' && k !== 'alerta_status_reserva' && k !== 'alerta_vigencia_cor');
-                }
+                let colunas = Object.keys(registrosFiltrados[0] || {}).filter(k => k !== 'pousada_id' && k !== 'reserva_id' && k !== 'suite_id');
+                thead.innerHTML = colunas.map(col => `<th class="py-3 px-4 text-[11px]">${obterApelidoColuna(col)}</th>`).join('');
 
-                let htmlCabecalho = '';
-                colunas.forEach(col => {
-                    htmlCabecalho += `<th class="py-3 px-4 text-[11px]">${obterApelidoColuna(col)}</th>`;
-                });
-                thead.innerHTML = htmlCabecalho;
+                tbody.innerHTML = registrosFiltrados.map((row, index) => {
+                    let bg = (index % 2 === 0) ? 'bg-white' : 'bg-gray-50';
+                    return `<tr class="${bg} hover:bg-blue-50 transition">` + colunas.map(col => {
+                        let val = row[col];
+                        if (col.includes('checkin') || col.includes('checkout')) val = formatarDataBr(val);
+                        if (col.includes('valor_') || col.includes('saldo_')) val = Number(val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                        return `<td class="py-3 px-4 text-[12px] font-medium">${val || '-'}</td>`;
+                    }).join('') + `</tr>`;
+                }).join('');
 
-                let htmlLinhas = '';
-                registrosFiltrados.forEach((row, index) => {
-                    let statusRow = String(row.status || row.status_reserva || '').toUpperCase();
-                    let isRecusada = (statusRow === 'RECUSADA' || statusRow === 'CANCELADA');
-                    let isAprovada = (statusRow === 'APROVADA');
-                    let classeCorFundo = ''; 
-                    
-                    if (isRecusada) classeCorFundo = 'bg-red-50 hover:bg-red-100 border-l-4 border-red-400'; 
-                    else if (isAprovada) classeCorFundo = 'bg-emerald-50 hover:bg-emerald-100 border-l-4 border-emerald-500'; 
-                    else classeCorFundo = (index%2===0 ? 'bg-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100');
-
-                    if (ehViewHospedagens && row.status_ocupacao === 'DISPONÍVEL') {
-                        classeCorFundo = 'bg-slate-50 hover:bg-slate-100 border-l-4 border-slate-300';
-                    }
-
-                    htmlLinhas += `<tr class="${classeCorFundo} transition">`;
-                    colunas.forEach(col => {
-                        let valorBruto = row[col];
-                        let valorExibicao = '-';
-                        let colLower = col.toLowerCase();
-
-                        if (valorBruto !== null && valorBruto !== undefined && String(valorBruto).trim() !== '') {
-                            if (colLower === 'suite_origem') {
-                                valorExibicao = `<span class="inline-flex items-center gap-1 bg-purple-100 text-purple-900 border border-purple-300 px-2 py-0.5 rounded-md font-extrabold text-[10px]"><i class="fa-solid fa-arrows-rotate text-purple-700"></i> ${String(valorBruto).toUpperCase()}</span>`;
-                            } else if (colLower === 'transferido_em') {
-                                valorExibicao = `<span class="text-purple-950 font-bold text-[11px]">${formatarDataHoraBr(valorBruto)}</span>`;
-                            } else if (colLower === 'motivo_transferencia') {
-                                valorExibicao = `<span class="font-bold text-purple-900 bg-purple-50 px-2 py-0.5 rounded border border-purple-200 text-[11px]">${String(valorBruto).toUpperCase()}</span>`;
-                            } else if (colLower === 'suite') {
-                                const tema = obterTemaSuite(row.suite_id || valorBruto);
-                                valorExibicao = `<span class="inline-flex items-center gap-1.5 font-extrabold ${tema.iconText}"><i class="fa-solid fa-bed text-[11px]"></i> ${String(valorBruto).toUpperCase()}</span>`;
-                            } else if (colLower === 'whatsapp') {
-                                let apenasNum = String(valorBruto).replace(/\D/g, '');
-                                if (apenasNum.length <= 11 && !apenasNum.startsWith('55')) apenasNum = '55' + apenasNum;
-                                valorExibicao = `<a href="https://wa.me/${apenasNum}" target="_blank" class="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-900 font-bold bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded-md border border-emerald-200 transition"><i class="fa-brands fa-whatsapp text-emerald-600"></i> ${valorBruto}</a>`;
-                            } else if (colLower === 'tem_pet') {
-                                valorExibicao = (valorBruto === true || valorBruto === 'true' || String(valorBruto).toLowerCase() === 'sim') 
-                                    ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300">🐶 SIM</span>' 
-                                    : '<span class="text-gray-400 text-[10px] font-medium">NÃO</span>';
-                            } else if (colLower === 'ocupacao') {
-                                valorExibicao = `<span class="font-bold text-slate-800 text-[11px] bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">${valorBruto}</span>`;
-                            } else if (colLower === 'status') {
-                                if (isAprovada) valorExibicao = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">APROVADA</span>';
-                                else if (isRecusada) valorExibicao = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-red-100 text-red-800 border border-red-300">RECUSADA</span>';
-                                else valorExibicao = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-gray-100 text-gray-800 border border-gray-300">${String(valorBruto).toUpperCase()}</span>`;
-                            } else if (colLower.includes('alerta_check_in') || colLower.includes('alerta_status')) {
-                                valorExibicao = valorBruto;
-                            } else if (colLower.includes('criado_em') || colLower.includes('recusado_em')) {
-                                valorExibicao = formatarDataHoraBr(valorBruto);
-                            } else if (colLower.includes('checkin') || colLower.includes('checkout') || colLower.includes('data_inicio') || colLower.includes('data_fim')) {
-                                valorExibicao = formatarDataBr(valorBruto);
-                            } else if (colLower === 'dias_restantes') { 
-                                if (isRecusada) { 
-                                    valorExibicao = '<span class="text-gray-400">-</span>'; 
-                                } else if (row.checkin) {
-                                    const hoje0 = new Date(); hoje0.setHours(0,0,0,0);
-                                    const chk0 = new Date(String(row.checkin).substring(0,10) + 'T00:00:00');
-                                    var diff = Math.round((chk0 - hoje0) / (1000*60*60*24));
-                                    if (diff === 0) valorExibicao = '<span class="bg-emerald-600 text-white px-2 py-0.5 rounded-full text-[9px] font-extrabold shadow-2xs">HOJE</span>';
-                                    else if (diff === 1) valorExibicao = '<span class="bg-blue-600 text-white px-2 py-0.5 rounded-full text-[9px] font-extrabold shadow-2xs">AMANHÃ</span>';
-                                    else if (diff > 1) valorExibicao = '<span class="text-emerald-700 font-extrabold">' + diff + ' DIAS</span>';
-                                    else valorExibicao = '<span class="text-gray-400 text-[10px]">EM ANDAMENTO</span>';
-                                } else { 
-                                    valorExibicao = '<span class="text-gray-400">-</span>'; 
-                                }
-                            } else {
-                                valorExibicao = String(valorBruto).toUpperCase();
-                            }
-                        }
-
-                        if ((colLower === 'valor_total' || colLower === 'valor_pago' || colLower === 'saldo_restante') && !isNaN(valorBruto)) {
-                            let num = Number(valorBruto);
-                            let corTexto = 'text-gray-800';
-                            if (colLower === 'saldo_restante') {
-                                corTexto = num > 0 ? 'text-amber-700 font-extrabold bg-amber-50 px-1.5 py-0.5 rounded-md border border-amber-200' : 'text-emerald-700 font-bold';
-                            } else if (colLower === 'valor_pago') {
-                                corTexto = 'text-emerald-700 font-bold';
-                            }
-                            valorExibicao = `<span class="${corTexto}">${num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>`;
-                        }
-
-                        if (colLower === 'status_ocupacao') {
-                            if (valorBruto === 'DISPONÍVEL') {
-                                valorExibicao = `<span class="px-2 py-1 bg-slate-200 text-slate-700 rounded-md font-bold text-[10px]">DISPONÍVEL</span>`;
-                            } else {
-                                valorExibicao = `<span class="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-md font-bold text-[10px]">OCUPADA</span>`;
-                            }
-                        }
-
-                        htmlLinhas += `<td class="py-3 px-4 text-[12px] font-medium">${valorExibicao}</td>`;
-                    });
-                    htmlLinhas += `</tr>`;
-                });
-                tbody.innerHTML = htmlLinhas;
             } catch (err) {
-                console.error("Erro geral:", err);
                 tbody.innerHTML = `<tr><td colspan="20" class="py-6 text-center text-red-500">ERRO: ${err.message}</td></tr>`;
             }
         }
@@ -1465,96 +957,40 @@
 
         function toggleSuites() {
             const container = document.getElementById('containerSuites');
-            const card = document.getElementById('cardSuites');
             if (!container) return;
-            
             suitesVisivel = !suitesVisivel;
-            
-            if (suitesVisivel) {
-                container.classList.remove('hidden');
-                if (card) card.classList.add('ring-2', 'ring-amber-500', 'bg-amber-50', 'border-amber-400');
-                carregarSuitesComReservas();
-            } else {
-                container.classList.add('hidden');
-                if (card) card.classList.remove('ring-2', 'ring-amber-500', 'bg-amber-50', 'border-amber-400');
-            }
+            container.classList.toggle('hidden', !suitesVisivel);
+            if (suitesVisivel) carregarSuitesComReservas();
         }
 
         async function carregarSuitesComReservas() {
-            if (!usuarioIdAtual) return;
             const grid = document.getElementById('gridSuites');
-            const badge = document.getElementById('badgeSuites');
             if (!grid) return;
-            
-            grid.innerHTML = '<div class="col-span-full py-4 text-center text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i> BUSCANDO RESERVAS FUTURAS...</div>';
-            
+            grid.innerHTML = '<div class="col-span-full py-4 text-center text-gray-400 text-xs">BUSCANDO RESERVAS...</div>';
             try {
                 const hojeStr = new Date().toISOString().split('T')[0];
-                
-                const { data: reservasFuturas, error } = await supabaseClient
-                    .from('reservas')
-                    .select('id, suite_id, checkin, checkout, hospede_nome, status, suites ( nome )')
-                    .eq('pousada_id', usuarioIdAtual)
-                    .eq('status', 'Aprovada')
-                    .gte('checkout', hojeStr)
-                    .order('checkin', { ascending: true });
-                
-                if (error) throw error;
-                
+                const { data: reservasFuturas } = await supabaseClient
+                    .from('reservas').select('id, suite_id, checkin, checkout, hospede_nome, suites(nome)')
+                    .eq('pousada_id', usuarioIdAtual).eq('status', 'Aprovada').gte('checkout', hojeStr).order('checkin');
+
                 reservasFuturasCache = reservasFuturas || [];
-                
                 const suitesMap = {};
                 reservasFuturasCache.forEach(r => {
-                    const nomeSuite = r.suites?.nome || 'SUÍTE SEM NOME';
                     const sId = r.suite_id;
-                    if (!suitesMap[sId]) {
-                        suitesMap[sId] = {
-                            suite_id: sId,
-                            nome: nomeSuite,
-                            reservas: [],
-                            total: 0
-                        };
-                    }
-                    suitesMap[sId].reservas.push(r);
+                    if (!suitesMap[sId]) suitesMap[sId] = { suite_id: sId, nome: r.suites?.nome || 'SUÍTE', total: 0 };
                     suitesMap[sId].total++;
                 });
-                
-                const suitesComReserva = Object.values(suitesMap);
-                
-                if (badge) badge.textContent = `${suitesComReserva.length} SUÍTES`;
-                
-                if (suitesComReserva.length === 0) {
-                    grid.innerHTML = '<div class="col-span-full py-6 text-center text-gray-500 text-xs">NENHUMA SUÍTE COM RESERVAS FUTURAS</div>';
-                    return;
-                }
-                
-                let htmlCards = '';
-                suitesComReserva.forEach(s => {
-                    const proximas = s.reservas.slice(0,2).map(r => {
-                        let chk = r.checkin ? String(r.checkin).substring(0,10).split('-').reverse().join('/') : '';
-                        return chk;
-                    }).join(', ');
-                    
-                    const tema = obterTemaSuite(s.suite_id || s.nome);
 
-                    htmlCards += `
-                        <div onclick="abrirCalendarioSuite('${s.suite_id}', '${s.nome.replace(/'/g, "\\'")}')" class="cursor-pointer border-2 ${tema.border} bg-white hover:${tema.bgLight} ${tema.borderHover} p-3 rounded-xl shadow-sm transition group">
-                            <div class="flex items-center justify-between mb-1.5">
-                                <div class="w-7 h-7 ${tema.iconBg} ${tema.iconText} rounded-lg flex items-center justify-center text-[11px]"><i class="fa-solid fa-bed"></i></div>
-                                <span class="text-[9px] font-bold ${tema.badgeBg} text-white px-2 py-0.5 rounded-full">${s.total} RESERVA(S)</span>
-                            </div>
-                            <div class="font-bold text-[11px] text-gray-800 uppercase truncate ${tema.textGroupHover}">${String(s.nome).toUpperCase()}</div>
-                            <div class="mt-1 text-[10px] text-gray-600 truncate"><i class="fa-solid fa-calendar mr-1"></i>${proximas}${s.total>2 ? '...' : ''}</div>
-                            <div class="mt-2 text-[9px] ${tema.iconText} font-bold ${tema.textGroupHover}"><i class="fa-solid fa-calendar-days mr-1"></i>VER CALENDÁRIO</div>
-                        </div>
-                    `;
-                });
-                grid.innerHTML = htmlCards;
-                
-            } catch (e) {
-                console.error('Erro carregarSuitesComReservas', e);
-                grid.innerHTML = `<div class="col-span-full py-4 text-center text-red-500 text-xs">ERRO: ${e.message}</div>`;
-            }
+                const lista = Object.values(suitesMap);
+                if (lista.length === 0) { grid.innerHTML = '<div class="col-span-full py-4 text-center text-gray-500 text-xs">NENHUMA RESERVA FUTURA</div>'; return; }
+
+                grid.innerHTML = lista.map(s => `
+                    <div onclick="abrirCalendarioSuite('${s.suite_id}', '${s.nome}')" class="cursor-pointer border p-3 rounded-xl bg-white hover:bg-amber-50 transition flex justify-between items-center">
+                        <span class="font-bold text-xs uppercase">${s.nome}</span>
+                        <span class="text-[10px] bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full font-bold">${s.total} res.</span>
+                    </div>
+                `).join('');
+            } catch(e) { grid.innerHTML = '<div class="col-span-full text-red-500 text-xs">Erro ao carregar suítes</div>'; }
         }
 
         function abrirCalendarioSuite(suiteId, suiteNome) {
@@ -1564,13 +1000,11 @@
             const titulo = document.getElementById('cal-suite-nome');
             if (titulo) titulo.innerText = `Suíte: ${suiteNome}`;
             renderizarCalendario();
-            const modal = document.getElementById('modal-calendario-suite');
-            if (modal) modal.classList.remove('hidden');
+            document.getElementById('modal-calendario-suite').classList.remove('hidden');
         }
 
         function fecharCalendarioSuite() {
-            const modal = document.getElementById('modal-calendario-suite');
-            if (modal) modal.classList.add('hidden');
+            document.getElementById('modal-calendario-suite').classList.add('hidden');
         }
 
         function mudarMesCalendario(dir) {
@@ -1589,54 +1023,33 @@
             const nomesMeses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
             label.innerText = `${nomesMeses[mes]} de ${ano}`;
             
-            const primeiroDiaSemana = new Date(ano, mes, 1).getDay();
-            const ultimoDiaMes = new Date(ano, mes+1, 0).getDate();
-            
+            const primeiroDia = new Date(ano, mes, 1).getDay();
+            const ultimoDia = new Date(ano, mes+1, 0).getDate();
             const reservasDaSuite = reservasFuturasCache.filter(r => r.suite_id === suiteCalId);
             const datasOcupadas = new Set();
             reservasDaSuite.forEach(r => {
-                if (!r.checkin || !r.checkout) return;
-                let dCurr = new Date(String(r.checkin).substring(0,10) + 'T00:00:00');
-                const dFim = new Date(String(r.checkout).substring(0,10) + 'T00:00:00');
+                let dCurr = new Date(r.checkin + 'T00:00:00');
+                const dFim = new Date(r.checkout + 'T00:00:00');
                 while (dCurr < dFim) {
                     datasOcupadas.add(dCurr.toISOString().split('T')[0]);
                     dCurr.setDate(dCurr.getDate() + 1);
                 }
             });
-            
-            for (let i=0;i<primeiroDiaSemana;i++) grid.innerHTML += '<div></div>';
-            
+
+            for (let i=0; i<primeiroDia; i++) grid.innerHTML += '<div></div>';
             const hojeStr = new Date().toISOString().split('T')[0];
-            
-            for (let dia=1; dia<=ultimoDiaMes; dia++) {
-                const mesStr = String(mes+1).padStart(2,'0');
-                const diaStr = String(dia).padStart(2,'0');
-                const dataIso = `${ano}-${mesStr}-${diaStr}`;
+
+            for (let dia=1; dia<=ultimoDia; dia++) {
+                const dataIso = `${ano}-${String(mes+1).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
                 const estaOcupado = datasOcupadas.has(dataIso);
                 const ePassado = dataIso < hojeStr;
-                let classe = "";
-                let tooltip = "";
-                if (ePassado) {
-                    classe = "bg-gray-100 text-gray-400 border border-gray-200 opacity-60";
-                    tooltip = "Data passada";
-                } else if (estaOcupado) {
-                    classe = "bg-red-100 text-red-700 border border-red-200 font-bold shadow-sm relative overflow-hidden";
-                    tooltip = "Ocupado - com reserva futura";
-                } else {
-                    classe = "bg-emerald-100 text-emerald-800 border border-emerald-200 hover:bg-emerald-200 font-bold";
-                    tooltip = "Livre - disponível para reserva";
-                }
-                const isHoje = dataIso === hojeStr ? 'ring-2 ring-blue-500' : '';
-                let conteudoDia = `${dia}`;
-                if (estaOcupado) {
-                    conteudoDia = `${dia}<span class="absolute inset-0 flex items-center justify-center text-white font-extrabold text-[16px] leading-none" style="text-shadow: 0 0 3px rgba(239,68,68,0.9);">✕</span>`;
-                }
-                grid.innerHTML += `<div title="${tooltip} ${dataIso}" class="h-8 flex items-center justify-center rounded-lg text-[11px] ${classe} ${isHoje} relative">${conteudoDia}</div>`;
+                let classe = ePassado ? "bg-gray-100 text-gray-400" : (estaOcupado ? "bg-red-100 text-red-700 font-bold" : "bg-emerald-100 text-emerald-800 font-bold");
+                grid.innerHTML += `<div class="h-8 flex items-center justify-center rounded-lg text-xs ${classe}">${dia}</div>`;
             }
         }
 
         // =========================================================================
-        // CALENDÁRIO GERAL NO RELATÓRIOS (BLINDAGEM CONTRA ERRO DE INNERHTML)
+        // CALENDÁRIO GERAL & CRIAÇÃO DE RESERVAS COM MODAL ELEGANTE
         // =========================================================================
         let calGeralRelSuiteIndex = 0;
         let calGeralRelDataRef = new Date();
@@ -1647,77 +1060,36 @@
 
         async function abrirCalendarioGeralRelatorios() {
             if (!usuarioIdAtual) return;
-            
             const modal = document.getElementById('modal-calendario-geral-relatorios');
-            if (!modal) {
-                console.error('Modal modal-calendario-geral-relatorios não encontrado no DOM!');
-                return;
-            }
-
-            const elSuiteNome = document.getElementById('cal-geral-rel-suite-nome');
-            if (elSuiteNome) elSuiteNome.innerText = 'Carregando...';
+            if (!modal) return;
             
             try {
-                const { data: suites } = await supabaseClient.from('suites').select('id,nome').eq('pousada_id', usuarioIdAtual).order('nome');
+                const { data: suites } = await supabaseClient.from('suites').select('id,nome,capacidade_hospedes,hospedes_inclusos,valor_diaria').eq('pousada_id', usuarioIdAtual).order('nome');
                 const { data: reservas } = await supabaseClient.from('reservas').select('suite_id,checkin,checkout,status').eq('pousada_id', usuarioIdAtual).in('status', ['Aprovada','Ocupada','Reservado']);
-                
                 calGeralRelSuitesCache = suites || [];
                 calGeralRelReservasCache = reservas || [];
-                
-                if (calGeralRelSuitesCache.length === 0) {
-                    alert('Nenhuma suíte cadastrada');
-                    return;
-                }
-                
+
+                if (calGeralRelSuitesCache.length === 0) { alert('Nenhuma suíte cadastrada'); return; }
                 calGeralRelSuiteIndex = 0;
                 calGeralRelDataRef = new Date();
-                
-                // Exibe o modal primeiro para garantir que os elementos estejam ativos no DOM
                 modal.classList.remove('hidden');
-
                 renderizarPainelSuitesRelatorios();
                 renderizarCalendarioGeralRelatorios();
-            } catch(e) {
-                console.error('Erro calendário geral', e);
-            }
+            } catch(e) { console.error(e); }
         }
 
         function fecharCalendarioGeralRelatorios() {
-            const modal = document.getElementById('modal-calendario-geral-relatorios');
-            if (modal) modal.classList.add('hidden');
+            document.getElementById('modal-calendario-geral-relatorios').classList.add('hidden');
         }
 
         function renderizarPainelSuitesRelatorios() {
             const container = document.getElementById('cal-geral-rel-painel-suites');
-            const totalEl = document.getElementById('cal-geral-rel-total');
             if (!container) return;
-            
-            if (totalEl) totalEl.innerText = calGeralRelSuitesCache.length;
-            container.innerHTML = '';
-            
-            calGeralRelSuitesCache.forEach((suite, idx) => {
+            container.innerHTML = calGeralRelSuitesCache.map((suite, idx) => {
                 const isAtiva = idx === calGeralRelSuiteIndex;
-                const reservasSuite = calGeralRelReservasCache.filter(r => r.suite_id === suite.id).length;
-                
-                const tema = obterTemaSuite(suite.id || suite.nome);
-                const classeAtiva = isAtiva 
-                    ? `bg-slate-900 text-white ${tema.borderActive} shadow-md scale-[1.02]` 
-                    : `bg-white text-gray-800 ${tema.border} ${tema.borderHover} hover:${tema.bgLight} hover:shadow-sm`;
-                
-                const badgeOcup = reservasSuite > 0 ? `<span class="text-[9px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-bold">${reservasSuite} res.</span>` : `<span class="text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full">livre</span>`;
-                
-                container.innerHTML += `
-                    <div onclick="selecionarSuiteGeralRelatorios(${idx})" onmouseenter="if(${!isAtiva}) selecionarSuiteGeralRelatorios(${idx})" 
-                         class="cursor-pointer border-2 rounded-xl p-2.5 flex flex-col gap-1 transition-all duration-150 ${classeAtiva}">
-                        <div class="flex justify-between items-start">
-                            <i class="fa-solid fa-bed text-[11px] ${isAtiva ? 'text-amber-300' : tema.iconText}"></i>
-                            ${badgeOcup}
-                        </div>
-                        <span class="font-bold text-[11px] uppercase truncate leading-tight ${isAtiva ? '' : tema.textGroupHover}">${suite.nome}</span>
-                        <span class="text-[9px] ${isAtiva ? 'text-slate-300' : 'text-gray-500'}">${isAtiva ? 'VISUALIZANDO' : 'CLIQUE OU PASSE O MOUSE'}</span>
-                    </div>
-                `;
-            });
+                const classe = isAtiva ? 'bg-slate-900 text-white' : 'bg-white text-gray-800 border';
+                return `<div onclick="selecionarSuiteGeralRelatorios(${idx})" class="cursor-pointer p-2 rounded-xl text-xs font-bold uppercase ${classe}">${suite.nome}</div>`;
+            }).join('');
         }
 
         function selecionarSuiteGeralRelatorios(index) {
@@ -1726,47 +1098,28 @@
             renderizarCalendarioGeralRelatorios();
         }
 
-        function mudarMesCalendarioGeralRelatorios(direcao) {
-            calGeralRelDataRef.setMonth(calGeralRelDataRef.getMonth() + direcao);
+        function mudarMesCalendarioGeralRelatorios(dir) {
+            calGeralRelDataRef.setMonth(calGeralRelDataRef.getMonth() + dir);
             renderizarCalendarioGeralRelatorios();
         }
 
         function renderizarCalendarioGeralRelatorios() {
             const suite = calGeralRelSuitesCache[calGeralRelSuiteIndex];
             if (!suite) return;
-
-            const elSuiteNome = document.getElementById('cal-geral-rel-suite-nome');
-            if (elSuiteNome) elSuiteNome.innerText = `${suite.nome.toUpperCase()}`;
+            document.getElementById('cal-geral-rel-suite-nome').innerText = suite.nome.toUpperCase();
 
             const ano = calGeralRelDataRef.getFullYear();
             const mes = calGeralRelDataRef.getMonth();
             const nomesMeses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-            const elMesAno = document.getElementById('cal-geral-rel-mes-ano');
-            if (elMesAno) elMesAno.innerText = `${nomesMeses[mes]} de ${ano}`.toUpperCase();
+            document.getElementById('cal-geral-rel-mes-ano').innerText = `${nomesMeses[mes]} de ${ano}`.toUpperCase();
 
-            // Busca defensiva e resiliente da grade de dias
-            let gridEl = document.getElementById('cal-geral-rel-grid');
-            if (!gridEl) {
-                const modalEl = document.getElementById('modal-calendario-geral-relatorios');
-                if (modalEl) {
-                    gridEl = modalEl.querySelector('#cal-geral-rel-grid') || modalEl.querySelector('.grid-cols-7:last-of-type');
-                }
-            }
-
-            if (!gridEl) {
-                console.error("Container cal-geral-rel-grid não foi encontrado no DOM!");
-                return;
-            }
-
+            const gridEl = document.getElementById('cal-geral-rel-grid');
             gridEl.innerHTML = '';
-
-            const primeiroDiaSemana = new Date(ano, mes, 1).getDay();
-            const ultimoDiaMes = new Date(ano, mes + 1, 0).getDate();
-
+            const primeiroDia = new Date(ano, mes, 1).getDay();
+            const ultimoDia = new Date(ano, mes + 1, 0).getDate();
             const reservasDaSuite = calGeralRelReservasCache.filter(r => r.suite_id === suite.id);
             const datasOcupadas = new Set();
             reservasDaSuite.forEach(r => {
-                if (!r.checkin || !r.checkout) return;
                 let dCurr = new Date(r.checkin + 'T00:00:00');
                 const dFim = new Date(r.checkout + 'T00:00:00');
                 while (dCurr < dFim) {
@@ -1775,276 +1128,142 @@
                 }
             });
 
-            for (let i = 0; i < primeiroDiaSemana; i++) {
-                gridEl.innerHTML += `<div></div>`;
-            }
-
+            for (let i=0; i<primeiroDia; i++) gridEl.innerHTML += '<div></div>';
             const hojeStr = new Date().toLocaleDateString('sv-SE');
 
-            for (let dia = 1; dia <= ultimoDiaMes; dia++) {
-                const mesStr = String(mes + 1).padStart(2, '0');
-                const diaStr = String(dia).padStart(2, '0');
-                const dataIso = `${ano}-${mesStr}-${diaStr}`;
+            for (let dia=1; dia<=ultimoDia; dia++) {
+                const dataIso = `${ano}-${String(mes+1).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
                 const estaOcupado = datasOcupadas.has(dataIso);
                 const ePassado = dataIso < hojeStr;
-                const isCheckin = calGeralCheckinTemp === dataIso;
-                const isCheckout = calGeralCheckoutTemp === dataIso;
-                const isNoIntervalo = calGeralCheckinTemp && calGeralCheckoutTemp && dataIso > calGeralCheckinTemp && dataIso < calGeralCheckoutTemp;
-
-                let classe = "";
-                let conteudo = dia;
-                let onclick = "";
-                if (ePassado) {
-                    classe = "bg-gray-100 text-gray-400 border border-gray-200 opacity-60";
-                } else if (estaOcupado) {
-                    classe = "bg-red-50 text-red-600 font-bold border border-red-200";
-                    conteudo = `<span class="flex flex-col items-center justify-center leading-none"><span>${dia}</span><span class="text-[10px]">✕</span></span>`;
-                } else {
-                    onclick = `onclick="selecionarDataCalendarioGeral('${dataIso}')"`;
-                    if (isCheckin || isCheckout) {
-                        classe = "bg-blue-600 text-white font-extrabold border-2 border-blue-800 shadow-md scale-105 cursor-pointer";
-                        conteudo = `<span class="flex flex-col items-center leading-none"><span>${dia}</span><span class="text-[7px]">${isCheckin ? 'IN' : 'OUT'}</span></span>`;
-                    } else if (isNoIntervalo) {
-                        classe = "bg-blue-100 text-blue-800 font-bold border border-blue-300 cursor-pointer";
-                    } else {
-                        classe = "bg-emerald-100 text-emerald-800 font-extrabold border border-emerald-300 shadow-sm hover:bg-emerald-200 cursor-pointer hover:scale-105 transition-all";
-                    }
-                }
-
-                gridEl.innerHTML += `<div ${onclick} class="h-11 flex items-center justify-center rounded-xl text-[13px] ${classe}">${conteudo}</div>`;
-            }
-
-            const instrucaoEl = document.getElementById('cal-geral-instrucao');
-            if (instrucaoEl) {
-                if (!calGeralCheckinTemp) instrucaoEl.innerText = 'Clique em uma data livre para definir CHECK-IN';
-                else if (!calGeralCheckoutTemp) instrucaoEl.innerText = `Check-in: ${calGeralCheckinTemp} → Agora clique na data de CHECK-OUT`;
-                else instrucaoEl.innerText = `Período: ${calGeralCheckinTemp} até ${calGeralCheckoutTemp} → Pronto!`;
+                let classe = ePassado ? "bg-gray-100 text-gray-400" : (estaOcupado ? "bg-red-50 text-red-600 font-bold" : "bg-emerald-100 text-emerald-800 font-bold cursor-pointer hover:bg-emerald-200");
+                let onclick = (!ePassado && !estaOcupado) ? `onclick="selecionarDataCalendarioGeral('${dataIso}')"` : '';
+                gridEl.innerHTML += `<div ${onclick} class="h-10 flex items-center justify-center rounded-xl text-xs ${classe}">${dia}</div>`;
             }
         }
 
         function selecionarDataCalendarioGeral(dataIso) {
-            const hojeStrSel = new Date().toLocaleDateString('sv-SE');
-            if (dataIso < hojeStrSel) return;
-            const suite = calGeralRelSuitesCache[calGeralRelSuiteIndex];
-            const reservasDaSuite = calGeralRelReservasCache.filter(r => r.suite_id === suite.id);
-            const datasOcupadas = new Set();
-            reservasDaSuite.forEach(r => {
-                if (!r.checkin || !r.checkout) return;
-                let dCurr = new Date(r.checkin + 'T00:00:00');
-                const dFim = new Date(r.checkout + 'T00:00:00');
-                while (dCurr < dFim) {
-                    datasOcupadas.add(dCurr.toLocaleDateString('sv-SE'));
-                    dCurr.setDate(dCurr.getDate() + 1);
-                }
-            });
-            if (datasOcupadas.has(dataIso)) return;
-
             if (!calGeralCheckinTemp || (calGeralCheckinTemp && calGeralCheckoutTemp)) {
                 calGeralCheckinTemp = dataIso;
                 calGeralCheckoutTemp = null;
-                const btn = document.getElementById('btn-criar-reserva-calendario');
-                if (btn) btn.classList.add('hidden');
             } else {
                 if (dataIso <= calGeralCheckinTemp) {
                     calGeralCheckoutTemp = calGeralCheckinTemp;
                     calGeralCheckinTemp = dataIso;
                 } else {
-                    let temOcupacao = false;
-                    let dCurr = new Date(calGeralCheckinTemp + 'T00:00:00');
-                    const dFim = new Date(dataIso + 'T00:00:00');
-                    while (dCurr < dFim) {
-                        if (datasOcupadas.has(dCurr.toLocaleDateString('sv-SE'))) { temOcupacao = true; break; }
-                        dCurr.setDate(dCurr.getDate() + 1);
-                    }
-                    if (temOcupacao) {
-                        alert('Existe data ocupada no intervalo. Escolha outro período livre.');
-                        return;
-                    }
                     calGeralCheckoutTemp = dataIso;
                 }
-                if (calGeralCheckinTemp && calGeralCheckoutTemp) {
-                    const btn = document.getElementById('btn-criar-reserva-calendario');
-                    if (btn) btn.classList.remove('hidden');
-                    abrirModalNovaReservaCalendario();
-                }
+                abrirModalNovaReservaCalendario();
             }
             renderizarCalendarioGeralRelatorios();
         }
 
         function abrirModalNovaReservaCalendario() {
             const suite = calGeralRelSuitesCache[calGeralRelSuiteIndex];
-            if (!suite || !calGeralCheckinTemp || !calGeralCheckoutTemp) return;
             document.getElementById('nova-reserva-titulo').innerText = `Criar Nova Reserva: ${suite.nome}`;
             document.getElementById('nova-reserva-suite-id').value = suite.id;
             document.getElementById('nova-reserva-checkin').value = calGeralCheckinTemp;
             document.getElementById('nova-reserva-checkout').value = calGeralCheckoutTemp;
-            document.getElementById('nova-reserva-hospede').value = '';
-            document.getElementById('nova-reserva-whatsapp').value = '';
-            document.getElementById('nova-reserva-cpf').value = '';
-            document.getElementById('nova-reserva-rg').value = '';
-            document.getElementById('nova-reserva-endereco').value = '';
-            document.getElementById('nova-reserva-cep').value = '';
-            document.getElementById('nova-reserva-email').value = '';
-            document.getElementById('nova-reserva-valor-sinal').value = '';
-            document.getElementById('nova-reserva-observacao').value = '';
-            document.getElementById('nova-reserva-adultos').value = '2';
-            document.getElementById('nova-reserva-criancas').value = '0';
-            document.getElementById('nova-reserva-pet').value = 'false';
             document.getElementById('modal-nova-reserva-calendario').classList.remove('hidden');
             recalcularNovaReservaCalendario();
         }
 
         function fecharModalNovaReservaCalendario() { 
-            const modal = document.getElementById('modal-nova-reserva-calendario');
-            if (modal) modal.classList.add('hidden'); 
+            document.getElementById('modal-nova-reserva-calendario').classList.add('hidden'); 
         }
-        
-        function calcularDiariasCalendario(a,b){ if(!a||!b)return 0; return Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/(1000*60*60*24)); }
 
-        function renderizarInputsIdadesCriancasCalendario(qtdCriancas, idadesAtuais = []) {
-            const container = document.getElementById('nova-reserva-container-idades-criancas');
-            const lista = document.getElementById('nova-reserva-lista-idades-criancas');
-            if (!container || !lista) return;
-            if (qtdCriancas <= 0) { container.classList.add('hidden'); lista.innerHTML=''; return; }
-            container.classList.remove('hidden');
-            let html = '';
-            for (let i=0;i<qtdCriancas;i++) {
-                const idadeAtual = idadesAtuais[i] !== undefined ? idadesAtuais[i] : '';
-                html += `<div><label class="block text-[10px] font-bold text-gray-600 mb-1">Criança ${i+1} (Idade)</label><input type="number" min="0" max="17" value="${idadeAtual}" placeholder="0" class="nova-reserva-input-idade-crianca w-full p-2.5 border rounded-xl text-sm bg-white" oninput="recalcularNovaReservaCalendario()"></div>`;
-            }
-            lista.innerHTML = html;
-        }
+        function calcularDiariasCalendario(a,b){ return Math.max(1, Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/(1000*60*60*24))); }
 
         async function recalcularNovaReservaCalendario(){
-            const checkin=document.getElementById('nova-reserva-checkin').value; 
-            const checkout=document.getElementById('nova-reserva-checkout').value;
-            const suiteId=document.getElementById('nova-reserva-suite-id').value;
-            const adultos=parseInt(document.getElementById('nova-reserva-adultos').value)||2;
-            const criancas=parseInt(document.getElementById('nova-reserva-criancas').value)||0;
-            const pet=document.getElementById('nova-reserva-pet').value==='true';
-            
-            try {
-                const suite = calGeralRelSuitesCache.find(s=>s.id===suiteId);
-                if (suite) {
-                    const capMax = Number(suite.capacidade_hospedes) || 0;
-                    const inclusos = Number(suite.hospedes_inclusos) || 2;
-                    const totalOcup = (Number(adultos)||0)+(Number(criancas)||0);
-                    const capTextoEl = document.getElementById('nova-reserva-capacidade-texto');
-                    if (capTextoEl) {
-                        if (capMax>0) capTextoEl.innerHTML = `Capacidade real desta suíte: <strong>${capMax} pessoa(s)</strong> no total (adultos + crianças) | ${inclusos} incluso(s)`;
-                        else capTextoEl.innerHTML = `Capacidade não definida (defina em Configurar Pousada)`;
-                    }
-                    const avisoCap = document.getElementById('nova-reserva-aviso-capacidade');
-                    if (avisoCap) {
-                        if (capMax>0 && totalOcup>capMax) {
-                            avisoCap.className = 'mt-2 p-2.5 rounded-xl text-xs font-bold bg-red-50 border border-red-300 text-red-800';
-                            avisoCap.innerHTML = `⚠️ Capacidade excedida: esta suíte comporta no máximo ${capMax} pessoa(s). Você informou ${totalOcup} (${adultos} adultos + ${criancas} crianças).`;
-                            avisoCap.classList.remove('hidden');
-                        } else if (capMax>0) {
-                            avisoCap.className = 'mt-2 p-2.5 rounded-xl text-xs font-bold bg-green-50 border border-green-200 text-green-800';
-                            avisoCap.innerHTML = `✅ Ocupação OK: ${totalOcup}/${capMax} pessoa(s)`;
-                            avisoCap.classList.remove('hidden');
-                        } else {
-                            avisoCap.classList.add('hidden');
-                        }
-                    }
-                }
-            } catch(e){}
-
-            const inputsAntes = document.querySelectorAll('.nova-reserva-input-idade-crianca');
-            const idadesAntes = Array.from(inputsAntes).map(el=>el.value);
-            renderizarInputsIdadesCriancasCalendario(criancas, idadesAntes);
-            const inputsIdades = document.querySelectorAll('.nova-reserva-input-idade-crianca');
-            const idadesArr = Array.from(inputsIdades).map(el=>parseInt(el.value)||0);
-            const idadesStr = idadesArr.join(',');
-
-            const diarias=calcularDiariasCalendario(checkin, checkout);
-            const qtdEl=document.getElementById('nova-reserva-qtd-diarias');
-            if(qtdEl) qtdEl.innerText=`${diarias} diária(s)`;
-            let total=0;
-            try{ 
-                const {data, error} = await supabaseClient.rpc('calcular_total_reserva',{p_suite_id:suiteId,p_checkin:checkin,p_checkout:checkout,p_adultos:adultos,p_criancas:criancas,p_idades_criancas:idadesStr,p_pet:pet}); 
-                if(!error && data!==null) total=Number(data); 
-                else {
-                    const {data:fb} = await supabaseClient.rpc('calcular_total_reserva',{p_suite_id:suiteId,p_checkin:checkin,p_checkout:checkout,p_adultos:adultos,p_criancas:criancas,p_pet:pet});
-                    if(fb!==null) total=Number(fb);
-                }
-            }catch(e){ const suite=calGeralRelSuitesCache.find(s=>s.id===suiteId); total=(suite?.valor_diaria||0)*diarias; if(pet) total+=50*diarias; }
-            const totalEl=document.getElementById('nova-reserva-valor-total');
-            if(totalEl) totalEl.innerText=total.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-            const sinal=Number(document.getElementById('nova-reserva-valor-sinal').value||0);
-            const saldoEl=document.getElementById('nova-reserva-saldo-restante');
-            if(saldoEl){ saldoEl.innerText=(total-sinal).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); saldoEl.dataset.valorTotal=total; }
+            const checkin = document.getElementById('nova-reserva-checkin').value; 
+            const checkout = document.getElementById('nova-reserva-checkout').value;
+            const suiteId = document.getElementById('nova-reserva-suite-id').value;
+            const diarias = calcularDiariasCalendario(checkin, checkout);
+            const suite = calGeralRelSuitesCache.find(s=>s.id===suiteId);
+            const total = (suite?.valor_diaria || 150) * diarias;
+            document.getElementById('nova-reserva-qtd-diarias').innerText = `${diarias} diária(s)`;
+            document.getElementById('nova-reserva-valor-total').innerText = total.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+            document.getElementById('nova-reserva-saldo-restante').dataset.valorTotal = total;
         }
 
+        // =========================================================================
+        // SALVAMENTO DE RESERVA COM INTERCEPTAÇÃO ELEGANTE DO BLOQUEIO SOFT
+        // =========================================================================
         async function salvarNovaReservaCalendario(){
-            const suiteId=document.getElementById('nova-reserva-suite-id').value;
-            const hospede=document.getElementById('nova-reserva-hospede').value.trim();
-            const whatsapp=document.getElementById('nova-reserva-whatsapp').value.trim();
-            const checkin=document.getElementById('nova-reserva-checkin').value;
-            const checkout=document.getElementById('nova-reserva-checkout').value;
-            if(!hospede||!whatsapp){ alert('Preencha nome e whatsapp'); return; }
-
-            const suiteCap = calGeralRelSuitesCache.find(s=>s.id===suiteId);
-            if (suiteCap) {
-                const capMax = Number(suiteCap.capacidade_hospedes)||0;
-                const adultosVal = parseInt(document.getElementById('nova-reserva-adultos').value)||2;
-                const criancasVal = parseInt(document.getElementById('nova-reserva-criancas').value)||0;
-                if (capMax>0 && (adultosVal+criancasVal)>capMax) { alert(`Capacidade excedida: máximo ${capMax} pessoa(s)`); return; }
+            // 1. SE A POUSADA JÁ ESTIVER BLOQUEADA, ABRE O MODAL NA HORA (SEM TENTAR GRAVAR)
+            if (!pousadaEmDiaCache) {
+                fecharModalNovaReservaCalendario();
+                abrirModalModoLeitura();
+                return;
             }
 
+            const suiteId = document.getElementById('nova-reserva-suite-id').value;
+            const hospede = document.getElementById('nova-reserva-hospede').value.trim();
+            const whatsapp = document.getElementById('nova-reserva-whatsapp').value.trim();
+            const checkin = document.getElementById('nova-reserva-checkin').value;
+            const checkout = document.getElementById('nova-reserva-checkout').value;
+            
+            if (!hospede || !whatsapp) {
+                alert('Por favor, preencha o Nome e WhatsApp do hóspede.');
+                return;
+            }
+
+            const valorTotal = Number(document.getElementById('nova-reserva-saldo-restante').dataset.valorTotal || 0);
+            const valorSinal = Number(document.getElementById('nova-reserva-valor-sinal').value || 0);
+            const forma = document.getElementById('nova-reserva-forma-pagamento').value;
+
             try {
-                const {data:temConflito} = await supabaseClient.rpc('verificar_conflito_reserva',{p_suite_id:suiteId,p_checkin:checkin,p_checkout:checkout,p_reserva_id:null});
-                if (temConflito===true) { alert('Já existe uma reserva confirmada para esta suíte nestas datas!'); return; }
-            } catch(e){ console.warn('Erro verificar conflito',e); }
-
-            const valorTotal=Number(document.getElementById('nova-reserva-saldo-restante').dataset.valorTotal||0);
-            const valorSinal=Number(document.getElementById('nova-reserva-valor-sinal').value||0);
-            const forma=document.getElementById('nova-reserva-forma-pagamento').value;
-            const obs=document.getElementById('nova-reserva-observacao').value;
-            const cpf=document.getElementById('nova-reserva-cpf').value;
-            const rg=document.getElementById('nova-reserva-rg').value;
-            const endereco=document.getElementById('nova-reserva-endereco').value;
-            const cep=document.getElementById('nova-reserva-cep').value;
-            const email=document.getElementById('nova-reserva-email').value;
-            const adultos=parseInt(document.getElementById('nova-reserva-adultos').value)||2;
-            const criancas=parseInt(document.getElementById('nova-reserva-criancas').value)||0;
-            const pet=document.getElementById('nova-reserva-pet').value==='true';
-            const inputsIdades = document.querySelectorAll('.nova-reserva-input-idade-crianca');
-            const idadesStr = Array.from(inputsIdades).map(el=>parseInt(el.value)||0).join(',');
-
-            try{
                 const dadosReserva = {
                     pousada_id: usuarioIdAtual,
                     suite_id: suiteId,
                     hospede_nome: hospede,
                     whatsapp_hospede: whatsapp,
-                    cpf: cpf||null,
-                    rg: rg||null,
-                    endereco: endereco||null,
-                    cep: cep||null,
-                    email: email||null,
-                    qtd_adultos: adultos,
-                    qtd_criancas: criancas,
-                    idades_criancas: idadesStr,
-                    tem_pet: pet,
                     checkin: checkin,
                     checkout: checkout,
                     valor_total: valorTotal,
-                    status: 'Aprovada',
-                    observacao: obs||null
+                    status: 'Aprovada'
                 };
-                const {data:nova, error}=await supabaseClient.from('reservas').insert([dadosReserva]).select().single();
-                if(error) throw error;
-                if(valorSinal>0 && nova) await supabaseClient.from('hospede_pagamentos').insert([{pousada_id:usuarioIdAtual, reserva_id:nova.id, valor_pago:valorSinal, forma_pagamento:forma, observacao:'Sinal via calendário geral'}]);
+
+                const { data: nova, error } = await supabaseClient.from('reservas').insert([dadosReserva]).select().single();
+                
+                // 2. SE O BANCO DEVOLVER ERRO DE RLS (BLOQUEIO SOFT), INTERCEPTA E ABRE O MODAL
+                if (error) {
+                    if (error.message && (error.message.includes('row-level security') || error.message.includes('policy'))) {
+                        fecharModalNovaReservaCalendario();
+                        abrirModalModoLeitura();
+                        return;
+                    }
+                    throw error;
+                }
+
+                if (valorSinal > 0 && nova) {
+                    await supabaseClient.from('hospede_pagamentos').insert([{
+                        pousada_id: usuarioIdAtual,
+                        reserva_id: nova.id,
+                        valor_pago: valorSinal,
+                        forma_pagamento: forma,
+                        observacao: 'Sinal via calendário de consultas'
+                    }]);
+                }
+
                 alert('Reserva criada com sucesso!');
-                fecharModalNovaReservaCalendario(); fecharCalendarioGeralRelatorios(); calGeralCheckinTemp=null; calGeralCheckoutTemp=null; if(typeof carregarDadosView==='function') carregarDadosView();
-            }catch(e){ console.error(e); alert('Erro: '+(e.message||e)); }
+                fecharModalNovaReservaCalendario();
+                fecharCalendarioGeralRelatorios();
+                carregarDadosView();
+
+            } catch(e) {
+                console.error(e);
+                // Se cair no catch com mensagem de segurança, abre o modal elegante
+                if (String(e.message || e).includes('row-level security') || String(e.message || e).includes('policy')) {
+                    fecharModalNovaReservaCalendario();
+                    abrirModalModoLeitura();
+                } else {
+                    alert('Não foi possível salvar: ' + (e.message || e));
+                }
+            }
         }
 
         window.onload = () => {
             protegerPagina();
-            setTimeout(() => { if (viewAtualSelecionada === 'vw_gestor_reservas_relatorio') carregarCardsControleHoje(); }, 800);
         };
     </script>
 
@@ -2056,7 +1275,6 @@
                 <span class="text-xl">📅</span>
                 <h3 id="cal-suite-nome" class="text-lg font-bold text-gray-900">Calendário da Suíte</h3>
             </div>
-            <p class="text-xs text-gray-600 font-medium mb-4">Dias em <strong class="bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">verde</strong> livres. <strong class="bg-red-100 text-red-700 border border-red-200 px-1.5 py-0.5 rounded">vermelho claro com X</strong> ocupados.</p>
             <div class="flex justify-between items-center mb-4 bg-gray-50 p-2.5 rounded-xl border border-gray-200">
                 <button onclick="mudarMesCalendario(-1)" class="px-3 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-xs">◀ Mês Anterior</button>
                 <strong id="cal-mes-ano" class="text-xs sm:text-sm font-bold text-gray-800 uppercase">MÊS / ANO</strong>
@@ -2066,11 +1284,6 @@
                 <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
             </div>
             <div id="cal-grid-dias" class="grid grid-cols-7 gap-1.5 text-center text-xs"></div>
-            <div class="mt-4 flex items-center justify-center gap-4 text-[10px]">
-                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-100 border border-emerald-200 rounded"></span> Livre</span>
-                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-red-100 border border-red-200 rounded relative flex items-center justify-center"><span class="text-[8px] text-red-600 font-bold">✕</span></span> Ocupado</span>
-                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-gray-100 border rounded"></span> Passado</span>
-            </div>
             <div class="mt-6 flex justify-end">
                 <button onclick="fecharCalendarioSuite()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold text-xs sm:text-sm py-2.5 rounded-xl transition">Fechar</button>
             </div>
@@ -2081,45 +1294,29 @@
     <div id="modal-calendario-geral-relatorios" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-[60]">
         <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6 sm:p-7 relative max-h-[92vh] overflow-y-auto">
             <button onclick="fecharCalendarioGeralRelatorios()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold">✕</button>
-            
             <div class="flex items-center gap-2 mb-4 pr-8">
                 <span class="text-xl">🗓️</span>
                 <div>
                     <h3 class="text-lg font-extrabold text-gray-900">Calendário Geral de Ocupação</h3>
-                    <p class="text-[11px] text-gray-500">Navegue entre suítes (seta topo) e meses (seta baixo)</p>
+                    <p class="text-[11px] text-gray-500">Selecione uma data para criar nova reserva</p>
                 </div>
             </div>
-
-            <!-- PAINEL COM TODAS AS SUÍTES -->
             <div class="mb-4">
                 <div class="flex justify-between items-center mb-2">
-                    <span class="text-[11px] font-extrabold text-slate-700 uppercase tracking-widest flex items-center gap-2"><i class="fa-solid fa-layer-group text-indigo-600"></i> TODAS AS SUÍTES (<span id="cal-geral-rel-total">0</span>) - PASSE O MOUSE OU CLIQUE</span>
+                    <span class="text-[11px] font-extrabold text-slate-700 uppercase tracking-widest"><i class="fa-solid fa-layer-group text-indigo-600 mr-1"></i> Suítes</span>
                     <span id="cal-geral-rel-suite-nome" class="text-[11px] font-bold bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full">Suíte: -</span>
                 </div>
                 <div id="cal-geral-rel-painel-suites" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 max-h-[160px] overflow-y-auto p-2 bg-gray-50 rounded-2xl border border-gray-200"></div>
             </div>
-
-            <p class="text-[11px] text-emerald-700 font-medium mb-1 text-center">Dias em <span class="bg-emerald-100 px-1.5 py-0.5 rounded font-bold">verde</span> livres, <span class="bg-red-100 px-1.5 py-0.5 rounded font-bold">vermelho com X</span> ocupados. Azul = seleção.</p><p id="cal-geral-instrucao" class="text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-full px-3 py-1.5 text-center mb-3">Clique em uma data livre para definir CHECK-IN</p>
-
-            <!-- NAVEGAÇÃO DE MÊS -->
             <div class="flex justify-between items-center mb-4 bg-gray-50 p-2.5 rounded-xl border border-gray-200">
-                <button onclick="mudarMesCalendarioGeralRelatorios(-1)" class="px-3 py-1.5 bg-white hover:bg-gray-100 rounded-xl text-[11px] font-bold border shadow-xs flex items-center gap-1.5"><i class="fa-solid fa-chevron-left text-[10px]"></i> Mês Anterior</button>
-                <strong id="cal-geral-rel-mes-ano" class="text-xs sm:text-sm font-extrabold text-gray-800 uppercase tracking-wide">SETEMBRO DE 2026</strong>
-                <button onclick="mudarMesCalendarioGeralRelatorios(1)" class="px-3 py-1.5 bg-white hover:bg-gray-100 rounded-xl text-[11px] font-bold border shadow-xs flex items-center gap-1.5">Próximo Mês <i class="fa-solid fa-chevron-right text-[10px]"></i></button>
+                <button onclick="mudarMesCalendarioGeralRelatorios(-1)" class="px-3 py-1.5 bg-white hover:bg-gray-100 rounded-xl text-[11px] font-bold border shadow-xs"><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+                <strong id="cal-geral-rel-mes-ano" class="text-xs sm:text-sm font-extrabold text-gray-800 uppercase">SETEMBRO DE 2026</strong>
+                <button onclick="mudarMesCalendarioGeralRelatorios(1)" class="px-3 py-1.5 bg-white hover:bg-gray-100 rounded-xl text-[11px] font-bold border shadow-xs">Próximo <i class="fa-solid fa-chevron-right"></i></button>
             </div>
-
             <div class="grid grid-cols-7 gap-1 text-center font-bold text-[11px] text-gray-500 mb-2">
                 <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
             </div>
-
             <div id="cal-geral-rel-grid" class="grid grid-cols-7 gap-1.5 text-center text-sm min-h-[240px]"></div>
-
-            <div class="mt-5 flex flex-wrap justify-center gap-3 text-[11px] font-bold">
-                <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-emerald-100 border border-emerald-300"></span> Livre</span>
-                <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-red-100 border border-red-300 flex items-center justify-center text-[9px]">✕</span> Ocupado</span>
-                <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-gray-100 border border-gray-200"></span> Passado</span>
-            </div>
-
             <div class="mt-6">
                 <button onclick="fecharCalendarioGeralRelatorios()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-3 rounded-xl transition text-sm">Fechar</button>
             </div>
@@ -2131,7 +1328,7 @@
         <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-7 relative max-h-[92vh] overflow-y-auto">
             <button onclick="fecharModalNovaReservaCalendario()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold">✕</button>
             <h3 id="nova-reserva-titulo" class="text-lg font-extrabold text-blue-700 mb-1 pr-8">Criar Nova Reserva: Suíte</h3>
-            <p class="text-[11px] text-gray-500 mb-3">Datas preenchidas automaticamente pelo calendário geral</p>
+            <p class="text-[11px] text-gray-500 mb-3">Datas preenchidas pelo calendário</p>
             <div id="nova-reserva-resumo" class="bg-blue-50 border border-blue-200 p-3 rounded-xl space-y-1 text-xs text-blue-900 mb-4">
                 <div class="flex justify-between"><span>Qtd. Diárias:</span><strong id="nova-reserva-qtd-diarias">0</strong></div>
                 <div class="flex justify-between"><span>Valor Total:</span><strong id="nova-reserva-valor-total">R$ 0,00</strong></div>
@@ -2139,37 +1336,21 @@
             </div>
             <div class="space-y-3">
                 <input type="hidden" id="nova-reserva-suite-id">
-                <div id="nova-reserva-capacidade-info" class="mb-1 bg-blue-50 border border-blue-200 p-2.5 rounded-xl text-xs font-bold text-blue-900 flex items-center gap-2"><span>🏨</span> <span id="nova-reserva-capacidade-texto">Capacidade: carregando...</span></div>
                 <input type="text" id="nova-reserva-hospede" placeholder="Nome Hóspede *" class="w-full p-3 border rounded-xl text-sm">
                 <input type="text" id="nova-reserva-whatsapp" placeholder="WhatsApp *" class="w-full p-3 border rounded-xl text-sm">
-                <div class="grid grid-cols-2 gap-2"><input type="text" id="nova-reserva-cpf" placeholder="CPF (Opcional)" class="p-3 border rounded-xl text-sm"><input type="text" id="nova-reserva-rg" placeholder="RG (Opcional)" class="p-3 border rounded-xl text-sm"></div>
-                <input type="text" id="nova-reserva-endereco" placeholder="Endereço" class="w-full p-3 border rounded-xl text-sm">
-                <div class="grid grid-cols-2 gap-2"><input type="text" id="nova-reserva-cep" placeholder="CEP" class="p-3 border rounded-xl text-sm"><input type="email" id="nova-reserva-email" placeholder="E-mail" class="p-3 border rounded-xl text-sm"></div>
-                <div class="grid grid-cols-3 gap-3 pt-2">
-                    <div><label class="block text-xs font-bold text-gray-700 mb-1">Adultos</label><input type="number" id="nova-reserva-adultos" min="1" value="2" class="w-full p-3 border rounded-xl text-sm" onchange="recalcularNovaReservaCalendario()" oninput="recalcularNovaReservaCalendario()"></div>
-                    <div><label class="block text-xs font-bold text-gray-700 mb-1">Crianças</label><input type="number" id="nova-reserva-criancas" min="0" value="0" class="w-full p-3 border rounded-xl text-sm" onchange="recalcularNovaReservaCalendario()" oninput="recalcularNovaReservaCalendario()"></div>
-                    <div><label class="block text-xs font-bold text-gray-700 mb-1">Taxa de Pet</label><select id="nova-reserva-pet" class="w-full p-3 border rounded-xl text-sm font-bold" onchange="recalcularNovaReservaCalendario()"><option value="false">Não</option><option value="true">Sim</option></select></div>
-                </div>
-                <div id="nova-reserva-container-idades-criancas" class="hidden bg-gray-50 border border-gray-200 p-3 rounded-xl space-y-2">
-                    <label class="block text-xs font-bold text-gray-700">Idade(s) da(s) Criança(s) (para cálculo e isenção):</label>
-                    <div id="nova-reserva-lista-idades-criancas" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
-                </div>
-                <div id="nova-reserva-aviso-capacidade" class="hidden mt-2 p-2.5 rounded-xl text-xs font-bold"></div>
                 <div class="grid grid-cols-2 gap-3 pt-2">
                     <div><label class="block text-xs font-bold text-gray-700 mb-1">Check-in</label><input type="date" id="nova-reserva-checkin" readonly class="w-full p-3 border rounded-xl text-sm bg-blue-50/50 font-bold"></div>
                     <div><label class="block text-xs font-bold text-gray-700 mb-1">Check-out</label><input type="date" id="nova-reserva-checkout" readonly class="w-full p-3 border rounded-xl text-sm bg-blue-50/50 font-bold"></div>
                 </div>
                 <div class="pt-2 space-y-2">
-                    <div><label class="block text-xs font-bold text-emerald-700 mb-1">Registrar Novo Pagamento / Sinal (R$)</label><input type="number" step="0.01" id="nova-reserva-valor-sinal" placeholder="0.00" class="w-full p-3 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-sm" oninput="recalcularNovaReservaCalendario()"></div>
-                    <div><label class="block text-xs font-bold text-emerald-700 mb-1">Forma de Pagamento</label><select id="nova-reserva-forma-pagamento" class="w-full p-3 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-sm"><option>Pix / Sinal</option><option>Dinheiro</option><option>Cartão de Crédito</option><option>Cartão de Débito</option><option>Transferência Bancária</option></select></div>
-                    <div><label class="block text-xs font-bold text-amber-700 mb-1">⚠️ Observação / Mensagem de Alerta Importante</label><textarea id="nova-reserva-observacao" rows="2" placeholder="Ex: Hóspede solicitou late checkout, etc." class="w-full p-3 border border-amber-300 bg-amber-50/40 rounded-xl text-sm"></textarea></div>
+                    <div><label class="block text-xs font-bold text-emerald-700 mb-1">Registrar Sinal (R$)</label><input type="number" step="0.01" id="nova-reserva-valor-sinal" placeholder="0.00" class="w-full p-3 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-sm"></div>
+                    <div><label class="block text-xs font-bold text-emerald-700 mb-1">Forma de Pagamento</label><select id="nova-reserva-forma-pagamento" class="w-full p-3 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-sm"><option>Pix / Sinal</option><option>Dinheiro</option><option>Cartão de Crédito</option></select></div>
                 </div>
-                <button onclick="salvarNovaReservaCalendario()" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold mt-4 text-sm">Salvar Alterações</button>
-                <button onclick="fecharModalNovaReservaCalendario()" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 p-3 rounded-xl font-bold mt-2 text-sm">Cancelar</button>
+                <button onclick="salvarNovaReservaCalendario()" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold mt-4 text-sm shadow-md">Salvar Reserva</button>
+                <button onclick="fecharModalNovaReservaCalendario()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 p-3 rounded-xl font-bold mt-2 text-sm">Cancelar</button>
             </div>
         </div>
     </div>
 
 </body>
 </html>
---- END OF FILE relatorios.html ---
