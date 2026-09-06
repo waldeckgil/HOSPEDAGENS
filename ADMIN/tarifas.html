@@ -10,7 +10,7 @@
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col md:flex-row text-slate-800">
 
-    <!-- MENU LATERAL COMPLETO E DESTRAVADO -->
+    <!-- MENU LATERAL -->
     <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl shrink-0">
         <div class="p-4 sm:p-6">
             <div class="flex justify-between items-center md:block mb-4 md:mb-6">
@@ -58,7 +58,7 @@
             <div class="max-w-7xl mx-auto space-y-6">
                 
                 <!-- ============================================================== -->
-                <!-- CARD DE ASSINATURA DINÂMICO (REFLETE 100% O ADMIN-MASTER)      -->
+                <!-- CARD NO TOPO: MINHA ASSINATURA (SINCRONIZADO COM ADMIN-MASTER) -->
                 <!-- ============================================================== -->
                 <div id="card-minha-assinatura" class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 p-6 rounded-3xl shadow-xl border border-slate-800 text-white relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-48 h-48 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -258,7 +258,8 @@
                                 <span class="block text-xs font-extrabold text-blue-900 uppercase tracking-wider flex items-center gap-2">
                                     <i class="fa-solid fa-pen-nib text-blue-600"></i> Descrição da Pousada (Vitrine)
                                 </span>
-                                <textarea id="pousada-descricao-pousada" rows="3" placeholder="Ex: Você desfruta de um ambiente ideal para descanso e lazer da família..." class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs"></textarea>
+                                <textarea id="pousada-descricao-pousada" rows="3" placeholder="Ex: Você desfruta de um ambiente ideal para descanso e lazer da família, combinando hospitalidade, diversão e natureza..." class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs"></textarea>
+                                <p class="text-[10px] text-gray-500">Exibido quando o cliente clica em 'Conheça a Pousada' na vitrine pública.</p>
                             </div>
 
                             <!-- MÍDIAS: FOTOS E ATRAÇÕES -->
@@ -301,7 +302,7 @@
                 </div>
 
                 <!-- ============================================================== -->
-                <!-- SEÇÃO 2: MOTOR COMPLETO DE TARIFAS ESPECIAIS E SAZONALIDADE     -->
+                <!-- SEÇÃO 2: MOTOR DE TARIFAS ESPECIAIS E SAZONALIDADE (COMPLETO)  -->
                 <!-- ============================================================== -->
                 <div class="bg-white p-5 sm:p-8 rounded-3xl shadow-md border border-gray-200">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2 border-b border-gray-100 pb-3">
@@ -389,7 +390,7 @@
         </main>
     </div>
 
-    <!-- TOAST DE NOTIFICAÇÃO -->
+    <!-- TOAST -->
     <div id="toast-notificacao" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
         <div id="toast-content" class="bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
             <span id="toast-icone" class="text-xl">✨</span>
@@ -400,7 +401,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE EXCLUSÃO -->
+    <!-- MODAL EXCLUSÃO -->
     <div id="modal-confirmacao" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white p-8 rounded-3xl max-w-md w-full shadow-2xl space-y-6 text-center">
             <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto text-xl font-bold">⚠️</div>
@@ -415,7 +416,6 @@
         </div>
     </div>
 
-    <!-- SCRIPT DE INTEGRAÇÃO COMPLETA -->
     <script>
         const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
@@ -445,7 +445,6 @@
             setTimeout(() => { toast.classList.add('translate-y-24', 'opacity-0'); }, 3000);
         }
 
-        // CARREGAMENTO SEGURO
         window.addEventListener('DOMContentLoaded', async () => {
             await protegerPagina();
         });
@@ -459,13 +458,26 @@
                 }
 
                 usuarioIdAtual = session.user.id;
+                const emailUsuario = session.user.email;
 
-                // 1. Busca os dados reais da Pousada
-                const { data: pousada, error: errP } = await supabaseClient
+                // Busca a pousada por ID ou por email_admin
+                let { data: pousada } = await supabaseClient
                     .from('pousadas')
                     .select('*')
                     .eq('id', usuarioIdAtual)
                     .maybeSingle();
+
+                if (!pousada && emailUsuario) {
+                    const resAlt = await supabaseClient
+                        .from('pousadas')
+                        .select('*')
+                        .eq('email_admin', emailUsuario)
+                        .maybeSingle();
+                    if (resAlt.data) {
+                        pousada = resAlt.data;
+                        usuarioIdAtual = pousada.id;
+                    }
+                }
 
                 pousadaCache = pousada || {};
                 const nomePousada = pousadaCache.nome || "Minha Pousada";
@@ -473,10 +485,10 @@
                 document.getElementById('titulo-pousada').innerText = nomePousada;
                 document.getElementById('nome-pousada-sidebar').innerText = nomePousada;
 
-                // 2. Conecta e Atualiza em tempo real o Card de Assinatura
+                // 1. Atualiza o Card de Assinatura SaaS no topo
                 await atualizarCardAssinatura(pousadaCache);
 
-                // 3. Preenche todas as regras de negócio da Pousada
+                // 2. Preenche todos os campos operacionais originais
                 if (pousadaCache) {
                     document.getElementById('pousada-checkin').value = pousadaCache.horario_checkin || '';
                     document.getElementById('pousada-checkout').value = pousadaCache.horario_checkout || '';
@@ -504,7 +516,7 @@
                     document.getElementById('pousada-descricao-pensao').value = pousadaCache.descricao_pensao || '';
                     document.getElementById('pousada-descricao-pousada').value = pousadaCache.descricao_pousada || '';
 
-                    // Galerias
+                    // Mídias
                     document.getElementById('check-exibir-fotos').checked = pousadaCache.exibir_fotos_pousada || false;
                     toggleSecaoFotos();
                     renderizarFotosSalvas('pousada', pousadaCache.fotos_pousada);
@@ -514,17 +526,17 @@
                     renderizarFotosSalvas('atracoes', pousadaCache.atracoes_turisticas);
                 }
 
-                // 4. Carrega as suítes e tarifas especiais
+                // 3. Carrega as suítes e tarifas especiais
                 await carregarSuitesETarifas();
 
-            } catch (e) {
-                console.error("Erro ao carregar tarifas:", e);
+            } catch (err) {
+                console.error("Erro na inicialização:", err);
             }
         }
 
-        // ATUALIZA O CARD DE ASSINATURA COM OS VALORES REAIS DO ADMIN MASTER
+        // ATUALIZA O CARD DE ASSINATURA CONECTADO AO ADMIN MASTER
         async function atualizarCardAssinatura(pousada) {
-            // Contagem de suítes ativas para auditoria do plano
+            // Contagem de suítes ativas
             const { data: suites } = await supabaseClient
                 .from('suites')
                 .select('id, ativa')
@@ -554,8 +566,8 @@
                 if (config && config.dias_aviso_vencimento) diasAviso = config.dias_aviso_vencimento;
             } catch(e) {}
 
-            // Valor do plano: se o Admin Master definiu plano_valor, usa ele!
-            const valorFinal = pousada.plano_valor !== null && pousada.plano_valor !== undefined 
+            // Valor do plano: usa plano_valor gravado no Admin Master
+            const valorFinal = (pousada.plano_valor !== null && pousada.plano_valor !== undefined)
                 ? Number(pousada.plano_valor) 
                 : (faixaEncontrada ? Number(faixaEncontrada.valor_mensal) : 149.90);
 
@@ -594,7 +606,7 @@
             vencimento.innerText = dVenc.toLocaleDateString('pt-BR');
             const diffDias = Math.ceil((dVenc - hoje) / (1000 * 60 * 60 * 24));
 
-            // CONDICIONAIS DE STATUS EXATAS DO ADMIN MASTER:
+            // CONDICIONAIS DE STATUS
             if (pousada.status === 'blocked' || diffDias < 0) {
                 // VENCIDA OU BLOQUEADA
                 badge.className = 'px-3 py-0.5 rounded-full text-[10px] font-extrabold border bg-red-500/20 text-red-300 border-red-500/30';
@@ -741,7 +753,7 @@
             } catch (e) {}
         }
 
-        // SALVAR REGRAS OPERACIONAIS DA POUSADA
+        // SALVA AS REGRAS DA POUSADA (INCLUINDO REDES E CONTATOS)
         async function salvarRegrasPousada() {
             const nomeAtualPousada = document.getElementById('titulo-pousada').innerText || "Minha Pousada";
 
@@ -810,12 +822,14 @@
                 valor_pet: document.getElementById('pousada-aceita-pet').value === 'sim' ? (Number(document.getElementById('pousada-valor-pet').value) || 0) : null,
                 valor_hospede_extra: Number(document.getElementById('pousada-valor-hospede-extra').value) || 0,
                 
+                // GRAVAÇÃO COMPLETA DE CONTATOS E REDES SOCIAIS
                 whatsapp_contato: document.getElementById('pousada-whatsapp-contato').value.trim() || null,
                 cnpj_cpf: document.getElementById('pousada-cnpj-cpf').value.trim() || null,
                 instagram: document.getElementById('pousada-instagram').value.trim() || null,
                 facebook: document.getElementById('pousada-facebook').value.trim() || null,
                 exigir_documento: document.getElementById('pousada-exigir-documento').checked,
 
+                // PENSÃO E MÍDIAS
                 tipo_pensao: document.getElementById('pousada-tipo-pensao').value || null,
                 descricao_pensao: document.getElementById('pousada-descricao-pensao').value || null,
                 descricao_pousada: document.getElementById('pousada-descricao-pousada').value || null,
