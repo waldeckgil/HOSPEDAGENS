@@ -41,10 +41,11 @@
 
     <!-- CONTEÚDO PRINCIPAL -->
     <div class="flex-1 flex flex-col min-w-0">
+        
         <!-- CABEÇALHO -->
         <header class="bg-white border-b border-gray-200 p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                <h2 class="text-lg sm:text-xl font-bold text-gray-800">Tarifas, Regras e Assinatura</h2>
+                <h2 class="text-lg sm:text-xl font-bold text-gray-800">Gerenciamento de Tarifas e Regras</h2>
                 <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold w-fit">Carregando...</span>
             </div>
             <a href="dashboard.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 border border-slate-200 shadow-xs">
@@ -56,74 +57,69 @@
         <main class="p-4 sm:p-6 md:p-8 flex-1 overflow-y-auto space-y-6">
             <div class="max-w-7xl mx-auto space-y-6">
                 
-                <!-- SEÇÃO 0: STATUS DO PLANO DE ASSINATURA SAAS (CONTROLE ADMIN MASTER) -->
-                <div id="card-plano-assinatura" class="bg-white p-5 sm:p-6 rounded-3xl shadow-sm border border-gray-200">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-gray-100 pb-4 mb-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg border border-blue-100">
-                                <i class="fa-solid fa-shield-halved"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-base font-extrabold text-gray-900">Meu Plano de Assinatura</h3>
-                                <p class="text-xs text-gray-500">Dados cadastrados e controlados pelo painel Master SaaS.</p>
-                            </div>
-                        </div>
-                        <div id="status-assinatura-badge">
-                            <span class="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-bold">Verificando...</span>
-                        </div>
-                    </div>
+                <!-- ============================================================== -->
+                <!-- CARD DINÂMICO DE ASSINATURA (CONECTADO 100% AO ADMIN MASTER)  -->
+                <!-- ============================================================== -->
+                <div id="card-minha-assinatura" class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 p-6 rounded-3xl shadow-xl border border-slate-800 text-white relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-48 h-48 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
-                    <!-- GRID DE DETALHES -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200">
-                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Status do Acesso</span>
-                            <div id="info-status-texto" class="text-sm font-extrabold text-gray-800 mt-1 flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full bg-gray-400"></span> Carregando...
+                    <div class="flex flex-col lg:flex-row justify-between gap-6 relative z-10">
+                        <!-- COLUNA ESQUERDA: DADOS REAIS DO SUPABASE -->
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="bg-amber-400 text-slate-950 px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase flex items-center gap-1 shadow">
+                                    <i class="fa-solid fa-crown"></i> Minha Assinatura
+                                </span>
+                                <span id="assinatura-badge" class="px-3 py-0.5 rounded-full text-[10px] font-extrabold border bg-slate-800 text-slate-300 border-slate-700">
+                                    Carregando status...
+                                </span>
+                            </div>
+
+                            <h3 class="text-xl font-extrabold tracking-wide">
+                                Plano: <span id="assinatura-plano-nome" class="text-amber-300">Carregando...</span>
+                            </h3>
+
+                            <!-- MÉTRICAS DO PLANO (LIDAS DO BANCO) -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4 text-xs">
+                                <div class="bg-white/5 border border-white/10 p-3.5 rounded-2xl backdrop-blur-xs">
+                                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Suítes Ativas</p>
+                                    <p id="assinatura-suites" class="text-xl font-black mt-1 text-white">0</p>
+                                    <p id="assinatura-limite-desc" class="text-[10px] text-slate-400 mt-1">Auditadas no banco</p>
+                                </div>
+                                <div class="bg-white/5 border border-white/10 p-3.5 rounded-2xl backdrop-blur-xs">
+                                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Valor Mensal</p>
+                                    <p id="assinatura-valor" class="text-xl font-black mt-1 text-emerald-400">R$ 0,00</p>
+                                    <p class="text-[10px] text-slate-400 mt-1">Definido pelo Admin Master</p>
+                                </div>
+                                <div class="bg-white/5 border border-white/10 p-3.5 rounded-2xl backdrop-blur-xs">
+                                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Vencimento</p>
+                                    <p id="assinatura-vencimento" class="text-xl font-black mt-1 text-white">--/--/----</p>
+                                    <p id="assinatura-dias" class="text-[10px] text-slate-400 font-bold mt-1">Calculando...</p>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200">
-                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Próximo Vencimento</span>
-                            <div id="info-vencimento-texto" class="text-sm font-extrabold text-gray-800 mt-1">
-                                --/--/----
+                        <!-- COLUNA DIREITA: CAIXA DE AVISO / MENSAGEM DINÂMICA -->
+                        <div class="lg:w-80 flex flex-col justify-between">
+                            <div id="assinatura-msg-box" class="bg-white text-slate-900 p-4 rounded-2xl shadow-lg border-l-4 border-slate-400 transition-all">
+                                <p id="assinatura-msg-titulo" class="text-xs font-extrabold text-slate-900 leading-snug">
+                                    Consultando situação...
+                                </p>
+                                <p id="assinatura-msg-sub" class="text-[11px] text-slate-600 mt-1.5 leading-relaxed">
+                                    Aguarde enquanto verificamos os dados de acesso da pousada.
+                                </p>
                             </div>
-                            <span id="info-dias-restantes" class="text-[11px] text-gray-500 block mt-0.5">Calculando...</span>
+                            <p class="text-[10px] text-slate-400 mt-3 text-center italic">
+                                * Para alteração de plano ou renovação via PIX, contate o administrador.
+                            </p>
                         </div>
-
-                        <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200">
-                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Valor Mensalidade</span>
-                            <div id="info-valor-mensal" class="text-sm font-extrabold text-blue-700 mt-1">
-                                R$ 0,00
-                            </div>
-                            <span id="info-descricao-faixa" class="text-[11px] text-gray-500 block mt-0.5">Plano padrão</span>
-                        </div>
-
-                        <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200">
-                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Suítes Ativas</span>
-                            <div id="info-suites-ativas" class="text-sm font-extrabold text-gray-800 mt-1">
-                                0 suítes ativas
-                            </div>
-                            <span class="text-[10px] text-gray-400 block mt-0.5">Base de cálculo do plano</span>
-                        </div>
-                    </div>
-
-                    <!-- BANNER DE AVISO / BLOQUEIO -->
-                    <div id="alerta-cobranca" class="hidden mt-4 p-4 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                        <div class="flex items-center gap-3">
-                            <div id="alerta-icone" class="text-2xl">⚠️</div>
-                            <div>
-                                <h4 id="alerta-titulo" class="font-extrabold text-xs sm:text-sm">Atenção ao Vencimento</h4>
-                                <p id="alerta-descricao" class="text-xs">Sua fatura vencerá em breve. Renove para manter todas as reservas e canais ativos.</p>
-                            </div>
-                        </div>
-                        <a id="btn-contato-master" href="#" target="_blank" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-slate-900 hover:bg-black transition shrink-0 flex items-center gap-2">
-                            <i class="fa-brands fa-whatsapp text-emerald-400"></i> Falar com Suporte Master
-                        </a>
                     </div>
                 </div>
 
-                <!-- SEÇÃO 1: REGRAS GERAIS, CANAIS E POLÍTICAS DA POUSADA -->
-                <div class="bg-white p-5 sm:p-8 rounded-3xl shadow-sm border border-gray-200">
+                <!-- ============================================================== -->
+                <!-- SEÇÃO 1: TODAS AS REGRAS DA POUSADA DA VERSÃO ANTERIOR         -->
+                <!-- ============================================================== -->
+                <div class="bg-white p-5 sm:p-8 rounded-3xl shadow-md border border-gray-200">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2 border-b border-gray-100 pb-3">
                         <div>
                             <h2 class="text-base sm:text-xl font-extrabold text-blue-600 flex items-center gap-2">
@@ -131,14 +127,14 @@
                             </h2>
                             <p class="text-xs text-gray-500 mt-0.5">Defina horários, redes sociais, políticas de estadias e mídias exibidas na vitrine.</p>
                         </div>
-                        <button type="button" id="btn-salvar-regras-pousada" onclick="salvarRegrasPousada()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl transition text-xs sm:text-sm shadow-md flex items-center justify-center gap-2">
+                        <button type="button" id="btn-salvar-pousada" onclick="salvarRegrasPousada()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl transition text-xs sm:text-sm shadow-md flex items-center justify-center gap-2">
                             <i class="fa-solid fa-floppy-disk"></i> Salvar Regras da Pousada
                         </button>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-5">
                         
-                        <!-- SUB-BLOCO ESQUERDO: HORÁRIOS, POLÍTICAS E OPERAÇÃO (6 COLUNAS) -->
+                        <!-- SUB-BLOCO ESQUERDO: HORÁRIOS, POLÍTICAS E REGRAS OPERACIONAIS (6 COLUNAS) -->
                         <div class="lg:col-span-6 space-y-4">
                             <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-200 space-y-3">
                                 <span class="block text-xs font-extrabold text-blue-900 uppercase tracking-wider mb-2 flex items-center gap-2">
@@ -191,7 +187,7 @@
                                         <div>
                                             <span class="text-xs font-extrabold text-blue-950 block">Exigir Documento do Hóspede na Vitrine</span>
                                             <span class="text-[11px] text-gray-500 leading-tight block mt-0.5">
-                                                Se marcado, o hóspede será obrigado a preencher documento ao solicitar reserva na vitrine.
+                                                Se marcado, o hóspede será obrigado a preencher/enviar documento oficial ao solicitar reserva na vitrine.
                                             </span>
                                         </div>
                                     </label>
@@ -214,18 +210,20 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Descrição do Regime (Opcional - Vitrine)</label>
+                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Descrição do Regime (Opcional - Exibido na vitrine)</label>
                                     <textarea id="pousada-descricao-pensao" rows="2" placeholder="Ex: Café colonial servido das 08h às 10h com produtos artesanais..." class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs"></textarea>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- SUB-BLOCO DIREITO: CONTATOS, REDES, TEXTOS E FOTOS (6 COLUNAS) -->
+                        <!-- SUB-BLOCO DIREITO: CANAIS DE ATENDIMENTO, REDES, TEXTOS E FOTOS (6 COLUNAS) -->
                         <div class="lg:col-span-6 space-y-4">
+                            <!-- CANAIS DE ATENDIMENTO, REDES SOCIAIS E CNPJ -->
                             <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-200 space-y-3">
                                 <span class="block text-xs font-extrabold text-blue-900 uppercase tracking-wider mb-1 flex items-center gap-2">
-                                    <i class="fa-solid fa-share-nodes text-blue-600"></i> Canais de Contato e Redes Oficiais
+                                    <i class="fa-solid fa-share-nodes text-blue-600"></i> Canais Oficiais de Contato e Redes
                                 </span>
+                                <p class="text-[11px] text-gray-500">Exibidos na vitrine pública do hóspede para contato e credibilidade.</p>
                                 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
@@ -236,19 +234,19 @@
                                     </div>
                                     <div>
                                         <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1 flex items-center gap-1">
-                                            <i class="fa-solid fa-file-invoice text-gray-500"></i> CNPJ ou CPF
+                                            <i class="fa-solid fa-file-invoice text-gray-500"></i> CNPJ ou CPF da Pousada
                                         </label>
                                         <input type="text" id="pousada-cnpj-cpf" placeholder="Ex: 00.000.000/0001-00" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm">
                                     </div>
                                     <div>
                                         <label class="block text-[11px] font-bold text-pink-800 uppercase mb-1 flex items-center gap-1">
-                                            <i class="fa-brands fa-instagram text-pink-600"></i> Instagram
+                                            <i class="fa-brands fa-instagram text-pink-600"></i> Instagram da Pousada
                                         </label>
                                         <input type="text" id="pousada-instagram" placeholder="Ex: @minhapousada" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm">
                                     </div>
                                     <div>
                                         <label class="block text-[11px] font-bold text-blue-800 uppercase mb-1 flex items-center gap-1">
-                                            <i class="fa-brands fa-facebook text-blue-600"></i> Facebook
+                                            <i class="fa-brands fa-facebook text-blue-600"></i> Facebook da Pousada
                                         </label>
                                         <input type="text" id="pousada-facebook" placeholder="Ex: /minhapousada" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm">
                                     </div>
@@ -260,7 +258,7 @@
                                 <span class="block text-xs font-extrabold text-blue-900 uppercase tracking-wider flex items-center gap-2">
                                     <i class="fa-solid fa-pen-nib text-blue-600"></i> Descrição da Pousada (Vitrine)
                                 </span>
-                                <textarea id="pousada-descricao-pousada" rows="3" placeholder="Ex: Você desfruta de um ambiente ideal para descanso e lazer..." class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs"></textarea>
+                                <textarea id="pousada-descricao-pousada" rows="3" placeholder="Ex: Você desfruta de um ambiente ideal para descanso e lazer da família..." class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs"></textarea>
                             </div>
 
                             <!-- MÍDIAS: FOTOS E ATRAÇÕES -->
@@ -277,7 +275,7 @@
                                     </label>
                                     <div id="container-upload-fotos" class="hidden space-y-2 mt-2 bg-white p-3 rounded-xl border border-gray-200">
                                         <div id="lista-fotos-salvas-pousada"></div>
-                                        <label class="block text-[10px] font-bold text-gray-500 uppercase">Adicionar novas fotos:</label>
+                                        <label class="block text-[10px] font-bold text-gray-500 uppercase">Adicionar novas fotos da pousada:</label>
                                         <input type="file" id="input-fotos-pousada" multiple accept="image/*" class="w-full text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700" onchange="gerarCamposDescricaoFotos('pousada')">
                                         <div id="lista-descricoes-fotos" class="space-y-1.5 mt-2"></div>
                                     </div>
@@ -291,7 +289,7 @@
                                     </label>
                                     <div id="container-upload-atracoes" class="hidden space-y-2 mt-2 bg-white p-3 rounded-xl border border-gray-200">
                                         <div id="lista-fotos-salvas-atracoes"></div>
-                                        <label class="block text-[10px] font-bold text-gray-500 uppercase">Adicionar fotos de atrações:</label>
+                                        <label class="block text-[10px] font-bold text-gray-500 uppercase">Adicionar novas fotos de atrações:</label>
                                         <input type="file" id="input-fotos-atracoes" multiple accept="image/*" class="w-full text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700" onchange="gerarCamposDescricaoFotos('atracoes')">
                                         <div id="lista-descricoes-atracoes" class="space-y-1.5 mt-2"></div>
                                     </div>
@@ -302,8 +300,10 @@
                     </div>
                 </div>
 
-                <!-- SEÇÃO 2: MOTOR DE TARIFAS ESPECIAIS E SAZONALIDADE -->
-                <div class="bg-white p-5 sm:p-8 rounded-3xl shadow-sm border border-gray-200">
+                <!-- ============================================================== -->
+                <!-- SEÇÃO 2: MOTOR COMPLETO DE TARIFAS ESPECIAIS E SAZONALIDADE     -->
+                <!-- ============================================================== -->
+                <div class="bg-white p-5 sm:p-8 rounded-3xl shadow-md border border-gray-200">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2 border-b border-gray-100 pb-3">
                         <div>
                             <h2 id="titulo-form-regra" class="text-base sm:text-xl font-extrabold text-blue-600 flex items-center gap-2">
@@ -311,7 +311,7 @@
                             </h2>
                             <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Defina acréscimos percentuais (%) ou valores fixos (R$) para feriados, pacotes ou fins de semana.</p>
                         </div>
-                        <button type="button" id="btn-cancelar-edicao" onclick="cancelarEdicao()" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1.5 px-4 rounded-xl text-xs transition">
+                        <button id="btn-cancelar-edicao" onclick="cancelarEdicao()" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1.5 px-4 rounded-xl text-xs transition">
                             Cancelar Edição
                         </button>
                     </div>
@@ -379,7 +379,7 @@
                                 </tr>
                             </thead>
                             <tbody id="tabela-tarifas-corpo" class="text-sm divide-y text-gray-700">
-                                <tr><td colspan="5" class="p-4 text-center text-gray-500">Carregando regras...</td></tr>
+                                <tr><td colspan="5" class="p-4 text-center text-gray-500">Carregando tarifas especiais...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -389,7 +389,7 @@
         </main>
     </div>
 
-    <!-- TOAST -->
+    <!-- TOAST DE NOTIFICAÇÃO -->
     <div id="toast-notificacao" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
         <div id="toast-content" class="bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
             <span id="toast-icone" class="text-xl">✨</span>
@@ -400,7 +400,7 @@
         </div>
     </div>
 
-    <!-- MODAL EXCLUSÃO -->
+    <!-- MODAL DE EXCLUSÃO -->
     <div id="modal-confirmacao" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white p-8 rounded-3xl max-w-md w-full shadow-2xl space-y-6 text-center">
             <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto text-xl font-bold">⚠️</div>
@@ -415,6 +415,7 @@
         </div>
     </div>
 
+    <!-- SCRIPT DE INTEGRAÇÃO COMPLETA -->
     <script>
         const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
@@ -425,7 +426,6 @@
         let suitesCache = [];
         let tarifasCache = [];
         let idParaExcluir = null;
-        let contaBloqueada = false;
 
         function mostrarToast(mensagem, tipo = 'sucesso') {
             const toast = document.getElementById('toast-notificacao');
@@ -445,12 +445,12 @@
             setTimeout(() => { toast.classList.add('translate-y-24', 'opacity-0'); }, 3000);
         }
 
-        // INICIALIZAÇÃO LIMPA E SEM CONCORRÊNCIA COM EXTENSÕES
+        // CARREGAMENTO SEGURO
         window.addEventListener('DOMContentLoaded', async () => {
-            await inicializarPagina();
+            await protegerPagina();
         });
 
-        async function inicializarPagina() {
+        async function protegerPagina() {
             try {
                 const { data: { session }, error } = await supabaseClient.auth.getSession();
                 if (error || !session) {
@@ -460,8 +460,8 @@
 
                 usuarioIdAtual = session.user.id;
 
-                // Busca dados da pousada
-                const { data: pousada, error: erroPousada } = await supabaseClient
+                // 1. Busca os dados reais da Pousada
+                const { data: pousada, error: errP } = await supabaseClient
                     .from('pousadas')
                     .select('*')
                     .eq('id', usuarioIdAtual)
@@ -473,10 +473,10 @@
                 document.getElementById('titulo-pousada').innerText = nomePousada;
                 document.getElementById('nome-pousada-sidebar').innerText = nomePousada;
 
-                // Carrega o plano de assinatura SaaS vindo do Admin Master
-                await carregarPainelAssinatura(pousadaCache);
+                // 2. Conecta e Atualiza em tempo real o Card de Assinatura
+                await atualizarCardAssinatura(pousadaCache);
 
-                // Carrega as regras operacionais da pousada
+                // 3. Preenche todas as regras de negócio da Pousada
                 if (pousadaCache) {
                     document.getElementById('pousada-checkin').value = pousadaCache.horario_checkin || '';
                     document.getElementById('pousada-checkout').value = pousadaCache.horario_checkout || '';
@@ -492,18 +492,19 @@
                     }
                     document.getElementById('pousada-valor-hospede-extra').value = pousadaCache.valor_hospede_extra || '';
 
-                    // Contatos e redes
+                    // Contatos e Redes Sociais
                     document.getElementById('pousada-whatsapp-contato').value = pousadaCache.whatsapp_contato || '';
                     document.getElementById('pousada-cnpj-cpf').value = pousadaCache.cnpj_cpf || '';
                     document.getElementById('pousada-instagram').value = pousadaCache.instagram || '';
                     document.getElementById('pousada-facebook').value = pousadaCache.facebook || '';
                     document.getElementById('pousada-exigir-documento').checked = pousadaCache.exigir_documento === true || pousadaCache.exigir_documento === 'true';
 
-                    // Pensão e descrições
+                    // Regime de Alimentação
                     document.getElementById('pousada-tipo-pensao').value = pousadaCache.tipo_pensao || '';
                     document.getElementById('pousada-descricao-pensao').value = pousadaCache.descricao_pensao || '';
                     document.getElementById('pousada-descricao-pousada').value = pousadaCache.descricao_pousada || '';
 
+                    // Galerias
                     document.getElementById('check-exibir-fotos').checked = pousadaCache.exibir_fotos_pousada || false;
                     toggleSecaoFotos();
                     renderizarFotosSalvas('pousada', pousadaCache.fotos_pousada);
@@ -513,24 +514,26 @@
                     renderizarFotosSalvas('atracoes', pousadaCache.atracoes_turisticas);
                 }
 
+                // 4. Carrega as suítes e tarifas especiais
                 await carregarSuitesETarifas();
 
-            } catch (err) {
-                console.error("Erro na inicialização da página:", err);
+            } catch (e) {
+                console.error("Erro ao carregar tarifas:", e);
             }
         }
 
-        async function carregarPainelAssinatura(pousada) {
-            // Contagem de suítes ativas
+        // ATUALIZA O CARD DE ASSINATURA COM OS VALORES REAIS DO ADMIN MASTER
+        async function atualizarCardAssinatura(pousada) {
+            // Contagem de suítes ativas para auditoria do plano
             const { data: suites } = await supabaseClient
                 .from('suites')
                 .select('id, ativa')
                 .eq('pousada_id', usuarioIdAtual);
 
             const totalAtivas = suites ? suites.filter(s => s.ativa === true).length : 0;
-            document.getElementById('info-suites-ativas').innerText = `${totalAtivas} suítes ativas`;
+            document.getElementById('assinatura-suites').innerText = totalAtivas;
 
-            // Faixas de preço do sistema
+            // Busca as faixas de preço para saber a descrição do plano
             let faixaEncontrada = null;
             try {
                 const { data: faixas } = await supabaseClient.from('config_faixas_preco').select('*').order('min_suites');
@@ -544,79 +547,89 @@
                 }
             } catch(e) {}
 
-            // Dias de aviso configurados no Master
+            // Dias de aviso configurados no Admin Master
             let diasAviso = 5;
             try {
                 const { data: config } = await supabaseClient.from('config_sistema').select('dias_aviso_vencimento').eq('id', 1).maybeSingle();
                 if (config && config.dias_aviso_vencimento) diasAviso = config.dias_aviso_vencimento;
             } catch(e) {}
 
-            const valorFinal = pousada.plano_valor || (faixaEncontrada ? faixaEncontrada.valor_mensal : 149.90);
-            document.getElementById('info-valor-mensal').innerText = 'R$ ' + Number(valorFinal).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-            document.getElementById('info-descricao-faixa').innerText = faixaEncontrada ? faixaEncontrada.descricao : 'Plano Personalizado';
+            // Valor do plano: se o Admin Master definiu plano_valor, usa ele!
+            const valorFinal = pousada.plano_valor !== null && pousada.plano_valor !== undefined 
+                ? Number(pousada.plano_valor) 
+                : (faixaEncontrada ? Number(faixaEncontrada.valor_mensal) : 149.90);
 
-            // Datas e status
-            const hoje = new Date();
-            hoje.setHours(0,0,0,0);
+            document.getElementById('assinatura-valor').innerText = 'R$ ' + valorFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            document.getElementById('assinatura-plano-nome').innerText = faixaEncontrada ? faixaEncontrada.descricao : 'Até 10 suítes';
+            
+            if (faixaEncontrada && faixaEncontrada.max_suites) {
+                document.getElementById('assinatura-limite-desc').innerText = `Limite do plano: ${faixaEncontrada.max_suites}`;
+            } else {
+                document.getElementById('assinatura-limite-desc').innerText = 'Plano Ilimitado';
+            }
 
-            const badgeStatus = document.getElementById('status-assinatura-badge');
-            const textoStatus = document.getElementById('info-status-texto');
-            const textoVenc = document.getElementById('info-vencimento-texto');
-            const textoDias = document.getElementById('info-dias-restantes');
-            const alertaDiv = document.getElementById('alerta-cobranca');
-            const alertaTitulo = document.getElementById('alerta-titulo');
-            const alertaDesc = document.getElementById('alerta-descricao');
-            const alertaIcone = document.getElementById('alerta-icone');
-
-            const whatsContatoPousada = pousada.whatsapp_contato ? pousada.whatsapp_contato.replace(/\D/g,'') : '5521999999999';
-            document.getElementById('btn-contato-master').href = `https://wa.me/${whatsContatoPousada}?text=Ol%C3%A1%2C%20gostaria%20de%20verificar%20o%20pagamento%20da%20minha%20assinatura%20(${encodeURIComponent(pousada.nome || '')})`;
+            // Cálculo das datas e dias restantes
+            const badge = document.getElementById('assinatura-badge');
+            const vencimento = document.getElementById('assinatura-vencimento');
+            const dias = document.getElementById('assinatura-dias');
+            const msgBox = document.getElementById('assinatura-msg-box');
+            const msgTitulo = document.getElementById('assinatura-msg-titulo');
+            const msgSub = document.getElementById('assinatura-msg-sub');
 
             if (!pousada.data_vencimento) {
-                textoVenc.innerText = "Sem data cadastrada";
-                textoDias.innerText = "Aguardando ativação pelo Master";
-                badgeStatus.innerHTML = '<span class="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full text-xs font-bold">EM ANÁLISE</span>';
-                textoStatus.innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Pendente de Ativação';
+                vencimento.innerText = 'Sem data';
+                dias.innerText = 'Aguardando Master';
+                badge.className = 'px-3 py-0.5 rounded-full text-[10px] font-extrabold border bg-amber-500/20 text-amber-300 border-amber-500/30';
+                badge.innerText = 'PENDENTE';
+                msgBox.className = 'bg-white text-slate-900 p-4 rounded-2xl shadow-lg border-l-4 border-amber-500';
+                msgTitulo.innerText = 'Aguardando Liberação da Assinatura';
+                msgSub.innerText = 'Sua pousada está sendo configurada. Entre em contato com a administração caso precise de liberação imediata.';
                 return;
             }
 
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+
             const dVenc = new Date(pousada.data_vencimento + 'T12:00:00');
-            textoVenc.innerText = dVenc.toLocaleDateString('pt-BR');
+            vencimento.innerText = dVenc.toLocaleDateString('pt-BR');
             const diffDias = Math.ceil((dVenc - hoje) / (1000 * 60 * 60 * 24));
 
+            // CONDICIONAIS DE STATUS EXATAS DO ADMIN MASTER:
             if (pousada.status === 'blocked' || diffDias < 0) {
-                // BLOQUEADO OU VENCIDO
-                contaBloqueada = true;
-                badgeStatus.innerHTML = '<span class="bg-red-100 text-red-800 border border-red-300 px-3 py-1 rounded-full text-xs font-bold animate-pulse">ASSINATURA VENCIDA</span>';
-                textoStatus.innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-red-600"></span> Acesso Bloqueado';
-                textoDias.innerText = `Venceu há ${Math.abs(diffDias)} dia(s)`;
-                textoDias.className = "text-[11px] text-red-600 font-bold block mt-0.5";
+                // VENCIDA OU BLOQUEADA
+                badge.className = 'px-3 py-0.5 rounded-full text-[10px] font-extrabold border bg-red-500/20 text-red-300 border-red-500/30';
+                badge.innerText = pousada.status === 'blocked' ? 'BLOQUEADA' : 'VENCIDA';
+                
+                dias.innerText = diffDias < 0 ? `Vencido há ${Math.abs(diffDias)} dia(s)` : 'Acesso suspenso';
+                dias.className = 'text-[10px] text-red-400 font-extrabold mt-1';
 
-                alertaDiv.className = "mt-4 p-4 rounded-2xl border border-red-300 bg-red-50 text-red-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3";
-                alertaIcone.innerText = "🚨";
-                alertaTitulo.innerText = "Assinatura Vencida / Bloqueada";
-                alertaDesc.innerText = "A renovação deste mês está pendente. Entre em contato com a administração da plataforma para reativar seu plano.";
-                alertaDiv.classList.remove('hidden');
+                msgBox.className = 'bg-red-50 text-red-950 p-4 rounded-2xl shadow-lg border-l-4 border-red-500';
+                msgTitulo.innerText = 'Plano Suspenso por Falta de Pagamento';
+                msgSub.innerText = 'Seu painel está em modo de aviso. Para voltar a aprovar reservas e atualizar regras, regularize sua assinatura com o administrador.';
 
             } else if (diffDias <= diasAviso) {
-                // AVISO DE FATURA PRÓXIMA
-                badgeStatus.innerHTML = '<span class="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full text-xs font-bold">VENCE EM BREVE</span>';
-                textoStatus.innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Regular (Aviso de Fatura)';
-                textoDias.innerText = `Vence em ${diffDias} dia(s)`;
-                textoDias.className = "text-[11px] text-amber-700 font-bold block mt-0.5";
+                // VENCENDO EM BREVE
+                badge.className = 'px-3 py-0.5 rounded-full text-[10px] font-extrabold border bg-amber-500/20 text-amber-300 border-amber-500/30';
+                badge.innerText = 'VENCIMENTO PRÓXIMO';
+                
+                dias.innerText = `Faltam ${diffDias} dia(s) para vencer!`;
+                dias.className = 'text-[10px] text-amber-300 font-bold mt-1 animate-pulse';
 
-                alertaDiv.className = "mt-4 p-4 rounded-2xl border border-amber-300 bg-amber-50 text-amber-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3";
-                alertaIcone.innerText = "⏳";
-                alertaTitulo.innerText = `Fatura vence em ${diffDias} dia(s)`;
-                alertaDesc.innerText = "Sua próxima mensalidade está próxima do vencimento. Antecipe para evitar qualquer pausa nos serviços.";
-                alertaDiv.classList.remove('hidden');
+                msgBox.className = 'bg-amber-50 text-amber-950 p-4 rounded-2xl shadow-lg border-l-4 border-amber-500';
+                msgTitulo.innerText = `Lembrete: Seu plano vence em ${diffDias} dias!`;
+                msgSub.innerText = 'Envie o comprovante do PIX ao administrador para evitar a interrupção da aprovação de reservas.';
 
             } else {
-                // REGULAR
-                badgeStatus.innerHTML = '<span class="bg-emerald-100 text-emerald-800 border border-emerald-300 px-3 py-1 rounded-full text-xs font-bold">PLANO ATIVO</span>';
-                textoStatus.innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Em Dia';
-                textoDias.innerText = `Restam ${diffDias} dias de acesso`;
-                textoDias.className = "text-[11px] text-emerald-700 font-medium block mt-0.5";
-                alertaDiv.classList.add('hidden');
+                // EM DIA
+                badge.className = 'px-3 py-0.5 rounded-full text-[10px] font-extrabold border bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+                badge.innerText = 'ATIVA - Em dia';
+                
+                dias.innerText = `Faltam ${diffDias} dias`;
+                dias.className = 'text-[10px] text-emerald-300 font-bold mt-1';
+
+                msgBox.className = 'bg-white text-slate-900 p-4 rounded-2xl shadow-lg border-l-4 border-emerald-500';
+                msgTitulo.innerText = 'Parabéns, sua pousada está em dia!';
+                msgSub.innerText = 'Seu acesso para aprovar reservas, cadastrar suítes e criar tarifas está 100% liberado.';
             }
         }
 
@@ -728,12 +741,8 @@
             } catch (e) {}
         }
 
+        // SALVAR REGRAS OPERACIONAIS DA POUSADA
         async function salvarRegrasPousada() {
-            if (contaBloqueada) {
-                alert("Atenção: A assinatura da sua pousada está vencida ou bloqueada. Regularize seu plano no painel de suporte para salvar alterações.");
-                return;
-            }
-
             const nomeAtualPousada = document.getElementById('titulo-pousada').innerText || "Minha Pousada";
 
             let fotosPousadaArray = [];
@@ -752,7 +761,7 @@
                     const legenda = inputsDesc[i] ? inputsDesc[i].value : `Foto da pousada - ${nomeAtualPousada}`;
                     const filePath = `${usuarioIdAtual}/pousada_${Date.now()}_${i}_${file.name}`;
                     
-                    const { data: uploadData, error: uploadError } = await supabaseClient.storage
+                    const { error: uploadError } = await supabaseClient.storage
                         .from('suites-fotos')
                         .upload(filePath, file, { upsert: true });
 
@@ -779,7 +788,7 @@
                     const legenda = inputsDescAtra[i] ? inputsDescAtra[i].value : `Atração Turística`;
                     const filePath = `${usuarioIdAtual}/atracao_${Date.now()}_${i}_${file.name}`;
                     
-                    const { data: uploadData, error: uploadError } = await supabaseClient.storage
+                    const { error: uploadError } = await supabaseClient.storage
                         .from('suites-fotos')
                         .upload(filePath, file, { upsert: true });
 
@@ -822,8 +831,8 @@
                 return; 
             }
             
-            mostrarToast("Regras e canais da pousada atualizados com sucesso!");
-            await inicializarPagina();
+            mostrarToast("Regras da pousada salvas com sucesso!");
+            await protegerPagina();
         }
 
         async function carregarSuitesETarifas() {
@@ -857,7 +866,7 @@
             }
 
             if (!tarifasCache || tarifasCache.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">Nenhuma regra especial cadastrada.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">Nenhuma tarifa especial cadastrada.</td></tr>`;
                 return;
             }
 
@@ -972,10 +981,6 @@
 
         document.getElementById('form-tarifa-especial').onsubmit = async (e) => {
             e.preventDefault();
-            if (contaBloqueada) {
-                alert("Atenção: Sua conta está com assinatura vencida/bloqueada. Regularize para cadastrar tarifas.");
-                return;
-            }
 
             const idEditando = document.getElementById('tarifa-editando-id').value;
             const checkboxes = document.querySelectorAll('input[name="dias_semana"]:checked');
