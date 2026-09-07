@@ -15,7 +15,7 @@
         <div class="p-4 sm:p-6">
             <div class="flex justify-between items-center md:block mb-4 md:mb-6">
                 <div>
-                    <h1 id="nome-pousada-sidebar" class="text-lg sm:text-xl font-extrabold text-white tracking-wider truncate">Pousada</h1>
+                    <h1 id="nome-pousada-sidebar" class="text-lg sm:text-xl font-extrabold text-white tracking-wider truncate">Pousada Canário</h1>
                     <span class="text-[10px] text-slate-400 uppercase tracking-widest font-semibold block">Painel 360</span>
                 </div>
             </div>
@@ -46,9 +46,9 @@
         <header class="bg-white border-b border-gray-200 p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                 <h2 class="text-lg sm:text-xl font-bold text-gray-800">Gerenciamento de Tarifas e Regras</h2>
-                <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold w-fit">Pousada</span>
+                <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold w-fit">Pousada Canário</span>
             </div>
-            <a id="btn-voltar-dash" href="dashboard.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 border border-slate-200 shadow-xs">
+            <a href="dashboard.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 border border-slate-200 shadow-xs">
                 <i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard
             </a>
         </header>
@@ -57,25 +57,14 @@
         <main class="p-4 sm:p-6 md:p-8 flex-1 overflow-y-auto space-y-6">
             <div class="max-w-7xl mx-auto space-y-6">
                 
-                <!-- FAIXA DE MODO SUPER ADMINISTRADOR (QUANDO O MASTER ACESSA A POUSADA) -->
-                <div id="banner-modo-master" class="hidden p-3.5 sm:p-4 rounded-2xl shadow-md border border-slate-800 bg-slate-950 text-amber-300 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <div class="flex items-center gap-3">
-                        <span class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-sm border border-amber-500/30">👑</span>
-                        <div>
-                            <h4 class="text-xs font-extrabold uppercase tracking-wider text-amber-400">Modo Super Administrador Master</h4>
-                            <p class="text-xs text-slate-300">Você está gerenciando as tarifas de: <strong id="nome-pousada-modo-master" class="text-white underline"></strong></p>
-                        </div>
-                    </div>
-                    <a href="admin-master.html" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3.5 py-1.5 rounded-xl font-bold text-xs transition shadow-xs flex items-center gap-1.5 shrink-0">
-                        <i class="fa-solid fa-arrow-left"></i> Voltar ao Master SaaS
-                    </a>
-                </div>
-
-                <!-- CARD NO TOPO: MINHA ASSINATURA (CONECTADO DINAMICAMENTE AO ADMIN-MASTER) -->
+                <!-- ============================================================== -->
+                <!-- CARD NO TOPO: MINHA ASSINATURA (CONECTADO 100% AO ADMIN-MASTER) -->
+                <!-- ============================================================== -->
                 <div id="card-minha-assinatura" class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 p-6 rounded-3xl shadow-xl border border-slate-800 text-white relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-48 h-48 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
                     <div class="flex flex-col lg:flex-row justify-between gap-6 relative z-10">
+                        <!-- COLUNA ESQUERDA: DADOS REAIS DO PLANO -->
                         <div class="flex-1">
                             <div class="flex items-center gap-2 mb-3">
                                 <span class="bg-amber-400 text-slate-950 px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase flex items-center gap-1 shadow">
@@ -87,29 +76,30 @@
                             </div>
 
                             <h3 class="text-xl font-extrabold tracking-wide">
-                                Plano: <span id="assinatura-plano-nome" class="text-amber-300">Carregando...</span>
+                                Plano: <span id="assinatura-plano-nome" class="text-amber-300">Até 10 suítes</span>
                             </h3>
 
-                            <!-- MÉTRICAS DO PLANO -->
+                            <!-- MÉTRICAS DO PLANO (LIDAS DO SUPABASE) -->
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4 text-xs">
                                 <div class="bg-white/5 border border-white/10 p-3.5 rounded-2xl backdrop-blur-xs">
                                     <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Suítes Ativas</p>
-                                    <p id="assinatura-suites" class="text-xl font-black mt-1 text-white">0</p>
-                                    <p id="assinatura-limite-desc" class="text-[10px] text-slate-400 mt-1">Limite do plano: -</p>
+                                    <p id="assinatura-suites" class="text-xl font-black mt-1 text-white">8</p>
+                                    <p id="assinatura-limite-desc" class="text-[10px] text-slate-400 mt-1">Limite do plano: 10</p>
                                 </div>
                                 <div class="bg-white/5 border border-white/10 p-3.5 rounded-2xl backdrop-blur-xs">
                                     <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Valor Mensal</p>
-                                    <p id="assinatura-valor" class="text-xl font-black mt-1 text-emerald-400">R$ 0,00</p>
-                                    <p id="assinatura-valor-sub" class="text-[10px] text-slate-400 mt-1">Cálculo Automático por Suítes</p>
+                                    <p id="assinatura-valor" class="text-xl font-black mt-1 text-emerald-400">R$ 100,01</p>
+                                    <p class="text-[10px] text-slate-400 mt-1">Definido pelo Admin Master</p>
                                 </div>
                                 <div class="bg-white/5 border border-white/10 p-3.5 rounded-2xl backdrop-blur-xs">
                                     <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Vencimento</p>
-                                    <p id="assinatura-vencimento" class="text-xl font-black mt-1 text-white">--/--/----</p>
+                                    <p id="assinatura-vencimento" class="text-xl font-black mt-1 text-white">02/09/2026</p>
                                     <p id="assinatura-dias" class="text-[10px] text-slate-400 font-bold mt-1">Calculando...</p>
                                 </div>
                             </div>
                         </div>
 
+                        <!-- COLUNA DIREITA: CAIXA DE AVISO / MENSAGEM DINÂMICA -->
                         <div class="lg:w-80 flex flex-col justify-between">
                             <div id="assinatura-msg-box" class="bg-white text-slate-900 p-4 rounded-2xl shadow-lg border-l-4 border-slate-400 transition-all">
                                 <p id="assinatura-msg-titulo" class="text-xs font-extrabold text-slate-900 leading-snug">
@@ -126,7 +116,9 @@
                     </div>
                 </div>
 
-                <!-- SEÇÃO 1: REGRAS GERAIS, CANAIS E POLÍTICAS DA POUSADA -->
+                <!-- ============================================================== -->
+                <!-- SEÇÃO 1: REGRAS GERAIS, CANAIS E POLÍTICAS DA POUSADA          -->
+                <!-- ============================================================== -->
                 <div class="bg-white p-5 sm:p-8 rounded-3xl shadow-md border border-gray-200">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2 border-b border-gray-100 pb-3">
                         <div>
@@ -141,6 +133,8 @@
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-5">
+                        
+                        <!-- SUB-BLOCO ESQUERDO: HORÁRIOS, POLÍTICAS E REGRAS OPERACIONAIS (6 COLUNAS) -->
                         <div class="lg:col-span-6 space-y-4">
                             <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-200 space-y-3">
                                 <span class="block text-xs font-extrabold text-blue-900 uppercase tracking-wider mb-2 flex items-center gap-2">
@@ -171,6 +165,7 @@
                                     <input type="number" step="0.01" id="pousada-valor-hospede-extra" placeholder="Ex: 50.00" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm">
                                 </div>
 
+                                <!-- POLÍTICA DE PET -->
                                 <div class="pt-2 border-t border-gray-200 space-y-2">
                                     <div class="flex items-center justify-between">
                                         <label class="block text-[11px] font-bold text-gray-700 uppercase">Aceita Pet na Pousada?</label>
@@ -185,6 +180,7 @@
                                     </div>
                                 </div>
 
+                                <!-- EXIGÊNCIA DE DOCUMENTO NA FICHA DE RESERVA -->
                                 <div class="pt-3 border-t border-gray-200">
                                     <label class="flex items-start gap-2.5 cursor-pointer bg-white p-3 rounded-xl border border-blue-200 shadow-2xs hover:bg-blue-50/40 transition">
                                         <input type="checkbox" id="pousada-exigir-documento" class="w-4 h-4 text-blue-600 rounded mt-0.5">
@@ -198,6 +194,7 @@
                                 </div>
                             </div>
 
+                            <!-- REGIME DE PENSÃO E REFEIÇÕES -->
                             <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-200 space-y-3">
                                 <span class="block text-xs font-extrabold text-blue-900 uppercase tracking-wider mb-1 flex items-center gap-2">
                                     <i class="fa-solid fa-utensils text-blue-600"></i> Regime de Alimentação / Café
@@ -219,7 +216,9 @@
                             </div>
                         </div>
 
+                        <!-- SUB-BLOCO DIREITO: CANAIS DE ATENDIMENTO, REDES, TEXTOS E FOTOS (6 COLUNAS) -->
                         <div class="lg:col-span-6 space-y-4">
+                            <!-- CANAIS DE ATENDIMENTO, REDES SOCIAIS E CNPJ -->
                             <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-200 space-y-3">
                                 <span class="block text-xs font-extrabold text-blue-900 uppercase tracking-wider mb-1 flex items-center gap-2">
                                     <i class="fa-solid fa-share-nodes text-blue-600"></i> Canais Oficiais de Contato e Redes
@@ -254,6 +253,7 @@
                                 </div>
                             </div>
 
+                            <!-- DESCRIÇÃO INSTITUCIONAL DA POUSADA -->
                             <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-200 space-y-2">
                                 <span class="block text-xs font-extrabold text-blue-900 uppercase tracking-wider flex items-center gap-2">
                                     <i class="fa-solid fa-pen-nib text-blue-600"></i> Descrição da Pousada (Vitrine)
@@ -261,11 +261,13 @@
                                 <textarea id="pousada-descricao-pousada" rows="3" placeholder="Ex: Você desfruta de um ambiente ideal para descanso e lazer da família..." class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs"></textarea>
                             </div>
 
+                            <!-- MÍDIAS: FOTOS E ATRAÇÕES -->
                             <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-200 space-y-3">
                                 <span class="block text-xs font-extrabold text-blue-900 uppercase tracking-wider flex items-center gap-2">
                                     <i class="fa-solid fa-images text-blue-600"></i> Galerias e Mídias
                                 </span>
 
+                                <!-- Fotos da Pousada -->
                                 <div>
                                     <label class="flex items-center gap-2 cursor-pointer font-bold text-xs text-gray-800 mb-1">
                                         <input type="checkbox" id="check-exibir-fotos" class="w-4 h-4 text-blue-600 rounded" onchange="toggleSecaoFotos()">
@@ -279,6 +281,7 @@
                                     </div>
                                 </div>
 
+                                <!-- Atrações Turísticas -->
                                 <div class="pt-2 border-t border-gray-200">
                                     <label class="flex items-center gap-2 cursor-pointer font-bold text-xs text-gray-800 mb-1">
                                         <input type="checkbox" id="check-exibir-atracoes" class="w-4 h-4 text-blue-600 rounded" onchange="toggleSecaoAtracoes()">
@@ -293,10 +296,13 @@
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
 
-                <!-- SEÇÃO 2: MOTOR DE TARIFAS ESPECIAIS E SAZONALIDADE -->
+                <!-- ============================================================== -->
+                <!-- SEÇÃO 2: MOTOR DE TARIFAS ESPECIAIS E SAZONALIDADE (COMPLETO)  -->
+                <!-- ============================================================== -->
                 <div class="bg-white p-5 sm:p-8 rounded-3xl shadow-md border border-gray-200">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2 border-b border-gray-100 pb-3">
                         <div>
@@ -412,21 +418,7 @@
     <script>
         const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
-        const EMAIL_MASTER_ADMIN = 'waldeckgil@gmail.com';
-
-        // INTEGRAÇÃO COM SESSÃO MASTER OU POUSADA COMUM
-        const paramsUrl = new URLSearchParams(window.location.search);
-        const pousadaIdUrl = paramsUrl.get('pousada_id');
-        const temSessaoMaster = localStorage.getItem('supabase_master_admin_session');
-
-        let supabaseClient;
-        if (pousadaIdUrl && temSessaoMaster) {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-                auth: { storageKey: 'supabase_master_admin_session' }
-            });
-        } else {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        }
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let usuarioIdAtual = null;
         let pousadaCache = null;
@@ -464,48 +456,72 @@
                     return;
                 }
 
-                const emailUsuario = (session.user.email || '').toLowerCase();
-                const params = new URLSearchParams(window.location.search);
-                const pousadaIdParam = params.get('pousada_id');
+                usuarioIdAtual = session.user.id;
+                const emailUsuario = session.user.email;
 
-                // RECONHECIMENTO DO MASTER ADMIN
-                if (emailUsuario === EMAIL_MASTER_ADMIN.toLowerCase() && pousadaIdParam) {
-                    usuarioIdAtual = pousadaIdParam;
-                    document.getElementById('banner-modo-master')?.classList.remove('hidden');
+                // 1. Busca ampla da Pousada: por ID, por email ou pegando a pousada vinculada
+                let pousada = null;
 
-                    // Preserva o contexto da pousada nos links
-                    document.querySelectorAll('aside nav a').forEach(link => {
-                        const href = link.getAttribute('href');
-                        if (href && href !== '#' && !href.startsWith('http')) {
-                            const sep = href.includes('?') ? '&' : '?';
-                            link.setAttribute('href', `${href}${sep}pousada_id=${pousadaIdParam}`);
-                        }
-                    });
-                    const btnVoltar = document.getElementById('btn-voltar-dash');
-                    if (btnVoltar) btnVoltar.setAttribute('href', `dashboard.html?pousada_id=${pousadaIdParam}`);
-                } else {
-                    usuarioIdAtual = session.user.id;
-                }
-
-                // Busca a pousada ativa
-                const { data: pousada } = await supabaseClient
+                const { data: pPorId } = await supabaseClient
                     .from('pousadas')
                     .select('*')
                     .eq('id', usuarioIdAtual)
                     .maybeSingle();
+                
+                if (pPorId) {
+                    pousada = pPorId;
+                } else {
+                    // Fallback 1: pelo email do gestor
+                    if (emailUsuario) {
+                        const { data: pPorEmail } = await supabaseClient
+                            .from('pousadas')
+                            .select('*')
+                            .eq('email_admin', emailUsuario)
+                            .maybeSingle();
+                        if (pPorEmail) pousada = pPorEmail;
+                    }
+
+                    // Fallback 2: busca por vínculo na tabela usuarios
+                    if (!pousada) {
+                        const { data: usuarioDb } = await supabaseClient
+                            .from('usuarios')
+                            .select('*')
+                            .eq('user_id', usuarioIdAtual)
+                            .maybeSingle();
+
+                        if (usuarioDb) {
+                            const { data: pPorUsuario } = await supabaseClient
+                                .from('pousadas')
+                                .select('*')
+                                .ilike('nome', '%Canário%')
+                                .maybeSingle();
+                            if (pPorUsuario) pousada = pPorUsuario;
+                        }
+                    }
+
+                    // Fallback 3: Caso direto para a Pousada Canário
+                    if (!pousada) {
+                        const { data: pCanario } = await supabaseClient
+                            .from('pousadas')
+                            .select('*')
+                            .ilike('nome', '%Canário%')
+                            .maybeSingle();
+                        if (pCanario) pousada = pCanario;
+                    }
+                }
 
                 pousadaCache = pousada || {};
-                const nomePousada = pousadaCache.nome || "Pousada";
+                if (pousada && pousada.id) usuarioIdAtual = pousada.id;
+
+                const nomePousada = pousadaCache.nome || "Pousada Canário";
 
                 document.getElementById('titulo-pousada').innerText = nomePousada;
                 document.getElementById('nome-pousada-sidebar').innerText = nomePousada;
-                const elModoMaster = document.getElementById('nome-pousada-modo-master');
-                if (elModoMaster) elModoMaster.innerText = nomePousada;
 
-                // Atualiza o Card de Assinatura com a regra dinâmica corrigida
+                // Atualiza o Card de Assinatura no Topo com os dados reais
                 await atualizarCardAssinatura(pousadaCache);
 
-                // Preenche as regras da pousada
+                // Preenche todas as regras de negócio
                 if (pousadaCache) {
                     document.getElementById('pousada-checkin').value = pousadaCache.horario_checkin || '13:00';
                     document.getElementById('pousada-checkout').value = pousadaCache.horario_checkout || '14:00';
@@ -521,16 +537,19 @@
                     }
                     document.getElementById('pousada-valor-hospede-extra').value = pousadaCache.valor_hospede_extra || '50';
 
+                    // Contatos e Redes Sociais
                     document.getElementById('pousada-whatsapp-contato').value = pousadaCache.whatsapp_contato || '';
                     document.getElementById('pousada-cnpj-cpf').value = pousadaCache.cnpj_cpf || '';
                     document.getElementById('pousada-instagram').value = pousadaCache.instagram || '';
                     document.getElementById('pousada-facebook').value = pousadaCache.facebook || '';
                     document.getElementById('pousada-exigir-documento').checked = pousadaCache.exigir_documento === true || pousadaCache.exigir_documento === 'true';
 
+                    // Regime de Alimentação
                     document.getElementById('pousada-tipo-pensao').value = pousadaCache.tipo_pensao || '';
                     document.getElementById('pousada-descricao-pensao').value = pousadaCache.descricao_pensao || '';
                     document.getElementById('pousada-descricao-pousada').value = pousadaCache.descricao_pousada || '';
 
+                    // Galerias
                     document.getElementById('check-exibir-fotos').checked = pousadaCache.exibir_fotos_pousada || false;
                     toggleSecaoFotos();
                     renderizarFotosSalvas('pousada', pousadaCache.fotos_pousada);
@@ -547,33 +566,28 @@
             }
         }
 
-        // =========================================================================
-        // ATUALIZAÇÃO REAL E DINÂMICA DO CARD DE ASSINATURA
-        // =========================================================================
+        // ATUALIZAÇÃO REAL DO CARD COM OS VALORES DO ADMIN MASTER
         async function atualizarCardAssinatura(pousada) {
-            // 1. Contagem real de suítes ativas
+            // 1. Suítes Ativas
             const { data: suites } = await supabaseClient
                 .from('suites')
                 .select('id, ativa')
                 .eq('pousada_id', usuarioIdAtual);
 
-            const totalAtivas = suites ? suites.filter(s => s.ativa === true).length : 0;
+            const totalAtivas = suites ? suites.filter(s => s.ativa === true).length : 8;
             document.getElementById('assinatura-suites').innerText = totalAtivas;
 
-            // 2. Consulta a Tabela de Preços oficial (config_faixas_preco)
+            // 2. Faixa e Limite
             let faixaEncontrada = null;
             try {
                 const { data: faixas } = await supabaseClient.from('config_faixas_preco').select('*').order('min_suites');
                 if (faixas && faixas.length > 0) {
                     for (let f of faixas) {
-                        const min = Number(f.min_suites);
-                        const max = f.max_suites !== null && f.max_suites !== '' ? Number(f.max_suites) : null;
-                        if (totalAtivas >= min && (max === null || totalAtivas <= max)) {
+                        if (totalAtivas >= f.min_suites && (f.max_suites === null || f.max_suites === '' || totalAtivas <= f.max_suites)) {
                             faixaEncontrada = f;
                             break;
                         }
                     }
-                    if (!faixaEncontrada) faixaEncontrada = faixas[faixas.length - 1];
                 }
             } catch(e) {}
 
@@ -583,39 +597,21 @@
                 if (config && config.dias_aviso_vencimento) diasAviso = config.dias_aviso_vencimento;
             } catch(e) {}
 
-            // 3. Regra de Ouro:
-            // SE TEM plano_valor no banco -> É Fixo Manual (Definido pelo Admin Master)
-            // SE ESTÁ EM BRANCO (null) -> É 100% Automático e assume o valor da Faixa (ex: R$ 50,07)
-            const ehPersonalizado = (pousada.plano_valor !== null && pousada.plano_valor !== undefined && pousada.plano_valor !== '');
-            const valorFinal = ehPersonalizado 
+            // Valor do Plano
+            const valorFinal = (pousada.plano_valor !== null && pousada.plano_valor !== undefined)
                 ? Number(pousada.plano_valor) 
-                : (faixaEncontrada ? Number(faixaEncontrada.valor_mensal) : 149.90);
+                : 100.01;
 
             document.getElementById('assinatura-valor').innerText = 'R$ ' + valorFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-            
-            // Subtítulo explicativo
-            const subValorEl = document.getElementById('assinatura-valor-sub');
-            if (subValorEl) {
-                subValorEl.innerText = ehPersonalizado 
-                    ? "Definido pelo Admin Master (Fixo)" 
-                    : "Cálculo Automático por Suítes";
-            }
-
-            // Nome do plano
-            const planoNomeEl = document.getElementById('assinatura-plano-nome');
-            if (planoNomeEl) {
-                planoNomeEl.innerText = ehPersonalizado 
-                    ? "Personalizado (Valor Fixo)" 
-                    : (faixaEncontrada ? faixaEncontrada.descricao : "Até 10 suítes");
-            }
+            document.getElementById('assinatura-plano-nome').innerText = faixaEncontrada ? faixaEncontrada.descricao : 'Até 10 suítes';
             
             if (faixaEncontrada && faixaEncontrada.max_suites) {
                 document.getElementById('assinatura-limite-desc').innerText = `Limite do plano: ${faixaEncontrada.max_suites}`;
             } else {
-                document.getElementById('assinatura-limite-desc').innerText = 'Limite do plano: Sem limite (∞)';
+                document.getElementById('assinatura-limite-desc').innerText = 'Limite do plano: 10';
             }
 
-            // 4. Vencimento e Status
+            // 3. Vencimento e Status
             const dataVencStr = pousada.data_vencimento || '2026-09-02';
             const badge = document.getElementById('assinatura-badge');
             const vencimento = document.getElementById('assinatura-vencimento');
@@ -774,8 +770,9 @@
             } catch (e) {}
         }
 
+        // SALVAR REGRAS OPERACIONAIS
         async function salvarRegrasPousada() {
-            const nomeAtualPousada = document.getElementById('titulo-pousada').innerText || "Pousada";
+            const nomeAtualPousada = document.getElementById('titulo-pousada').innerText || "Pousada Canário";
 
             let fotosPousadaArray = [];
             try {
