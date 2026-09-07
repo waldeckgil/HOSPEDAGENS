@@ -63,20 +63,29 @@
             <!-- Feedback Banner / Alertas no Front-end -->
             <div id="mensagem-container" class="hidden mb-4 sm:mb-6 p-3.5 sm:p-4 rounded-2xl text-xs sm:text-sm font-semibold border flex items-center gap-3 shadow-xs transition-all"></div>
 
-            <!-- Modal de Confirmação Inline para Renomeação / Exclusão -->
-            <div id="modal-confirmacao" class="hidden mb-4 sm:mb-6 p-4 sm:p-5 bg-amber-50 border border-amber-200 rounded-2xl shadow-xs">
-                <div class="flex items-start gap-3">
-                    <div class="text-amber-600 mt-0.5"><i class="fa-solid fa-triangle-exclamation text-lg sm:text-xl"></i></div>
-                    <div class="flex-1">
-                        <h3 id="titulo-modal" class="text-amber-900 font-bold mb-1 text-sm sm:text-base">Confirmação de Alteração</h3>
-                        <p id="texto-confirmacao" class="text-amber-800 text-xs sm:text-sm mb-3.5"></p>
-                        <div class="flex flex-row gap-2.5">
-                            <button id="btn-confirma-sim" class="flex-1 sm:flex-initial bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-xs transition">Sim, Continuar</button>
-                            <button id="btn-confirma-nao" class="flex-1 sm:flex-initial bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition">Cancelar</button>
-                        </div>
-                    </div>
-                </div>
+
+<!-- MODAL DE CONFIRMAÇÃO FIXO (RODAPÉ NO CELULAR / CENTRALIZADO NO NOTEBOOK) -->
+<div id="modal-confirmacao" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-3 sm:p-4 transition-all">
+    <div class="bg-white rounded-3xl p-5 sm:p-6 w-full max-w-md shadow-2xl border border-slate-100 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+        <div class="flex items-start gap-3.5">
+            <div id="icone-modal-confirmacao" class="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center text-xl flex-shrink-0">
+                <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
+            <div class="flex-1 min-w-0">
+                <h3 id="titulo-modal" class="text-base sm:text-lg font-extrabold text-slate-900 leading-snug">Confirmação</h3>
+                <p id="texto-confirmacao" class="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed"></p>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2.5 pt-1">
+            <button id="btn-confirma-nao" type="button" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition">
+                Cancelar
+            </button>
+            <button id="btn-confirma-sim" type="button" class="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold shadow-md transition flex items-center justify-center gap-1.5">
+                Sim, Excluir
+            </button>
+        </div>
+    </div>
+</div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                 
@@ -409,39 +418,46 @@
                 textoStatus.className = 'text-[11px] sm:text-xs font-bold text-amber-700 status-texto';
             }
         }
+async function removerCampo(botao) {
+    const rowDiv = botao.closest('.suite-row');
+    if (!rowDiv) return;
+    const suiteId = rowDiv.dataset.suiteId;
 
-        async function removerCampo(botao) {
-            const rowDiv = botao.closest('.suite-row');
-            if (!rowDiv) return;
-            const suiteId = rowDiv.dataset.suiteId;
+    if (suiteId) {
+        const modal = document.getElementById('modal-confirmacao');
+        const titulo = document.getElementById('titulo-modal');
+        const texto = document.getElementById('texto-confirmacao');
+        const btnSim = document.getElementById('btn-confirma-sim');
+        const btnNao = document.getElementById('btn-confirma-nao');
+        const iconeModal = document.getElementById('icone-modal-confirmacao');
 
-            if (suiteId) {
-                const modal = document.getElementById('modal-confirmacao');
-                const titulo = document.getElementById('titulo-modal');
-                const texto = document.getElementById('texto-confirmacao');
-                const btnSim = document.getElementById('btn-confirma-sim');
-                const btnNao = document.getElementById('btn-confirma-nao');
+        // Configura visual de exclusão (Vermelho)
+        titulo.innerText = "Excluir Suíte Permanentemente?";
+        texto.innerText = "Esta ação apagará a acomodação do sistema. Deseja prosseguir com a exclusão?";
+        iconeModal.className = "w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center text-xl flex-shrink-0";
+        btnSim.className = "w-full bg-red-600 hover:bg-red-700 text-white py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold shadow-md transition flex items-center justify-center gap-1.5";
+        btnSim.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i> Sim, Excluir';
 
-                titulo.innerText = "Excluir Suíte";
-                texto.innerText = "Deseja realmente excluir esta suíte do sistema permanentemente?";
-                modal.classList.remove('hidden');
+        modal.classList.remove('hidden');
 
-                btnSim.onclick = async () => {
-                    modal.classList.add('hidden');
-                    const { error } = await supabaseClient.from('suites').delete().eq('id', suiteId);
-                    if (error) {
-                        mostrarMensagem('Erro ao excluir suíte do banco de dados.', 'erro');
-                        return;
-                    }
-                    rowDiv.remove();
-                    mostrarMensagem('Suíte excluída com sucesso.', 'sucesso');
-                };
-
-                btnNao.onclick = () => { modal.classList.add('hidden'); };
-            } else {
-                rowDiv.remove();
+        btnSim.onclick = async () => {
+            modal.classList.add('hidden');
+            const { error } = await supabaseClient.from('suites').delete().eq('id', suiteId);
+            if (error) {
+                mostrarMensagem('Erro ao excluir suíte do banco de dados.', 'erro');
+                mostrarToast('Erro', 'Não foi possível excluir a suíte.', 'erro');
+                return;
             }
-        }
+            rowDiv.remove();
+            mostrarToast('Sucesso', 'Suíte excluída com sucesso!');
+        };
+
+        btnNao.onclick = () => { modal.classList.add('hidden'); };
+    } else {
+        // Se for uma linha recém-adicionada que ainda não foi pro banco
+        rowDiv.remove();
+    }
+}
 
         async function salvarFotos(suiteId, rowDiv) {
             if (!rowDiv) return null;
