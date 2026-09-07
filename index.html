@@ -18,7 +18,8 @@
 <body class="bg-fundo-pousada flex items-center justify-center min-h-screen p-4">
 
     <div class="bg-white p-8 sm:p-10 rounded-3xl shadow-2xl w-full max-w-md border border-gray-100 relative">
-        <div class="text-center mb-6">
+        
+        <div id="login-header" class="text-center mb-6">
             <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto text-xl font-bold mb-3 border border-blue-100 shadow-xs">
                 <i class="fa-solid fa-hotel"></i>
             </div>
@@ -26,7 +27,7 @@
             <p class="text-gray-500 text-xs mt-1">Acesse o painel da sua pousada</p>
         </div>
 
-        <!-- MENSAGEM DE STATUS DO PLANO - APARECE APÓS O LOGIN -->
+        <!-- MENSAGEM DE STATUS DO PLANO - APARECE APÓS O LOGIN DE POUSADAS -->
         <div id="card-aviso-login" class="hidden mb-6 p-4 rounded-2xl border-l-4 shadow-sm transition-all duration-300">
             <div class="flex items-start gap-3">
                 <div id="aviso-login-icone" class="text-xl mt-0.5">🔔</div>
@@ -42,6 +43,26 @@
                 </div>
             </div>
             <p class="text-[10px] text-gray-500 mt-2 text-center">Redirecionando em <span id="aviso-login-countdown" class="font-bold">3</span>s...</p>
+        </div>
+
+        <!-- MENU DE ESCOLHA EXCLUSIVO PARA O SUPER ADMINISTRADOR MASTER -->
+        <div id="card-escolha-master" class="hidden text-center space-y-4">
+            <div class="w-14 h-14 bg-amber-500/10 text-amber-500 rounded-2xl flex items-center justify-center mx-auto text-2xl font-bold border border-amber-500/20 shadow-xs">
+                <i class="fa-solid fa-crown"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-extrabold text-slate-900">Olá, Administrador Master!</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Qual painel você deseja gerenciar agora?</p>
+            </div>
+
+            <div class="space-y-2.5 pt-2">
+                <a href="admin-master.html" class="w-full bg-slate-950 hover:bg-black text-white p-3.5 rounded-xl font-bold text-xs transition shadow-md flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-crown text-amber-400"></i> Painel Master SaaS (Planos & Auditoria)
+                </a>
+                <a href="dashboard.html" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3.5 rounded-xl font-bold text-xs transition shadow-md flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-hotel"></i> Painel da Pousada (Minha Pousada)
+                </a>
+            </div>
         </div>
 
         <!-- FORMULÁRIO DE LOGIN -->
@@ -71,7 +92,19 @@
     <script>
         const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
+
+        // 1. Cliente Padrão (utilizado pelo dashboard das pousadas)
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // 2. Cliente com Sessão Isolada do Master (para alimentar o admin-master sem conflitos)
+        const supabaseMasterClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+            auth: {
+                storageKey: 'supabase_master_admin_session',
+                persistSession: true
+            }
+        });
+
+        const EMAIL_MASTER_ADMIN = 'waldeckgil@gmail.com';
 
         function mostrarAvisoLogin(tipo, titulo, texto, subtexto){
             const card = document.getElementById('card-aviso-login');
@@ -129,10 +162,11 @@
             btn.disabled = true;
             btn.innerText = 'Verificando...';
 
-            const email = document.getElementById('email').value;
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
 
             try {
+                // Autentica no cliente padrão
                 await supabaseClient.auth.signOut();
                 const resultado = await supabaseClient.auth.signInWithPassword({ email, password });
 
@@ -143,6 +177,18 @@
                     return;
                 }
 
+                // CASO SEJA O SUPER ADMINISTRADOR MASTER:
+                if(email.toLowerCase() === EMAIL_MASTER_ADMIN.toLowerCase()){
+                    // Autentica também no cliente exclusivo do Master para carregar a chave isolada
+                    await supabaseMasterClient.auth.signInWithPassword({ email, password });
+                    
+                    document.getElementById('login-header').classList.add('hidden');
+                    document.getElementById('login-form-container').classList.add('hidden');
+                    document.getElementById('card-escolha-master').classList.remove('hidden');
+                    return;
+                }
+
+                // CASO SEJA UM GESTOR DE POUSADA COMUM:
                 const userId = resultado.data.user.id;
                 
                 let pousada = null;
@@ -196,7 +242,6 @@
                     mostrarAvisoLogin('alerta', `Lembrete: Seu plano ${diasTxt}!`, `Data de pagamento: ${vencDate.toLocaleDateString('pt-BR')}.`, 'Regularize com o administrador para evitar a suspensão de reservas.');
                     iniciarContagemERedirecionar('dashboard.html');
                 } else {
-                    // FRASE CURTA E LIMPA
                     mostrarAvisoLogin('sucesso', 'Parabéns, você está em dia com seu plano!', 'Acesso liberado ao painel da sua pousada.');
                     iniciarContagemERedirecionar('dashboard.html');
                 }
