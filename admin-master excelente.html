@@ -127,7 +127,7 @@
                 <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div>
                         <h3 class="font-extrabold text-slate-900 text-base">Pousadas Clientes</h3>
-                        <p class="text-xs text-slate-500">Auditoria de suítes, identificação de plano automático ou personalizado e ações de gestão.</p>
+                        <p class="text-xs text-slate-500">Auditoria de suítes, identificação de gestor, acesso direto ao painel e cobrança.</p>
                     </div>
                     <div class="w-full sm:w-72 relative">
                         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
@@ -141,7 +141,7 @@
                             <tr class="bg-slate-50 text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b">
                                 <th class="p-4">Pousada, Gestor & Login</th>
                                 <th class="p-4">Suítes Ativas (Auditoria)</th>
-                                <th class="p-4">Plano & Modalidade</th>
+                                <th class="p-4">Plano & Valor</th>
                                 <th class="p-4">Vencimento</th>
                                 <th class="p-4">Status</th>
                                 <th class="p-4 text-center">Ações de Gestão</th>
@@ -154,14 +154,14 @@
                 </div>
             </div>
 
-            <!-- TABELA DE PREÇOS EDITÁVEL -->
+            <!-- TABELA DE PREÇOS EDITÁVEL (COM SUPORTE A FAIXA 3 E NOVAS FAIXAS) -->
             <div id="sec-configuracoes" class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 sm:p-6">
                 <div class="border-b border-slate-100 pb-4 mb-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div>
                         <h3 class="font-extrabold text-slate-900 text-base flex items-center gap-2">
                             <i class="fa-solid fa-tags text-amber-500"></i> Tabela de Preços por Quantidade de Suítes
                         </h3>
-                        <p class="text-xs text-slate-500 mt-0.5">As pousadas sem valor fixo manual assumirão estes valores automaticamente baseados nas suítes ativas.</p>
+                        <p class="text-xs text-slate-500 mt-0.5">Defina faixas progressivas (ex: Faixa 1 até 10, Faixa 2 de 11 a 20, Faixa 3 de 21 em diante).</p>
                     </div>
                     <div class="flex items-center gap-2">
                         <button onclick="adicionarFaixa()" type="button" class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
@@ -181,7 +181,7 @@
         </main>
     </div>
 
-    <!-- MODAL DE ALTERAÇÃO INDIVIDUAL (COM SUPORTE A VALOR AUTOMÁTICO OU FIXO) -->
+    <!-- MODAL DE ALTERAÇÃO INDIVIDUAL -->
     <div id="modal-editar-pousada" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4 z-50">
         <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-200">
             <h3 class="text-lg font-extrabold text-slate-900 mb-0.5">Ajustar Assinatura & Acesso</h3>
@@ -206,22 +206,12 @@
                         <input type="date" id="edit-data-vencimento" required class="w-full p-2.5 border rounded-xl font-bold text-xs bg-slate-50 outline-none focus:border-blue-500">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1 flex items-center justify-between">
-                            <span>Mensalidade (R$)</span>
-                            <span class="text-[9px] text-blue-600 lowercase font-bold">Vazio = Auto</span>
-                        </label>
-                        <!-- CAMPO NÃO É MAIS REQUIRED: PODE DEIXAR EM BRANCO PARA AUTOMÁTICO! -->
-                        <input type="number" step="0.01" id="edit-plano-valor" placeholder="Automático pela Faixa" class="w-full p-2.5 border rounded-xl font-bold text-xs bg-slate-50 outline-none focus:border-blue-500">
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Mensalidade (R$)</label>
+                        <input type="number" step="0.01" id="edit-plano-valor" required class="w-full p-2.5 border rounded-xl font-bold text-xs bg-slate-50 outline-none focus:border-blue-500">
                     </div>
                 </div>
 
-                <div class="bg-blue-50 border border-blue-200 p-3 rounded-xl text-[11px] text-blue-900 leading-snug">
-                    💡 <strong>Como funciona o valor:</strong><br>
-                    • Se deixar o campo <strong>Mensalidade em branco</strong>, o sistema calculará o preço automaticamente pela quantidade de suítes ativas.<br>
-                    • Se digitar um valor (ex: 50.00), esse valor ficará fixo manualmente para essa pousada.
-                </div>
-
-                <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-100 mt-2">
                     <button type="button" onclick="fecharModalEdicao()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100">Cancelar</button>
                     <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-md">Salvar Alterações</button>
                 </div>
@@ -515,18 +505,13 @@
             pousadasCache = pousadas.map(p => {
                 const totalSuitesAtivas = suites ? suites.filter(s => s.pousada_id === p.id && s.ativa).length : 0;
                 const faixaCalculada = calcularFaixaPorSuites(totalSuitesAtivas);
-                
-                // SE TEM PLANO_VALOR NO BANCO: É PERSONALIZADO/FIXO
-                // SE ESTÁ NULL: É AUTOMÁTICO PELA FAIXA
-                const ehPersonalizado = (p.plano_valor !== null && p.plano_valor !== undefined && p.plano_valor !== '');
-                const valorFinal = ehPersonalizado ? Number(p.plano_valor) : (faixaCalculada ? Number(faixaCalculada.valor_mensal) : 149.90);
+                const valorFinal = p.plano_valor || (faixaCalculada ? faixaCalculada.valor_mensal : 149.90);
                 const gestor = usuarios.find(u => u.user_id === p.id);
 
                 return { 
                     ...p, 
                     totalSuitesAtivas, 
                     faixaCalculada, 
-                    ehPersonalizado,
                     valorFinal,
                     nomeGestor: gestor?.nome_completo || null,
                     loginAdmin: p.email_admin || null
@@ -585,15 +570,6 @@
 
                 const whatsLink = p.whatsapp_contato ? `https://wa.me/55${p.whatsapp_contato.replace(/\D/g,'')}` : '#';
 
-                // IDENTIFICA SE O VALOR É AUTOMÁTICO OU FIXO MANUAL
-                const badgeModalidade = p.ehPersonalizado 
-                    ? `<span class="bg-purple-100 text-purple-800 border border-purple-200 text-[9px] font-extrabold px-1.5 py-0.5 rounded ml-1">Fixo Manual</span>`
-                    : `<span class="bg-blue-100 text-blue-800 border border-blue-200 text-[9px] font-extrabold px-1.5 py-0.5 rounded ml-1">Automático</span>`;
-
-                const descricaoPlano = p.ehPersonalizado
-                    ? 'Personalizado'
-                    : (p.faixaCalculada ? p.faixaCalculada.descricao : 'Faixa Padrão');
-
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50/80 transition">
                         <td class="p-4">
@@ -628,13 +604,8 @@
                         </td>
                         <td class="p-4">${badgeSuites}</td>
                         <td class="p-4">
-                            <div class="font-bold text-slate-800 flex items-center gap-1">
-                                <span>${descricaoPlano}</span>
-                                ${badgeModalidade}
-                            </div>
-                            <div class="text-[11px] ${p.ehPersonalizado ? 'text-purple-700' : 'text-blue-600'} font-extrabold mt-0.5">
-                                R$ ${Number(p.valorFinal).toFixed(2)}/mês
-                            </div>
+                            <div class="font-bold text-slate-800">${p.faixaCalculada ? p.faixaCalculada.descricao : 'Personalizado'}</div>
+                            <div class="text-[11px] text-blue-600 font-extrabold">R$ ${Number(p.valorFinal).toFixed(2)}/mês</div>
                         </td>
                         <td class="p-4">
                             <span class="${vencBadgeClass}">${vencTexto}</span>
@@ -642,6 +613,7 @@
                         <td class="p-4">${statusHtml}</td>
                         <td class="p-4 text-center">
                             <div class="inline-flex items-center gap-1.5">
+                                <!-- NOVO BOTÃO: ACESSAR PAINEL DA POUSADA (MODO MASTER EM NOVA ABA) -->
                                 <a href="dashboard.html?pousada_id=${p.id}" target="_blank" title="Acessar painel desta pousada como Master" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-xs">
                                     <i class="fa-solid fa-arrow-up-right-from-square"></i> Acessar
                                 </a>
@@ -724,16 +696,7 @@
             document.getElementById('edit-nome-gestor').value = p.nomeGestor || '';
             document.getElementById('edit-email-admin').value = p.email_admin || '';
             document.getElementById('edit-data-vencimento').value = p.data_vencimento || '';
-            
-            // SE TEM VALOR PERSONALIZADO NO BANCO, MOSTRA ELE NO CAMPO
-            // SE FOR AUTOMÁTICO (NULL), DEIXA EM BRANCO PARA O USUÁRIO SABER QUE É AUTOMÁTICO!
-            const inputValor = document.getElementById('edit-plano-valor');
-            if(p.ehPersonalizado){
-                inputValor.value = p.plano_valor;
-            } else {
-                inputValor.value = '';
-                inputValor.placeholder = `R$ ${p.valorFinal.toFixed(2)} (Automático)`;
-            }
+            document.getElementById('edit-plano-valor').value = p.valorFinal || 149.90;
 
             const modal = document.getElementById('modal-editar-pousada');
             modal.classList.remove('hidden');
@@ -752,10 +715,7 @@
             const email_admin = document.getElementById('edit-email-admin').value.trim();
             const nome_gestor = document.getElementById('edit-nome-gestor').value.trim();
             const data_vencimento = document.getElementById('edit-data-vencimento').value;
-            
-            // SE O USUÁRIO DEIXOU EM BRANCO, GRAVA NULL NO BANCO (100% AUTOMÁTICO)!
-            const valorInputStr = document.getElementById('edit-plano-valor').value.trim();
-            const plano_valor = valorInputStr !== '' ? Number(valorInputStr) : null;
+            const plano_valor = Number(document.getElementById('edit-plano-valor').value);
 
             const { error: errPousada } = await supabaseClient.from('pousadas').update({
                 email_admin: email_admin || null,
@@ -782,7 +742,7 @@
             }
 
             fecharModalEdicao();
-            mostrarToast("Dados atualizados com sucesso!", "success");
+            mostrarToast("Dados e assinatura atualizados com sucesso!", "success");
             carregarDados();
         }
 
@@ -804,4 +764,4 @@
         }
     </script>
 </body>
-</html>omo você queria!
+</html>
