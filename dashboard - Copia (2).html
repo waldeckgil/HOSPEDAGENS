@@ -137,7 +137,7 @@
                     <div id="lista-resumo-pendentes" class="mt-3 flex flex-wrap gap-2"></div>
                 </div>
                 <a href="reservas.html" class="w-full sm:w-auto text-center bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-3 rounded-xl transition shadow-sm whitespace-nowrap text-xs sm:text-sm">
-                    Gerenciar Todas as Reservas &rarr;
+                    Gerenciar Todas las Reservas &rarr;
                 </a>
             </div>
 
@@ -154,7 +154,9 @@
                         <i class="fa-solid fa-border-all"></i> Ver Todas as Suítes
                     </button>
                 </div>
-                <div id="grid-seletor-suites-dash" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5"></div>
+                <div id="grid-seletor-suites-dash" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+                    <!-- Cards dinâmicos renderizados via JS com as cores de estado solicitadas -->
+                </div>
             </div>
 
             <!-- BANNER INFORMATIVO CASO UMA SUÍTE ESTEJA FILTRADA -->
@@ -253,53 +255,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE CONFIRMAÇÃO DE CANCELAMENTO PROFISSIONAL COM AUDITORIA -->
-    <div id="modal-cancelamento-profissional" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-[75]">
-        <div class="bg-white p-6 sm:p-7 rounded-3xl w-full max-w-md shadow-2xl border border-gray-100 transform transition-all">
-            <div class="flex items-start gap-4">
-                <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center text-xl flex-shrink-0">
-                    <i class="fa-solid fa-ban"></i>
-                </div>
-                <div class="flex-1">
-                    <h3 class="text-base sm:text-lg font-extrabold text-gray-900">Cancelar Reserva?</h3>
-                    <p class="text-xs sm:text-sm text-gray-600 mt-1.5 leading-relaxed">
-                        Tem certeza que deseja <strong class="text-red-700">CANCELAR</strong> a reserva de <strong id="nome-hospede-cancelamento" class="text-gray-900">hóspede</strong>?
-                    </p>
-                    <div class="mt-3 bg-red-50 border border-red-200 rounded-xl p-2.5 flex items-start gap-2">
-                        <span class="text-red-600 text-sm">🏨</span>
-                        <p class="text-[11px] text-red-900 font-medium leading-snug">A acomodação será liberada imediatamente para o status <strong>Disponível</strong> e a ocorrência será auditada no relatório.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="mt-5">
-                <label class="block text-xs font-extrabold text-red-700 uppercase tracking-wider mb-1.5">
-                    <i class="fa-solid fa-pen-to-square mr-1"></i> Motivo do cancelamento <span class="text-red-600">*</span> (obrigatório)
-                </label>
-                <textarea id="motivo-cancelamento-input" rows="3" maxlength="500" placeholder="Ex: Desistência do hóspede, problemas de saúde, no-show..." class="w-full p-3 border-2 border-red-200 bg-red-50/30 focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-100 rounded-xl text-sm font-medium text-gray-900 placeholder:text-gray-400 outline-none transition"></textarea>
-                <div class="flex justify-between items-center mt-1.5">
-                    <span id="erro-motivo-cancelamento" class="hidden text-[11px] font-bold text-red-600 flex items-center gap-1"><i class="fa-solid fa-circle-exclamation"></i> Informe o motivo do cancelamento</span>
-                    <span class="text-[10px] text-gray-400 ml-auto"><span id="contador-motivo-cancelamento">0</span>/500</span>
-                </div>
-                <div class="mt-2 flex flex-wrap gap-1.5">
-                    <button type="button" onclick="document.getElementById('motivo-cancelamento-input').value='Desistência do hóspede'; document.getElementById('motivo-cancelamento-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition">Desistência do hóspede</button>
-                    <button type="button" onclick="document.getElementById('motivo-cancelamento-input').value='Problemas de saúde'; document.getElementById('motivo-cancelamento-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition">Problemas de saúde</button>
-                    <button type="button" onclick="document.getElementById('motivo-cancelamento-input').value='No-show (não compareceu)'; document.getElementById('motivo-cancelamento-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition">No-show</button>
-                    <button type="button" onclick="document.getElementById('motivo-cancelamento-input').value='Mudança de planos na viagem'; document.getElementById('motivo-cancelamento-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition">Mudança de planos</button>
-                </div>
-            </div>
-
-            <div class="mt-6 flex gap-2.5">
-                <button onclick="fecharModalCancelamento()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-4 rounded-xl transition text-sm">
-                    Voltar
-                </button>
-                <button onclick="confirmarCancelamentoReserva()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-extrabold py-2.5 px-4 rounded-xl shadow-md transition text-sm flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-ban"></i> Confirmar Cancelamento
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- Modal de Edição -->
     <div id="modal-edicao" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-hidden">
         <div id="modal-edicao-card" class="bg-white p-5 sm:p-8 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto relative cursor-default" style="-webkit-overflow-scrolling: touch; overscroll-behavior-y: contain;">
@@ -359,8 +314,8 @@
                         <option value="Ocupada">Ocupada (Agora)</option>
                         <option value="Reservado">Criar Nova Reserva</option>
                         <option value="Limpeza">Limpeza</option>
+                        <option value="Pendente">Pendente</option>
                         <option value="Checkout">Checkout (Finalizar Estadia)</option>
-                        <option value="Cancelar" class="text-red-600 font-extrabold">❌ Cancelar Reserva</option>
                     </select>
                 </div>
 
@@ -572,16 +527,19 @@
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
         const EMAIL_MASTER_ADMIN = 'waldeckgil@gmail.com';
 
+        // INTEGRAÇÃO COM SESSÃO MASTER OU POUSADA COMUM
         const paramsUrl = new URLSearchParams(window.location.search);
         const pousadaIdUrl = paramsUrl.get('pousada_id');
         const temSessaoMaster = localStorage.getItem('supabase_master_admin_session');
 
         let supabaseClient;
         if (pousadaIdUrl && temSessaoMaster) {
+            // Se veio do clique do admin-master, usa o cliente master isolado
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
                 auth: { storageKey: 'supabase_master_admin_session' }
             });
         } else {
+            // Caso contrário, cliente padrão de gestores
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         }
 
@@ -595,6 +553,9 @@
         let camposLimposParaNovaReserva = false;
         let pousadaAceitaPetCache = false;
 
+        // =========================================================================
+        // PALETA DINÂMICA DE CORES EXCLUSIVAS POR SUÍTE (PARA OS CARDS PRINCIPAIS)
+        // =========================================================================
         const PALETA_SUITES = [
             { nome: 'indigo', border: 'border-indigo-300', borderHover: 'hover:border-indigo-500', borderActive: 'border-indigo-600', bgLight: 'bg-indigo-50/60', bgActive: 'bg-indigo-100', iconBg: 'bg-indigo-100', iconText: 'text-indigo-700', badgeBg: 'bg-indigo-600', textGroupHover: 'group-hover:text-indigo-700', barBg: 'bg-indigo-500' },
             { nome: 'amber', border: 'border-amber-300', borderHover: 'hover:border-amber-500', borderActive: 'border-amber-600', bgLight: 'bg-amber-50/60', bgActive: 'bg-amber-100', iconBg: 'bg-amber-100', iconText: 'text-amber-700', badgeBg: 'bg-amber-600', textGroupHover: 'group-hover:text-amber-700', barBg: 'bg-amber-500' },
@@ -736,10 +697,12 @@
             const params = new URLSearchParams(window.location.search);
             const pousadaIdParam = params.get('pousada_id');
 
+            // RECONHECIMENTO DO SUPER ADMINISTRADOR MASTER
             if (emailLogado === EMAIL_MASTER_ADMIN.toLowerCase() && pousadaIdParam) {
-                usuarioIdAtual = pousadaIdParam;
+                usuarioIdAtual = pousadaIdParam; // Foca na pousada selecionada no Master
                 document.getElementById('banner-modo-master')?.classList.remove('hidden');
 
+                // Mantém o ID da pousada nos links da barra lateral enquanto o Master navega
                 document.querySelectorAll('aside nav a').forEach(link => {
                     const href = link.getAttribute('href');
                     if (href && href !== '#' && !href.startsWith('http')) {
@@ -748,6 +711,7 @@
                     }
                 });
             } else {
+                // Gestor comum: acessa exclusivamente o próprio ID
                 usuarioIdAtual = session.user.id;
             }
 
@@ -860,6 +824,9 @@
             return { texto: `Chegada em ${dias} dias`, classe: 'bg-blue-100 text-blue-800 border-blue-200' };
         }
 
+        // =========================================================================
+        // LOCALIZADOR DETALHADO DE CONFLITOS DE DATAS (NOMINAL)
+        // =========================================================================
         function obterConflitosDatas(suiteId, checkin, checkout, reservaIdIgnorar = null) {
             if (!suiteId || !checkin || !checkout) return [];
             return reservasGlobaisCache.filter(r => {
@@ -920,6 +887,9 @@
             }
             document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`;
 
+            // =========================================================================
+            // VERIFICAÇÃO DA FAIXA INTELIGENTE DE STATUS DA ASSINATURA
+            // =========================================================================
             try {
                 let diasAviso = 5;
                 try {
@@ -1136,6 +1106,9 @@
             document.getElementById('modal-tarifa-especial').classList.add('hidden');
         }
 
+        // =========================================================================
+        // HUB CONSOLIDADO - SELETOR DE SUÍTES COM CORES DE ESTADO (OCUPADA / LIVRE)
+        // =========================================================================
         function renderizarSeletorSuitesTopo() {
             const grid = document.getElementById('grid-seletor-suites-dash');
             const btnTodas = document.getElementById('btn-ver-todas-suites-dash');
@@ -1807,7 +1780,7 @@
                                     <button type="button" onclick="alternarExpandirCard(this)" class="text-xs font-bold text-amber-900 hover:text-amber-950 underline flex items-center gap-1">
                                         <span class="label-expandir">Ver Detalhes</span> ▾
                                     </button>
-                                    <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', 'Reservado', '${pend.id}')" class="text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1">
+                                    <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', 'Pendente', '${pend.id}')" class="text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1">
                                         <span>Editar Card</span> &rarr;
                                     </button>
                                 </div>
@@ -1838,9 +1811,8 @@
             const elMotivo = document.getElementById('edit-motivo-transferencia');
             if (elMotivo) elMotivo.value = '';
 
-            const statusFinalParaModal = (status === 'Pendente' || status === 'Cancelar') ? 'Reservado' : status;
-            document.getElementById('edit-status').value = statusFinalParaModal;
-            document.getElementById('edit-status-original').value = statusFinalParaModal;
+            document.getElementById('edit-status').value = status;
+            document.getElementById('edit-status-original').value = status;
             document.getElementById('edit-valor-sinal').value = '';
             document.getElementById('edit-forma-pagamento').value = 'Pix / Sinal';
             document.getElementById('edit-observacao').value = '';
@@ -1965,8 +1937,6 @@
                 let payload = { status: novoStatus };
                 if (novoStatus === 'Recusada' && motivoRecusa) {
                     payload.motivo_recusa = motivoRecusa;
-                    payload.recusado_em = new Date().toISOString();
-                    payload.recusado_por = usuarioIdAtual;
                 }
                 const { error } = await supabaseClient.from('reservas').update(payload).eq('id', reservaId);
                 if (!error) mostrarToast("Sucesso", `Reserva ${novoStatus.toLowerCase()}!`);
@@ -2070,79 +2040,6 @@
                     await supabaseClient.from('reservas').update({ status: 'Aprovada' }).eq('id', reservaId);
                     carregarDashboard();
                 } catch(e) {}
-            }
-        }
-
-        // =========================================================================
-        // CANCELAMENTO DE RESERVA PROFISSIONAL COM AUDITORIA
-        // =========================================================================
-        let reservaIdParaCancelar = null;
-
-        function abrirModalCancelamento(reservaId, nomeHospede) {
-            reservaIdParaCancelar = reservaId;
-            const elNome = document.getElementById('nome-hospede-cancelamento');
-            if (elNome) elNome.innerText = nomeHospede || 'hóspede';
-            const input = document.getElementById('motivo-cancelamento-input');
-            const erro = document.getElementById('erro-motivo-cancelamento');
-            const contador = document.getElementById('contador-motivo-cancelamento');
-            if (input) { input.value = ''; input.classList.remove('border-red-500','ring-2','ring-red-200'); }
-            if (erro) erro.classList.add('hidden');
-            if (contador) contador.innerText = '0';
-            const modal = document.getElementById('modal-cancelamento-profissional');
-            if (modal) modal.classList.remove('hidden');
-            setTimeout(() => { if (input) input.focus(); }, 150);
-        }
-
-        function fecharModalCancelamento() {
-            reservaIdParaCancelar = null;
-            const modal = document.getElementById('modal-cancelamento-profissional');
-            if (modal) modal.classList.add('hidden');
-            const statusSel = document.getElementById('edit-status');
-            const statusOrig = document.getElementById('edit-status-original');
-            if (statusSel && statusSel.value === 'Cancelar') {
-                statusSel.value = (statusOrig && statusOrig.value !== 'Cancelar') ? statusOrig.value : 'Disponível';
-            }
-        }
-
-        async function confirmarCancelamentoReserva() {
-            if (!reservaIdParaCancelar) return;
-            const input = document.getElementById('motivo-cancelamento-input');
-            const erro = document.getElementById('erro-motivo-cancelamento');
-            const motivo = input ? input.value.trim() : '';
-            if (!motivo || motivo.length < 1) {
-                if (erro) erro.classList.remove('hidden');
-                if (input) { input.classList.add('border-red-500','ring-2','ring-red-200'); input.focus(); }
-                return;
-            }
-            if (erro) erro.classList.add('hidden');
-            
-            try {
-                const suiteId = document.getElementById('edit-suite-id').value;
-                const payload = {
-                    status: 'Cancelada',
-                    motivo_cancelamento: motivo,
-                    cancelado_em: new Date().toISOString(),
-                    cancelado_por: usuarioIdAtual,
-                    motivo_recusa: motivo
-                };
-
-                const { error: errRes } = await supabaseClient.from('reservas').update(payload).eq('id', reservaIdParaCancelar);
-                if (errRes) {
-                    mostrarErroModal('Erro ao cancelar reserva: ' + errRes.message);
-                    return;
-                }
-
-                if (suiteId) {
-                    await supabaseClient.from('suites').update({ status: 'Disponível' }).eq('id', suiteId);
-                }
-
-                fecharModalCancelamento();
-                fecharModal();
-                carregarDashboard();
-                mostrarToast('Reserva Cancelada', 'A reserva foi cancelada e a acomodação liberada para Disponível.');
-            } catch(err) {
-                console.error('Erro ao cancelar reserva:', err);
-                mostrarErroModal('Falha ao processar o cancelamento.');
             }
         }
 
@@ -2371,19 +2268,6 @@
             const containerCampos = document.getElementById('campos-hospede-container');
             const containerCheckout = document.getElementById('container-checkout-financeiro');
             const lblValorSinal = document.getElementById('lbl-valor-sinal');
-
-            // INTERCEPTAÇÃO DA OPÇÃO CANCELAR RESERVA
-            if (status === 'Cancelar') {
-                const reservaIdAtual = document.getElementById('edit-reserva-id').value;
-                if (!reservaIdAtual) {
-                    mostrarErroModal("Esta suíte não possui uma reserva ativa vinculada para cancelar.");
-                    document.getElementById('edit-status').value = statusOriginal || 'Disponível';
-                    return;
-                }
-                const nomeHospede = document.getElementById('edit-hospede').value || 'hóspede';
-                abrirModalCancelamento(reservaIdAtual, nomeHospede);
-                return;
-            }
             
             if (status === 'Disponível' || status === 'Limpeza') {
                 containerCampos.classList.add('opacity-50');
@@ -2393,7 +2277,7 @@
 
             if (status === 'Checkout') {
                 containerCheckout.classList.remove('hidden');
-                lblValorSinal.innerText = "Valor do Pagamento no Checkout (R$) * Mínimo Obrigatório";
+                lblValorSinal.innerText = "Valor do Pagamento o Checkout (R$) * Mínimo Obrigatório";
                 lblValorSinal.classList.add('text-red-700');
                 lblValorSinal.classList.remove('text-emerald-700');
                 await atualizarSaldoCheckoutModal();
@@ -2660,22 +2544,12 @@
             const status = document.getElementById('edit-status').value;
             const statusOriginal = document.getElementById('edit-status-original').value;
             const suiteId = document.getElementById('edit-suite-id').value;
+            const suiteIdOriginal = document.getElementById('edit-suite-id-original').value;
             const reservaIdEditada = document.getElementById('edit-reserva-id').value;
             const checkinInformado = document.getElementById('edit-checkin').value;
             const checkoutInformado = document.getElementById('edit-checkout').value;
             const hojeStr = new Date().toLocaleDateString('sv-SE');
             
-            // SE FOR CANCELAR RESERVA, DISPARA O FLUXO DE CANCELAMENTO
-            if (status === 'Cancelar') {
-                if (!reservaIdEditada) {
-                    mostrarErroModal("Esta suíte não possui uma reserva ativa vinculada para cancelar.");
-                    return;
-                }
-                const nomeHospede = document.getElementById('edit-hospede').value || 'hóspede';
-                abrirModalCancelamento(reservaIdEditada, nomeHospede);
-                return;
-            }
-
             const suiteObj = suitesGlobaisCache.find(s => s.id === suiteId);
             const estaPausada = suiteObj && (suiteObj.ativa === false || suiteObj.ativa === 'false');
             if (estaPausada && status !== 'Limpeza' && status !== 'Checkout') {
@@ -2762,9 +2636,9 @@
             intervaloAutoRefresh = setInterval(() => {
                 const modalEdicaoAberto = document.getElementById('modal-edicao') && !document.getElementById('modal-edicao').classList.contains('hidden');
                 const modalRecusaAberto = document.getElementById('modal-recusa-profissional') && !document.getElementById('modal-recusa-profissional').classList.contains('hidden');
-                const modalCancAberto = document.getElementById('modal-cancelamento-profissional') && !document.getElementById('modal-cancelamento-profissional').classList.contains('hidden');
                 const modalAntecipacaoAberto = document.getElementById('modal-confirmacao-antecipacao') && !document.getElementById('modal-confirmacao-antecipacao').classList.contains('hidden');
-                if (!modalEdicaoAberto && !modalRecusaAberto && !modalCancAberto && !modalAntecipacaoAberto) {
+                if (!modalEdicaoAberto && !modalRecusaAberto && !modalAntecipacaoAberto) {
+                    console.log('🔄 Auto-refresh 60s');
                     carregarDashboard();
                     atualizarHorarioUltimaAtualizacao();
                 }
@@ -2788,9 +2662,8 @@
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'reservas', filter: `pousada_id=eq.${pousadaId}` }, (payload) => {
                         const modalEdicaoAberto = document.getElementById('modal-edicao') && !document.getElementById('modal-edicao').classList.contains('hidden');
                         const modalRecusaAberto = document.getElementById('modal-recusa-profissional') && !document.getElementById('modal-recusa-profissional').classList.contains('hidden');
-                        const modalCancAberto = document.getElementById('modal-cancelamento-profissional') && !document.getElementById('modal-cancelamento-profissional').classList.contains('hidden');
                         const modalAntecipacaoAberto = document.getElementById('modal-confirmacao-antecipacao') && !document.getElementById('modal-confirmacao-antecipacao').classList.contains('hidden');
-                        if (!modalEdicaoAberto && !modalRecusaAberto && !modalCancAberto && !modalAntecipacaoAberto) {
+                        if (!modalEdicaoAberto && !modalRecusaAberto && !modalAntecipacaoAberto) {
                             carregarDashboard();
                             atualizarHorarioUltimaAtualizacao();
                             mostrarToast('Atualizado', `Reserva ${payload.eventType === 'INSERT' ? 'nova' : 'alterada'} detectada!`);
@@ -2799,9 +2672,8 @@
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'suites', filter: `pousada_id=eq.${pousadaId}` }, () => {
                         const modalEdicaoAberto = document.getElementById('modal-edicao') && !document.getElementById('modal-edicao').classList.contains('hidden');
                         const modalRecusaAberto = document.getElementById('modal-recusa-profissional') && !document.getElementById('modal-recusa-profissional').classList.contains('hidden');
-                        const modalCancAberto = document.getElementById('modal-cancelamento-profissional') && !document.getElementById('modal-cancelamento-profissional').classList.contains('hidden');
                         const modalAntecipacaoAberto = document.getElementById('modal-confirmacao-antecipacao') && !document.getElementById('modal-confirmacao-antecipacao').classList.contains('hidden');
-                        if (!modalEdicaoAberto && !modalRecusaAberto && !modalCancAberto && !modalAntecipacaoAberto) { carregarDashboard(); atualizarHorarioUltimaAtualizacao(); }
+                        if (!modalEdicaoAberto && !modalRecusaAberto && !modalAntecipacaoAberto) { carregarDashboard(); atualizarHorarioUltimaAtualizacao(); }
                     })
                     .subscribe();
             } catch (e) { console.warn('Realtime falhou:', e); }
@@ -2861,17 +2733,6 @@
                     if (contador) contador.innerText = String(input.value.length);
                     if (erro && input.value.trim().length >= 1) erro.classList.add('hidden');
                     input.classList.remove('border-red-500','ring-2','ring-red-200');
-                });
-            }
-
-            const inputCanc = document.getElementById('motivo-cancelamento-input');
-            const contadorCanc = document.getElementById('contador-motivo-cancelamento');
-            const erroCanc = document.getElementById('erro-motivo-cancelamento');
-            if (inputCanc) {
-                inputCanc.addEventListener('input', () => {
-                    if (contadorCanc) contadorCanc.innerText = String(inputCanc.value.length);
-                    if (erroCanc && inputCanc.value.trim().length >= 1) erroCanc.classList.add('hidden');
-                    inputCanc.classList.remove('border-red-500','ring-2','ring-red-200');
                 });
             }
         });
