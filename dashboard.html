@@ -78,6 +78,20 @@
         <!-- CORPO DA PÁGINA -->
         <main class="p-4 sm:p-6 md:p-8 flex-1 overflow-y-auto">
             
+            <!-- FAIXA DE MODO SUPER ADMINISTRADOR (SÓ APARECE QUANDO O MASTER ACESSA A POUSADA VIA ADMIN MASTER) -->
+            <div id="banner-modo-master" class="hidden mb-6 bg-slate-950 text-amber-300 p-3.5 sm:p-4 rounded-2xl shadow-md border border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-sm border border-amber-500/30">👑</span>
+                    <div>
+                        <h4 class="text-xs font-extrabold uppercase tracking-wider text-amber-400">Modo Super Administrador Master</h4>
+                        <p class="text-xs text-slate-300">Você está gerenciando a pousada: <strong id="nome-pousada-modo-master" class="text-white underline"></strong></p>
+                    </div>
+                </div>
+                <a href="admin-master.html" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3.5 py-1.5 rounded-xl font-bold text-xs transition shadow-xs flex items-center gap-1.5 shrink-0">
+                    <i class="fa-solid fa-arrow-left"></i> Voltar ao Master SaaS
+                </a>
+            </div>
+
             <!-- FAIXA INTELIGENTE DE STATUS DA ASSINATURA (SÓ APARECE SE ESTIVER VENCENDO OU BLOQUEADA) -->
             <div id="banner-assinatura-dashboard" class="hidden mb-6 p-4 rounded-2xl shadow-xs border flex items-center justify-between gap-3 transition-all">
                 <div class="flex items-center gap-3">
@@ -511,7 +525,23 @@
 <script>
         const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const EMAIL_MASTER_ADMIN = 'waldeckgil@gmail.com';
+
+        // INTEGRAÇÃO COM SESSÃO MASTER OU POUSADA COMUM
+        const paramsUrl = new URLSearchParams(window.location.search);
+        const pousadaIdUrl = paramsUrl.get('pousada_id');
+        const temSessaoMaster = localStorage.getItem('supabase_master_admin_session');
+
+        let supabaseClient;
+        if (pousadaIdUrl && temSessaoMaster) {
+            // Se veio do clique do admin-master, usa o cliente master isolado
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+                auth: { storageKey: 'supabase_master_admin_session' }
+            });
+        } else {
+            // Caso contrário, cliente padrão de gestores
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
 
         let usuarioIdAtual = null;
         let nomePousadaAtual = "nossa pousada";
@@ -663,7 +693,28 @@
                 return;
             }
 
-            usuarioIdAtual = session.user.id;
+            const emailLogado = (session.user.email || '').toLowerCase();
+            const params = new URLSearchParams(window.location.search);
+            const pousadaIdParam = params.get('pousada_id');
+
+            // RECONHECIMENTO DO SUPER ADMINISTRADOR MASTER
+            if (emailLogado === EMAIL_MASTER_ADMIN.toLowerCase() && pousadaIdParam) {
+                usuarioIdAtual = pousadaIdParam; // Foca na pousada selecionada no Master
+                document.getElementById('banner-modo-master')?.classList.remove('hidden');
+
+                // Mantém o ID da pousada nos links da barra lateral enquanto o Master navega
+                document.querySelectorAll('aside nav a').forEach(link => {
+                    const href = link.getAttribute('href');
+                    if (href && href !== '#' && !href.startsWith('http')) {
+                        const separador = href.includes('?') ? '&' : '?';
+                        link.setAttribute('href', `${href}${separador}pousada_id=${pousadaIdParam}`);
+                    }
+                });
+            } else {
+                // Gestor comum: acessa exclusivamente o próprio ID
+                usuarioIdAtual = session.user.id;
+            }
+
             carregarDashboard();
         }
 
@@ -828,6 +879,8 @@
                 nomePousadaAtual = pousada.nome;
                 document.getElementById('titulo-pousada').innerText = pousada.nome;
                 document.getElementById('titulo-menu-pousada').innerText = pousada.nome;
+                const elModoMaster = document.getElementById('nome-pousada-modo-master');
+                if (elModoMaster) elModoMaster.innerText = pousada.nome;
             } else {
                 document.getElementById('titulo-pousada').innerText = "Minha Pousada";
                 document.getElementById('titulo-menu-pousada').innerText = "Minha Pousada";
@@ -992,7 +1045,7 @@
                 detalhes.classList.remove('hidden');
                 if (iconeSeta) iconeSeta.style.transform = 'rotate(180deg)';
                 if (labelTexto) labelTexto.innerText = 'Recolher';
-                else btnElement.innerText = 'Recolher ▴';
+                else btnElement.innerText = 'Recolher ▾';
             } else {
                 detalhes.classList.add('hidden');
                 if (iconeSeta) iconeSeta.style.transform = 'rotate(0deg)';
@@ -2437,7 +2490,7 @@
             if (status === 'Reservado' || status === 'Ocupada' || status === 'Aprovada' || status === 'Checkout') {
                 if (reservaIdEditada) {
                     const { error: errResUpdate } = await supabaseClient.from('reservas').update(dadosReserva).eq('id', reservaIdEditada);
-                    if (errResResUpdate) {
+                    if (errResUpdate) {
                         mostrarErroModal("Ação bloqueada: seu plano está em modo somente leitura.");
                         return;
                     }

@@ -71,7 +71,7 @@
         <header class="bg-white border-b border-slate-200 p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
                 <h2 class="text-xl font-extrabold text-slate-900">Gestão de Assinantes & Planos</h2>
-                <p class="text-xs text-slate-500 mt-0.5">Audite o volume de suítes, controle vencimentos e ative pousadas após o pagamento.</p>
+                <p class="text-xs text-slate-500 mt-0.5">Audite o volume de suítes, acesse painéis de pousadas e gerencie vencimentos.</p>
             </div>
             <button onclick="carregarDados()" class="bg-slate-900 hover:bg-black text-white px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-sm">
                 <i class="fa-solid fa-rotate"></i> Atualizar Dados
@@ -127,7 +127,7 @@
                 <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div>
                         <h3 class="font-extrabold text-slate-900 text-base">Pousadas Clientes</h3>
-                        <p class="text-xs text-slate-500">Auditoria de suítes ativas, identificação de gestor e ação de cobrança.</p>
+                        <p class="text-xs text-slate-500">Auditoria de suítes, identificação de gestor, acesso direto ao painel e cobrança.</p>
                     </div>
                     <div class="w-full sm:w-72 relative">
                         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
@@ -136,7 +136,7 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse min-w-[950px]">
+                    <table class="w-full text-left border-collapse min-w-[1000px]">
                         <thead>
                             <tr class="bg-slate-50 text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b">
                                 <th class="p-4">Pousada, Gestor & Login</th>
@@ -181,7 +181,7 @@
         </main>
     </div>
 
-    <!-- MODAL DE ALTERAÇÃO INDIVIDUAL (COM GESTOR E LOGIN) -->
+    <!-- MODAL DE ALTERAÇÃO INDIVIDUAL -->
     <div id="modal-editar-pousada" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4 z-50">
         <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-200">
             <h3 class="text-lg font-extrabold text-slate-900 mb-0.5">Ajustar Assinatura & Acesso</h3>
@@ -223,10 +223,10 @@
         const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
 
-        // CLIENTE SUPABASE COM SESSÃO TOTALMENTE ISOLADA PARA O MASTER
+        // CLIENTE COM SESSÃO MASTER ISOLADA
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
             auth: {
-                storageKey: 'supabase_master_admin_session', // Chave exclusiva: não colide com o dashboard da pousada
+                storageKey: 'supabase_master_admin_session',
                 persistSession: true,
                 autoRefreshToken: true,
                 detectSessionInUrl: true
@@ -238,7 +238,6 @@
         let pousadasCache = [];
         let faixasPreco = [];
 
-        // NOTIFICAÇÕES TOAST
         function mostrarToast(mensagem, tipo = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -263,7 +262,6 @@
             }, 3500);
         }
 
-        // CONFIRMAÇÃO MODAL INTERNA
         function confirmarAcao({ titulo, mensagem, textoBotao = 'Confirmar', cor = 'emerald', icone = 'fa-circle-check' }) {
             return new Promise((resolve) => {
                 const modal = document.getElementById('modal-confirmacao');
@@ -322,7 +320,6 @@
 
             document.getElementById('admin-email').innerText = user.email;
 
-            // Busca nome do Master no banco de usuários se existir
             try {
                 const { data: uMaster } = await supabaseClient.from('usuarios').select('nome_completo').eq('user_id', user.id).maybeSingle();
                 if(uMaster && uMaster.nome_completo){
@@ -356,7 +353,6 @@
             if(!error && data && data.length > 0){
                 faixasPreco = data;
             } else {
-                // Padrão com Faixa 1, Faixa 2 e Faixa 3
                 faixasPreco = [
                     { min_suites: 1, max_suites: 10, valor_mensal: 149.90, descricao: 'Até 10 suítes' },
                     { min_suites: 11, max_suites: 20, valor_mensal: 249.90, descricao: 'De 11 a 20 suítes' },
@@ -498,7 +494,6 @@
                 return;
             }
 
-            // Busca os dados da tabela de usuários para obter os nomes dos gestores
             let usuarios = [];
             try {
                 const { data: uData } = await supabaseClient.from('usuarios').select('user_id, nome_completo, whatsapp');
@@ -578,10 +573,8 @@
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50/80 transition">
                         <td class="p-4">
-                            <!-- NOME DA POUSADA -->
                             <div class="font-extrabold text-slate-900 text-sm">${p.nome}</div>
                             
-                            <!-- GESTOR E LOGIN -->
                             <div class="text-[11px] text-slate-600 font-semibold flex flex-wrap items-center gap-1.5 mt-1">
                                 ${p.nomeGestor ? `
                                     <span class="inline-flex items-center gap-1 text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
@@ -604,7 +597,6 @@
                                 `}
                             </div>
 
-                            <!-- CONTATOS -->
                             <div class="text-[11px] text-slate-500 mt-1.5 flex items-center gap-3">
                                 ${p.whatsapp_contato ? `<a href="${whatsLink}" target="_blank" class="text-emerald-600 hover:underline font-bold inline-flex items-center gap-1"><i class="fa-brands fa-whatsapp text-xs"></i> ${p.whatsapp_contato}</a>` : ''}
                                 ${p.telefone_contato && p.telefone_contato !== p.whatsapp_contato ? `<span class="inline-flex items-center gap-1 text-slate-500"><i class="fa-solid fa-phone text-[10px]"></i> ${p.telefone_contato}</span>` : ''}
@@ -621,6 +613,11 @@
                         <td class="p-4">${statusHtml}</td>
                         <td class="p-4 text-center">
                             <div class="inline-flex items-center gap-1.5">
+                                <!-- NOVO BOTÃO: ACESSAR PAINEL DA POUSADA (MODO MASTER EM NOVA ABA) -->
+                                <a href="dashboard.html?pousada_id=${p.id}" target="_blank" title="Acessar painel desta pousada como Master" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-xs">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Acessar
+                                </a>
+
                                 <button onclick="renovar30Dias('${p.id}', '${p.data_vencimento}', '${p.nome.replace(/'/g, "\\'")}')" title="Confirmar Pagamento (+30 dias)" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-xs">
                                     <i class="fa-solid fa-plus"></i> 30d
                                 </button>
@@ -720,7 +717,6 @@
             const data_vencimento = document.getElementById('edit-data-vencimento').value;
             const plano_valor = Number(document.getElementById('edit-plano-valor').value);
 
-            // 1. Atualiza dados na tabela pousadas
             const { error: errPousada } = await supabaseClient.from('pousadas').update({
                 email_admin: email_admin || null,
                 data_vencimento,
@@ -732,7 +728,6 @@
                 return;
             }
 
-            // 2. Se informado nome do gestor, atualiza na tabela usuarios
             if(nome_gestor){
                 try {
                     const { data: existU } = await supabaseClient.from('usuarios').select('id').eq('user_id', id).maybeSingle();
@@ -768,5 +763,1056 @@
             window.location.href = 'index.html';
         }
     </script>
+</body>
+</html>
+
+2. Código Completo: dashboard.html
+
+(Agora compatível com o acesso do Master via dashboard.html?pousada_id=...,
+exibindo a barra superior dourada de Super Administrador e mantendo a navegação
+daquela pousada intacta).
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Principal </title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes piscarAlerta {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(1.002); }
+        }
+        .alerta-piscando {
+            animation: piscarAlerta 1.5s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row">
+
+    <!-- MENU LATERAL -->
+    <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl">
+        <div class="p-4 sm:p-6">
+            <div class="flex justify-between items-center md:block">
+                <h1 id="titulo-menu-pousada" class="text-xl sm:text-2xl font-extrabold text-white mb-0 md:mb-6 tracking-wider text-center">Painel 360</h1>
+            </div>
+            <nav class="mt-4 md:mt-0 space-y-1.5 sm:space-y-2 flex flex-wrap md:flex-col gap-1.5 md:gap-0">
+                <a href="dashboard.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold shadow-md text-xs sm:text-sm">
+                    <span>🏠</span> <span class="hidden sm:inline">Painel Principal</span><span class="sm:hidden">Suítes</span>
+                </a>
+
+                <a href="relatorios.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
+                    <span>📋</span> <span class="hidden sm:inline">Gestão Completa  </span><span class="sm:hidden">Consultas</span>
+                </a>
+                <a href="hospedes.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
+                    <span>👥</span> <span class="hidden sm:inline">Hóspedes</span><span class="sm:hidden">Hóspedes</span>
+                </a>
+                <a href="configurar-pousada.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
+                    <span>⚙️</span> <span class="hidden sm:inline">Configuração de Suítes</span><span class="sm:hidden">Configurações</span>
+                </a>
+                <a href="tarifas.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
+                    <span>💰</span> <span class="hidden sm:inline">Gerenciar Regras e Tarifas</span><span class="sm:hidden">Tarifas</span>
+                </a>
+                
+                <div class="w-full pt-3 mt-2 border-t border-slate-800 flex flex-col md:space-y-2 gap-2">
+                    <button onclick="copiarLinkVitrine()" class="w-full flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300 text-left text-xs sm:text-sm">
+                        <span>🔗</span> Copiar Link (Enviar p/ Hospedes)
+                    </button>
+                    <a id="link-ver-vitrine" href="#" target="_blank" class="w-full flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300 text-xs sm:text-sm">
+                        <span>👁️</span> Ver Vitrine (Visão dos Hospedes)
+                    </a>
+                    <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl transition shadow text-xs sm:text-sm flex items-center justify-center gap-2 mt-1">
+                        <i class="fa-solid fa-right-from-bracket"></i> Sair
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="flex-1 flex flex-col min-w-0">
+        
+        <!-- CABEÇALHO -->
+        <header class="bg-white shadow-xs border-b border-gray-200 p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                <h2 class="text-lg sm:text-xl font-bold text-gray-800">Painel Principal - Controle de Suítes</h2>
+                <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold w-fit">Carregando...</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <div id="kpi-mes-container" class="hidden bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-full text-indigo-900 text-xs font-bold flex items-center gap-1.5">
+                    <span>📊</span> <span id="kpi-texto-mes">Reservas no mês: 0</span>
+                </div>
+                <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200 w-fit">Sistema Online</span>
+            </div>
+        </header>
+
+        <!-- CORPO DA PÁGINA -->
+        <main class="p-4 sm:p-6 md:p-8 flex-1 overflow-y-auto">
+
+            <!-- FAIXA DE MODO SUPER ADMINISTRADOR (SÓ APARECE QUANDO O MASTER ACESSA A POUSADA) -->
+            <div id="banner-modo-master" class="hidden mb-6 bg-slate-950 text-amber-300 p-3.5 sm:p-4 rounded-2xl shadow-md border border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-sm border border-amber-500/30">👑</span>
+                    <div>
+                        <h4 class="text-xs font-extrabold uppercase tracking-wider text-amber-400">Modo Super Administrador Master</h4>
+                        <p class="text-xs text-slate-300">Você está auditando e gerenciando: <strong id="nome-pousada-modo-master" class="text-white underline"></strong></p>
+                    </div>
+                </div>
+                <a href="admin-master.html" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3.5 py-1.5 rounded-xl font-bold text-xs transition shadow-xs flex items-center gap-1.5 shrink-0">
+                    <i class="fa-solid fa-arrow-left"></i> Voltar ao Master SaaS
+                </a>
+            </div>
+            
+            <!-- FAIXA INTELIGENTE DE STATUS DA ASSINATURA -->
+            <div id="banner-assinatura-dashboard" class="hidden mb-6 p-4 rounded-2xl shadow-xs border flex items-center justify-between gap-3 transition-all">
+                <div class="flex items-center gap-3">
+                    <span id="banner-assinatura-icone" class="text-2xl">⚠️</span>
+                    <div>
+                        <h4 id="banner-assinatura-titulo" class="text-sm font-extrabold leading-tight"></h4>
+                        <p id="banner-assinatura-sub" class="text-xs mt-0.5 font-medium"></p>
+                    </div>
+                </div>
+                <a href="tarifas.html" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-white/90 hover:bg-white text-slate-800 border border-black/10 shadow-xs transition shrink-0">
+                    Ver Assinatura &rarr;
+                </a>
+            </div>
+
+            <!-- AVISO DE SUÍTES PAUSADAS -->
+            <div id="card-aviso-pausadas" class="hidden mb-6 bg-slate-800 border-l-8 border-slate-500 p-4 sm:p-5 rounded-2xl shadow-sm text-white flex flex-col gap-1">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">⚠️</span>
+                    <h3 class="text-sm sm:text-base font-bold">Aviso: Existem suítes pausadas no momento</h3>
+                </div>
+                <p id="texto-suites-pausadas" class="text-xs text-slate-300 pl-7"></p>
+            </div>
+
+            <!-- RADAR DE PRÓXIMAS CHEGADAS -->
+            <div id="radar-chegadas-container" class="hidden mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-l-8 border-blue-600 p-4 sm:p-5 rounded-2xl shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">🚀</span>
+                    <div>
+                        <h3 class="text-sm sm:text-base font-bold text-blue-950" id="radar-titulo">Radar de Próxima Chegada</h3>
+                        <p class="text-xs text-blue-800" id="radar-subtitulo">Calculando próxima estada...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CARD DE ATENÇÃO NO TOPO (PENDENTES) -->
+            <div id="card-atencao-pendentes" class="hidden mb-8 bg-amber-50 border-l-8 border-amber-500 p-4 sm:p-6 rounded-2xl shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-4 alerta-piscando">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xl sm:text-2xl">🔔</span>
+                        <h2 class="text-base sm:text-xl font-bold text-red-700">Você tem <span id="contador-pendentes">0</span> solicitação(ões) de reserva pendente(s)!</h2>
+                    </div>
+                    <p class="text-xs sm:text-sm text-amber-700 mt-1">Há hóspedes aguardando a aprovação. Veja os detalhes e a data/hora da solicitação abaixo:</p>
+                    <div id="lista-resumo-pendentes" class="mt-3 flex flex-wrap gap-2"></div>
+                </div>
+                <a href="reservas.html" class="w-full sm:w-auto text-center bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-3 rounded-xl transition shadow-sm whitespace-nowrap text-xs sm:text-sm">
+                    Gerenciar Todas as Reservas &rarr;
+                </a>
+            </div>
+
+            <!-- HUB DE NAVEGAÇÃO E FILTRO CONSOLIDADO POR SUÍTE -->
+            <div id="container-filtro-suites-topo" class="mb-6 bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-200">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
+                    <div>
+                        <h3 class="text-xs sm:text-sm font-extrabold text-gray-800 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-layer-group text-blue-600"></i> Navegação por Suíte - Clique para Focar ou Veja Todas
+                        </h3>
+                        <p class="text-[11px] text-gray-400 mt-0.5">Cards em <strong class="text-slate-600">cinza claro</strong> indicam suítes ocupadas e em <strong class="text-emerald-700">verde claro</strong> indicam suítes livres para novas estadias.</p>
+                    </div>
+                    <button id="btn-ver-todas-suites-dash" onclick="filtrarDashboardPorSuite(null)" class="text-[11px] font-bold bg-slate-900 hover:bg-black text-white px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1.5 ring-2 ring-blue-500">
+                        <i class="fa-solid fa-border-all"></i> Ver Todas as Suítes
+                    </button>
+                </div>
+                <div id="grid-seletor-suites-dash" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5"></div>
+            </div>
+
+            <!-- BANNER INFORMATIVO CASO UMA SUÍTE ESTEJA FILTRADA -->
+            <div id="banner-suite-filtrada" class="hidden mb-5 p-3.5 rounded-2xl flex items-center justify-between shadow-xs border transition-all">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-lg">🎯</span>
+                    <div>
+                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-gray-500 block">Modo de Visualização Focada</span>
+                        <h4 id="texto-suite-filtrada" class="text-xs sm:text-sm font-bold text-gray-900">Mostrando apenas: Suíte</h4>
+                    </div>
+                </div>
+                <button onclick="filtrarDashboardPorSuite(null)" class="text-[10px] font-bold bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 px-3 py-1.5 rounded-xl shadow-xs transition">
+                    <i class="fa-solid fa-xmark mr-1"></i> Mostrar Todas
+                </button>
+            </div>
+
+            <!-- GRID PRINCIPAL DE CARDS DE SUÍTES -->
+            <div id="suites-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </main>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast-notificacao" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+        <div id="toast-content" class="bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
+            <span id="toast-icone" class="text-xl">✨</span>
+            <div>
+                <h4 id="toast-titulo" class="font-bold text-sm">Sucesso</h4>
+                <p id="toast-mensagem" class="text-xs text-gray-300">Alterações salvas com sucesso!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAIS E COMPONENTES -->
+    <div id="modal-confirmacao" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-6 sm:p-8 rounded-3xl w-full max-w-md shadow-2xl text-center space-y-4">
+            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">⚠️</div>
+            <h3 class="text-lg sm:text-xl font-bold text-gray-900">Confirmar Saída / Limpeza?</h3>
+            <p id="modal-confirmacao-texto" class="text-xs sm:text-sm text-gray-600">Esta ação encerrará a estadia atual do hóspede e enviará a suíte para limpeza. Deseja prosseguir?</p>
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <button type="button" onclick="fecharModalConfirmacao()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-xl transition text-xs sm:text-sm">Cancelar</button>
+                <button type="button" id="btn-confirmar-acao" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl transition text-xs sm:text-sm shadow-md">Sim, Liberar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-confirmacao-antecipacao" class="hidden fixed inset-0 bg-black bg-opacity-65 flex items-center justify-center p-4 z-[75]">
+        <div class="bg-white p-6 sm:p-7 rounded-3xl w-full max-w-md shadow-2xl space-y-4 border border-blue-100">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-amber-100 text-amber-700 rounded-2xl flex items-center justify-center text-xl font-bold flex-shrink-0"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                <div><h3 class="text-base sm:text-lg font-extrabold text-gray-900">Atenção: Antecipação de Check-in</h3><p class="text-xs text-gray-500">A entrada do hóspede foi adiantada para Ocupada.</p></div>
+            </div>
+            <div class="bg-blue-50/70 border border-blue-200 p-3.5 rounded-2xl space-y-2 text-xs text-blue-950">
+                <div class="flex justify-between items-center pb-1.5 border-b border-blue-200/60"><span class="text-gray-600">Hóspede:</span><strong id="antecipacao-nome-hospede" class="font-bold text-gray-900">-</strong></div>
+                <div class="flex justify-between items-center pb-1.5 border-b border-blue-200/60"><span class="text-gray-600">Período Anterior:</span><span id="antecipacao-checkin-antigo" class="text-gray-500 line-through text-[11px]">-</span></div>
+                <div class="flex justify-between items-center pb-1.5 border-b border-blue-200/60"><span class="text-gray-600">Novo Período de Entrada:</span><strong id="antecipacao-checkin-novo" class="text-emerald-700 font-extrabold text-xs">-</strong></div>
+                <div class="flex justify-between items-center pb-1.5 border-b border-blue-200/60"><span class="text-gray-600">Novo Total da Estadia:</span><strong id="antecipacao-novo-total" class="text-blue-900 font-extrabold text-sm">R$ 0,00</strong></div>
+                <div class="flex justify-between items-center pt-0.5"><span class="text-amber-900 font-bold uppercase text-[10px]">Saldo Restante a Cobrar:</span><strong id="antecipacao-saldo-restante" class="text-amber-700 font-extrabold text-base">R$ 0,00</strong></div>
+            </div>
+            <p class="text-[11px] text-gray-500 leading-snug">Deseja confirmar a antecipação? A suíte passará imediatamente para o status <strong class="text-slate-900">Ocupada</strong> com o novo saldo registrado.</p>
+            <div class="grid grid-cols-2 gap-3 pt-1">
+                <button type="button" onclick="fecharModalAntecipacao()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-4 rounded-xl transition text-xs sm:text-sm">Revisar / Cancelar</button>
+                <button type="button" id="btn-confirmar-antecipacao" class="bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-2.5 px-4 rounded-xl transition text-xs sm:text-sm shadow-md flex items-center justify-center gap-1.5"><i class="fa-solid fa-check"></i> Confirmar Entrada</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE EDIÇÃO -->
+    <div id="modal-edicao" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-hidden">
+        <div id="modal-edicao-card" class="bg-white p-5 sm:p-8 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto relative cursor-default" style="-webkit-overflow-scrolling: touch; overscroll-behavior-y: contain;">
+            <div id="modal-drag-handle" class="flex justify-between items-center mb-4 cursor-move select-none">
+                <h2 id="modal-titulo" class="text-xl sm:text-2xl font-bold text-blue-600 m-0">Gerenciar Suíte</h2>
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] text-gray-400 font-bold uppercase hidden sm:block">Arraste aqui ↕</span>
+                    <button type="button" onclick="fecharModal()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold">✕</button>
+                </div>
+            </div>
+            
+            <div id="modal-erro-alerta" class="hidden mb-4 bg-red-50 border-l-4 border-red-500 p-3.5 rounded-xl text-red-900 text-xs sm:text-sm font-semibold flex items-start gap-2 shadow-xs">
+                <span class="text-base">⚠️</span>
+                <div id="modal-erro-texto" class="flex-1 leading-relaxed">Mensagem de erro aqui</div>
+            </div>
+
+            <form id="form-edicao" class="space-y-3">
+                <input type="hidden" id="edit-suite-id-original">
+                <input type="hidden" id="edit-status-original">
+                <input type="hidden" id="edit-reserva-id">
+                
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1 flex items-center justify-between">
+                        <span>Acomodação / Suíte</span>
+                        <span id="badge-transferencia-topo" class="hidden text-[10px] bg-purple-100 text-purple-800 px-2 py-0.5 rounded-md font-extrabold uppercase">🔄 Transferência</span>
+                    </label>
+                    <select id="edit-suite-id" class="w-full p-3 border-2 border-blue-200 focus:border-blue-600 rounded-xl font-bold bg-white text-sm" onchange="aoMudarSuiteModal()"></select>
+                </div>
+
+                <div id="container-transferencia-suite" class="hidden bg-purple-50 border-2 border-purple-300 p-3.5 rounded-xl space-y-2 text-xs text-purple-950">
+                    <div class="flex items-center gap-2 font-bold text-purple-900">
+                        <i class="fa-solid fa-arrows-rotate text-sm"></i>
+                        <span id="texto-resumo-transferencia">Transferindo hóspede de quarto</span>
+                    </div>
+                    <p class="text-[11px] text-purple-800 leading-snug">Todos os dados cadastrais e pagamentos já realizados acompanharão a nova reserva. A diária e o saldo serão recalculados pela nova suíte.</p>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-wider text-purple-900 mb-1">Motivo da Transferência (Opcional):</label>
+                        <input type="text" id="edit-motivo-transferencia" placeholder="Ex: Upgrade, pedido do cliente, manutenção..." class="w-full p-2.5 border border-purple-300 rounded-xl text-xs bg-white">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Status Físico da Suíte</label>
+                    <select id="edit-status" class="w-full p-3 border rounded-xl font-bold bg-gray-50 text-sm" onchange="(async () => { await verificarStatusModal(); })()">
+                        <option value="Disponível">Disponível</option>
+                        <option value="Ocupada">Ocupada (Agora)</option>
+                        <option value="Reservado">Criar Nova Reserva</option>
+                        <option value="Limpeza">Limpeza</option>
+                        <option value="Pendente">Pendente</option>
+                        <option value="Checkout">Checkout (Finalizar Estadia)</option>
+                    </select>
+                </div>
+
+                <div id="container-checkout-financeiro" class="hidden bg-red-50 border border-red-200 p-4 rounded-xl space-y-2">
+                    <div class="flex justify-between items-center text-xs sm:text-sm">
+                        <span class="font-bold text-red-900 uppercase">Saldo Devedor do Hóspede:</span>
+                        <strong id="display-saldo-devedor-checkout" class="text-red-700 font-extrabold text-base">R$ 0,00</strong>
+                    </div>
+                </div>
+
+                <div id="resumo-dinamico-container" class="bg-blue-50 border border-blue-200 p-3 rounded-xl space-y-1 text-xs text-blue-900">
+                    <div class="flex justify-between"><span>Qtd. Diárias:</span><strong id="modal-qtd-diarias">1 diária(s)</strong></div>
+                    <div class="flex justify-between"><span>Valor Total:</span><strong id="modal-valor-total">R$ 0,00</strong></div>
+                    <div class="flex justify-between border-t border-blue-200 pt-1"><span>Saldo Restante:</span><strong id="modal-saldo-restante" class="text-amber-700">R$ 0,00</strong></div>
+                </div>
+
+                <div id="campos-hospede-container" class="space-y-3 transition-all">
+                    <div class="grid grid-cols-1 gap-2">
+                        <input type="text" id="edit-hospede" placeholder="Nome Hóspede" class="p-3 border rounded-xl text-sm">
+                        <input type="text" id="edit-whatsapp" placeholder="WhatsApp" class="p-3 border rounded-xl text-sm">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <input type="text" id="edit-cpf" placeholder="CPF (Opcional)" class="p-3 border rounded-xl text-sm">
+                            <input type="text" id="edit-rg" placeholder="RG (Opcional)" class="p-3 border rounded-xl text-sm">
+                        </div>
+                        <input type="text" id="edit-endereco" placeholder="Endereço" class="p-3 border rounded-xl text-sm">
+                        <input type="text" id="edit-cep" placeholder="CEP" class="p-3 border rounded-xl text-sm">
+                        <input type="email" id="edit-email" placeholder="E-mail" class="p-3 border rounded-xl text-sm">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Adultos</label>
+                            <input type="number" id="edit-adultos" min="1" value="2" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="recalcularValoresModalEdicao()" oninput="recalcularValoresModalEdicao()">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Crianças</label>
+                            <input type="number" id="edit-criancas" min="0" value="0" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="recalcularValoresModalEdicao()" oninput="recalcularValoresModalEdicao()">
+                        </div>          
+                        <div id="container-taxa-pet">
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Taxa de Pet</label>
+                            <select id="edit-pet" class="w-full p-3 border rounded-xl bg-white text-sm font-bold" onchange="recalcularValoresModalEdicao()" oninput="recalcularValoresModalEdicao()">
+                                <option value="false">Não</option>
+                                <option value="true">Sim</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="container-idades-criancas" class="hidden bg-gray-50 border border-gray-200 p-3 rounded-xl space-y-2">
+                        <label class="block text-xs font-bold text-gray-700">Idade(s) da(s) Criança(s):</label>
+                        <div id="lista-idades-criancas" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Check-in</label>
+                            <input type="date" id="edit-checkin" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="recalcularValoresModalEdicao()" oninput="recalcularValoresModalEdicao()">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Check-out</label>
+                            <input type="date" id="edit-checkout" class="w-full p-3 border rounded-xl bg-white text-sm" onchange="recalcularValoresModalEdicao()" oninput="recalcularValoresModalEdicao()">
+                        </div>
+                    </div>
+
+                    <div class="pt-2 space-y-2">
+                        <div>
+                            <label id="lbl-valor-sinal" class="block text-xs font-bold text-emerald-700 mb-1">Registrar Novo Pagamento / Sinal (R$)</label>
+                            <input type="number" step="0.01" id="edit-valor-sinal" placeholder="0.00" class="w-full p-3 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-emerald-900 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-emerald-700 mb-1">Forma de Pagamento</label>
+                            <select id="edit-forma-pagamento" class="w-full p-3 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-emerald-900 text-sm">
+                                <option value="Pix / Sinal">Pix / Sinal</option>
+                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                                <option value="Cartão de Débito">Cartão de Débito</option>
+                                <option value="Transferência Bancária">Transferência Bancária</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-amber-700 mb-1">⚠️ Observação Importante</label>
+                            <textarea id="edit-observacao" rows="2" placeholder="Ex: Hóspede solicitou late checkout..." class="w-full p-3 border border-amber-300 bg-amber-50/40 rounded-xl text-sm font-medium text-amber-950"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sticky bottom-0 bg-white pt-3 pb-2 mt-4 border-t border-gray-100 space-y-2 z-10">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold transition text-sm shadow-md flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-check"></i> Salvar Alterações
+                    </button>
+                    <button type="button" onclick="fecharModal()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 p-3 rounded-xl font-bold transition text-sm">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAIS DE APOIO -->
+    <div id="modal-tarifa-especial" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="fecharModalTarifaEspecial()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+            <div class="flex items-center gap-2 mb-1"><span class="text-xl">⚡</span><h3 class="text-lg font-bold text-gray-900">Tarifas Especiais Aplicadas</h3></div>
+            <p id="modal-tarifa-suite-nome" class="text-xs text-blue-600 font-bold mb-4 uppercase tracking-wider"></p>
+            <div id="modal-tarifa-conteudo" class="space-y-3"></div>
+            <div class="mt-6 flex justify-end"><button onclick="fecharModalTarifaEspecial()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition">Fechar</button></div>
+        </div>
+    </div>
+
+    <div id="modal-calendario-suite" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative">
+            <button onclick="fecharModalCalendario()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+            <div class="flex items-center gap-2 mb-1"><span class="text-xl">📅</span><h3 id="cal-suite-nome" class="text-lg font-bold text-gray-900">Calendário da Suíte</h3></div>
+            <p class="text-xs text-emerald-700 font-medium mb-4">Dias em <strong class="bg-emerald-100 px-1 rounded">verde</strong> estão livres para novas reservas.</p>
+            <div class="flex justify-between items-center mb-4 bg-gray-50 p-2.5 rounded-xl border border-gray-200">
+                <button onclick="mudarMesCalendario(-1)" class="px-3 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-xs">◀ Mês Anterior</button>
+                <strong id="cal-mes-ano-atual" class="text-xs sm:text-sm font-bold text-gray-800 uppercase">MÊS / ANO</strong>
+                <button onclick="mudarMesCalendario(1)" class="px-3 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-xs">Próximo Mês ▶</button>
+            </div>
+            <div class="grid grid-cols-7 gap-1 text-center font-bold text-[11px] text-gray-500 mb-2"><div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sexta</div><div>Sáb</div></div>
+            <div id="cal-grid-dias" class="grid grid-cols-7 gap-1.5 text-center text-xs"></div>
+            <div class="mt-6 flex justify-end"><button onclick="fecharModalCalendario()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold text-xs sm:text-sm py-2.5 rounded-xl transition">Fechar</button></div>
+        </div>
+    </div>
+
+    <div id="modal-recusa-profissional" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-[70]">
+        <div class="bg-white p-6 sm:p-7 rounded-3xl w-full max-w-md shadow-2xl border border-gray-100">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center text-xl flex-shrink-0"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div class="flex-1">
+                    <h3 class="text-base sm:text-lg font-extrabold text-gray-900">Recusar reserva?</h3>
+                    <p class="text-xs sm:text-sm text-gray-600 mt-1.5 leading-relaxed">Tem certeza que deseja <strong class="text-red-700">RECUSAR</strong> a reserva de <strong id="nome-hospede-recusa" class="text-gray-900">hóspede</strong>?</p>
+                </div>
+            </div>
+            <div class="mt-5">
+                <label class="block text-xs font-extrabold text-red-700 uppercase tracking-wider mb-1.5">Motivo da recusa <span class="text-red-600">*</span></label>
+                <textarea id="motivo-recusa-input" rows="3" maxlength="500" placeholder="Ex: Sem sinal, datas indisponíveis..." class="w-full p-3 border-2 border-red-200 bg-red-50/30 rounded-xl text-sm outline-none"></textarea>
+                <div class="flex justify-between items-center mt-1.5">
+                    <span id="erro-motivo-recusa" class="hidden text-[11px] font-bold text-red-600">Informe o motivo</span>
+                    <span class="text-[10px] text-gray-400 ml-auto"><span id="contador-motivo">0</span>/500</span>
+                </div>
+            </div>
+            <div class="mt-6 flex gap-2.5">
+                <button onclick="fecharModalRecusa()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-4 rounded-xl text-sm">Cancelar</button>
+                <button onclick="confirmarRecusaReserva()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-extrabold py-2.5 px-4 rounded-xl text-sm shadow-md">Sim, Recusar</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+        const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
+        const EMAIL_MASTER_ADMIN = 'waldeckgil@gmail.com';
+
+        // INTEGRAÇÃO COM SESSÃO MASTER OU POUSADA COMUM
+        const paramsUrl = new URLSearchParams(window.location.search);
+        const pousadaIdUrl = paramsUrl.get('pousada_id');
+        const temSessaoMaster = localStorage.getItem('supabase_master_admin_session');
+
+        let supabaseClient;
+        if (pousadaIdUrl && temSessaoMaster) {
+            // Se veio do clique do admin-master, usa o cliente master isolado
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+                auth: { storageKey: 'supabase_master_admin_session' }
+            });
+        } else {
+            // Caso contrário, cliente padrão de gestores
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
+
+        let usuarioIdAtual = null;
+        let nomePousadaAtual = "nossa pousada";
+        let diariaMinimaPousadaCache = 1;
+        let reservasGlobaisCache = [];
+        let suitesGlobaisCache = [];
+        let pagamentosGlobaisCache = [];
+        let tarifasEspeciaisGlobaisCache = [];
+        let camposLimposParaNovaReserva = false;
+        let pousadaAceitaPetCache = false;
+
+        const PALETA_SUITES = [
+            { nome: 'indigo', border: 'border-indigo-300', borderHover: 'hover:border-indigo-500', borderActive: 'border-indigo-600', bgLight: 'bg-indigo-50/60', bgActive: 'bg-indigo-100', iconBg: 'bg-indigo-100', iconText: 'text-indigo-700', badgeBg: 'bg-indigo-600', textGroupHover: 'group-hover:text-indigo-700', barBg: 'bg-indigo-500' },
+            { nome: 'amber', border: 'border-amber-300', borderHover: 'hover:border-amber-500', borderActive: 'border-amber-600', bgLight: 'bg-amber-50/60', bgActive: 'bg-amber-100', iconBg: 'bg-amber-100', iconText: 'text-amber-700', badgeBg: 'bg-amber-600', textGroupHover: 'group-hover:text-amber-700', barBg: 'bg-amber-500' },
+            { nome: 'emerald', border: 'border-emerald-300', borderHover: 'hover:border-emerald-500', borderActive: 'border-emerald-600', bgLight: 'bg-emerald-50/60', bgActive: 'bg-emerald-100', iconBg: 'bg-emerald-100', iconText: 'text-emerald-700', badgeBg: 'bg-emerald-600', textGroupHover: 'group-hover:text-emerald-700', barBg: 'bg-emerald-500' },
+            { nome: 'violet', border: 'border-violet-300', borderHover: 'hover:border-violet-500', borderActive: 'border-violet-600', bgLight: 'bg-violet-50/60', bgActive: 'bg-violet-100', iconBg: 'bg-violet-100', iconText: 'text-violet-700', badgeBg: 'bg-violet-600', textGroupHover: 'group-hover:text-violet-700', barBg: 'bg-violet-500' }
+        ];
+
+        function obterTemaSuite(idOuNome) {
+            if (!idOuNome) return PALETA_SUITES[0];
+            const str = String(idOuNome).trim().toLowerCase();
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = (hash << 5) - hash + str.charCodeAt(i);
+                hash |= 0;
+            }
+            return PALETA_SUITES[Math.abs(hash) % PALETA_SUITES.length];
+        }
+
+        let suiteFiltroDashboard = null;
+        let calSuiteIdAtual = null;
+        let calSuiteNomeAtual = "";
+        let calDataReferencia = new Date();
+
+        function abrirCalendarioSuite(suiteId, suiteNome) {
+            calSuiteIdAtual = suiteId;
+            calSuiteNomeAtual = suiteNome;
+            calDataReferencia = new Date();
+            document.getElementById('cal-suite-nome').innerText = `Suíte: ${suiteNome}`;
+            renderizarGridCalendario();
+            document.getElementById('modal-calendario-suite').classList.remove('hidden');
+        }
+
+        function fecharModalCalendario() { document.getElementById('modal-calendario-suite').classList.add('hidden'); }
+        function fecharModalAntecipacao() { document.getElementById('modal-confirmacao-antecipacao')?.classList.add('hidden'); }
+
+        function mudarMesCalendario(direcao) {
+            calDataReferencia.setMonth(calDataReferencia.getMonth() + direcao);
+            renderizarGridCalendario();
+        }
+
+        function renderizarGridCalendario() {
+            const gridEl = document.getElementById('cal-grid-dias');
+            const labelMesAno = document.getElementById('cal-mes-ano-atual');
+            gridEl.innerHTML = '';
+
+            const ano = calDataReferencia.getFullYear();
+            const mes = calDataReferencia.getMonth();
+            const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            labelMesAno.innerText = `${nomesMeses[mes]} de ${ano}`;
+
+            const primeiroDiaSemana = new Date(ano, mes, 1).getDay();
+            const ultimoDiaMes = new Date(ano, mes + 1, 0).getDate();
+            const reservasDaSuite = reservasGlobaisCache.filter(r => r.suite_id === calSuiteIdAtual && (r.status === 'Aprovada' || r.status === 'Ocupada'));
+
+            const datasOcupadas = new Set();
+            reservasDaSuite.forEach(r => {
+                if (!r.checkin || !r.checkout) return;
+                let dCurr = new Date(r.checkin + 'T00:00:00');
+                const dFim = new Date(r.checkout + 'T00:00:00');
+                while (dCurr < dFim) {
+                    datasOcupadas.add(dCurr.toLocaleDateString('sv-SE'));
+                    dCurr.setDate(dCurr.getDate() + 1);
+                }
+            });
+
+            for (let i = 0; i < primeiroDiaSemana; i++) gridEl.innerHTML += `<div></div>`;
+
+            const hojeStr = new Date().toLocaleDateString('sv-SE');
+            for (let dia = 1; dia <= ultimoDiaMes; dia++) {
+                const mesStr = String(mes + 1).padStart(2, '0');
+                const diaStr = String(dia).padStart(2, '0');
+                const dataIso = `${ano}-${mesStr}-${diaStr}`;
+                const estaOcupado = datasOcupadas.has(dataIso);
+                const ePassado = dataIso < hojeStr;
+
+                let estiloClasse = ePassado ? "bg-gray-100 text-gray-400 border border-gray-200 opacity-60" : (estaOcupado ? "bg-red-100 text-red-700 font-bold border border-red-300" : "bg-emerald-100 text-emerald-800 font-extrabold border border-emerald-300 shadow-xs");
+                gridEl.innerHTML += `<div class="h-9 flex flex-col items-center justify-center rounded-xl text-xs ${estiloClasse}"><span>${dia}</span></div>`;
+            }
+        }
+
+        async function protegerPagina() {
+            supabaseClient.auth.onAuthStateChange((event, session) => {
+                if (event === 'SIGNED_OUT' || !session) {
+                    window.location.href = 'index.html';
+                }
+            });
+
+            const { data: { session }, error } = await supabaseClient.auth.getSession();
+            if (error || !session) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const emailLogado = (session.user.email || '').toLowerCase();
+            const params = new URLSearchParams(window.location.search);
+            const pousadaIdParam = params.get('pousada_id');
+
+            // RECONHECIMENTO DO SUPER ADMINISTRADOR MASTER
+            if (emailLogado === EMAIL_MASTER_ADMIN.toLowerCase() && pousadaIdParam) {
+                usuarioIdAtual = pousadaIdParam; // Foca na pousada selecionada no Master
+                document.getElementById('banner-modo-master')?.classList.remove('hidden');
+
+                // Atualiza links da navegação para preservar a pousada
+                document.querySelectorAll('aside nav a').forEach(link => {
+                    const href = link.getAttribute('href');
+                    if (href && href !== '#' && !href.startsWith('http')) {
+                        const separador = href.includes('?') ? '&' : '?';
+                        link.setAttribute('href', `${href}${separador}pousada_id=${pousadaIdParam}`);
+                    }
+                });
+            } else {
+                // Gestor comum: acessa exclusivamente o próprio ID
+                usuarioIdAtual = session.user.id;
+            }
+
+            carregarDashboard();
+        }
+
+        function mostrarToast(titulo, mensagem, tipo = 'sucesso') {
+            const toast = document.getElementById('toast-notificacao');
+            const toastTitulo = document.getElementById('toast-titulo');
+            const toastMsg = document.getElementById('toast-mensagem');
+            const toastIcone = document.getElementById('toast-icone');
+            const toastContent = document.getElementById('toast-content');
+
+            toastTitulo.innerText = titulo;
+            toastMsg.innerText = mensagem;
+            toastContent.className = tipo === 'sucesso' ? "bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800" : "bg-red-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-red-800";
+            toastIcone.innerText = tipo === 'sucesso' ? "✨" : "🚨";
+
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => { toast.classList.add('translate-y-24', 'opacity-0'); }, 3500);
+        }
+
+        function mostrarErroModal(mensagemHtml) {
+            const alertaEl = document.getElementById('modal-erro-alerta');
+            document.getElementById('modal-erro-texto').innerHTML = mensagemHtml;
+            alertaEl.classList.remove('hidden');
+        }
+
+        function limparErroModal() { document.getElementById('modal-erro-alerta').classList.add('hidden'); }
+
+        function calcularDiasRestantes(dataAlvo) {
+            const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+            const [ano, mes, dia] = dataAlvo.split('-');
+            const alvo = new Date(ano, mes - 1, dia); alvo.setHours(0, 0, 0, 0);
+            return Math.round((alvo.getTime() - hoje.getTime()) / (1000 * 3600 * 24));
+        }
+
+        function calcularQuantidadeDiarias(checkinStr, checkoutStr) {
+            if (!checkinStr || !checkoutStr) return 1;
+            const [anoIn, mesIn, diaIn] = checkinStr.split('-');
+            const [anoOut, mesOut, diaOut] = checkoutStr.split('-');
+            const diffTime = (new Date(anoOut, mesOut - 1, diaOut)).getTime() - (new Date(anoIn, mesIn - 1, diaIn)).getTime();
+            const diffDays = Math.round(diffTime / (1000 * 3600 * 24));
+            return diffDays > 0 ? diffDays : 1;
+        }
+
+        function formatarMoeda(valor) {
+            if (valor === null || valor === undefined || isNaN(valor)) return 'R$ 0,00';
+            return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function formatarDataSimples(dataStr) {
+            if (!dataStr) return '';
+            const partes = dataStr.split('-');
+            return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : dataStr;
+        }
+
+        function formatarDataHora(timestampStr) {
+            if (!timestampStr) return 'Recente';
+            const dataObj = new Date(timestampStr);
+            if (isNaN(dataObj.getTime())) return timestampStr;
+            return `${String(dataObj.getDate()).padStart(2, '0')}/${String(dataObj.getMonth() + 1).padStart(2, '0')}/${dataObj.getFullYear()} às ${String(dataObj.getHours()).padStart(2, '0')}:${String(dataObj.getMinutes()).padStart(2, '0')}`;
+        }
+
+        function gerarLinkWhatsApp(whats, nomeHospede, checkin, checkout) {
+            if (!whats) return '#';
+            let numeroFinal = whats.replace(/\D/g, '');
+            if (numeroFinal.length <= 11 && !numeroFinal.startsWith('55')) numeroFinal = '55' + numeroFinal;
+            let texto = `Olá ${nomeHospede ? nomeHospede.trim() : 'Hóspede'}, agradecemos o contato com a ${nomePousadaAtual}`;
+            if (checkin && checkout) texto += `, referente ao período de ${formatarDataSimples(checkin)} até ${formatarDataSimples(checkout)}.`;
+            return `https://wa.me/${numeroFinal}?text=${encodeURIComponent(texto)}`;
+        }
+
+        function obterIndicadorCheckout(checkoutStr) {
+            const dias = calcularDiasRestantes(checkoutStr);
+            if (dias < 0) return { texto: `Checkout vencido há ${Math.abs(dias)}d`, classe: 'bg-red-100 text-red-700 border-red-300' };
+            if (dias === 0) return { texto: `🔥 Saída HOJE!`, classe: 'bg-orange-100 text-orange-800 border-orange-300 font-bold' };
+            if (dias === 1) return { texto: `⏳ Saída amanhã`, classe: 'bg-yellow-100 text-yellow-800 border-yellow-300' };
+            return { texto: `Saída em ${dias} dias`, classe: 'bg-slate-200 text-slate-800 border-slate-300' };
+        }
+
+        function obterIndicadorProximaEstada(checkinStr) {
+            const dias = calcularDiasRestantes(checkinStr);
+            if (dias < 0) return { texto: `Em andamento`, classe: 'bg-gray-100 text-gray-600 border-gray-200' };
+            if (dias === 0) return { texto: `🚀 Chegada HOJE!`, classe: 'bg-green-100 text-green-800 border-green-300 font-bold' };
+            if (dias === 1) return { texto: `🔔 Chegada amanhã`, classe: 'bg-indigo-100 text-indigo-800 border-indigo-300' };
+            return { texto: `Chegada em ${dias} dias`, classe: 'bg-blue-100 text-blue-800 border-blue-200' };
+        }
+
+        function obterConflitosDatas(suiteId, checkin, checkout, reservaIdIgnorar = null) {
+            if (!suiteId || !checkin || !checkout) return [];
+            return reservasGlobaisCache.filter(r => {
+                if (r.suite_id !== suiteId) return false;
+                if (reservaIdIgnorar && r.id === reservaIdIgnorar) return false;
+                if (r.status === 'Cancelada' || r.status === 'Recusada' || r.status === 'Finalizada') return false;
+                return (checkin < r.checkout && checkout > r.checkin);
+            });
+        }
+
+        function gerarMensagemErroConflito(conflitos, nomeSuite = '') {
+            if (!conflitos || conflitos.length === 0) return `Já existe uma reserva confirmada para estas datas!`;
+            const prefixo = nomeSuite ? `na acomodação <strong>${nomeSuite.toUpperCase()}</strong>` : `para esta suíte`;
+            const c = conflitos[0];
+            return `⚠️ <strong>Conflito de Datas:</strong> Já existe reserva ${prefixo} para ${c.hospede_nome ? `<strong>${c.hospede_nome.toUpperCase()}</strong>` : 'outro hóspede'} de <strong>${formatarDataSimples(c.checkin)} a ${formatarDataSimples(c.checkout)}</strong>!`;
+        }
+
+        async function carregarPousada() {
+            if (!usuarioIdAtual) return;
+            const { data: pousada } = await supabaseClient
+                .from('pousadas')
+                .select('nome, aceita_pet, diaria_minima, status, data_vencimento')
+                .eq('id', usuarioIdAtual)
+                .single();
+
+            pousadaAceitaPetCache = pousada?.aceita_pet === true;
+            diariaMinimaPousadaCache = Number(pousada?.diaria_minima) > 0 ? Number(pousada.diaria_minima) : 1;
+
+            if (pousada && pousada.nome) {
+                nomePousadaAtual = pousada.nome;
+                document.getElementById('titulo-pousada').innerText = pousada.nome;
+                document.getElementById('titulo-menu-pousada').innerText = pousada.nome;
+                const elModoMaster = document.getElementById('nome-pousada-modo-master');
+                if (elModoMaster) elModoMaster.innerText = pousada.nome;
+            } else {
+                document.getElementById('titulo-pousada').innerText = "Pousada";
+            }
+            document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`;
+
+            try {
+                let diasAviso = 5;
+                try {
+                    const { data: config } = await supabaseClient.from('config_sistema').select('dias_aviso_vencimento').eq('id', 1).maybeSingle();
+                    if (config && config.dias_aviso_vencimento) diasAviso = Number(config.dias_aviso_vencimento);
+                } catch (e) {}
+
+                if (pousada) {
+                    const banner = document.getElementById('banner-assinatura-dashboard');
+                    const tit = document.getElementById('banner-assinatura-titulo');
+                    const sub = document.getElementById('banner-assinatura-sub');
+                    const icone = document.getElementById('banner-assinatura-icone');
+
+                    let diasRest = null;
+                    let dVenc = null;
+                    if (pousada.data_vencimento) {
+                        dVenc = new Date(pousada.data_vencimento + 'T12:00:00');
+                        const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+                        diasRest = Math.ceil((dVenc - hoje) / (1000 * 60 * 60 * 24));
+                    }
+
+                    const st = (pousada.status || 'active').toLowerCase();
+
+                    if (st === 'blocked' || (diasRest !== null && diasRest < 0)) {
+                        banner.className = "mb-6 p-4 rounded-2xl shadow-xs border-2 border-red-300 bg-red-50 text-red-950 flex items-center justify-between gap-3";
+                        icone.innerText = "🚫";
+                        tit.innerText = "Plano Suspenso por Inadimplência (Modo Somente Leitura)";
+                        sub.innerText = `Vencido em ${dVenc ? dVenc.toLocaleDateString('pt-BR') : 'data anterior'}. Edições travadas.`;
+                        banner.classList.remove('hidden');
+                    } else if (diasRest !== null && diasRest <= diasAviso) {
+                        banner.className = "mb-6 p-4 rounded-2xl shadow-xs border-2 border-amber-300 bg-amber-50 text-amber-950 flex items-center justify-between gap-3";
+                        icone.innerText = "⚠️";
+                        tit.innerText = `Atenção: Plano vence em ${diasRest === 0 ? 'HOJE' : diasRest + ' dia(s)'}!`;
+                        sub.innerText = `Vencimento: ${dVenc.toLocaleDateString('pt-BR')}.`;
+                        banner.classList.remove('hidden');
+                    } else {
+                        banner.classList.add('hidden');
+                    }
+                }
+            } catch (err) {}
+        }
+
+        function aplicarVisibilidadeTaxaPet() {
+            const container = document.getElementById('container-taxa-pet');
+            if (!container) return;
+            if (pousadaAceitaPetCache === true) container.classList.remove('hidden');
+            else {
+                container.classList.add('hidden');
+                const elPet = document.getElementById('edit-pet');
+                if (elPet) elPet.value = 'false';
+            }
+        }
+
+        function copiarLinkVitrine() {
+            if (!usuarioIdAtual) return;
+            navigator.clipboard.writeText(window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`).then(() => {
+                mostrarToast("Copiado!", "Link da vitrine copiado!");
+            });
+        }
+
+        async function verificarReservasPendentesDashboard() {
+            const { data: pendentes } = await supabaseClient.from('reservas').select('*').eq('pousada_id', usuarioIdAtual).eq('status', 'Pendente');
+            const cardContainer = document.getElementById('card-atencao-pendentes');
+            const listaResumo = document.getElementById('lista-resumo-pendentes');
+            
+            if (!pendentes || pendentes.length === 0) { 
+                cardContainer.classList.add('hidden'); 
+                return; 
+            }
+            
+            cardContainer.classList.remove('hidden');
+            document.getElementById('contador-pendentes').innerText = pendentes.length;
+            listaResumo.innerHTML = '';
+            pendentes.forEach(p => {
+                listaResumo.innerHTML += `
+                    <div class="bg-white border border-amber-200 px-3 py-1.5 rounded-xl shadow-xs text-xs flex items-center gap-2 text-amber-950 font-medium">
+                        <span>👤</span> <div><strong>${p.hospede_nome || 'Hóspede'}</strong> <span class="text-gray-500 text-[10px]">• ${formatarDataHora(p.criado_em)}</span></div>
+                    </div>`;
+            });
+        }
+
+        function atualizarRadarEKPIs() {
+            const hojeStr = new Date().toLocaleDateString('sv-SE');
+            const [anoAtual, mesAtual] = hojeStr.split('-');
+            const aprovadas = reservasGlobaisCache.filter(r => r.status === 'Aprovada');
+            const reservasDoMes = aprovadas.filter(r => r.checkin && r.checkin.startsWith(`${anoAtual}-${mesAtual}`));
+
+            const kpiContainer = document.getElementById('kpi-mes-container');
+            if (kpiContainer) {
+                kpiContainer.classList.remove('hidden');
+                document.getElementById('kpi-texto-mes').innerText = `Reservas no mês: ${reservasDoMes.length}`;
+            }
+
+            const radarContainer = document.getElementById('radar-chegadas-container');
+            const futuras = aprovadas.filter(r => r.checkin >= hojeStr).sort((a, b) => a.checkin.localeCompare(b.checkin));
+
+            if (futuras.length === 0) { radarContainer.classList.add('hidden'); return; }
+
+            const proxima = futuras[0];
+            const dias = calcularDiasRestantes(proxima.checkin);
+            const suite = suitesGlobaisCache.find(s => s.id === proxima.suite_id);
+            radarContainer.classList.remove('hidden');
+            document.getElementById('radar-titulo').innerText = dias === 0 ? `🔥 Chegada HOJE: ${proxima.hospede_nome || 'Hóspede'}` : `📅 Chegada em ${dias}d: ${proxima.hospede_nome || 'Hóspede'}`;
+            document.getElementById('radar-subtitulo').innerText = `Suíte: ${suite?.nome || 'Quarto'} (${formatarDataSimples(proxima.checkin)} a ${formatarDataSimples(proxima.checkout)})`;
+        }
+
+        function alternarExpandirCard(btn) {
+            const card = btn.closest('.card-suite');
+            const detalhes = card.querySelector('.card-detalhes');
+            const icone = card.querySelector('.icone-seta');
+            detalhes.classList.toggle('hidden');
+            if (icone) icone.style.transform = detalhes.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+
+        function abrirModalTarifaEspecial(suiteId) {
+            const suite = suitesGlobaisCache.find(s => s.id === suiteId);
+            document.getElementById('modal-tarifa-suite-nome').innerText = `Suíte: ${suite?.nome || 'Suíte'}`;
+            const container = document.getElementById('modal-tarifa-conteudo');
+            const tarifas = tarifasEspeciaisGlobaisCache.filter(t => t.suite_id === suiteId || !t.suite_id);
+            container.innerHTML = tarifas.length ? tarifas.map(t => `
+                <div class="bg-amber-50/60 border border-amber-200 p-3 rounded-xl text-xs space-y-1">
+                    <div class="flex justify-between font-bold text-amber-900"><span>${t.descricao || 'Tarifa'}</span><span>${formatarMoeda(t.valor_especial)}</span></div>
+                    <p class="text-gray-600">Período: ${formatarDataSimples(t.data_inicio)} a ${formatarDataSimples(t.data_fim)}</p>
+                </div>`).join('') : '<p class="text-xs text-gray-400 text-center">Nenhuma tarifa especial cadastrada.</p>';
+            document.getElementById('modal-tarifa-especial').classList.remove('hidden');
+        }
+
+        function fecharModalTarifaEspecial() { document.getElementById('modal-tarifa-especial').classList.add('hidden'); }
+
+        function renderizarSeletorSuitesTopo() {
+            const grid = document.getElementById('grid-seletor-suites-dash');
+            const btnTodas = document.getElementById('btn-ver-todas-suites-dash');
+            if (!grid) return;
+            if (!suitesGlobaisCache.length) { grid.innerHTML = '<div class="col-span-full py-2 text-center text-gray-400 text-xs">Nenhuma suíte</div>'; return; }
+
+            btnTodas.className = !suiteFiltroDashboard 
+                ? "text-[11px] font-bold bg-slate-900 text-amber-300 px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1.5 ring-2 ring-amber-400"
+                : "text-[11px] font-bold bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1.5";
+
+            const hojeStr = new Date().toLocaleDateString('sv-SE');
+            grid.innerHTML = suitesGlobaisCache.map(suite => {
+                const isAtiva = suiteFiltroDashboard === suite.id;
+                const aprovadas = reservasGlobaisCache.filter(r => r.suite_id === suite.id && r.status === 'Aprovada');
+                const ocupadaHoje = suite.status === 'Ocupada' || aprovadas.some(r => r.checkin <= hojeStr && r.checkout > hojeStr);
+
+                const estilo = ocupadaHoje 
+                    ? 'bg-slate-100 border-slate-300 text-slate-800' 
+                    : 'bg-emerald-50 border-emerald-300 text-emerald-900';
+
+                return `
+                    <div onclick="filtrarDashboardPorSuite('${suite.id}')" class="cursor-pointer p-2.5 rounded-xl border-2 transition flex flex-col justify-between ${estilo} ${isAtiva ? 'ring-2 ring-blue-500 scale-[1.02]' : ''}">
+                        <div class="flex justify-between items-center"><span class="font-bold text-[11px] uppercase truncate">${suite.nome}</span><span class="text-[9px] px-1.5 py-0.5 rounded-full font-bold ${ocupadaHoje ? 'bg-red-100 text-red-700' : 'bg-emerald-200 text-emerald-900'}">${ocupadaHoje ? 'Ocupada' : 'Livre'}</span></div>
+                        <span class="text-[10px] mt-1">${formatarMoeda(suite.valor_diaria)}/dia</span>
+                    </div>`;
+            }).join('');
+        }
+
+        function filtrarDashboardPorSuite(suiteId) {
+            suiteFiltroDashboard = suiteFiltroDashboard === suiteId ? null : suiteId;
+            carregarDashboard();
+        }
+
+        async function carregarDashboard() {
+            await carregarPousada();
+
+            const { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', usuarioIdAtual);
+            suitesGlobaisCache = suites || [];
+
+            const { data: reservas } = await supabaseClient.from('reservas').select('*').eq('pousada_id', usuarioIdAtual);
+            reservasGlobaisCache = reservas || [];
+
+            const { data: pagamentos } = await supabaseClient.from('hospede_pagamentos').select('*').eq('pousada_id', usuarioIdAtual);
+            pagamentosGlobaisCache = pagamentos || [];
+
+            const { data: tarifas } = await supabaseClient.from('tarifas_especiais').select('*').eq('pousada_id', usuarioIdAtual);
+            tarifasEspeciaisGlobaisCache = tarifas || [];
+
+            await verificarReservasPendentesDashboard();
+            atualizarRadarEKPIs();
+            renderizarSeletorSuitesTopo();
+
+            const container = document.getElementById('suites-container');
+            container.innerHTML = '';
+            
+            if (!suitesGlobaisCache.length) {
+                container.innerHTML = '<p class="text-gray-500 col-span-3 text-center py-6">Nenhuma suíte encontrada para esta pousada.</p>';
+                return;
+            }
+
+            const suitesExibir = suiteFiltroDashboard ? suitesGlobaisCache.filter(s => s.id === suiteFiltroDashboard) : suitesGlobaisCache;
+            const hojeStr = new Date().toLocaleDateString('sv-SE');
+
+            for (const suite of suitesExibir) {
+                const tema = obterTemaSuite(suite.id || suite.nome);
+                const reservasDaSuite = reservasGlobaisCache.filter(r => r.suite_id === suite.id && r.status !== 'Cancelada' && r.status !== 'Recusada' && r.status !== 'Finalizada');
+                const aprovadas = reservasDaSuite.filter(r => r.status === 'Aprovada');
+                const pendentes = reservasDaSuite.filter(r => r.status === 'Pendente');
+
+                // 1. APROVADAS
+                if (aprovadas.length > 0) {
+                    for (const aprovada of aprovadas) {
+                        const isFutura = aprovada.checkin > hojeStr;
+                        const linkZap = gerarLinkWhatsApp(aprovada.whatsapp_hospede, aprovada.hospede_nome, aprovada.checkin, aprovada.checkout);
+                        
+                        let totalPago = pagamentosGlobaisCache.filter(p => p.reserva_id === aprovada.id).reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
+                        let saldo = Number(aprovada.valor_total || 0) - totalPago;
+
+                        container.innerHTML += `
+                            <div class="card-suite p-4 rounded-2xl shadow-xs border-2 ${isFutura ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'} border-l-4 ${tema.borderActive} flex flex-col justify-between">
+                                <div>
+                                    <div class="flex justify-between items-start mb-2">
+                                        <div><h3 class="font-bold text-sm text-slate-900">${suite.nome}</h3><p class="text-xs text-slate-600 font-semibold">${aprovada.hospede_nome || 'Hóspede'}</p></div>
+                                        <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${isFutura ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}">${isFutura ? 'Reserva' : 'Ocupada'}</span>
+                                    </div>
+                                    <div class="p-2 bg-white rounded-xl border border-black/5 text-[11px] grid grid-cols-3 text-center my-2">
+                                        <div><span class="text-[9px] text-gray-400 block">TOTAL</span><strong>${formatarMoeda(aprovada.valor_total)}</strong></div>
+                                        <div><span class="text-[9px] text-gray-400 block">PAGO</span><strong class="text-emerald-700">${formatarMoeda(totalPago)}</strong></div>
+                                        <div><span class="text-[9px] text-gray-400 block">SALDO</span><strong class="${saldo > 0 ? 'text-amber-700' : 'text-emerald-700'}">${formatarMoeda(saldo)}</strong></div>
+                                    </div>
+                                    <div class="flex justify-between items-center text-xs mt-3 pt-2 border-t">
+                                        <a href="${linkZap}" target="_blank" class="text-emerald-600 hover:underline font-bold text-[11px] flex items-center gap-1"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+                                        <button onclick="abrirModal('${suite.id}', '${suite.nome}', '${isFutura ? 'Reservado' : 'Ocupada'}', '${aprovada.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-xl text-xs font-bold">Editar &rarr;</button>
+                                    </div>
+                                </div>
+                            </div>`;
+                    }
+                }
+
+                // 2. DISPONÍVEL / LIMPEZA
+                if (aprovadas.length === 0 && pendentes.length === 0) {
+                    const isDisp = suite.status === 'Disponível';
+                    container.innerHTML += `
+                        <div class="card-suite p-4 rounded-2xl shadow-xs border-2 ${isDisp ? 'bg-emerald-50 border-emerald-200' : 'bg-pink-50 border-pink-200'} border-l-4 ${tema.borderActive} flex flex-col justify-between">
+                            <div>
+                                <div class="flex justify-between items-start mb-2"><h3 class="font-bold text-sm text-slate-900">${suite.nome}</h3><span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${isDisp ? 'bg-emerald-600 text-white' : 'bg-pink-600 text-white'}">${suite.status}</span></div>
+                                <p class="text-xs text-slate-500 mt-2">Diária: ${formatarMoeda(suite.valor_diaria)}</p>
+                                <div class="mt-4 pt-2 border-t flex justify-end">
+                                    <button onclick="abrirModal('${suite.id}', '${suite.nome}', '${suite.status}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-xl text-xs font-bold">Gerenciar &rarr;</button>
+                                </div>
+                            </div>
+                        </div>`;
+                }
+
+                // 3. PENDENTES
+                for (const pend of pendentes) {
+                    container.innerHTML += `
+                        <div class="card-suite p-4 rounded-2xl shadow-xs border-2 bg-amber-50 border-amber-200 border-l-4 ${tema.borderActive} flex flex-col justify-between">
+                            <div>
+                                <div class="flex justify-between items-start mb-2"><h3 class="font-bold text-sm text-amber-950">${suite.nome}</h3><span class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-300 text-amber-950">Pendente</span></div>
+                                <p class="text-xs font-bold text-slate-800">${pend.hospede_nome || 'Hóspede'}</p>
+                                <p class="text-[11px] text-slate-500">Período: ${formatarDataSimples(pend.checkin)} a ${formatarDataSimples(pend.checkout)}</p>
+                                <div class="mt-3 flex gap-2">
+                                    <button onclick="mudarStatusReserva('${pend.id}', 'Aprovada')" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-1.5 rounded-xl text-xs font-bold">Aprovar</button>
+                                    <button onclick="abrirModalRecusa('${pend.id}', '${pend.hospede_nome || 'hóspede'}')" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-1.5 rounded-xl text-xs font-bold">Recusar</button>
+                                </div>
+                            </div>
+                        </div>`;
+                }
+            }
+        }
+
+        async function abrirModal(id, nome, status, reservaId = null) {
+            camposLimposParaNovaReserva = false;
+            limparErroModal();
+            aplicarVisibilidadeTaxaPet();
+
+            const selectSuites = document.getElementById('edit-suite-id');
+            selectSuites.innerHTML = suitesGlobaisCache.map(s => `<option value="${s.id}">${s.nome.toUpperCase()}</option>`).join('');
+            selectSuites.value = id;
+            document.getElementById('edit-suite-id-original').value = id;
+            document.getElementById('edit-status').value = status;
+            document.getElementById('edit-status-original').value = status;
+            document.getElementById('modal-titulo').innerText = "Gerenciar Suíte: " + nome;
+
+            let reserva = reservaId ? reservasGlobaisCache.find(r => r.id === reservaId) : null;
+            if (reserva) {
+                document.getElementById('edit-reserva-id').value = reserva.id;
+                document.getElementById('edit-hospede').value = reserva.hospede_nome || '';
+                document.getElementById('edit-whatsapp').value = reserva.whatsapp_hospede || '';
+                document.getElementById('edit-checkin').value = reserva.checkin || '';
+                document.getElementById('edit-checkout').value = reserva.checkout || '';
+                document.getElementById('edit-adultos').value = reserva.qtd_adultos || 2;
+                document.getElementById('edit-criancas').value = reserva.qtd_criancas || 0;
+            } else {
+                document.getElementById('edit-reserva-id').value = '';
+                document.getElementById('edit-hospede').value = '';
+                document.getElementById('edit-whatsapp').value = '';
+                document.getElementById('edit-checkin').value = '';
+                document.getElementById('edit-checkout').value = '';
+            }
+
+            document.getElementById('modal-edicao').classList.remove('hidden');
+            await recalcularValoresModalEdicao();
+        }
+
+        async function recalcularValoresModalEdicao() {
+            const checkin = document.getElementById('edit-checkin').value;
+            const checkout = document.getElementById('edit-checkout').value;
+            const qtdDiarias = calcularQuantidadeDiarias(checkin, checkout);
+            document.getElementById('modal-qtd-diarias').innerText = `${qtdDiarias} diária(s)`;
+        }
+
+        function fecharModal() { document.getElementById('modal-edicao').classList.add('hidden'); }
+        function fecharModalConfirmacao() { document.getElementById('modal-confirmacao').classList.add('hidden'); }
+
+        document.getElementById('form-edicao').onsubmit = async (e) => {
+            e.preventDefault();
+            const suiteId = document.getElementById('edit-suite-id').value;
+            const status = document.getElementById('edit-status').value;
+            const reservaId = document.getElementById('edit-reserva-id').value;
+
+            await supabaseClient.from('suites').update({ status }).eq('id', suiteId);
+            if (reservaId) {
+                await supabaseClient.from('reservas').update({
+                    hospede_nome: document.getElementById('edit-hospede').value,
+                    whatsapp_hospede: document.getElementById('edit-whatsapp').value,
+                    checkin: document.getElementById('edit-checkin').value,
+                    checkout: document.getElementById('edit-checkout').value
+                }).eq('id', reservaId);
+            }
+
+            fecharModal();
+            carregarDashboard();
+            mostrarToast("Sucesso", "Alterações salvas com sucesso!");
+        };
+
+        async function mudarStatusReserva(reservaId, novoStatus, motivoRecusa = null) {
+            let payload = { status: novoStatus };
+            if (motivoRecusa) payload.motivo_recusa = motivoRecusa;
+            await supabaseClient.from('reservas').update(payload).eq('id', reservaId);
+            mostrarToast("Atualizado", `Reserva ${novoStatus.toLowerCase()}!`);
+            carregarDashboard();
+        }
+
+        function abrirModalRecusa(id, nome) {
+            document.getElementById('nome-hospede-recusa').innerText = nome;
+            document.getElementById('modal-recusa-profissional').classList.remove('hidden');
+            document.getElementById('btn-confirmar-recusa')?.setAttribute('onclick', `confirmarRecusaReserva('${id}')`);
+        }
+
+        function fecharModalRecusa() { document.getElementById('modal-recusa-profissional').classList.add('hidden'); }
+
+        async function fazerLogout() {
+            await supabaseClient.auth.signOut();
+            window.location.href = 'index.html';
+        }
+
+        protegerPagina();
+</script>
 </body>
 </html>
