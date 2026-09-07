@@ -222,7 +222,16 @@
     <script>
         const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // CLIENTE SUPABASE COM SESSÃO TOTALMENTE ISOLADA PARA O MASTER
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+            auth: {
+                storageKey: 'supabase_master_admin_session', // Chave exclusiva: não colide com o dashboard da pousada
+                persistSession: true,
+                autoRefreshToken: true,
+                detectSessionInUrl: true
+            }
+        });
 
         const EMAIL_MASTER_ADMIN = 'waldeckgil@gmail.com';
 
