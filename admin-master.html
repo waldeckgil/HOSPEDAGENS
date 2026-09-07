@@ -85,7 +85,7 @@
                 </div>
             </div>
 
-            <!-- REGRA DE ANTECEDÊNCIA DE LEMBRETE (NOVO!) -->
+            <!-- REGRA DE ANTECEDÊNCIA DE LEMBRETE -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h4 class="font-extrabold text-slate-900 text-sm flex items-center gap-2">
@@ -186,12 +186,29 @@
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // CONFIGURAÇÃO DO EMAIL DO MASTER ADMIN
+        const EMAIL_MASTER_ADMIN = 'waldeckgil@gmail.com';
+
         let pousadasCache = [];
         let faixasPreco = [];
 
         async function inicializarMaster(){
             const { data: { user } } = await supabaseClient.auth.getUser();
-            if(!user){ window.location.href = 'index.html'; return; }
+            
+            // 1. Verifica se há usuário autenticado
+            if(!user){ 
+                window.location.href = 'index.html'; 
+                return; 
+            }
+
+            // 2. Trava de segurança: somente waldeckgil@gmail.com tem permissão
+            if((user.email || '').toLowerCase() !== EMAIL_MASTER_ADMIN.toLowerCase()){
+                alert('Acesso Negado! Apenas o Super Administrador Master pode acessar este painel.');
+                await supabaseClient.auth.signOut();
+                window.location.href = 'index.html';
+                return;
+            }
+
             document.getElementById('admin-email').innerText = user.email;
 
             await carregarConfigSistema();
@@ -285,7 +302,7 @@
                 .order('nome');
 
             if(error){
-                document.getElementById('lista-pousadas').innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-600 font-bold">Erro: ${error.message}</td></tr>`;
+                document.getElementById('lista-pousadas').innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-600 font-bold">Erro ao carregar dados: ${error.message}</td></tr>`;
                 return;
             }
 
@@ -317,7 +334,7 @@
         function renderizarTabela(lista){
             const tbody = document.getElementById('lista-pousadas');
             if(lista.length === 0){
-                tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400">Nenhuma pousada encontrada.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400">Nenhuma pousada cadastrada ou encontrada.</td></tr>';
                 return;
             }
 
