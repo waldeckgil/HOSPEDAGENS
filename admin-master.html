@@ -10,6 +10,24 @@
 </head>
 <body class="bg-slate-100 min-h-screen flex flex-col md:flex-row text-slate-800 font-sans" onload="inicializarMaster()">
 
+    <!-- CONTAINER DE NOTIFICAÇÕES (TOASTS INTERNOS) -->
+    <div id="toast-container" class="fixed top-5 right-5 z-[9999] flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- MODAL DE CONFIRMAÇÃO CUSTOMIZADO (SUBSTITUI O CONFIRM NATIVO) -->
+    <div id="modal-confirmacao" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4 z-[9998] transition-opacity">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl border border-slate-100 text-center transform transition-all">
+            <div id="modal-confirm-icon-bg" class="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center text-2xl mb-4 bg-emerald-100 text-emerald-600">
+                <i id="modal-confirm-icon" class="fa-solid fa-circle-check"></i>
+            </div>
+            <h3 id="modal-confirm-titulo" class="text-base font-extrabold text-slate-900 mb-1">Confirmação</h3>
+            <p id="modal-confirm-mensagem" class="text-xs text-slate-500 font-medium mb-6 leading-relaxed">Deseja prosseguir?</p>
+            <div class="grid grid-cols-2 gap-3">
+                <button type="button" id="btn-confirm-cancelar" class="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">Cancelar</button>
+                <button type="button" id="btn-confirm-ok" class="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md transition">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- BARRA LATERAL -->
     <aside class="w-full md:w-72 bg-slate-950 text-slate-300 flex flex-col shadow-2xl border-r border-slate-800 shrink-0">
         <div class="p-6 border-b border-slate-800">
@@ -158,7 +176,7 @@
     </div>
 
     <!-- MODAL DE ALTERAÇÃO INDIVIDUAL -->
-    <div id="modal-editar-pousada" class="fixed inset-0 bg-slate-900/60 hidden flex items-center justify-center p-4 z-50">
+    <div id="modal-editar-pousada" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4 z-50">
         <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-200">
             <h3 class="text-lg font-extrabold text-slate-900 mb-0.5">Ajustar Assinatura</h3>
             <p id="modal-nome-pousada" class="text-xs text-blue-600 font-bold mb-4"></p>
@@ -186,26 +204,93 @@
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // CONFIGURAÇÃO DO EMAIL DO MASTER ADMIN
         const EMAIL_MASTER_ADMIN = 'waldeckgil@gmail.com';
 
         let pousadasCache = [];
         let faixasPreco = [];
 
+        // SISTEMA DE NOTIFICAÇÃO INTERNA (TOAST)
+        function mostrarToast(mensagem, tipo = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+
+            const cores = {
+                success: { bg: 'bg-emerald-600 text-white', icon: 'fa-circle-check' },
+                error: { bg: 'bg-red-600 text-white', icon: 'fa-circle-exclamation' },
+                warning: { bg: 'bg-amber-500 text-white', icon: 'fa-triangle-exclamation' },
+                info: { bg: 'bg-blue-600 text-white', icon: 'fa-circle-info' }
+            };
+            const estilo = cores[tipo] || cores.info;
+
+            toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl text-xs font-bold transition-all duration-300 transform translate-y-2 opacity-0 ${estilo.bg}`;
+            toast.innerHTML = `<i class="fa-solid ${estilo.icon} text-base"></i><span>${mensagem}</span>`;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-[-8px]');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // SISTEMA DE CONFIRMAÇÃO INTERNA (SUBSTITUI O CONFIRM)
+        function confirmarAcao({ titulo, mensagem, textoBotao = 'Confirmar', cor = 'emerald', icone = 'fa-circle-check' }) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('modal-confirmacao');
+                const tit = document.getElementById('modal-confirm-titulo');
+                const msg = document.getElementById('modal-confirm-mensagem');
+                const iconBg = document.getElementById('modal-confirm-icon-bg');
+                const icon = document.getElementById('modal-confirm-icon');
+                const btnOk = document.getElementById('btn-confirm-ok');
+                const btnCancel = document.getElementById('btn-confirm-cancelar');
+
+                tit.innerText = titulo;
+                msg.innerText = mensagem;
+                btnOk.innerText = textoBotao;
+
+                const estilos = {
+                    emerald: { btn: 'bg-emerald-600 hover:bg-emerald-700', iconBg: 'bg-emerald-100 text-emerald-600' },
+                    red: { btn: 'bg-red-600 hover:bg-red-700', iconBg: 'bg-red-100 text-red-600' },
+                    blue: { btn: 'bg-blue-600 hover:bg-blue-700', iconBg: 'bg-blue-100 text-blue-600' }
+                };
+                const e = estilos[cor] || estilos.emerald;
+
+                iconBg.className = `w-14 h-14 rounded-2xl mx-auto flex items-center justify-center text-2xl mb-4 ${e.iconBg}`;
+                icon.className = `fa-solid ${icone}`;
+                btnOk.className = `w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white shadow-md transition ${e.btn}`;
+
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+
+                const fechar = (resposta) => {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                    btnOk.onclick = null;
+                    btnCancel.onclick = null;
+                    resolve(resposta);
+                };
+
+                btnOk.onclick = () => fechar(true);
+                btnCancel.onclick = () => fechar(false);
+            });
+        }
+
         async function inicializarMaster(){
             const { data: { user } } = await supabaseClient.auth.getUser();
             
-            // 1. Verifica se há usuário autenticado
             if(!user){ 
                 window.location.href = 'index.html'; 
                 return; 
             }
 
-            // 2. Trava de segurança: somente waldeckgil@gmail.com tem permissão
             if((user.email || '').toLowerCase() !== EMAIL_MASTER_ADMIN.toLowerCase()){
-                alert('Acesso Negado! Apenas o Super Administrador Master pode acessar este painel.');
+                mostrarToast('Acesso Negado! Apenas o Super Administrador Master pode acessar.', 'error');
                 await supabaseClient.auth.signOut();
-                window.location.href = 'index.html';
+                setTimeout(() => window.location.href = 'index.html', 1500);
                 return;
             }
 
@@ -228,8 +313,8 @@
         async function salvarDiasAviso(){
             const dias = Number(document.getElementById('input-dias-aviso').value) || 5;
             const { error } = await supabaseClient.from('config_sistema').upsert({ id: 1, dias_aviso_vencimento: dias });
-            if(error) alert("Erro ao salvar configuração: " + error.message);
-            else alert("Configuração salva com sucesso! Os gestores verão aviso no login com " + dias + " dias de antecedência.");
+            if(error) mostrarToast("Erro ao salvar configuração: " + error.message, "error");
+            else mostrarToast(`Salvo! Lembrete configurado para ${dias} dias antes.`, "success");
         }
 
         async function carregarFaixas(){
@@ -278,11 +363,11 @@
             try {
                 await supabaseClient.from('config_faixas_preco').delete().neq('id', '00000000-0000-0000-0000-000000000000');
                 for(let f of novas){ await supabaseClient.from('config_faixas_preco').insert([f]); }
-                alert('Tabela de preços salva com sucesso!');
+                mostrarToast('Tabela de preços salva com sucesso!', 'success');
                 carregarFaixas();
                 carregarDados();
             } catch(e){
-                alert('Erro ao salvar no banco: ' + e.message);
+                mostrarToast('Erro ao salvar tabela: ' + e.message, 'error');
             }
         }
 
@@ -387,10 +472,10 @@
                         <td class="p-4">${statusHtml}</td>
                         <td class="p-4 text-center">
                             <div class="inline-flex items-center gap-1.5">
-                                <button onclick="renovar30Dias('${p.id}', '${p.data_vencimento}')" title="Confirmar Pagamento (+30 dias)" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-xs">
+                                <button onclick="renovar30Dias('${p.id}', '${p.data_vencimento}', '${p.nome.replace(/'/g, "\\'")}')" title="Confirmar Pagamento (+30 dias)" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-xs">
                                     <i class="fa-solid fa-plus"></i> 30d
                                 </button>
-                                <button onclick="alternarStatus('${p.id}', '${p.status === 'active' ? 'blocked' : 'active'}')" title="${p.status === 'active' ? 'Bloquear Pousada' : 'Ativar Pousada'}" class="${p.status === 'active' ? 'bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border border-red-200' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white border border-emerald-200'} px-2.5 py-1.5 rounded-lg text-xs font-bold transition">
+                                <button onclick="alternarStatus('${p.id}', '${p.status === 'active' ? 'blocked' : 'active'}', '${p.nome.replace(/'/g, "\\'")}')" title="${p.status === 'active' ? 'Bloquear Pousada' : 'Ativar Pousada'}" class="${p.status === 'active' ? 'bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border border-red-200' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white border border-emerald-200'} px-2.5 py-1.5 rounded-lg text-xs font-bold transition">
                                     <i class="fa-solid ${p.status === 'active' ? 'fa-ban' : 'fa-check'}"></i>
                                 </button>
                                 <button onclick="abrirModalEdicao('${p.id}')" title="Ajustar Vencimento ou Valor" class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">
@@ -403,7 +488,7 @@
             });
         }
 
-        async function renovar30Dias(id, vencimentoAtual){
+        async function renovar30Dias(id, vencimentoAtual, nomePousada){
             let novaData = new Date();
             if(vencimentoAtual){
                 const dAtual = new Date(vencimentoAtual + 'T12:00:00');
@@ -412,24 +497,48 @@
             novaData.setDate(novaData.getDate() + 30);
             const dataFinalStr = novaData.toISOString().split('T')[0];
 
-            if(!confirm(`Confirma o pagamento? A pousada será ATIVADA com vencimento em ${novaData.toLocaleDateString('pt-BR')}.`)) return;
+            const confirmou = await confirmarAcao({
+                titulo: "Confirmar Pagamento",
+                mensagem: `Confirmar recebimento de ${nomePousada}? A pousada será ATIVADA com vencimento em ${novaData.toLocaleDateString('pt-BR')}.`,
+                textoBotao: "Confirmar Pagamento (+30d)",
+                cor: "emerald",
+                icone: "fa-calendar-plus"
+            });
+
+            if(!confirmou) return;
 
             const { error } = await supabaseClient.from('pousadas').update({
                 status: 'active',
                 data_vencimento: dataFinalStr
             }).eq('id', id);
 
-            if(error) alert("Erro ao renovar: " + error.message);
-            else carregarDados();
+            if(error) mostrarToast("Erro ao renovar: " + error.message, "error");
+            else {
+                mostrarToast(`Plano de ${nomePousada} renovado com sucesso!`, "success");
+                carregarDados();
+            }
         }
 
-        async function alternarStatus(id, novoStatus){
-            const acao = novoStatus === 'active' ? 'ATIVAR' : 'BLOQUEAR';
-            if(!confirm(`Deseja realmente ${acao} esta pousada?`)) return;
+        async function alternarStatus(id, novoStatus, nomePousada){
+            const isAtivar = novoStatus === 'active';
+            const confirmou = await confirmarAcao({
+                titulo: isAtivar ? "Ativar Pousada" : "Bloquear Acesso",
+                mensagem: isAtivar 
+                    ? `Deseja liberar o acesso de ${nomePousada}? Ela voltará a operar normalmente.`
+                    : `Deseja bloquear ${nomePousada}? O gestor ficará apenas em modo leitura por inadimplência.`,
+                textoBotao: isAtivar ? "Sim, Ativar" : "Sim, Bloquear",
+                cor: isAtivar ? "emerald" : "red",
+                icone: isAtivar ? "fa-circle-check" : "fa-ban"
+            });
+
+            if(!confirmou) return;
 
             const { error } = await supabaseClient.from('pousadas').update({ status: novoStatus }).eq('id', id);
-            if(error) alert("Erro: " + error.message);
-            else carregarDados();
+            if(error) mostrarToast("Erro ao alterar status: " + error.message, "error");
+            else {
+                mostrarToast(`Status de ${nomePousada} atualizado com sucesso!`, "success");
+                carregarDados();
+            }
         }
 
         function abrirModalEdicao(id){
@@ -441,11 +550,15 @@
             document.getElementById('edit-data-vencimento').value = p.data_vencimento || '';
             document.getElementById('edit-plano-valor').value = p.valorFinal || 149.90;
 
-            document.getElementById('modal-editar-pousada').classList.remove('hidden');
+            const modal = document.getElementById('modal-editar-pousada');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
         }
 
         function fecharModalEdicao(){
-            document.getElementById('modal-editar-pousada').classList.add('hidden');
+            const modal = document.getElementById('modal-editar-pousada');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
         }
 
         async function salvarAjustePousada(e){
@@ -459,9 +572,11 @@
                 plano_valor
             }).eq('id', id);
 
-            if(error) alert("Erro ao salvar: " + error.message);
-            else {
+            if(error) {
+                mostrarToast("Erro ao salvar: " + error.message, "error");
+            } else {
                 fecharModalEdicao();
+                mostrarToast("Assinatura atualizada com sucesso!", "success");
                 carregarDados();
             }
         }
