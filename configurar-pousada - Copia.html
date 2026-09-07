@@ -10,36 +10,19 @@
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col md:flex-row" onload="protegerPagina()">
 
-    <!-- MENU LATERAL / BARRA SUPERIOR NO MOBILE -->
-    <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl flex-shrink-0 z-20">
-        <div class="p-3 sm:p-6">
+    <!-- MENU LATERAL (Adaptado para mobile e desktop) -->
+    <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl">
+        <div class="p-4 sm:p-6">
             <div class="flex justify-between items-center md:block">
-                <h1 id="nome-pousada-sidebar" class="text-base sm:text-2xl font-extrabold text-white mb-0 md:mb-6 tracking-wider truncate max-w-[180px] sm:max-w-none">
-                    Painel 360
-                </h1>
-
-                <!-- ATALHOS RÁPIDOS NO MOBILE -->
-                <div class="flex items-center gap-2 md:hidden">
-                    <a href="dashboard.html" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-xs">
-                        <span>🏠</span> <span>Painel Principal</span>
-                    </a>
-                    <button onclick="fazerLogout()" class="bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white px-2.5 py-1.5 rounded-xl font-bold text-xs transition">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                    </button>
-                </div>
+                <h1 id="nome-pousada-sidebar" class="text-xl sm:text-2xl font-extrabold text-white mb-0 md:mb-6 tracking-wider">Painel 360</h1>
             </div>
-
-            <!-- NAVEGAÇÃO DESKTOP -->
-            <nav class="hidden md:flex flex-col space-y-2 mt-4 md:mt-0">
-                <a href="dashboard.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm text-slate-200">
-                    <span>🏠</span> <span>Painel Principal</span>
+            <nav class="mt-4 md:mt-0 space-y-1.5 sm:space-y-2 flex flex-wrap md:flex-col gap-1.5 md:gap-0">
+                <a href="dashboard.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
+                    <span>🏠</span> <span class="hidden sm:inline">Painel Principal</span><span class="sm:hidden">Suítes</span>
                 </a>
-                
-                <div class="pt-3 border-t border-slate-800">
-                    <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-3 rounded-xl transition shadow text-sm flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-right-from-bracket"></i> Sair
-                    </button>
-                </div>
+                <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl transition shadow text-xs sm:text-sm flex items-center justify-center gap-2 mt-1">
+                    <i class="fa-solid fa-right-from-bracket"></i> Sair
+                </button>
             </nav>
         </div>
     </aside>
@@ -47,110 +30,109 @@
     <!-- CONTEÚDO PRINCIPAL -->
     <div class="flex-1 flex flex-col min-w-0">
         <!-- CABEÇALHO -->
-        <header class="bg-white shadow-xs border-b border-gray-200 p-3 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5">
-            <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
-                <h2 class="text-base sm:text-xl font-extrabold text-gray-800">Configuração de Suítes</h2>
-                <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-0.5 rounded-full text-xs font-bold w-fit">Carregando...</span>
+        <header class="bg-white shadow-xs border-b border-gray-200 p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                <h2 class="text-lg sm:text-xl font-bold text-gray-800">Configuração de Suítes</h2>
+                <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold w-fit">Carregando...</span>
             </div>
-            <a href="dashboard.html" class="hidden sm:inline-flex bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition items-center gap-2 border border-slate-200 shadow-xs w-fit">
+            <a href="dashboard.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 border border-slate-200 shadow-sm">
                 <i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard
             </a>
         </header>
 
         <!-- CORPO DA PÁGINA -->
-        <main class="p-3 sm:p-6 md:p-8 flex-1 overflow-y-auto">
+        <main class="p-4 sm:p-6 md:p-8 flex-1 overflow-y-auto">
             
             <!-- Feedback Banner / Alertas no Front-end -->
-            <div id="mensagem-container" class="hidden mb-4 sm:mb-6 p-3.5 sm:p-4 rounded-2xl text-xs sm:text-sm font-semibold border flex items-center gap-3 shadow-xs transition-all"></div>
+            <div id="mensagem-container" class="hidden mb-6 p-4 rounded-2xl text-sm font-semibold border flex items-center gap-3 shadow-sm transition-all"></div>
 
             <!-- Modal de Confirmação Inline para Renomeação / Exclusão -->
-            <div id="modal-confirmacao" class="hidden mb-4 sm:mb-6 p-4 sm:p-5 bg-amber-50 border border-amber-200 rounded-2xl shadow-xs">
+            <div id="modal-confirmacao" class="hidden mb-6 p-5 bg-amber-50 border border-amber-200 rounded-2xl shadow-sm">
                 <div class="flex items-start gap-3">
-                    <div class="text-amber-600 mt-0.5"><i class="fa-solid fa-triangle-exclamation text-lg sm:text-xl"></i></div>
+                    <div class="text-amber-600 mt-0.5"><i class="fa-solid fa-triangle-exclamation text-xl"></i></div>
                     <div class="flex-1">
-                        <h3 id="titulo-modal" class="text-amber-900 font-bold mb-1 text-sm sm:text-base">Confirmação de Alteração</h3>
-                        <p id="texto-confirmacao" class="text-amber-800 text-xs sm:text-sm mb-3.5"></p>
-                        <div class="flex flex-row gap-2.5">
-                            <button id="btn-confirma-sim" class="flex-1 sm:flex-initial bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-xs transition">Sim, Continuar</button>
-                            <button id="btn-confirma-nao" class="flex-1 sm:flex-initial bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition">Cancelar</button>
+                        <h3 id="titulo-modal" class="text-amber-900 font-bold mb-1">Confirmação de Alteração</h3>
+                        <p id="texto-confirmacao" class="text-amber-800 text-sm mb-4"></p>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <button id="btn-confirma-sim" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition">Sim, Continuar</button>
+                            <button id="btn-confirma-nao" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 px-4 py-2 rounded-xl text-sm font-bold transition">Cancelar</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
                 
-                <!-- Coluna Esquerda: Dados da Pousada e Regras -->
-                <div class="md:col-span-1 space-y-4 sm:space-y-6">
-                    <!-- DADOS DA POUSADA -->
-                    <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-xs border border-gray-200">
-                        <h2 class="text-sm sm:text-base font-bold text-slate-900 mb-3 flex items-center gap-2">
+                <!-- Coluna Esquerda: Dados da Pousada -->
+                <div class="md:col-span-1 space-y-6">
+                    <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-md border border-gray-200">
+                        <h2 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
                             <i class="fa-solid fa-building text-blue-600"></i> Dados da Pousada
                         </h2>
                         
-                        <div class="space-y-3">
+                        <div class="space-y-4">
                             <div>
-                                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Nome da Pousada</label>
-                                <input type="text" id="nome-pousada" class="w-full p-2.5 sm:p-3 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="Carregando...">
-                                <p class="text-[10px] text-slate-400 mt-1">Nome exibido para os clientes no sistema.</p>
+                                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Nome da Pousada</label>
+                                <input type="text" id="nome-pousada" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="Carregando...">
+                                <p class="text-xs text-slate-400 mt-1.5">Nome exibido para os clientes no sistema.</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- REGRAS DE NEGÓCIO DA POUSADA -->
-                    <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-xs border border-gray-200">
-                        <h2 class="text-sm sm:text-base font-bold text-slate-900 mb-3 flex items-center gap-2">
-                            <i class="fa-solid fa-coins text-amber-600"></i> Regras Gerais da Pousada
+                    <!-- NOVO: Regras de Negócio da Pousada -->
+                    <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-md border border-gray-200">
+                        <h2 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-coins text-amber-600"></i> Regras de Negócio (Pousada)
                         </h2>
-                        <div class="space-y-3">
-                            <div class="grid grid-cols-2 gap-2.5">
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block text-[10px] sm:text-[11px] font-bold text-slate-600 uppercase mb-1">Taxa Pet (R$)</label>
-                                    <input type="number" step="0.01" id="valor-pet" class="w-full p-2 sm:p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="50.00">
+                                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Taxa Pet (R$) - Única</label>
+                                    <input type="number" step="0.01" id="valor-pet" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="50.00">
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] sm:text-[11px] font-bold text-slate-600 uppercase mb-1">Extra (R$) / noite</label>
-                                    <input type="number" step="0.01" id="valor-hospede-extra" class="w-full p-2 sm:p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="30.00">
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2.5">
-                                <div>
-                                    <label class="block text-[10px] sm:text-[11px] font-bold text-slate-600 uppercase mb-1">Idade Criança Grátis</label>
-                                    <input type="number" min="0" max="17" id="idade-limite-crianca" class="w-full p-2 sm:p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="5">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] sm:text-[11px] font-bold text-slate-600 uppercase mb-1">Diária Mínima</label>
-                                    <input type="number" min="1" id="diaria-minima" class="w-full p-2 sm:p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="1">
+                                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Hóspede Extra (R$) / noite</label>
+                                    <input type="number" step="0.01" id="valor-hospede-extra" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="30.00">
                                 </div>
                             </div>
-                            <div class="grid grid-cols-2 gap-2.5">
+                            <div class="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block text-[10px] sm:text-[11px] font-bold text-slate-600 uppercase mb-1">Check-in (ex: 14:00)</label>
-                                    <input type="text" id="horario-checkin" class="w-full p-2 sm:p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="14:00">
+                                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Idade Limite Criança Grátis</label>
+                                    <input type="number" min="0" max="17" id="idade-limite-crianca" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="5">
+                                    <p class="text-[10px] text-slate-400 mt-1">Acima disso paga extra</p>
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] sm:text-[11px] font-bold text-slate-600 uppercase mb-1">Check-out (ex: 12:00)</label>
-                                    <input type="text" id="horario-checkout" class="w-full p-2 sm:p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="12:00">
+                                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Diária Mínima</label>
+                                    <input type="number" min="1" id="diaria-minima" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="1">
                                 </div>
                             </div>
-                            <div class="pt-1">
-                                <label class="flex items-center gap-2 cursor-pointer bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Check-in (ex: 14:00)</label>
+                                    <input type="text" id="horario-checkin" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="14:00">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Check-out (ex: 12:00)</label>
+                                    <input type="text" id="horario-checkout" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="12:00">
+                                </div>
+                            </div>
+                            <div class="pt-2">
+                                <label class="flex items-center gap-2 cursor-pointer bg-slate-50 border border-slate-200 px-3 py-2.5 rounded-xl">
                                     <input type="checkbox" id="aceita-pet" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
                                     <span class="text-xs font-bold text-slate-700">Aceita Pet na Pousada</span>
                                 </label>
                             </div>
-                            <div class="bg-amber-50 border border-amber-200 p-2.5 rounded-xl text-[10px] sm:text-[11px] text-amber-900 leading-snug">
-                                <strong>Cálculo:</strong> Diárias base + (adicionais - inclusos) × valor extra × noites + taxa pet.
+                            <div class="bg-amber-50 border border-amber-200 p-3 rounded-xl text-[11px] text-amber-900 leading-relaxed">
+                                <strong>Como calcula:</strong> Total = diárias (c/ tarifa especial) + (adultos+crianças pagantes - inclusos) × valor_extra × noites + taxa pet
                             </div>
                         </div>
                     </div>
 
-                    <!-- DICA DE GESTÃO -->
-                    <div class="bg-blue-50 border border-blue-100 p-4 rounded-2xl">
-                        <div class="flex items-start gap-2.5">
-                            <div class="text-blue-600"><i class="fa-solid fa-circle-info text-sm mt-0.5"></i></div>
-                            <div class="text-[11px] text-blue-900 leading-relaxed">
-                                <span class="font-bold block mb-0.5">Dica de Gestão:</span>
+                    <div class="bg-blue-50 border border-blue-100 p-5 rounded-2xl">
+                        <div class="flex items-start gap-3">
+                            <div class="text-blue-600"><i class="fa-solid fa-circle-info text-base mt-0.5"></i></div>
+                            <div class="text-xs text-blue-900 leading-relaxed">
+                                <span class="font-bold block mb-1">Dica de Gestão:</span>
                                 Você pode pausar uma suíte temporariamente para ocultá-la da vitrine de reservas sem precisar apagá-la.
                             </div>
                         </div>
@@ -159,26 +141,26 @@
 
                 <!-- Coluna Direita: Gerenciamento de Suítes -->
                 <div class="md:col-span-2">
-                    <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-xs border border-gray-200">
-                        <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100 gap-2">
+                    <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-md border border-gray-200">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 pb-4 border-b border-slate-100 gap-3">
                             <div>
-                                <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
+                                <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
                                     <i class="fa-solid fa-door-open text-blue-600"></i> Suítes da Pousada
                                 </h2>
-                                <p class="text-[11px] text-slate-500">Unidades disponíveis para hóspedes.</p>
+                                <p class="text-xs text-slate-500">Configure os quartos e unidades disponíveis para reserva.</p>
                             </div>
-                            <button onclick="adicionarCampo()" class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-2xs">
+                            <button onclick="adicionarCampo()" class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
                                 <i class="fa-solid fa-plus"></i> Nova Suíte
                             </button>
                         </div>
 
-                        <!-- Container onde as suítes são injetadas -->
-                        <div id="suites-container" class="space-y-3 mb-6">
-                            <p class="text-xs sm:text-sm text-slate-400 italic">Carregando suítes...</p>
+                        <!-- Container onde as suítes serão injetadas -->
+                        <div id="suites-container" class="space-y-3 mb-8">
+                            <p class="text-sm text-slate-400 italic">Carregando suítes...</p>
                         </div>
 
-                        <div class="pt-3 border-t border-slate-100 flex justify-end">
-                            <button onclick="salvarConfiguracao()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold shadow-md shadow-blue-500/20 transition flex items-center justify-center gap-2">
+                        <div class="pt-4 border-t border-slate-100 flex justify-end">
+                            <button onclick="salvarConfiguracao()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl text-sm font-bold shadow-md shadow-blue-500/20 transition flex items-center justify-center gap-2">
                                 <i class="fa-solid fa-floppy-disk"></i> Salvar Alterações
                             </button>
                         </div>
@@ -189,30 +171,30 @@
         </main>
     </div>
 
-    <!-- TOAST / NOTIFICAÇÃO -->
+    <!-- 💬 TOAST / NOTIFICAÇÃO INTERNA MODERNA -->
     <div id="toast-notificacao" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
-        <div id="toast-content" class="bg-gray-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
-            <span id="toast-icone" class="text-lg">✨</span>
+        <div id="toast-content" class="bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
+            <span id="toast-icone" class="text-xl">✨</span>
             <div>
-                <h4 id="toast-titulo" class="font-bold text-xs sm:text-sm">Sucesso</h4>
-                <p id="toast-mensagem" class="text-[11px] sm:text-xs text-gray-300">Alterações salvas com sucesso!</p>
+                <h4 id="toast-titulo" class="font-bold text-sm">Sucesso</h4>
+                <p id="toast-mensagem" class="text-xs text-gray-300">Alterações salvas com sucesso!</p>
             </div>
         </div>
     </div>
 
-    <!-- MODAL DE VISUALIZAÇÃO DE FOTOS -->
-    <div id="modal-fotos" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-3 sm:p-4 transition-opacity">
+    <!-- 🖼️ MODAL DE VISUALIZAÇÃO DE FOTOS -->
+    <div id="modal-fotos" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 transition-opacity">
         <div class="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl">
-            <div class="flex justify-between items-center mb-3 pb-3 border-b border-gray-100">
-                <h3 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
+            <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-100">
+                <h3 class="font-bold text-slate-800 text-base sm:text-lg flex items-center gap-2">
                     <i class="fa-solid fa-images text-blue-600"></i> Fotos da Suíte
                 </h3>
-                <button onclick="fecharGaleria()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition">
-                    <i class="fa-solid fa-xmark text-lg"></i>
+                <button onclick="fecharGaleria()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
-            <div id="galeria-fotos" class="grid grid-cols-2 md:grid-cols-3 gap-2.5 overflow-y-auto pr-1 pb-1">
-                <!-- Fotos injetadas via JS -->
+            <div id="galeria-fotos" class="grid grid-cols-2 md:grid-cols-3 gap-3 overflow-y-auto pr-2 pb-2">
+                <!-- As fotos serão injetadas aqui pelo JS -->
             </div>
         </div>
     </div>
@@ -233,10 +215,10 @@
             toastMsg.innerText = mensagem;
 
             if (tipo === 'sucesso') {
-                toastContent.className = "bg-gray-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800";
+                toastContent.className = "bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800";
                 toastIcone.innerText = "🎉";
             } else {
-                toastContent.className = "bg-red-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-red-800";
+                toastContent.className = "bg-red-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-red-800";
                 toastIcone.innerText = "🚨";
             }
 
@@ -246,14 +228,14 @@
 
         function mostrarMensagem(texto, tipo = 'erro') {
             const container = document.getElementById('mensagem-container');
-            container.className = 'mb-4 sm:mb-6 p-3.5 sm:p-4 rounded-2xl text-xs sm:text-sm font-semibold border flex items-center gap-2.5 shadow-xs transition-all';
+            container.className = 'mb-6 p-4 rounded-2xl text-sm font-semibold border flex items-center gap-3 shadow-sm transition-all';
             
             if (tipo === 'erro') {
                 container.classList.add('bg-red-50', 'border-red-200', 'text-red-700');
-                container.innerHTML = `<i class="fa-solid fa-circle-exclamation text-red-500 text-sm"></i> <span>${texto}</span>`;
+                container.innerHTML = `<i class="fa-solid fa-circle-exclamation text-red-500 text-base"></i> <span>${texto}</span>`;
             } else {
                 container.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-700');
-                container.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500 text-sm"></i> <span>${texto}</span>`;
+                container.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500 text-base"></i> <span>${texto}</span>`;
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -262,6 +244,7 @@
             document.getElementById('mensagem-container').className = 'hidden';
         }
 
+        // --- PROTEÇÃO DE SESSÃO UNIFICADA ---
         async function protegerPagina() {
             supabaseClient.auth.onAuthStateChange((event, session) => {
                 if (event === 'SIGNED_OUT' || !session) {
@@ -295,6 +278,7 @@
             document.getElementById('titulo-pousada').innerText = nomePousada;
             document.getElementById('nome-pousada-sidebar').innerText = nomePousada;
 
+            // Preencher regras de negócio existentes (editáveis)
             if (pousada) {
                 document.getElementById('valor-pet').value = pousada.valor_pet ?? '';
                 document.getElementById('valor-hospede-extra').value = pousada.valor_hospede_extra ?? '';
@@ -305,6 +289,7 @@
                 document.getElementById('aceita-pet').checked = pousada.aceita_pet === true || pousada.aceita_pet === 'true';
             }
 
+            // Buscando colunas de regras de suítes
             const { data: suites } = await supabaseClient
                 .from('suites')
                 .select('id, nome, fotos, ativa, valor_diaria, hospedes_inclusos, capacidade_hospedes, usa_adicional_customizado, valor_hospede_extra_customizado')
@@ -330,65 +315,68 @@
             }
 
             const div = document.createElement('div');
-            div.className = `suite-row flex flex-col gap-2.5 items-start sm:items-center p-3 sm:p-4 rounded-2xl border transition ${ativa === false ? 'bg-amber-50/60 border-amber-200' : 'bg-slate-50 border-slate-200'}`;
+            div.className = `suite-row flex flex-col gap-3 items-start sm:items-center p-4 rounded-2xl border transition ${ativa === false ? 'bg-amber-50/60 border-amber-200' : 'bg-slate-50 border-slate-200'}`;
             div.dataset.suiteId = id;
             
             let fotosInfoHtml = '';
             if (fotos && fotos.length > 0) {
                 const fotosJsonEscapado = JSON.stringify(fotos).replace(/"/g, '&quot;');
-                fotosInfoHtml = `<button type="button" onclick="abrirGaleria(${fotosJsonEscapado})" class="text-[10px] sm:text-[11px] bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md font-bold hover:bg-emerald-200 transition cursor-pointer flex items-center gap-1 shadow-2xs border border-emerald-200" title="Clique para visualizar">
-                    <i class="fa-regular fa-image"></i> ${fotos.length} foto(s)
+                fotosInfoHtml = `<button type="button" onclick="abrirGaleria(${fotosJsonEscapado})" class="text-[11px] bg-emerald-100 text-emerald-800 px-2.5 py-1.5 rounded-md font-bold hover:bg-emerald-200 transition cursor-pointer flex items-center gap-1 shadow-sm border border-emerald-200" title="Clique para visualizar">
+                    <i class="fa-regular fa-image"></i> ${fotos.length} foto(s) (Ver)
                 </button>`;
             } else {
-                fotosInfoHtml = `<span class="text-[10px] sm:text-[11px] bg-gray-200 text-gray-600 px-2 py-1 rounded-md border border-gray-300">Sem fotos</span>`;
+                fotosInfoHtml = `<span class="text-[11px] bg-gray-200 text-gray-600 px-2.5 py-1.5 rounded-md border border-gray-300">Sem fotos</span>`;
             }
 
             const checkedCustom = usa_adicional_customizado === true || usa_adicional_customizado === 'true';
 
+            // HTML com regras de negócio editáveis por suíte
             div.innerHTML = `
-                <div class="flex items-center gap-2.5 w-full">
-                    <div class="text-slate-400 text-xs sm:text-sm"><i class="fa-solid fa-bed"></i></div>
+                <div class="flex items-center gap-3 w-full">
+                    <div class="text-slate-400"><i class="fa-solid fa-bed"></i></div>
                     <div class="flex-1">
-                        <input type="text" class="suite-input w-full p-2 sm:p-2.5 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="Nome da Suíte (ex: Suíte Master 01)" value="${nome}">
+                        <input type="text" class="suite-input w-full p-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="Nome da Suíte (ex: Suíte Master 01)" value="${nome}">
                     </div>
                 </div>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-2 w-full">
                     <div>
-                        <label class="block text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase mb-0.5">Diária Base (R$)</label>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Diária Base (R$)</label>
                         <input type="number" step="0.01" class="suite-valor-diaria w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-bold focus:ring-2 focus:ring-blue-500 outline-none" placeholder="100.00" value="${valor_diaria ?? ''}">
                     </div>
                     <div>
-                        <label class="block text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase mb-0.5">Inclusos</label>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Inclusos</label>
                         <input type="number" min="1" class="suite-hospedes-inclusos w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-bold focus:ring-2 focus:ring-blue-500 outline-none" placeholder="2" value="${hospedes_inclusos ?? ''}">
                     </div>
                     <div>
-                        <label class="block text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase mb-0.5">Capacidade Máx.</label>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Capacidade Máx.</label>
                         <input type="number" min="1" class="suite-capacidade w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-bold focus:ring-2 focus:ring-blue-500 outline-none" placeholder="4" value="${capacidade_hospedes ?? ''}">
                     </div>
                     <div>
-                        <label class="block text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase mb-0.5">Extra Custom (R$)</label>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Extra Custom (R$)</label>
                         <input type="number" step="0.01" class="suite-valor-extra-custom w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-bold focus:ring-2 focus:ring-blue-500 outline-none" placeholder="30.00" value="${valor_hospede_extra_customizado ?? ''}">
                     </div>
                 </div>
-                <div class="flex items-center gap-2 w-full flex-wrap">
-                    <label class="flex items-center gap-1.5 cursor-pointer select-none bg-white px-2 py-1 rounded-lg border border-slate-200 shadow-2xs">
-                        <input type="checkbox" class="suite-usa-custom w-3 h-3 text-amber-600 rounded focus:ring-amber-500" ${checkedCustom ? 'checked' : ''}>
-                        <span class="text-[10px] sm:text-[11px] font-bold text-slate-700">Usar extra customizado</span>
+                <div class="flex items-center gap-3 w-full">
+                    <label class="flex items-center gap-1.5 cursor-pointer select-none bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-xs">
+                        <input type="checkbox" class="suite-usa-custom w-3.5 h-3.5 text-amber-600 rounded focus:ring-amber-500" ${checkedCustom ? 'checked' : ''}>
+                        <span class="text-[11px] font-bold text-slate-700">Usar extra customizado</span>
                     </label>
-                    <span class="text-[9px] sm:text-[10px] text-slate-400">Ignora regra da pousada</span>
+                    <span class="text-[10px] text-slate-400">Se marcado, ignora valor da pousada</span>
                 </div>
                 <div class="flex items-center justify-between w-full pt-2 border-t border-slate-200 flex-wrap gap-2">
                     <div class="flex items-center gap-2 flex-wrap">
                         ${fotosInfoHtml}
-                        <input type="file" class="upload-fotos text-[10px] sm:text-xs text-slate-600 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-[10px] sm:file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer max-w-[170px] sm:max-w-none" multiple accept="image/*">
+                        <div class="flex flex-col">
+                            <input type="file" class="upload-fotos text-xs text-slate-600 file:mr-2 file:py-1 file:px-2.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer w-full sm:w-auto" multiple accept="image/*">
+                        </div>
                     </div>
-                    <div class="flex items-center gap-2 sm:gap-3 ml-auto">
-                        <label class="flex items-center gap-1 cursor-pointer select-none bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs">
-                            <input type="checkbox" class="suite-ativa-checkbox w-3.5 h-3.5 text-blue-600 rounded focus:ring-blue-500" ${ativa !== false ? 'checked' : ''} onchange="atualizarEstiloLinha(this)">
-                            <span class="text-[11px] sm:text-xs font-bold ${ativa !== false ? 'text-emerald-700' : 'text-amber-700'} status-texto">${ativa !== false ? 'Ativa' : 'Pausada'}</span>
+                    <div class="flex items-center gap-3">
+                        <label class="flex items-center gap-1.5 cursor-pointer select-none bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-xs">
+                            <input type="checkbox" class="suite-ativa-checkbox w-4 h-4 text-blue-600 rounded focus:ring-blue-500" ${ativa !== false ? 'checked' : ''} onchange="atualizarEstiloLinha(this)">
+                            <span class="text-xs font-bold ${ativa !== false ? 'text-emerald-700' : 'text-amber-700'} status-texto">${ativa !== false ? 'Ativa' : 'Pausada'}</span>
                         </label>
-                        <button type="button" onclick="removerCampo(this)" class="bg-white hover:bg-red-50 text-red-500 hover:text-red-700 border border-slate-200 p-1.5 sm:p-2 rounded-lg transition cursor-pointer" title="Excluir Suíte">
-                            <i class="fa-solid fa-trash-can text-xs sm:text-sm"></i>
+                        <button type="button" onclick="removerCampo(this)" class="bg-white hover:bg-red-50 text-red-500 hover:text-red-700 border border-slate-200 p-2.5 rounded-xl transition cursor-pointer" title="Excluir Suíte">
+                            <i class="fa-solid fa-trash-can text-sm"></i>
                         </button>
                     </div>
                 </div>
@@ -396,17 +384,18 @@
             container.appendChild(div);
         }
 
+        // Altera o visual da linha dinamicamente quando o gestor clica em pausar/ativar
         function atualizarEstiloLinha(checkbox) {
             const rowDiv = checkbox.closest('.suite-row');
             const textoStatus = rowDiv.querySelector('.status-texto');
             if (checkbox.checked) {
-                rowDiv.className = 'suite-row flex flex-col gap-2.5 items-start sm:items-center p-3 sm:p-4 rounded-2xl border transition bg-slate-50 border-slate-200';
+                rowDiv.className = 'suite-row flex flex-col gap-3 items-start sm:items-center p-4 rounded-2xl border transition bg-slate-50 border-slate-200';
                 textoStatus.innerText = 'Ativa';
-                textoStatus.className = 'text-[11px] sm:text-xs font-bold text-emerald-700 status-texto';
+                textoStatus.className = 'text-xs font-bold text-emerald-700 status-texto';
             } else {
-                rowDiv.className = 'suite-row flex flex-col gap-2.5 items-start sm:items-center p-3 sm:p-4 rounded-2xl border transition bg-amber-50/60 border-amber-200';
+                rowDiv.className = 'suite-row flex flex-col gap-3 items-start sm:items-center p-4 rounded-2xl border transition bg-amber-50/60 border-amber-200';
                 textoStatus.innerText = 'Pausada';
-                textoStatus.className = 'text-[11px] sm:text-xs font-bold text-amber-700 status-texto';
+                textoStatus.className = 'text-xs font-bold text-amber-700 status-texto';
             }
         }
 
@@ -481,6 +470,7 @@
             if (!session) return;
             const userId = session.user.id;
 
+            // Coletar regras de negócio da pousada (editáveis, existentes ou novas)
             const valorPetRaw = document.getElementById('valor-pet')?.value;
             const valorHospedeExtraRaw = document.getElementById('valor-hospede-extra')?.value;
             const idadeLimiteRaw = document.getElementById('idade-limite-crianca')?.value;
@@ -637,15 +627,15 @@
             if (fotosArray && fotosArray.length > 0) {
                 fotosArray.forEach(url => {
                     galeria.innerHTML += `
-                        <a href="${url}" target="_blank" class="block border border-gray-200 rounded-xl overflow-hidden shadow-xs hover:shadow-md transition bg-gray-50 aspect-[4/3] relative group" title="Clique para abrir imagem original">
+                        <a href="${url}" target="_blank" class="block border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition bg-gray-50 aspect-[4/3] relative group" title="Clique para abrir imagem original">
                             <img src="${url}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                             <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition flex items-center justify-center">
-                                <i class="fa-solid fa-arrow-up-right-from-square text-white opacity-0 group-hover:opacity-100 drop-shadow-md text-base sm:text-xl"></i>
+                                <i class="fa-solid fa-arrow-up-right-from-square text-white opacity-0 group-hover:opacity-100 drop-shadow-md text-xl"></i>
                             </div>
                         </a>`;
                 });
             } else {
-                galeria.innerHTML = '<p class="text-xs sm:text-sm text-slate-500 col-span-full py-4 text-center">Nenhuma foto disponível para esta suíte.</p>';
+                galeria.innerHTML = '<p class="text-sm text-slate-500 col-span-full py-4 text-center">Nenhuma foto disponível para esta suíte.</p>';
             }
             modal.classList.remove('hidden');
         }
