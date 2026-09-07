@@ -11,18 +11,33 @@
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col md:flex-row" onload="inicializarPagina()">
 
-    <!-- MENU LATERAL (Adaptado para mobile e desktop) -->
-    <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl">
-        <div class="p-4 sm:p-6">
+    <!-- MENU LATERAL / TOPO NO MOBILE -->
+    <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl flex-shrink-0 z-20">
+        <div class="p-3 sm:p-6">
             <div class="flex justify-between items-center md:block">
-                <h1 id="nome-pousada-sidebar" class="text-xl sm:text-2xl font-extrabold text-white mb-0 md:mb-6 tracking-wider">Painel 360</h1>
+                <h1 id="nome-pousada-sidebar" class="text-base sm:text-2xl font-extrabold text-white mb-0 md:mb-6 tracking-wider truncate max-w-[180px] sm:max-w-none">
+                    Painel 360
+                </h1>
+
+                <!-- AÇÕES RÁPIDAS NO TOPO (MOBILE) -->
+                <div class="flex items-center gap-2 md:hidden">
+                    <a href="dashboard.html" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-xs">
+                        <span>🏠</span> <span>Painel Principal</span>
+                    </a>
+                    <button onclick="fazerLogout()" class="bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white px-2.5 py-1.5 rounded-xl font-bold text-xs transition">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
             </div>
-            <nav class="mt-4 md:mt-0 space-y-1.5 sm:space-y-2 flex flex-wrap md:flex-col gap-1.5 md:gap-0">
-                <a href="dashboard.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
-                    <span>🏠</span> <span class="hidden sm:inline">Painel Principal</span><span class="sm:hidden">Suítes</span>
+
+            <!-- NAVEGAÇÃO DESKTOP -->
+            <nav class="hidden md:flex flex-col space-y-2 mt-4 md:mt-0">
+                <a href="dashboard.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm text-slate-200">
+                    <span>🏠</span> <span>Painel Principal</span>
                 </a>
-            
-                    <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl transition shadow text-xs sm:text-sm flex items-center justify-center gap-2 mt-1">
+                
+                <div class="pt-3 border-t border-slate-800">
+                    <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-3 rounded-xl transition shadow text-sm flex items-center justify-center gap-2">
                         <i class="fa-solid fa-right-from-bracket"></i> Sair
                     </button>
                 </div>
@@ -33,32 +48,33 @@
     <!-- CONTEÚDO PRINCIPAL -->
     <div class="flex-1 flex flex-col min-w-0">
         <!-- CABEÇALHO -->
-        <header class="bg-white shadow-xs border-b border-gray-200 p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                <h2 class="text-lg sm:text-xl font-bold text-gray-800">Gestão de Hóspedes</h2>
-                <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold w-fit">Carregando...</span>
+        <header class="bg-white shadow-xs border-b border-gray-200 p-3 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
+                <h2 class="text-base sm:text-xl font-extrabold text-gray-800">Gestão de Hóspedes</h2>
+                <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-0.5 rounded-full text-xs font-bold w-fit">Carregando...</span>
             </div>
-            <a href="dashboard.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 border border-slate-200 w-fit">
+            <a href="dashboard.html" class="hidden sm:inline-flex bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition items-center gap-2 border border-slate-200 w-fit">
                 <i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard
             </a>
         </header>
 
         <!-- CORPO DA PÁGINA -->
-        <main class="p-4 sm:p-6 md:p-8 flex-1 overflow-y-auto space-y-6 sm:space-y-8">
+        <main class="p-3 sm:p-6 md:p-8 flex-1 overflow-y-auto space-y-4 sm:space-y-6">
             
             <!-- ÁREA DE BUSCA INTELIGENTE -->
-            <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-md border border-gray-200">
-                <h2 class="text-sm sm:text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <div class="bg-white p-3.5 sm:p-6 rounded-2xl shadow-xs border border-gray-200">
+                <h2 class="text-xs sm:text-base font-bold text-slate-900 mb-3 sm:mb-4 flex items-center gap-2">
                     <i class="fa-solid fa-magnifying-glass text-blue-600"></i> Consulta Inteligente de Hóspedes
                 </h2>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 sm:gap-4 items-end">
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 items-end">
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Buscar por Nome, CPF ou E-mail</label>
-                        <input type="text" id="filtro-texto" placeholder="Digite parte do nome, CPF..." class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1">Nome, CPF ou E-mail</label>
+                        <input type="text" id="filtro-texto" placeholder="Digite para buscar..." class="w-full p-2.5 sm:p-3 border rounded-xl bg-gray-50 text-xs sm:text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Filtrar por Status</label>
-                        <select id="filtro-status" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1">Status</label>
+                        <select id="filtro-status" class="w-full p-2.5 sm:p-3 border rounded-xl bg-gray-50 text-xs sm:text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition">
                             <option value="">Todos os Status</option>
                             <option value="Aprovada">Ocupada / Aprovada</option>
                             <option value="Pendente">Pendente</option>
@@ -67,46 +83,53 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Período Inicial (Estadia)</label>
-                        <input type="date" id="filtro-inicio" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1">Período Inicial</label>
+                        <input type="date" id="filtro-inicio" class="w-full p-2.5 sm:p-3 border rounded-xl bg-gray-50 text-xs sm:text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Período Final</label>
-                        <input type="date" id="filtro-fim" class="w-full p-3 border rounded-xl bg-gray-50 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1">Período Final</label>
+                        <input type="date" id="filtro-fim" class="w-full p-2.5 sm:p-3 border rounded-xl bg-gray-50 text-xs sm:text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition">
                     </div>
                 </div>
-                <div class="flex flex-col sm:flex-row gap-2.5 sm:gap-3 mt-4">
-                    <button onclick="carregarHistoricoHospedes()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition shadow-sm text-xs sm:text-sm flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-search"></i> Pesquisar Histórico
+
+                <!-- BOTÕES DE AÇÃO RESPONSIVOS -->
+                <div class="flex gap-2 sm:gap-3 mt-3.5">
+                    <button onclick="carregarHistoricoHospedes()" class="flex-1 sm:flex-initial bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 sm:py-3 rounded-xl transition shadow-xs text-xs sm:text-sm flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-search"></i> <span>Pesquisar</span>
                     </button>
-                    <button onclick="limparFiltros()" class="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-4 py-3 rounded-xl transition text-xs sm:text-sm">
-                        Limpar Filtros
+                    <button onclick="limparFiltros()" class="flex-1 sm:flex-initial bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-4 py-2.5 sm:py-3 rounded-xl transition text-xs sm:text-sm text-center">
+                        Limpar
                     </button>
                 </div>
             </div>
 
             <!-- TABELA DE RESULTADOS DO HISTÓRICO -->
-            <div class="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
-                <div class="p-4 sm:p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                    <h3 class="font-bold text-gray-800 text-base sm:text-lg flex items-center gap-2">
-                        <i class="fa-solid fa-address-book text-blue-600"></i> Histórico de Hóspedes e Estadias
+            <div class="bg-white rounded-2xl shadow-xs border border-gray-200 overflow-hidden">
+                <div class="p-3.5 sm:p-5 border-b border-gray-100 flex justify-between items-center gap-2 bg-gray-50/50">
+                    <h3 class="font-extrabold text-gray-800 text-xs sm:text-base flex items-center gap-1.5">
+                        <i class="fa-solid fa-address-book text-blue-600"></i> Histórico de Hóspedes
                     </h3>
-                    <span id="contador-resultados" class="text-xs bg-blue-50 text-blue-700 font-bold px-3 py-1 rounded-full border border-blue-200">0 registros encontrados</span>
+                    <span id="contador-resultados" class="text-[10px] sm:text-xs bg-blue-50 text-blue-700 font-bold px-2.5 py-1 rounded-full border border-blue-200">
+                        0 registros
+                    </span>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse min-w-[700px]">
+
+                <!-- CONTAINER DE ROLAGEM TOUCH -->
+                <div class="overflow-x-auto" style="-webkit-overflow-scrolling: touch;">
+                    <table class="w-full text-left border-collapse min-w-[760px]">
                         <thead>
-                            <tr class="bg-gray-50 text-gray-600 uppercase text-xs tracking-wider border-b border-gray-200">
-                                <th class="p-4 font-bold">Hóspede / Contato</th>
-                                <th class="p-4 font-bold">Documentos</th>
-                                <th class="p-4 font-bold">Suíte / Acomodação</th>
-                                <th class="p-4 font-bold">Período da Estadia</th>
-                                <th class="p-4 font-bold">Resumo Financeiro</th>
-                                <th class="p-4 font-bold">Status</th>
-                                <th class="p-4 font-bold">Data da Reserva</th>
+                            <tr class="bg-gray-50 text-gray-600 uppercase text-[10px] sm:text-xs tracking-wider border-b border-gray-200">
+                                <th class="p-3 sm:p-4 font-bold">Hóspede / Contato</th>
+                                <th class="p-3 sm:p-4 font-bold">Documentos</th>
+                                <th class="p-3 sm:p-4 font-bold">Suíte</th>
+                                <th class="p-3 sm:p-4 font-bold">Estadia</th>
+                                <th class="p-3 sm:p-4 font-bold">Financeiro</th>
+                                <th class="p-3 sm:p-4 font-bold">Status</th>
+                                <th class="p-3 sm:p-4 font-bold">Data Reserva</th>
+                                <th class="p-3 sm:p-4 font-bold text-center">Comprovante</th>
                             </tr>
                         </thead>
-                        <tbody id="tabela-hospedes-corpo" class="divide-y divide-gray-100 text-sm text-gray-700">
+                        <tbody id="tabela-hospedes-corpo" class="divide-y divide-gray-100 text-xs sm:text-sm text-gray-700">
                             <tr>
                                 <td colspan="8" class="p-8 text-center text-gray-500 italic">Carregando histórico de hóspedes...</td>
                             </tr>
@@ -120,11 +143,11 @@
 
     <!-- TOAST / NOTIFICAÇÃO -->
     <div id="toast-notificacao" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
-        <div id="toast-content" class="bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
-            <span id="toast-icone" class="text-xl">✨</span>
+        <div id="toast-content" class="bg-gray-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
+            <span id="toast-icone" class="text-lg">✨</span>
             <div>
-                <h4 class="font-bold text-sm">Aviso</h4>
-                <p id="toast-mensagem" class="text-xs text-gray-300">Ação realizada com sucesso!</p>
+                <h4 class="font-bold text-xs sm:text-sm">Aviso</h4>
+                <p id="toast-mensagem" class="text-[11px] sm:text-xs text-gray-300">Ação realizada com sucesso!</p>
             </div>
         </div>
     </div>
@@ -149,10 +172,10 @@
             toastMsg.innerText = mensagem;
 
             if (tipo === 'sucesso') {
-                toastContent.className = "bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800";
+                toastContent.className = "bg-gray-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800";
                 toastIcone.innerText = "✨";
             } else {
-                toastContent.className = "bg-red-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-red-800";
+                toastContent.className = "bg-red-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-red-800";
                 toastIcone.innerText = "🚨";
             }
 
@@ -161,14 +184,12 @@
         }
 
         async function inicializarPagina() {
-            // Monitoramento em tempo real de autenticação (padrão unificado)
             supabaseClient.auth.onAuthStateChange((event, session) => {
                 if (event === 'SIGNED_OUT' || !session) {
                     window.location.href = 'index.html';
                 }
             });
 
-            // Validação imediata de sessão por getSession()
             const { data: { session }, error } = await supabaseClient.auth.getSession();
             if (error || !session) {
                 window.location.href = 'index.html';
@@ -181,21 +202,10 @@
             const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', user.id).maybeSingle();
             const nomePousada = (pousada && pousada.nome) ? pousada.nome : "Minha Pousada";
 
-            // Atualiza o nome da pousada tanto no topo do menu lateral quanto no cabeçalho
             document.getElementById('nome-pousada-sidebar').innerText = nomePousada;
             document.getElementById('titulo-pousada').innerText = nomePousada;
 
-            const linkVitrineEl = document.getElementById('link-ver-vitrine');
-            if (linkVitrineEl) linkVitrineEl.href = window.location.origin + `/vitrine.html?pousada_id=${user.id}`;
-
             carregarHistoricoHospedes();
-        }
-
-        function copiarLinkVitrine() {
-            if (!usuarioIdAtual) return;
-            navigator.clipboard.writeText(window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`).then(() => {
-                mostrarToast("Link da vitrine copiado para a área de transferência!");
-            });
         }
 
         function formatarDataSimples(dataStr) {
@@ -301,7 +311,7 @@
             });
 
             const tbody = document.getElementById('tabela-hospedes-corpo');
-            document.getElementById('contador-resultados').innerText = `${filtrados.length} registro(s) encontrado(s)`;
+            document.getElementById('contador-resultados').innerText = `${filtrados.length} registro(s)`;
 
             if (filtrados.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-gray-500 italic">Nenhum hóspede encontrado com os critérios informados.</td></tr>`;
@@ -318,13 +328,11 @@
 
                 const nomeSuite = mapaSuites[r.suite_id] || 'Suíte não informada';
 
-                // >>> WA.ME DIRETO + HOVER - CENÁRIO B
-                let whatsAppHtml = '<span class="text-gray-400 italic text-xs">Sem WhatsApp</span>';
+                let whatsAppHtml = '<span class="text-gray-400 italic text-[11px]">Sem WhatsApp</span>';
                 if (r.whatsapp_hospede) {
                     let numeroLimpo = r.whatsapp_hospede.replace(/\D/g, '');
                     if (numeroLimpo.length <= 11 && !numeroLimpo.startsWith('55')) numeroLimpo = '55' + numeroLimpo;
-                    else if (numeroLimpo.length > 11 && !numeroLimpo.startsWith('55')) numeroLimpo = '55' + numeroLimpo;
-                    whatsAppHtml = `<a href="https://wa.me/${numeroLimpo}" target="_blank" class="text-emerald-700 hover:text-emerald-900 font-bold flex items-center gap-1.5 transition hover:underline group" title="Falar com ${r.hospede_nome || 'hóspede'} no WhatsApp - Clique para abrir"><i class="fa-brands fa-whatsapp text-sm group-hover:scale-110 transition"></i> ${r.whatsapp_hospede} <span class="text-[10px] opacity-0 group-hover:opacity-100 transition">💬</span></a>`;
+                    whatsAppHtml = `<a href="https://wa.me/${numeroLimpo}" target="_blank" class="text-emerald-700 hover:text-emerald-900 font-bold flex items-center gap-1 transition hover:underline" title="Falar no WhatsApp"><i class="fa-brands fa-whatsapp text-xs"></i> ${r.whatsapp_hospede}</a>`;
                 }
 
                 const valorTotal = Number(r.valor_total || 0);
@@ -335,66 +343,65 @@
 
                 let badgeQuitacao = '';
                 if (valorTotal === 0) {
-                    badgeQuitacao = `<span class="px-2 py-0.5 rounded text-[10px] bg-gray-100 text-gray-600 font-bold">Sem Custo</span>`;
+                    badgeQuitacao = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-gray-100 text-gray-600 font-bold">Sem Custo</span>`;
                 } else if (quitado) {
-                    badgeQuitacao = `<span class="px-2 py-0.5 rounded text-[10px] bg-green-100 text-green-800 font-bold">Quitado</span>`;
+                    badgeQuitacao = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-green-100 text-green-800 font-bold">Quitado</span>`;
                 } else if (totalPago > 0 && totalPago < valorTotal) {
-                    badgeQuitacao = `<span class="px-2 py-0.5 rounded text-[10px] bg-blue-100 text-blue-800 font-bold">Parcialmente Pago</span>`;
+                    badgeQuitacao = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-blue-100 text-blue-800 font-bold">Parcial</span>`;
                 } else {
-                    badgeQuitacao = `<span class="px-2 py-0.5 rounded text-[10px] bg-amber-100 text-amber-800 font-bold">Saldo Pendente</span>`;
+                    badgeQuitacao = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-amber-100 text-amber-800 font-bold">Pendente</span>`;
                 }
 
-                // >>> COMPROVANTE - VER PDF + REENVIAR WHATSAPP - CENÁRIO B
                 let comprovanteHtml = '';
                 if (r.pdf_url) {
                     comprovanteHtml = `
-                        <div class="flex flex-col gap-1.5 min-w-[130px]">
-                            <a href="${r.pdf_url}" target="_blank" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-2.5 py-1.5 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1.5 transition" title="Abrir PDF definitivo">
+                        <div class="flex flex-col gap-1 min-w-[110px]">
+                            <a href="${r.pdf_url}" target="_blank" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-2 py-1 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1 transition">
                                 📄 Ver PDF
                             </a>
-                            <button onclick="reenviarWhatsappPDF('${r.id}')" class="bg-green-600 hover:bg-green-700 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1.5 transition shadow-sm" title="Reenviar comprovante via WhatsApp">
-                                📲 Reenviar WhatsApp
+                            <button onclick="reenviarWhatsappPDF('${r.id}')" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1 transition shadow-2xs">
+                                📲 WhatsApp
                             </button>
                         </div>
                     `;
                 } else {
                     if (r.status === 'Aprovada') {
-                        comprovanteHtml = `<button onclick="reenviarWhatsappPDF('${r.id}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300 px-2.5 py-1.5 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1 transition">⚠️ Gerar PDF</button>`;
+                        comprovanteHtml = `<button onclick="reenviarWhatsappPDF('${r.id}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300 px-2 py-1 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1 transition">⚠️ Gerar PDF</button>`;
                     } else {
-                        comprovanteHtml = `<span class="text-[10px] text-gray-400 italic">Sem PDF<br/>(${r.status})</span>`;
+                        comprovanteHtml = `<span class="text-[10px] text-gray-400 italic">Sem PDF</span>`;
                     }
                 }
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-50 transition">
-                        <td class="p-4">
+                        <td class="p-3 sm:p-4">
                             <div class="font-bold text-gray-900">${r.hospede_nome || 'Não informado'}</div>
                             <div class="text-xs mt-0.5">${whatsAppHtml}</div>
-                            <div class="text-xs text-gray-500">${r.email || 'Sem e-mail'}</div>
+                            <div class="text-[11px] text-gray-500">${r.email || 'Sem e-mail'}</div>
                         </td>
-                        <td class="p-4 text-xs">
-                            <div><strong class="text-gray-600">CPF:</strong> ${r.cpf || '-'}</div>
-                            <div><strong class="text-gray-600">RG:</strong> ${r.rg || '-'}</div>
+                        <td class="p-3 sm:p-4 text-xs">
+                            <div><strong class="text-gray-500">CPF:</strong> ${r.cpf || '-'}</div>
+                            <div><strong class="text-gray-500">RG:</strong> ${r.rg || '-'}</div>
                         </td>
-                        <td class="p-4 text-xs font-semibold">
-                            <div class="text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg inline-block border border-blue-100">🏨 ${nomeSuite}</div>
+                        <td class="p-3 sm:p-4 text-xs font-semibold">
+                            <div class="text-blue-700 bg-blue-50 px-2 py-0.5 rounded-lg inline-block border border-blue-100">🏨 ${nomeSuite}</div>
                         </td>
-                        <td class="p-4 text-xs font-semibold">
-                            <div>Check-in: <span class="text-gray-900">${formatarDataSimples(r.checkin)}</span></div>
-                            <div>Check-out: <span class="text-gray-900">${formatarDataSimples(r.checkout)}</span></div>
+                        <td class="p-3 sm:p-4 text-xs font-semibold">
+                            <div>In: <span class="text-gray-900">${formatarDataSimples(r.checkin)}</span></div>
+                            <div>Out: <span class="text-gray-900">${formatarDataSimples(r.checkout)}</span></div>
                         </td>
-                        <td class="p-4 text-xs">
-                            <div><strong class="text-gray-600">Total:</strong> ${formatarMoeda(valorTotal)}</div>
-                            <div><strong class="text-gray-600">Pago/Sinal:</strong> ${formatarMoeda(totalPago)}</div>
+                        <td class="p-3 sm:p-4 text-xs">
+                            <div><strong class="text-gray-500">Total:</strong> ${formatarMoeda(valorTotal)}</div>
+                            <div><strong class="text-gray-500">Pago:</strong> ${formatarMoeda(totalPago)}</div>
                             <div class="mt-1">${badgeQuitacao}</div>
                         </td>
-                        <td class="p-4">
-                            <span class="px-2.5 py-1 rounded-full text-xs uppercase ${badgeStatus}">${r.status}</span>
+                        <td class="p-3 sm:p-4">
+                            <span class="px-2 py-0.5 rounded-full text-[10px] uppercase ${badgeStatus}">${r.status}</span>
                         </td>
-                        <td class="p-4 text-xs text-gray-500">
+                        <td class="p-3 sm:p-4 text-[11px] text-gray-500">
                             ${formatarDataHora(r.criado_em)}
                         </td>
-                        <td class="p-4">
+                        <td class="p-3 sm:p-4 text-center">
                             ${comprovanteHtml}
                         </td>
                     </tr>
@@ -402,13 +409,16 @@
             });
         }
 
-        // >>> FUNÇÃO REENVIO PDF + WHATSAPP - CENÁRIO B
         async function reenviarWhatsappPDF(reservaId) {
             try {
-                mostrarToast("Processando... Buscando comprovante PDF...");
+                mostrarToast("Processando comprovante PDF...");
                 let reserva = null;
-                try { if (typeof todasReservasCache !== 'undefined' && todasReservasCache && todasReservasCache.length > 0) { reserva = todasReservasCache.find(r => r.id === reservaId); } } catch(e) { console.log('cache não disponível', e); }
-                // fallback busca direta no supabase se cache vazio
+                try { 
+                    if (typeof todasReservasCache !== 'undefined' && todasReservasCache && todasReservasCache.length > 0) { 
+                        reserva = todasReservasCache.find(r => r.id === reservaId); 
+                    } 
+                } catch(e) {}
+
                 let rData = reserva;
                 if (!rData) {
                     const { data } = await supabaseClient.from('reservas').select('*').eq('id', reservaId).single();
@@ -419,7 +429,7 @@
                 let pdfPublicUrl = rData.pdf_url;
 
                 if (!pdfPublicUrl && rData.status === 'Aprovada') {
-                    mostrarToast("Gerando PDF agora (caso antigo)...");
+                    mostrarToast("Gerando PDF...");
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF();
                     doc.setFillColor(37, 99, 235);
@@ -439,7 +449,7 @@
                     doc.setFontSize(11);
                     let y = 50;
                     const nomeHospede = rData.hospede_nome || 'Hóspede';
-                    const suiteNome = (typeof mapaSuitesGlobal !== 'undefined' && mapaSuitesGlobal[rData.suite_id]) ? mapaSuitesGlobal[rData.suite_id] : (typeof mapaSuites !== 'undefined' && mapaSuites[rData.suite_id] ? mapaSuites[rData.suite_id] : 'Suíte') || 'Suíte';
+                    const suiteNome = mapaSuitesGlobal[rData.suite_id] || 'Suíte';
                     doc.text(`Hospede: ${nomeHospede}`, 15, y); y+=8;
                     doc.text(`Suite: ${suiteNome}`, 15, y); y+=8;
                     doc.text(`Check-in: ${formatarDataSimples(rData.checkin)}`, 15, y); y+=8;
@@ -464,16 +474,15 @@
                     if (reserva) reserva.pdf_url = pdfPublicUrl;
                 }
 
-                if (!pdfPublicUrl) { mostrarToast("Esta reserva não possui PDF (não está aprovada)", 'erro'); return; }
+                if (!pdfPublicUrl) { mostrarToast("Esta reserva não possui PDF", 'erro'); return; }
 
                 const nomeHospede = rData.hospede_nome || 'Hóspede';
                 const whatsappRaw = rData.whatsapp_hospede || '';
                 const valorTotal = Number(rData.valor_total || 0);
-                const suiteNome = (typeof mapaSuitesGlobal !== 'undefined' && mapaSuitesGlobal[rData.suite_id]) ? mapaSuitesGlobal[rData.suite_id] : (typeof mapaSuites !== 'undefined' && mapaSuites[rData.suite_id] ? mapaSuites[rData.suite_id] : 'Suíte') || 'Suíte';
+                const suiteNome = mapaSuitesGlobal[rData.suite_id] || 'Suíte';
                 const tituloPousadaEl = document.getElementById('titulo-pousada');
                 const pousadaNome = tituloPousadaEl ? tituloPousadaEl.innerText : 'Pousada';
 
-                // >>> MENSAGEM DE REENVIO - DIFERENTE DA APROVAÇÃO
                 let textoMensagem = `Olá ${nomeHospede}, estamos reenviando o comprovante da sua reserva na ${pousadaNome} 😊\n\n`;
                 textoMensagem += `Reserva efetuada:\n`;
                 textoMensagem += `Check-in: ${formatarDataSimples(rData.checkin)} | Check-out: ${formatarDataSimples(rData.checkout)}\n`;
@@ -484,10 +493,9 @@
 
                 let apenasNumeros = whatsappRaw.replace(/\D/g, '');
                 if (apenasNumeros.length <= 11 && !apenasNumeros.startsWith('55')) apenasNumeros = '55' + apenasNumeros;
-                else if (apenasNumeros.length > 11 && !apenasNumeros.startsWith('55')) apenasNumeros = '55' + apenasNumeros;
 
                 const urlWhatsapp = `https://wa.me/${apenasNumeros}?text=${encodeURIComponent(textoMensagem)}`;
-                mostrarToast("Sucesso! Abrindo WhatsApp com comprovante...");
+                mostrarToast("Abrindo WhatsApp...");
                 window.open(urlWhatsapp, '_blank');
                 setTimeout(() => carregarHistoricoHospedes(), 1500);
 
