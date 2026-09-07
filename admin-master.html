@@ -13,7 +13,7 @@
     <!-- CONTAINER DE NOTIFICAÇÕES (TOASTS INTERNOS) -->
     <div id="toast-container" class="fixed top-5 right-5 z-[9999] flex flex-col gap-2 pointer-events-none"></div>
 
-    <!-- MODAL DE CONFIRMAÇÃO CUSTOMIZADO (SUBSTITUI O CONFIRM NATIVO) -->
+    <!-- MODAL DE CONFIRMAÇÃO CUSTOMIZADO -->
     <div id="modal-confirmacao" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4 z-[9998] transition-opacity">
         <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl border border-slate-100 text-center transform transition-all">
             <div id="modal-confirm-icon-bg" class="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center text-2xl mb-4 bg-emerald-100 text-emerald-600">
@@ -40,9 +40,10 @@
                     <p class="text-[10px] text-slate-400 uppercase tracking-widest font-semibold">Controle da Plataforma</p>
                 </div>
             </div>
-            <div class="mt-4 bg-slate-900 p-3 rounded-xl border border-slate-800">
+            <div class="mt-4 bg-slate-900 p-3.5 rounded-xl border border-slate-800">
                 <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Super Administrador</p>
-                <p id="admin-email" class="text-xs text-amber-300 font-semibold truncate mt-0.5">Carregando...</p>
+                <p id="admin-nome" class="text-xs text-white font-extrabold truncate mt-0.5">Waldeck Gil</p>
+                <p id="admin-email" class="text-[11px] text-amber-300 font-semibold truncate mt-0.5">Carregando...</p>
             </div>
         </div>
 
@@ -126,11 +127,11 @@
                 <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div>
                         <h3 class="font-extrabold text-slate-900 text-base">Pousadas Clientes</h3>
-                        <p class="text-xs text-slate-500">Auditoria de suítes ativas e ação rápida de cobrança.</p>
+                        <p class="text-xs text-slate-500">Auditoria de suítes ativas, identificação de gestor e ação de cobrança.</p>
                     </div>
                     <div class="w-full sm:w-72 relative">
                         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
-                        <input id="busca-pousada" oninput="filtrarTabela()" placeholder="Buscar por nome, telefone..." class="border rounded-xl pl-9 pr-4 py-2 text-xs w-full bg-slate-50 outline-none focus:border-blue-500 font-medium">
+                        <input id="busca-pousada" oninput="filtrarTabela()" placeholder="Buscar por pousada, gestor, login..." class="border rounded-xl pl-9 pr-4 py-2 text-xs w-full bg-slate-50 outline-none focus:border-blue-500 font-medium">
                     </div>
                 </div>
 
@@ -138,7 +139,7 @@
                     <table class="w-full text-left border-collapse min-w-[950px]">
                         <thead>
                             <tr class="bg-slate-50 text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b">
-                                <th class="p-4">Pousada & Contato</th>
+                                <th class="p-4">Pousada, Gestor & Login</th>
                                 <th class="p-4">Suítes Ativas (Auditoria)</th>
                                 <th class="p-4">Plano & Valor</th>
                                 <th class="p-4">Vencimento</th>
@@ -153,21 +154,26 @@
                 </div>
             </div>
 
-            <!-- TABELA DE PREÇOS EDITÁVEL (CONFIG_FAIXAS_PRECO) -->
+            <!-- TABELA DE PREÇOS EDITÁVEL (COM SUPORTE A FAIXA 3 E NOVAS FAIXAS) -->
             <div id="sec-configuracoes" class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 sm:p-6">
-                <div class="border-b border-slate-100 pb-4 mb-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <div class="border-b border-slate-100 pb-4 mb-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div>
                         <h3 class="font-extrabold text-slate-900 text-base flex items-center gap-2">
                             <i class="fa-solid fa-tags text-amber-500"></i> Tabela de Preços por Quantidade de Suítes
                         </h3>
-                        <p class="text-xs text-slate-500 mt-0.5">O sistema calcula o valor de cada pousada automaticamente baseado nas suítes ativas.</p>
+                        <p class="text-xs text-slate-500 mt-0.5">Defina faixas progressivas (ex: Faixa 1 até 10, Faixa 2 de 11 a 20, Faixa 3 de 21 em diante).</p>
                     </div>
-                    <button onclick="salvarFaixasPreco()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1">
-                        <i class="fa-solid fa-floppy-disk"></i> Salvar Tabela de Preços
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button onclick="adicionarFaixa()" type="button" class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+                            <i class="fa-solid fa-plus text-emerald-600"></i> Nova Faixa
+                        </button>
+                        <button onclick="salvarFaixasPreco()" type="button" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1.5">
+                            <i class="fa-solid fa-floppy-disk"></i> Salvar Tabela de Preços
+                        </button>
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="container-faixas">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="container-faixas">
                     <!-- Injetado via JS -->
                 </div>
             </div>
@@ -209,7 +215,7 @@
         let pousadasCache = [];
         let faixasPreco = [];
 
-        // SISTEMA DE NOTIFICAÇÃO INTERNA (TOAST)
+        // NOTIFICAÇÕES TOAST
         function mostrarToast(mensagem, tipo = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -227,17 +233,14 @@
 
             container.appendChild(toast);
 
-            setTimeout(() => {
-                toast.classList.remove('translate-y-2', 'opacity-0');
-            }, 10);
-
+            setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'translate-y-[-8px]');
                 setTimeout(() => toast.remove(), 300);
             }, 3500);
         }
 
-        // SISTEMA DE CONFIRMAÇÃO INTERNA (SUBSTITUI O CONFIRM)
+        // CONFIRMAÇÃO MODAL INTERNA
         function confirmarAcao({ titulo, mensagem, textoBotao = 'Confirmar', cor = 'emerald', icone = 'fa-circle-check' }) {
             return new Promise((resolve) => {
                 const modal = document.getElementById('modal-confirmacao');
@@ -296,6 +299,14 @@
 
             document.getElementById('admin-email').innerText = user.email;
 
+            // Busca nome do Master no banco de usuários se existir
+            try {
+                const { data: uMaster } = await supabaseClient.from('usuarios').select('nome_completo').eq('user_id', user.id).maybeSingle();
+                if(uMaster && uMaster.nome_completo){
+                    document.getElementById('admin-nome').innerText = uMaster.nome_completo;
+                }
+            } catch(e){}
+
             await carregarConfigSistema();
             await carregarFaixas();
             await carregarDados();
@@ -322,50 +333,121 @@
             if(!error && data && data.length > 0){
                 faixasPreco = data;
             } else {
+                // Padrão com Faixa 1, Faixa 2 e Faixa 3
                 faixasPreco = [
-                    { id: 'f1', min_suites: 1, max_suites: 10, valor_mensal: 149.90, descricao: 'Até 10 suítes' },
-                    { id: 'f2', min_suites: 11, max_suites: null, valor_mensal: 249.90, descricao: 'Acima de 10 suítes' }
+                    { min_suites: 1, max_suites: 10, valor_mensal: 149.90, descricao: 'Até 10 suítes' },
+                    { min_suites: 11, max_suites: 20, valor_mensal: 249.90, descricao: 'De 11 a 20 suítes' },
+                    { min_suites: 21, max_suites: null, valor_mensal: 349.90, descricao: 'Acima de 20 suítes' }
                 ];
             }
             renderizarFaixas();
+        }
+
+        function sincronizarInputsFaixas(){
+            faixasPreco.forEach((f, idx) => {
+                const desc = document.getElementById(`desc-${idx}`);
+                const min = document.getElementById(`min-${idx}`);
+                const max = document.getElementById(`max-${idx}`);
+                const val = document.getElementById(`valor-${idx}`);
+                if(desc) f.descricao = desc.value;
+                if(min) f.min_suites = Number(min.value);
+                if(max) f.max_suites = max.value !== '' ? Number(max.value) : null;
+                if(val) f.valor_mensal = Number(val.value);
+            });
         }
 
         function renderizarFaixas(){
             const c = document.getElementById('container-faixas');
             c.innerHTML = '';
             faixasPreco.forEach((f, idx)=>{
+                const podeExcluir = faixasPreco.length > 1;
                 c.innerHTML += `
-                <div class="border border-slate-200 bg-slate-50 p-4 rounded-2xl">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-[10px] font-extrabold uppercase bg-white border border-slate-200 px-2 py-0.5 rounded-md text-slate-700">Faixa ${idx+1}</span>
-                    </div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Descrição</label>
-                    <input id="desc-${idx}" value="${f.descricao||''}" class="w-full p-2.5 border rounded-xl text-xs font-bold bg-white mb-3">
-                    <div class="grid grid-cols-3 gap-2">
-                        <div><label class="block text-[10px] font-bold uppercase">Mín</label><input id="min-${idx}" type="number" value="${f.min_suites}" class="w-full p-2 border rounded-xl text-xs font-bold bg-white"></div>
-                        <div><label class="block text-[10px] font-bold uppercase">Máx</label><input id="max-${idx}" type="number" value="${f.max_suites||''}" placeholder="∞" class="w-full p-2 border rounded-xl text-xs font-bold bg-white"></div>
-                        <div><label class="block text-[10px] font-bold uppercase">Valor R$</label><input id="valor-${idx}" type="number" step="0.01" value="${f.valor_mensal}" class="w-full p-2 border border-blue-300 rounded-xl text-xs font-extrabold text-blue-700 bg-blue-50/50"></div>
+                <div class="border border-slate-200 bg-slate-50 p-4 rounded-2xl flex flex-col justify-between relative shadow-xs">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[10px] font-extrabold uppercase bg-white border border-slate-200 px-2 py-0.5 rounded-md text-slate-700">Faixa ${idx+1}</span>
+                            ${podeExcluir ? `
+                                <button onclick="removerFaixa(${idx})" type="button" title="Excluir Faixa ${idx+1}" class="text-slate-400 hover:text-red-600 text-xs p-1 transition">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Descrição</label>
+                        <input id="desc-${idx}" value="${f.descricao||''}" placeholder="Ex: De 21 a 30 suítes" class="w-full p-2.5 border rounded-xl text-xs font-bold bg-white mb-3 outline-none focus:border-blue-500">
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-500 mb-0.5">Mín</label>
+                                <input id="min-${idx}" type="number" value="${f.min_suites}" class="w-full p-2 border rounded-xl text-xs font-bold bg-white outline-none focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-500 mb-0.5">Máx</label>
+                                <input id="max-${idx}" type="number" value="${f.max_suites !== null && f.max_suites !== undefined ? f.max_suites : ''}" placeholder="∞ (Sem limite)" class="w-full p-2 border rounded-xl text-xs font-bold bg-white outline-none focus:border-blue-500" title="Deixe em branco se não houver limite máximo">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-blue-600 mb-0.5">Valor R$</label>
+                                <input id="valor-${idx}" type="number" step="0.01" value="${f.valor_mensal}" class="w-full p-2 border border-blue-300 rounded-xl text-xs font-extrabold text-blue-700 bg-blue-50/50 outline-none focus:border-blue-500">
+                            </div>
+                        </div>
                     </div>
                 </div>`;
             });
         }
 
-        async function salvarFaixasPreco(){
-            const novas = [];
-            for(let i=0; i<faixasPreco.length; i++){
-                novas.push({
-                    min_suites: Number(document.getElementById(`min-${i}`).value),
-                    max_suites: document.getElementById(`max-${i}`).value ? Number(document.getElementById(`max-${i}`).value) : null,
-                    valor_mensal: Number(document.getElementById(`valor-${i}`).value),
-                    descricao: document.getElementById(`desc-${i}`).value
-                });
+        function adicionarFaixa(){
+            sincronizarInputsFaixas();
+            const last = faixasPreco[faixasPreco.length - 1];
+            let novoMin = 1;
+
+            if(last){
+                if(last.max_suites){
+                    novoMin = Number(last.max_suites) + 1;
+                } else {
+                    novoMin = Number(last.min_suites) + 10;
+                    last.max_suites = novoMin - 1;
+                    last.descricao = `De ${last.min_suites} a ${last.max_suites} suítes`;
+                }
             }
+
+            faixasPreco.push({
+                min_suites: novoMin,
+                max_suites: null,
+                valor_mensal: last ? (Number(last.valor_mensal) + 100) : 349.90,
+                descricao: `Acima de ${novoMin - 1} suítes`
+            });
+
+            renderizarFaixas();
+            mostrarToast(`Faixa ${faixasPreco.length} criada! Clique em "Salvar Tabela de Preços" para confirmar.`, 'info');
+        }
+
+        function removerFaixa(idx){
+            if(faixasPreco.length <= 1){
+                mostrarToast("Você precisa manter ao menos 1 faixa cadastrada.", "warning");
+                return;
+            }
+            sincronizarInputsFaixas();
+            faixasPreco.splice(idx, 1);
+            renderizarFaixas();
+            mostrarToast("Faixa removida da visualização. Clique em Salvar para persistir.", "warning");
+        }
+
+        async function salvarFaixasPreco(){
+            sincronizarInputsFaixas();
+            const novas = faixasPreco.map(f => ({
+                id: crypto.randomUUID(),
+                min_suites: Number(f.min_suites),
+                max_suites: (f.max_suites !== null && f.max_suites !== '' && !isNaN(f.max_suites)) ? Number(f.max_suites) : null,
+                valor_mensal: Number(f.valor_mensal),
+                descricao: f.descricao || ''
+            }));
+
             try {
                 await supabaseClient.from('config_faixas_preco').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-                for(let f of novas){ await supabaseClient.from('config_faixas_preco').insert([f]); }
+                const { error: insError } = await supabaseClient.from('config_faixas_preco').insert(novas);
+                if(insError) throw insError;
+
                 mostrarToast('Tabela de preços salva com sucesso!', 'success');
-                carregarFaixas();
-                carregarDados();
+                await carregarFaixas();
+                await carregarDados();
             } catch(e){
                 mostrarToast('Erro ao salvar tabela: ' + e.message, 'error');
             }
@@ -373,17 +455,19 @@
 
         function calcularFaixaPorSuites(totalAtivas){
             for(let f of faixasPreco){
-                if(totalAtivas >= f.min_suites && (f.max_suites === null || f.max_suites === '' || totalAtivas <= f.max_suites)){
+                const min = Number(f.min_suites);
+                const max = f.max_suites !== null && f.max_suites !== '' ? Number(f.max_suites) : null;
+                if(totalAtivas >= min && (max === null || totalAtivas <= max)){
                     return f;
                 }
             }
-            return faixasPreco[faixasPreco.length-1];
+            return faixasPreco[faixasPreco.length - 1];
         }
 
         async function carregarDados(){
             const { data: pousadas, error } = await supabaseClient
                 .from('pousadas')
-                .select('id, nome, status, whatsapp_contato, telefone_contato, data_vencimento, plano_valor')
+                .select('id, nome, email_admin, status, whatsapp_contato, telefone_contato, data_vencimento, plano_valor')
                 .order('nome');
 
             if(error){
@@ -391,13 +475,29 @@
                 return;
             }
 
+            // Busca os dados da tabela de usuários para obter os nomes dos gestores
+            let usuarios = [];
+            try {
+                const { data: uData } = await supabaseClient.from('usuarios').select('user_id, nome_completo, whatsapp');
+                if(uData) usuarios = uData;
+            } catch(e){}
+
             const { data: suites } = await supabaseClient.from('suites').select('pousada_id, ativa');
 
             pousadasCache = pousadas.map(p => {
                 const totalSuitesAtivas = suites ? suites.filter(s => s.pousada_id === p.id && s.ativa).length : 0;
                 const faixaCalculada = calcularFaixaPorSuites(totalSuitesAtivas);
                 const valorFinal = p.plano_valor || (faixaCalculada ? faixaCalculada.valor_mensal : 149.90);
-                return { ...p, totalSuitesAtivas, faixaCalculada, valorFinal };
+                const gestor = usuarios.find(u => u.user_id === p.id);
+
+                return { 
+                    ...p, 
+                    totalSuitesAtivas, 
+                    faixaCalculada, 
+                    valorFinal,
+                    nomeGestor: gestor?.nome_completo || 'Gestor',
+                    loginAdmin: p.email_admin || 'Não informado'
+                };
             });
 
             atualizarKPIs();
@@ -455,10 +555,23 @@
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50/80 transition">
                         <td class="p-4">
-                            <div class="font-extrabold text-slate-900">${p.nome}</div>
-                            <div class="text-[11px] text-slate-500 mt-0.5">
-                                ${p.whatsapp_contato ? `<a href="${whatsLink}" target="_blank" class="text-emerald-600 hover:underline font-bold mr-2"><i class="fa-brands fa-whatsapp"></i> ${p.whatsapp_contato}</a>` : ''}
-                                ${p.telefone_contato ? `<span>${p.telefone_contato}</span>` : ''}
+                            <!-- NOME DA POUSADA -->
+                            <div class="font-extrabold text-slate-900 text-sm">${p.nome}</div>
+                            
+                            <!-- GESTOR E LOGIN -->
+                            <div class="text-[11px] text-slate-600 font-semibold flex flex-wrap items-center gap-1.5 mt-1">
+                                <span class="inline-flex items-center gap-1 text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
+                                    <i class="fa-solid fa-user-tie text-[10px] text-slate-500"></i> ${p.nomeGestor}
+                                </span>
+                                <span class="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100" title="Login de Acesso">
+                                    <i class="fa-solid fa-envelope text-[10px] text-blue-500"></i> ${p.loginAdmin}
+                                </span>
+                            </div>
+
+                            <!-- CONTATOS -->
+                            <div class="text-[11px] text-slate-500 mt-1.5 flex items-center gap-3">
+                                ${p.whatsapp_contato ? `<a href="${whatsLink}" target="_blank" class="text-emerald-600 hover:underline font-bold inline-flex items-center gap-1"><i class="fa-brands fa-whatsapp text-xs"></i> ${p.whatsapp_contato}</a>` : ''}
+                                ${p.telefone_contato && p.telefone_contato !== p.whatsapp_contato ? `<span class="inline-flex items-center gap-1 text-slate-500"><i class="fa-solid fa-phone text-[10px]"></i> ${p.telefone_contato}</span>` : ''}
                             </div>
                         </td>
                         <td class="p-4">${badgeSuites}</td>
@@ -585,6 +698,8 @@
             const q = document.getElementById('busca-pousada').value.toLowerCase();
             const filtradas = pousadasCache.filter(p => 
                 p.nome.toLowerCase().includes(q) || 
+                p.loginAdmin.toLowerCase().includes(q) ||
+                p.nomeGestor.toLowerCase().includes(q) ||
                 (p.whatsapp_contato && p.whatsapp_contato.includes(q)) ||
                 (p.telefone_contato && p.telefone_contato.includes(q))
             );
