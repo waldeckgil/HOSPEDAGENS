@@ -23,13 +23,14 @@
     <!-- MENU LATERAL -->
     <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl flex-shrink-0 z-20">
         <div class="p-4 sm:p-6">
-            <div class="flex justify-between items-center md:block">
-                <h1 id="titulo-menu-pousada" class="text-xl sm:text-2xl font-extrabold text-white mb-0 md:mb-6 tracking-wider text-center">Painel 360</h1>
+            <div class="flex justify-between items-center md:block mb-4 md:mb-6">
+                <h1 id="titulo-menu-pousada" class="text-xl sm:text-2xl font-extrabold text-white tracking-wider text-center">Painel 360</h1>
             </div>
-            <nav class="mt-4 md:mt-0 space-y-1.5 sm:space-y-2 flex flex-wrap md:flex-col gap-1.5 md:gap-0">
+            <nav class="space-y-1.5 flex flex-wrap md:flex-col gap-1 md:gap-0">
                 <a href="dashboard.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold shadow-md text-xs sm:text-sm">
                     <span>🏠</span> <span>Painel Principal</span>
                 </a>
+
                 <a href="relatorios.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
                     <span>📋</span> <span>Gestão Completa</span>
                 </a>
@@ -40,20 +41,20 @@
                     <span>⚙️</span> <span>Configuração de Suítes</span>
                 </a>
                 <a id="link-menu-tarifas" href="tarifas.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
-                    <span>💰</span> <span>Tarifas & Assinatura</span>
+                    <span>💰</span> <span>Gerenciar Regras e Tarifas</span>
                 </a>
                 <a id="link-menu-equipe" href="equipe.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
-                    <span>👥</span> <span>Minha Equipe</span>
+                    <span>👤</span> <span>Minha Equipe</span>
                 </a>
                 
-                <div class="w-full pt-3 mt-2 border-t border-slate-800 flex flex-col md:space-y-2 gap-2">
-                    <button onclick="copiarLinkVitrine()" class="w-full flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300 text-left text-xs sm:text-sm">
-                        <span>🔗</span> Copiar Link Vitrine
+                <div class="w-full pt-3 mt-2 border-t border-slate-800 flex flex-col gap-2">
+                    <button type="button" onclick="copiarLinkVitrine()" class="w-full flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300 text-left text-xs sm:text-sm cursor-pointer">
+                        <span>🔗</span> Copiar Link (Enviar p/ Hóspedes)
                     </button>
                     <a id="link-ver-vitrine" href="#" target="_blank" class="w-full flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-slate-300 text-xs sm:text-sm">
-                        <span>👁️</span> Ver Vitrine Pública
+                        <span>👁️</span> Ver Vitrine (Visão dos Hóspedes)
                     </a>
-                    <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl transition shadow text-xs sm:text-sm flex items-center justify-center gap-2 mt-1">
+                    <button type="button" onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl transition shadow text-xs sm:text-sm flex items-center justify-center gap-2 mt-1 cursor-pointer">
                         <i class="fa-solid fa-right-from-bracket"></i> Sair
                     </button>
                 </div>
@@ -81,7 +82,7 @@
         <!-- CORPO DA PÁGINA -->
         <main class="p-4 sm:p-6 md:p-8 flex-1 overflow-y-auto">
             
-            <!-- FAIXA DE MODO SUPER ADMINISTRADOR (QUANDO MASTER ACESSA A POUSADA) -->
+            <!-- FAIXA DE MODO SUPER ADMINISTRADOR (MASTER INSPECIONANDO CLIENTE) -->
             <div id="banner-modo-master" class="hidden mb-6 bg-slate-950 text-amber-300 p-3.5 sm:p-4 rounded-2xl shadow-md border border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div class="flex items-center gap-3">
                     <span class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-sm border border-amber-500/30">👑</span>
@@ -90,12 +91,12 @@
                         <p class="text-xs text-slate-300">Você está gerenciando a pousada: <strong id="nome-pousada-modo-master" class="text-white underline"></strong></p>
                     </div>
                 </div>
-                <a href="admin-master.html" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3.5 py-1.5 rounded-xl font-bold text-xs transition shadow-xs flex items-center gap-1.5 shrink-0">
+                <button type="button" onclick="sairDoModoMaster()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3.5 py-1.5 rounded-xl font-bold text-xs transition shadow-xs flex items-center gap-1.5 shrink-0 cursor-pointer">
                     <i class="fa-solid fa-arrow-left"></i> Voltar ao Master SaaS
-                </a>
+                </button>
             </div>
 
-            <!-- FAIXA INTELIGENTE DE STATUS DA ASSINATURA (EXCLUSIVO DONO) -->
+            <!-- FAIXA INTELIGENTE DE STATUS DA ASSINATURA -->
             <div id="banner-assinatura-dashboard" class="hidden mb-6 p-4 rounded-2xl shadow-xs border flex items-center justify-between gap-3 transition-all">
                 <div class="flex items-center gap-3">
                     <span id="banner-assinatura-icone" class="text-2xl">⚠️</span>
@@ -109,7 +110,7 @@
                 </a>
             </div>
 
-            <!-- AVISO DE SUÍTES PAUSADAS (EXCLUSIVO DONO) -->
+            <!-- AVISO DE SUÍTES PAUSADAS -->
             <div id="card-aviso-pausadas" class="hidden mb-6 bg-slate-800 border-l-8 border-slate-500 p-4 sm:p-5 rounded-2xl shadow-sm text-white flex flex-col gap-1">
                 <div class="flex items-center gap-2">
                     <span class="text-xl">⚠️</span>
@@ -136,7 +137,7 @@
                         <span class="text-xl sm:text-2xl">🔔</span>
                         <h2 class="text-base sm:text-xl font-bold text-red-700">Você tem <span id="contador-pendentes">0</span> solicitação(ões) de reserva pendente(s)!</h2>
                     </div>
-                    <p class="text-xs sm:text-sm text-amber-700 mt-1">Há hóspedes aguardando a aprovação. Veja os detalhes abaixo:</p>
+                    <p class="text-xs sm:text-sm text-amber-700 mt-1">Há hóspedes aguardando a aprovação. Veja os detalhes e a data/hora da solicitação abaixo:</p>
                     <div id="lista-resumo-pendentes" class="mt-3 flex flex-wrap gap-2"></div>
                 </div>
                 <a href="relatorios.html" class="w-full sm:w-auto text-center bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-3 rounded-xl transition shadow-sm whitespace-nowrap text-xs sm:text-sm">
@@ -151,9 +152,9 @@
                         <h3 class="text-xs sm:text-sm font-extrabold text-gray-800 uppercase tracking-wider flex items-center gap-2">
                             <i class="fa-solid fa-layer-group text-blue-600"></i> Navegação por Suíte - Clique para Focar ou Veja Todas
                         </h3>
-                        <p class="text-[11px] text-gray-400 mt-0.5">Cards em <strong class="text-slate-600">cinza claro</strong> indicam suítes ocupadas e em <strong class="text-emerald-700">verde claro</strong> indicam suítes livres.</p>
+                        <p class="text-[11px] text-gray-400 mt-0.5">Cards em <strong class="text-slate-600">cinza claro</strong> indicam suítes ocupadas e em <strong class="text-emerald-700">verde claro</strong> indicam suítes livres para novas estadias.</p>
                     </div>
-                    <button id="btn-ver-todas-suites-dash" onclick="filtrarDashboardPorSuite(null)" class="text-[11px] font-bold bg-slate-900 hover:bg-black text-white px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1.5 ring-2 ring-blue-500">
+                    <button id="btn-ver-todas-suites-dash" onclick="filtrarDashboardPorSuite(null)" class="text-[11px] font-bold bg-slate-900 hover:bg-black text-white px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1.5 ring-2 ring-blue-500 cursor-pointer">
                         <i class="fa-solid fa-border-all"></i> Ver Todas as Suítes
                     </button>
                 </div>
@@ -169,7 +170,7 @@
                         <h4 id="texto-suite-filtrada" class="text-xs sm:text-sm font-bold text-gray-900">Mostrando apenas: Suíte</h4>
                     </div>
                 </div>
-                <button onclick="filtrarDashboardPorSuite(null)" class="text-[10px] font-bold bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 px-3 py-1.5 rounded-xl shadow-xs transition">
+                <button onclick="filtrarDashboardPorSuite(null)" class="text-[10px] font-bold bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 px-3 py-1.5 rounded-xl shadow-xs transition cursor-pointer">
                     <i class="fa-solid fa-xmark mr-1"></i> Mostrar Todas
                 </button>
             </div>
@@ -179,7 +180,7 @@
         </main>
     </div>
 
-    <!-- TOAST -->
+    <!-- TOAST COM SUPORTE A TEMPO CUSTOMIZADO -->
     <div id="toast-notificacao" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
         <div id="toast-content" class="bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
             <span id="toast-icone" class="text-xl">✨</span>
@@ -199,8 +200,8 @@
                 Esta ação encerrará a estadia atual do hóspede e colocará a acomodação em <strong>LIMPEZA</strong> automaticamente. Deseja prosseguir?
             </p>
             <div class="grid grid-cols-2 gap-3 pt-2">
-                <button type="button" onclick="fecharModalConfirmacao()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-xl transition text-xs sm:text-sm">Cancelar</button>
-                <button type="button" id="btn-confirmar-acao" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition text-xs sm:text-sm shadow-md">Sim, Concluir Checkout</button>
+                <button type="button" onclick="fecharModalConfirmacao()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-xl transition text-xs sm:text-sm cursor-pointer">Cancelar</button>
+                <button type="button" id="btn-confirmar-acao" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition text-xs sm:text-sm shadow-md cursor-pointer">Sim, Concluir Checkout</button>
             </div>
         </div>
     </div>
@@ -244,14 +245,14 @@
             </div>
 
             <p class="text-[11px] text-gray-500 leading-snug">
-                Deseja confirmar a antecipação? A suíte passará imediatamente para o status <strong class="text-slate-900">Ocupada</strong>.
+                Deseja confirmar a antecipação? A suíte passará imediatamente para o status <strong class="text-slate-900">Ocupada</strong> com o novo saldo registrado.
             </p>
 
             <div class="grid grid-cols-2 gap-3 pt-1">
-                <button type="button" onclick="fecharModalAntecipacao()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-4 rounded-xl transition text-xs sm:text-sm">
+                <button type="button" onclick="fecharModalAntecipacao()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-4 rounded-xl transition text-xs sm:text-sm cursor-pointer">
                     Revisar / Cancelar
                 </button>
-                <button type="button" id="btn-confirmar-antecipacao" class="bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-2.5 px-4 rounded-xl transition text-xs sm:text-sm shadow-md flex items-center justify-center gap-1.5">
+                <button type="button" id="btn-confirmar-antecipacao" class="bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-2.5 px-4 rounded-xl transition text-xs sm:text-sm shadow-md flex items-center justify-center gap-1.5 cursor-pointer">
                     <i class="fa-solid fa-check"></i> Confirmar Entrada
                 </button>
             </div>
@@ -270,6 +271,12 @@
                     <p id="subtitulo-modal-cancelamento" class="text-xs sm:text-sm text-gray-600 mt-1.5 leading-relaxed">
                         Tem certeza que deseja cancelar a reserva de <strong id="nome-hospede-cancelamento" class="text-gray-900">hóspede</strong>?
                     </p>
+                    <div id="box-aviso-cancelamento" class="mt-3 bg-red-50 border border-red-200 rounded-xl p-2.5 flex items-start gap-2">
+                        <span class="text-red-600 text-sm">🏨</span>
+                        <p id="texto-efeito-cancelamento" class="text-[11px] text-red-900 font-medium leading-snug">
+                            A acomodação será liberada imediatamente para novas consultas e a ocorrência será auditada no relatório.
+                        </p>
+                    </div>
                 </div>
             </div>
 
@@ -297,18 +304,24 @@
                 <label class="block text-xs font-extrabold text-red-700 uppercase tracking-wider mb-1.5">
                     <i class="fa-solid fa-pen-to-square mr-1"></i> Motivo do cancelamento <span class="text-red-600">*</span> (obrigatório)
                 </label>
-                <textarea id="motivo-cancelamento-input" rows="3" maxlength="500" placeholder="Ex: Desistência do hóspede, problemas de saúde, saída antecipada..." class="w-full p-3 border-2 border-red-200 bg-red-50/30 focus:bg-white focus:border-red-500 rounded-xl text-sm font-medium text-gray-900 placeholder:text-gray-400 outline-none transition"></textarea>
+                <textarea id="motivo-cancelamento-input" rows="3" maxlength="500" placeholder="Ex: Desistência do hóspede, problemas de saúde, saída antecipada..." class="w-full p-3 border-2 border-red-200 bg-red-50/30 focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-100 rounded-xl text-sm font-medium text-gray-900 placeholder:text-gray-400 outline-none transition"></textarea>
                 <div class="flex justify-between items-center mt-1.5">
                     <span id="erro-motivo-cancelamento" class="hidden text-[11px] font-bold text-red-600 flex items-center gap-1"><i class="fa-solid fa-circle-exclamation"></i> Informe o motivo do cancelamento</span>
                     <span class="text-[10px] text-gray-400 ml-auto"><span id="contador-motivo-cancelamento">0</span>/500</span>
                 </div>
+                <div class="mt-2 flex flex-wrap gap-1.5">
+                    <button type="button" onclick="document.getElementById('motivo-cancelamento-input').value='Desistência do hóspede'; document.getElementById('motivo-cancelamento-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition cursor-pointer">Desistência</button>
+                    <button type="button" onclick="document.getElementById('motivo-cancelamento-input').value='Saída antecipada / Imprevisto na viagem'; document.getElementById('motivo-cancelamento-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition cursor-pointer">Saída antecipada</button>
+                    <button type="button" onclick="document.getElementById('motivo-cancelamento-input').value='Problemas de saúde'; document.getElementById('motivo-cancelamento-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition cursor-pointer">Saúde</button>
+                    <button type="button" onclick="document.getElementById('motivo-cancelamento-input').value='No-show (não compareceu)'; document.getElementById('motivo-cancelamento-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition cursor-pointer">No-show</button>
+                </div>
             </div>
 
             <div class="mt-6 flex gap-2.5">
-                <button onclick="fecharModalCancelamento()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-4 rounded-xl transition text-sm">
+                <button onclick="fecharModalCancelamento()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-4 rounded-xl transition text-sm cursor-pointer">
                     Voltar
                 </button>
-                <button onclick="confirmarCancelamentoReserva()" id="btn-acao-confirmar-canc" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-extrabold py-2.5 px-4 rounded-xl shadow-md transition text-sm flex items-center justify-center gap-1.5">
+                <button onclick="confirmarCancelamentoReserva()" id="btn-acao-confirmar-canc" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-extrabold py-2.5 px-4 rounded-xl shadow-md transition text-sm flex items-center justify-center gap-1.5 cursor-pointer">
                     <i class="fa-solid fa-ban"></i> Confirmar
                 </button>
             </div>
@@ -317,11 +330,12 @@
 
     <!-- MODAL DE EDIÇÃO -->
     <div id="modal-edicao" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-hidden">
-        <div id="modal-edicao-card" class="bg-white p-5 sm:p-8 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto relative cursor-default">
+        <div id="modal-edicao-card" class="bg-white p-5 sm:p-8 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto relative cursor-default" style="-webkit-overflow-scrolling: touch; overscroll-behavior-y: contain;">
             <div id="modal-drag-handle" class="flex justify-between items-center mb-4 cursor-move select-none">
                 <h2 id="modal-titulo" class="text-xl sm:text-2xl font-bold text-blue-600 m-0">Gerenciar Suíte</h2>
                 <div class="flex items-center gap-2">
-                    <button type="button" onclick="fecharModal()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold">✕</button>
+                    <span class="text-[10px] text-gray-400 font-bold uppercase hidden sm:block">Arraste aqui ↕</span>
+                    <button type="button" onclick="fecharModal()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold cursor-pointer">✕</button>
                 </div>
             </div>
             
@@ -335,6 +349,7 @@
                 <input type="hidden" id="edit-status-original">
                 <input type="hidden" id="edit-reserva-id">
                 
+                <!-- SELETOR DE SUÍTE -->
                 <div>
                     <label class="block text-xs font-bold text-gray-700 uppercase mb-1 flex items-center justify-between">
                         <span>Acomodação / Suíte</span>
@@ -344,14 +359,18 @@
                     </select>
                 </div>
 
+                <!-- PAINEL DE TRANSFERÊNCIA -->
                 <div id="container-transferencia-suite" class="hidden bg-purple-50 border-2 border-purple-300 p-3.5 rounded-xl space-y-2 text-xs text-purple-950">
                     <div class="flex items-center gap-2 font-bold text-purple-900">
                         <i class="fa-solid fa-arrows-rotate text-sm"></i>
                         <span id="texto-resumo-transferencia">Transferindo hóspede de quarto</span>
                     </div>
+                    <p class="text-[11px] text-purple-800 leading-snug">
+                        Todos os dados cadastrais e pagamentos acompanharão a nova reserva.
+                    </p>
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-wider text-purple-900 mb-1">Motivo da Transferência (Opcional):</label>
-                        <input type="text" id="edit-motivo-transferencia" placeholder="Ex: Upgrade, pedido do cliente..." class="w-full p-2.5 border border-purple-300 rounded-xl text-xs bg-white">
+                        <input type="text" id="edit-motivo-transferencia" placeholder="Ex: Upgrade, pedido do cliente, manutenção..." class="w-full p-2.5 border border-purple-300 rounded-xl text-xs bg-white">
                     </div>
                 </div>
 
@@ -364,7 +383,7 @@
                         <option value="Limpeza">Limpeza</option>
                         <option id="opt-status-checkout" value="Checkout">Checkout (Finalizar Estadia)</option>
                         <option id="opt-status-cancelar-reserva" value="CancelarReserva" class="text-red-600 font-extrabold">❌ Cancelar Reserva</option>
-                        <option id="opt-status-cancelar-estadia" value="CancelarEstadia" class="text-red-700 font-extrabold">⛔ Cancelar Estadia</option>
+                        <option id="opt-status-cancelar-estadia" value="CancelarEstadia" class="text-red-700 font-extrabold">⛔ Cancelar Estadia (Interrupção)</option>
                     </select>
                 </div>
 
@@ -373,11 +392,13 @@
                         <span class="font-bold text-red-900 uppercase">Saldo Devedor do Hóspede:</span>
                         <strong id="display-saldo-devedor-checkout" class="text-red-700 font-extrabold text-base">R$ 0,00</strong>
                     </div>
+                    <p class="text-[11px] text-red-700 leading-tight">O saldo devedor foi preenchido automaticamente como valor mínimo para quitar a estadia.</p>
                 </div>
 
+                <!-- RESUMO DINÂMICO -->
                 <div id="resumo-dinamico-container" class="bg-blue-50 border border-blue-200 p-3 rounded-xl space-y-1 text-xs text-blue-900">
                     <div class="flex justify-between">
-                        <span>Qtd. Diárias:</span>
+                        <span>Qtd. Diárias Calculadas:</span>
                         <strong id="modal-qtd-diarias">1 diária(s)</strong>
                     </div>
                     <div id="bloco-financeiro-modal-resumo" class="space-y-1">
@@ -386,7 +407,7 @@
                             <strong id="modal-valor-total">R$ 0,00</strong>
                         </div>
                         <div class="flex justify-between border-t border-blue-200 pt-1">
-                            <span>Saldo Restante:</span>
+                            <span>Saldo Restante Atualizado:</span>
                             <strong id="modal-saldo-restante" class="text-amber-700">R$ 0,00</strong>
                         </div>
                     </div>
@@ -408,7 +429,7 @@
                                 </div>
                             </div>
                             <span id="msg-hospede-encontrado" class="hidden text-[11px] font-bold text-emerald-700 mt-1 block">
-                                <i class="fa-solid fa-check-circle"></i> Hóspede localizado! Dados preenchidos.
+                                <i class="fa-solid fa-check-circle"></i> Hóspede localizado! Dados cadastrais preenchidos.
                             </span>
                         </div>
 
@@ -454,9 +475,14 @@
                         </div>
                     </div>
 
+                    <div id="aviso-diaria-minima-modal" class="hidden bg-amber-50 border border-amber-300 p-2.5 rounded-xl text-xs text-amber-900 font-bold flex items-center gap-2">
+                        <span>ℹ️</span>
+                        <span id="texto-diaria-minima-modal">A pousada exige um período mínimo de diárias.</span>
+                    </div>
+
                     <div id="bloco-pagamento-modal" class="pt-2 space-y-2">
                         <div>
-                            <label id="lbl-valor-sinal" class="block text-xs font-bold text-emerald-700 mb-1">Registrar Pagamento / Sinal (R$)</label>
+                            <label id="lbl-valor-sinal" class="block text-xs font-bold text-emerald-700 mb-1">Registrar Novo Pagamento / Sinal (R$)</label>
                             <input type="number" step="0.01" id="edit-valor-sinal" placeholder="0.00" class="w-full p-3 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-emerald-900 text-sm">
                         </div>
                         <div>
@@ -470,17 +496,17 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-amber-700 mb-1">⚠️ Observação / Mensagem de Alerta</label>
-                            <textarea id="edit-observacao" rows="2" placeholder="Observações..." class="w-full p-3 border border-amber-300 bg-amber-50/40 rounded-xl text-sm font-medium text-amber-950"></textarea>
+                            <label class="block text-xs font-bold text-amber-700 mb-1">⚠️ Observação / Mensagem de Alerta Importante</label>
+                            <textarea id="edit-observacao" rows="2" placeholder="Ex: Hóspede solicitou late checkout, etc." class="w-full p-3 border border-amber-300 bg-amber-50/40 rounded-xl text-sm font-medium text-amber-950"></textarea>
                         </div>
                     </div>
                 </div>
 
-                <div class="sticky bottom-0 bg-white pt-3 pb-2 mt-4 border-t border-gray-100 space-y-2 z-10">
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold transition text-sm shadow-md flex items-center justify-center gap-1.5">
+                <div class="sticky bottom-0 bg-white pt-3 pb-2 mt-4 border-t border-gray-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.04)] space-y-2 z-10">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold transition text-sm shadow-md flex items-center justify-center gap-1.5 cursor-pointer">
                         <i class="fa-solid fa-check"></i> Salvar Alterações
                     </button>
-                    <button type="button" onclick="fecharModal()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 p-3 rounded-xl font-bold transition text-sm">
+                    <button type="button" onclick="fecharModal()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 p-3 rounded-xl font-bold transition text-sm cursor-pointer">
                         Cancelar
                     </button>
                 </div>
@@ -488,20 +514,47 @@
         </div>
     </div>
 
-    <!-- MODAL DE CALENDÁRIO DA SUÍTE -->
+    <!-- MODAL DE VISUALIZAÇÃO DE TARIFA ESPECIAL -->
+    <div id="modal-tarifa-especial" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="fecharModalTarifaEspecial()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold cursor-pointer">&times;</button>
+            <div class="flex items-center gap-2 mb-1">
+                <span class="text-xl">⚡</span>
+                <h3 class="text-lg font-bold text-gray-900">Tarifas Especiais Aplicadas</h3>
+            </div>
+            <p id="modal-tarifa-suite-nome" class="text-xs text-blue-600 font-bold mb-4 uppercase tracking-wider"></p>
+            <div id="modal-tarifa-conteudo" class="space-y-3"></div>
+            <div class="mt-6 flex justify-end">
+                <button onclick="fecharModalTarifaEspecial()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition cursor-pointer">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CALENDÁRIO DE DISPONIBILIDADE DA SUÍTE -->
     <div id="modal-calendario-suite" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative">
-            <button onclick="fecharModalCalendario()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+            <button onclick="fecharModalCalendario()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold cursor-pointer">&times;</button>
             <div class="flex items-center gap-2 mb-1">
                 <span class="text-xl">📅</span>
                 <h3 id="cal-suite-nome" class="text-lg font-bold text-gray-900">Calendário da Suíte</h3>
             </div>
-            <div id="cal-grid-dias" class="grid grid-cols-7 gap-1.5 text-center text-xs mt-3"></div>
-            <button onclick="fecharModalCalendario()" class="w-full mt-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold text-xs sm:text-sm py-2.5 rounded-xl transition">Fechar</button>
+            <p class="text-xs text-emerald-700 font-medium mb-4">Dias em <strong class="bg-emerald-100 px-1 rounded">verde</strong> estão livres para novas reservas.</p>
+            <div class="flex justify-between items-center mb-4 bg-gray-50 p-2.5 rounded-xl border border-gray-200">
+                <button onclick="mudarMesCalendario(-1)" class="px-3 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-xs cursor-pointer">◀ Mês Anterior</button>
+                <strong id="cal-mes-ano-atual" class="text-xs sm:text-sm font-bold text-gray-800 uppercase">MÊS / ANO</strong>
+                <button onclick="mudarMesCalendario(1)" class="px-3 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-xs cursor-pointer">Próximo Mês ▶</button>
+            </div>
+            <div class="grid grid-cols-7 gap-1 text-center font-bold text-[11px] text-gray-500 mb-2">
+                <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sexta</div><div>Sáb</div>
+            </div>
+            <div id="cal-grid-dias" class="grid grid-cols-7 gap-1.5 text-center text-xs"></div>
+            <div class="mt-6 flex justify-end">
+                <button onclick="fecharModalCalendario()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold text-xs sm:text-sm py-2.5 rounded-xl transition cursor-pointer">Fechar</button>
+            </div>
         </div>
     </div>
 
-    <!-- MODAL DE RECUSA COM AUDITORIA -->
+    <!-- MODAL PROFISSIONAL DE RECUSA COM MOTIVO OBRIGATÓRIO -->
     <div id="modal-recusa-profissional" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 z-[70]">
         <div class="bg-white p-6 sm:p-7 rounded-3xl w-full max-w-md shadow-2xl border border-gray-100 transform transition-all">
             <div class="flex items-start gap-4">
@@ -513,18 +566,31 @@
                     <p class="text-xs sm:text-sm text-gray-600 mt-1.5 leading-relaxed">
                         Tem certeza que deseja <strong class="text-red-700">RECUSAR</strong> a reserva de <strong id="nome-hospede-recusa" class="text-gray-900">hóspede</strong>?
                     </p>
+                    <div class="mt-3 bg-amber-50 border border-amber-200 rounded-xl p-2.5 flex items-start gap-2">
+                        <span class="text-amber-600 text-sm">📋</span>
+                        <p class="text-[11px] text-amber-900 font-medium leading-snug">Ela ficará registrada como <strong>Recusada</strong> para auditoria com motivo obrigatório.</p>
+                    </div>
                 </div>
             </div>
+            
             <div class="mt-5">
                 <label class="block text-xs font-extrabold text-red-700 uppercase tracking-wider mb-1.5">
-                    Motivo da recusa <span class="text-red-600">*</span>
+                    <i class="fa-solid fa-pen-to-square mr-1"></i> Motivo da recusa <span class="text-red-600">*</span> (obrigatório)
                 </label>
-                <textarea id="motivo-recusa-input" rows="3" maxlength="500" placeholder="Informe o motivo da recusa..." class="w-full p-3 border-2 border-red-200 bg-red-50/30 focus:bg-white rounded-xl text-sm font-medium outline-none transition"></textarea>
-                <span id="erro-motivo-recusa" class="hidden text-[11px] font-bold text-red-600">Informe o motivo da recusa</span>
+                <textarea id="motivo-recusa-input" rows="3" maxlength="500" placeholder="Ex: Sem pagamento do sinal, datas indisponíveis..." class="w-full p-3 border-2 border-red-200 bg-red-50/30 focus:bg-white focus:border-red-500 rounded-xl text-sm font-medium text-gray-900 outline-none transition"></textarea>
+                <div class="flex justify-between items-center mt-1.5">
+                    <span id="erro-motivo-recusa" class="hidden text-[11px] font-bold text-red-600 flex items-center gap-1"><i class="fa-solid fa-circle-exclamation"></i> Informe o motivo (mínimo 1 caractere)</span>
+                    <span class="text-[10px] text-gray-400 ml-auto"><span id="contador-motivo">0</span>/500</span>
+                </div>
             </div>
+
             <div class="mt-6 flex gap-2.5">
-                <button onclick="fecharModalRecusa()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-4 rounded-xl transition text-sm">Cancelar</button>
-                <button onclick="confirmarRecusaReserva()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-extrabold py-2.5 px-4 rounded-xl shadow-md transition text-sm">Confirmar Recusa</button>
+                <button onclick="fecharModalRecusa()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-4 rounded-xl transition text-sm cursor-pointer">
+                    Cancelar
+                </button>
+                <button onclick="confirmarRecusaReserva()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-extrabold py-2.5 px-4 rounded-xl shadow-md transition text-sm flex items-center justify-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i> Sim, Recusar
+                </button>
             </div>
         </div>
     </div>
@@ -565,7 +631,9 @@
             { nome: 'emerald', border: 'border-emerald-300', borderHover: 'hover:border-emerald-500', borderActive: 'border-emerald-600', bgLight: 'bg-emerald-50/60', bgActive: 'bg-emerald-100', iconBg: 'bg-emerald-100', iconText: 'text-emerald-700', badgeBg: 'bg-emerald-600', textGroupHover: 'group-hover:text-emerald-700', barBg: 'bg-emerald-500' },
             { nome: 'violet', border: 'border-violet-300', borderHover: 'hover:border-violet-500', borderActive: 'border-violet-600', bgLight: 'bg-violet-50/60', bgActive: 'bg-violet-100', iconBg: 'bg-violet-100', iconText: 'text-violet-700', badgeBg: 'bg-violet-600', textGroupHover: 'group-hover:text-violet-700', barBg: 'bg-violet-500' },
             { nome: 'sky', border: 'border-sky-300', borderHover: 'hover:border-sky-500', borderActive: 'border-sky-600', bgLight: 'bg-sky-50/60', bgActive: 'bg-sky-100', iconBg: 'bg-sky-100', iconText: 'text-sky-700', badgeBg: 'bg-sky-600', textGroupHover: 'group-hover:text-sky-700', barBg: 'bg-sky-500' },
-            { nome: 'rose', border: 'border-rose-300', borderHover: 'hover:border-rose-500', borderActive: 'border-rose-600', bgLight: 'bg-rose-50/60', bgActive: 'bg-rose-100', iconBg: 'bg-rose-100', iconText: 'text-rose-700', badgeBg: 'bg-rose-600', textGroupHover: 'group-hover:text-rose-700', barBg: 'bg-rose-500' }
+            { nome: 'rose', border: 'border-rose-300', borderHover: 'hover:border-rose-500', borderActive: 'border-rose-600', bgLight: 'bg-rose-50/60', bgActive: 'bg-rose-100', iconBg: 'bg-rose-100', iconText: 'text-rose-700', badgeBg: 'bg-rose-600', textGroupHover: 'group-hover:text-rose-700', barBg: 'bg-rose-500' },
+            { nome: 'orange', border: 'border-orange-300', borderHover: 'hover:border-orange-500', borderActive: 'border-orange-600', bgLight: 'bg-orange-50/60', bgActive: 'bg-orange-100', iconBg: 'bg-orange-100', iconText: 'text-orange-700', badgeBg: 'bg-orange-600', textGroupHover: 'group-hover:text-orange-700', barBg: 'bg-orange-500' },
+            { nome: 'teal', border: 'border-teal-300', borderHover: 'hover:border-teal-500', borderActive: 'border-teal-600', bgLight: 'bg-teal-50/60', bgActive: 'bg-teal-100', iconBg: 'bg-teal-100', iconText: 'text-teal-700', badgeBg: 'bg-teal-600', textGroupHover: 'group-hover:text-teal-700', barBg: 'bg-teal-500' }
         ];
 
         function obterTemaSuite(idOuNome) {
@@ -580,9 +648,98 @@
         }
 
         let suiteFiltroDashboard = null;
+        let calSuiteIdAtual = null;
+        let calSuiteNomeAtual = "";
+        let calDataReferencia = new Date();
+
+        function abrirCalendarioSuite(suiteId, suiteNome) {
+            calSuiteIdAtual = suiteId;
+            calSuiteNomeAtual = suiteNome;
+            calDataReferencia = new Date();
+            document.getElementById('cal-suite-nome').innerText = `Suíte: ${suiteNome}`;
+            renderizarGridCalendario();
+            document.getElementById('modal-calendario-suite').classList.remove('hidden');
+        }
+
+        function fecharModalCalendario() {
+            document.getElementById('modal-calendario-suite').classList.add('hidden');
+        }
+
+        function fecharModalAntecipacao() {
+            document.getElementById('modal-confirmacao-antecipacao')?.classList.add('hidden');
+        }
+
+        function mudarMesCalendario(direcao) {
+            calDataReferencia.setMonth(calDataReferencia.getMonth() + direcao);
+            renderizarGridCalendario();
+        }
+
+        function renderizarGridCalendario() {
+            const gridEl = document.getElementById('cal-grid-dias');
+            const labelMesAno = document.getElementById('cal-mes-ano-atual');
+            gridEl.innerHTML = '';
+
+            const ano = calDataReferencia.getFullYear();
+            const mes = calDataReferencia.getMonth();
+
+            const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            labelMesAno.innerText = `${nomesMeses[mes]} de ${ano}`;
+
+            const primeiroDiaSemana = new Date(ano, mes, 1).getDay();
+            const ultimoDiaMes = new Date(ano, mes + 1, 0).getDate();
+
+            const reservasDaSuite = reservasGlobaisCache.filter(r => r.suite_id === calSuiteIdAtual && (r.status === 'Aprovada' || r.status === 'Ocupada'));
+
+            const datasOcupadas = new Set();
+            reservasDaSuite.forEach(r => {
+                if (!r.checkin || !r.checkout) return;
+                let dCurr = new Date(r.checkin + 'T00:00:00');
+                const dFim = new Date(r.checkout + 'T00:00:00');
+                
+                while (dCurr < dFim) {
+                    datasOcupadas.add(dCurr.toLocaleDateString('sv-SE'));
+                    dCurr.setDate(dCurr.getDate() + 1);
+                }
+            });
+
+            for (let i = 0; i < primeiroDiaSemana; i++) {
+                gridEl.innerHTML += `<div></div>`;
+            }
+
+            const hojeStr = new Date().toLocaleDateString('sv-SE');
+
+            for (let dia = 1; dia <= ultimoDiaMes; dia++) {
+                const mesStr = String(mes + 1).padStart(2, '0');
+                const diaStr = String(dia).padStart(2, '0');
+                const dataIso = `${ano}-${mesStr}-${diaStr}`;
+
+                const estaOcupado = datasOcupadas.has(dataIso);
+                const ePassado = dataIso < hojeStr;
+
+                let estiloClasse = "";
+                let textoTooltip = "";
+
+                if (ePassado) {
+                    estiloClasse = "bg-gray-100 text-gray-400 border border-gray-200 opacity-60";
+                    textoTooltip = "Data passada";
+                } else if (estaOcupado) {
+                    estiloClasse = "bg-red-100 text-red-700 font-bold border border-red-300";
+                    textoTooltip = "Ocupada / Reservada";
+                } else {
+                    estiloClasse = "bg-emerald-100 text-emerald-800 font-extrabold border border-emerald-300 shadow-xs";
+                    textoTooltip = "Disponível!";
+                }
+
+                gridEl.innerHTML += `
+                    <div class="h-9 flex flex-col items-center justify-center rounded-xl text-xs ${estiloClasse}" title="${textoTooltip}">
+                        <span>${dia}</span>
+                    </div>
+                `;
+            }
+        }
 
         // =========================================================================
-        // RESOLUÇÃO OFICIAL DE TENANT E BLINDAGEM DE INTERFACE
+        // PROTEÇÃO DA PÁGINA (RBAC + PERSISTÊNCIA MASTER)
         // =========================================================================
         async function protegerPagina() {
             supabaseClient.auth.onAuthStateChange((event, session) => {
@@ -600,8 +757,38 @@
             usuarioSessaoRealId = session.user.id;
             const emailLogado = (session.user.email || '').toLowerCase();
             const isMaster = (emailLogado === EMAIL_MASTER_ADMIN.toLowerCase());
+            const params = new URLSearchParams(window.location.search);
+            const pousadaIdParam = params.get('pousada_id');
 
-            // 1. Resolução via tabela usuarios
+            // 1. CONTEXTO DO MASTER INSPECIONANDO OUTRA POUSADA
+            if (isMaster) {
+                const pousadaAlvoMaster = pousadaIdParam || sessionStorage.getItem('master_pousada_ativa');
+
+                if (pousadaAlvoMaster) {
+                    sessionStorage.setItem('master_pousada_ativa', pousadaAlvoMaster);
+                    usuarioIdAtual = pousadaAlvoMaster;
+                    cargoUsuarioAtual = 'dono';
+
+                    document.getElementById('banner-modo-master')?.classList.remove('hidden');
+
+                    // PROPAGAÇÃO AUTOMÁTICA NOS LINKS DO MENU
+                    document.querySelectorAll('aside nav a, header a').forEach(link => {
+                        const href = link.getAttribute('href');
+                        if (href && href !== '#' && !href.startsWith('http') && !href.includes('admin-master.html')) {
+                            const limpo = href.split('?')[0];
+                            link.setAttribute('href', `${limpo}?pousada_id=${pousadaAlvoMaster}`);
+                        }
+                    });
+
+                    const badgeCargo = document.getElementById('badge-perfil-cargo');
+                    if (badgeCargo) badgeCargo.innerText = "Perfil: Super Admin";
+
+                    await carregarDashboard();
+                    return;
+                }
+            }
+
+            // 2. CONTEXTO DE USUÁRIO COMUM (DONO, RECEPÇÃO OU CAMAREIRA)
             const { data: usuarioPerfil } = await supabaseClient
                 .from('usuarios')
                 .select('pousada_id, cargo, ativo, nome_completo')
@@ -616,25 +803,23 @@
             }
 
             cargoUsuarioAtual = isMaster ? 'dono' : (usuarioPerfil?.cargo || 'dono');
-            usuarioIdAtual = (isMaster && pousadaIdUrl) ? pousadaIdUrl : (usuarioPerfil?.pousada_id || session.user.id);
 
-            // 2. Redirecionamento da Camareira para governança
+            // Se for camareira, redireciona imediatamente para o checklist mobile
             if (cargoUsuarioAtual === 'limpeza') {
                 window.location.href = 'limpeza.html';
                 return;
             }
 
-            // 3. Blindagem Visual se o perfil for 'recepcao'
+            // Garante que o ID da pousada seja o do perfil (e não o ID pessoal do colaborador)
+            usuarioIdAtual = usuarioPerfil?.pousada_id || session.user.id;
+
+            // BLINDAGEM DE MENUS PARA RECEPÇÃO
             const badgeCargo = document.getElementById('badge-perfil-cargo');
             if (cargoUsuarioAtual === 'recepcao') {
                 if (badgeCargo) badgeCargo.innerText = "Perfil: Recepção";
-                
-                // Oculta links restritos do menu lateral
                 document.getElementById('link-menu-config')?.remove();
                 document.getElementById('link-menu-tarifas')?.remove();
                 document.getElementById('link-menu-equipe')?.remove();
-
-                // Oculta banners financeiros e de assinatura
                 document.getElementById('banner-assinatura-dashboard')?.remove();
                 document.getElementById('card-aviso-pausadas')?.remove();
                 document.getElementById('banner-modo-master')?.remove();
@@ -642,14 +827,16 @@
                 document.getElementById('bloco-antecipacao-valores')?.remove();
                 document.getElementById('container-checkout-financeiro')?.remove();
             } else {
-                if (badgeCargo) badgeCargo.innerText = isMaster ? "Perfil: Super Admin" : "Perfil: Dono / Gestor";
+                if (badgeCargo) badgeCargo.innerText = isMaster ? "Perfil: Super Admin" : "Perfil: Gestor (Dono)";
             }
 
-            if (isMaster && pousadaIdUrl) {
-                document.getElementById('banner-modo-master')?.classList.remove('hidden');
-            }
+            await carregarDashboard();
+        }
 
-            carregarDashboard();
+        function sairDoModoMaster() {
+            sessionStorage.removeItem('master_pousada_ativa');
+            sessionStorage.removeItem('master_pousada_nome');
+            window.location.href = 'admin-master.html';
         }
 
         let toastTimerTimeout = null;
@@ -676,6 +863,18 @@
             toastTimerTimeout = setTimeout(() => {
                 toast.classList.add('translate-y-24', 'opacity-0');
             }, duracaoMs);
+        }
+
+        function mostrarErroModal(mensagemHtml) {
+            const alertaEl = document.getElementById('modal-erro-alerta');
+            const textoEl = document.getElementById('modal-erro-texto');
+            textoEl.innerHTML = mensagemHtml;
+            alertaEl.classList.remove('hidden');
+            alertaEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function limparErroModal() {
+            document.getElementById('modal-erro-alerta')?.classList.add('hidden');
         }
 
         function formatarCPF(v) {
@@ -729,13 +928,13 @@
                     let dados = hospedeBase;
 
                     if (!dados) {
-                        const { data: hospedeSemMasc } = await supabaseClient
+                        const { data: hospedeBaseSemMasc } = await supabaseClient
                             .from('hospedes')
                             .select('*')
                             .eq('pousada_id', usuarioIdAtual)
                             .eq('cpf', cpfLimpo)
                             .maybeSingle();
-                        dados = hospedeSemMasc;
+                        dados = hospedeBaseSemMasc;
                     }
 
                     if (dados) {
@@ -757,7 +956,7 @@
                         mostrarToast("Hóspede Localizado!", `Cadastro de ${dados.nome || 'Hóspede'} preenchido!`, "sucesso", 4000);
                     }
                 } catch (err) {
-                    console.warn("Aviso busca CPF:", err);
+                    console.warn("Erro busca CPF:", err);
                 } finally {
                     if (feedbackSpinner) feedbackSpinner.classList.add('hidden');
                 }
@@ -851,13 +1050,20 @@
             });
         }
 
+        function gerarMensagemErroConflito(conflitos, nomeSuite = '') {
+            if (!conflitos || conflitos.length === 0) return `Já existe uma reserva confirmada para estas datas!`;
+            const c = conflitos[0];
+            return `⚠️ <strong>Conflito de Datas:</strong> Já existe uma reserva de <strong>${(c.hospede_nome || 'outro hóspede').toUpperCase()}</strong> de <strong>${formatarDataSimples(c.checkin)} a ${formatarDataSimples(c.checkout)}</strong>!`;
+        }
+
         async function carregarPousada() {
             if (!usuarioIdAtual) return;
+            // .maybeSingle() resolve o erro 406!
             const { data: pousada } = await supabaseClient
                 .from('pousadas')
                 .select('nome, aceita_pet, diaria_minima, status, data_vencimento')
                 .eq('id', usuarioIdAtual)
-                .single();
+                .maybeSingle();
 
             pousadaAceitaPetCache = pousada?.aceita_pet === true;
             diariaMinimaPousadaCache = Number(pousada?.diaria_minima) > 0 ? Number(pousada.diaria_minima) : 1;
@@ -870,16 +1076,14 @@
                 if (elModoMaster) elModoMaster.innerText = pousada.nome;
             }
 
-            document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`;
+            document.getElementById('link-ver-vitrine').href = `${window.location.origin}/vitrine.html?pousada_id=${usuarioIdAtual}`;
 
-            // Validação de assinatura exclusiva para o Dono
+            // Assinatura exibida apenas para o Dono
             if (cargoUsuarioAtual === 'dono') {
                 try {
                     let diasAviso = 5;
-                    try {
-                        const { data: config } = await supabaseClient.from('config_sistema').select('dias_aviso_vencimento').eq('id', 1).maybeSingle();
-                        if (config && config.dias_aviso_vencimento) diasAviso = Number(config.dias_aviso_vencimento);
-                    } catch (e) {}
+                    const { data: config } = await supabaseClient.from('config_sistema').select('dias_aviso_vencimento').eq('id', 1).maybeSingle();
+                    if (config && config.dias_aviso_vencimento) diasAviso = Number(config.dias_aviso_vencimento);
 
                     if (pousada) {
                         const banner = document.getElementById('banner-assinatura-dashboard');
@@ -901,7 +1105,7 @@
                             banner.className = "mb-6 p-4 rounded-2xl shadow-xs border-2 border-red-300 bg-red-50 text-red-950 flex items-center justify-between gap-3";
                             icone.innerText = "🚫";
                             tit.innerText = "Plano Suspenso por Inadimplência";
-                            sub.innerText = `Sua assinatura venceu em ${dVenc ? dVenc.toLocaleDateString('pt-BR') : 'data anterior'}. Regularize com o administrador.`;
+                            sub.innerText = `Sua assinatura venceu em ${dVenc ? dVenc.toLocaleDateString('pt-BR') : 'data anterior'}. Regularize seu plano.`;
                             banner.classList.remove('hidden');
                         } else if (diasRest !== null && diasRest <= diasAviso) {
                             banner.className = "mb-6 p-4 rounded-2xl shadow-xs border-2 border-amber-300 bg-amber-50 text-amber-950 flex items-center justify-between gap-3";
@@ -919,10 +1123,22 @@
             }
         }
 
+        function aplicarVisibilidadeTaxaPet() {
+            const container = document.getElementById('container-taxa-pet');
+            if (!container) return;
+            if (pousadaAceitaPetCache === true) {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+                const elPet = document.getElementById('edit-pet');
+                if (elPet) elPet.value = 'false';
+            }
+        }
+
         function copiarLinkVitrine() {
             if (!usuarioIdAtual) return;
-            navigator.clipboard.writeText(window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`).then(() => {
-                mostrarToast("Copiado!", "Link da vitrine copiado para a área de transferência!");
+            navigator.clipboard.writeText(`${window.location.origin}/vitrine.html?pousada_id=${usuarioIdAtual}`).then(() => {
+                mostrarToast("Copiado!", "Link da vitrine copiado!");
             });
         }
 
@@ -1021,7 +1237,8 @@
                     ? `border-2 ${tema.borderActive} bg-slate-900 text-white shadow-md scale-105` 
                     : `border-2 ${tema.border} bg-white hover:${tema.bgLight} text-slate-800 shadow-xs`;
 
-                const subtituloSelector = cargoUsuarioAtual === 'dono'
+                // Blindagem de diária no seletor do topo
+                const subTexto = cargoUsuarioAtual === 'dono' && suite.valor_diaria
                     ? `${formatarMoeda(suite.valor_diaria)}/dia`
                     : `Acomodação`;
 
@@ -1033,7 +1250,7 @@
                         </div>
                         <div>
                             <span class="text-xs font-bold truncate uppercase block">${suite.nome}</span>
-                            <span class="text-[10px] text-gray-400 block">${subtituloSelector}</span>
+                            <span class="text-[10px] text-gray-400 block">${subTexto}</span>
                         </div>
                     </div>
                 `;
@@ -1097,7 +1314,7 @@
                 const aprovadasDaSuite = reservasDaSuite.filter(r => r.status === 'Aprovada');
                 const pendentesDaSuite = reservasDaSuite.filter(r => r.status === 'Pendente');
 
-                // CASO LIMPEZA
+                // CASO 1: SUÍTE EM LIMPEZA
                 if (suite.status === 'Limpeza') {
                     const ocupandoHoje = aprovadasDaSuite.find(r => r.checkin <= hojeStr && r.checkout > hojeStr);
                     container.innerHTML += `
@@ -1113,10 +1330,10 @@
                                 ${ocupandoHoje ? `<p class="text-xs text-gray-600">Hóspede: <strong>${ocupandoHoje.hospede_nome}</strong> (na casa)</p>` : ''}
                             </div>
                             <div class="mt-4 pt-2.5 border-t border-black/10 flex justify-end gap-2">
-                                <button onclick="liberarLimpezaSuite('${suite.id}')" class="text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-xl transition shadow-xs">
+                                <button onclick="liberarLimpezaSuite('${suite.id}')" class="text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-xl transition shadow-xs cursor-pointer">
                                     <i class="fa-solid fa-check mr-1"></i> Concluir Limpeza
                                 </button>
-                                <button onclick="abrirModal('${suite.id}', '${suite.nome}', 'Limpeza', '${ocupandoHoje?.id || ''}')" class="text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-xl transition shadow-xs">
+                                <button onclick="abrirModal('${suite.id}', '${suite.nome}', 'Limpeza', '${ocupandoHoje?.id || ''}')" class="text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-xl transition shadow-xs cursor-pointer">
                                     Editar
                                 </button>
                             </div>
@@ -1124,7 +1341,7 @@
                     continue;
                 }
 
-                // CASO RESERVAS APROVADAS (OCUPADA / FUTURA)
+                // CASO 2: SUÍTE COM RESERVAS APROVADAS (OCUPADA OU FUTURA)
                 if (aprovadasDaSuite.length > 0) {
                     aprovadasDaSuite.forEach((aprovada) => {
                         const isFutura = aprovada.checkin > hojeStr;
@@ -1138,7 +1355,7 @@
                         const totalPago = pags.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
                         const saldoRestante = valorTotal - totalPago;
 
-                        // BLINDAGEM DO BLOCO FINANCEIRO DO CARD PARA RECEPÇÃO
+                        // BLINDAGEM FINANCEIRA DO CARD
                         let blocoFinanceiroCard = '';
                         if (cargoUsuarioAtual === 'dono') {
                             blocoFinanceiroCard = `
@@ -1167,7 +1384,7 @@
                                 </div>
                             `;
                         } else {
-                            // Bloco de conferência operacional para recepcionista
+                            // Bloco operacional para a recepção (sem números de faturamento)
                             blocoFinanceiroCard = `
                                 <div class="mt-3 p-2.5 rounded-xl bg-white/85 border border-blue-100 shadow-2xs text-xs space-y-1">
                                     <div class="flex justify-between items-center text-slate-700">
@@ -1175,21 +1392,8 @@
                                         <span class="font-extrabold text-gray-900">${aprovada.qtd_adultos || 2} Adulto(s) ${aprovada.qtd_criancas ? `+ ${aprovada.qtd_criancas} Criança(s)` : ''}</span>
                                     </div>
                                     <div class="flex justify-between items-center text-slate-700">
-                                        <span class="font-bold text-gray-500 text-[10px] uppercase">Saída:</span>
+                                        <span class="font-bold text-gray-500 text-[10px] uppercase">Saída Prevista:</span>
                                         <span class="font-extrabold text-blue-700">${formatarDataSimples(aprovada.checkout)}</span>
-                                    </div>
-                                </div>
-                            `;
-                        }
-
-                        let htmlAlertaTopo = '';
-                        if (aprovada.observacao && aprovada.observacao.trim() !== '') {
-                            htmlAlertaTopo = `
-                                <div class="mt-2.5 bg-amber-100 border-l-4 border-amber-500 p-2.5 rounded-xl text-amber-950 text-xs font-semibold flex items-start gap-2 shadow-2xs">
-                                    <span class="text-amber-700">⚠️</span>
-                                    <div class="leading-snug">
-                                        <strong class="block text-amber-900 uppercase text-[9px] tracking-wider">Aviso:</strong>
-                                        <span>${aprovada.observacao}</span>
                                     </div>
                                 </div>
                             `;
@@ -1224,13 +1428,12 @@
                                         <span class="inline-flex items-center gap-1.5 bg-slate-100 text-slate-900 border border-slate-300 text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-2xs">
                                             ${indicador.texto}
                                         </span>
-                                        <button onclick="abrirCalendarioSuite('${suite.id}', '${suite.nome}')" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300 text-[10px] font-extrabold px-2 py-0.5 rounded-lg transition">
+                                        <button onclick="abrirCalendarioSuite('${suite.id}', '${suite.nome}')" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300 text-[10px] font-extrabold px-2 py-0.5 rounded-lg transition cursor-pointer">
                                             📅 Calendário
                                         </button>
                                     </div>
 
                                     ${blocoFinanceiroCard}
-                                    ${htmlAlertaTopo}
 
                                     <div class="card-detalhes hidden mt-3 pt-3 border-t border-black/10 text-xs space-y-2">
                                         <div class="flex items-center justify-between bg-white/80 p-2 rounded-xl border border-black/5">
@@ -1245,10 +1448,10 @@
                                     </div>
 
                                     <div class="mt-3.5 pt-2.5 flex justify-between items-center border-t border-black/10">
-                                        <button type="button" onclick="alternarExpandirCard(this)" class="text-xs font-bold text-gray-700 hover:text-gray-900 underline">
+                                        <button type="button" onclick="alternarExpandirCard(this)" class="text-xs font-bold text-gray-700 hover:text-gray-900 underline cursor-pointer">
                                             <span class="label-expandir">Expandir Detalhes</span> ▾
                                         </button>
-                                        <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', '${statusParaModal}', '${aprovada.id}')" class="text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1">
+                                        <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', '${statusParaModal}', '${aprovada.id}')" class="text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1 cursor-pointer">
                                             <span>Gerenciar</span> &rarr;
                                         </button>
                                     </div>
@@ -1257,7 +1460,7 @@
                     });
                 }
 
-                // CASO DISPONÍVEL
+                // CASO 3: SUÍTE DISPONÍVEL
                 if (aprovadasDaSuite.length === 0 && pendentesDaSuite.length === 0) {
                     const textoDiariaOuCapacidade = cargoUsuarioAtual === 'dono' 
                         ? `Diária (2 Ad.): ${formatarMoeda(suite.valor_diaria)}` 
@@ -1275,18 +1478,18 @@
                                 </div>
                                 <div class="mt-3 flex items-center justify-between pt-2 border-t border-black/5">
                                     <span class="text-[11px] font-bold text-slate-700 bg-white/75 px-2.5 py-1 rounded-lg border border-black/5">${textoDiariaOuCapacidade}</span>
-                                    <button onclick="abrirCalendarioSuite('${suite.id}', '${suite.nome}')" class="bg-emerald-200 hover:bg-emerald-300 text-emerald-900 border border-emerald-400 text-[10px] font-extrabold px-2 py-0.5 rounded-lg transition">📅 Calendário</button>
+                                    <button onclick="abrirCalendarioSuite('${suite.id}', '${suite.nome}')" class="bg-emerald-200 hover:bg-emerald-300 text-emerald-900 border border-emerald-400 text-[10px] font-extrabold px-2 py-0.5 rounded-lg transition cursor-pointer">📅 Calendário</button>
                                 </div>
                             </div>
                             <div class="mt-5 pt-2.5 border-t border-black/10 flex justify-end">
-                                <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', 'Disponível')" class="text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-xl transition shadow-xs">
+                                <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', 'Disponível')" class="text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-xl transition shadow-xs cursor-pointer">
                                     + Adicionar Reserva
                                 </button>
                             </div>
                         </div>`;
                 }
 
-                // CASO PENDENTE
+                // CASO 4: SUÍTE COM RESERVA PENDENTE
                 if (pendentesDaSuite.length > 0) {
                     pendentesDaSuite.forEach((pend) => {
                         container.innerHTML += `
@@ -1304,10 +1507,10 @@
                                     </div>
                                 </div>
                                 <div class="mt-4 flex gap-2">
-                                    <button onclick="mudarStatusReserva('${pend.id}', 'Aprovada')" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-extrabold py-2 rounded-xl text-xs transition">
+                                    <button onclick="mudarStatusReserva('${pend.id}', 'Aprovada')" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-extrabold py-2 rounded-xl text-xs transition cursor-pointer">
                                         ✔ Aprovar
                                     </button>
-                                    <button onclick="abrirModalRecusa('${pend.id}', '${(pend.hospede_nome || 'hóspede').replace(/'/g, '')}')" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-extrabold py-2 rounded-xl text-xs transition">
+                                    <button onclick="abrirModalRecusa('${pend.id}', '${(pend.hospede_nome || 'hóspede').replace(/'/g, '')}')" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-extrabold py-2 rounded-xl text-xs transition cursor-pointer">
                                         ✖ Recusar
                                     </button>
                                 </div>
@@ -1316,14 +1519,11 @@
                 }
             }
         }
-
+        
         async function abrirModal(id, nome, status, reservaId = null) {
             camposLimposParaNovaReserva = false;
             limparErroModal();
             aplicarVisibilidadeTaxaPet();
-
-            document.getElementById('msg-hospede-encontrado')?.classList.add('hidden');
-            document.getElementById('feedback-busca-cpf')?.classList.add('hidden');
 
             const selectSuites = document.getElementById('edit-suite-id');
             selectSuites.innerHTML = '';
@@ -1347,7 +1547,7 @@
             document.getElementById('edit-valor-sinal').value = '';
             document.getElementById('edit-forma-pagamento').value = 'Pix / Sinal';
             document.getElementById('edit-observacao').value = '';
-            document.getElementById('modal-titulo').innerText = "Gerenciar Suíte: " + nome;
+            document.getElementById('modal-titulo').innerText = `Gerenciar Suíte: ${nome}`;
 
             let reserva = null;
             if (reservaId && reservaId !== 'null' && reservaId !== 'undefined' && reservaId !== '') {
@@ -1614,20 +1814,6 @@
 
         function fecharModal() { document.getElementById('modal-edicao').classList.add('hidden'); }
         function fecharModalConfirmacao() { document.getElementById('modal-confirmacao').classList.add('hidden'); }
-        function limparErroModal() { document.getElementById('modal-erro-alerta').classList.add('hidden'); }
-        function mostrarErroModal(msg) {
-            const el = document.getElementById('modal-erro-alerta');
-            document.getElementById('modal-erro-texto').innerHTML = msg;
-            el.classList.remove('hidden');
-        }
-
-        function aplicarVisibilidadeTaxaPet() {
-            if (pousadaAceitaPetCache) {
-                document.getElementById('container-taxa-pet')?.classList.remove('hidden');
-            } else {
-                document.getElementById('container-taxa-pet')?.classList.add('hidden');
-            }
-        }
 
         async function executarSalvamento(suiteId, status) {
             const reservaIdEditada = document.getElementById('edit-reserva-id').value;
@@ -1637,7 +1823,7 @@
             const cpfInformado = (document.getElementById('edit-cpf').value || '').trim();
             const cpfLimpo = cpfInformado.replace(/\D/g, "");
 
-            // REGRA: CPF Obrigatório ao criar nova reserva
+            // Validação de CPF para novas reservas
             const criandoNova = (!reservaIdEditada || status === 'Reservado');
             if (criandoNova) {
                 if (!cpfInformado || cpfLimpo.length !== 11 || !validarCPF(cpfLimpo)) {
@@ -1682,7 +1868,7 @@
                 await supabaseClient.from('reservas').insert([dadosReserva]);
             }
 
-            // Sincronização de CRM
+            // Sincronização automática no CRM
             if (cpfLimpo.length === 11 && dadosReserva.hospede_nome) {
                 try {
                     const dadosHosp = {
@@ -1734,9 +1920,77 @@
         }
 
         async function fazerLogout() { 
+            sessionStorage.removeItem('master_pousada_ativa');
+            sessionStorage.removeItem('master_pousada_nome');
             await supabaseClient.auth.signOut(); 
             window.location.href = 'index.html'; 
         }
+
+        // DRAGGABLE MODAL
+        (function() {
+            const modal = document.getElementById('modal-edicao');
+            const card = document.getElementById('modal-edicao-card');
+            const handle = document.getElementById('modal-drag-handle');
+            if (!modal || !card || !handle) return;
+            let isDragging = false;
+            let startX, startY, initialLeft, initialTop;
+
+            function getCardPosition() {
+                const rect = card.getBoundingClientRect();
+                return { left: rect.left, top: rect.top };
+            }
+
+            function onMouseDown(e) {
+                if (window.innerWidth < 768) return;
+                if (e.target.closest('button')) return;
+                isDragging = true;
+                card.style.transition = 'none';
+                const pos = getCardPosition();
+                initialLeft = pos.left;
+                initialTop = pos.top;
+                card.style.position = 'fixed';
+                card.style.left = initialLeft + 'px';
+                card.style.top = initialTop + 'px';
+                card.style.margin = '0';
+                card.style.zIndex = '60';
+                document.body.style.userSelect = 'none';
+            }
+
+            function onMouseMove(e) {
+                if (!isDragging) return;
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                let newLeft = initialLeft + dx;
+                let newTop = initialTop + dy;
+                const maxLeft = window.innerWidth - 100;
+                const maxTop = window.innerHeight - 100;
+                newLeft = Math.min(Math.max(newLeft, -card.offsetWidth + 100), maxLeft);
+                newTop = Math.min(Math.max(newTop, 0), maxTop);
+                card.style.left = newLeft + 'px';
+                card.style.top = newTop + 'px';
+            }
+
+            function onMouseUp() {
+                if (!isDragging) return;
+                isDragging = false;
+                card.style.transition = '';
+                document.body.style.userSelect = '';
+            }
+
+            handle.addEventListener('mousedown', onMouseDown);
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('mouseup', onMouseUp);
+
+            window.fecharModal = function() {
+                card.style.position = '';
+                card.style.left = '';
+                card.style.top = '';
+                card.style.margin = '';
+                card.style.zIndex = '';
+                card.style.transition = '';
+                document.getElementById('modal-edicao').classList.add('hidden');
+            };
+        })();
 
         protegerPagina();
     </script>
