@@ -176,7 +176,7 @@
         </main>
     </div>
 
-    <!-- TOAST -->
+    <!-- TOAST COM SUPORTE A TEMPO CUSTOMIZADO -->
     <div id="toast-notificacao" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
         <div id="toast-content" class="bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
             <span id="toast-icone" class="text-xl">✨</span>
@@ -273,8 +273,28 @@
                     </div>
                 </div>
             </div>
+
+            <!-- PAINEL FINANCEIRO DE ESTADIA INTERROMPIDA (EXIBIDO NO CANCELAMENTO DE ESTADIA) -->
+            <div id="box-financeiro-cancelamento-estadia" class="hidden mt-3.5 bg-amber-50 border border-amber-200 p-3 rounded-xl space-y-1 text-xs text-amber-950">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Diárias consumidas até hoje:</span>
+                    <strong id="canc-diarias-consumidas" class="font-bold text-gray-900">1 diária(s)</strong>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Valor das diárias consumidas:</span>
+                    <strong id="canc-valor-consumido" class="font-bold text-gray-900">R$ 0,00</strong>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Total já pago pelo hóspede:</span>
+                    <strong id="canc-total-pago" class="font-bold text-emerald-700">R$ 0,00</strong>
+                </div>
+                <div class="flex justify-between items-center pt-1.5 border-t border-amber-200">
+                    <span class="font-extrabold uppercase text-[11px] text-red-800">Saldo a Cobrar / Receber:</span>
+                    <strong id="canc-saldo-receber" class="text-sm font-extrabold text-red-700">R$ 0,00</strong>
+                </div>
+            </div>
             
-            <div class="mt-5">
+            <div class="mt-4">
                 <label class="block text-xs font-extrabold text-red-700 uppercase tracking-wider mb-1.5">
                     <i class="fa-solid fa-pen-to-square mr-1"></i> Motivo do cancelamento <span class="text-red-600">*</span> (obrigatório)
                 </label>
@@ -357,7 +377,7 @@
                 <div>
                     <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Status Físico da Suíte</label>
                     <select id="edit-status" class="w-full p-3 border rounded-xl font-bold bg-gray-50 text-sm" onchange="(async () => { await verificarStatusModal(); })()">
-                        <option value="Disponível">Disponível</option>
+                        <option id="opt-status-disponivel" value="Disponível">Disponível</option>
                         <option value="Ocupada">Ocupada (Agora)</option>
                         <option value="Reservado">Criar Nova Reserva</option>
                         <option value="Limpeza">Limpeza</option>
@@ -396,12 +416,28 @@
                     <div class="grid grid-cols-1 gap-2">
                         <input type="text" id="edit-hospede" placeholder="Nome Hóspede" class="p-3 border rounded-xl text-sm">
                         <input type="text" id="edit-whatsapp" placeholder="WhatsApp" class="p-3 border rounded-xl text-sm">
+                        
+                        <!-- CAMPO CPF COM BUSCA INTELIGENTE AUTOMÁTICA -->
+                        <div>
+                            <label id="lbl-cpf-hospede" class="block text-xs font-bold text-gray-700 mb-1">
+                                CPF <span id="tag-obrigatorio-cpf" class="text-red-600 hidden">* (Obrigatório)</span>
+                            </label>
+                            <div class="relative">
+                                <input type="text" id="edit-cpf" placeholder="000.000.000-00" maxlength="14" class="w-full p-3 border rounded-xl text-sm bg-white font-medium" oninput="aoDigitarCpf(this)">
+                                <div id="feedback-busca-cpf" class="hidden absolute right-3 top-3 text-xs font-bold text-blue-600 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-spinner fa-spin"></i> <span>Buscando...</span>
+                                </div>
+                            </div>
+                            <span id="msg-hospede-encontrado" class="hidden text-[11px] font-bold text-emerald-700 mt-1 block">
+                                <i class="fa-solid fa-check-circle"></i> Hóspede localizado! Dados cadastrais preenchidos automaticamente.
+                            </span>
+                        </div>
+
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <input type="text" id="edit-cpf" placeholder="CPF (Opcional)" class="p-3 border rounded-xl text-sm">
                             <input type="text" id="edit-rg" placeholder="RG (Opcional)" class="p-3 border rounded-xl text-sm">
+                            <input type="text" id="edit-cep" placeholder="CEP" class="p-3 border rounded-xl text-sm">
                         </div>
                         <input type="text" id="edit-endereco" placeholder="Endereço" class="p-3 border rounded-xl text-sm">
-                        <input type="text" id="edit-cep" placeholder="CEP" class="p-3 border rounded-xl text-sm">
                         <input type="email" id="edit-email" placeholder="E-mail" class="p-3 border rounded-xl text-sm">
                     </div>
 
@@ -611,7 +647,7 @@
             { nome: 'violet', border: 'border-violet-300', borderHover: 'hover:border-violet-500', borderActive: 'border-violet-600', bgLight: 'bg-violet-50/60', bgActive: 'bg-violet-100', iconBg: 'bg-violet-100', iconText: 'text-violet-700', badgeBg: 'bg-violet-600', textGroupHover: 'group-hover:text-violet-700', barBg: 'bg-violet-500' },
             { nome: 'sky', border: 'border-sky-300', borderHover: 'hover:border-sky-500', borderActive: 'border-sky-600', bgLight: 'bg-sky-50/60', bgActive: 'bg-sky-100', iconBg: 'bg-sky-100', iconText: 'text-sky-700', badgeBg: 'bg-sky-600', textGroupHover: 'group-hover:text-sky-700', barBg: 'bg-sky-500' },
             { nome: 'rose', border: 'border-rose-300', borderHover: 'hover:border-rose-500', borderActive: 'border-rose-600', bgLight: 'bg-rose-50/60', bgActive: 'bg-rose-100', iconBg: 'bg-rose-100', iconText: 'text-rose-700', badgeBg: 'bg-rose-600', textGroupHover: 'group-hover:text-rose-700', barBg: 'bg-rose-500' },
-            { nome: 'orange', border: 'border-orange-300', borderHover: 'hover:border-orange-500', borderActive: 'border-orange-600', bgLight: 'bg-orange-50/60', borderActive: 'border-orange-600', bgLight: 'bg-orange-50/60', bgActive: 'bg-orange-100', iconBg: 'bg-orange-100', iconText: 'text-orange-700', badgeBg: 'bg-orange-600', textGroupHover: 'group-hover:text-orange-700', barBg: 'bg-orange-500' },
+            { nome: 'orange', border: 'border-orange-300', borderHover: 'hover:border-orange-500', borderActive: 'border-orange-600', bgLight: 'bg-orange-50/60', bgActive: 'bg-orange-100', iconBg: 'bg-orange-100', iconText: 'text-orange-700', badgeBg: 'bg-orange-600', textGroupHover: 'group-hover:text-orange-700', barBg: 'bg-orange-500' },
             { nome: 'teal', border: 'border-teal-300', borderHover: 'hover:border-teal-500', borderActive: 'border-teal-600', bgLight: 'bg-teal-50/60', bgActive: 'bg-teal-100', iconBg: 'bg-teal-100', iconText: 'text-teal-700', badgeBg: 'bg-teal-600', textGroupHover: 'group-hover:text-teal-700', barBg: 'bg-teal-500' },
             { nome: 'fuchsia', border: 'border-fuchsia-300', borderHover: 'hover:border-fuchsia-500', borderActive: 'border-fuchsia-600', bgLight: 'bg-fuchsia-50/60', bgActive: 'bg-fuchsia-100', iconBg: 'bg-fuchsia-100', iconText: 'text-fuchsia-700', badgeBg: 'bg-fuchsia-600', textGroupHover: 'group-hover:text-fuchsia-700', barBg: 'bg-fuchsia-500' },
             { nome: 'cyan', border: 'border-cyan-300', borderHover: 'hover:border-cyan-500', borderActive: 'border-cyan-600', bgLight: 'bg-cyan-50/60', bgActive: 'bg-cyan-100', iconBg: 'bg-cyan-100', iconText: 'text-cyan-700', badgeBg: 'bg-cyan-600', textGroupHover: 'group-hover:text-cyan-700', barBg: 'bg-cyan-500' },
@@ -763,12 +799,15 @@
             carregarDashboard();
         }
 
-        function mostrarToast(titulo, mensagem, tipo = 'sucesso') {
+        let toastTimerTimeout = null;
+        function mostrarToast(titulo, mensagem, tipo = 'sucesso', duracaoMs = 3500) {
             const toast = document.getElementById('toast-notificacao');
             const toastTitulo = document.getElementById('toast-titulo');
             const toastMsg = document.getElementById('toast-mensagem');
             const toastIcone = document.getElementById('toast-icone');
             const toastContent = document.getElementById('toast-content');
+
+            if (toastTimerTimeout) clearTimeout(toastTimerTimeout);
 
             toastTitulo.innerText = titulo;
             toastMsg.innerText = mensagem;
@@ -776,13 +815,18 @@
             if (tipo === 'sucesso') {
                 toastContent.className = "bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800";
                 toastIcone.innerText = "✨";
+            } else if (tipo === 'alerta') {
+                toastContent.className = "bg-amber-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-amber-800";
+                toastIcone.innerText = "⚠️";
             } else {
                 toastContent.className = "bg-red-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-red-800";
                 toastIcone.innerText = "🚨";
             }
 
             toast.classList.remove('translate-y-24', 'opacity-0');
-            setTimeout(() => { toast.classList.add('translate-y-24', 'opacity-0'); }, 3500);
+            toastTimerTimeout = setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, duracaoMs);
         }
 
         function mostrarErroModal(mensagemHtml) {
@@ -796,6 +840,121 @@
         function limparErroModal() {
             const alertaEl = document.getElementById('modal-erro-alerta');
             alertaEl.classList.add('hidden');
+        }
+
+        // =========================================================================
+        // VALIDAÇÃO E INTELIGÊNCIA DE BUSCA DE CPF
+        // =========================================================================
+        function formatarCPF(v) {
+            v = v.replace(/\D/g, "");
+            if (v.length > 11) v = v.substring(0, 11);
+            if (v.length > 9) return v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, "$1.$2.$3-$4");
+            if (v.length > 6) return v.replace(/(\d{3})(\d{3})(\d{1,3})/, "$1.$2.$3");
+            if (v.length > 3) return v.replace(/(\d{3})(\d{1,3})/, "$1.$2");
+            return v;
+        }
+
+        function validarCPF(cpfLimpo) {
+            if (!cpfLimpo || cpfLimpo.length !== 11) return false;
+            if (/^(\d)\1{10}$/.test(cpfLimpo)) return false;
+            let soma = 0;
+            let resto;
+            for (let i = 1; i <= 9; i++) soma += parseInt(cpfLimpo.substring(i - 1, i)) * (11 - i);
+            resto = (soma * 10) % 11;
+            if (resto === 10 || resto === 11) resto = 0;
+            if (resto !== parseInt(cpfLimpo.substring(9, 10))) return false;
+            soma = 0;
+            for (let i = 1; i <= 10; i++) soma += parseInt(cpfLimpo.substring(i - 1, i)) * (12 - i);
+            resto = (soma * 10) % 11;
+            if (resto === 10 || resto === 11) resto = 0;
+            return resto === parseInt(cpfLimpo.substring(10, 11));
+        }
+
+        let timerBuscaCpf = null;
+        async function aoDigitarCpf(input) {
+            input.value = formatarCPF(input.value);
+            const cpfLimpo = input.value.replace(/\D/g, "");
+            const msgEncontrado = document.getElementById('msg-hospede-encontrado');
+            const feedbackSpinner = document.getElementById('feedback-busca-cpf');
+
+            if (msgEncontrado) msgEncontrado.classList.add('hidden');
+            if (cpfLimpo.length !== 11) {
+                if (feedbackSpinner) feedbackSpinner.classList.add('hidden');
+                return;
+            }
+
+            if (timerBuscaCpf) clearTimeout(timerBuscaCpf);
+            timerBuscaCpf = setTimeout(async () => {
+                if (feedbackSpinner) feedbackSpinner.classList.remove('hidden');
+                try {
+                    // 1. Busca na tabela hospedes da pousada
+                    const { data: hospedeBase } = await supabaseClient
+                        .from('hospedes')
+                        .select('*')
+                        .eq('pousada_id', usuarioIdAtual)
+                        .eq('cpf', input.value)
+                        .maybeSingle();
+
+                    let dados = hospedeBase;
+
+                    // 2. Se não encontrou, busca com CPF sem pontuação ou na tabela de reservas
+                    if (!dados) {
+                        const { data: hospedeBaseSemMasc } = await supabaseClient
+                            .from('hospedes')
+                            .select('*')
+                            .eq('pousada_id', usuarioIdAtual)
+                            .eq('cpf', cpfLimpo)
+                            .maybeSingle();
+                        dados = hospedeBaseSemMasc;
+                    }
+
+                    if (!dados) {
+                        const { data: reservaAntiga } = await supabaseClient
+                            .from('reservas')
+                            .select('*')
+                            .eq('pousada_id', usuarioIdAtual)
+                            .or(`cpf.eq.${input.value},cpf.eq.${cpfLimpo}`)
+                            .order('criado_em', { ascending: false })
+                            .limit(1)
+                            .maybeSingle();
+                        
+                        if (reservaAntiga) {
+                            dados = {
+                                nome: reservaAntiga.hospede_nome,
+                                telefone: reservaAntiga.whatsapp_hospede,
+                                rg: reservaAntiga.rg,
+                                endereco: reservaAntiga.endereco,
+                                cep: reservaAntiga.cep,
+                                email: reservaAntiga.email
+                            };
+                        }
+                    }
+
+                    if (dados) {
+                        const elNome = document.getElementById('edit-hospede');
+                        const elWhats = document.getElementById('edit-whatsapp');
+                        const elRg = document.getElementById('edit-rg');
+                        const elEnd = document.getElementById('edit-endereco');
+                        const elCep = document.getElementById('edit-cep');
+                        const elEmail = document.getElementById('edit-email');
+
+                        if (dados.nome && elNome) elNome.value = dados.nome;
+                        if (dados.telefone && elWhats) elWhats.value = dados.telefone;
+                        if (dados.whatsapp_hospede && elWhats) elWhats.value = dados.whatsapp_hospede;
+                        if (dados.rg && elRg) elRg.value = dados.rg;
+                        if (dados.endereco && elEnd) elEnd.value = dados.endereco;
+                        if (dados.cep && elCep) elCep.value = dados.cep;
+                        if (dados.email && elEmail) elEmail.value = dados.email;
+
+                        if (msgEncontrado) msgEncontrado.classList.remove('hidden');
+                        mostrarToast("Hóspede Localizado!", `Cadastro de ${dados.nome || 'Hóspede'} preenchido automaticamente!`, "sucesso", 4000);
+                    }
+                } catch (err) {
+                    console.warn("Erro na busca de inteligência de CPF:", err);
+                } finally {
+                    if (feedbackSpinner) feedbackSpinner.classList.add('hidden');
+                }
+            }, 300);
         }
 
         function calcularDiasRestantes(dataAlvo) {
@@ -1209,7 +1368,7 @@
                 const temReservaIminente = !ocupadaHoje && !emLimpeza && proximaReserva && (diasAteProxima <= diariaMinimaPousadaCache);
 
                 let estado = 'Livre';
-                if (ocupadaHoje) {
+                if (ocupadaHoje && !emLimpeza) {
                     estado = 'Ocupada';
                 } else if (emLimpeza) {
                     estado = 'Limpeza';
@@ -1312,14 +1471,28 @@
             carregarDashboard();
         }
 
+        // =========================================================================
+        // REGRA 1: LIBERAR LIMPEZA - RESTAURA OCUPADA SE HOUVER ESTADIA EM ANDAMENTO
+        // =========================================================================
         async function liberarLimpezaSuite(suiteId) {
             try {
-                const { error } = await supabaseClient.from('suites').update({ status: 'Disponível' }).eq('id', suiteId);
+                const hojeStr = new Date().toLocaleDateString('sv-SE');
+                const reservasDaSuite = reservasGlobaisCache.filter(r => r.suite_id === suiteId && r.status === 'Aprovada');
+                const temEstadiaOcupada = reservasDaSuite.some(r => r.checkin <= hojeStr && r.checkout > hojeStr);
+
+                const statusRestaurado = temEstadiaOcupada ? 'Ocupada' : 'Disponível';
+
+                const { error } = await supabaseClient.from('suites').update({ status: statusRestaurado }).eq('id', suiteId);
                 if (error) {
-                    mostrarToast("Erro", "Falha ao liberar suíte: " + error.message, true);
+                    mostrarToast("Erro", "Falha ao liberar suíte: " + error.message, 'erro');
                     return;
                 }
-                mostrarToast("Sucesso", "Limpeza concluída! A suíte está Disponível.");
+
+                if (temEstadiaOcupada) {
+                    mostrarToast("Higienização Concluída", "A suíte voltou ao status normal de OCUPADA com o hóspede na casa.", "sucesso");
+                } else {
+                    mostrarToast("Sucesso", "Limpeza concluída! A suíte está Disponível.");
+                }
                 await carregarDashboard();
             } catch (e) {
                 console.error("Erro ao liberar limpeza:", e);
@@ -1431,16 +1604,34 @@
 
                 const htmlBotaoCalendario = `<button onclick="abrirCalendarioSuite('${suite.id}', '${suite.nome}')" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300 text-[10px] font-extrabold px-2 py-0.5 rounded-lg transition flex items-center gap-1 cursor-pointer shadow-2xs"><span>📅 Calendário</span></button>`;
 
-                // CASO ESPECIAL: Suíte física em Limpeza
+                // =================================================================
+                // CASO ESPECIAL: Suíte física em Limpeza (Com Hóspede na casa OU Reserva Futura)
+                // =================================================================
                 if (suite.status === 'Limpeza') {
+                    const estadiaOcupandoHoje = aprovadasDaSuite.find(r => r.checkin <= hojeStr && r.checkout > hojeStr);
                     const proximaFutura = aprovadasDaSuite
-                        .filter(r => r.checkin >= hojeStr)
+                        .filter(r => r.checkin > hojeStr)
                         .sort((a, b) => a.checkin.localeCompare(b.checkin))[0] || null;
 
-                    let badgeAvisoFutura = '';
-                    if (proximaFutura) {
+                    let badgeAvisoEstadia = '';
+                    let botaoGerenciarLimpeza = '';
+
+                    if (estadiaOcupandoHoje) {
+                        // CASO: Hóspede está ocupando e o quarto está em limpeza diária
+                        badgeAvisoEstadia = `
+                            <div class="mt-2.5 bg-amber-100/90 border border-amber-300 p-2.5 rounded-xl text-xs text-amber-950 font-semibold space-y-0.5 shadow-2xs">
+                                <div class="flex items-center gap-1 font-bold text-amber-900 text-[11px] uppercase">
+                                    <i class="fa-solid fa-user-clock text-amber-700"></i> Hóspede Alojado (Limpeza em Andamento)
+                                </div>
+                                <div>Hóspede: <strong>${estadiaOcupandoHoje.hospede_nome || 'Hóspede'}</strong></div>
+                                <div class="text-[11px] text-amber-800">Saída prevista: <strong>${formatarDataSimples(estadiaOcupandoHoje.checkout)}</strong></div>
+                            </div>
+                        `;
+                        botaoGerenciarLimpeza = `<button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', 'Ocupada', '${estadiaOcupandoHoje.id}')" class="text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1"><span>Gerenciar Estadia</span> &rarr;</button>`;
+                    } else if (proximaFutura) {
+                        // CASO: Quarto em limpeza com reserva futura confirmada (permite cancelar reserva se necessário)
                         const diasAte = calcularDiasRestantes(proximaFutura.checkin);
-                        badgeAvisoFutura = `
+                        badgeAvisoEstadia = `
                             <div class="mt-2.5 bg-blue-100/90 border border-blue-300 p-2.5 rounded-xl text-xs text-blue-950 font-semibold space-y-0.5 shadow-2xs">
                                 <div class="flex items-center gap-1 font-bold text-blue-900 text-[11px] uppercase">
                                     <i class="fa-solid fa-calendar-check text-blue-600"></i> Reserva Futura Confirmada
@@ -1449,7 +1640,15 @@
                                 <div class="text-[11px] text-blue-800">Check-in em: <strong>${formatarDataSimples(proximaFutura.checkin)}</strong> (${diasAte === 0 ? 'HOJE' : (diasAte === 1 ? 'Amanhã' : 'em ' + diasAte + ' dias')})</div>
                             </div>
                         `;
+                        botaoGerenciarLimpeza = `<button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', 'Limpeza', '${proximaFutura.id}')" class="text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1"><span>Gerenciar</span> &rarr;</button>`;
+                    } else {
+                        botaoGerenciarLimpeza = `<button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', 'Limpeza')" class="text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1"><span>Gerenciar</span> &rarr;</button>`;
                     }
+
+                    const tituloStatusCard = estadiaOcupandoHoje ? 'Ocupada (Limpeza)' : 'Limpeza';
+                    const subTextoLimpeza = estadiaOcupandoHoje 
+                        ? '🧹 Arrumação / Higienização com hóspede na casa' 
+                        : '🧹 Em processo de higienização';
 
                     container.innerHTML += `
                         <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-sm bg-pink-100 border-2 border-pink-300 text-pink-950 border-l-4 ${temaSuite.borderActive} flex flex-col justify-between transition hover:shadow-md">
@@ -1461,19 +1660,19 @@
                                         </div>
                                         <div class="min-w-0">
                                             <h2 class="text-sm sm:text-base font-extrabold text-gray-900 truncate leading-tight">${suite.nome}</h2>
-                                            <p class="text-xs font-bold text-pink-800 truncate mt-0.5">🧹 Em processo de higienização</p>
+                                            <p class="text-xs font-bold text-pink-800 truncate mt-0.5">${subTextoLimpeza}</p>
                                         </div>
                                     </div>
 
                                     <div class="flex items-center gap-1.5 flex-shrink-0">
                                         ${tagPausadaHtml}
                                         <span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-2xs bg-pink-600 text-white">
-                                            Limpeza
+                                            ${tituloStatusCard}
                                         </span>
                                     </div>
                                 </div>
 
-                                ${badgeAvisoFutura}
+                                ${badgeAvisoEstadia}
 
                                 <div class="mt-3 flex flex-wrap items-center justify-between gap-1.5 pt-2 border-t border-black/5">
                                     <span class="text-[11px] font-bold text-slate-700 bg-white/75 px-2.5 py-1 rounded-lg border border-black/5 shadow-2xs">
@@ -1490,9 +1689,7 @@
                                 <button type="button" onclick="liberarLimpezaSuite('${suite.id}')" class="text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1">
                                     <i class="fa-solid fa-check"></i> Concluir Limpeza
                                 </button>
-                                <button type="button" onclick="abrirModal('${suite.id}', '${suite.nome}', 'Limpeza')" class="text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1">
-                                    <span>Gerenciar</span> &rarr;
-                                </button>
+                                ${botaoGerenciarLimpeza}
                             </div>
                         </div>`;
                     continue;
@@ -1708,8 +1905,6 @@
                 
                 // 2. CASO DISPONÍVEL
                 if (aprovadasDaSuite.length === 0 && pendentesDaSuite.length === 0) {
-                    const isDisponivel = suite.status === 'Disponível';
-                    
                     const bgCardClasses = 'bg-emerald-100 border-2 border-emerald-400 text-emerald-950';
                     const badgeClasses = 'bg-emerald-600 text-white font-extrabold';
                     
@@ -1926,7 +2121,11 @@
             limparErroModal();
             aplicarVisibilidadeTaxaPet();
 
-            // Garante que nenhum aviso antigo de capacidade fique poluindo o topo do modal
+            const msgEncontrado = document.getElementById('msg-hospede-encontrado');
+            if (msgEncontrado) msgEncontrado.classList.add('hidden');
+            const feedbackSpinner = document.getElementById('feedback-busca-cpf');
+            if (feedbackSpinner) feedbackSpinner.classList.add('hidden');
+
             const capInfoElExistente = document.getElementById('info-capacidade-suite');
             if (capInfoElExistente) capInfoElExistente.remove();
 
@@ -1965,7 +2164,7 @@
                 document.getElementById('edit-reserva-id').value = reserva.id;
                 document.getElementById('edit-hospede').value = reserva.hospede_nome || '';
                 document.getElementById('edit-whatsapp').value = reserva.whatsapp_hospede || '';
-                document.getElementById('edit-cpf').value = reserva.cpf || '';
+                document.getElementById('edit-cpf').value = reserva.cpf ? formatarCPF(reserva.cpf) : '';
                 document.getElementById('edit-rg').value = reserva.rg || '';
                 document.getElementById('edit-endereco').value = reserva.endereco || '';
                 document.getElementById('edit-cep').value = reserva.cep || '';
@@ -2151,7 +2350,7 @@
 
             } catch (err) {
                 console.error("Erro no fluxo de aprovação com PDF:", err);
-                mostrarToast("Erro", "Falha ao gerar PDF: " + err.message, true);
+                mostrarToast("Erro", "Falha ao gerar PDF: " + err.message, 'erro');
                 try {
                     await supabaseClient.from('reservas').update({ status: 'Aprovada' }).eq('id', reservaId);
                     carregarDashboard();
@@ -2160,12 +2359,12 @@
         }
 
         // =========================================================================
-        // REGRAS 3 E 4: CANCELAMENTO PROFISSIONAL (RESERVA VS ESTADIA)
+        // REGRAS 3 E 4: CANCELAMENTO PROFISSIONAL (RESERVA VS ESTADIA) + SALDO DEVEDOR
         // =========================================================================
         let reservaIdParaCancelar = null;
-        let tipoCancelamentoAtual = 'reserva'; // 'reserva' ou 'estadia'
+        let tipoCancelamentoAtual = 'reserva';
 
-        function abrirModalCancelamento(reservaId, nomeHospede, tipo = 'reserva') {
+        async function abrirModalCancelamento(reservaId, nomeHospede, tipo = 'reserva') {
             reservaIdParaCancelar = reservaId;
             tipoCancelamentoAtual = tipo;
 
@@ -2176,17 +2375,64 @@
             const subEl = document.getElementById('subtitulo-modal-cancelamento');
             const efeitoEl = document.getElementById('texto-efeito-cancelamento');
             const btnConfirmar = document.getElementById('btn-acao-confirmar-canc');
+            const boxFinanc = document.getElementById('box-financeiro-cancelamento-estadia');
 
             if (tipo === 'estadia') {
                 titEl.innerText = "Interromper / Cancelar Estadia?";
                 subEl.innerHTML = `Tem certeza que deseja cancelar a <strong>estadia em andamento</strong> de <strong class="text-gray-900">${nomeHospede || 'hóspede'}</strong>?`;
-                efeitoEl.innerHTML = `O encerramento será computado na data de hoje, o valor das diárias consumidas será recalculado, os pagamentos realizados serão preservados para acerto contábil e a suíte física irá imediatamente para <strong>LIMPEZA</strong>.`;
+                efeitoEl.innerHTML = `O encerramento será computado na data de hoje, o valor das diárias consumidas será recalculado, os pagamentos realizados serão preservados e a suíte física irá imediatamente para <strong>LIMPEZA</strong>.`;
                 btnConfirmar.innerHTML = `<i class="fa-solid fa-ban"></i> Confirmar Saída / Cancelamento`;
+
+                // Cálculo prévio do saldo para exibir na caixa financeira do modal
+                try {
+                    const hojeStr = new Date().toLocaleDateString('sv-SE');
+                    const rAtual = reservasGlobaisCache.find(r => r.id === reservaId);
+                    const suiteId = rAtual?.suite_id || document.getElementById('edit-suite-id').value;
+                    let dCons = 1;
+                    if (rAtual?.checkin && rAtual.checkin < hojeStr) {
+                        dCons = Math.max(1, calcularQuantidadeDiarias(rAtual.checkin, hojeStr));
+                    }
+
+                    let vCons = 0;
+                    try {
+                        const { data: vCalc } = await supabaseClient.rpc('calcular_total_reserva', {
+                            p_suite_id: suiteId,
+                            p_checkin: rAtual?.checkin || hojeStr,
+                            p_checkout: hojeStr,
+                            p_adultos: rAtual?.qtd_adultos || 2,
+                            p_criancas: rAtual?.qtd_criancas || 0,
+                            p_idades_criancas: rAtual?.idades_criancas || '',
+                            p_pet: rAtual?.tem_pet || false
+                        });
+                        if (vCalc !== null && !isNaN(vCalc)) vCons = Number(vCalc);
+                        else {
+                            const sObj = suitesGlobaisCache.find(s => s.id === suiteId);
+                            vCons = dCons * Number(sObj?.valor_diaria || 0);
+                        }
+                    } catch(e) {
+                        const sObj = suitesGlobaisCache.find(s => s.id === suiteId);
+                        vCons = dCons * Number(sObj?.valor_diaria || 0);
+                    }
+
+                    const pags = pagamentosGlobaisCache.filter(p => p.reserva_id === reservaId);
+                    const tPago = pags.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
+                    const saldoDev = vCons - tPago;
+
+                    document.getElementById('canc-diarias-consumidas').innerText = `${dCons} diária(s)`;
+                    document.getElementById('canc-valor-consumido').innerText = formatarMoeda(vCons);
+                    document.getElementById('canc-total-pago').innerText = formatarMoeda(tPago);
+                    document.getElementById('canc-saldo-receber').innerText = formatarMoeda(saldoDev > 0 ? saldoDev : 0);
+                    if (boxFinanc) boxFinanc.classList.remove('hidden');
+                } catch(eFin) {
+                    if (boxFinanc) boxFinanc.classList.add('hidden');
+                }
+
             } else {
                 titEl.innerText = "Cancelar Reserva?";
                 subEl.innerHTML = `Tem certeza que deseja <strong class="text-red-700">CANCELAR</strong> a reserva futura de <strong class="text-gray-900">${nomeHospede || 'hóspede'}</strong>?`;
                 efeitoEl.innerHTML = `A acomodação será liberada imediatamente para novas consultas e a ocorrência será auditada no relatório financeiro.`;
                 btnConfirmar.innerHTML = `<i class="fa-solid fa-ban"></i> Confirmar Cancelamento`;
+                if (boxFinanc) boxFinanc.classList.add('hidden');
             }
 
             const input = document.getElementById('motivo-cancelamento-input');
@@ -2260,6 +2506,11 @@
                         valorConsumido = diariasConsumidas * Number(suiteObj?.valor_diaria || 0);
                     }
 
+                    // Cálculo do Saldo Devedor
+                    const pagamentosDesta = pagamentosGlobaisCache.filter(p => p.reserva_id === reservaIdParaCancelar);
+                    const totalPagoAteAgora = pagamentosDesta.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
+                    const saldoDevedorFinal = valorConsumido - totalPagoAteAgora;
+
                     const payload = {
                         status: 'Cancelada',
                         checkout: hojeStr,
@@ -2282,7 +2533,18 @@
                     fecharModalCancelamento();
                     fecharModal();
                     await carregarDashboard();
-                    mostrarToast('Estadia Interrompida', 'Estadia cancelada, diárias recalculadas e quarto enviado para LIMPEZA.');
+
+                    // =========================================================
+                    // MENSAGEM NA TELA DE 5 SEGUNDOS (5000ms+) INFORMANDO O SALDO
+                    // =========================================================
+                    let mensagemNotificacao = "";
+                    if (saldoDevedorFinal > 0) {
+                        mensagemNotificacao = `⚠️ Estadia interrompida! A pousada deve receber ${formatarMoeda(saldoDevedorFinal)} do hóspede. (Total consumido: ${formatarMoeda(valorConsumido)} | Já pago: ${formatarMoeda(totalPagoAteAgora)}). Suíte enviada para Limpeza.`;
+                    } else {
+                        mensagemNotificacao = `Estadia interrompida e quitada sem saldo pendente. (Consumido: ${formatarMoeda(valorConsumido)} | Pago: ${formatarMoeda(totalPagoAteAgora)}). Suíte enviada para Limpeza.`;
+                    }
+
+                    mostrarToast('Atenção: Saldo de Estadia Cancelada', mensagemNotificacao, saldoDevedorFinal > 0 ? 'alerta' : 'sucesso', 6000);
                 } else {
                     const payload = {
                         status: 'Cancelada',
@@ -2308,7 +2570,7 @@
                     fecharModalCancelamento();
                     fecharModal();
                     await carregarDashboard();
-                    mostrarToast('Reserva Cancelada', 'A reserva foi cancelada com sucesso!');
+                    mostrarToast('Reserva Cancelada', 'A reserva futura foi cancelada com sucesso!', 'sucesso', 5000);
                 }
             } catch(err) {
                 console.error('Erro ao cancelar reserva:', err);
@@ -2523,17 +2785,40 @@
             }
         }
 
+        // =========================================================================
+        // REGRAS 2 E 3: GESTÃO DAS OPÇÕES DE STATUS NO MODAL
+        // =========================================================================
         async function verificarStatusModal() {
             const status = document.getElementById('edit-status').value;
             const statusOriginal = document.getElementById('edit-status-original').value;
+            const reservaIdAtual = document.getElementById('edit-reserva-id').value;
             const containerCampos = document.getElementById('campos-hospede-container');
             const containerCheckout = document.getElementById('container-checkout-financeiro');
             const lblValorSinal = document.getElementById('lbl-valor-sinal');
 
+            const optDisponivel = document.getElementById('opt-status-disponivel');
             const optCheckout = document.getElementById('opt-status-checkout');
             const optCancReserva = document.getElementById('opt-status-cancelar-reserva');
             const optCancEstadia = document.getElementById('opt-status-cancelar-estadia');
+            const tagObrigatorioCpf = document.getElementById('tag-obrigatorio-cpf');
 
+            // REGRA 2: Se tem reserva confirmada em andamento (statusOriginal === 'Reservado' ou reservaId),
+            // NÃO pode alterar diretamente para 'Disponível'. A opção é desabilitada/oculta!
+            const temReservaAtiva = Boolean(reservaIdAtual && reservaIdAtual.trim() !== '');
+
+            if (temReservaAtiva && (statusOriginal === 'Reservado' || statusOriginal === 'Ocupada')) {
+                if (optDisponivel) {
+                    optDisponivel.disabled = true;
+                    optDisponivel.classList.add('hidden');
+                }
+            } else {
+                if (optDisponivel) {
+                    optDisponivel.disabled = false;
+                    optDisponivel.classList.remove('hidden');
+                }
+            }
+
+            // Exibição condicional dos botões de cancelamento profissional
             if (statusOriginal === 'Ocupada') {
                 if (optCancEstadia) optCancEstadia.classList.remove('hidden');
                 if (optCancReserva) optCancReserva.classList.add('hidden');
@@ -2542,14 +2827,29 @@
                 if (optCancReserva) optCancReserva.classList.remove('hidden');
                 if (optCancEstadia) optCancEstadia.classList.add('hidden');
                 if (optCheckout) optCheckout.classList.add('hidden');
+            } else if (statusOriginal === 'Limpeza') {
+                // REGRA 3: Se suíte em limpeza possui reserva ativa, permite cancelar a reserva
+                if (temReservaAtiva) {
+                    if (optCancReserva) optCancReserva.classList.remove('hidden');
+                } else {
+                    if (optCancReserva) optCancReserva.classList.add('hidden');
+                }
+                if (optCancEstadia) optCancEstadia.classList.add('hidden');
+                if (optCheckout) optCheckout.classList.add('hidden');
             } else {
                 if (optCancReserva) optCancReserva.classList.add('hidden');
                 if (optCancEstadia) optCancEstadia.classList.add('hidden');
                 if (optCheckout) optCheckout.classList.add('hidden');
             }
 
+            // Destaca a obrigatoriedade do CPF na criação de nova reserva
+            if (status === 'Reservado' || !temReservaAtiva) {
+                if (tagObrigatorioCpf) tagObrigatorioCpf.classList.remove('hidden');
+            } else {
+                if (tagObrigatorioCpf) tagObrigatorioCpf.classList.add('hidden');
+            }
+
             if (status === 'CancelarReserva') {
-                const reservaIdAtual = document.getElementById('edit-reserva-id').value;
                 if (!reservaIdAtual) {
                     mostrarErroModal("Esta suíte não possui uma reserva ativa vinculada para cancelar.");
                     document.getElementById('edit-status').value = statusOriginal || 'Disponível';
@@ -2561,7 +2861,6 @@
             }
 
             if (status === 'CancelarEstadia') {
-                const reservaIdAtual = document.getElementById('edit-reserva-id').value;
                 if (!reservaIdAtual) {
                     mostrarErroModal("Esta suíte não possui uma estadia ocupada ativa vinculada para cancelar.");
                     document.getElementById('edit-status').value = statusOriginal || 'Ocupada';
@@ -2601,7 +2900,6 @@
             }
 
             if (status === 'Reservado' && !camposLimposParaNovaReserva) {
-                const reservaIdAtual = document.getElementById('edit-reserva-id').value;
                 const deveLimpar = statusOriginal !== 'Reservado' || !reservaIdAtual;
                 if (deveLimpar) {
                     document.getElementById('edit-reserva-id').value = '';
@@ -2649,6 +2947,7 @@
         async function executarSalvamento(suiteId, status) {
             const reservaIdEditada = document.getElementById('edit-reserva-id').value;
             const suiteIdOriginal = document.getElementById('edit-suite-id-original').value;
+            const statusOriginal = document.getElementById('edit-status-original').value;
             const campoSinalStr = document.getElementById('edit-valor-sinal').value.trim();
             const valorSinalInformado = parseFloat(campoSinalStr) || 0;
             const formaPagamentoSelecionada = document.getElementById('edit-forma-pagamento').value || 'Pix / Sinal';
@@ -2664,6 +2963,24 @@
             const inputsIdades = document.querySelectorAll('.input-idade-crianca');
             const idadesCriancasArr = Array.from(inputsIdades).map(input => parseInt(input.value) || 0);
             const idadesCriancasStr = idadesCriancasArr.join(',');
+
+            const cpfInformado = (document.getElementById('edit-cpf').value || '').trim();
+            const cpfLimpo = cpfInformado.replace(/\D/g, "");
+
+            // =================================================================
+            // REGRA 5: CPF OBRIGATÓRIO NA CRIAÇÃO DE NOVA RESERVA
+            // =================================================================
+            const criandoNovaReserva = (!reservaIdEditada || status === 'Reservado' || (status === 'Ocupada' && !reservaIdEditada));
+            if (criandoNovaReserva) {
+                if (!cpfInformado || cpfLimpo.length === 0) {
+                    mostrarErroModal("⚠️ <strong>Campo Obrigatório:</strong> O CPF do hóspede é obrigatório para registrar uma nova reserva.");
+                    return;
+                }
+                if (cpfLimpo.length !== 11 || !validarCPF(cpfLimpo)) {
+                    mostrarErroModal("⚠️ <strong>CPF Inválido:</strong> O número de CPF informado não é válido. Por favor, verifique a digitação.");
+                    return;
+                }
+            }
 
             if (status === 'Reservado' || (status === 'Ocupada' && !reservaIdEditada)) {
                 const qtdDiariasCalculadas = calcularQuantidadeDiarias(checkinVal, checkoutVal);
@@ -2694,7 +3011,7 @@
                 suite_id: suiteId,
                 hospede_nome: document.getElementById('edit-hospede').value || 'Hóspede',
                 whatsapp_hospede: document.getElementById('edit-whatsapp').value,
-                cpf: document.getElementById('edit-cpf').value,
+                cpf: cpfInformado,
                 rg: document.getElementById('edit-rg').value,
                 endereco: document.getElementById('edit-endereco').value,
                 cep: document.getElementById('edit-cep').value,
@@ -2774,15 +3091,15 @@
                 }
             }
 
+            // =================================================================
+            // REGRA 1: LIMPEZA SEM ENCERRAR ESTADIA (PRESERVA RESERVA ATIVA)
+            // =================================================================
             if (status === 'Limpeza') {
                 if (reservaIdEditada) {
-                    const rObj = reservasGlobaisCache.find(r => r.id === reservaIdEditada);
-                    const hoje = new Date().toLocaleDateString('sv-SE');
-                    if (rObj && rObj.checkin > hoje) {
-                        await supabaseClient.from('reservas').update({ status: 'Aprovada' }).eq('id', reservaIdEditada);
-                    } else {
-                        await supabaseClient.from('reservas').update({ status: 'Finalizada' }).eq('id', reservaIdEditada);
-                    }
+                    // Mantém a reserva ativa como Aprovada (NÃO finaliza)
+                    await supabaseClient.from('reservas').update({
+                        observacao: observacaoInformada
+                    }).eq('id', reservaIdEditada);
                 }
             } else if (status === 'Reservado' || status === 'Ocupada' || status === 'Aprovada' || status === 'Checkout') {
                 if (reservaIdEditada) {
@@ -2812,6 +3129,37 @@
                 }
             }
 
+            // =================================================================
+            // SUGESTÃO MASTER: CRM AUTOMÁTICO NA TABELA HOSPEDES
+            // =================================================================
+            if (cpfLimpo.length === 11 && dadosReserva.hospede_nome) {
+                try {
+                    const dadosHospede = {
+                        pousada_id: usuarioIdAtual,
+                        nome: dadosReserva.hospede_nome,
+                        cpf: cpfInformado,
+                        email: dadosReserva.email || null,
+                        telefone: dadosReserva.whatsapp_hospede || null
+                    };
+
+                    const { data: hospedeExiste } = await supabaseClient
+                        .from('hospedes')
+                        .select('id')
+                        .eq('pousada_id', usuarioIdAtual)
+                        .eq('cpf', cpfInformado)
+                        .maybeSingle();
+
+                    if (hospedeExiste) {
+                        await supabaseClient.from('hospedes').update(dadosHospede).eq('id', hospedeExiste.id);
+                    } else {
+                        await supabaseClient.from('hospedes').insert([dadosHospede]);
+                    }
+                } catch (eCrm) {
+                    console.warn("Aviso ao sincronizar hóspede:", eCrm);
+                }
+            }
+
+            // Registro de pagamento se houver valor lançado
             if ((valorSinalInformado > 0 || status === 'Checkout') && reservaIdFinal) {
                 const { error: errPag } = await supabaseClient.from('hospede_pagamentos').insert([{
                     pousada_id: usuarioIdAtual,
@@ -2828,8 +3176,12 @@
 
             fecharModal();
             await carregarDashboard();
-            const msgSucesso = status === 'Checkout' ? "Checkout concluído com sucesso! Suíte enviada para Limpeza." : (houveTransferencia ? "Hóspede transferido de suíte com sucesso!" : "Dados salvos com sucesso!");
-            mostrarToast("Sucesso", msgSucesso);
+            const msgSucesso = status === 'Checkout' 
+                ? "Checkout concluído com sucesso! Suíte enviada para Limpeza." 
+                : (status === 'Limpeza' && reservaIdEditada 
+                    ? "Suíte colocada em Limpeza! A estadia do hóspede permanece ativa e protegida." 
+                    : (houveTransferencia ? "Hóspede transferido de suíte com sucesso!" : "Dados salvos com sucesso!"));
+            mostrarToast("Sucesso", msgSucesso, "sucesso", 4500);
         }
 
         document.getElementById('form-edicao').onsubmit = async (e) => {
@@ -2852,6 +3204,12 @@
             if (status === 'CancelarEstadia') {
                 const nomeHospede = document.getElementById('edit-hospede').value || 'hóspede';
                 abrirModalCancelamento(reservaIdEditada, nomeHospede, 'estadia');
+                return;
+            }
+
+            // REGRA 2: Bloqueio contra colocar em 'Disponível' quando há reserva ativa
+            if (status === 'Disponível' && reservaIdEditada && (statusOriginal === 'Reservado' || statusOriginal === 'Ocupada')) {
+                mostrarErroModal("⚠️ <strong>Operação Não Permitida:</strong> Esta suíte possui uma reserva confirmada em andamento. Para desocupá-la ou cancelá-la, use a opção <strong>'❌ Cancelar Reserva'</strong>.");
                 return;
             }
 
@@ -2889,7 +3247,8 @@
                 return;
             }
 
-            if (statusOriginal === 'Ocupada' && (status === 'Limpeza' || status === 'Checkout')) {
+            // REGRA 1: Se for apenas Limpeza (arrumação) NÃO pede confirmação de checkout destrutivo!
+            if (statusOriginal === 'Ocupada' && status === 'Checkout') {
                 fecharModal(); 
                 document.getElementById('modal-confirmacao').classList.remove('hidden');
                 document.getElementById('btn-confirmar-acao').onclick = async () => {
@@ -2972,7 +3331,7 @@
                         const modalAntecipacaoAberto = document.getElementById('modal-confirmacao-antecipacao') && !document.getElementById('modal-confirmacao-antecipacao').classList.contains('hidden');
                         if (!modalEdicaoAberto && !modalRecusaAberto && !modalCancAberto && !modalAntecipacaoAberto) {
                             carregarDashboard();
-                            mostrarToast('Atualizado', `Reserva ${payload.eventType === 'INSERT' ? 'nova' : 'alterada'} detectada!`);
+                            mostrarToast('Atualizado', `Reserva ${payload.eventType === 'INSERT' ? 'nova' : 'alterada'} detectada!`, 'sucesso', 4000);
                         }
                     })
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'suites', filter: `pousada_id=eq.${pousadaId}` }, () => {
