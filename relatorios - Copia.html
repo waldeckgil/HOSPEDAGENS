@@ -13,170 +13,141 @@
 </head>
 <body class="bg-gray-100 font-sans antialiased">
 
-    <!-- ESTRUTURA PRINCIPAL RESPONSIVA (COLUNA NO MOBILE, LADO A LADO NO DESKTOP) -->
-    <div class="min-h-screen md:h-screen flex flex-col md:flex-row bg-gray-100 md:overflow-hidden">
+    <div class="flex h-screen bg-gray-100 overflow-hidden">
         
-        <!-- MENU LATERAL / BARRA SUPERIOR NO MOBILE -->
-        <aside class="w-full md:w-56 bg-slate-800 text-white flex flex-col shadow-lg flex-shrink-0 z-20">
-            <!-- CABEÇALHO DO MENU -->
-            <div class="p-3 sm:p-4 border-b border-slate-700 flex justify-between items-center md:block">
-                <div>
-                    <h1 class="text-sm sm:text-base font-bold tracking-wide text-amber-400">
-                        <i class="fa-solid fa-umbrella-beach mr-1.5"></i>Pousada
-                    </h1>
-                    <p id="nomePousadaMenu" class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 truncate max-w-[160px] sm:max-w-none">Carregando...</p>
-                </div>
-                
-                <!-- BOTÕES RÁPIDOS EXCLUSIVOS DO CELULAR -->
-                <div class="flex items-center gap-2 md:hidden">
-                    <a href="dashboard.html" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs">
-                        <i class="fa-solid fa-chart-pie"></i> <span>Painel</span>
-                    </a>
-                    <button onclick="logout()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-red-600/20 text-red-300 hover:bg-red-600 hover:text-white text-xs font-semibold transition">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                    </button>
-                </div>
+        <!-- MENU LATERAL COMPACTADO -->
+        <aside class="w-52 bg-slate-800 text-white flex flex-col shadow-lg flex-shrink-0">
+            <div class="p-4 border-b border-slate-700">
+                <h1 class="text-base font-bold tracking-wide text-amber-400"><i class="fa-solid fa-umbrella-beach mr-1.5"></i>Pousada</h1>
+                <p id="nomePousadaMenu" class="text-[11px] text-slate-400 mt-0.5 truncate">Carregando...</p>
             </div>
 
-            <!-- NAVEGAÇÃO DESKTOP -->
-            <nav class="hidden md:flex flex-col flex-1 px-3 py-3 space-y-1.5 overflow-y-auto">
+            <nav class="flex-1 px-3 py-3 space-y-1.5 overflow-y-auto">
                 <a href="dashboard.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition text-xs font-medium">
                     <i class="fa-solid fa-chart-pie w-4"></i> Painel Principal
                 </a>
             </nav>
 
-            <!-- BOTÃO SAIR DESKTOP -->
-            <div class="hidden md:block p-3 border-t border-slate-700">
+            <div class="p-3 border-t border-slate-700">
                 <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white transition font-medium text-xs">
                     <i class="fa-solid fa-right-from-bracket"></i> Sair
                 </button>
             </div>
         </aside>
 
-        <!-- CONTEÚDO PRINCIPAL -->
-        <main class="flex-1 flex flex-col min-w-0 md:overflow-hidden">
-            <div class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-3 sm:p-5 md:p-6">
-                <div class="w-full max-w-full sm:max-w-[98%] mx-auto">
+        <!-- Conteúdo Principal -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <div class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 sm:p-6">
+                <div class="w-full max-w-[98%] mx-auto">
                     
-                    <!-- FAIXA INTELIGENTE DE STATUS DA ASSINATURA -->
-                    <div id="banner-assinatura-relatorios" class="hidden mb-4 sm:mb-5 p-3 sm:p-4 rounded-2xl shadow-xs border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-all">
-                        <div class="flex items-center gap-3">
-                            <span id="banner-assinatura-icone" class="text-xl sm:text-2xl">⚠️</span>
-                            <div>
-                                <h4 id="banner-assinatura-titulo" class="text-xs sm:text-sm font-extrabold leading-tight"></h4>
-                                <p id="banner-assinatura-sub" class="text-[11px] mt-0.5 font-medium"></p>
-                            </div>
-                        </div>
-                        <a href="tarifas.html" class="w-full sm:w-auto text-center px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white/90 hover:bg-white text-slate-800 border border-black/10 shadow-xs transition shrink-0">
-                            Ver Assinatura &rarr;
-                        </a>
-                    </div>
-
-                    <!-- Cabeçalho - SISTEMA DE CONSULTAS CENTRALIZADO -->
-                    <div class="flex flex-col items-center justify-center mb-5 gap-1 text-center">
-                        <h1 class="text-base sm:text-xl md:text-2xl font-extrabold text-gray-800 tracking-wide leading-snug">
-                            Gestão completa de reservas, ocupação e financeiro
-                        </h1>
-                        <p id="nomePousadaLogada" class="text-xs sm:text-sm font-bold text-blue-600 uppercase tracking-wider">Carregando dados...</p>
-                        <p class="text-[10px] sm:text-[11px] text-gray-500">Sistema de Consultas detalhadas</p>
-                    </div>
-
-                    <!-- Cards de Seleção de Views -->
-                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3.5 mb-4">
-                        <!-- Card 1: Financeiro -->
-                        <div onclick="selecionarView('vw_gestor_financeiro_relatorio', 'Extrato Detalhado de Pagamentos', this)" 
-                             class="card-view cursor-pointer bg-slate-50 p-3 sm:p-4 rounded-xl shadow-xs border-2 border-amber-400 hover:border-amber-600 hover:shadow-md transition group flex flex-col justify-between">
-                            <div>
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <div class="w-7 h-7 sm:w-8 sm:h-8 bg-amber-500 text-white rounded-lg flex items-center justify-center text-xs sm:text-sm shadow-xs">
-                                        <i class="fa-solid fa-money-bill-wave"></i>
-                                    </div>
-                                    <span class="text-[8px] sm:text-[9px] font-bold uppercase tracking-wider bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded-full border border-amber-300">FINANCEIRO</span>
-                                </div>
-                                <h3 class="font-bold text-gray-900 text-xs sm:text-sm group-hover:text-amber-800 transition leading-tight">Visão Financeira</h3>
-                            </div>
-                            <p class="text-[10px] sm:text-[11px] text-gray-500 mt-1 truncate">Extrato de pagamentos.</p>
-                        </div>
-
-                        <!-- Card 2: Hospedagens -->
-                        <div onclick="selecionarView('vw_gestor_hospedagens_relatorio', 'Hospedagens, Suítes e Movimentações', this)" 
-                             class="card-view cursor-pointer bg-slate-50 p-3 sm:p-4 rounded-xl shadow-xs border-2 border-emerald-400 hover:border-emerald-600 hover:shadow-md transition group flex flex-col justify-between">
-                            <div>
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <div class="w-7 h-7 sm:w-8 sm:h-8 bg-emerald-700 text-white rounded-lg flex items-center justify-center text-xs sm:text-sm shadow-xs">
-                                        <i class="fa-solid fa-bed"></i>
-                                    </div>
-                                    <span class="text-[8px] sm:text-[9px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-900 px-1.5 py-0.5 rounded-full border border-emerald-300">HOSPEDAGENS</span>
-                                </div>
-                                <h3 class="font-bold text-gray-900 text-xs sm:text-sm group-hover:text-emerald-800 transition leading-tight">Ocupação Suítes</h3>
-                            </div>
-                            <p class="text-[10px] sm:text-[11px] text-gray-500 mt-1 truncate">Nomes e acomodações.</p>
-                        </div>
-
-                        <!-- Card 3: Calendário -->
-                        <div onclick="abrirCalendarioGeralRelatorios()" 
-                             class="card-view cursor-pointer bg-slate-50 p-3 sm:p-4 rounded-xl shadow-xs border-2 border-indigo-400 hover:border-indigo-600 hover:shadow-md transition group flex flex-col justify-between">
-                            <div>
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <div class="w-7 h-7 sm:w-8 sm:h-8 bg-indigo-700 text-white rounded-lg flex items-center justify-center text-xs sm:text-sm shadow-xs">
-                                        <i class="fa-solid fa-calendar-days"></i>
-                                    </div>
-                                    <span class="text-[8px] sm:text-[9px] font-bold uppercase tracking-wider bg-indigo-100 text-indigo-900 border border-indigo-300 px-1.5 py-0.5 rounded-full">CALENDÁRIO</span>
-                                </div>
-                                <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-indigo-800 transition leading-tight">Criar Reserva</h3>
-                            </div>
-                            <p class="text-[10px] sm:text-[11px] text-gray-500 mt-1 truncate">Mês a mês por suíte.</p>
-                        </div>
-
-                        <!-- Card 4: Tarifas -->
-                        <div onclick="selecionarView('vw_gestor_tarifas_relatorio', 'Auditoria de Tarifas Especiais', this)" 
-                             class="card-view cursor-pointer bg-slate-50 p-3 sm:p-4 rounded-xl shadow-xs border-2 border-amber-400 hover:border-amber-600 hover:shadow-md transition group flex flex-col justify-between">
-                            <div>
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <div class="w-7 h-7 sm:w-8 sm:h-8 bg-amber-600 text-white rounded-lg flex items-center justify-center text-xs sm:text-sm shadow-xs">
-                                        <i class="fa-solid fa-tags"></i>
-                                    </div>
-                                    <span class="text-[8px] sm:text-[9px] font-bold uppercase tracking-wider bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded-full border border-amber-300">TARIFAS</span>
-                                </div>
-                                <h3 class="font-bold text-gray-900 text-xs sm:text-sm group-hover:text-amber-800 transition leading-tight">Tarifas Aplicadas</h3>
-                            </div>
-                            <p class="text-[10px] sm:text-[11px] text-gray-500 mt-1 truncate">Regras e valores vigentes.</p>
-                        </div>
-
-                        <!-- Card 5: Reservas -->
-                        <div onclick="selecionarView('vw_gestor_reservas_relatorio', 'Reservas', this)" 
-                             class="card-view col-span-2 sm:col-span-1 cursor-pointer bg-slate-50 p-3 sm:p-4 rounded-xl shadow-xs border-2 border-pink-400 hover:border-pink-600 hover:shadow-md transition group flex flex-col justify-between">
-                            <div>
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <div class="w-7 h-7 sm:w-8 sm:h-8 bg-pink-600 text-white rounded-lg flex items-center justify-center text-xs sm:text-sm shadow-xs">
-                                        <i class="fa-solid fa-calendar-check"></i>
-                                    </div>
-                                    <span class="text-[8px] sm:text-[9px] font-bold uppercase tracking-wider bg-pink-100 text-pink-900 px-1.5 py-0.5 rounded-full border border-pink-300">RESERVAS</span>
-                                </div>
-                                <h3 class="font-bold text-gray-900 text-xs sm:text-sm group-hover:text-pink-800 transition leading-tight">Todas Reservas</h3>
-                            </div>
-                            <p class="text-[10px] sm:text-[11px] text-gray-500 mt-1 truncate">Lista geral de reservas.</p>
+                <!-- FAIXA INTELIGENTE DE STATUS DA ASSINATURA -->
+                <div id="banner-assinatura-relatorios" class="hidden mb-5 p-3.5 sm:p-4 rounded-2xl shadow-xs border flex items-center justify-between gap-3 transition-all">
+                    <div class="flex items-center gap-3">
+                        <span id="banner-assinatura-icone" class="text-xl sm:text-2xl">⚠️</span>
+                        <div>
+                            <h4 id="banner-assinatura-titulo" class="text-xs sm:text-sm font-extrabold leading-tight"></h4>
+                            <p id="banner-assinatura-sub" class="text-[11px] mt-0.5 font-medium"></p>
                         </div>
                     </div>
+                    <a href="tarifas.html" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white/90 hover:bg-white text-slate-800 border border-black/10 shadow-xs transition shrink-0">
+                        Ver Assinatura &rarr;
+                    </a>
+                </div>
+
+                <!-- Cabeçalho - SISTEMA DE CONSULTAS CENTRALIZADO -->
+                <div class="flex flex-col items-center justify-center mb-6 gap-2 text-center">
+                    <div>
+                        <h1 class="text-xl sm:text-2xl font-extrabold text-gray-800 tracking-wide">Gestão completa de reservas, ocupação e financeiro</h1>
+                        <p id="nomePousadaLogada" class="text-sm font-bold text-blue-600 mt-1 uppercase tracking-wider">Carregando dados...</p>
+                        <p class="text-[11px] text-gray-500 mt-1">Sistema de Consultas detalhadas</p>
+                    </div>
+                </div>
+
+                <!-- Cards de Seleção de Views -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
+                    <!-- Card 1: Financeiro -->
+                    <div onclick="selecionarView('vw_gestor_financeiro_relatorio', 'Extrato Detalhado de Pagamentos', this)" 
+                         class="card-view cursor-pointer bg-slate-50 p-4 rounded-xl shadow-md border-2 border-amber-400 hover:border-amber-600 hover:shadow-lg transition group">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="w-8 h-8 bg-amber-500 text-white rounded-lg flex items-center justify-center text-sm shadow-sm">
+                                <i class="fa-solid fa-money-bill-wave"></i>
+                            </div>
+                            <span class="text-[9px] font-bold uppercase tracking-wider bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full border border-amber-300">FINANCEIRO</span>
+                        </div>
+                        <h3 class="font-bold text-gray-900 text-xs sm:text-sm group-hover:text-amber-800 transition">Visão Financeira (Extrato)</h3>
+                        <p class="text-[11px] text-gray-500 mt-0.5 truncate">Histórico detalhado de sinais e pagamentos.</p>
+                    </div>
+
+                    <!-- Card 2: Hospedagens -->
+                    <div onclick="selecionarView('vw_gestor_hospedagens_relatorio', 'Hospedagens, Suítes e Movimentações', this)" 
+                         class="card-view cursor-pointer bg-slate-50 p-4 rounded-xl shadow-md border-2 border-emerald-400 hover:border-emerald-600 hover:shadow-lg transition group">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="w-8 h-8 bg-emerald-700 text-white rounded-lg flex items-center justify-center text-sm shadow-sm">
+                                <i class="fa-solid fa-bed"></i>
+                            </div>
+                            <span class="text-[9px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded-full border border-emerald-300">HOSPEDAGENS</span>
+                        </div>
+                        <h3 class="font-bold text-gray-900 text-xs sm:text-sm group-hover:text-emerald-800 transition">Ocupação das Suites</h3>
+                        <p class="text-[11px] text-gray-500 mt-0.5 truncate">Cruzamento de nomes e acomodações.</p>
+                    </div>
+
+                    <!-- Card 3: Calendário -->
+                    <div onclick="abrirCalendarioGeralRelatorios()" 
+                         class="card-view cursor-pointer bg-slate-50 p-4 rounded-xl shadow-md border-2 border-indigo-400 hover:border-indigo-600 hover:shadow-lg transition group">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="w-8 h-8 bg-indigo-700 text-white rounded-lg flex items-center justify-center text-sm shadow-sm">
+                                <i class="fa-solid fa-calendar-days"></i>
+                            </div>
+                            <span class="text-[9px] font-bold uppercase tracking-wider bg-indigo-100 text-indigo-900 border border-indigo-300 px-2 py-0.5 rounded-full">CALENDÁRIO</span>
+                        </div>
+                        <h3 class="font-bold text-gray-800 text-xs sm:text-sm group-hover:text-indigo-800 transition">Criar Nova Reserva</h3>
+                        <p class="text-[11px] text-gray-500 mt-0.5 truncate">Ocupação mês a mês por suíte.</p>
+                    </div>
+
+                    <!-- Card 4: Tarifas (Lê da tabela tarifas_especiais) -->
+                    <div onclick="selecionarView('vw_gestor_tarifas_relatorio', 'Auditoria de Tarifas Especiais', this)" 
+                         class="card-view cursor-pointer bg-slate-50 p-4 rounded-xl shadow-md border-2 border-amber-400 hover:border-amber-600 hover:shadow-lg transition group">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="w-8 h-8 bg-amber-600 text-white rounded-lg flex items-center justify-center text-sm shadow-sm">
+                                <i class="fa-solid fa-tags"></i>
+                            </div>
+                            <span class="text-[9px] font-bold uppercase tracking-wider bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full border border-amber-300">TARIFAS</span>
+                        </div>
+                        <h3 class="font-bold text-gray-900 text-xs sm:text-sm group-hover:text-amber-800 transition">Tarifas Aplicadas</h3>
+                        <p class="text-[11px] text-gray-500 mt-0.5 truncate">Valores e regras vigentes.</p>
+                    </div>
+
+                    <!-- Card 5: Reservas -->
+                    <div onclick="selecionarView('vw_gestor_reservas_relatorio', 'Reservas', this)" 
+                         class="card-view cursor-pointer bg-slate-50 p-4 rounded-xl shadow-md border-2 border-pink-400 hover:border-pink-600 hover:shadow-lg transition group">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="w-8 h-8 bg-pink-600 text-white rounded-lg flex items-center justify-center text-sm shadow-sm">
+                                <i class="fa-solid fa-calendar-check"></i>
+                            </div>
+                            <span class="text-[9px] font-bold uppercase tracking-wider bg-pink-100 text-pink-900 px-2 py-0.5 rounded-full border border-pink-300">RESERVAS</span>
+                        </div>
+                        <h3 class="font-bold text-gray-900 text-xs sm:text-sm group-hover:text-pink-800 transition">Reservas</h3>
+                        <p class="text-[11px] text-gray-500 mt-0.5 truncate">Todas as reservas.</p>
+                    </div>
+                </div>
 
                     <!-- CONTAINER DE KPIS FINANCEIROS OU GERAIS -->
-                    <div id="wrapperTopoHospedagens" class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4">
-                        <div id="containerKpis" class="flex flex-wrap gap-2.5 sm:gap-3 w-full lg:w-auto"></div>
-                        
+                    <div id="wrapperTopoHospedagens" class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-5">
+                        <div id="containerKpis" class="flex flex-wrap gap-3"></div>
                         <!-- FILTRO DATA AO LADO DOS CARDS DE OCUPAÇÃO -->
-                        <div id="containerFiltroDataHospedagens" class="hidden flex flex-wrap items-center gap-2 bg-white p-2.5 rounded-xl border border-gray-200 shadow-xs w-full lg:w-auto">
-                            <div class="flex-1 sm:flex-initial flex items-center gap-1.5 bg-gray-50 border border-gray-300 rounded-lg px-2.5 py-1.5">
+                        <div id="containerFiltroDataHospedagens" class="hidden flex flex-wrap items-center gap-2 bg-white p-2.5 rounded-xl border border-gray-200 shadow-sm">
+                            <div class="flex items-center gap-1.5 bg-gray-50 border border-gray-300 rounded-lg px-3 py-1.5">
                                 <span class="text-[10px] font-bold text-gray-500 uppercase">De:</span>
-                                <input type="date" id="filtroDataInicioHosp" onchange="sincronizarFiltrosData('inicio', this.value)" class="text-xs font-semibold text-gray-700 bg-transparent focus:outline-none w-full">
+                                <input type="date" id="filtroDataInicioHosp" onchange="sincronizarFiltrosData('inicio', this.value)" class="text-xs font-semibold text-gray-700 bg-transparent focus:outline-none">
                             </div>
-                            <div class="flex-1 sm:flex-initial flex items-center gap-1.5 bg-gray-50 border border-gray-300 rounded-lg px-2.5 py-1.5">
+                            <div class="flex items-center gap-1.5 bg-gray-50 border border-gray-300 rounded-lg px-3 py-1.5">
                                 <span class="text-[10px] font-bold text-gray-500 uppercase">Até:</span>
-                                <input type="date" id="filtroDataFimHosp" onchange="sincronizarFiltrosData('fim', this.value)" class="text-xs font-semibold text-gray-700 bg-transparent focus:outline-none w-full">
+                                <input type="date" id="filtroDataFimHosp" onchange="sincronizarFiltrosData('fim', this.value)" class="text-xs font-semibold text-gray-700 bg-transparent focus:outline-none">
                             </div>
-                            <button onclick="carregarDadosView()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 shadow-xs">
-                                <i class="fa-solid fa-filter"></i> <span>Filtrar</span>
+                            <button onclick="carregarDadosView()" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-sm">
+                                <i class="fa-solid fa-filter"></i> Filtrar
                             </button>
-                            <button onclick="carregarDadosView()" class="bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition shadow-xs" title="Atualizar">
+                            <button onclick="carregarDadosView()" class="bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition shadow-sm" title="Atualizar">
                                 <i class="fa-solid fa-rotate-right"></i>
                             </button>
                         </div>
@@ -184,140 +155,135 @@
 
                     <!-- CARDS DE OCUPAÇÃO POR SUÍTE - SOMENTE HOSPEDAGENS -->
                     <div id="containerCardsOcupacaoSuites" class="hidden mb-5">
-                        <div class="bg-white rounded-xl shadow-xs border border-emerald-100 p-3 sm:p-4">
-                            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 mb-3">
+                        <div class="bg-white rounded-xl shadow-sm border border-emerald-100 p-4">
+                            <div class="flex items-center justify-between mb-3">
                                 <span class="text-[11px] font-extrabold text-emerald-700 uppercase tracking-widest flex items-center gap-2">
                                     <i class="fa-solid fa-bed"></i> CONTROLE DE OCUPAÇÃO POR SUÍTE
-                                    <span id="badgeOcupacaoTotal" class="ml-1 bg-emerald-600 text-white px-2 py-0.5 rounded-full text-[9px]">4 SUÍTES</span>
+                                    <span id="badgeOcupacaoTotal" class="ml-2 bg-emerald-600 text-white px-2 py-0.5 rounded-full text-[9px]">4 SUÍTES</span>
                                 </span>
-                                <span class="text-[10px] text-gray-400">Clique para filtrar na tabela</span>
+                                <span class="text-[10px] text-gray-400">Clique em uma suíte para filtrar a tabela abaixo</span>
                             </div>
-                            <div id="gridOcupacaoSuites" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+                            <div id="gridOcupacaoSuites" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                                 <div class="col-span-full py-4 text-center text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO OCUPAÇÃO...</div>
                             </div>
                         </div>
 
-                        <!-- DASHBOARD GRÁFICO DE OCUPAÇÃO POR SUÍTE -->
-                        <div id="containerGraficoOcupacao" class="hidden mt-4">
-                            <div class="bg-white rounded-xl shadow-xs border border-amber-200 p-3 sm:p-4">
-                                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3">
-                                    <span class="text-[11px] font-extrabold text-amber-700 uppercase tracking-widest flex items-center gap-2">
-                                        <i class="fa-solid fa-chart-bar"></i> SUÍTE MAIS OCUPADA (FINALIZADAS)
-                                        <span id="badgePeriodoGrafico" class="ml-1 bg-amber-600 text-white px-2 py-0.5 rounded-full text-[9px]">PERÍODO</span>
-                                    </span>
-                                    <div class="flex items-center gap-2 w-full sm:w-auto justify-between">
-                                        <span class="text-[10px] text-gray-400">Filtro DE/ATÉ</span>
-                                        <button onclick="toggleGraficoOcupacao()" class="text-[10px] text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 px-2.5 py-1 rounded-full"><i class="fa-solid fa-xmark mr-1"></i> Fechar</button>
-                                    </div>
+                    <!-- DASHBOARD GRÁFICO DE OCUPAÇÃO POR SUÍTE -->
+                    <div id="containerGraficoOcupacao" class="hidden mb-5">
+                        <div class="bg-white rounded-xl shadow-sm border border-amber-200 p-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-[11px] font-extrabold text-amber-700 uppercase tracking-widest flex items-center gap-2">
+                                    <i class="fa-solid fa-chart-bar"></i> DASHBOARD - SUÍTE MAIS OCUPADA NO PERÍODO (SÓ FINALIZADAS)
+                                    <span id="badgePeriodoGrafico" class="ml-2 bg-amber-600 text-white px-2 py-0.5 rounded-full text-[9px]">PERÍODO</span>
+                                </span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] text-gray-400">Respeita filtro DE/ATÉ acima</span>
+                                    <button onclick="toggleGraficoOcupacao()" class="text-[10px] text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 px-2.5 py-1 rounded-full"><i class="fa-solid fa-xmark mr-1"></i> Fechar</button>
                                 </div>
-                                <div id="graficoBarrasOcupacao" class="space-y-2.5">
-                                    <div class="py-6 text-center text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO GRÁFICO...</div>
-                                </div>
-                                <p class="text-[10px] text-gray-400 mt-2.5">Total de diárias no período filtrado. Apenas reservas <strong>Finalizadas</strong>.</p>
                             </div>
+                            <div id="graficoBarrasOcupacao" class="space-y-3">
+                                <div class="py-8 text-center text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO GRÁFICO...</div>
+                            </div>
+                            <p class="text-[10px] text-gray-400 mt-3">Gráfico mostra total de diárias ocupadas por suíte no período filtrado (DE/ATÉ). Conta SOMENTE reservas com status <strong>Finalizada</strong>.</p>
                         </div>
+                    </div>
                     </div>
 
                     <!-- FILTRO POR SUÍTE - VISÃO FINANCEIRA -->
                     <div id="containerFiltroSuites" class="hidden mb-5">
-                        <div class="bg-white rounded-xl shadow-xs border border-blue-100 p-3 sm:p-4">
+                        <div class="bg-white rounded-xl shadow-sm border border-blue-100 p-4">
                             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
                                 <span class="text-[11px] font-extrabold text-blue-700 uppercase tracking-widest flex items-center gap-2">
                                     <i class="fa-solid fa-filter"></i> FILTRAR EXTRATO POR SUÍTE
                                     <span id="badgeSuiteAtiva" class="hidden ml-2 bg-blue-600 text-white px-2 py-0.5 rounded-full text-[9px]"></span>
                                 </span>
-                                <button id="btnVerTodasSuites" onclick="filtrarPorSuite(null)" class="text-[10px] font-bold bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5 rounded-lg transition shadow-xs flex items-center gap-1.5">
+                                <button id="btnVerTodasSuites" onclick="filtrarPorSuite(null)" class="text-[10px] font-bold bg-slate-800 hover:bg-slate-900 text-white px-3.5 py-1.5 rounded-lg transition shadow-sm flex items-center gap-1.5">
                                     <i class="fa-solid fa-layer-group"></i> VER TODAS AS SUÍTES
                                 </button>
                             </div>
-                            <div id="gridSuitesFiltro" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-2.5">
+                            <div id="gridSuitesFiltro" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
                                 <div class="col-span-full py-4 text-center text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO SUÍTES...</div>
                             </div>
-                            <p class="text-[10px] text-gray-400 mt-2">Clique em uma suíte para focar no extrato individual.</p>
+                            <p class="text-[10px] text-gray-400 mt-2.5">Clique em uma suíte para ver apenas o extrato dela no período selecionado.</p>
                         </div>
                     </div>
 
-                    <!-- FILTRO RÁPIDO DE STATUS DE RESERVAS E CARDS HOJE -->
-                    <div id="containerFiltroStatusReservas" class="mb-4 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
-                        <!-- STATUS PILLS SEPARADOS -->
-                        <div class="flex items-center gap-1.5 bg-white p-2.5 rounded-xl border border-gray-200 shadow-xs overflow-x-auto">
-                            <span class="text-[10px] font-extrabold text-gray-500 uppercase tracking-widest mr-1 flex-shrink-0">
+                    <!-- FILTRO RÁPIDO DE STATUS DE RESERVAS -->
+                    <div id="containerFiltroStatusReservas" class="mb-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                        <div class="flex items-center gap-2 bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
+                            <span class="text-[10px] font-extrabold text-gray-500 uppercase tracking-widest mr-2">
                                 <i class="fa-solid fa-filter mr-1"></i> Status:
                             </span>
-                            <button id="btnAprovada" onclick="alterarFiltroStatusReservas('APROVADA')" class="px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-emerald-500 text-white shadow-xs whitespace-nowrap">APROVADAS</button>
-                            <button id="btnCancelada" onclick="alterarFiltroStatusReservas('CANCELADA')" class="px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-white text-rose-600 border border-rose-200 hover:bg-rose-50 whitespace-nowrap">CANCELADAS</button>
-                            <button id="btnRecusada" onclick="alterarFiltroStatusReservas('RECUSADA')" class="px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-white text-red-600 border border-red-200 hover:bg-red-50 whitespace-nowrap">RECUSADAS</button>
-                            <button id="btnTodas" onclick="alterarFiltroStatusReservas('TODAS')" class="px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 whitespace-nowrap">TODAS</button>
+                            <button id="btnAprovada" onclick="alterarFiltroStatusReservas('APROVADA')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500 text-white shadow-sm">APROVADAS</button>
+                            <button id="btnRecusada" onclick="alterarFiltroStatusReservas('RECUSADA')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-white text-red-600 border border-red-200 hover:bg-red-50">RECUSADAS</button>
+                            <button id="btnTodas" onclick="alterarFiltroStatusReservas('TODAS')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-white text-gray-600 border border-gray-200 hover:bg-gray-50">TODAS</button>
                         </div>
-
-                        <!-- CARDS DE CONTROLE HOJE RESPONSIVOS -->
-                        <div id="containerCardsControleHoje" class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5">
-                            <div id="cardCheckInHoje" onclick="filtrarPorCardHoje('checkin')" class="bg-white p-2.5 rounded-xl border border-gray-200 shadow-xs flex items-center gap-2.5 cursor-pointer hover:shadow-md hover:border-violet-300 transition-all group">
-                                <div class="w-8 h-8 sm:w-9 sm:h-9 bg-violet-100 text-violet-600 rounded-full flex items-center justify-center text-xs shadow-xs"><i class="fa-solid fa-calendar-days"></i></div>
-                                <div class="flex flex-col"><span id="cardCheckInHojeValor" class="text-base sm:text-lg font-extrabold text-gray-800 leading-none">0</span><span class="text-[10px] text-gray-500 font-medium">In Hoje</span></div>
+                        <div id="containerCardsControleHoje" class="flex flex-wrap items-center gap-3">
+                            <div id="cardCheckInHoje" onclick="filtrarPorCardHoje('checkin')" class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3 min-w-[150px] cursor-pointer hover:shadow-md hover:border-violet-300 transition-all group">
+                                <div class="w-10 h-10 bg-violet-100 text-violet-600 rounded-full flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-calendar-days"></i></div>
+                                <div class="flex flex-col"><span id="cardCheckInHojeValor" class="text-lg font-extrabold text-gray-800 leading-none">0</span><span class="text-[11px] text-gray-500 font-medium">Check-In Hoje</span></div>
                             </div>
-                            <div id="cardCheckOutHoje" onclick="filtrarPorCardHoje('checkout')" class="bg-white p-2.5 rounded-xl border border-gray-200 shadow-xs flex items-center gap-2.5 cursor-pointer hover:shadow-md hover:border-red-300 transition-all group">
-                                <div class="w-8 h-8 sm:w-9 sm:h-9 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-xs shadow-xs"><i class="fa-solid fa-door-open"></i></div>
-                                <div class="flex flex-col"><span id="cardCheckOutHojeValor" class="text-base sm:text-lg font-extrabold text-gray-800 leading-none">0</span><span class="text-[10px] text-gray-500 font-medium">Out Hoje</span></div>
+                            <div id="cardCheckOutHoje" onclick="filtrarPorCardHoje('checkout')" class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3 min-w-[150px] cursor-pointer hover:shadow-md hover:border-red-300 transition-all group">
+                                <div class="w-10 h-10 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-laptop"></i></div>
+                                <div class="flex flex-col"><span id="cardCheckOutHojeValor" class="text-lg font-extrabold text-gray-800 leading-none">0</span><span class="text-[11px] text-gray-500 font-medium">Check-Out Hoje</span></div>
                             </div>
-                            <div id="cardCheckOutAmanha" onclick="filtrarPorCardHoje('checkout_amanha')" class="bg-white p-2.5 rounded-xl border border-orange-300 shadow-xs flex items-center gap-2.5 cursor-pointer hover:shadow-md hover:border-orange-400 transition-all group">
-                                <div class="w-8 h-8 sm:w-9 sm:h-9 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-xs shadow-xs"><i class="fa-solid fa-calendar-check"></i></div>
-                                <div class="flex flex-col"><span id="cardCheckOutAmanhaValor" class="text-base sm:text-lg font-extrabold text-gray-800 leading-none">0</span><span class="text-[10px] text-gray-500 font-medium">Out Amanhã</span></div>
+                            <div id="cardCheckOutAmanha" onclick="filtrarPorCardHoje('checkout_amanha')" class="bg-white p-3 rounded-xl border border-orange-300 shadow-sm flex items-center gap-3 min-w-[150px] cursor-pointer hover:shadow-md hover:border-orange-400 transition-all group">
+                                <div class="w-10 h-10 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-calendar-check"></i></div>
+                                <div class="flex flex-col"><span id="cardCheckOutAmanhaValor" class="text-lg font-extrabold text-gray-800 leading-none">0</span><span class="text-[11px] text-gray-500 font-medium">Check-Out Amanhã</span></div>
                             </div>
-                            <div id="cardReservasHoje" onclick="filtrarPorCardHoje('reservas')" class="bg-white p-2.5 rounded-xl border border-blue-200 shadow-xs flex items-center gap-2.5 cursor-pointer hover:shadow-md hover:border-blue-300 transition-all group">
-                                <div class="w-8 h-8 sm:w-9 sm:h-9 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs shadow-xs"><i class="fa-solid fa-bed"></i></div>
-                                <div class="flex flex-col"><span id="cardReservasHojeValor" class="text-base sm:text-lg font-extrabold text-gray-800 leading-none">0</span><span class="text-[10px] text-gray-500 font-medium">Reservas</span></div>
+                            <div id="cardReservasHoje" onclick="filtrarPorCardHoje('reservas')" class="bg-white p-3 rounded-xl border border-blue-200 shadow-sm flex items-center gap-3 min-w-[150px] cursor-pointer hover:shadow-md hover:border-blue-300 transition-all group">
+                                <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-money-bill"></i></div>
+                                <div class="flex flex-col"><span id="cardReservasHojeValor" class="text-lg font-extrabold text-gray-800 leading-none">0</span><span class="text-[11px] text-gray-500 font-medium">Reservas</span></div>
                             </div>
-                            <div id="cardSuites" onclick="toggleSuites()" class="col-span-2 sm:col-span-1 bg-white p-2.5 rounded-xl border border-amber-200 shadow-xs flex items-center justify-center sm:justify-start gap-2.5 cursor-pointer hover:shadow-md hover:border-amber-400 transition-all group">
-                                <div class="w-8 h-8 sm:w-9 sm:h-9 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-xs shadow-xs"><i class="fa-solid fa-bed"></i></div>
-                                <div class="flex flex-col"><span class="text-xs sm:text-sm font-extrabold text-gray-800 leading-none">Suítes</span><span class="text-[10px] text-gray-500 font-medium">c/ Reserva</span></div>
+                            <div id="cardSuites" onclick="toggleSuites()" class="bg-white p-3 rounded-xl border border-amber-200 shadow-sm flex items-center gap-3 min-w-[130px] cursor-pointer hover:shadow-md hover:border-amber-400 transition-all group">
+                                <div class="w-10 h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-sm shadow-sm"><i class="fa-solid fa-bed"></i></div>
+                                <div class="flex flex-col"><span class="text-lg font-extrabold text-gray-800 leading-none">Suítes</span><span class="text-[11px] text-gray-500 font-medium">com Reserva</span></div>
                             </div>
                         </div>
                     </div>
 
                     <!-- PAINEL SUÍTES COM RESERVAS FUTURAS -->
                     <div id="containerSuites" class="hidden mb-5">
-                        <div class="bg-white rounded-xl shadow-xs border border-amber-200 p-3 sm:p-4">
+                        <div class="bg-white rounded-xl shadow-sm border border-amber-200 p-4">
                             <div class="flex items-center justify-between mb-3">
                                 <span class="text-[11px] font-extrabold text-amber-700 uppercase tracking-widest flex items-center gap-2">
                                     <i class="fa-solid fa-bed"></i> SUÍTES COM RESERVAS FUTURAS
-                                    <span id="badgeSuites" class="ml-1 bg-amber-600 text-white px-2 py-0.5 rounded-full text-[9px]">0 SUÍTES</span>
+                                    <span id="badgeSuites" class="ml-2 bg-amber-600 text-white px-2 py-0.5 rounded-full text-[9px]">0 SUÍTES</span>
                                 </span>
                                 <button onclick="toggleSuites()" class="text-[10px] text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 px-2.5 py-1 rounded-full"><i class="fa-solid fa-xmark mr-1"></i> Fechar</button>
                             </div>
-                            <div id="gridSuites" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+                            <div id="gridSuites" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                                 <div class="col-span-full py-4 text-center text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO SUÍTES...</div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Área da Tabela -->
-                    <div class="bg-white rounded-xl shadow-xs border border-gray-200 overflow-hidden mb-6">
-                        <div class="px-3.5 sm:px-5 py-3 border-b border-gray-200 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-2.5 bg-gray-50/50">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                        <div class="px-5 py-3.5 border-b border-gray-200 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 bg-gray-50/50">
                             <div>
-                                <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wide">Visão Operacional</span>
-                                <h3 id="tituloViewAtiva" class="font-bold text-xs sm:text-base text-gray-800 leading-tight">CARREGANDO...</h3>
+                                <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wide">View Ativa</span>
+                                <h3 id="tituloViewAtiva" class="font-bold text-sm sm:text-base text-gray-800">CARREGANDO...</h3>
                             </div>
 
                             <div id="containerFiltroDataTabela" class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
-                                <div class="flex-1 sm:flex-initial flex items-center gap-1.5 bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 shadow-2xs">
+                                <div class="flex items-center gap-1.5 bg-white border border-gray-300 rounded-lg px-3 py-1.5 shadow-sm">
                                     <span class="text-[10px] font-bold text-gray-500 uppercase">De:</span>
-                                    <input type="date" id="filtroDataInicio" onchange="sincronizarFiltrosData('inicio_tabela', this.value)" class="text-xs font-semibold text-gray-700 bg-transparent focus:outline-none w-full">
+                                    <input type="date" id="filtroDataInicio" onchange="sincronizarFiltrosData('inicio_tabela', this.value)" class="text-xs font-semibold text-gray-700 bg-transparent focus:outline-none">
                                 </div>
-                                <div class="flex-1 sm:flex-initial flex items-center gap-1.5 bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 shadow-2xs">
+                                <div class="flex items-center gap-1.5 bg-white border border-gray-300 rounded-lg px-3 py-1.5 shadow-sm">
                                     <span class="text-[10px] font-bold text-gray-500 uppercase">Até:</span>
-                                    <input type="date" id="filtroDataFim" onchange="sincronizarFiltrosData('fim_tabela', this.value)" class="text-xs font-semibold text-gray-700 bg-transparent focus:outline-none w-full">
+                                    <input type="date" id="filtroDataFim" onchange="sincronizarFiltrosData('fim_tabela', this.value)" class="text-xs font-semibold text-gray-700 bg-transparent focus:outline-none">
                                 </div>
-                                <button onclick="carregarDadosView()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 shadow-xs">
-                                    <i class="fa-solid fa-filter"></i> <span>Filtrar</span>
+                                <button onclick="carregarDadosView()" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-sm">
+                                    <i class="fa-solid fa-filter"></i> Filtrar
                                 </button>
-                                <button onclick="carregarDadosView()" class="bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition shadow-xs" title="Atualizar dados">
+                                <button onclick="carregarDadosView()" class="bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow-sm" title="Atualizar dados">
                                     <i class="fa-solid fa-rotate-right"></i>
                                 </button>
                             </div>
                         </div>
 
-                        <!-- TABELA COM ROLAGEM HORIZONTAL SUAVE NO CELULAR -->
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse">
                                 <thead>
@@ -336,11 +302,11 @@
     <!-- MODAL ELEGANTE DE MODO SOMENTE LEITURA -->
     <div id="modal-modo-leitura" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-[999]">
         <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-red-100 text-center space-y-4">
-            <div class="w-14 h-14 sm:w-16 sm:h-16 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto text-xl sm:text-2xl font-bold shadow-inner">
+            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto text-2xl font-bold shadow-inner">
                 <i class="fa-solid fa-lock"></i>
             </div>
             <div>
-                <h3 class="text-base sm:text-xl font-extrabold text-slate-900">Modo Somente Leitura</h3>
+                <h3 class="text-lg sm:text-xl font-extrabold text-slate-900">Modo Somente Leitura</h3>
                 <p class="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
                     A criação de novas reservas está temporariamente pausada devido a uma pendência na assinatura da pousada.
                 </p>
@@ -360,135 +326,6 @@
         </div>
     </div>
 
-    <!-- MODAL CALENDÁRIO SUÍTE -->
-    <div id="modal-calendario-suite" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-3 sm:p-4 z-[100]">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-4 sm:p-6 relative">
-            <button onclick="fecharCalendarioSuite()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
-            <div class="flex items-center gap-2 mb-1">
-                <span class="text-xl">📅</span>
-                <h3 id="cal-suite-nome" class="text-base sm:text-lg font-bold text-gray-900">Calendário da Suíte</h3>
-            </div>
-            <p class="text-[11px] sm:text-xs text-gray-600 font-medium mb-3">Dias em <strong class="bg-emerald-100 text-emerald-700 px-1 py-0.5 rounded">verde</strong> livres. <strong class="bg-red-100 text-red-700 border border-red-200 px-1 py-0.5 rounded">vermelho com X</strong> ocupados.</p>
-            <div class="flex justify-between items-center mb-3 bg-gray-50 p-2 rounded-xl border border-gray-200">
-                <button onclick="mudarMesCalendario(-1)" class="px-2.5 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-2xs">◀ Anterior</button>
-                <strong id="cal-mes-ano" class="text-xs sm:text-sm font-bold text-gray-800 uppercase">MÊS / ANO</strong>
-                <button onclick="mudarMesCalendario(1)" class="px-2.5 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-2xs">Próximo ▶</button>
-            </div>
-            <div class="grid grid-cols-7 gap-1 text-center font-bold text-[10px] sm:text-[11px] text-gray-500 mb-2">
-                <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
-            </div>
-            <div id="cal-grid-dias" class="grid grid-cols-7 gap-1 sm:gap-1.5 text-center text-xs"></div>
-            <div class="mt-4 flex items-center justify-center gap-3 text-[10px]">
-                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-100 border border-emerald-200 rounded"></span> Livre</span>
-                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-red-100 border border-red-200 rounded relative flex items-center justify-center"><span class="text-[8px] text-red-600 font-bold">✕</span></span> Ocupado</span>
-                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-gray-100 border rounded"></span> Passado</span>
-            </div>
-            <div class="mt-5 flex justify-end">
-                <button onclick="fecharCalendarioSuite()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold text-xs sm:text-sm py-2 rounded-xl transition">Fechar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL CALENDÁRIO GERAL DAS SUÍTES -->
-    <div id="modal-calendario-geral-relatorios" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-3 sm:p-4 z-[60]">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-4 sm:p-7 relative max-h-[92vh] overflow-y-auto">
-            <button onclick="fecharCalendarioGeralRelatorios()" class="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold">✕</button>
-            
-            <div class="flex items-center gap-2 mb-3 pr-8">
-                <span class="text-xl">🗓️</span>
-                <div>
-                    <h3 class="text-base sm:text-lg font-extrabold text-gray-900">Calendário Geral de Ocupação</h3>
-                    <p class="text-[10px] sm:text-[11px] text-gray-500">Navegue entre suítes e meses</p>
-                </div>
-            </div>
-
-            <!-- PAINEL COM TODAS AS SUÍTES -->
-            <div class="mb-3">
-                <div class="flex justify-between items-center mb-1.5">
-                    <span class="text-[10px] sm:text-[11px] font-extrabold text-slate-700 uppercase tracking-widest flex items-center gap-1.5"><i class="fa-solid fa-layer-group text-indigo-600"></i> SUÍTES (<span id="cal-geral-rel-total">0</span>)</span>
-                    <span id="cal-geral-rel-suite-nome" class="text-[10px] sm:text-[11px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Suíte: -</span>
-                </div>
-                <div id="cal-geral-rel-painel-suites" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 max-h-[140px] overflow-y-auto p-2 bg-gray-50 rounded-2xl border border-gray-200"></div>
-            </div>
-
-            <p class="text-[10px] sm:text-[11px] text-emerald-700 font-medium mb-1 text-center">Dias em <span class="bg-emerald-100 px-1 py-0.5 rounded font-bold">verde</span> livres, <span class="bg-red-100 px-1 py-0.5 rounded font-bold">vermelho com X</span> ocupados.</p>
-            <p id="cal-geral-instrucao" class="text-[10px] sm:text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-full px-2.5 py-1 text-center mb-3">Clique em uma data livre para definir CHECK-IN</p>
-
-            <!-- NAVEGAÇÃO DE MÊS -->
-            <div class="flex justify-between items-center mb-3 bg-gray-50 p-2 rounded-xl border border-gray-200">
-                <button onclick="mudarMesCalendarioGeralRelatorios(-1)" class="px-2.5 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-2xs flex items-center gap-1"><i class="fa-solid fa-chevron-left text-[9px]"></i> Anterior</button>
-                <strong id="cal-geral-rel-mes-ano" class="text-xs sm:text-sm font-extrabold text-gray-800 uppercase tracking-wide">SETEMBRO DE 2026</strong>
-                <button onclick="mudarMesCalendarioGeralRelatorios(1)" class="px-2.5 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-2xs flex items-center gap-1">Próximo <i class="fa-solid fa-chevron-right text-[9px]"></i></button>
-            </div>
-
-            <div class="grid grid-cols-7 gap-1 text-center font-bold text-[10px] sm:text-[11px] text-gray-500 mb-1.5">
-                <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
-            </div>
-
-            <div id="cal-geral-rel-grid" class="grid grid-cols-7 gap-1 sm:gap-1.5 text-center text-xs min-h-[200px]"></div>
-
-            <div class="mt-4 flex flex-wrap justify-center gap-3 text-[10px] font-bold">
-                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-emerald-100 border border-emerald-300"></span> Livre</span>
-                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-red-100 border border-red-300 flex items-center justify-center text-[8px]">✕</span> Ocupado</span>
-                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-gray-100 border border-gray-200"></span> Passado</span>
-            </div>
-
-            <div class="mt-5">
-                <button onclick="fecharCalendarioGeralRelatorios()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-2.5 rounded-xl transition text-xs sm:text-sm">Fechar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL NOVA RESERVA DIRETO DO CALENDÁRIO -->
-    <div id="modal-nova-reserva-calendario" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-3 sm:p-4 z-[70]">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-4 sm:p-7 relative max-h-[92vh] overflow-y-auto">
-            <button onclick="fecharModalNovaReservaCalendario()" class="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold">✕</button>
-            <h3 id="nova-reserva-titulo" class="text-base sm:text-lg font-extrabold text-blue-700 mb-1 pr-8">Criar Nova Reserva: Suíte</h3>
-            <p class="text-[10px] sm:text-[11px] text-gray-500 mb-3">Datas preenchidas automaticamente pelo calendário geral</p>
-            <div id="nova-reserva-resumo" class="bg-blue-50 border border-blue-200 p-2.5 rounded-xl space-y-1 text-xs text-blue-900 mb-3">
-                <div class="flex justify-between"><span>Qtd. Diárias:</span><strong id="nova-reserva-qtd-diarias">0</strong></div>
-                <div class="flex justify-between"><span>Valor Total:</span><strong id="nova-reserva-valor-total">R$ 0,00</strong></div>
-                <div class="flex justify-between border-t border-blue-200 pt-1"><span>Saldo Restante:</span><strong id="nova-reserva-saldo-restante">R$ 0,00</strong></div>
-            </div>
-            <div class="space-y-2.5">
-                <input type="hidden" id="nova-reserva-suite-id">
-                <div id="nova-reserva-capacidade-info" class="mb-1 bg-blue-50 border border-blue-200 p-2 rounded-xl text-xs font-bold text-blue-900 flex items-center gap-2"><span>🏨</span> <span id="nova-reserva-capacidade-texto">Capacidade: carregando...</span></div>
-                <input type="text" id="nova-reserva-hospede" placeholder="Nome Hóspede *" class="w-full p-2.5 sm:p-3 border rounded-xl text-xs sm:text-sm">
-                <input type="text" id="nova-reserva-whatsapp" placeholder="WhatsApp *" class="w-full p-2.5 sm:p-3 border rounded-xl text-xs sm:text-sm">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <input type="text" id="nova-reserva-cpf" placeholder="CPF (Opcional)" class="p-2.5 sm:p-3 border rounded-xl text-xs sm:text-sm">
-                    <input type="text" id="nova-reserva-rg" placeholder="RG (Opcional)" class="p-2.5 sm:p-3 border rounded-xl text-xs sm:text-sm">
-                </div>
-                <input type="text" id="nova-reserva-endereco" placeholder="Endereço" class="w-full p-2.5 sm:p-3 border rounded-xl text-xs sm:text-sm">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <input type="text" id="nova-reserva-cep" placeholder="CEP" class="p-2.5 sm:p-3 border rounded-xl text-xs sm:text-sm">
-                    <input type="email" id="nova-reserva-email" placeholder="E-mail" class="p-2.5 sm:p-3 border rounded-xl text-xs sm:text-sm">
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
-                    <div><label class="block text-[11px] font-bold text-gray-700 mb-0.5">Adultos</label><input type="number" id="nova-reserva-adultos" min="1" value="2" class="w-full p-2.5 border rounded-xl text-xs sm:text-sm" onchange="recalcularNovaReservaCalendario()" oninput="recalcularNovaReservaCalendario()"></div>
-                    <div><label class="block text-[11px] font-bold text-gray-700 mb-0.5">Crianças</label><input type="number" id="nova-reserva-criancas" min="0" value="0" class="w-full p-2.5 border rounded-xl text-xs sm:text-sm" onchange="recalcularNovaReservaCalendario()" oninput="recalcularNovaReservaCalendario()"></div>
-                    <div><label class="block text-[11px] font-bold text-gray-700 mb-0.5">Taxa de Pet</label><select id="nova-reserva-pet" class="w-full p-2.5 border rounded-xl text-xs sm:text-sm font-bold" onchange="recalcularNovaReservaCalendario()"><option value="false">Não</option><option value="true">Sim</option></select></div>
-                </div>
-                <div id="nova-reserva-container-idades-criancas" class="hidden bg-gray-50 border border-gray-200 p-2.5 rounded-xl space-y-1.5">
-                    <label class="block text-[11px] font-bold text-gray-700">Idade(s) da(s) Criança(s):</label>
-                    <div id="nova-reserva-lista-idades-criancas" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
-                </div>
-                <div id="nova-reserva-aviso-capacidade" class="hidden mt-1.5 p-2 rounded-xl text-xs font-bold"></div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                    <div><label class="block text-[11px] font-bold text-gray-700 mb-0.5">Check-in</label><input type="date" id="nova-reserva-checkin" readonly class="w-full p-2.5 border rounded-xl text-xs sm:text-sm bg-blue-50/50 font-bold"></div>
-                    <div><label class="block text-[11px] font-bold text-gray-700 mb-0.5">Check-out</label><input type="date" id="nova-reserva-checkout" readonly class="w-full p-2.5 border rounded-xl text-xs sm:text-sm bg-blue-50/50 font-bold"></div>
-                </div>
-                <div class="pt-1 space-y-2">
-                    <div><label class="block text-[11px] font-bold text-emerald-700 mb-0.5">Registrar Novo Pagamento / Sinal (R$)</label><input type="number" step="0.01" id="nova-reserva-valor-sinal" placeholder="0.00" class="w-full p-2.5 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-xs sm:text-sm" oninput="recalcularNovaReservaCalendario()"></div>
-                    <div><label class="block text-[11px] font-bold text-emerald-700 mb-0.5">Forma de Pagamento</label><select id="nova-reserva-forma-pagamento" class="w-full p-2.5 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-xs sm:text-sm"><option>Pix / Sinal</option><option>Dinheiro</option><option>Cartão de Crédito</option><option>Cartão de Débito</option><option>Transferência Bancária</option></select></div>
-                    <div><label class="block text-[11px] font-bold text-amber-700 mb-0.5">⚠️ Observação / Alerta</label><textarea id="nova-reserva-observacao" rows="2" placeholder="Ex: Hóspede solicitou late checkout, etc." class="w-full p-2.5 border border-amber-300 bg-amber-50/40 rounded-xl text-xs sm:text-sm"></textarea></div>
-                </div>
-                <button onclick="salvarNovaReservaCalendario()" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-2.5 sm:p-3 rounded-xl font-bold mt-3 text-xs sm:text-sm shadow-md">Salvar Alterações</button>
-                <button onclick="fecharModalNovaReservaCalendario()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 p-2.5 rounded-xl font-bold mt-1.5 text-xs sm:text-sm">Cancelar</button>
-            </div>
-        </div>
-    </div>
-
     <script>
         const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
@@ -498,7 +335,7 @@
         let viewAtualSelecionada = 'vw_gestor_financeiro_relatorio';
         var filtroStatusReservasAtual = 'APROVADA';
         var filtroCheckTipoHoje = null;
-        var hojeStrGlobal = new Date().toLocaleDateString('sv-SE'); 
+        var hojeStrGlobal = new Date().toISOString().split('T')[0]; 
         let suiteFiltroAtual = null;
         let suitesDaPousadaCache = []; 
         let tituloBaseAtual = 'Extrato Detalhado de Pagamentos';
@@ -585,6 +422,7 @@
                 labelMenu.textContent = "PAINEL ADMINISTRATIVO";
             }
 
+            // CHECAGEM DE ASSINATURA E FAIXA INTELIGENTE
             try {
                 let diasAviso = 5;
                 try {
@@ -610,14 +448,14 @@
 
                     if (st === 'blocked' || (diasRest !== null && diasRest < 0)) {
                         pousadaEmDiaCache = false;
-                        banner.className = "mb-4 sm:mb-5 p-3.5 sm:p-4 rounded-2xl shadow-xs border-2 border-red-300 bg-red-50 text-red-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3";
+                        banner.className = "mb-5 p-3.5 sm:p-4 rounded-2xl shadow-xs border-2 border-red-300 bg-red-50 text-red-950 flex items-center justify-between gap-3";
                         icone.innerText = "🚫";
                         tit.innerText = "Plano Suspenso por Inadimplência (Modo Somente Leitura)";
                         sub.innerText = `Sua assinatura venceu em ${dVenc ? dVenc.toLocaleDateString('pt-BR') : 'data anterior'}. Novas reservas estão travadas.`;
                         banner.classList.remove('hidden');
                     } else if (diasRest !== null && diasRest <= diasAviso) {
                         pousadaEmDiaCache = true;
-                        banner.className = "mb-4 sm:mb-5 p-3.5 sm:p-4 rounded-2xl shadow-xs border-2 border-amber-300 bg-amber-50 text-amber-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3";
+                        banner.className = "mb-5 p-3.5 sm:p-4 rounded-2xl shadow-xs border-2 border-amber-300 bg-amber-50 text-amber-950 flex items-center justify-between gap-3";
                         icone.innerText = "⚠️";
                         tit.innerText = `Atenção: Seu plano vence em ${diasRest === 0 ? 'HOJE' : diasRest + ' dia(s)'}!`;
                         sub.innerText = `Vencimento: ${dVenc.toLocaleDateString('pt-BR')}. Confirme o pagamento para manter reservas liberadas.`;
@@ -673,13 +511,13 @@
                     ? `<span class="text-[9px] ${tema.iconBg} ${tema.iconText} px-1.5 py-0.5 rounded-full font-bold">${qtd}</span>` 
                     : `<span class="text-[9px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">0</span>`;
                 
-                html += `<div onclick="filtrarPorSuite('${suite.nome.replace(/'/g, "\\'")}')" class="cursor-pointer ${borda} border-2 p-2.5 sm:p-3 rounded-xl transition group flex flex-col gap-1 sm:gap-1.5">
+                html += `<div onclick="filtrarPorSuite('${suite.nome.replace(/'/g, "\\'")}')" class="cursor-pointer ${borda} border-2 p-3 rounded-xl transition group flex flex-col gap-1.5">
                     <div class="flex items-center justify-between">
-                        <div class="w-6 h-6 sm:w-7 sm:h-7 ${tema.iconBg} ${tema.iconText} rounded-lg flex items-center justify-center text-[10px] sm:text-[11px]"><i class="fa-solid fa-bed"></i></div>
+                        <div class="w-7 h-7 ${tema.iconBg} ${tema.iconText} rounded-lg flex items-center justify-center text-[11px]"><i class="fa-solid fa-bed"></i></div>
                         ${badge}
                     </div>
-                    <span class="font-bold text-[10px] sm:text-[11px] text-gray-800 uppercase truncate ${tema.textGroupHover}">${suite.nome.toUpperCase()}</span>
-                    <span class="text-[9px] sm:text-[10px] text-gray-500 truncate">${isAtiva ? 'FILTRADA' : 'FILTRAR'}</span>
+                    <span class="font-bold text-[11px] text-gray-800 uppercase truncate ${tema.textGroupHover}">${suite.nome.toUpperCase()}</span>
+                    <span class="text-[10px] text-gray-500 truncate">${isAtiva ? 'FILTRADA' : 'CLIQUE PARA FILTRAR'}</span>
                 </div>`;
             });
             grid.innerHTML = html;
@@ -697,9 +535,9 @@
             const btnTodas = document.getElementById('btnVerTodasSuites');
             if (btnTodas) {
                 if (!suiteFiltroAtual) {
-                    btnTodas.className = "text-[10px] font-bold bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition shadow-xs flex items-center gap-1.5";
+                    btnTodas.className = "text-[10px] font-bold bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg transition shadow-sm flex items-center gap-1.5";
                 } else {
-                    btnTodas.className = "text-[10px] font-bold bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5 rounded-lg transition shadow-xs flex items-center gap-1.5";
+                    btnTodas.className = "text-[10px] font-bold bg-slate-800 hover:bg-slate-900 text-white px-3.5 py-1.5 rounded-lg transition shadow-sm flex items-center gap-1.5";
                 }
             }
             carregarDadosView();
@@ -727,26 +565,20 @@
 
         function alterarFiltroStatusReservas(valor) {
             filtroStatusReservasAtual = valor;
-            filtroCheckTipoHoje = null; // Limpa o filtro de card diário para ver por status
-            limparEstiloCardsHoje();
-
             var btnA = document.getElementById('btnAprovada');
-            var btnC = document.getElementById('btnCancelada');
             var btnR = document.getElementById('btnRecusada');
             var btnT = document.getElementById('btnTodas');
-            
-            if (btnA) { btnA.className = (valor==='APROVADA' ? 'px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-emerald-500 text-white shadow-xs whitespace-nowrap' : 'px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-white text-emerald-600 border border-emerald-200 hover:bg-emerald-50 whitespace-nowrap'); }
-            if (btnC) { btnC.className = (valor==='CANCELADA' ? 'px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-rose-600 text-white shadow-xs whitespace-nowrap' : 'px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-white text-rose-600 border border-rose-200 hover:bg-rose-50 whitespace-nowrap'); }
-            if (btnR) { btnR.className = (valor==='RECUSADA' ? 'px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-red-600 text-white shadow-xs whitespace-nowrap' : 'px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-white text-red-600 border border-red-200 hover:bg-red-50 whitespace-nowrap'); }
-            if (btnT) { btnT.className = (valor==='TODAS' ? 'px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-gray-800 text-white shadow-xs whitespace-nowrap' : 'px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 whitespace-nowrap'); }
-            
+            if (btnA) { btnA.className = (valor==='APROVADA' ? 'px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500 text-white shadow-sm' : 'px-3 py-1 rounded-full text-[11px] font-bold bg-white text-emerald-600 border border-emerald-200 hover:bg-emerald-50'); }
+            if (btnR) { btnR.className = (valor==='RECUSADA' ? 'px-3 py-1 rounded-full text-[11px] font-bold bg-red-500 text-white shadow-sm' : 'px-3 py-1 rounded-full text-[11px] font-bold bg-white text-red-600 border border-red-200 hover:bg-red-50'); }
+            if (btnT) { btnT.className = (valor==='TODAS' ? 'px-3 py-1 rounded-full text-[11px] font-bold bg-gray-800 text-white shadow-sm' : 'px-3 py-1 rounded-full text-[11px] font-bold bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'); }
             carregarDadosView();
         }
 
         async function carregarCardsControleHoje() {
             if (!usuarioIdAtual) return;
             try {
-                const hojeStr = new Date().toLocaleDateString('sv-SE');
+                const hoje = new Date();
+                const hojeStr = hoje.toISOString().split('T')[0];
 
                 const { count: countCheckIn, error: errIn } = await supabaseClient
                     .from('reservas')
@@ -764,9 +596,9 @@
                     .neq('status', 'Recusada')
                     .neq('status', 'Cancelada');
 
-                const amanha = new Date();
+                const amanha = new Date(hoje);
                 amanha.setDate(amanha.getDate() + 1);
-                const amanhaStr = amanha.toLocaleDateString('sv-SE');
+                const amanhaStr = amanha.toISOString().split('T')[0];
                 const { count: countCheckOutAmanha, error: errOutAmanha } = await supabaseClient
                     .from('reservas')
                     .select('id', { count: 'exact', head: true })
@@ -779,8 +611,7 @@
                     .from('reservas')
                     .select('id', { count: 'exact', head: true })
                     .eq('pousada_id', usuarioIdAtual)
-                    .eq('status', 'Aprovada')
-                    .gte('checkout', hojeStr);
+                    .eq('status', 'Aprovada');
 
                 const elIn = document.getElementById('cardCheckInHojeValor');
                 const elOut = document.getElementById('cardCheckOutHojeValor');
@@ -796,7 +627,13 @@
             }
         }
 
-        function limparEstiloCardsHoje() {
+        function filtrarPorCardHoje(tipo) {
+            if (filtroCheckTipoHoje === tipo) {
+                filtroCheckTipoHoje = null;
+            } else {
+                filtroCheckTipoHoje = tipo;
+            }
+
             const cardIn = document.getElementById('cardCheckInHoje');
             const cardOut = document.getElementById('cardCheckOutHoje');
             const cardOutAmanha = document.getElementById('cardCheckOutAmanha');
@@ -807,32 +644,21 @@
                     c.classList.remove('ring-2', 'ring-violet-500', 'ring-red-500', 'ring-orange-500', 'ring-blue-500', 'bg-violet-50', 'bg-red-50', 'bg-orange-50', 'bg-blue-50', 'border-violet-400', 'border-red-400', 'border-orange-400', 'border-blue-400');
                 }
             });
-        }
 
-        // =========================================================================
-        // ITEM 2: OPERAÇÃO ÁGIL NOS CARDS "IN HOJE", "OUT HOJE", "OUT AMANHÃ", "RESERVAS"
-        // =========================================================================
-        function filtrarPorCardHoje(tipo) {
-            if (filtroCheckTipoHoje === tipo) {
-                filtroCheckTipoHoje = null; // Toggle off: desativa o filtro ao clicar novamente
-                limparEstiloCardsHoje();
-            } else {
-                filtroCheckTipoHoje = tipo;
-                limparEstiloCardsHoje();
+            if (filtroCheckTipoHoje === 'checkin' && cardIn) {
+                cardIn.classList.add('ring-2', 'ring-violet-500', 'bg-violet-50', 'border-violet-400');
+            } else if (filtroCheckTipoHoje === 'checkout' && cardOut) {
+                cardOut.classList.add('ring-2', 'ring-red-500', 'bg-red-50', 'border-red-400');
+            } else if (filtroCheckTipoHoje === 'checkout_amanha' && cardOutAmanha) {
+                cardOutAmanha.classList.add('ring-2', 'ring-orange-500', 'bg-orange-50', 'border-orange-400');
+            } else if (filtroCheckTipoHoje === 'reservas' && cardRes) {
+                cardRes.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50', 'border-blue-400');
+            }
 
-                const cardIn = document.getElementById('cardCheckInHoje');
-                const cardOut = document.getElementById('cardCheckOutHoje');
-                const cardOutAmanha = document.getElementById('cardCheckOutAmanha');
-                const cardRes = document.getElementById('cardReservasHoje');
-
-                if (filtroCheckTipoHoje === 'checkin' && cardIn) {
-                    cardIn.classList.add('ring-2', 'ring-violet-500', 'bg-violet-50', 'border-violet-400');
-                } else if (filtroCheckTipoHoje === 'checkout' && cardOut) {
-                    cardOut.classList.add('ring-2', 'ring-red-500', 'bg-red-50', 'border-red-400');
-                } else if (filtroCheckTipoHoje === 'checkout_amanha' && cardOutAmanha) {
-                    cardOutAmanha.classList.add('ring-2', 'ring-orange-500', 'bg-orange-50', 'border-orange-400');
-                } else if (filtroCheckTipoHoje === 'reservas' && cardRes) {
-                    cardRes.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50', 'border-blue-400');
+            if (tipo === 'reservas' && filtroCheckTipoHoje === 'reservas') {
+                filtroCheckTipoHoje = null;
+                if (cardRes) {
+                    cardRes.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50', 'border-blue-400');
                 }
             }
 
@@ -884,7 +710,7 @@
             const grid = document.getElementById('graficoBarrasOcupacao');
             const badge = document.getElementById('badgePeriodoGrafico');
             if (!grid) return;
-            grid.innerHTML = '<div class="py-4 text-center text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CALCULANDO OCUPAÇÃO REAL...</div>';
+            grid.innerHTML = '<div class="py-4 text-center text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CALCULANDO OCUPAÇÃO REAL (SOBREPOSIÇÃO)...</div>';
             try {
                 const dataInicio = document.getElementById('filtroDataInicio')?.value || document.getElementById('filtroDataInicioHosp')?.value || '';
                 const dataFim = document.getElementById('filtroDataFim')?.value || document.getElementById('filtroDataFimHosp')?.value || '';
@@ -943,14 +769,14 @@
                     const tooltip = item.detalhes.join(' | ');
 
                     htmlChart += `
-                        <div class="flex items-center gap-2 sm:gap-3 group" title="${tooltip}">
-                            <div class="w-24 sm:w-36 text-[10px] sm:text-[11px] font-bold text-gray-700 uppercase truncate text-right ${tema.textGroupHover}">${item.nome}</div>
-                            <div class="flex-1 bg-gray-100 rounded-full h-5 sm:h-6 relative overflow-hidden border border-gray-200">
-                                <div class="${cor} h-5 sm:h-6 rounded-full transition-all duration-700 flex items-center justify-end pr-2" style="width: ${perc}%">
-                                    <span class="text-[9px] sm:text-[10px] font-bold text-white">${item.diarias}d</span>
+                        <div class="flex items-center gap-3 group" title="${tooltip}">
+                            <div class="w-32 sm:w-40 text-[11px] font-bold text-gray-700 uppercase truncate text-right ${tema.textGroupHover}">${item.nome}</div>
+                            <div class="flex-1 bg-gray-100 rounded-full h-6 relative overflow-hidden border border-gray-200">
+                                <div class="${cor} h-6 rounded-full transition-all duration-700 flex items-center justify-end pr-2" style="width: ${perc}%">
+                                    <span class="text-[10px] font-bold text-white">${item.diarias} diárias</span>
                                 </div>
                             </div>
-                            <div class="w-16 sm:w-20 text-[9px] sm:text-[10px] ${corTexto} font-bold text-right">${item.reservas} res.</div>
+                            <div class="w-20 text-[10px] ${corTexto} font-bold">${item.reservas} reserva(s)</div>
                         </div>
                     `;
                 });
@@ -962,6 +788,7 @@
         }
 
         function sincronizarFiltrosData(origem, valor) {
+            var ids = ['filtroDataInicio', 'filtroDataFim', 'filtroDataInicioHosp', 'filtroDataFimHosp'];
             if (origem === 'inicio' || origem === 'inicio_tabela') {
                 document.getElementById('filtroDataInicio').value = valor;
                 var elHosp = document.getElementById('filtroDataInicioHosp');
@@ -1017,7 +844,7 @@
                 let hora = String(dt.getHours()).padStart(2, '0');
                 let minuto = String(dt.getMinutes()).padStart(2, '0');
                 
-                return `${dia}/${mes}/${ano} às ${hora}:${minuto}`;
+                return `${dia}/${mes}/${ano} ${hora}:${minuto}`;
             } catch(e) {
                 return String(valor).toUpperCase();
             }
@@ -1079,8 +906,9 @@
             if (c === 'valor_especial') return 'VALOR TARIFA';
             if (c === 'descricao') return 'DESCRIÇÃO / REGRA';
             if (c === 'status_ocupacao') return 'STATUS OCUPAÇÃO';
-            if (c === 'motivo_ocorrencia' || c === 'motivo_recusa' || c === 'motivo_cancelamento') return 'MOTIVO (RECUSA / CANCELAMENTO)';
-            if (c === 'data_ocorrencia' || c === 'recusado_em' || c === 'cancelado_em') return 'DATA OCORRÊNCIA';
+            if (c === 'motivo_recusa') return 'MOTIVO RECUSA';
+            if (c === 'recusado_em') return 'RECUSADO EM';
+            if (c === 'recusado_por') return 'RECUSADO POR';
             return col.replace(/_/g, ' ').toUpperCase();
         }
 
@@ -1097,26 +925,8 @@
             let dataFimFormatada = dataFim ? dataFim.split('-').reverse().join('/') : 'SEM LIMITE';
             
             let tituloCompleto = `${tituloBaseAtual} (DE ${dataInicioFormatada} ATÉ ${dataFimFormatada})`;
-
-            // Título dinâmico inteligente ao clicar nos cards de controle diário
-            if (viewAtualSelecionada === 'vw_gestor_reservas_relatorio' && filtroCheckTipoHoje) {
-                const hojeBr = formatarDataBr(new Date().toLocaleDateString('sv-SE'));
-                const amanhaObj = new Date();
-                amanhaObj.setDate(amanhaObj.getDate() + 1);
-                const amanhaBr = formatarDataBr(amanhaObj.toLocaleDateString('sv-SE'));
-
-                if (filtroCheckTipoHoje === 'checkin') {
-                    tituloCompleto = `CHECK-INS PREVISTOS PARA HOJE (${hojeBr})`;
-                } else if (filtroCheckTipoHoje === 'checkout') {
-                    tituloCompleto = `CHECK-OUTS PREVISTOS PARA HOJE (${hojeBr})`;
-                } else if (filtroCheckTipoHoje === 'checkout_amanha') {
-                    tituloCompleto = `CHECK-OUTS PREVISTOS PARA AMANHÃ (${amanhaBr})`;
-                } else if (filtroCheckTipoHoje === 'reservas') {
-                    tituloCompleto = `RESERVAS ATIVAS E FUTURAS`;
-                }
-            }
-
             document.getElementById('tituloViewAtiva').textContent = tituloCompleto.toUpperCase();
+
             tbody.innerHTML = `<tr><td colspan="20" class="py-6 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO DADOS...</td></tr>`;
 
             try {
@@ -1128,6 +938,9 @@
                 let registros = [];
                 let error = null;
 
+                // =========================================================================
+                // CORREÇÃO PONTUAL DE TARIFAS: BUSCA DA TABELA REAL tarifas_especiais
+                // =========================================================================
                 if (ehViewTarifas) {
                     const { data: tarifas, error: errTarifas } = await supabaseClient
                         .from('tarifas_especiais')
@@ -1136,7 +949,7 @@
                         .order('data_inicio', { ascending: true });
 
                     error = errTarifas;
-                    const hojeIso = new Date().toLocaleDateString('sv-SE');
+                    const hojeIso = new Date().toISOString().split('T')[0];
                     const nomesDias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
                     registros = (tarifas || []).map(t => {
@@ -1175,6 +988,7 @@
                         };
                     });
 
+                    // Filtro de data DE/ATÉ
                     if (dataInicio || dataFim) {
                         registros = registros.filter(r => {
                             let ini = r.data_inicio;
@@ -1186,20 +1000,17 @@
                         });
                     }
 
-                // =============================================================
-                // ITEM 1: VISÃO FINANCEIRA COMPLETA (INCLUI ESTADIAS INTERROMPIDAS)
-                // =============================================================
                 } else if (ehViewFinanceiro) {
                     if (!suitesDaPousadaCache || suitesDaPousadaCache.length === 0) {
                         const { data: suData } = await supabaseClient.from('suites').select('id,nome').eq('pousada_id', usuarioIdAtual).order('nome');
                         if (suData) suitesDaPousadaCache = suData;
                     }
 
-                    // Busca reservas da pousada sem descartar cegamente as canceladas
                     let queryRes = supabaseClient
                         .from('reservas')
                         .select('*')
                         .eq('pousada_id', usuarioIdAtual)
+                        .neq('status', 'Cancelada')
                         .neq('status', 'Recusada');
 
                     if (dataInicio) queryRes = queryRes.gte('checkout', dataInicio);
@@ -1224,16 +1035,7 @@
                         }
                     });
 
-                    // Filtra para manter no financeiro apenas: ativas, finalizadas e estadias canceladas com movimentação financeira real
-                    registros = (reservasFin || []).filter(r => {
-                        if (r.status === 'Cancelada') {
-                            const temValor = Number(r.valor_total || 0) > 0;
-                            const temPagamentos = (pagamentosPorReserva[r.id] && pagamentosPorReserva[r.id].length > 0);
-                            const eInterrompida = Boolean(r.motivo_cancelamento && r.motivo_cancelamento.includes('ESTADIA INTERROMPIDA'));
-                            return temValor || temPagamentos || eInterrompida;
-                        }
-                        return true;
-                    }).map(r => {
+                    registros = (reservasFin || []).map(r => {
                         const suiteObj = (suitesDaPousadaCache || []).find(s => s.id === r.suite_id);
                         const nomeSuite = suiteObj ? suiteObj.nome : (r.suite || 'SUÍTE');
                         
@@ -1250,9 +1052,6 @@
                         let dataUltimoPag = pags.length > 0 ? pags[pags.length - 1].criado_em : r.criado_em;
                         let obsPag = pags.map(p => p.observacao).filter(Boolean).join(' | ') || r.observacao || '-';
 
-                        const isInterrompida = (r.status === 'Cancelada' && (r.motivo_cancelamento?.includes('ESTADIA INTERROMPIDA') || valorTotal > 0));
-                        const statusExib = isInterrompida ? 'ESTADIA INTERROMPIDA' : (r.status || '-');
-
                         return {
                             hospede: r.hospede_nome || 'HÓSPEDE NÃO IDENTIFICADO',
                             suite: nomeSuite,
@@ -1261,13 +1060,12 @@
                             checkout: r.checkout || '',
                             diarias: calcularDiarias(r.checkin, r.checkout),
                             valor_total: valorTotal,
+                            data_pagamento: dataUltimoPag,
                             valor_pago: totalPago,
                             saldo_restante: saldoRestante,
                             forma_pagamento: formasPag,
-                            data_pagamento: dataUltimoPag,
-                            status: statusExib,
                             observacao: obsPag,
-                            motivo_cancelamento: r.motivo_cancelamento || null
+                            status: r.status || '-'
                         };
                     });
                 } else if (ehViewHospedagens) {
@@ -1309,39 +1107,19 @@
                             }
                         });
                     }
-                // =============================================================
-                // ITEM 2: CONSULTA DE RESERVAS COM FILTRAGEM RÁPIDA PRECISA
-                // =============================================================
                 } else if (ehViewReservas) {
                     if (!suitesDaPousadaCache || suitesDaPousadaCache.length === 0) {
                         const { data: suData } = await supabaseClient.from('suites').select('id,nome').eq('pousada_id', usuarioIdAtual).order('nome');
                         if (suData) suitesDaPousadaCache = suData;
                     }
 
-                    const hojeIso = new Date().toLocaleDateString('sv-SE');
-                    const amanhaObj = new Date();
-                    amanhaObj.setDate(amanhaObj.getDate() + 1);
-                    const amanhaIso = amanhaObj.toLocaleDateString('sv-SE');
-
                     let query = supabaseClient
                         .from('reservas')
                         .select('*')
                         .eq('pousada_id', usuarioIdAtual);
 
-                    // Filtra diretamente no banco para respostas precisas aos botões rápidos
-                    if (filtroCheckTipoHoje === 'checkin') {
-                        query = query.eq('checkin', hojeIso).neq('status', 'Cancelada').neq('status', 'Recusada');
-                    } else if (filtroCheckTipoHoje === 'checkout') {
-                        query = query.eq('checkout', hojeIso).neq('status', 'Cancelada').neq('status', 'Recusada');
-                    } else if (filtroCheckTipoHoje === 'checkout_amanha') {
-                        query = query.eq('checkout', amanhaIso).neq('status', 'Cancelada').neq('status', 'Recusada');
-                    } else if (filtroCheckTipoHoje === 'reservas') {
-                        query = query.eq('status', 'Aprovada').gte('checkout', hojeIso);
-                    } else {
-                        if (dataInicio) query = query.gte('checkin', dataInicio);
-                        if (dataFim) query = query.lte('checkin', dataFim);
-                    }
-
+                    if (dataInicio) query = query.gte('checkin', dataInicio);
+                    if (dataFim) query = query.lte('checkin', dataFim);
                     query = query.order('checkin', { ascending: true, nullsFirst: true });
                     const res = await query;
                     error = res.error;
@@ -1374,9 +1152,6 @@
                         const suiteAtual = (suitesDaPousadaCache || []).find(s => s.id === r.suite_id);
                         const suiteOrigem = (suitesDaPousadaCache || []).find(s => s.id === r.suite_origem_id);
 
-                        const motivoOcorrencia = r.motivo_cancelamento || r.motivo_recusa || '-';
-                        const dataOcorrencia = r.cancelado_em || r.recusado_em || null;
-
                         return {
                             ...r,
                             suite: suiteAtual ? suiteAtual.nome : (r.suite || 'SUÍTE'),
@@ -1392,8 +1167,6 @@
                             saldo_restante: saldo,
                             ocupacao: detalhesOcup,
                             tem_pet: r.tem_pet === true || r.tem_pet === 'true' || r.taxa_pet > 0,
-                            motivo_ocorrencia: motivoOcorrencia,
-                            data_ocorrencia: dataOcorrencia,
                             obs: r.observacao || '-'
                         };
                     });
@@ -1420,19 +1193,37 @@
                 let registrosFiltrados = registros;
 
                 if (ehViewReservas) {
-                    // Se um card rápido estiver ativo, respeita o filtro do card sem ser barrado pelas pílulas
-                    if (!filtroCheckTipoHoje) {
-                        registrosFiltrados = registrosFiltrados.filter(row => {
-                            let status = String(row.status || row.status_reserva || '').toUpperCase();
-                            let isCancelada = (status === 'CANCELADA');
-                            let isRecusada = (status === 'RECUSADA');
-                            let isAprovada = (status === 'APROVADA');
+                    registrosFiltrados = registrosFiltrados.filter(row => {
+                        let status = String(row.status || row.status_reserva || '').toUpperCase();
+                        let isRecusada = (status === 'RECUSADA' || status === 'CANCELADA');
+                        let isAprovada = (status === 'APROVADA');
 
-                            if (filtroStatusReservasAtual === 'APROVADA') return isAprovada;
-                            if (filtroStatusReservasAtual === 'CANCELADA') return isCancelada;
-                            if (filtroStatusReservasAtual === 'RECUSADA') return isRecusada;
-                            return true; 
-                        });
+                        if (filtroStatusReservasAtual === 'APROVADA') return isAprovada;
+                        if (filtroStatusReservasAtual === 'RECUSADA') return isRecusada;
+                        return true; 
+                    });
+
+                    if (filtroCheckTipoHoje) {
+                        const hojeStr = hojeStrGlobal || new Date().toISOString().split('T')[0];
+                        const amanhaObj = new Date();
+                        amanhaObj.setDate(amanhaObj.getDate() + 1);
+                        const amanhaStr = amanhaObj.toISOString().split('T')[0];
+                        if (filtroCheckTipoHoje === 'checkin') {
+                            registrosFiltrados = registrosFiltrados.filter(row => {
+                                let chk = String(row.checkin || '').substring(0,10);
+                                return chk === hojeStr;
+                            });
+                        } else if (filtroCheckTipoHoje === 'checkout') {
+                            registrosFiltrados = registrosFiltrados.filter(row => {
+                                let chk = String(row.checkout || '').substring(0,10);
+                                return chk === hojeStr;
+                            });
+                        } else if (filtroCheckTipoHoje === 'checkout_amanha') {
+                            registrosFiltrados = registrosFiltrados.filter(row => {
+                                let chk = String(row.checkout || '').substring(0,10);
+                                return chk === amanhaStr;
+                            });
+                        }
                     }
                 } else if (ehViewFinanceiro) {
                     registrosFiltrados = registrosFiltrados.filter(row => {
@@ -1462,31 +1253,31 @@
 
                 containerKpis.classList.remove("hidden");
                 if (ehViewFinanceiro) {
-                    containerKpis.className = "flex flex-wrap gap-2.5 sm:gap-3 mb-4 sm:mb-5 w-full lg:w-auto";
+                    containerKpis.className = "flex flex-wrap gap-3 mb-5";
                     let totalGeralBruto = registrosFiltrados.reduce((acc, r) => acc + Number(r.valor_total || 0), 0);
                     let totalJaPago = registrosFiltrados.reduce((acc, r) => acc + Number(r.valor_pago || 0), 0);
                     let saldoRestanteGeral = totalGeralBruto - totalJaPago;
 
                     containerKpis.innerHTML = `
-                        <div class="flex-1 min-w-[140px] sm:min-w-[160px] bg-white p-2.5 sm:p-3 rounded-xl border border-blue-200 shadow-xs flex items-center gap-2.5 hover:shadow-md transition">
-                            <div class="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs sm:text-sm"><i class="fa-solid fa-sack-dollar"></i></div>
+                        <div class="bg-white p-3 rounded-xl border border-blue-200 shadow-sm flex items-center gap-3 min-w-[160px] hover:shadow-md transition">
+                            <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-sack-dollar"></i></div>
                             <div class="flex flex-col">
-                                <span class="text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-wider">Saldo Bruto</span>
-                                <span class="text-xs sm:text-sm font-extrabold text-blue-700 leading-none">${totalGeralBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Saldo Total Bruto</span>
+                                <span class="text-sm font-extrabold text-blue-700 leading-none">${totalGeralBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                             </div>
                         </div>
-                        <div class="flex-1 min-w-[140px] sm:min-w-[160px] bg-white p-2.5 sm:p-3 rounded-xl border border-emerald-200 shadow-xs flex items-center gap-2.5 hover:shadow-md transition">
-                            <div class="w-8 h-8 sm:w-10 sm:h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xs sm:text-sm"><i class="fa-solid fa-check"></i></div>
+                        <div class="bg-white p-3 rounded-xl border border-emerald-200 shadow-sm flex items-center gap-3 min-w-[160px] hover:shadow-md transition">
+                            <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-check"></i></div>
                             <div class="flex flex-col">
-                                <span class="text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Pago</span>
-                                <span class="text-xs sm:text-sm font-extrabold text-emerald-600 leading-none">${totalJaPago.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Já Pago</span>
+                                <span class="text-sm font-extrabold text-emerald-600 leading-none">${totalJaPago.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                             </div>
                         </div>
-                        <div class="flex-1 min-w-[140px] sm:min-w-[160px] bg-white p-2.5 sm:p-3 rounded-xl border border-amber-200 shadow-xs flex items-center gap-2.5 hover:shadow-md transition">
-                            <div class="w-8 h-8 sm:w-10 sm:h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-xs sm:text-sm"><i class="fa-solid fa-clock"></i></div>
+                        <div class="bg-white p-3 rounded-xl border border-amber-200 shadow-sm flex items-center gap-3 min-w-[160px] hover:shadow-md transition">
+                            <div class="w-10 h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-clock"></i></div>
                             <div class="flex flex-col">
-                                <span class="text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-wider">A Receber</span>
-                                <span class="text-xs sm:text-sm font-extrabold text-amber-600 leading-none">${saldoRestanteGeral.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Saldo Restante a Receber</span>
+                                <span class="text-sm font-extrabold text-amber-600 leading-none">${saldoRestanteGeral.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                             </div>
                         </div>
                     `;
@@ -1499,34 +1290,34 @@
                     let ocupadas = registros.filter(r => r.status_ocupacao === 'OCUPADA / RESERVADA').length;
                     let disponiveis = totalSuites - ocupadas;
                     
-                    containerKpis.className = "flex flex-wrap gap-2.5 sm:gap-3 mb-4 sm:mb-5 w-full lg:w-auto";
+                    containerKpis.className = "flex flex-wrap gap-3 mb-5";
                     containerKpis.innerHTML = `
-                        <div class="flex-1 min-w-[130px] sm:min-w-[160px] bg-white p-2.5 sm:p-3 rounded-xl border border-gray-200 shadow-xs flex items-center gap-2.5 hover:shadow-md transition">
-                            <div class="w-8 h-8 sm:w-10 sm:h-10 bg-slate-100 text-slate-600 rounded-full flex items-center justify-center text-xs sm:text-sm"><i class="fa-solid fa-layer-group"></i></div>
+                        <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3 min-w-[160px] hover:shadow-md transition">
+                            <div class="w-10 h-10 bg-slate-100 text-slate-600 rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-layer-group"></i></div>
                             <div class="flex flex-col">
-                                <span class="text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-wider">Cadastradas</span>
-                                <span class="text-sm sm:text-base font-extrabold text-slate-800 leading-none">${totalSuites} SUÍTES</span>
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Cadastradas</span>
+                                <span class="text-base font-extrabold text-slate-800 leading-none">${totalSuites} SUÍTES</span>
                             </div>
                         </div>
-                        <div class="flex-1 min-w-[130px] sm:min-w-[160px] bg-white p-2.5 sm:p-3 rounded-xl border border-blue-200 shadow-xs flex items-center gap-2.5 hover:shadow-md transition">
-                            <div class="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs sm:text-sm"><i class="fa-solid fa-bed"></i></div>
+                        <div class="bg-white p-3 rounded-xl border border-blue-200 shadow-sm flex items-center gap-3 min-w-[160px] hover:shadow-md transition">
+                            <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-bed"></i></div>
                             <div class="flex flex-col">
-                                <span class="text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-wider">Ocupadas</span>
-                                <span class="text-sm sm:text-base font-extrabold text-blue-600 leading-none">${ocupadas} SUÍTES</span>
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Ocupadas / Reservadas</span>
+                                <span class="text-base font-extrabold text-blue-600 leading-none">${ocupadas} SUÍTES</span>
                             </div>
                         </div>
-                        <div class="flex-1 min-w-[130px] sm:min-w-[160px] bg-white p-2.5 sm:p-3 rounded-xl border border-emerald-200 shadow-xs flex items-center gap-2.5 hover:shadow-md transition">
-                            <div class="w-8 h-8 sm:w-10 sm:h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xs sm:text-sm"><i class="fa-solid fa-door-open"></i></div>
+                        <div class="bg-white p-3 rounded-xl border border-emerald-200 shadow-sm flex items-center gap-3 min-w-[160px] hover:shadow-md transition">
+                            <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-sm"><i class="fa-solid fa-door-open"></i></div>
                             <div class="flex flex-col">
-                                <span class="text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-wider">Disponíveis</span>
-                                <span class="text-sm sm:text-base font-extrabold text-emerald-600 leading-none">${disponiveis} SUÍTES</span>
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Disponíveis</span>
+                                <span class="text-base font-extrabold text-emerald-600 leading-none">${disponiveis} SUÍTES</span>
                             </div>
                         </div>
-                        <div onclick="toggleGraficoOcupacao()" id="cardGraficoOcupacao" class="flex-1 min-w-[150px] sm:min-w-[180px] bg-white p-2.5 sm:p-3 rounded-xl border-2 border-amber-300 shadow-xs flex items-center gap-2.5 hover:shadow-md hover:border-amber-500 hover:bg-amber-50/50 transition cursor-pointer group">
-                            <div class="w-8 h-8 sm:w-10 sm:h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-xs sm:text-sm group-hover:scale-110 transition"><i class="fa-solid fa-chart-column"></i></div>
+                        <div onclick="toggleGraficoOcupacao()" id="cardGraficoOcupacao" class="bg-white p-3 rounded-xl border-2 border-amber-300 shadow-sm flex items-center gap-3 min-w-[180px] hover:shadow-md hover:border-amber-500 hover:bg-amber-50/50 transition cursor-pointer group">
+                            <div class="w-10 h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-sm group-hover:scale-110 transition"><i class="fa-solid fa-chart-column"></i></div>
                             <div class="flex flex-col">
-                                <span class="text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-amber-700">Dashboard</span>
-                                <span class="text-[10px] sm:text-[11px] font-extrabold text-gray-800 leading-none group-hover:text-amber-700">Mais Ocupada</span>
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-amber-700">Dashboard</span>
+                                <span class="text-[11px] font-extrabold text-gray-800 leading-none group-hover:text-amber-700">Suíte Mais Ocupada</span>
                             </div>
                         </div>
                     `;
@@ -1548,24 +1339,26 @@
                             const checkout = r.checkout && r.checkout !== '-' ? formatarDataBr(r.checkout) : '-';
                             
                             const tema = obterTemaSuite(r.suite_id || r.suite);
-                            const borda = `${tema.border} bg-white hover:${tema.bgLight} border-2`;
+                            const borda = isOcupada 
+                                ? `${tema.border} bg-white hover:${tema.bgLight} border-2` 
+                                : `${tema.border} bg-white hover:${tema.bgLight} border-2`;
                             const iconeBg = `${tema.iconBg} ${tema.iconText}`;
                             const statusBadge = isOcupada 
-                                ? '<span class="text-[8px] font-bold bg-blue-600 text-white px-1.5 py-0.5 rounded-full uppercase shadow-2xs">OCUPADA</span>' 
-                                : '<span class="text-[8px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded-full uppercase shadow-2xs">LIVRE</span>';
+                                ? '<span class="text-[8px] font-bold bg-blue-600 text-white px-2 py-0.5 rounded-full uppercase shadow-xs">OCUPADA</span>' 
+                                : '<span class="text-[8px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full uppercase shadow-xs">DISPONÍVEL</span>';
                             const hospedeInfo = isOcupada 
-                                ? `<div class="mt-1 text-[10px] text-gray-600 truncate"><i class="fa-solid fa-user mr-1 text-[9px]"></i>${nomeHospede}</div><div class="text-[9px] text-gray-500 mt-0.5 truncate">${checkin} até ${checkout}</div>` 
-                                : `<div class="mt-1 text-[10px] text-emerald-600 font-medium">Livre para reserva</div>`;
+                                ? `<div class="mt-1.5 text-[10px] text-gray-600 truncate"><i class="fa-solid fa-user mr-1"></i>${nomeHospede}</div><div class="text-[9px] text-gray-500 mt-0.5">${checkin} até ${checkout}</div>` 
+                                : `<div class="mt-1.5 text-[10px] text-emerald-600 font-medium">Livre para reserva</div>`;
                             
                             htmlCards += `
-                                <div onclick="filtrarPorSuiteOcupacao('${nomeSuite.replace(/'/g, "\\'")}')" title="Clique para filtrar esta suíte na tabela" class="cursor-pointer border-2 ${borda} p-2.5 sm:p-3 rounded-xl shadow-xs transition group">
-                                    <div class="flex items-center justify-between mb-1">
-                                        <div class="w-6 h-6 sm:w-7 sm:h-7 ${iconeBg} rounded-lg flex items-center justify-center text-[10px] sm:text-[11px]"><i class="fa-solid fa-bed"></i></div>
+                                <div onclick="filtrarPorSuiteOcupacao('${nomeSuite.replace(/'/g, "\\'")}')" title="Clique para filtrar esta suíte na tabela" class="cursor-pointer border-2 ${borda} p-3 rounded-xl shadow-sm transition group">
+                                    <div class="flex items-center justify-between mb-1.5">
+                                        <div class="w-7 h-7 ${iconeBg} rounded-lg flex items-center justify-center text-[11px]"><i class="fa-solid fa-bed"></i></div>
                                         ${statusBadge}
                                     </div>
-                                    <div class="font-bold text-[10px] sm:text-[11px] text-gray-800 uppercase truncate ${tema.textGroupHover}">${nomeSuite}</div>
+                                    <div class="font-bold text-[11px] text-gray-800 uppercase truncate ${tema.textGroupHover}">${nomeSuite}</div>
                                     ${hospedeInfo}
-                                    <div class="mt-1.5 text-[9px] text-gray-400 ${tema.textGroupHover}">FILTRAR</div>
+                                    <div class="mt-2 text-[9px] text-gray-400 ${tema.textGroupHover}">CLIQUE PARA FILTRAR</div>
                                 </div>
                             `;
                         });
@@ -1587,76 +1380,29 @@
                 let colunas = [];
                 if (ehViewTarifas) {
                     colunas = ['status', 'descricao', 'suite', 'data_inicio', 'data_fim', 'dias_semana', 'tipo_ajuste', 'valor_especial'];
-                // =============================================================
-                // ITEM 1: COLUNAS FIXAS E PRIORIZADAS NA VISÃO FINANCEIRA
-                // =============================================================
-                } else if (ehViewFinanceiro) {
-                    colunas = [
-                        'hospede',
-                        'suite',
-                        'checkin',
-                        'checkout',
-                        'diarias',
-                        'valor_total',
-                        'valor_pago',
-                        'saldo_restante',
-                        'forma_pagamento',
-                        'data_pagamento',
-                        'status',
-                        'observacao'
-                    ];
-                // =============================================================
-                // ITEM 2: COLUNAS OPERACIONAIS OBJETIVAS (SEM POLUIÇÃO DE 21 ITENS)
-                // =============================================================
                 } else if (ehViewReservas) {
-                    if (filtroCheckTipoHoje) {
-                        // Modo Focado de Recepção: Rápido, claro e sem rolagem excessiva
-                        colunas = [
-                            'status', 
-                            'suite', 
-                            'hospede', 
-                            'whatsapp', 
-                            'checkin', 
-                            'checkout', 
-                            'valor_total', 
-                            'valor_pago', 
-                            'saldo_restante', 
-                            'ocupacao', 
-                            'obs'
-                        ];
-                    } else if (filtroStatusReservasAtual === 'CANCELADA' || filtroStatusReservasAtual === 'RECUSADA') {
-                        colunas = [
-                            'status', 
-                            'suite', 
-                            'hospede', 
-                            'whatsapp', 
-                            'checkin', 
-                            'checkout', 
-                            'valor_total', 
-                            'valor_pago', 
-                            'saldo_restante', 
-                            'motivo_ocorrencia', 
-                            'data_ocorrencia',
-                            'obs'
-                        ];
-                    } else {
-                        colunas = [
-                            'status', 
-                            'suite', 
-                            'hospede', 
-                            'whatsapp', 
-                            'checkin', 
-                            'checkout', 
-                            'dias_restantes', 
-                            'valor_total', 
-                            'valor_pago', 
-                            'saldo_restante', 
-                            'ocupacao', 
-                            'tem_pet', 
-                            'cpf', 
-                            'obs'
-                        ];
-                    }
+                    colunas = [
+                        'status', 
+                        'suite', 
+                        'suite_origem', 
+                        'transferido_em', 
+                        'motivo_transferencia', 
+                        'hospede', 
+                        'whatsapp', 
+                        'checkin', 
+                        'checkout', 
+                        'dias_restantes', 
+                        'valor_total', 
+                        'valor_pago', 
+                        'saldo_restante', 
+                        'ocupacao', 
+                        'tem_pet', 
+                        'cpf', 
+                        'email', 
+                        'criado_em', 
+                        'motivo_recusa', 
+                        'obs'
+                    ];
                 } else if (ehViewHospedagens) {
                     colunas = ['status_ocupacao', 'suite', 'hospede', 'checkin', 'checkout', 'status'];
                 } else {
@@ -1665,22 +1411,18 @@
 
                 let htmlCabecalho = '';
                 colunas.forEach(col => {
-                    htmlCabecalho += `<th class="py-2.5 sm:py-3 px-3 sm:px-4 text-[10px] sm:text-[11px]">${obterApelidoColuna(col)}</th>`;
+                    htmlCabecalho += `<th class="py-3 px-4 text-[11px]">${obterApelidoColuna(col)}</th>`;
                 });
                 thead.innerHTML = htmlCabecalho;
 
                 let htmlLinhas = '';
                 registrosFiltrados.forEach((row, index) => {
                     let statusRow = String(row.status || row.status_reserva || '').toUpperCase();
-                    let isInterrompida = (statusRow === 'ESTADIA INTERROMPIDA' || (row.motivo_cancelamento && row.motivo_cancelamento.includes('ESTADIA INTERROMPIDA')));
-                    let isCancelada = (statusRow === 'CANCELADA');
-                    let isRecusada = (statusRow === 'RECUSADA');
+                    let isRecusada = (statusRow === 'RECUSADA' || statusRow === 'CANCELADA');
                     let isAprovada = (statusRow === 'APROVADA');
                     let classeCorFundo = ''; 
                     
-                    if (isInterrompida) classeCorFundo = 'bg-amber-50/70 hover:bg-amber-100/80 border-l-4 border-amber-600';
-                    else if (isCancelada) classeCorFundo = 'bg-rose-50 hover:bg-rose-100 border-l-4 border-rose-500';
-                    else if (isRecusada) classeCorFundo = 'bg-red-50 hover:bg-red-100 border-l-4 border-red-400'; 
+                    if (isRecusada) classeCorFundo = 'bg-red-50 hover:bg-red-100 border-l-4 border-red-400'; 
                     else if (isAprovada) classeCorFundo = 'bg-emerald-50 hover:bg-emerald-100 border-l-4 border-emerald-500'; 
                     else classeCorFundo = (index%2===0 ? 'bg-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100');
 
@@ -1704,8 +1446,6 @@
                             } else if (colLower === 'suite') {
                                 const tema = obterTemaSuite(row.suite_id || valorBruto);
                                 valorExibicao = `<span class="inline-flex items-center gap-1.5 font-extrabold ${tema.iconText}"><i class="fa-solid fa-bed text-[11px]"></i> ${String(valorBruto).toUpperCase()}</span>`;
-                            } else if (colLower === 'hospede') {
-                                valorExibicao = `<span class="font-extrabold text-gray-900 text-xs">${String(valorBruto).toUpperCase()}</span>`;
                             } else if (colLower === 'whatsapp') {
                                 let apenasNum = String(valorBruto).replace(/\D/g, '');
                                 if (apenasNum.length <= 11 && !apenasNum.startsWith('55')) apenasNum = '55' + apenasNum;
@@ -1717,23 +1457,17 @@
                             } else if (colLower === 'ocupacao') {
                                 valorExibicao = `<span class="font-bold text-slate-800 text-[11px] bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">${valorBruto}</span>`;
                             } else if (colLower === 'status') {
-                                if (isInterrompida) valorExibicao = '<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-200 text-amber-950 border border-amber-400">ESTADIA INTERROMPIDA</span>';
-                                else if (isAprovada) valorExibicao = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">APROVADA</span>';
-                                else if (statusRow === 'FINALIZADA') valorExibicao = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-700 border border-slate-300">FINALIZADA</span>';
-                                else if (isCancelada) valorExibicao = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-100 text-rose-800 border border-rose-300">CANCELADA</span>';
+                                if (isAprovada) valorExibicao = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">APROVADA</span>';
                                 else if (isRecusada) valorExibicao = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-red-100 text-red-800 border border-red-300">RECUSADA</span>';
                                 else valorExibicao = String(valorBruto);
                             } else if (colLower.includes('alerta_check_in') || colLower.includes('alerta_status')) {
                                 valorExibicao = valorBruto;
-                            // FORMATAÇÃO CORRETA DE DATA E HORA
-                            } else if (colLower === 'data_pagamento' || colLower.includes('criado_em') || colLower.includes('recusado_em') || colLower.includes('data_ocorrencia')) {
-                                valorExibicao = `<span class="font-bold text-gray-700">${formatarDataHoraBr(valorBruto)}</span>`;
+                            } else if (colLower.includes('criado_em') || colLower.includes('recusado_em')) {
+                                valorExibicao = formatarDataHoraBr(valorBruto);
                             } else if (colLower.includes('checkin') || colLower.includes('checkout') || colLower.includes('data_inicio') || colLower.includes('data_fim')) {
                                 valorExibicao = formatarDataBr(valorBruto);
-                            } else if (colLower === 'motivo_ocorrencia') {
-                                valorExibicao = `<span class="font-semibold text-red-900 bg-red-50 px-2 py-0.5 rounded border border-red-200 text-[11px]">${String(valorBruto).toUpperCase()}</span>`;
                             } else if (colLower === 'dias_restantes') { 
-                                if (isRecusada || isCancelada) { 
+                                if (isRecusada) { 
                                     valorExibicao = '<span class="text-gray-400">-</span>'; 
                                 } else if (row.checkin) {
                                     const hoje0 = new Date(); hoje0.setHours(0,0,0,0);
@@ -1770,7 +1504,7 @@
                             }
                         }
 
-                        htmlLinhas += `<td class="py-2.5 sm:py-3 px-3 sm:px-4 text-[11px] sm:text-[12px] font-medium">${valorExibicao}</td>`;
+                        htmlLinhas += `<td class="py-3 px-4 text-[12px] font-medium">${valorExibicao}</td>`;
                     });
                     htmlLinhas += `</tr>`;
                 });
@@ -1816,7 +1550,7 @@
             grid.innerHTML = '<div class="col-span-full py-4 text-center text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i> BUSCANDO RESERVAS FUTURAS...</div>';
             
             try {
-                const hojeStr = new Date().toLocaleDateString('sv-SE');
+                const hojeStr = new Date().toISOString().split('T')[0];
                 
                 const { data: reservasFuturas, error } = await supabaseClient
                     .from('reservas')
@@ -1865,14 +1599,14 @@
                     const tema = obterTemaSuite(s.suite_id || s.nome);
 
                     htmlCards += `
-                        <div onclick="abrirCalendarioSuite('${s.suite_id}', '${s.nome.replace(/'/g, "\\'")}')" class="cursor-pointer border-2 ${tema.border} bg-white hover:${tema.bgLight} ${tema.borderHover} p-2.5 sm:p-3 rounded-xl shadow-xs transition group">
+                        <div onclick="abrirCalendarioSuite('${s.suite_id}', '${s.nome.replace(/'/g, "\\'")}')" class="cursor-pointer border-2 ${tema.border} bg-white hover:${tema.bgLight} ${tema.borderHover} p-3 rounded-xl shadow-sm transition group">
                             <div class="flex items-center justify-between mb-1.5">
-                                <div class="w-6 h-6 sm:w-7 sm:h-7 ${tema.iconBg} ${tema.iconText} rounded-lg flex items-center justify-center text-[10px] sm:text-[11px]"><i class="fa-solid fa-bed"></i></div>
-                                <span class="text-[8px] sm:text-[9px] font-bold ${tema.badgeBg} text-white px-2 py-0.5 rounded-full">${s.total} RES.</span>
+                                <div class="w-7 h-7 ${tema.iconBg} ${tema.iconText} rounded-lg flex items-center justify-center text-[11px]"><i class="fa-solid fa-bed"></i></div>
+                                <span class="text-[9px] font-bold ${tema.badgeBg} text-white px-2 py-0.5 rounded-full">${s.total} RESERVA(S)</span>
                             </div>
-                            <div class="font-bold text-[10px] sm:text-[11px] text-gray-800 uppercase truncate ${tema.textGroupHover}">${String(s.nome).toUpperCase()}</div>
-                            <div class="mt-1 text-[9px] sm:text-[10px] text-gray-600 truncate"><i class="fa-solid fa-calendar mr-1"></i>${proximas}${s.total>2 ? '...' : ''}</div>
-                            <div class="mt-2 text-[9px] ${tema.iconText} font-bold ${tema.textGroupHover}"><i class="fa-solid fa-calendar-days mr-1"></i>CALENDÁRIO</div>
+                            <div class="font-bold text-[11px] text-gray-800 uppercase truncate ${tema.textGroupHover}">${String(s.nome).toUpperCase()}</div>
+                            <div class="mt-1 text-[10px] text-gray-600 truncate"><i class="fa-solid fa-calendar mr-1"></i>${proximas}${s.total>2 ? '...' : ''}</div>
+                            <div class="mt-2 text-[9px] ${tema.iconText} font-bold ${tema.textGroupHover}"><i class="fa-solid fa-calendar-days mr-1"></i>VER CALENDÁRIO</div>
                         </div>
                     `;
                 });
@@ -1926,14 +1660,14 @@
                 let dCurr = new Date(String(r.checkin).substring(0,10) + 'T00:00:00');
                 const dFim = new Date(String(r.checkout).substring(0,10) + 'T00:00:00');
                 while (dCurr < dFim) {
-                    datasOcupadas.add(dCurr.toLocaleDateString('sv-SE'));
+                    datasOcupadas.add(dCurr.toISOString().split('T')[0]);
                     dCurr.setDate(dCurr.getDate() + 1);
                 }
             });
             
             for (let i=0;i<primeiroDiaSemana;i++) grid.innerHTML += '<div></div>';
             
-            const hojeStr = new Date().toLocaleDateString('sv-SE');
+            const hojeStr = new Date().toISOString().split('T')[0];
             
             for (let dia=1; dia<=ultimoDiaMes; dia++) {
                 const mesStr = String(mes+1).padStart(2,'0');
@@ -1947,16 +1681,16 @@
                     classe = "bg-gray-100 text-gray-400 border border-gray-200 opacity-60";
                     tooltip = "Data passada";
                 } else if (estaOcupado) {
-                    classe = "bg-red-100 text-red-700 border border-red-200 font-bold shadow-2xs relative overflow-hidden";
-                    tooltip = "Ocupado";
+                    classe = "bg-red-100 text-red-700 border border-red-200 font-bold shadow-sm relative overflow-hidden";
+                    tooltip = "Ocupado - com reserva futura";
                 } else {
                     classe = "bg-emerald-100 text-emerald-800 border border-emerald-200 hover:bg-emerald-200 font-bold";
-                    tooltip = "Livre";
+                    tooltip = "Livre - disponível para reserva";
                 }
                 const isHoje = dataIso === hojeStr ? 'ring-2 ring-blue-500' : '';
                 let conteudoDia = `${dia}`;
                 if (estaOcupado) {
-                    conteudoDia = `${dia}<span class="absolute inset-0 flex items-center justify-center text-white font-extrabold text-[14px] leading-none" style="text-shadow: 0 0 3px rgba(239,68,68,0.9);">✕</span>`;
+                    conteudoDia = `${dia}<span class="absolute inset-0 flex items-center justify-center text-white font-extrabold text-[16px] leading-none" style="text-shadow: 0 0 3px rgba(239,68,68,0.9);">✕</span>`;
                 }
                 grid.innerHTML += `<div title="${tooltip} ${dataIso}" class="h-8 flex items-center justify-center rounded-lg text-[11px] ${classe} ${isHoje} relative">${conteudoDia}</div>`;
             }
@@ -1977,7 +1711,7 @@
             
             const modal = document.getElementById('modal-calendario-geral-relatorios');
             if (!modal) {
-                console.error('Modal não encontrado!');
+                console.error('Modal modal-calendario-geral-relatorios não encontrado no DOM!');
                 return;
             }
 
@@ -2026,20 +1760,20 @@
                 
                 const tema = obterTemaSuite(suite.id || suite.nome);
                 const classeAtiva = isAtiva 
-                    ? `bg-slate-900 text-white ${tema.borderActive} shadow-xs scale-[1.02]` 
-                    : `bg-white text-gray-800 ${tema.border} ${tema.borderHover} hover:${tema.bgLight} hover:shadow-xs`;
+                    ? `bg-slate-900 text-white ${tema.borderActive} shadow-md scale-[1.02]` 
+                    : `bg-white text-gray-800 ${tema.border} ${tema.borderHover} hover:${tema.bgLight} hover:shadow-sm`;
                 
-                const badgeOcup = reservasSuite > 0 ? `<span class="text-[8px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-bold">${reservasSuite} res.</span>` : `<span class="text-[8px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full">livre</span>`;
+                const badgeOcup = reservasSuite > 0 ? `<span class="text-[9px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-bold">${reservasSuite} res.</span>` : `<span class="text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full">livre</span>`;
                 
                 container.innerHTML += `
                     <div onclick="selecionarSuiteGeralRelatorios(${idx})" onmouseenter="if(${!isAtiva}) selecionarSuiteGeralRelatorios(${idx})" 
-                         class="cursor-pointer border-2 rounded-xl p-2 flex flex-col gap-0.5 transition-all duration-150 ${classeAtiva}">
+                         class="cursor-pointer border-2 rounded-xl p-2.5 flex flex-col gap-1 transition-all duration-150 ${classeAtiva}">
                         <div class="flex justify-between items-start">
-                            <i class="fa-solid fa-bed text-[10px] ${isAtiva ? 'text-amber-300' : tema.iconText}"></i>
+                            <i class="fa-solid fa-bed text-[11px] ${isAtiva ? 'text-amber-300' : tema.iconText}"></i>
                             ${badgeOcup}
                         </div>
-                        <span class="font-bold text-[10px] uppercase truncate leading-tight ${isAtiva ? '' : tema.textGroupHover}">${suite.nome}</span>
-                        <span class="text-[8px] ${isAtiva ? 'text-slate-300' : 'text-gray-500'}">${isAtiva ? 'ATIVO' : 'SELECIONAR'}</span>
+                        <span class="font-bold text-[11px] uppercase truncate leading-tight ${isAtiva ? '' : tema.textGroupHover}">${suite.nome}</span>
+                        <span class="text-[9px] ${isAtiva ? 'text-slate-300' : 'text-gray-500'}">${isAtiva ? 'VISUALIZANDO' : 'CLIQUE OU PASSE O MOUSE'}</span>
                     </div>
                 `;
             });
@@ -2111,26 +1845,26 @@
                     classe = "bg-gray-100 text-gray-400 border border-gray-200 opacity-60";
                 } else if (estaOcupado) {
                     classe = "bg-red-50 text-red-600 font-bold border border-red-200";
-                    conteudo = `<span class="flex flex-col items-center justify-center leading-none"><span>${dia}</span><span class="text-[9px]">✕</span></span>`;
+                    conteudo = `<span class="flex flex-col items-center justify-center leading-none"><span>${dia}</span><span class="text-[10px]">✕</span></span>`;
                 } else {
                     onclick = `onclick="selecionarDataCalendarioGeral('${dataIso}')"`;
                     if (isCheckin || isCheckout) {
-                        classe = "bg-blue-600 text-white font-extrabold border-2 border-blue-800 shadow-xs scale-105 cursor-pointer";
+                        classe = "bg-blue-600 text-white font-extrabold border-2 border-blue-800 shadow-md scale-105 cursor-pointer";
                         conteudo = `<span class="flex flex-col items-center leading-none"><span>${dia}</span><span class="text-[7px]">${isCheckin ? 'IN' : 'OUT'}</span></span>`;
                     } else if (isNoIntervalo) {
                         classe = "bg-blue-100 text-blue-800 font-bold border border-blue-300 cursor-pointer";
                     } else {
-                        classe = "bg-emerald-100 text-emerald-800 font-extrabold border border-emerald-300 shadow-2xs hover:bg-emerald-200 cursor-pointer hover:scale-105 transition-all";
+                        classe = "bg-emerald-100 text-emerald-800 font-extrabold border border-emerald-300 shadow-sm hover:bg-emerald-200 cursor-pointer hover:scale-105 transition-all";
                     }
                 }
 
-                gridEl.innerHTML += `<div ${onclick} class="h-9 sm:h-10 flex items-center justify-center rounded-xl text-xs sm:text-sm ${classe}">${conteudo}</div>`;
+                gridEl.innerHTML += `<div ${onclick} class="h-11 flex items-center justify-center rounded-xl text-[13px] ${classe}">${conteudo}</div>`;
             }
 
             const instrucaoEl = document.getElementById('cal-geral-instrucao');
             if (instrucaoEl) {
                 if (!calGeralCheckinTemp) instrucaoEl.innerText = 'Clique em uma data livre para definir CHECK-IN';
-                else if (!calGeralCheckoutTemp) instrucaoEl.innerText = `Check-in: ${calGeralCheckinTemp} → Clique na data de CHECK-OUT`;
+                else if (!calGeralCheckoutTemp) instrucaoEl.innerText = `Check-in: ${calGeralCheckinTemp} → Agora clique na data de CHECK-OUT`;
                 else instrucaoEl.innerText = `Período: ${calGeralCheckinTemp} até ${calGeralCheckoutTemp} → Pronto!`;
             }
         }
@@ -2219,7 +1953,7 @@
             let html = '';
             for (let i=0;i<qtdCriancas;i++) {
                 const idadeAtual = idadesAtuais[i] !== undefined ? idadesAtuais[i] : '';
-                html += `<div><label class="block text-[10px] font-bold text-gray-600 mb-0.5">Criança ${i+1} (Idade)</label><input type="number" min="0" max="17" value="${idadeAtual}" placeholder="0" class="nova-reserva-input-idade-crianca w-full p-2 border rounded-xl text-xs bg-white" oninput="recalcularNovaReservaCalendario()"></div>`;
+                html += `<div><label class="block text-[10px] font-bold text-gray-600 mb-1">Criança ${i+1} (Idade)</label><input type="number" min="0" max="17" value="${idadeAtual}" placeholder="0" class="nova-reserva-input-idade-crianca w-full p-2.5 border rounded-xl text-sm bg-white" oninput="recalcularNovaReservaCalendario()"></div>`;
             }
             lista.innerHTML = html;
         }
@@ -2240,17 +1974,17 @@
                     const totalOcup = (Number(adultos)||0)+(Number(criancas)||0);
                     const capTextoEl = document.getElementById('nova-reserva-capacidade-texto');
                     if (capTextoEl) {
-                        if (capMax>0) capTextoEl.innerHTML = `Capacidade real: <strong>${capMax} pessoa(s)</strong> | ${inclusos} incluso(s)`;
-                        else capTextoEl.innerHTML = `Capacidade não definida`;
+                        if (capMax>0) capTextoEl.innerHTML = `Capacidade real desta suíte: <strong>${capMax} pessoa(s)</strong> no total (adultos + crianças) | ${inclusos} incluso(s)`;
+                        else capTextoEl.innerHTML = `Capacidade não definida (defina em Configurar Pousada)`;
                     }
                     const avisoCap = document.getElementById('nova-reserva-aviso-capacidade');
                     if (avisoCap) {
                         if (capMax>0 && totalOcup>capMax) {
-                            avisoCap.className = 'mt-1.5 p-2 rounded-xl text-xs font-bold bg-red-50 border border-red-300 text-red-800';
-                            avisoCap.innerHTML = `⚠️ Capacidade excedida: máximo ${capMax} pessoa(s). Você informou ${totalOcup}.`;
+                            avisoCap.className = 'mt-2 p-2.5 rounded-xl text-xs font-bold bg-red-50 border border-red-300 text-red-800';
+                            avisoCap.innerHTML = `⚠️ Capacidade excedida: esta suíte comporta no máximo ${capMax} pessoa(s). Você informou ${totalOcup} (${adultos} adultos + ${criancas} crianças).`;
                             avisoCap.classList.remove('hidden');
                         } else if (capMax>0) {
-                            avisoCap.className = 'mt-1.5 p-2 rounded-xl text-xs font-bold bg-green-50 border border-green-200 text-green-800';
+                            avisoCap.className = 'mt-2 p-2.5 rounded-xl text-xs font-bold bg-green-50 border border-green-200 text-green-800';
                             avisoCap.innerHTML = `✅ Ocupação OK: ${totalOcup}/${capMax} pessoa(s)`;
                             avisoCap.classList.remove('hidden');
                         } else {
@@ -2286,6 +2020,9 @@
             if(saldoEl){ saldoEl.innerText=(total-sinal).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); saldoEl.dataset.valorTotal=total; }
         }
 
+        // =========================================================================
+        // SALVAMENTO DE RESERVA COM INTERCEPTAÇÃO ELEGANTE DO BLOQUEIO SOFT
+        // =========================================================================
         async function salvarNovaReservaCalendario(){
             if (!pousadaEmDiaCache) {
                 fecharModalNovaReservaCalendario();
@@ -2379,5 +2116,128 @@
             setTimeout(() => { if (viewAtualSelecionada === 'vw_gestor_reservas_relatorio') carregarCardsControleHoje(); }, 800);
         };
     </script>
+
+    <!-- MODAL CALENDÁRIO SUÍTE -->
+    <div id="modal-calendario-suite" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-[100]">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative">
+            <button onclick="fecharCalendarioSuite()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+            <div class="flex items-center gap-2 mb-1">
+                <span class="text-xl">📅</span>
+                <h3 id="cal-suite-nome" class="text-lg font-bold text-gray-900">Calendário da Suíte</h3>
+            </div>
+            <p class="text-xs text-gray-600 font-medium mb-4">Dias em <strong class="bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">verde</strong> livres. <strong class="bg-red-100 text-red-700 border border-red-200 px-1.5 py-0.5 rounded">vermelho claro com X</strong> ocupados.</p>
+            <div class="flex justify-between items-center mb-4 bg-gray-50 p-2.5 rounded-xl border border-gray-200">
+                <button onclick="mudarMesCalendario(-1)" class="px-3 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-xs">◀ Mês Anterior</button>
+                <strong id="cal-mes-ano" class="text-xs sm:text-sm font-bold text-gray-800 uppercase">MÊS / ANO</strong>
+                <button onclick="mudarMesCalendario(1)" class="px-3 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-xs">Próximo Mês ▶</button>
+            </div>
+            <div class="grid grid-cols-7 gap-1 text-center font-bold text-[11px] text-gray-500 mb-2">
+                <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+            </div>
+            <div id="cal-grid-dias" class="grid grid-cols-7 gap-1.5 text-center text-xs"></div>
+            <div class="mt-4 flex items-center justify-center gap-4 text-[10px]">
+                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-100 border border-emerald-200 rounded"></span> Livre</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-red-100 border border-red-200 rounded relative flex items-center justify-center"><span class="text-[8px] text-red-600 font-bold">✕</span></span> Ocupado</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-gray-100 border rounded"></span> Passado</span>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button onclick="fecharCalendarioSuite()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold text-xs sm:text-sm py-2.5 rounded-xl transition">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CALENDÁRIO GERAL DAS SUÍTES -->
+    <div id="modal-calendario-geral-relatorios" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-[60]">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6 sm:p-7 relative max-h-[92vh] overflow-y-auto">
+            <button onclick="fecharCalendarioGeralRelatorios()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold">✕</button>
+            
+            <div class="flex items-center gap-2 mb-4 pr-8">
+                <span class="text-xl">🗓️</span>
+                <div>
+                    <h3 class="text-lg font-extrabold text-gray-900">Calendário Geral de Ocupação</h3>
+                    <p class="text-[11px] text-gray-500">Navegue entre suítes (seta topo) e meses (seta baixo)</p>
+                </div>
+            </div>
+
+            <!-- PAINEL COM TODAS AS SUÍTES -->
+            <div class="mb-4">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-[11px] font-extrabold text-slate-700 uppercase tracking-widest flex items-center gap-2"><i class="fa-solid fa-layer-group text-indigo-600"></i> TODAS AS SUÍTES (<span id="cal-geral-rel-total">0</span>) - PASSE O MOUSE OU CLIQUE</span>
+                    <span id="cal-geral-rel-suite-nome" class="text-[11px] font-bold bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full">Suíte: -</span>
+                </div>
+                <div id="cal-geral-rel-painel-suites" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 max-h-[160px] overflow-y-auto p-2 bg-gray-50 rounded-2xl border border-gray-200"></div>
+            </div>
+
+            <p class="text-[11px] text-emerald-700 font-medium mb-1 text-center">Dias em <span class="bg-emerald-100 px-1.5 py-0.5 rounded font-bold">verde</span> livres, <span class="bg-red-100 px-1.5 py-0.5 rounded font-bold">vermelho com X</span> ocupados. Azul = seleção.</p><p id="cal-geral-instrucao" class="text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-full px-3 py-1.5 text-center mb-3">Clique em uma data livre para definir CHECK-IN</p>
+
+            <!-- NAVEGAÇÃO DE MÊS -->
+            <div class="flex justify-between items-center mb-4 bg-gray-50 p-2.5 rounded-xl border border-gray-200">
+                <button onclick="mudarMesCalendarioGeralRelatorios(-1)" class="px-3 py-1.5 bg-white hover:bg-gray-100 rounded-xl text-[11px] font-bold border shadow-xs flex items-center gap-1.5"><i class="fa-solid fa-chevron-left text-[10px]"></i> Mês Anterior</button>
+                <strong id="cal-geral-rel-mes-ano" class="text-xs sm:text-sm font-extrabold text-gray-800 uppercase tracking-wide">SETEMBRO DE 2026</strong>
+                <button onclick="mudarMesCalendarioGeralRelatorios(1)" class="px-3 py-1.5 bg-white hover:bg-gray-100 rounded-xl text-[11px] font-bold border shadow-xs flex items-center gap-1.5">Próximo Mês <i class="fa-solid fa-chevron-right text-[10px]"></i></button>
+            </div>
+
+            <div class="grid grid-cols-7 gap-1 text-center font-bold text-[11px] text-gray-500 mb-2">
+                <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+            </div>
+
+            <div id="cal-geral-rel-grid" class="grid grid-cols-7 gap-1.5 text-center text-sm min-h-[240px]"></div>
+
+            <div class="mt-5 flex flex-wrap justify-center gap-3 text-[11px] font-bold">
+                <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-emerald-100 border border-emerald-300"></span> Livre</span>
+                <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-red-100 border border-red-300 flex items-center justify-center text-[9px]">✕</span> Ocupado</span>
+                <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-gray-100 border border-gray-200"></span> Passado</span>
+            </div>
+
+            <div class="mt-6">
+                <button onclick="fecharCalendarioGeralRelatorios()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-3 rounded-xl transition text-sm">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL NOVA RESERVA DIRETO DO CALENDÁRIO -->
+    <div id="modal-nova-reserva-calendario" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-[70]">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-7 relative max-h-[92vh] overflow-y-auto">
+            <button onclick="fecharModalNovaReservaCalendario()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold">✕</button>
+            <h3 id="nova-reserva-titulo" class="text-lg font-extrabold text-blue-700 mb-1 pr-8">Criar Nova Reserva: Suíte</h3>
+            <p class="text-[11px] text-gray-500 mb-3">Datas preenchidas automaticamente pelo calendário geral</p>
+            <div id="nova-reserva-resumo" class="bg-blue-50 border border-blue-200 p-3 rounded-xl space-y-1 text-xs text-blue-900 mb-4">
+                <div class="flex justify-between"><span>Qtd. Diárias:</span><strong id="nova-reserva-qtd-diarias">0</strong></div>
+                <div class="flex justify-between"><span>Valor Total:</span><strong id="nova-reserva-valor-total">R$ 0,00</strong></div>
+                <div class="flex justify-between border-t border-blue-200 pt-1"><span>Saldo Restante:</span><strong id="nova-reserva-saldo-restante">R$ 0,00</strong></div>
+            </div>
+            <div class="space-y-3">
+                <input type="hidden" id="nova-reserva-suite-id">
+                <div id="nova-reserva-capacidade-info" class="mb-1 bg-blue-50 border border-blue-200 p-2.5 rounded-xl text-xs font-bold text-blue-900 flex items-center gap-2"><span>🏨</span> <span id="nova-reserva-capacidade-texto">Capacidade: carregando...</span></div>
+                <input type="text" id="nova-reserva-hospede" placeholder="Nome Hóspede *" class="w-full p-3 border rounded-xl text-sm">
+                <input type="text" id="nova-reserva-whatsapp" placeholder="WhatsApp *" class="w-full p-3 border rounded-xl text-sm">
+                <div class="grid grid-cols-2 gap-2"><input type="text" id="nova-reserva-cpf" placeholder="CPF (Opcional)" class="p-3 border rounded-xl text-sm"><input type="text" id="nova-reserva-rg" placeholder="RG (Opcional)" class="p-3 border rounded-xl text-sm"></div>
+                <input type="text" id="nova-reserva-endereco" placeholder="Endereço" class="w-full p-3 border rounded-xl text-sm">
+                <div class="grid grid-cols-2 gap-2"><input type="text" id="nova-reserva-cep" placeholder="CEP" class="p-3 border rounded-xl text-sm"><input type="email" id="nova-reserva-email" placeholder="E-mail" class="p-3 border rounded-xl text-sm"></div>
+                <div class="grid grid-cols-3 gap-3 pt-2">
+                    <div><label class="block text-xs font-bold text-gray-700 mb-1">Adultos</label><input type="number" id="nova-reserva-adultos" min="1" value="2" class="w-full p-3 border rounded-xl text-sm" onchange="recalcularNovaReservaCalendario()" oninput="recalcularNovaReservaCalendario()"></div>
+                    <div><label class="block text-xs font-bold text-gray-700 mb-1">Crianças</label><input type="number" id="nova-reserva-criancas" min="0" value="0" class="w-full p-3 border rounded-xl text-sm" onchange="recalcularNovaReservaCalendario()" oninput="recalcularNovaReservaCalendario()"></div>
+                    <div><label class="block text-xs font-bold text-gray-700 mb-1">Taxa de Pet</label><select id="nova-reserva-pet" class="w-full p-3 border rounded-xl text-sm font-bold" onchange="recalcularNovaReservaCalendario()"><option value="false">Não</option><option value="true">Sim</option></select></div>
+                </div>
+                <div id="nova-reserva-container-idades-criancas" class="hidden bg-gray-50 border border-gray-200 p-3 rounded-xl space-y-2">
+                    <label class="block text-xs font-bold text-gray-700">Idade(s) da(s) Criança(s) (para cálculo e isenção):</label>
+                    <div id="nova-reserva-lista-idades-criancas" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+                </div>
+                <div id="nova-reserva-aviso-capacidade" class="hidden mt-2 p-2.5 rounded-xl text-xs font-bold"></div>
+                <div class="grid grid-cols-2 gap-3 pt-2">
+                    <div><label class="block text-xs font-bold text-gray-700 mb-1">Check-in</label><input type="date" id="nova-reserva-checkin" readonly class="w-full p-3 border rounded-xl text-sm bg-blue-50/50 font-bold"></div>
+                    <div><label class="block text-xs font-bold text-gray-700 mb-1">Check-out</label><input type="date" id="nova-reserva-checkout" readonly class="w-full p-3 border rounded-xl text-sm bg-blue-50/50 font-bold"></div>
+                </div>
+                <div class="pt-2 space-y-2">
+                    <div><label class="block text-xs font-bold text-emerald-700 mb-1">Registrar Novo Pagamento / Sinal (R$)</label><input type="number" step="0.01" id="nova-reserva-valor-sinal" placeholder="0.00" class="w-full p-3 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-sm" oninput="recalcularNovaReservaCalendario()"></div>
+                    <div><label class="block text-xs font-bold text-emerald-700 mb-1">Forma de Pagamento</label><select id="nova-reserva-forma-pagamento" class="w-full p-3 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-sm"><option>Pix / Sinal</option><option>Dinheiro</option><option>Cartão de Crédito</option><option>Cartão de Débito</option><option>Transferência Bancária</option></select></div>
+                    <div><label class="block text-xs font-bold text-amber-700 mb-1">⚠️ Observação / Mensagem de Alerta Importante</label><textarea id="nova-reserva-observacao" rows="2" placeholder="Ex: Hóspede solicitou late checkout, etc." class="w-full p-3 border border-amber-300 bg-amber-50/40 rounded-xl text-sm"></textarea></div>
+                </div>
+                <button onclick="salvarNovaReservaCalendario()" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold mt-4 text-sm">Salvar Alterações</button>
+                <button onclick="fecharModalNovaReservaCalendario()" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 p-3 rounded-xl font-bold mt-2 text-sm">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

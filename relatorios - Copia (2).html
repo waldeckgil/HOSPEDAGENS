@@ -257,7 +257,7 @@
                                 <div class="flex flex-col"><span id="cardCheckInHojeValor" class="text-base sm:text-lg font-extrabold text-gray-800 leading-none">0</span><span class="text-[10px] text-gray-500 font-medium">In Hoje</span></div>
                             </div>
                             <div id="cardCheckOutHoje" onclick="filtrarPorCardHoje('checkout')" class="bg-white p-2.5 rounded-xl border border-gray-200 shadow-xs flex items-center gap-2.5 cursor-pointer hover:shadow-md hover:border-red-300 transition-all group">
-                                <div class="w-8 h-8 sm:w-9 sm:h-9 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-xs shadow-xs"><i class="fa-solid fa-door-open"></i></div>
+                                <div class="w-8 h-8 sm:w-9 sm:h-9 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-xs shadow-xs"><i class="fa-solid fa-laptop"></i></div>
                                 <div class="flex flex-col"><span id="cardCheckOutHojeValor" class="text-base sm:text-lg font-extrabold text-gray-800 leading-none">0</span><span class="text-[10px] text-gray-500 font-medium">Out Hoje</span></div>
                             </div>
                             <div id="cardCheckOutAmanha" onclick="filtrarPorCardHoje('checkout_amanha')" class="bg-white p-2.5 rounded-xl border border-orange-300 shadow-xs flex items-center gap-2.5 cursor-pointer hover:shadow-md hover:border-orange-400 transition-all group">
@@ -265,7 +265,7 @@
                                 <div class="flex flex-col"><span id="cardCheckOutAmanhaValor" class="text-base sm:text-lg font-extrabold text-gray-800 leading-none">0</span><span class="text-[10px] text-gray-500 font-medium">Out Amanhã</span></div>
                             </div>
                             <div id="cardReservasHoje" onclick="filtrarPorCardHoje('reservas')" class="bg-white p-2.5 rounded-xl border border-blue-200 shadow-xs flex items-center gap-2.5 cursor-pointer hover:shadow-md hover:border-blue-300 transition-all group">
-                                <div class="w-8 h-8 sm:w-9 sm:h-9 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs shadow-xs"><i class="fa-solid fa-bed"></i></div>
+                                <div class="w-8 h-8 sm:w-9 sm:h-9 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs shadow-xs"><i class="fa-solid fa-money-bill"></i></div>
                                 <div class="flex flex-col"><span id="cardReservasHojeValor" class="text-base sm:text-lg font-extrabold text-gray-800 leading-none">0</span><span class="text-[10px] text-gray-500 font-medium">Reservas</span></div>
                             </div>
                             <div id="cardSuites" onclick="toggleSuites()" class="col-span-2 sm:col-span-1 bg-white p-2.5 rounded-xl border border-amber-200 shadow-xs flex items-center justify-center sm:justify-start gap-2.5 cursor-pointer hover:shadow-md hover:border-amber-400 transition-all group">
@@ -295,7 +295,7 @@
                     <div class="bg-white rounded-xl shadow-xs border border-gray-200 overflow-hidden mb-6">
                         <div class="px-3.5 sm:px-5 py-3 border-b border-gray-200 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-2.5 bg-gray-50/50">
                             <div>
-                                <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wide">Visão Operacional</span>
+                                <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wide">View Ativa</span>
                                 <h3 id="tituloViewAtiva" class="font-bold text-xs sm:text-base text-gray-800 leading-tight">CARREGANDO...</h3>
                             </div>
 
@@ -498,7 +498,7 @@
         let viewAtualSelecionada = 'vw_gestor_financeiro_relatorio';
         var filtroStatusReservasAtual = 'APROVADA';
         var filtroCheckTipoHoje = null;
-        var hojeStrGlobal = new Date().toLocaleDateString('sv-SE'); 
+        var hojeStrGlobal = new Date().toISOString().split('T')[0]; 
         let suiteFiltroAtual = null;
         let suitesDaPousadaCache = []; 
         let tituloBaseAtual = 'Extrato Detalhado de Pagamentos';
@@ -727,9 +727,6 @@
 
         function alterarFiltroStatusReservas(valor) {
             filtroStatusReservasAtual = valor;
-            filtroCheckTipoHoje = null; // Limpa o filtro de card diário para ver por status
-            limparEstiloCardsHoje();
-
             var btnA = document.getElementById('btnAprovada');
             var btnC = document.getElementById('btnCancelada');
             var btnR = document.getElementById('btnRecusada');
@@ -746,7 +743,8 @@
         async function carregarCardsControleHoje() {
             if (!usuarioIdAtual) return;
             try {
-                const hojeStr = new Date().toLocaleDateString('sv-SE');
+                const hoje = new Date();
+                const hojeStr = hoje.toISOString().split('T')[0];
 
                 const { count: countCheckIn, error: errIn } = await supabaseClient
                     .from('reservas')
@@ -764,9 +762,9 @@
                     .neq('status', 'Recusada')
                     .neq('status', 'Cancelada');
 
-                const amanha = new Date();
+                const amanha = new Date(hoje);
                 amanha.setDate(amanha.getDate() + 1);
-                const amanhaStr = amanha.toLocaleDateString('sv-SE');
+                const amanhaStr = amanha.toISOString().split('T')[0];
                 const { count: countCheckOutAmanha, error: errOutAmanha } = await supabaseClient
                     .from('reservas')
                     .select('id', { count: 'exact', head: true })
@@ -779,8 +777,7 @@
                     .from('reservas')
                     .select('id', { count: 'exact', head: true })
                     .eq('pousada_id', usuarioIdAtual)
-                    .eq('status', 'Aprovada')
-                    .gte('checkout', hojeStr);
+                    .eq('status', 'Aprovada');
 
                 const elIn = document.getElementById('cardCheckInHojeValor');
                 const elOut = document.getElementById('cardCheckOutHojeValor');
@@ -796,7 +793,13 @@
             }
         }
 
-        function limparEstiloCardsHoje() {
+        function filtrarPorCardHoje(tipo) {
+            if (filtroCheckTipoHoje === tipo) {
+                filtroCheckTipoHoje = null;
+            } else {
+                filtroCheckTipoHoje = tipo;
+            }
+
             const cardIn = document.getElementById('cardCheckInHoje');
             const cardOut = document.getElementById('cardCheckOutHoje');
             const cardOutAmanha = document.getElementById('cardCheckOutAmanha');
@@ -807,32 +810,21 @@
                     c.classList.remove('ring-2', 'ring-violet-500', 'ring-red-500', 'ring-orange-500', 'ring-blue-500', 'bg-violet-50', 'bg-red-50', 'bg-orange-50', 'bg-blue-50', 'border-violet-400', 'border-red-400', 'border-orange-400', 'border-blue-400');
                 }
             });
-        }
 
-        // =========================================================================
-        // ITEM 2: OPERAÇÃO ÁGIL NOS CARDS "IN HOJE", "OUT HOJE", "OUT AMANHÃ", "RESERVAS"
-        // =========================================================================
-        function filtrarPorCardHoje(tipo) {
-            if (filtroCheckTipoHoje === tipo) {
-                filtroCheckTipoHoje = null; // Toggle off: desativa o filtro ao clicar novamente
-                limparEstiloCardsHoje();
-            } else {
-                filtroCheckTipoHoje = tipo;
-                limparEstiloCardsHoje();
+            if (filtroCheckTipoHoje === 'checkin' && cardIn) {
+                cardIn.classList.add('ring-2', 'ring-violet-500', 'bg-violet-50', 'border-violet-400');
+            } else if (filtroCheckTipoHoje === 'checkout' && cardOut) {
+                cardOut.classList.add('ring-2', 'ring-red-500', 'bg-red-50', 'border-red-400');
+            } else if (filtroCheckTipoHoje === 'checkout_amanha' && cardOutAmanha) {
+                cardOutAmanha.classList.add('ring-2', 'ring-orange-500', 'bg-orange-50', 'border-orange-400');
+            } else if (filtroCheckTipoHoje === 'reservas' && cardRes) {
+                cardRes.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50', 'border-blue-400');
+            }
 
-                const cardIn = document.getElementById('cardCheckInHoje');
-                const cardOut = document.getElementById('cardCheckOutHoje');
-                const cardOutAmanha = document.getElementById('cardCheckOutAmanha');
-                const cardRes = document.getElementById('cardReservasHoje');
-
-                if (filtroCheckTipoHoje === 'checkin' && cardIn) {
-                    cardIn.classList.add('ring-2', 'ring-violet-500', 'bg-violet-50', 'border-violet-400');
-                } else if (filtroCheckTipoHoje === 'checkout' && cardOut) {
-                    cardOut.classList.add('ring-2', 'ring-red-500', 'bg-red-50', 'border-red-400');
-                } else if (filtroCheckTipoHoje === 'checkout_amanha' && cardOutAmanha) {
-                    cardOutAmanha.classList.add('ring-2', 'ring-orange-500', 'bg-orange-50', 'border-orange-400');
-                } else if (filtroCheckTipoHoje === 'reservas' && cardRes) {
-                    cardRes.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50', 'border-blue-400');
+            if (tipo === 'reservas' && filtroCheckTipoHoje === 'reservas') {
+                filtroCheckTipoHoje = null;
+                if (cardRes) {
+                    cardRes.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50', 'border-blue-400');
                 }
             }
 
@@ -1017,7 +1009,7 @@
                 let hora = String(dt.getHours()).padStart(2, '0');
                 let minuto = String(dt.getMinutes()).padStart(2, '0');
                 
-                return `${dia}/${mes}/${ano} às ${hora}:${minuto}`;
+                return `${dia}/${mes}/${ano} ${hora}:${minuto}`;
             } catch(e) {
                 return String(valor).toUpperCase();
             }
@@ -1097,26 +1089,8 @@
             let dataFimFormatada = dataFim ? dataFim.split('-').reverse().join('/') : 'SEM LIMITE';
             
             let tituloCompleto = `${tituloBaseAtual} (DE ${dataInicioFormatada} ATÉ ${dataFimFormatada})`;
-
-            // Título dinâmico inteligente ao clicar nos cards de controle diário
-            if (viewAtualSelecionada === 'vw_gestor_reservas_relatorio' && filtroCheckTipoHoje) {
-                const hojeBr = formatarDataBr(new Date().toLocaleDateString('sv-SE'));
-                const amanhaObj = new Date();
-                amanhaObj.setDate(amanhaObj.getDate() + 1);
-                const amanhaBr = formatarDataBr(amanhaObj.toLocaleDateString('sv-SE'));
-
-                if (filtroCheckTipoHoje === 'checkin') {
-                    tituloCompleto = `CHECK-INS PREVISTOS PARA HOJE (${hojeBr})`;
-                } else if (filtroCheckTipoHoje === 'checkout') {
-                    tituloCompleto = `CHECK-OUTS PREVISTOS PARA HOJE (${hojeBr})`;
-                } else if (filtroCheckTipoHoje === 'checkout_amanha') {
-                    tituloCompleto = `CHECK-OUTS PREVISTOS PARA AMANHÃ (${amanhaBr})`;
-                } else if (filtroCheckTipoHoje === 'reservas') {
-                    tituloCompleto = `RESERVAS ATIVAS E FUTURAS`;
-                }
-            }
-
             document.getElementById('tituloViewAtiva').textContent = tituloCompleto.toUpperCase();
+
             tbody.innerHTML = `<tr><td colspan="20" class="py-6 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> CARREGANDO DADOS...</td></tr>`;
 
             try {
@@ -1136,7 +1110,7 @@
                         .order('data_inicio', { ascending: true });
 
                     error = errTarifas;
-                    const hojeIso = new Date().toLocaleDateString('sv-SE');
+                    const hojeIso = new Date().toISOString().split('T')[0];
                     const nomesDias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
                     registros = (tarifas || []).map(t => {
@@ -1186,20 +1160,17 @@
                         });
                     }
 
-                // =============================================================
-                // ITEM 1: VISÃO FINANCEIRA COMPLETA (INCLUI ESTADIAS INTERROMPIDAS)
-                // =============================================================
                 } else if (ehViewFinanceiro) {
                     if (!suitesDaPousadaCache || suitesDaPousadaCache.length === 0) {
                         const { data: suData } = await supabaseClient.from('suites').select('id,nome').eq('pousada_id', usuarioIdAtual).order('nome');
                         if (suData) suitesDaPousadaCache = suData;
                     }
 
-                    // Busca reservas da pousada sem descartar cegamente as canceladas
                     let queryRes = supabaseClient
                         .from('reservas')
                         .select('*')
                         .eq('pousada_id', usuarioIdAtual)
+                        .neq('status', 'Cancelada')
                         .neq('status', 'Recusada');
 
                     if (dataInicio) queryRes = queryRes.gte('checkout', dataInicio);
@@ -1224,16 +1195,7 @@
                         }
                     });
 
-                    // Filtra para manter no financeiro apenas: ativas, finalizadas e estadias canceladas com movimentação financeira real
-                    registros = (reservasFin || []).filter(r => {
-                        if (r.status === 'Cancelada') {
-                            const temValor = Number(r.valor_total || 0) > 0;
-                            const temPagamentos = (pagamentosPorReserva[r.id] && pagamentosPorReserva[r.id].length > 0);
-                            const eInterrompida = Boolean(r.motivo_cancelamento && r.motivo_cancelamento.includes('ESTADIA INTERROMPIDA'));
-                            return temValor || temPagamentos || eInterrompida;
-                        }
-                        return true;
-                    }).map(r => {
+                    registros = (reservasFin || []).map(r => {
                         const suiteObj = (suitesDaPousadaCache || []).find(s => s.id === r.suite_id);
                         const nomeSuite = suiteObj ? suiteObj.nome : (r.suite || 'SUÍTE');
                         
@@ -1250,9 +1212,6 @@
                         let dataUltimoPag = pags.length > 0 ? pags[pags.length - 1].criado_em : r.criado_em;
                         let obsPag = pags.map(p => p.observacao).filter(Boolean).join(' | ') || r.observacao || '-';
 
-                        const isInterrompida = (r.status === 'Cancelada' && (r.motivo_cancelamento?.includes('ESTADIA INTERROMPIDA') || valorTotal > 0));
-                        const statusExib = isInterrompida ? 'ESTADIA INTERROMPIDA' : (r.status || '-');
-
                         return {
                             hospede: r.hospede_nome || 'HÓSPEDE NÃO IDENTIFICADO',
                             suite: nomeSuite,
@@ -1261,13 +1220,12 @@
                             checkout: r.checkout || '',
                             diarias: calcularDiarias(r.checkin, r.checkout),
                             valor_total: valorTotal,
+                            data_pagamento: dataUltimoPag,
                             valor_pago: totalPago,
                             saldo_restante: saldoRestante,
                             forma_pagamento: formasPag,
-                            data_pagamento: dataUltimoPag,
-                            status: statusExib,
                             observacao: obsPag,
-                            motivo_cancelamento: r.motivo_cancelamento || null
+                            status: r.status || '-'
                         };
                     });
                 } else if (ehViewHospedagens) {
@@ -1309,39 +1267,19 @@
                             }
                         });
                     }
-                // =============================================================
-                // ITEM 2: CONSULTA DE RESERVAS COM FILTRAGEM RÁPIDA PRECISA
-                // =============================================================
                 } else if (ehViewReservas) {
                     if (!suitesDaPousadaCache || suitesDaPousadaCache.length === 0) {
                         const { data: suData } = await supabaseClient.from('suites').select('id,nome').eq('pousada_id', usuarioIdAtual).order('nome');
                         if (suData) suitesDaPousadaCache = suData;
                     }
 
-                    const hojeIso = new Date().toLocaleDateString('sv-SE');
-                    const amanhaObj = new Date();
-                    amanhaObj.setDate(amanhaObj.getDate() + 1);
-                    const amanhaIso = amanhaObj.toLocaleDateString('sv-SE');
-
                     let query = supabaseClient
                         .from('reservas')
                         .select('*')
                         .eq('pousada_id', usuarioIdAtual);
 
-                    // Filtra diretamente no banco para respostas precisas aos botões rápidos
-                    if (filtroCheckTipoHoje === 'checkin') {
-                        query = query.eq('checkin', hojeIso).neq('status', 'Cancelada').neq('status', 'Recusada');
-                    } else if (filtroCheckTipoHoje === 'checkout') {
-                        query = query.eq('checkout', hojeIso).neq('status', 'Cancelada').neq('status', 'Recusada');
-                    } else if (filtroCheckTipoHoje === 'checkout_amanha') {
-                        query = query.eq('checkout', amanhaIso).neq('status', 'Cancelada').neq('status', 'Recusada');
-                    } else if (filtroCheckTipoHoje === 'reservas') {
-                        query = query.eq('status', 'Aprovada').gte('checkout', hojeIso);
-                    } else {
-                        if (dataInicio) query = query.gte('checkin', dataInicio);
-                        if (dataFim) query = query.lte('checkin', dataFim);
-                    }
-
+                    if (dataInicio) query = query.gte('checkin', dataInicio);
+                    if (dataFim) query = query.lte('checkin', dataFim);
                     query = query.order('checkin', { ascending: true, nullsFirst: true });
                     const res = await query;
                     error = res.error;
@@ -1420,19 +1358,39 @@
                 let registrosFiltrados = registros;
 
                 if (ehViewReservas) {
-                    // Se um card rápido estiver ativo, respeita o filtro do card sem ser barrado pelas pílulas
-                    if (!filtroCheckTipoHoje) {
-                        registrosFiltrados = registrosFiltrados.filter(row => {
-                            let status = String(row.status || row.status_reserva || '').toUpperCase();
-                            let isCancelada = (status === 'CANCELADA');
-                            let isRecusada = (status === 'RECUSADA');
-                            let isAprovada = (status === 'APROVADA');
+                    registrosFiltrados = registrosFiltrados.filter(row => {
+                        let status = String(row.status || row.status_reserva || '').toUpperCase();
+                        let isCancelada = (status === 'CANCELADA');
+                        let isRecusada = (status === 'RECUSADA');
+                        let isAprovada = (status === 'APROVADA');
 
-                            if (filtroStatusReservasAtual === 'APROVADA') return isAprovada;
-                            if (filtroStatusReservasAtual === 'CANCELADA') return isCancelada;
-                            if (filtroStatusReservasAtual === 'RECUSADA') return isRecusada;
-                            return true; 
-                        });
+                        if (filtroStatusReservasAtual === 'APROVADA') return isAprovada;
+                        if (filtroStatusReservasAtual === 'CANCELADA') return isCancelada;
+                        if (filtroStatusReservasAtual === 'RECUSADA') return isRecusada;
+                        return true; 
+                    });
+
+                    if (filtroCheckTipoHoje) {
+                        const hojeStr = hojeStrGlobal || new Date().toISOString().split('T')[0];
+                        const amanhaObj = new Date();
+                        amanhaObj.setDate(amanhaObj.getDate() + 1);
+                        const amanhaStr = amanhaObj.toISOString().split('T')[0];
+                        if (filtroCheckTipoHoje === 'checkin') {
+                            registrosFiltrados = registrosFiltrados.filter(row => {
+                                let chk = String(row.checkin || '').substring(0,10);
+                                return chk === hojeStr;
+                            });
+                        } else if (filtroCheckTipoHoje === 'checkout') {
+                            registrosFiltrados = registrosFiltrados.filter(row => {
+                                let chk = String(row.checkout || '').substring(0,10);
+                                return chk === hojeStr;
+                            });
+                        } else if (filtroCheckTipoHoje === 'checkout_amanha') {
+                            registrosFiltrados = registrosFiltrados.filter(row => {
+                                let chk = String(row.checkout || '').substring(0,10);
+                                return chk === amanhaStr;
+                            });
+                        }
                     }
                 } else if (ehViewFinanceiro) {
                     registrosFiltrados = registrosFiltrados.filter(row => {
@@ -1548,7 +1506,9 @@
                             const checkout = r.checkout && r.checkout !== '-' ? formatarDataBr(r.checkout) : '-';
                             
                             const tema = obterTemaSuite(r.suite_id || r.suite);
-                            const borda = `${tema.border} bg-white hover:${tema.bgLight} border-2`;
+                            const borda = isOcupada 
+                                ? `${tema.border} bg-white hover:${tema.bgLight} border-2` 
+                                : `${tema.border} bg-white hover:${tema.bgLight} border-2`;
                             const iconeBg = `${tema.iconBg} ${tema.iconText}`;
                             const statusBadge = isOcupada 
                                 ? '<span class="text-[8px] font-bold bg-blue-600 text-white px-1.5 py-0.5 rounded-full uppercase shadow-2xs">OCUPADA</span>' 
@@ -1587,76 +1547,30 @@
                 let colunas = [];
                 if (ehViewTarifas) {
                     colunas = ['status', 'descricao', 'suite', 'data_inicio', 'data_fim', 'dias_semana', 'tipo_ajuste', 'valor_especial'];
-                // =============================================================
-                // ITEM 1: COLUNAS FIXAS E PRIORIZADAS NA VISÃO FINANCEIRA
-                // =============================================================
-                } else if (ehViewFinanceiro) {
-                    colunas = [
-                        'hospede',
-                        'suite',
-                        'checkin',
-                        'checkout',
-                        'diarias',
-                        'valor_total',
-                        'valor_pago',
-                        'saldo_restante',
-                        'forma_pagamento',
-                        'data_pagamento',
-                        'status',
-                        'observacao'
-                    ];
-                // =============================================================
-                // ITEM 2: COLUNAS OPERACIONAIS OBJETIVAS (SEM POLUIÇÃO DE 21 ITENS)
-                // =============================================================
                 } else if (ehViewReservas) {
-                    if (filtroCheckTipoHoje) {
-                        // Modo Focado de Recepção: Rápido, claro e sem rolagem excessiva
-                        colunas = [
-                            'status', 
-                            'suite', 
-                            'hospede', 
-                            'whatsapp', 
-                            'checkin', 
-                            'checkout', 
-                            'valor_total', 
-                            'valor_pago', 
-                            'saldo_restante', 
-                            'ocupacao', 
-                            'obs'
-                        ];
-                    } else if (filtroStatusReservasAtual === 'CANCELADA' || filtroStatusReservasAtual === 'RECUSADA') {
-                        colunas = [
-                            'status', 
-                            'suite', 
-                            'hospede', 
-                            'whatsapp', 
-                            'checkin', 
-                            'checkout', 
-                            'valor_total', 
-                            'valor_pago', 
-                            'saldo_restante', 
-                            'motivo_ocorrencia', 
-                            'data_ocorrencia',
-                            'obs'
-                        ];
-                    } else {
-                        colunas = [
-                            'status', 
-                            'suite', 
-                            'hospede', 
-                            'whatsapp', 
-                            'checkin', 
-                            'checkout', 
-                            'dias_restantes', 
-                            'valor_total', 
-                            'valor_pago', 
-                            'saldo_restante', 
-                            'ocupacao', 
-                            'tem_pet', 
-                            'cpf', 
-                            'obs'
-                        ];
-                    }
+                    colunas = [
+                        'status', 
+                        'suite', 
+                        'suite_origem', 
+                        'transferido_em', 
+                        'motivo_transferencia', 
+                        'hospede', 
+                        'whatsapp', 
+                        'checkin', 
+                        'checkout', 
+                        'dias_restantes', 
+                        'valor_total', 
+                        'valor_pago', 
+                        'saldo_restante', 
+                        'ocupacao', 
+                        'tem_pet', 
+                        'cpf', 
+                        'email', 
+                        'criado_em', 
+                        'motivo_ocorrencia', 
+                        'data_ocorrencia',
+                        'obs'
+                    ];
                 } else if (ehViewHospedagens) {
                     colunas = ['status_ocupacao', 'suite', 'hospede', 'checkin', 'checkout', 'status'];
                 } else {
@@ -1672,14 +1586,12 @@
                 let htmlLinhas = '';
                 registrosFiltrados.forEach((row, index) => {
                     let statusRow = String(row.status || row.status_reserva || '').toUpperCase();
-                    let isInterrompida = (statusRow === 'ESTADIA INTERROMPIDA' || (row.motivo_cancelamento && row.motivo_cancelamento.includes('ESTADIA INTERROMPIDA')));
                     let isCancelada = (statusRow === 'CANCELADA');
                     let isRecusada = (statusRow === 'RECUSADA');
                     let isAprovada = (statusRow === 'APROVADA');
                     let classeCorFundo = ''; 
                     
-                    if (isInterrompida) classeCorFundo = 'bg-amber-50/70 hover:bg-amber-100/80 border-l-4 border-amber-600';
-                    else if (isCancelada) classeCorFundo = 'bg-rose-50 hover:bg-rose-100 border-l-4 border-rose-500';
+                    if (isCancelada) classeCorFundo = 'bg-rose-50 hover:bg-rose-100 border-l-4 border-rose-500';
                     else if (isRecusada) classeCorFundo = 'bg-red-50 hover:bg-red-100 border-l-4 border-red-400'; 
                     else if (isAprovada) classeCorFundo = 'bg-emerald-50 hover:bg-emerald-100 border-l-4 border-emerald-500'; 
                     else classeCorFundo = (index%2===0 ? 'bg-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100');
@@ -1704,8 +1616,6 @@
                             } else if (colLower === 'suite') {
                                 const tema = obterTemaSuite(row.suite_id || valorBruto);
                                 valorExibicao = `<span class="inline-flex items-center gap-1.5 font-extrabold ${tema.iconText}"><i class="fa-solid fa-bed text-[11px]"></i> ${String(valorBruto).toUpperCase()}</span>`;
-                            } else if (colLower === 'hospede') {
-                                valorExibicao = `<span class="font-extrabold text-gray-900 text-xs">${String(valorBruto).toUpperCase()}</span>`;
                             } else if (colLower === 'whatsapp') {
                                 let apenasNum = String(valorBruto).replace(/\D/g, '');
                                 if (apenasNum.length <= 11 && !apenasNum.startsWith('55')) apenasNum = '55' + apenasNum;
@@ -1717,17 +1627,14 @@
                             } else if (colLower === 'ocupacao') {
                                 valorExibicao = `<span class="font-bold text-slate-800 text-[11px] bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">${valorBruto}</span>`;
                             } else if (colLower === 'status') {
-                                if (isInterrompida) valorExibicao = '<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-200 text-amber-950 border border-amber-400">ESTADIA INTERROMPIDA</span>';
-                                else if (isAprovada) valorExibicao = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">APROVADA</span>';
-                                else if (statusRow === 'FINALIZADA') valorExibicao = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-700 border border-slate-300">FINALIZADA</span>';
+                                if (isAprovada) valorExibicao = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">APROVADA</span>';
                                 else if (isCancelada) valorExibicao = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-100 text-rose-800 border border-rose-300">CANCELADA</span>';
                                 else if (isRecusada) valorExibicao = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-red-100 text-red-800 border border-red-300">RECUSADA</span>';
                                 else valorExibicao = String(valorBruto);
                             } else if (colLower.includes('alerta_check_in') || colLower.includes('alerta_status')) {
                                 valorExibicao = valorBruto;
-                            // FORMATAÇÃO CORRETA DE DATA E HORA
-                            } else if (colLower === 'data_pagamento' || colLower.includes('criado_em') || colLower.includes('recusado_em') || colLower.includes('data_ocorrencia')) {
-                                valorExibicao = `<span class="font-bold text-gray-700">${formatarDataHoraBr(valorBruto)}</span>`;
+                            } else if (colLower.includes('criado_em') || colLower.includes('recusado_em') || colLower.includes('data_ocorrencia')) {
+                                valorExibicao = formatarDataHoraBr(valorBruto);
                             } else if (colLower.includes('checkin') || colLower.includes('checkout') || colLower.includes('data_inicio') || colLower.includes('data_fim')) {
                                 valorExibicao = formatarDataBr(valorBruto);
                             } else if (colLower === 'motivo_ocorrencia') {
@@ -1816,7 +1723,7 @@
             grid.innerHTML = '<div class="col-span-full py-4 text-center text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i> BUSCANDO RESERVAS FUTURAS...</div>';
             
             try {
-                const hojeStr = new Date().toLocaleDateString('sv-SE');
+                const hojeStr = new Date().toISOString().split('T')[0];
                 
                 const { data: reservasFuturas, error } = await supabaseClient
                     .from('reservas')
@@ -1926,14 +1833,14 @@
                 let dCurr = new Date(String(r.checkin).substring(0,10) + 'T00:00:00');
                 const dFim = new Date(String(r.checkout).substring(0,10) + 'T00:00:00');
                 while (dCurr < dFim) {
-                    datasOcupadas.add(dCurr.toLocaleDateString('sv-SE'));
+                    datasOcupadas.add(dCurr.toISOString().split('T')[0]);
                     dCurr.setDate(dCurr.getDate() + 1);
                 }
             });
             
             for (let i=0;i<primeiroDiaSemana;i++) grid.innerHTML += '<div></div>';
             
-            const hojeStr = new Date().toLocaleDateString('sv-SE');
+            const hojeStr = new Date().toISOString().split('T')[0];
             
             for (let dia=1; dia<=ultimoDiaMes; dia++) {
                 const mesStr = String(mes+1).padStart(2,'0');
