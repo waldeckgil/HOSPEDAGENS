@@ -128,7 +128,7 @@
                     </div>
                     <div>
                         <h3 class="text-base font-extrabold text-gray-900">Novo Colaborador</h3>
-                        <p class="text-[11px] text-gray-500">Crie o acesso imediato sem necessidade de e-mail de ativação.</p>
+                        <p class="text-[11px] text-gray-500">Crie o acesso imediato sem necessidade de link de ativação por e-mail.</p>
                     </div>
                 </div>
                 <button onclick="fecharModalNovoMembro()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">✕</button>
@@ -225,7 +225,6 @@
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
         const EMAIL_MASTER_ADMIN = 'waldeckgil@gmail.com';
 
-        // Cliente padrão com sessão ativa
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let usuarioIdAtual = null; // ID da pousada
@@ -323,7 +322,6 @@
                 usuarioIdAtual = perfil?.pousada_id || session.user.id;
             }
 
-            // Busca nome da pousada
             const { data: pousada } = await supabaseClient
                 .from('pousadas')
                 .select('nome')
@@ -354,7 +352,6 @@
 
             membrosEquipeCache = membros || [];
 
-            // Atualiza KPIs
             const total = membrosEquipeCache.length;
             const recepcao = membrosEquipeCache.filter(m => m.cargo === 'recepcao' && m.ativo).length;
             const limpeza = membrosEquipeCache.filter(m => m.cargo === 'limpeza' && m.ativo).length;
@@ -378,7 +375,6 @@
             membrosEquipeCache.forEach(m => {
                 const isDono = m.cargo === 'dono';
                 const isRecepcao = m.cargo === 'recepcao';
-                const isLimpeza = m.cargo === 'limpeza';
 
                 let badgeCargo = '';
                 let iconeCargo = '';
@@ -474,7 +470,7 @@
         }
 
         // =========================================================================
-        // SALVAMENTO SEGURO: CRIAÇÃO DO COLABORADOR SEM DERRUBAR O GESTOR
+        // SALVAMENTO SEGURO COM PROTEÇÃO CONTRA CHAVE DUPLICADA
         // =========================================================================
         async function salvarNovoMembro(e) {
             e.preventDefault();
@@ -486,60 +482,102 @@
             const nome = document.getElementById('cad-nome').value.trim();
             const cargo = document.getElementById('cad-cargo').value;
             const whatsapp = document.getElementById('cad-whatsapp').value.trim();
-            const email = document.getElementById('cad-email').value.trim();
+            const email = document.getElementById('cad-email').value.trim().toLowerCase();
             const senha = document.getElementById('cad-senha').value;
 
             try {
-                // TÉCNICA MASTER: Instância isolada em memória para não sobrescrever a sessão do Dono
-                const tempAuthClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-                    auth: {
-                        persistSession: false,
-                        autoRefreshToken: false,
-                        detectSessionInUrl: false
-                    }
-                });
+                // 1. VALIDAÇÃO PRÉVIA: Verifica se o e-mail já existe na tabela usuarios
+                const { data: usuarioExistente } = await supabaseClient
+                    .from('usuarios')
+                    .select('id, email, pousada_id')
+                    .eq('email', email)
+                    .maybeSingle();
 
-                // 1. Cria a conta no Supabase Auth
-                const { data: authData, error: authError } = await tempAuthClient.auth.signUp({
-                    email: email,
-                    password: senha,
-                    options: {
-                        data: {
+                if (usuarioExistente) {
+                    throw new Error(`O e-mail "${email}" já está cadastrado nesta ou em outra equipe.`);
+                }
+
+                let novoUserId = null;
+                let criadoViaEdge = false;
+
+                // 2. Tenta criar primeiro via Edge Function oficial (se estiver deployada)
+                try {
+                    const { data: edgeData, error: edgeError } = await supabaseClient.functions.invoke('gerenciar-equipe', {
+                        body: {
+                            acao: 'criar',
                             nome: nome,
                             cargo: cargo,
+                            whatsapp: whatsapp,
+                            email: email,
+                            senha: senha,
                             pousada_id: usuarioIdAtual
                         }
+                    });
+
+                    if (!edgeError && edgeData && (edgeData.success || edgeData.user_id)) {
+                        novoUserId = edgeData.user_id;
+                        criadoViaEdge = true;
                     }
-                });
-
-                if (authError) {
-                    throw new Error("Falha ao criar login: " + authError.message);
+                } catch (edgeErr) {
+                    console.warn("Edge Function não disponível, executando fallback seguro:", edgeErr);
                 }
 
-                if (!authData.user) {
-                    throw new Error("Não foi possível gerar o usuário de autenticação.");
-                }
+                // 3. Fallback Client-side caso a Edge Function não esteja deployada
+                if (!criadoViaEdge) {
+                    const tempAuthClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+                        auth: {
+                            persistSession: false,
+                            autoRefreshToken: false,
+                            detectSessionInUrl: false
+                        }
+                    });
 
-                const novoUserId = authData.user.id;
-
-                // 2. Vincula à pousada na tabela usuarios usando a sessão do Dono
-                const { error: dbError } = await supabaseClient
-                    .from('usuarios')
-                    .insert([{
-                        user_id: novoUserId,
-                        pousada_id: usuarioIdAtual,
-                        nome_completo: nome,
-                        whatsapp: whatsapp,
+                    const { data: authData, error: authError } = await tempAuthClient.auth.signUp({
                         email: email,
-                        cargo: cargo,
-                        ativo: true
-                    }]);
+                        password: senha,
+                        options: {
+                            data: {
+                                nome: nome,
+                                cargo: cargo,
+                                pousada_id: usuarioIdAtual
+                            }
+                        }
+                    });
 
-                if (dbError) {
-                    throw new Error("Erro ao vincular na equipe: " + dbError.message);
+                    if (authError) {
+                        throw new Error("Falha ao registrar login: " + authError.message);
+                    }
+
+                    if (!authData.user) {
+                        throw new Error("Não foi possível gerar a conta de autenticação.");
+                    }
+
+                    // Se identities vier vazio, o e-mail já existe no Supabase Auth
+                    if (authData.user.identities && authData.user.identities.length === 0) {
+                        throw new Error(`O e-mail "${email}" já possui cadastro ativo no Supabase Auth. Use outro e-mail.`);
+                    }
+
+                    novoUserId = authData.user.id;
+
+                    // 4. UPSERT EM VEZ DE INSERT: Resolve o conflito de chave se um trigger de banco tiver inserido antes
+                    const { error: dbError } = await supabaseClient
+                        .from('usuarios')
+                        .upsert([{
+                            user_id: novoUserId,
+                            pousada_id: usuarioIdAtual,
+                            nome_completo: nome,
+                            whatsapp: whatsapp,
+                            email: email,
+                            cargo: cargo,
+                            ativo: true
+                        }], { onConflict: 'user_id' });
+
+                    if (dbError) {
+                        throw new Error("Erro ao vincular na equipe: " + dbError.message);
+                    }
                 }
 
-                // 3. Monta a mensagem pronta de WhatsApp
+                // 5. Gera mensagem de WhatsApp
                 const linkSistema = window.location.origin + '/index.html';
                 const cargoNomeAmigavel = cargo === 'recepcao' ? 'Recepção' : 'Camareira / Governança';
 
@@ -556,7 +594,6 @@
 
                 const urlWhatsapp = `https://wa.me/${zapLimpo}?text=${encodeURIComponent(textoMsg)}`;
 
-                // Preenche o modal de confirmação
                 document.getElementById('cred-nome').innerText = nome;
                 document.getElementById('cred-cargo').innerText = cargoNomeAmigavel;
                 document.getElementById('cred-email').innerText = email;
@@ -568,7 +605,7 @@
 
             } catch (err) {
                 console.error("Erro ao cadastrar membro:", err);
-                alert("Erro ao cadastrar colaborador: " + err.message);
+                alert(err.message);
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-check"></i> Cadastrar e Gerar Acesso';
