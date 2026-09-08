@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão de Tarifas, Regras e Assinatura</title>
+    <title>Gestão de Tarifas, Regras e Assinatura - Painel 360</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row text-slate-800">
+<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row text-slate-800 font-sans">
 
     <!-- MENU LATERAL -->
-    <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl shrink-0">
+    <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl shrink-0 z-20">
         <div class="p-4 sm:p-6">
             <div class="flex justify-between items-center md:block mb-4 md:mb-6">
                 <div>
@@ -36,7 +36,7 @@
                     <span>🏷️</span> <span>Tarifas & Assinatura</span>
                 </a>
                 <a href="equipe.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition font-medium text-xs sm:text-sm">
-                    <span>👥</span> <span>Minha Equipe</span>
+                    <span>👤</span> <span>Minha Equipe</span>
                 </a>
                 <button type="button" onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-3 rounded-xl transition shadow text-xs sm:text-sm flex items-center justify-center gap-2 mt-3 cursor-pointer">
                     <i class="fa-solid fa-right-from-bracket"></i> Sair
@@ -72,9 +72,9 @@
                             <p class="text-xs text-slate-300">Você está gerenciando as tarifas de: <strong id="nome-pousada-modo-master" class="text-white underline"></strong></p>
                         </div>
                     </div>
-                    <a href="admin-master.html" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3.5 py-1.5 rounded-xl font-bold text-xs transition shadow-xs flex items-center gap-1.5 shrink-0">
+                    <button type="button" onclick="sairDoModoMaster()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3.5 py-1.5 rounded-xl font-bold text-xs transition shadow-xs flex items-center gap-1.5 shrink-0 cursor-pointer">
                         <i class="fa-solid fa-arrow-left"></i> Voltar ao Master SaaS
-                    </a>
+                    </button>
                 </div>
 
                 <!-- CARD NO TOPO: MINHA ASSINATURA -->
@@ -141,7 +141,7 @@
                             </h2>
                             <p class="text-xs text-gray-500 mt-0.5">Defina horários, redes sociais, políticas de estadias e mídias exibidas na vitrine.</p>
                         </div>
-                        <button type="button" id="btn-salvar-pousada" onclick="salvarRegrasPousada()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl transition text-xs sm:text-sm shadow-md flex items-center justify-center gap-2">
+                        <button type="button" id="btn-salvar-pousada" onclick="salvarRegrasPousada()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl transition text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 cursor-pointer">
                             <i class="fa-solid fa-floppy-disk"></i> Salvar Regras da Pousada
                         </button>
                     </div>
@@ -197,7 +197,7 @@
                                         <div>
                                             <span class="text-xs font-extrabold text-blue-950 block">Exigir Documento do Hóspede na Vitrine</span>
                                             <span class="text-[11px] text-gray-500 leading-tight block mt-0.5">
-                                                Se marcado, o hóspede será obrigado a preencher/enviar documento oficial ao solicitar reserva na vitrine.
+                                                Se marcado, o hóspede será obrigado a preencher documento ao solicitar reserva na vitrine.
                                             </span>
                                         </div>
                                     </label>
@@ -311,7 +311,7 @@
                             </h2>
                             <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Defina acréscimos percentuais (%) ou valores fixos (R$) para feriados, pacotes ou fins de semana.</p>
                         </div>
-                        <button id="btn-cancelar-edicao" onclick="cancelarEdicao()" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1.5 px-4 rounded-xl text-xs transition">
+                        <button id="btn-cancelar-edicao" onclick="cancelarEdicao()" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1.5 px-4 rounded-xl text-xs transition cursor-pointer">
                             Cancelar Edição
                         </button>
                     </div>
@@ -360,7 +360,7 @@
                             </div>
                         </div>
                         <div class="md:col-span-3 flex justify-end">
-                            <button type="submit" id="btn-submit-regra" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition text-sm shadow-md">
+                            <button type="submit" id="btn-submit-regra" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition text-sm shadow-md cursor-pointer">
                                 + Salvar Regra de Tarifa Especial
                             </button>
                         </div>
@@ -409,8 +409,8 @@
                 <p id="modal-texto-exclusao" class="text-sm text-gray-600">Deseja realmente remover esta regra?</p>
             </div>
             <div class="flex justify-center gap-3 pt-2">
-                <button type="button" onclick="fecharModalExclusao()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-5 py-2.5 rounded-xl text-sm">Cancelar</button>
-                <button type="button" id="btn-confirmar-exclusao" class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow-md">Sim, Excluir</button>
+                <button type="button" onclick="fecharModalExclusao()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-5 py-2.5 rounded-xl text-sm cursor-pointer">Cancelar</button>
+                <button type="button" id="btn-confirmar-exclusao" class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow-md cursor-pointer">Sim, Excluir</button>
             </div>
         </div>
     </div>
@@ -458,10 +458,9 @@
             setTimeout(() => { toast.classList.add('translate-y-24', 'opacity-0'); }, 3000);
         }
 
-        window.addEventListener('DOMContentLoaded', async () => {
-            await protegerPagina();
-        });
-
+        // =========================================================================
+        // PROTEÇÃO DA PÁGINA (RBAC + PERSISTÊNCIA MASTER)
+        // =========================================================================
         async function protegerPagina() {
             try {
                 const { data: { session }, error } = await supabaseClient.auth.getSession();
@@ -470,52 +469,64 @@
                     return;
                 }
 
-                // RESOLUÇÃO DE TENANT E CARGO NO BANCO DE DADOS
-                const { data: usuarioPerfil } = await supabaseClient
-                    .from('usuarios')
-                    .select('pousada_id, cargo, ativo, nome_completo')
-                    .eq('user_id', session.user.id)
-                    .maybeSingle();
+                const emailLogado = (session.user.email || '').toLowerCase();
+                const isMaster = (emailLogado === EMAIL_MASTER_ADMIN.toLowerCase());
+                const params = new URLSearchParams(window.location.search);
+                const pousadaIdParam = params.get('pousada_id');
 
-                if (usuarioPerfil && usuarioPerfil.ativo === false) {
-                    await supabaseClient.auth.signOut();
-                    alert("Seu acesso foi desativado pelo gestor da pousada.");
-                    window.location.href = 'index.html';
-                    return;
-                }
+                // 1. MODO MASTER COM PERSISTÊNCIA DE SESSÃO
+                if (isMaster) {
+                    const pousadaAlvoMaster = pousadaIdParam || sessionStorage.getItem('master_pousada_ativa');
+                    if (pousadaAlvoMaster) {
+                        sessionStorage.setItem('master_pousada_ativa', pousadaAlvoMaster);
+                        usuarioIdAtual = pousadaAlvoMaster;
+                        cargoUsuarioAtual = 'dono';
 
-                const emailUsuario = (session.user.email || '').toLowerCase();
-                const isMaster = (emailUsuario === EMAIL_MASTER_ADMIN.toLowerCase());
+                        document.getElementById('banner-modo-master')?.classList.remove('hidden');
 
-                cargoUsuarioAtual = isMaster ? 'dono' : (usuarioPerfil?.cargo || 'dono');
-                usuarioIdAtual = isMaster && pousadaIdUrl ? pousadaIdUrl : (usuarioPerfil?.pousada_id || session.user.id);
-
-                // BLINDAGEM ABSOLUTA: APENAS O DONO OU MASTER PODE ACESSAR ESTA TELA
-                if (!isMaster && cargoUsuarioAtual !== 'dono') {
-                    alert("Acesso restrito: Apenas o gestor/proprietário da pousada pode acessar regras e tarifas financeiras.");
-                    if (cargoUsuarioAtual === 'limpeza') {
-                        window.location.href = 'limpeza.html';
-                    } else {
-                        window.location.href = 'dashboard.html';
+                        // PROPAGA AUTOMATICAMENTE O ID NOS LINKS DO MENU
+                        document.querySelectorAll('aside nav a, header a, a#btn-voltar-dash').forEach(link => {
+                            const href = link.getAttribute('href');
+                            if (href && href !== '#' && !href.startsWith('http') && !href.includes('admin-master.html')) {
+                                const limpo = href.split('?')[0];
+                                link.setAttribute('href', `${limpo}?pousada_id=${pousadaAlvoMaster}`);
+                            }
+                        });
                     }
-                    return;
                 }
 
-                if (isMaster && pousadaIdUrl) {
-                    document.getElementById('banner-modo-master')?.classList.remove('hidden');
+                // 2. MODO COMUM (DONO OU COLABORADOR)
+                if (!usuarioIdAtual) {
+                    const { data: usuarioPerfil } = await supabaseClient
+                        .from('usuarios')
+                        .select('pousada_id, cargo, ativo, nome_completo')
+                        .eq('user_id', session.user.id)
+                        .maybeSingle();
 
-                    document.querySelectorAll('aside nav a').forEach(link => {
-                        const href = link.getAttribute('href');
-                        if (href && href !== '#' && !href.startsWith('http')) {
-                            const sep = href.includes('?') ? '&' : '?';
-                            link.setAttribute('href', `${href}${sep}pousada_id=${pousadaIdUrl}`);
+                    if (usuarioPerfil && usuarioPerfil.ativo === false) {
+                        await supabaseClient.auth.signOut();
+                        alert("Seu acesso foi desativado pelo gestor da pousada.");
+                        window.location.href = 'index.html';
+                        return;
+                    }
+
+                    cargoUsuarioAtual = usuarioPerfil?.cargo || 'dono';
+
+                    // BLINDAGEM: Recepção e Camareira NUNCA acessam esta tela
+                    if (cargoUsuarioAtual !== 'dono' && !isMaster) {
+                        alert("Acesso restrito: Apenas o gestor/proprietário da pousada pode acessar regras e tarifas financeiras.");
+                        if (cargoUsuarioAtual === 'limpeza') {
+                            window.location.href = 'limpeza.html';
+                        } else {
+                            window.location.href = 'dashboard.html';
                         }
-                    });
-                    const btnVoltar = document.getElementById('btn-voltar-dash');
-                    if (btnVoltar) btnVoltar.setAttribute('href', `dashboard.html?pousada_id=${pousadaIdUrl}`);
+                        return;
+                    }
+
+                    usuarioIdAtual = usuarioPerfil?.pousada_id || session.user.id;
                 }
 
-                // Busca a pousada ativa
+                // 3. Busca a pousada ativa com .maybeSingle() para evitar erro 406
                 const { data: pousada } = await supabaseClient
                     .from('pousadas')
                     .select('*')
@@ -532,6 +543,7 @@
 
                 await atualizarCardAssinatura(pousadaCache);
 
+                // Preenche as regras da pousada
                 if (pousadaCache) {
                     document.getElementById('pousada-checkin').value = pousadaCache.horario_checkin || '13:00';
                     document.getElementById('pousada-checkout').value = pousadaCache.horario_checkout || '14:00';
@@ -571,6 +583,12 @@
             } catch (err) {
                 console.error("Erro na inicialização:", err);
             }
+        }
+
+        function sairDoModoMaster() {
+            sessionStorage.removeItem('master_pousada_ativa');
+            sessionStorage.removeItem('master_pousada_nome');
+            window.location.href = 'admin-master.html';
         }
 
         async function atualizarCardAssinatura(pousada) {
@@ -742,7 +760,6 @@
 
         function renderizarFotosSalvas(tipo, fotosJson) {
             const containerId = tipo === 'pousada' ? 'lista-fotos-salvas-pousada' : 'lista-fotos-salvas-atracoes';
-            const container = document.getElementById('containerId');
             const targetEl = document.getElementById(containerId);
             if (!targetEl) return;
 
@@ -769,7 +786,7 @@
                         <a href="${foto.url}" target="_blank" class="text-blue-600 hover:underline truncate flex-1 font-medium" title="Visualizar imagem">
                             👁️ ${foto.legenda || 'Foto ' + (idx + 1)}
                         </a>
-                        <button type="button" onclick="removerFotoSalva('${tipo}', ${idx})" class="text-red-600 hover:text-red-800 font-bold px-2 py-0.5 text-xs bg-red-50 rounded border border-red-100">Remover</button>
+                        <button type="button" onclick="removerFotoSalva('${tipo}', ${idx})" class="text-red-600 hover:text-red-800 font-bold px-2 py-0.5 text-xs bg-red-50 rounded border border-red-100 cursor-pointer">Remover</button>
                     </div>`;
             });
 
@@ -958,8 +975,8 @@
                         <td class="p-3 text-gray-600">${dInicioBR} até ${dFimBR} ${statusBadge}</td>
                         <td class="p-3 font-bold text-blue-600">${textoRegra}</td>
                         <td class="p-3 text-right space-x-2">
-                            <button type="button" onclick="prepararEdicaoTarifa('${t.id}')" class="text-blue-600 hover:text-blue-800 font-bold text-xs bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 transition">Editar</button>
-                            <button type="button" onclick="abrirModalExclusao('${t.id}')" class="text-red-600 hover:text-red-800 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-lg border border-red-100 transition">Excluir</button>
+                            <button type="button" onclick="prepararEdicaoTarifa('${t.id}')" class="text-blue-600 hover:text-blue-800 font-bold text-xs bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 transition cursor-pointer">Editar</button>
+                            <button type="button" onclick="abrirModalExclusao('${t.id}')" class="text-red-600 hover:text-red-800 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-lg border border-red-100 transition cursor-pointer">Excluir</button>
                         </td>
                     </tr>
                 `;
@@ -1065,12 +1082,18 @@
         };
 
         async function fazerLogout() { 
+            sessionStorage.removeItem('master_pousada_ativa');
+            sessionStorage.removeItem('master_pousada_nome');
             try {
                 await supabaseClient.auth.signOut();
             } finally {
                 window.location.href = 'index.html';
             }
         }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            await protegerPagina();
+        });
     </script>
 </body>
 </html>

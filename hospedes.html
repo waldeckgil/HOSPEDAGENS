@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão de Hóspedes</title>
+    <title>Gestão de Hóspedes - Painel 360</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row">
+<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row text-slate-800 font-sans">
 
     <!-- MENU LATERAL / TOPO NO MOBILE -->
     <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl flex-shrink-0 z-20">
         <div class="p-3 sm:p-6">
-            <div class="flex justify-between items-center md:block">
-                <h1 id="nome-pousada-sidebar" class="text-base sm:text-2xl font-extrabold text-white mb-0 md:mb-6 tracking-wider truncate max-w-[180px] sm:max-w-none">
+            <div class="flex justify-between items-center md:block mb-0 md:mb-6">
+                <h1 id="nome-pousada-sidebar" class="text-base sm:text-2xl font-extrabold text-white tracking-wider truncate max-w-[180px] sm:max-w-none">
                     Painel 360
                 </h1>
 
@@ -24,35 +24,35 @@
                     <a href="dashboard.html" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-xs">
                         <span>🏠</span> <span>Painel</span>
                     </a>
-                    <button onclick="fazerLogout()" class="bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white px-2.5 py-1.5 rounded-xl font-bold text-xs transition">
+                    <button onclick="fazerLogout()" class="bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white px-2.5 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer">
                         <i class="fa-solid fa-right-from-bracket"></i>
                     </button>
                 </div>
             </div>
 
             <!-- NAVEGAÇÃO DESKTOP -->
-            <nav class="hidden md:flex flex-col space-y-2 mt-4 md:mt-0">
-                <a href="dashboard.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm text-slate-200">
+            <nav class="hidden md:flex flex-col space-y-1.5 mt-4 md:mt-0">
+                <a href="dashboard.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm text-slate-300">
                     <span>🏠</span> <span>Painel Principal</span>
                 </a>
-                <a href="relatorios.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm text-slate-200">
+                <a href="relatorios.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm text-slate-300">
                     <span>📋</span> <span>Gestão Completa</span>
                 </a>
-                <a href="hospedes.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-blue-600 text-white transition font-medium text-sm">
+                <a href="hospedes.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-blue-600 text-white font-bold text-xs sm:text-sm shadow-md">
                     <span>👥</span> <span>Hóspedes</span>
                 </a>
-                <a id="link-menu-config" href="configurar-pousada.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm text-slate-200">
+                <a id="link-menu-config" href="configurar-pousada.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm text-slate-300">
                     <span>⚙️</span> <span>Configuração de Suítes</span>
                 </a>
-                <a id="link-menu-tarifas" href="tarifas.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm text-slate-200">
+                <a id="link-menu-tarifas" href="tarifas.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm text-slate-300">
                     <span>💰</span> <span>Tarifas & Assinatura</span>
                 </a>
-                <a id="link-menu-equipe" href="equipe.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm text-slate-200">
-                    <span>👥</span> <span>Minha Equipe</span>
+                <a id="link-menu-equipe" href="equipe.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm text-slate-300">
+                    <span>👤</span> <span>Minha Equipe</span>
                 </a>
                 
                 <div class="pt-3 border-t border-slate-800">
-                    <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-3 rounded-xl transition shadow text-sm flex items-center justify-center gap-2">
+                    <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl transition shadow text-xs flex items-center justify-center gap-2 cursor-pointer">
                         <i class="fa-solid fa-right-from-bracket"></i> Sair
                     </button>
                 </div>
@@ -76,6 +76,20 @@
         <!-- CORPO DA PÁGINA -->
         <main class="p-3 sm:p-6 md:p-8 flex-1 overflow-y-auto space-y-4 sm:space-y-6">
             
+            <!-- FAIXA DE MODO MASTER -->
+            <div id="banner-modo-master" class="hidden mb-4 p-3.5 rounded-2xl shadow-md border border-slate-800 bg-slate-950 text-amber-300 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-sm border border-amber-500/30">👑</span>
+                    <div>
+                        <h4 class="text-xs font-extrabold uppercase tracking-wider text-amber-400">Modo Super Administrador Master</h4>
+                        <p class="text-xs text-slate-300">Base de hóspedes de: <strong id="nome-pousada-modo-master" class="text-white underline"></strong></p>
+                    </div>
+                </div>
+                <button type="button" onclick="sairDoModoMaster()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3.5 py-1.5 rounded-xl font-bold text-xs transition shadow-xs flex items-center gap-1.5 shrink-0 cursor-pointer">
+                    <i class="fa-solid fa-arrow-left"></i> Voltar ao Master SaaS
+                </button>
+            </div>
+
             <!-- ÁREA DE BUSCA INTELIGENTE -->
             <div class="bg-white p-3.5 sm:p-6 rounded-2xl shadow-xs border border-gray-200">
                 <h2 class="text-xs sm:text-base font-bold text-slate-900 mb-3 sm:mb-4 flex items-center gap-2">
@@ -109,10 +123,10 @@
 
                 <!-- BOTÕES DE AÇÃO RESPONSIVOS -->
                 <div class="flex gap-2 sm:gap-3 mt-3.5">
-                    <button onclick="carregarHistoricoHospedes()" class="flex-1 sm:flex-initial bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 sm:py-3 rounded-xl transition shadow-xs text-xs sm:text-sm flex items-center justify-center gap-1.5">
+                    <button onclick="carregarHistoricoHospedes()" class="flex-1 sm:flex-initial bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 sm:py-3 rounded-xl transition shadow-xs text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer">
                         <i class="fa-solid fa-search"></i> <span>Pesquisar</span>
                     </button>
-                    <button onclick="limparFiltros()" class="flex-1 sm:flex-initial bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-4 py-2.5 sm:py-3 rounded-xl transition text-xs sm:text-sm text-center">
+                    <button onclick="limparFiltros()" class="flex-1 sm:flex-initial bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-4 py-2.5 sm:py-3 rounded-xl transition text-xs sm:text-sm text-center cursor-pointer">
                         Limpar
                     </button>
                 </div>
@@ -169,7 +183,20 @@
     <script>
         const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const EMAIL_MASTER_ADMIN = 'waldeckgil@gmail.com';
+
+        const paramsUrl = new URLSearchParams(window.location.search);
+        const pousadaIdUrl = paramsUrl.get('pousada_id');
+        const temSessaoMaster = localStorage.getItem('supabase_master_admin_session');
+
+        let supabaseClient;
+        if (pousadaIdUrl && temSessaoMaster) {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+                auth: { storageKey: 'supabase_master_admin_session' }
+            });
+        } else {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
 
         let usuarioIdAtual = null;
         let cargoUsuarioAtual = 'dono';
@@ -211,42 +238,85 @@
                 return;
             }
 
-            // RESOLUÇÃO DE TENANT E CARGO NO BANCO DE DADOS
-            const { data: usuarioPerfil } = await supabaseClient
-                .from('usuarios')
-                .select('pousada_id, cargo, ativo, nome_completo')
-                .eq('user_id', session.user.id)
+            const emailLogado = (session.user.email || '').toLowerCase();
+            const isMaster = (emailLogado === EMAIL_MASTER_ADMIN.toLowerCase());
+            const params = new URLSearchParams(window.location.search);
+            const pousadaIdParam = params.get('pousada_id');
+
+            // 1. MODO MASTER COM PERSISTÊNCIA DE SESSÃO
+            if (isMaster) {
+                const pousadaAlvoMaster = pousadaIdParam || sessionStorage.getItem('master_pousada_ativa');
+                if (pousadaAlvoMaster) {
+                    sessionStorage.setItem('master_pousada_ativa', pousadaAlvoMaster);
+                    usuarioIdAtual = pousadaAlvoMaster;
+                    cargoUsuarioAtual = 'dono';
+
+                    document.getElementById('banner-modo-master')?.classList.remove('hidden');
+
+                    // PROPAGA AUTOMATICAMENTE O ID NOS LINKS DO MENU
+                    document.querySelectorAll('aside nav a, header a').forEach(link => {
+                        const href = link.getAttribute('href');
+                        if (href && href !== '#' && !href.startsWith('http') && !href.includes('admin-master.html')) {
+                            const limpo = href.split('?')[0];
+                            link.setAttribute('href', `${limpo}?pousada_id=${pousadaAlvoMaster}`);
+                        }
+                    });
+                }
+            }
+
+            // 2. MODO COMUM (DONO OU RECEPÇÃO)
+            if (!usuarioIdAtual) {
+                const { data: usuarioPerfil } = await supabaseClient
+                    .from('usuarios')
+                    .select('pousada_id, cargo, ativo, nome_completo')
+                    .eq('user_id', session.user.id)
+                    .maybeSingle();
+
+                if (usuarioPerfil && usuarioPerfil.ativo === false) {
+                    await supabaseClient.auth.signOut();
+                    alert("Seu acesso foi desativado pelo gestor da pousada.");
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                cargoUsuarioAtual = usuarioPerfil?.cargo || 'dono';
+
+                if (cargoUsuarioAtual === 'limpeza') {
+                    window.location.href = 'limpeza.html';
+                    return;
+                }
+
+                usuarioIdAtual = usuarioPerfil?.pousada_id || session.user.id;
+
+                // BLINDAGEM DE MENUS PARA RECEPÇÃO
+                if (cargoUsuarioAtual === 'recepcao') {
+                    document.getElementById('link-menu-config')?.remove();
+                    document.getElementById('link-menu-tarifas')?.remove();
+                    document.getElementById('link-menu-equipe')?.remove();
+                    document.getElementById('banner-modo-master')?.remove();
+                }
+            }
+
+            // Busca nome da pousada usando .maybeSingle()
+            const { data: pousada } = await supabaseClient
+                .from('pousadas')
+                .select('nome')
+                .eq('id', usuarioIdAtual)
                 .maybeSingle();
 
-            if (usuarioPerfil && usuarioPerfil.ativo === false) {
-                await supabaseClient.auth.signOut();
-                alert("Seu acesso foi desativado pelo gestor da pousada.");
-                window.location.href = 'index.html';
-                return;
-            }
-
-            cargoUsuarioAtual = usuarioPerfil?.cargo || 'dono';
-            if (cargoUsuarioAtual === 'limpeza') {
-                window.location.href = 'limpeza.html';
-                return;
-            }
-
-            usuarioIdAtual = usuarioPerfil?.pousada_id || session.user.id;
-
-            // BLINDAGEM DE MENUS PARA RECEPÇÃO
-            if (cargoUsuarioAtual === 'recepcao') {
-                document.getElementById('link-menu-config')?.classList.add('hidden');
-                document.getElementById('link-menu-tarifas')?.classList.add('hidden');
-                document.getElementById('link-menu-equipe')?.classList.add('hidden');
-            }
-
-            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', usuarioIdAtual).maybeSingle();
             nomePousadaAtual = (pousada && pousada.nome) ? pousada.nome : "Minha Pousada";
-
             document.getElementById('nome-pousada-sidebar').innerText = nomePousadaAtual;
             document.getElementById('titulo-pousada').innerText = nomePousadaAtual;
+            const elModoMaster = document.getElementById('nome-pousada-modo-master');
+            if (elModoMaster) elModoMaster.innerText = nomePousadaAtual;
 
             carregarHistoricoHospedes();
+        }
+
+        function sairDoModoMaster() {
+            sessionStorage.removeItem('master_pousada_ativa');
+            sessionStorage.removeItem('master_pousada_nome');
+            window.location.href = 'admin-master.html';
         }
 
         function formatarDataSimples(dataStr) {
@@ -398,14 +468,14 @@
                             <a href="${r.pdf_url}" target="_blank" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-2 py-1 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1 transition">
                                 📄 Ver PDF
                             </a>
-                            <button onclick="reenviarWhatsappPDF('${r.id}')" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1 transition shadow-2xs">
+                            <button onclick="reenviarWhatsappPDF('${r.id}')" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1 transition shadow-2xs cursor-pointer">
                                 📲 WhatsApp
                             </button>
                         </div>
                     `;
                 } else {
                     if (r.status === 'Aprovada') {
-                        comprovanteHtml = `<button onclick="reenviarWhatsappPDF('${r.id}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300 px-2 py-1 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1 transition">⚠️ Gerar PDF</button>`;
+                        comprovanteHtml = `<button onclick="reenviarWhatsappPDF('${r.id}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300 px-2 py-1 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1 transition cursor-pointer">⚠️ Gerar PDF</button>`;
                     } else {
                         comprovanteHtml = `<span class="text-[10px] text-gray-400 italic">Sem PDF</span>`;
                     }
@@ -473,6 +543,7 @@
                     doc.setFont(undefined, 'bold');
                     const nomePousadaEl = document.getElementById('titulo-pousada');
                     const nomePousadaTxt = nomePousadaEl ? nomePousadaEl.innerText : 'Pousada';
+                    nomePousadaAtual = nomePousadaTxt;
                     doc.text(nomePousadaTxt.toUpperCase(), 105, 15, { align: 'center' });
                     doc.setTextColor(0,0,0);
                     doc.setFontSize(12);
@@ -547,6 +618,8 @@
         }
 
         async function fazerLogout() { 
+            sessionStorage.removeItem('master_pousada_ativa');
+            sessionStorage.removeItem('master_pousada_nome');
             await supabaseClient.auth.signOut(); 
             window.location.href = 'index.html'; 
         }
