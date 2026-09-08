@@ -333,17 +333,6 @@
         </main>
     </div>
 
-    <!-- TOAST NATIVO DO SISTEMA (SUBSTITUI OS ALERTS DO NAVEGADOR) -->
-    <div id="toast-notificacao" class="fixed bottom-6 right-6 z-[9999] transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
-        <div id="toast-content" class="bg-gray-900 text-white px-5 sm:px-6 py-3.5 sm:py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
-            <span id="toast-icone" class="text-xl">✨</span>
-            <div>
-                <h4 id="toast-titulo" class="font-bold text-xs sm:text-sm">Notificação</h4>
-                <p id="toast-mensagem" class="text-[11px] sm:text-xs text-gray-300">Mensagem aqui</p>
-            </div>
-        </div>
-    </div>
-
     <!-- MODAL ELEGANTE DE MODO SOMENTE LEITURA -->
     <div id="modal-modo-leitura" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-[999]">
         <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-red-100 text-center space-y-4">
@@ -450,77 +439,31 @@
         </div>
     </div>
 
-    <!-- MODAL NOVA RESERVA DIRETO DO CALENDÁRIO (FICHA COMPLETA) -->
+    <!-- MODAL NOVA RESERVA DIRETO DO CALENDÁRIO -->
     <div id="modal-nova-reserva-calendario" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-3 sm:p-4 z-[70]">
         <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-4 sm:p-7 relative max-h-[92vh] overflow-y-auto">
             <button onclick="fecharModalNovaReservaCalendario()" class="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold">✕</button>
             <h3 id="nova-reserva-titulo" class="text-base sm:text-lg font-extrabold text-blue-700 mb-1 pr-8">Criar Nova Reserva: Suíte</h3>
             <p class="text-[10px] sm:text-[11px] text-gray-500 mb-3">Datas preenchidas automaticamente pelo calendário geral</p>
-            
             <div id="nova-reserva-resumo" class="bg-blue-50 border border-blue-200 p-2.5 rounded-xl space-y-1 text-xs text-blue-900 mb-3">
                 <div class="flex justify-between"><span>Qtd. Diárias:</span><strong id="nova-reserva-qtd-diarias">0</strong></div>
                 <div class="flex justify-between"><span>Valor Total:</span><strong id="nova-reserva-valor-total">R$ 0,00</strong></div>
                 <div class="flex justify-between border-t border-blue-200 pt-1"><span>Saldo Restante:</span><strong id="nova-reserva-saldo-restante">R$ 0,00</strong></div>
             </div>
-            
             <div class="space-y-2.5">
                 <input type="hidden" id="nova-reserva-suite-id">
                 <div id="nova-reserva-capacidade-info" class="mb-1 bg-blue-50 border border-blue-200 p-2 rounded-xl text-xs font-bold text-blue-900 flex items-center gap-2"><span>🏨</span> <span id="nova-reserva-capacidade-texto">Capacidade: carregando...</span></div>
-
-                <!-- CAMPO CPF OBRIGATÓRIO COM INTELIGÊNCIA DE AUTOCOMPLETE -->
-                <div>
-                    <label class="block text-[11px] font-bold text-gray-700 mb-0.5">
-                        CPF do Hóspede <span class="text-red-600 font-extrabold">* (Obrigatório)</span>
-                    </label>
-                    <div class="relative">
-                        <input type="text" id="nova-reserva-cpf" placeholder="000.000.000-00" maxlength="14" class="w-full p-2.5 sm:p-3 border-2 border-blue-200 focus:border-blue-600 rounded-xl text-xs sm:text-sm bg-white font-bold text-gray-800 outline-none transition" oninput="aoDigitarCpfCalendario(this)">
-                        <div id="nova-reserva-feedback-cpf" class="hidden absolute right-3 top-3 text-[11px] font-bold text-blue-600 flex items-center gap-1.5">
-                            <i class="fa-solid fa-spinner fa-spin"></i> <span>Buscando...</span>
-                        </div>
-                    </div>
-                    <span id="nova-reserva-msg-encontrado" class="hidden text-[10px] font-bold text-emerald-700 mt-1 block">
-                        <i class="fa-solid fa-check-circle"></i> Hóspede localizado! Dados cadastrais preenchidos automaticamente.
-                    </span>
-                </div>
-
                 <input type="text" id="nova-reserva-hospede" placeholder="Nome Hóspede *" class="w-full p-2.5 sm:p-3 border rounded-xl text-xs sm:text-sm">
-                
+                <input type="text" id="nova-reserva-whatsapp" placeholder="WhatsApp *" class="w-full p-2.5 sm:p-3 border rounded-xl text-xs sm:text-sm">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <input type="text" id="nova-reserva-whatsapp" placeholder="WhatsApp *" class="p-2.5 sm:p-3 border rounded-xl text-xs sm:text-sm">
+                    <input type="text" id="nova-reserva-cpf" placeholder="CPF (Opcional)" class="p-2.5 sm:p-3 border rounded-xl text-xs sm:text-sm">
                     <input type="text" id="nova-reserva-rg" placeholder="RG (Opcional)" class="p-2.5 sm:p-3 border rounded-xl text-xs sm:text-sm">
                 </div>
-
-                <!-- BLOCO DE ENDEREÇO ESTRUTURADO (LOGRADOURO, BAIRRO, MUNICÍPIO, UF, CEP) -->
-                <div class="bg-gray-50/80 border border-gray-200 p-2.5 sm:p-3 rounded-2xl space-y-2">
-                    <span class="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block">Endereço do Hóspede (com Busca por CEP)</span>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        <div class="sm:col-span-1">
-                            <label class="block text-[10px] font-bold text-gray-600 mb-0.5">CEP:</label>
-                            <input type="text" id="nova-reserva-cep" placeholder="00000-000" maxlength="9" class="w-full p-2 border rounded-xl text-xs bg-white font-semibold" oninput="aoDigitarCepCalendario(this)">
-                        </div>
-                        <div class="sm:col-span-2">
-                            <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Endereço (Rua e Número):</label>
-                            <input type="text" id="nova-reserva-endereco" placeholder="Ex: Av. Beira Mar, 120" class="w-full p-2 border rounded-xl text-xs bg-white">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Bairro:</label>
-                            <input type="text" id="nova-reserva-bairro" placeholder="Ex: Centro" class="w-full p-2 border rounded-xl text-xs bg-white">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Município (Cidade):</label>
-                            <input type="text" id="nova-reserva-cidade" placeholder="Ex: Ubatuba" class="w-full p-2 border rounded-xl text-xs bg-white">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-600 mb-0.5">UF (Estado):</label>
-                            <input type="text" id="nova-reserva-uf" placeholder="Ex: SP" maxlength="2" class="w-full p-2 border rounded-xl text-xs bg-white uppercase font-bold text-center">
-                        </div>
-                    </div>
+                <input type="text" id="nova-reserva-endereco" placeholder="Endereço" class="w-full p-2.5 sm:p-3 border rounded-xl text-xs sm:text-sm">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <input type="text" id="nova-reserva-cep" placeholder="CEP" class="p-2.5 sm:p-3 border rounded-xl text-xs sm:text-sm">
+                    <input type="email" id="nova-reserva-email" placeholder="E-mail" class="p-2.5 sm:p-3 border rounded-xl text-xs sm:text-sm">
                 </div>
-
-                <input type="email" id="nova-reserva-email" placeholder="E-mail" class="w-full p-2.5 sm:p-3 border rounded-xl text-xs sm:text-sm">
-
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
                     <div><label class="block text-[11px] font-bold text-gray-700 mb-0.5">Adultos</label><input type="number" id="nova-reserva-adultos" min="1" value="2" class="w-full p-2.5 border rounded-xl text-xs sm:text-sm" onchange="recalcularNovaReservaCalendario()" oninput="recalcularNovaReservaCalendario()"></div>
                     <div><label class="block text-[11px] font-bold text-gray-700 mb-0.5">Crianças</label><input type="number" id="nova-reserva-criancas" min="0" value="0" class="w-full p-2.5 border rounded-xl text-xs sm:text-sm" onchange="recalcularNovaReservaCalendario()" oninput="recalcularNovaReservaCalendario()"></div>
@@ -540,10 +483,8 @@
                     <div><label class="block text-[11px] font-bold text-emerald-700 mb-0.5">Forma de Pagamento</label><select id="nova-reserva-forma-pagamento" class="w-full p-2.5 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-xs sm:text-sm"><option>Pix / Sinal</option><option>Dinheiro</option><option>Cartão de Crédito</option><option>Cartão de Débito</option><option>Transferência Bancária</option></select></div>
                     <div><label class="block text-[11px] font-bold text-amber-700 mb-0.5">⚠️ Observação / Alerta</label><textarea id="nova-reserva-observacao" rows="2" placeholder="Ex: Hóspede solicitou late checkout, etc." class="w-full p-2.5 border border-amber-300 bg-amber-50/40 rounded-xl text-xs sm:text-sm"></textarea></div>
                 </div>
-                <button onclick="salvarNovaReservaCalendario()" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-2.5 sm:p-3 rounded-xl font-bold mt-3 text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-check"></i> Salvar Alterações
-                </button>
-                <button onclick="fecharModalNovaReservaCalendario()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 p-2.5 rounded-xl font-bold mt-1.5 text-xs sm:text-sm transition">Cancelar</button>
+                <button onclick="salvarNovaReservaCalendario()" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-2.5 sm:p-3 rounded-xl font-bold mt-3 text-xs sm:text-sm shadow-md">Salvar Alterações</button>
+                <button onclick="fecharModalNovaReservaCalendario()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 p-2.5 rounded-xl font-bold mt-1.5 text-xs sm:text-sm">Cancelar</button>
             </div>
         </div>
     </div>
@@ -562,195 +503,6 @@
         let suitesDaPousadaCache = []; 
         let tituloBaseAtual = 'Extrato Detalhado de Pagamentos';
         let pousadaEmDiaCache = true;
-
-        // =========================================================================
-        // NOTIFICAÇÕES NATIVAS DO SISTEMA (SUBSTITUEM OS ALERTS DO NAVEGADOR)
-        // =========================================================================
-        let toastTimerRelatorios = null;
-        function mostrarToast(titulo, mensagem, tipo = 'sucesso', duracaoMs = 4000) {
-            const toast = document.getElementById('toast-notificacao');
-            const toastTitulo = document.getElementById('toast-titulo');
-            const toastMsg = document.getElementById('toast-mensagem');
-            const toastIcone = document.getElementById('toast-icone');
-            const toastContent = document.getElementById('toast-content');
-
-            if (!toast || !toastTitulo || !toastMsg) return;
-
-            if (toastTimerRelatorios) clearTimeout(toastTimerRelatorios);
-
-            toastTitulo.innerText = titulo;
-            toastMsg.innerText = mensagem;
-
-            if (tipo === 'sucesso') {
-                toastContent.className = "bg-gray-900 text-white px-5 sm:px-6 py-3.5 sm:py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800";
-                toastIcone.innerText = "✨";
-            } else if (tipo === 'alerta') {
-                toastContent.className = "bg-amber-900 text-white px-5 sm:px-6 py-3.5 sm:py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-amber-700";
-                toastIcone.innerText = "⚠️";
-            } else {
-                toastContent.className = "bg-red-900 text-white px-5 sm:px-6 py-3.5 sm:py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-red-700";
-                toastIcone.innerText = "🚨";
-            }
-
-            toast.classList.remove('translate-y-24', 'opacity-0');
-            toastTimerRelatorios = setTimeout(() => {
-                toast.classList.add('translate-y-24', 'opacity-0');
-            }, duracaoMs);
-        }
-
-        // =========================================================================
-        // FUNÇÕES DE MÁSCARA, VALIDAÇÃO DE CPF E AUTOCOMPLETE
-        // =========================================================================
-        function formatarCPF(v) {
-            v = v.replace(/\D/g, "");
-            if (v.length > 11) v = v.substring(0, 11);
-            if (v.length > 9) return v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, "$1.$2.$3-$4");
-            if (v.length > 6) return v.replace(/(\d{3})(\d{3})(\d{1,3})/, "$1.$2.$3");
-            if (v.length > 3) return v.replace(/(\d{3})(\d{1,3})/, "$1.$2");
-            return v;
-        }
-
-        function validarCPF(cpfLimpo) {
-            if (!cpfLimpo || cpfLimpo.length !== 11) return false;
-            if (/^(\d)\1{10}$/.test(cpfLimpo)) return false;
-            let soma = 0;
-            let resto;
-            for (let i = 1; i <= 9; i++) soma += parseInt(cpfLimpo.substring(i - 1, i)) * (11 - i);
-            resto = (soma * 10) % 11;
-            if (resto === 10 || resto === 11) resto = 0;
-            if (resto !== parseInt(cpfLimpo.substring(9, 10))) return false;
-            soma = 0;
-            for (let i = 1; i <= 10; i++) soma += parseInt(cpfLimpo.substring(i - 1, i)) * (12 - i);
-            resto = (soma * 10) % 11;
-            if (resto === 10 || resto === 11) resto = 0;
-            return resto === parseInt(cpfLimpo.substring(10, 11));
-        }
-
-        let timerBuscaCpfRelatorios = null;
-        async function aoDigitarCpfCalendario(input) {
-            input.value = formatarCPF(input.value);
-            const cpfLimpo = input.value.replace(/\D/g, "");
-            const msgEncontrado = document.getElementById('nova-reserva-msg-encontrado');
-            const feedbackSpinner = document.getElementById('nova-reserva-feedback-cpf');
-
-            if (msgEncontrado) msgEncontrado.classList.add('hidden');
-            if (cpfLimpo.length !== 11) {
-                if (feedbackSpinner) feedbackSpinner.classList.add('hidden');
-                return;
-            }
-
-            if (timerBuscaCpfRelatorios) clearTimeout(timerBuscaCpfRelatorios);
-            timerBuscaCpfRelatorios = setTimeout(async () => {
-                if (feedbackSpinner) feedbackSpinner.classList.remove('hidden');
-                try {
-                    // 1. Busca na tabela hospedes da pousada
-                    const { data: hospedeBase } = await supabaseClient
-                        .from('hospedes')
-                        .select('*')
-                        .eq('pousada_id', usuarioIdAtual)
-                        .eq('cpf', input.value)
-                        .maybeSingle();
-
-                    let dados = hospedeBase;
-
-                    // 2. Busca sem máscara ou na tabela de reservas anteriores
-                    if (!dados) {
-                        const { data: hospedeBaseSemMasc } = await supabaseClient
-                            .from('hospedes')
-                            .select('*')
-                            .eq('pousada_id', usuarioIdAtual)
-                            .eq('cpf', cpfLimpo)
-                            .maybeSingle();
-                        dados = hospedeBaseSemMasc;
-                    }
-
-                    if (!dados) {
-                        const { data: reservaAntiga } = await supabaseClient
-                            .from('reservas')
-                            .select('*')
-                            .eq('pousada_id', usuarioIdAtual)
-                            .or(`cpf.eq.${input.value},cpf.eq.${cpfLimpo}`)
-                            .order('criado_em', { ascending: false })
-                            .limit(1)
-                            .maybeSingle();
-                        
-                        if (reservaAntiga) {
-                            dados = {
-                                nome: reservaAntiga.hospede_nome,
-                                telefone: reservaAntiga.whatsapp_hospede,
-                                rg: reservaAntiga.rg,
-                                endereco: reservaAntiga.endereco,
-                                cep: reservaAntiga.cep,
-                                email: reservaAntiga.email
-                            };
-                        }
-                    }
-
-                    if (dados) {
-                        const elNome = document.getElementById('nova-reserva-hospede');
-                        const elWhats = document.getElementById('nova-reserva-whatsapp');
-                        const elRg = document.getElementById('nova-reserva-rg');
-                        const elEnd = document.getElementById('nova-reserva-endereco');
-                        const elCep = document.getElementById('nova-reserva-cep');
-                        const elEmail = document.getElementById('nova-reserva-email');
-
-                        if (dados.nome && elNome) elNome.value = dados.nome;
-                        if (dados.telefone && elWhats) elWhats.value = dados.telefone;
-                        if (dados.whatsapp_hospede && elWhats) elWhats.value = dados.whatsapp_hospede;
-                        if (dados.rg && elRg) elRg.value = dados.rg;
-                        if (dados.cep && elCep) elCep.value = dados.cep;
-                        if (dados.email && elEmail) elEmail.value = dados.email;
-
-                        // Se o endereço estiver composto com traço ou vírgula, tenta extrair partes
-                        if (dados.endereco && elEnd) {
-                            elEnd.value = dados.endereco;
-                        }
-
-                        if (msgEncontrado) msgEncontrado.classList.remove('hidden');
-                        mostrarToast("Hóspede Localizado!", `Cadastro de ${dados.nome || 'Hóspede'} preenchido automaticamente!`, "sucesso", 4000);
-                    }
-                } catch (err) {
-                    console.warn("Aviso busca CPF:", err);
-                } finally {
-                    if (feedbackSpinner) feedbackSpinner.classList.add('hidden');
-                }
-            }, 300);
-        }
-
-        // =========================================================================
-        // BUSCA AUTOMÁTICA DE ENDEREÇO VIA CEP (VIACEP)
-        // =========================================================================
-        async function aoDigitarCepCalendario(input) {
-            let cepLimpo = input.value.replace(/\D/g, "");
-            if (cepLimpo.length > 8) cepLimpo = cepLimpo.substring(0, 8);
-            if (cepLimpo.length > 5) {
-                input.value = cepLimpo.replace(/^(\d{5})(\d)/, "$1-$2");
-            } else {
-                input.value = cepLimpo;
-            }
-
-            if (cepLimpo.length === 8) {
-                try {
-                    const res = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
-                    const data = await res.json();
-                    if (!data.erro) {
-                        const elEnd = document.getElementById('nova-reserva-endereco');
-                        const elBairro = document.getElementById('nova-reserva-bairro');
-                        const elCidade = document.getElementById('nova-reserva-cidade');
-                        const elUf = document.getElementById('nova-reserva-uf');
-
-                        if (data.logradouro && elEnd && !elEnd.value) elEnd.value = data.logradouro;
-                        if (data.bairro && elBairro) elBairro.value = data.bairro;
-                        if (data.localidade && elCidade) elCidade.value = data.localidade;
-                        if (data.uf && elUf) elUf.value = data.uf;
-
-                        mostrarToast("CEP Localizado!", `${data.localidade}/${data.uf} preenchido automaticamente.`, "sucesso", 3000);
-                    }
-                } catch(e) {
-                    console.warn("Erro ao buscar CEP:", e);
-                }
-            }
-        }
 
         function abrirModalModoLeitura() {
             const m = document.getElementById('modal-modo-leitura');
@@ -975,7 +727,7 @@
 
         function alterarFiltroStatusReservas(valor) {
             filtroStatusReservasAtual = valor;
-            filtroCheckTipoHoje = null;
+            filtroCheckTipoHoje = null; // Limpa o filtro de card diário para ver por status
             limparEstiloCardsHoje();
 
             var btnA = document.getElementById('btnAprovada');
@@ -1057,9 +809,12 @@
             });
         }
 
+        // =========================================================================
+        // ITEM 2: OPERAÇÃO ÁGIL NOS CARDS "IN HOJE", "OUT HOJE", "OUT AMANHÃ", "RESERVAS"
+        // =========================================================================
         function filtrarPorCardHoje(tipo) {
             if (filtroCheckTipoHoje === tipo) {
-                filtroCheckTipoHoje = null;
+                filtroCheckTipoHoje = null; // Toggle off: desativa o filtro ao clicar novamente
                 limparEstiloCardsHoje();
             } else {
                 filtroCheckTipoHoje = tipo;
@@ -1343,6 +1098,7 @@
             
             let tituloCompleto = `${tituloBaseAtual} (DE ${dataInicioFormatada} ATÉ ${dataFimFormatada})`;
 
+            // Título dinâmico inteligente ao clicar nos cards de controle diário
             if (viewAtualSelecionada === 'vw_gestor_reservas_relatorio' && filtroCheckTipoHoje) {
                 const hojeBr = formatarDataBr(new Date().toLocaleDateString('sv-SE'));
                 const amanhaObj = new Date();
@@ -1430,12 +1186,16 @@
                         });
                     }
 
+                // =============================================================
+                // ITEM 1: VISÃO FINANCEIRA COMPLETA (INCLUI ESTADIAS INTERROMPIDAS)
+                // =============================================================
                 } else if (ehViewFinanceiro) {
                     if (!suitesDaPousadaCache || suitesDaPousadaCache.length === 0) {
                         const { data: suData } = await supabaseClient.from('suites').select('id,nome').eq('pousada_id', usuarioIdAtual).order('nome');
                         if (suData) suitesDaPousadaCache = suData;
                     }
 
+                    // Busca reservas da pousada sem descartar cegamente as canceladas
                     let queryRes = supabaseClient
                         .from('reservas')
                         .select('*')
@@ -1464,6 +1224,7 @@
                         }
                     });
 
+                    // Filtra para manter no financeiro apenas: ativas, finalizadas e estadias canceladas com movimentação financeira real
                     registros = (reservasFin || []).filter(r => {
                         if (r.status === 'Cancelada') {
                             const temValor = Number(r.valor_total || 0) > 0;
@@ -1548,6 +1309,9 @@
                             }
                         });
                     }
+                // =============================================================
+                // ITEM 2: CONSULTA DE RESERVAS COM FILTRAGEM RÁPIDA PRECISA
+                // =============================================================
                 } else if (ehViewReservas) {
                     if (!suitesDaPousadaCache || suitesDaPousadaCache.length === 0) {
                         const { data: suData } = await supabaseClient.from('suites').select('id,nome').eq('pousada_id', usuarioIdAtual).order('nome');
@@ -1564,6 +1328,7 @@
                         .select('*')
                         .eq('pousada_id', usuarioIdAtual);
 
+                    // Filtra diretamente no banco para respostas precisas aos botões rápidos
                     if (filtroCheckTipoHoje === 'checkin') {
                         query = query.eq('checkin', hojeIso).neq('status', 'Cancelada').neq('status', 'Recusada');
                     } else if (filtroCheckTipoHoje === 'checkout') {
@@ -1655,6 +1420,7 @@
                 let registrosFiltrados = registros;
 
                 if (ehViewReservas) {
+                    // Se um card rápido estiver ativo, respeita o filtro do card sem ser barrado pelas pílulas
                     if (!filtroCheckTipoHoje) {
                         registrosFiltrados = registrosFiltrados.filter(row => {
                             let status = String(row.status || row.status_reserva || '').toUpperCase();
@@ -1821,6 +1587,9 @@
                 let colunas = [];
                 if (ehViewTarifas) {
                     colunas = ['status', 'descricao', 'suite', 'data_inicio', 'data_fim', 'dias_semana', 'tipo_ajuste', 'valor_especial'];
+                // =============================================================
+                // ITEM 1: COLUNAS FIXAS E PRIORIZADAS NA VISÃO FINANCEIRA
+                // =============================================================
                 } else if (ehViewFinanceiro) {
                     colunas = [
                         'hospede',
@@ -1836,8 +1605,12 @@
                         'status',
                         'observacao'
                     ];
+                // =============================================================
+                // ITEM 2: COLUNAS OPERACIONAIS OBJETIVAS (SEM POLUIÇÃO DE 21 ITENS)
+                // =============================================================
                 } else if (ehViewReservas) {
                     if (filtroCheckTipoHoje) {
+                        // Modo Focado de Recepção: Rápido, claro e sem rolagem excessiva
                         colunas = [
                             'status', 
                             'suite', 
@@ -1952,6 +1725,7 @@
                                 else valorExibicao = String(valorBruto);
                             } else if (colLower.includes('alerta_check_in') || colLower.includes('alerta_status')) {
                                 valorExibicao = valorBruto;
+                            // FORMATAÇÃO CORRETA DE DATA E HORA
                             } else if (colLower === 'data_pagamento' || colLower.includes('criado_em') || colLower.includes('recusado_em') || colLower.includes('data_ocorrencia')) {
                                 valorExibicao = `<span class="font-bold text-gray-700">${formatarDataHoraBr(valorBruto)}</span>`;
                             } else if (colLower.includes('checkin') || colLower.includes('checkout') || colLower.includes('data_inicio') || colLower.includes('data_fim')) {
@@ -2202,7 +1976,10 @@
             if (!usuarioIdAtual) return;
             
             const modal = document.getElementById('modal-calendario-geral-relatorios');
-            if (!modal) return;
+            if (!modal) {
+                console.error('Modal não encontrado!');
+                return;
+            }
 
             const elSuiteNome = document.getElementById('cal-geral-rel-suite-nome');
             if (elSuiteNome) elSuiteNome.innerText = 'Carregando...';
@@ -2215,7 +1992,7 @@
                 calGeralRelReservasCache = reservas || [];
                 
                 if (calGeralRelSuitesCache.length === 0) {
-                    mostrarToast("Aviso", "Nenhuma acomodação cadastrada.", "alerta");
+                    alert('Nenhuma suíte cadastrada');
                     return;
                 }
                 
@@ -2391,7 +2168,7 @@
                         dCurr.setDate(dCurr.getDate() + 1);
                     }
                     if (temOcupacao) {
-                        mostrarToast("Período Indisponível", "Existe data ocupada no intervalo. Escolha outro período livre.", "alerta");
+                        alert('Existe data ocupada no intervalo. Escolha outro período livre.');
                         return;
                     }
                     calGeralCheckoutTemp = dataIso;
@@ -2415,9 +2192,6 @@
             document.getElementById('nova-reserva-cpf').value = '';
             document.getElementById('nova-reserva-rg').value = '';
             document.getElementById('nova-reserva-endereco').value = '';
-            document.getElementById('nova-reserva-bairro').value = '';
-            document.getElementById('nova-reserva-cidade').value = '';
-            document.getElementById('nova-reserva-uf').value = '';
             document.getElementById('nova-reserva-cep').value = '';
             document.getElementById('nova-reserva-email').value = '';
             document.getElementById('nova-reserva-valor-sinal').value = '';
@@ -2425,12 +2199,6 @@
             document.getElementById('nova-reserva-adultos').value = '2';
             document.getElementById('nova-reserva-criancas').value = '0';
             document.getElementById('nova-reserva-pet').value = 'false';
-
-            const msgEncontrado = document.getElementById('nova-reserva-msg-encontrado');
-            if (msgEncontrado) msgEncontrado.classList.add('hidden');
-            const feedbackCpf = document.getElementById('nova-reserva-feedback-cpf');
-            if (feedbackCpf) feedbackCpf.classList.add('hidden');
-
             document.getElementById('modal-nova-reserva-calendario').classList.remove('hidden');
             recalcularNovaReservaCalendario();
         }
@@ -2525,86 +2293,50 @@
                 return;
             }
 
-            const suiteId = document.getElementById('nova-reserva-suite-id').value;
-            const hospede = document.getElementById('nova-reserva-hospede').value.trim();
-            const whatsapp = document.getElementById('nova-reserva-whatsapp').value.trim();
-            const checkin = document.getElementById('nova-reserva-checkin').value;
-            const checkout = document.getElementById('nova-reserva-checkout').value;
-
-            // =================================================================
-            // REGRA: CPF OBRIGATÓRIO NA CRIAÇÃO DE NOVA RESERVA
-            // =================================================================
-            const cpfInformado = (document.getElementById('nova-reserva-cpf').value || '').trim();
-            const cpfLimpo = cpfInformado.replace(/\D/g, "");
-
-            if (!cpfInformado || cpfLimpo.length === 0) {
-                mostrarToast("Campo Obrigatório", "O CPF do hóspede é obrigatório para criar a reserva.", "alerta");
-                document.getElementById('nova-reserva-cpf').focus();
-                return;
-            }
-
-            if (cpfLimpo.length !== 11 || !validarCPF(cpfLimpo)) {
-                mostrarToast("CPF Inválido", "O CPF informado não é válido. Verifique a digitação.", "erro");
-                document.getElementById('nova-reserva-cpf').focus();
-                return;
-            }
-
-            if (!hospede || !whatsapp) {
-                mostrarToast("Dados Incompletos", "Por favor, preencha o Nome e o WhatsApp do hóspede.", "alerta");
-                return;
-            }
+            const suiteId=document.getElementById('nova-reserva-suite-id').value;
+            const hospede=document.getElementById('nova-reserva-hospede').value.trim();
+            const whatsapp=document.getElementById('nova-reserva-whatsapp').value.trim();
+            const checkin=document.getElementById('nova-reserva-checkin').value;
+            const checkout=document.getElementById('nova-reserva-checkout').value;
+            if(!hospede||!whatsapp){ alert('Preencha nome e whatsapp'); return; }
 
             const suiteCap = calGeralRelSuitesCache.find(s=>s.id===suiteId);
             if (suiteCap) {
                 const capMax = Number(suiteCap.capacidade_hospedes)||0;
                 const adultosVal = parseInt(document.getElementById('nova-reserva-adultos').value)||2;
                 const criancasVal = parseInt(document.getElementById('nova-reserva-criancas').value)||0;
-                if (capMax>0 && (adultosVal+criancasVal)>capMax) { 
-                    mostrarToast("Capacidade Excedida", `Esta acomodação comporta no máximo ${capMax} pessoa(s).`, "alerta");
-                    return; 
-                }
+                if (capMax>0 && (adultosVal+criancasVal)>capMax) { alert(`Capacidade excedida: máximo ${capMax} pessoa(s)`); return; }
             }
 
             try {
                 const {data:temConflito} = await supabaseClient.rpc('verificar_conflito_reserva',{p_suite_id:suiteId,p_checkin:checkin,p_checkout:checkout,p_reserva_id:null});
-                if (temConflito===true) { 
-                    mostrarToast("Conflito de Datas", "Já existe uma reserva confirmada para esta acomodação nestas datas!", "erro");
-                    return; 
-                }
+                if (temConflito===true) { alert('Já existe uma reserva confirmada para esta suíte nestas datas!'); return; }
             } catch(e){ console.warn('Erro verificar conflito',e); }
 
-            const valorTotal = Number(document.getElementById('nova-reserva-saldo-restante').dataset.valorTotal||0);
-            const valorSinal = Number(document.getElementById('nova-reserva-valor-sinal').value||0);
-            const forma = document.getElementById('nova-reserva-forma-pagamento').value;
-            const obs = document.getElementById('nova-reserva-observacao').value;
-            const rg = document.getElementById('nova-reserva-rg').value;
-            const logradouro = document.getElementById('nova-reserva-endereco').value.trim();
-            const bairro = document.getElementById('nova-reserva-bairro').value.trim();
-            const cidade = document.getElementById('nova-reserva-cidade').value.trim();
-            const uf = document.getElementById('nova-reserva-uf').value.trim().toUpperCase();
-            const cep = document.getElementById('nova-reserva-cep').value;
-            const email = document.getElementById('nova-reserva-email').value;
-            const adultos = parseInt(document.getElementById('nova-reserva-adultos').value)||2;
-            const criancas = parseInt(document.getElementById('nova-reserva-criancas').value)||0;
-            const pet = document.getElementById('nova-reserva-pet').value==='true';
+            const valorTotal=Number(document.getElementById('nova-reserva-saldo-restante').dataset.valorTotal||0);
+            const valorSinal=Number(document.getElementById('nova-reserva-valor-sinal').value||0);
+            const forma=document.getElementById('nova-reserva-forma-pagamento').value;
+            const obs=document.getElementById('nova-reserva-observacao').value;
+            const cpf=document.getElementById('nova-reserva-cpf').value;
+            const rg=document.getElementById('nova-reserva-rg').value;
+            const endereco=document.getElementById('nova-reserva-endereco').value;
+            const cep=document.getElementById('nova-reserva-cep').value;
+            const email=document.getElementById('nova-reserva-email').value;
+            const adultos=parseInt(document.getElementById('nova-reserva-adultos').value)||2;
+            const criancas=parseInt(document.getElementById('nova-reserva-criancas').value)||0;
+            const pet=document.getElementById('nova-reserva-pet').value==='true';
             const inputsIdades = document.querySelectorAll('.nova-reserva-input-idade-crianca');
             const idadesStr = Array.from(inputsIdades).map(el=>parseInt(el.value)||0).join(',');
 
-            // Composição segura do endereço completo
-            let enderecoCompleto = logradouro;
-            if (bairro) enderecoCompleto += (enderecoCompleto ? `, ` : '') + bairro;
-            if (cidade) enderecoCompleto += (enderecoCompleto ? ` - ` : '') + cidade;
-            if (uf) enderecoCompleto += (cidade ? `/` : ` - `) + uf;
-
-            try {
+            try{
                 const dadosReserva = {
                     pousada_id: usuarioIdAtual,
                     suite_id: suiteId,
                     hospede_nome: hospede,
                     whatsapp_hospede: whatsapp,
-                    cpf: cpfInformado,
+                    cpf: cpf||null,
                     rg: rg||null,
-                    endereco: enderecoCompleto||null,
+                    endereco: endereco||null,
                     cep: cep||null,
                     email: email||null,
                     qtd_adultos: adultos,
@@ -2617,8 +2349,7 @@
                     status: 'Aprovada',
                     observacao: obs||null
                 };
-
-                const { data: nova, error } = await supabaseClient.from('reservas').insert([dadosReserva]).select().single();
+                const {data:nova, error}=await supabaseClient.from('reservas').insert([dadosReserva]).select().single();
                 
                 if (error) {
                     if (error.message && (error.message.includes('row-level security') || error.message.includes('policy'))) {
@@ -2629,44 +2360,16 @@
                     throw error;
                 }
 
-                // Sincronização no CRM de hóspedes
-                try {
-                    const dadosHospede = {
-                        pousada_id: usuarioIdAtual,
-                        nome: hospede,
-                        cpf: cpfInformado,
-                        email: email || null,
-                        telefone: whatsapp || null
-                    };
-                    const { data: hExiste } = await supabaseClient.from('hospedes').select('id').eq('pousada_id', usuarioIdAtual).eq('cpf', cpfInformado).maybeSingle();
-                    if (hExiste) await supabaseClient.from('hospedes').update(dadosHospede).eq('id', hExiste.id);
-                    else await supabaseClient.from('hospedes').insert([dadosHospede]);
-                } catch(eCrm) { console.warn("Aviso CRM hóspede:", eCrm); }
-
-                if (valorSinal > 0 && nova) {
-                    await supabaseClient.from('hospede_pagamentos').insert([{
-                        pousada_id: usuarioIdAtual, 
-                        reserva_id: nova.id, 
-                        valor_pago: valorSinal, 
-                        forma_pagamento: forma, 
-                        observacao: 'Sinal via calendário geral de relatórios'
-                    }]);
-                }
-
-                mostrarToast("Sucesso!", "Reserva confirmada e criada com sucesso!", "sucesso", 4500);
-                fecharModalNovaReservaCalendario(); 
-                fecharCalendarioGeralRelatorios(); 
-                calGeralCheckinTemp = null; 
-                calGeralCheckoutTemp = null; 
-                if (typeof carregarDadosView === 'function') carregarDadosView();
-
-            } catch(e) { 
+                if(valorSinal>0 && nova) await supabaseClient.from('hospede_pagamentos').insert([{pousada_id:usuarioIdAtual, reserva_id:nova.id, valor_pago:valorSinal, forma_pagamento:forma, observacao:'Sinal via calendário geral'}]);
+                alert('Reserva criada com sucesso!');
+                fecharModalNovaReservaCalendario(); fecharCalendarioGeralRelatorios(); calGeralCheckinTemp=null; calGeralCheckoutTemp=null; if(typeof carregarDadosView==='function') carregarDadosView();
+            }catch(e){ 
                 console.error(e); 
                 if (String(e.message || e).includes('row-level security') || String(e.message || e).includes('policy')) {
                     fecharModalNovaReservaCalendario();
                     abrirModalModoLeitura();
                 } else {
-                    mostrarToast("Erro ao Gravar", (e.message || e), "erro", 5000);
+                    alert('Erro: '+(e.message||e)); 
                 }
             }
         }
