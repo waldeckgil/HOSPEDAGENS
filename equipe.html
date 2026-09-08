@@ -137,7 +137,7 @@
             <form id="form-novo-membro" onsubmit="salvarNovoMembro(event)" class="space-y-3.5">
                 <div>
                     <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nome Completo *</label>
-                    <input type="text" id="cad-nome" placeholder="Ex: Maria dos Santos" required class="w-full p-2.5 border rounded-xl text-xs font-semibold bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input type="text" id="cad-nome" placeholder="Ex: Angela Maria" required class="w-full p-2.5 border rounded-xl text-xs font-semibold bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
 
                 <div>
@@ -309,7 +309,7 @@
             const isMaster = (emailLogado === EMAIL_MASTER_ADMIN.toLowerCase());
             const cargo = perfil?.cargo || 'dono';
 
-            // SEGURANÇA: Se não for Dono nem Master, bloqueia imediatamente
+            // SEGURANÇA: Apenas Dono ou Master gerencia equipe
             if (!isMaster && cargo !== 'dono') {
                 alert("Acesso restrito: apenas o gestor proprietário da pousada pode gerenciar a equipe.");
                 window.location.href = 'dashboard.html';
@@ -366,7 +366,7 @@
                     <div class="col-span-full py-10 text-center text-gray-400">
                         <i class="fa-solid fa-user-group text-3xl mb-2 text-gray-300 block"></i>
                         <p class="text-xs font-semibold">Nenhum colaborador cadastrado ainda.</p>
-                        <p class="text-[11px] text-gray-400 mt-0.5">Clique no botão "Adicionar Colaborador" acima para convidar sua equipe.</p>
+                        <p class="text-[11px] text-gray-400 mt-0.5">Clique no botão "Adicionar Colaborador" acima para cadastrar.</p>
                     </div>`;
                 return;
             }
@@ -470,7 +470,7 @@
         }
 
         // =========================================================================
-        // SALVAMENTO SEGURO COM PROTEÇÃO CONTRA CHAVE DUPLICADA
+        // SALVAMENTO SEGURO DO COLABORADOR
         // =========================================================================
         async function salvarNovoMembro(e) {
             e.preventDefault();
@@ -486,98 +486,73 @@
             const senha = document.getElementById('cad-senha').value;
 
             try {
-                // 1. VALIDAÇÃO PRÉVIA: Verifica se o e-mail já existe na tabela usuarios
+                // 1. VALIDAÇÃO PRÉVIA NA TABELA USUARIOS
                 const { data: usuarioExistente } = await supabaseClient
                     .from('usuarios')
-                    .select('id, email, pousada_id')
+                    .select('id, email')
                     .eq('email', email)
                     .maybeSingle();
 
                 if (usuarioExistente) {
-                    throw new Error(`O e-mail "${email}" já está cadastrado nesta ou em outra equipe.`);
+                    throw new Error(`O e-mail "${email}" já está cadastrado.`);
                 }
 
-                let novoUserId = null;
-                let criadoViaEdge = false;
+                // 2. CRIAÇÃO ISOLADA NO SUPABASE AUTH (Sem derrubar a sessão do Dono)
+                const tempAuthClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+                    auth: {
+                        persistSession: false,
+                        autoRefreshToken: false,
+                        detectSessionInUrl: false
+                    }
+                });
 
-                // 2. Tenta criar primeiro via Edge Function oficial (se estiver deployada)
-                try {
-                    const { data: edgeData, error: edgeError } = await supabaseClient.functions.invoke('gerenciar-equipe', {
-                        body: {
-                            acao: 'criar',
+                const { data: authData, error: authError } = await tempAuthClient.auth.signUp({
+                    email: email,
+                    password: senha,
+                    options: {
+                        data: {
                             nome: nome,
                             cargo: cargo,
-                            whatsapp: whatsapp,
-                            email: email,
-                            senha: senha,
-                            pousada_id: usuarioIdAtual
-                        }
-                    });
-
-                    if (!edgeError && edgeData && (edgeData.success || edgeData.user_id)) {
-                        novoUserId = edgeData.user_id;
-                        criadoViaEdge = true;
-                    }
-                } catch (edgeErr) {
-                    console.warn("Edge Function não disponível, executando fallback seguro:", edgeErr);
-                }
-
-                // 3. Fallback Client-side caso a Edge Function não esteja deployada
-                if (!criadoViaEdge) {
-                    const tempAuthClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-                        auth: {
-                            persistSession: false,
-                            autoRefreshToken: false,
-                            detectSessionInUrl: false
-                        }
-                    });
-
-                    const { data: authData, error: authError } = await tempAuthClient.auth.signUp({
-                        email: email,
-                        password: senha,
-                        options: {
-                            data: {
-                                nome: nome,
-                                cargo: cargo,
-                                pousada_id: usuarioIdAtual
-                            }
-                        }
-                    });
-
-                    if (authError) {
-                        throw new Error("Falha ao registrar login: " + authError.message);
-                    }
-
-                    if (!authData.user) {
-                        throw new Error("Não foi possível gerar a conta de autenticação.");
-                    }
-
-                    // Se identities vier vazio, o e-mail já existe no Supabase Auth
-                    if (authData.user.identities && authData.user.identities.length === 0) {
-                        throw new Error(`O e-mail "${email}" já possui cadastro ativo no Supabase Auth. Use outro e-mail.`);
-                    }
-
-                    novoUserId = authData.user.id;
-
-                    // 4. UPSERT EM VEZ DE INSERT: Resolve o conflito de chave se um trigger de banco tiver inserido antes
-                    const { error: dbError } = await supabaseClient
-                        .from('usuarios')
-                        .upsert([{
-                            user_id: novoUserId,
                             pousada_id: usuarioIdAtual,
-                            nome_completo: nome,
-                            whatsapp: whatsapp,
-                            email: email,
-                            cargo: cargo,
-                            ativo: true
-                        }], { onConflict: 'user_id' });
-
-                    if (dbError) {
-                        throw new Error("Erro ao vincular na equipe: " + dbError.message);
+                            whatsapp: whatsapp
+                        }
                     }
+                });
+
+                if (authError) {
+                    throw new Error("Falha ao registrar login: " + authError.message);
                 }
 
-                // 5. Gera mensagem de WhatsApp
+                if (!authData.user) {
+                    throw new Error("Não foi possível gerar a conta de acesso.");
+                }
+
+                if (authData.user.identities && authData.user.identities.length === 0) {
+                    throw new Error(`O e-mail "${email}" já possui cadastro ativo no Supabase Auth. Use outro e-mail.`);
+                }
+
+                const novoUserId = authData.user.id;
+
+                // 3. VINCULAÇÃO NA TABELA USUARIOS
+                // Se um trigger automático já tiver criado a linha, atualizamos; caso contrário, inserimos.
+                const { error: dbError } = await supabaseClient
+                    .from('usuarios')
+                    .upsert([{
+                        user_id: novoUserId,
+                        pousada_id: usuarioIdAtual,
+                        nome_completo: nome,
+                        whatsapp: whatsapp,
+                        email: email,
+                        cargo: cargo,
+                        ativo: true
+                    }], { onConflict: 'user_id' });
+
+                if (dbError) {
+                    console.error("Erro ao vincular na tabela usuarios:", dbError);
+                    throw new Error("Erro ao vincular na equipe: " + dbError.message);
+                }
+
+                // 4. MENSAGEM PRONTA PARA DISPARO NO WHATSAPP
                 const linkSistema = window.location.origin + '/index.html';
                 const cargoNomeAmigavel = cargo === 'recepcao' ? 'Recepção' : 'Camareira / Governança';
 
@@ -604,7 +579,7 @@
                 document.getElementById('modal-sucesso-whatsapp').classList.remove('hidden');
 
             } catch (err) {
-                console.error("Erro ao cadastrar membro:", err);
+                console.error("Erro no cadastro:", err);
                 alert(err.message);
             } finally {
                 btn.disabled = false;
