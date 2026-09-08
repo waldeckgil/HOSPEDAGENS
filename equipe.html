@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Equipe - Painel 360</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row text-slate-800 font-sans">
+
+    <!-- MENU LATERAL -->
+    <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl shrink-0">
+        <div class="p-4 sm:p-6">
+            <div class="flex justify-between items-center md:block mb-4 md:mb-6">
+                <div>
+                    <h1 id="nome-pousada-sidebar" class="text-lg sm:text-xl font-extrabold text-white tracking-wider truncate">Pousada</h1>
+                    <span class="text-[10px] text-slate-400 uppercase tracking-widest font-semibold block">Painel 360</span>
+                </div>
+            </div>
+            <nav class="space-y-1.5 flex flex-wrap md:flex-col gap-1 md:gap-0">
+                <a href="dashboard.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition font-medium text-xs sm:text-sm">
+                    <span>🏠</span> <span>Painel Principal</span>
+                </a>
+                <a href="relatorios.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition font-medium text-xs sm:text-sm">
+                    <span>📋</span> <span>Gestão Completa</span>
+                </a>
+                <a href="hospedes.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition font-medium text-xs sm:text-sm">
+                    <span>👥</span> <span>Hóspedes</span>
+                </a>
+                <a href="configurar-pousada.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition font-medium text-xs sm:text-sm">
+                    <span>⚙️</span> <span>Configuração de Suítes</span>
+                </a>
+                <a href="tarifas.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition font-medium text-xs sm:text-sm">
+                    <span>🏷️</span> <span>Tarifas & Assinatura</span>
+                </a>
+                <a href="equipe.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-xs sm:text-sm shadow-md">
+                    <span>👤</span> <span>Minha Equipe</span>
+                </a>
+                <button type="button" onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-3 rounded-xl transition shadow text-xs sm:text-sm flex items-center justify-center gap-2 mt-3 cursor-pointer">
+                    <i class="fa-solid fa-right-from-bracket"></i> Sair
+                </button>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="flex-1 flex flex-col min-w-0">
+        <!-- CABEÇALHO -->
+        <header class="bg-white border-b border-gray-200 p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                <h2 class="text-lg sm:text-xl font-bold text-gray-800">Gestão de Equipe e Permissões</h2>
+                <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold w-fit">Carregando...</span>
+            </div>
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <button onclick="abrirModalNovoMembro()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 shadow-md">
+                    <i class="fa-solid fa-user-plus"></i> Adicionar Colaborador
+                </button>
+            </div>
+        </header>
+
+        <!-- CORPO -->
+        <main class="p-4 sm:p-6 md:p-8 flex-1 overflow-y-auto space-y-6">
+            <div class="max-w-7xl mx-auto space-y-6">
+
+                <!-- KPIS DA EQUIPE -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs flex items-center gap-4">
+                        <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-xl font-bold">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div>
+                            <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Total de Membros</span>
+                            <span id="kpi-total-membros" class="text-2xl font-black text-gray-900">0</span>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-blue-200 shadow-xs flex items-center gap-4">
+                        <div class="w-12 h-12 bg-blue-100 text-blue-700 rounded-2xl flex items-center justify-center text-xl font-bold">
+                            <i class="fa-solid fa-headset"></i>
+                        </div>
+                        <div>
+                            <span class="text-[11px] font-bold text-blue-600 uppercase tracking-wider block">Recepção Ativa</span>
+                            <span id="kpi-total-recepcao" class="text-2xl font-black text-blue-900">0</span>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-pink-200 shadow-xs flex items-center gap-4">
+                        <div class="w-12 h-12 bg-pink-100 text-pink-700 rounded-2xl flex items-center justify-center text-xl font-bold">
+                            <i class="fa-solid fa-broom"></i>
+                        </div>
+                        <div>
+                            <span class="text-[11px] font-bold text-pink-600 uppercase tracking-wider block">Limpeza / Governança</span>
+                            <span id="kpi-total-limpeza" class="text-2xl font-black text-pink-900">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LISTAGEM DE MEMBROS DA EQUIPE -->
+                <div class="bg-white rounded-2xl shadow-xs border border-gray-200 overflow-hidden">
+                    <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                        <div>
+                            <h3 class="font-extrabold text-gray-900 text-base">Colaboradores da Pousada</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">Gerencie os acessos de quem trabalha na sua recepção ou na limpeza dos quartos.</p>
+                        </div>
+                        <span id="badge-total-equipe" class="text-xs bg-slate-100 text-slate-700 font-bold px-3 py-1 rounded-full border border-slate-200">
+                            0 colaboradores
+                        </span>
+                    </div>
+
+                    <div id="grid-membros-equipe" class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="col-span-full py-8 text-center text-gray-400 text-xs">
+                            <i class="fa-solid fa-spinner fa-spin mr-2"></i> Carregando equipe...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL DE CADASTRO DE NOVO MEMBRO -->
+    <div id="modal-novo-membro" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-gray-200">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-sm font-bold">
+                        <i class="fa-solid fa-user-plus"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-extrabold text-gray-900">Novo Colaborador</h3>
+                        <p class="text-[11px] text-gray-500">Crie o acesso imediato sem necessidade de e-mail de ativação.</p>
+                    </div>
+                </div>
+                <button onclick="fecharModalNovoMembro()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">✕</button>
+            </div>
+
+            <form id="form-novo-membro" onsubmit="salvarNovoMembro(event)" class="space-y-3.5">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nome Completo *</label>
+                    <input type="text" id="cad-nome" placeholder="Ex: Maria dos Santos" required class="w-full p-2.5 border rounded-xl text-xs font-semibold bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Cargo / Função *</label>
+                    <select id="cad-cargo" required class="w-full p-2.5 border rounded-xl text-xs font-bold bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="recepcao">Recepção (Check-in, Check-out, Sem financeiro)</option>
+                        <option value="limpeza">Camareira / Limpeza (Somente quartos sujos)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">WhatsApp de Contato *</label>
+                    <input type="text" id="cad-whatsapp" placeholder="(21) 99999-9999" required oninput="mascaraTelefone(this)" class="w-full p-2.5 border rounded-xl text-xs font-semibold bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">E-mail de Login *</label>
+                    <input type="email" id="cad-email" placeholder="colaborador@gmail.com" required class="w-full p-2.5 border rounded-xl text-xs font-semibold bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Senha Inicial de Acesso *</label>
+                    <div class="relative">
+                        <input type="password" id="cad-senha" placeholder="Mínimo 6 caracteres" minlength="6" required class="w-full p-2.5 border rounded-xl text-xs font-bold bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none pr-10">
+                        <button type="button" onclick="alternarVisibilidadeSenha()" class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 text-xs">
+                            <i id="icone-olho-senha" class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                    <span class="text-[10px] text-gray-400 mt-1 block">Defina uma senha simples para o funcionário começar a usar agora.</span>
+                </div>
+
+                <div class="pt-2 flex justify-end gap-2 border-t">
+                    <button type="button" onclick="fecharModalNovoMembro()" class="px-4 py-2 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-100">Cancelar</button>
+                    <button type="submit" id="btn-salvar-membro" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-md transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-check"></i> Cadastrar e Gerar Acesso
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE SUCESSO COM BOTÃO DE DISPARO PARA O WHATSAPP -->
+    <div id="modal-sucesso-whatsapp" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-[60]">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-emerald-200 text-center space-y-4">
+            <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto text-2xl font-bold shadow-inner">
+                <i class="fa-solid fa-check-double"></i>
+            </div>
+            <div>
+                <h3 class="text-base sm:text-lg font-extrabold text-gray-900">Acesso Criado com Sucesso!</h3>
+                <p class="text-xs text-gray-500 mt-1">O colaborador já pode acessar o sistema com o e-mail e senha cadastrados.</p>
+            </div>
+
+            <!-- CARD COM CREDENCIAIS PARA CONFERÊNCIA -->
+            <div class="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl text-left text-xs space-y-1.5 font-medium text-slate-800">
+                <div class="flex justify-between"><span class="text-gray-500">Colaborador:</span><strong id="cred-nome">-</strong></div>
+                <div class="flex justify-between"><span class="text-gray-500">Cargo:</span><strong id="cred-cargo" class="uppercase text-blue-700">-</strong></div>
+                <div class="flex justify-between"><span class="text-gray-500">E-mail:</span><strong id="cred-email">-</strong></div>
+                <div class="flex justify-between"><span class="text-gray-500">Senha:</span><strong id="cred-senha" class="text-emerald-700 font-mono">-</strong></div>
+            </div>
+
+            <div class="pt-2 space-y-2">
+                <a id="btn-link-whatsapp" href="#" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 px-4 rounded-xl shadow-md transition text-xs sm:text-sm flex items-center justify-center gap-2">
+                    <i class="fa-brands fa-whatsapp text-base"></i> Enviar Acesso pelo WhatsApp
+                </a>
+                <button onclick="fecharModalSucessoWhatsapp()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2 rounded-xl text-xs transition">
+                    Concluir e Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST DE NOTIFICAÇÃO -->
+    <div id="toast-notificacao" class="fixed bottom-6 right-6 z-[9999] transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+        <div id="toast-content" class="bg-gray-900 text-white px-5 sm:px-6 py-3.5 sm:py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
+            <span id="toast-icone" class="text-xl">✨</span>
+            <div>
+                <h4 id="toast-titulo" class="font-bold text-xs sm:text-sm">Sucesso</h4>
+                <p id="toast-mensagem" class="text-[11px] sm:text-xs text-gray-300">Alteração realizada!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
+        const EMAIL_MASTER_ADMIN = 'waldeckgil@gmail.com';
+
+        // Cliente padrão com sessão ativa
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let usuarioIdAtual = null; // ID da pousada
+        let nomePousadaAtual = 'Pousada';
+        let membrosEquipeCache = [];
+        let toastTimer = null;
+
+        function mostrarToast(titulo, mensagem, tipo = 'sucesso') {
+            const toast = document.getElementById('toast-notificacao');
+            const toastTitulo = document.getElementById('toast-titulo');
+            const toastMsg = document.getElementById('toast-mensagem');
+            const toastIcone = document.getElementById('toast-icone');
+            const toastContent = document.getElementById('toast-content');
+
+            if (!toast) return;
+            if (toastTimer) clearTimeout(toastTimer);
+
+            toastTitulo.innerText = titulo;
+            toastMsg.innerText = mensagem;
+
+            if (tipo === 'sucesso') {
+                toastContent.className = "bg-gray-900 text-white px-5 sm:px-6 py-3.5 sm:py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800";
+                toastIcone.innerText = "✨";
+            } else if (tipo === 'alerta') {
+                toastContent.className = "bg-amber-900 text-white px-5 sm:px-6 py-3.5 sm:py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-amber-700";
+                toastIcone.innerText = "⚠️";
+            } else {
+                toastContent.className = "bg-red-900 text-white px-5 sm:px-6 py-3.5 sm:py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-red-700";
+                toastIcone.innerText = "🚨";
+            }
+
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            toastTimer = setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3500);
+        }
+
+        function mascaraTelefone(input) {
+            let v = input.value.replace(/\D/g, "");
+            if (v.length > 11) v = v.substring(0, 11);
+            if (v.length > 10) {
+                input.value = v.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
+            } else if (v.length > 5) {
+                input.value = v.replace(/^(\d{2})(\d{4})(\d{0,4})$/, "($1) $2-$3");
+            } else if (v.length > 2) {
+                input.value = v.replace(/^(\d{2})(\d{0,5})$/, "($1) $2");
+            } else {
+                input.value = v;
+            }
+        }
+
+        function alternarVisibilidadeSenha() {
+            const campo = document.getElementById('cad-senha');
+            const icone = document.getElementById('icone-olho-senha');
+            if (campo.type === 'password') {
+                campo.type = 'text';
+                icone.className = 'fa-solid fa-eye-slash';
+            } else {
+                campo.type = 'password';
+                icone.className = 'fa-solid fa-eye';
+            }
+        }
+
+        async function protegerPagina() {
+            const { data: { session }, error } = await supabaseClient.auth.getSession();
+            if (error || !session) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const emailLogado = (session.user.email || '').toLowerCase();
+            const params = new URLSearchParams(window.location.search);
+            const pousadaIdParam = params.get('pousada_id');
+
+            // 1. Resolução de Perfil na tabela usuarios (RBAC)
+            const { data: perfil } = await supabaseClient
+                .from('usuarios')
+                .select('pousada_id, cargo, ativo, nome_completo')
+                .eq('user_id', session.user.id)
+                .maybeSingle();
+
+            const isMaster = (emailLogado === EMAIL_MASTER_ADMIN.toLowerCase());
+            const cargo = perfil?.cargo || 'dono';
+
+            // SEGURANÇA: Se não for Dono nem Master, bloqueia imediatamente
+            if (!isMaster && cargo !== 'dono') {
+                alert("Acesso restrito: apenas o gestor proprietário da pousada pode gerenciar a equipe.");
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            if (isMaster && pousadaIdParam) {
+                usuarioIdAtual = pousadaIdParam;
+            } else {
+                usuarioIdAtual = perfil?.pousada_id || session.user.id;
+            }
+
+            // Busca nome da pousada
+            const { data: pousada } = await supabaseClient
+                .from('pousadas')
+                .select('nome')
+                .eq('id', usuarioIdAtual)
+                .maybeSingle();
+
+            nomePousadaAtual = pousada?.nome || 'Minha Pousada';
+            document.getElementById('titulo-pousada').innerText = nomePousadaAtual;
+            document.getElementById('nome-pousada-sidebar').innerText = nomePousadaAtual;
+
+            carregarEquipe();
+        }
+
+        async function carregarEquipe() {
+            const grid = document.getElementById('grid-membros-equipe');
+            grid.innerHTML = '<div class="col-span-full py-8 text-center text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Carregando equipe...</div>';
+
+            const { data: membros, error } = await supabaseClient
+                .from('usuarios')
+                .select('*')
+                .eq('pousada_id', usuarioIdAtual)
+                .order('cargo');
+
+            if (error) {
+                grid.innerHTML = `<div class="col-span-full py-6 text-center text-red-500 text-xs font-bold">Erro ao carregar colaboradores: ${error.message}</div>`;
+                return;
+            }
+
+            membrosEquipeCache = membros || [];
+
+            // Atualiza KPIs
+            const total = membrosEquipeCache.length;
+            const recepcao = membrosEquipeCache.filter(m => m.cargo === 'recepcao' && m.ativo).length;
+            const limpeza = membrosEquipeCache.filter(m => m.cargo === 'limpeza' && m.ativo).length;
+
+            document.getElementById('kpi-total-membros').innerText = total;
+            document.getElementById('kpi-total-recepcao').innerText = recepcao;
+            document.getElementById('kpi-total-limpeza').innerText = limpeza;
+            document.getElementById('badge-total-equipe').innerText = `${total} colaborador(es)`;
+
+            if (total === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-10 text-center text-gray-400">
+                        <i class="fa-solid fa-user-group text-3xl mb-2 text-gray-300 block"></i>
+                        <p class="text-xs font-semibold">Nenhum colaborador cadastrado ainda.</p>
+                        <p class="text-[11px] text-gray-400 mt-0.5">Clique no botão "Adicionar Colaborador" acima para convidar sua equipe.</p>
+                    </div>`;
+                return;
+            }
+
+            let html = '';
+            membrosEquipeCache.forEach(m => {
+                const isDono = m.cargo === 'dono';
+                const isRecepcao = m.cargo === 'recepcao';
+                const isLimpeza = m.cargo === 'limpeza';
+
+                let badgeCargo = '';
+                let iconeCargo = '';
+                let cargoDescricao = '';
+
+                if (isDono) {
+                    badgeCargo = '<span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300">👑 Gestor (Dono)</span>';
+                    iconeCargo = 'bg-amber-100 text-amber-700';
+                    cargoDescricao = 'Acesso irrestrito ao sistema';
+                } else if (isRecepcao) {
+                    badgeCargo = '<span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-blue-100 text-blue-900 border border-blue-300">🎧 Recepção</span>';
+                    iconeCargo = 'bg-blue-100 text-blue-700';
+                    cargoDescricao = 'Check-in, reservas e hóspedes';
+                } else {
+                    badgeCargo = '<span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-pink-100 text-pink-900 border border-pink-300">🧹 Camareira / Limpeza</span>';
+                    iconeCargo = 'bg-pink-100 text-pink-700';
+                    cargoDescricao = 'Checklist de quartos para higienização';
+                }
+
+                const statusBadge = m.ativo 
+                    ? '<span class="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Ativo</span>'
+                    : '<span class="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-red-100 text-red-800">Desativado</span>';
+
+                let whatsLink = '#';
+                if (m.whatsapp) {
+                    let num = m.whatsapp.replace(/\D/g, '');
+                    if (num.length <= 11 && !num.startsWith('55')) num = '55' + num;
+                    whatsLink = `https://wa.me/${num}`;
+                }
+
+                html += `
+                    <div class="bg-gray-50/70 border ${m.ativo ? 'border-gray-200' : 'border-red-200 opacity-75'} p-4 rounded-2xl flex flex-col justify-between transition hover:shadow-md">
+                        <div>
+                            <div class="flex items-start justify-between gap-2 mb-2">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-10 h-10 ${iconeCargo} rounded-xl flex items-center justify-center text-sm font-bold shadow-2xs">
+                                        <i class="fa-solid ${isDono ? 'fa-crown' : (isRecepcao ? 'fa-headset' : 'fa-broom')}"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-extrabold text-sm text-gray-900 leading-tight">${m.nome_completo || 'Sem nome'}</h4>
+                                        <span class="text-[11px] text-gray-500 font-medium block truncate mt-0.5">${m.email || 'Sem e-mail'}</span>
+                                    </div>
+                                </div>
+                                ${statusBadge}
+                            </div>
+
+                            <div class="mt-2.5 pt-2 border-t border-gray-200 space-y-1 text-xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[11px] text-gray-500">Função:</span>
+                                    ${badgeCargo}
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[11px] text-gray-500">WhatsApp:</span>
+                                    ${m.whatsapp ? `<a href="${whatsLink}" target="_blank" class="text-emerald-700 font-bold hover:underline flex items-center gap-1"><i class="fa-brands fa-whatsapp text-emerald-600"></i> ${m.whatsapp}</a>` : '<span class="text-gray-400">Não informado</span>'}
+                                </div>
+                                <div class="text-[10px] text-gray-400 italic pt-0.5">${cargoDescricao}</div>
+                            </div>
+                        </div>
+
+                        ${!isDono ? `
+                            <div class="mt-4 pt-3 border-t border-gray-200 flex items-center justify-between gap-2">
+                                <button onclick="alternarStatusMembro('${m.user_id}', ${m.ativo}, '${m.nome_completo.replace(/'/g, "\\'")}')" class="text-xs font-bold px-3 py-1.5 rounded-xl border transition ${m.ativo ? 'bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-300' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300'}">
+                                    <i class="fa-solid ${m.ativo ? 'fa-user-slash' : 'fa-user-check'} mr-1"></i> ${m.ativo ? 'Desativar' : 'Reativar'}
+                                </button>
+                                <button onclick="reenviarAcessoWhatsapp('${m.user_id}')" class="text-xs font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl shadow-xs transition flex items-center gap-1">
+                                    <i class="fa-brands fa-whatsapp"></i> Acesso
+                                </button>
+                            </div>
+                        ` : `
+                            <div class="mt-4 pt-3 border-t border-gray-200 text-right">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase">Conta Proprietária</span>
+                            </div>
+                        `}
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = html;
+        }
+
+        function abrirModalNovoMembro() {
+            document.getElementById('form-novo-membro').reset();
+            document.getElementById('modal-novo-membro').classList.remove('hidden');
+        }
+
+        function fecharModalNovoMembro() {
+            document.getElementById('modal-novo-membro').classList.add('hidden');
+        }
+
+        function fecharModalSucessoWhatsapp() {
+            document.getElementById('modal-sucesso-whatsapp').classList.add('hidden');
+            carregarEquipe();
+        }
+
+        // =========================================================================
+        // SALVAMENTO SEGURO: CRIAÇÃO DO COLABORADOR SEM DERRUBAR O GESTOR
+        // =========================================================================
+        async function salvarNovoMembro(e) {
+            e.preventDefault();
+
+            const btn = document.getElementById('btn-salvar-membro');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gravando...';
+
+            const nome = document.getElementById('cad-nome').value.trim();
+            const cargo = document.getElementById('cad-cargo').value;
+            const whatsapp = document.getElementById('cad-whatsapp').value.trim();
+            const email = document.getElementById('cad-email').value.trim();
+            const senha = document.getElementById('cad-senha').value;
+
+            try {
+                // TÉCNICA MASTER: Instância isolada em memória para não sobrescrever a sessão do Dono
+                const tempAuthClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+                    auth: {
+                        persistSession: false,
+                        autoRefreshToken: false,
+                        detectSessionInUrl: false
+                    }
+                });
+
+                // 1. Cria a conta no Supabase Auth
+                const { data: authData, error: authError } = await tempAuthClient.auth.signUp({
+                    email: email,
+                    password: senha,
+                    options: {
+                        data: {
+                            nome: nome,
+                            cargo: cargo,
+                            pousada_id: usuarioIdAtual
+                        }
+                    }
+                });
+
+                if (authError) {
+                    throw new Error("Falha ao criar login: " + authError.message);
+                }
+
+                if (!authData.user) {
+                    throw new Error("Não foi possível gerar o usuário de autenticação.");
+                }
+
+                const novoUserId = authData.user.id;
+
+                // 2. Vincula à pousada na tabela usuarios usando a sessão do Dono
+                const { error: dbError } = await supabaseClient
+                    .from('usuarios')
+                    .insert([{
+                        user_id: novoUserId,
+                        pousada_id: usuarioIdAtual,
+                        nome_completo: nome,
+                        whatsapp: whatsapp,
+                        email: email,
+                        cargo: cargo,
+                        ativo: true
+                    }]);
+
+                if (dbError) {
+                    throw new Error("Erro ao vincular na equipe: " + dbError.message);
+                }
+
+                // 3. Monta a mensagem pronta de WhatsApp
+                const linkSistema = window.location.origin + '/index.html';
+                const cargoNomeAmigavel = cargo === 'recepcao' ? 'Recepção' : 'Camareira / Governança';
+
+                let zapLimpo = whatsapp.replace(/\D/g, '');
+                if (zapLimpo.length <= 11 && !zapLimpo.startsWith('55')) zapLimpo = '55' + zapLimpo;
+
+                let textoMsg = `Olá, *${nome}*! 👋\n`;
+                textoMsg += `Seu acesso ao sistema da *${nomePousadaAtual}* foi liberado!\n\n`;
+                textoMsg += `🔗 *Link de Acesso:* ${linkSistema}\n`;
+                textoMsg += `📧 *Login:* ${email}\n`;
+                textoMsg += `🔑 *Senha:* ${senha}\n`;
+                textoMsg += `👤 *Função:* ${cargoNomeAmigavel}\n\n`;
+                textoMsg += `Acesse pelo link acima para iniciar seus trabalhos. Qualquer dúvida, procure a gerência!`;
+
+                const urlWhatsapp = `https://wa.me/${zapLimpo}?text=${encodeURIComponent(textoMsg)}`;
+
+                // Preenche o modal de confirmação
+                document.getElementById('cred-nome').innerText = nome;
+                document.getElementById('cred-cargo').innerText = cargoNomeAmigavel;
+                document.getElementById('cred-email').innerText = email;
+                document.getElementById('cred-senha').innerText = senha;
+                document.getElementById('btn-link-whatsapp').href = urlWhatsapp;
+
+                fecharModalNovoMembro();
+                document.getElementById('modal-sucesso-whatsapp').classList.remove('hidden');
+
+            } catch (err) {
+                console.error("Erro ao cadastrar membro:", err);
+                alert("Erro ao cadastrar colaborador: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Cadastrar e Gerar Acesso';
+            }
+        }
+
+        async function alternarStatusMembro(userId, statusAtual, nomeMembro) {
+            const novoStatus = !statusAtual;
+            const confirmou = confirm(`Deseja ${novoStatus ? 'REATIVAR' : 'DESATIVAR'} o acesso de ${nomeMembro}?`);
+            if (!confirmou) return;
+
+            const { error } = await supabaseClient
+                .from('usuarios')
+                .update({ ativo: novoStatus })
+                .eq('user_id', userId)
+                .eq('pousada_id', usuarioIdAtual);
+
+            if (error) {
+                mostrarToast("Erro", "Não foi possível alterar status: " + error.message, 'erro');
+                return;
+            }
+
+            mostrarToast("Sucesso", `Acesso de ${nomeMembro} foi ${novoStatus ? 'reativado' : 'suspenso'}!`);
+            carregarEquipe();
+        }
+
+        function reenviarAcessoWhatsapp(userId) {
+            const membro = membrosEquipeCache.find(m => m.user_id === userId);
+            if (!membro) return;
+
+            const linkSistema = window.location.origin + '/index.html';
+            const cargoNomeAmigavel = membro.cargo === 'recepcao' ? 'Recepção' : 'Camareira / Governança';
+
+            let zapLimpo = (membro.whatsapp || '').replace(/\D/g, '');
+            if (zapLimpo.length <= 11 && !zapLimpo.startsWith('55')) zapLimpo = '55' + zapLimpo;
+
+            let textoMsg = `Olá, *${membro.nome_completo}*! 👋\n`;
+            textoMsg += `Lembrete de acesso ao sistema da *${nomePousadaAtual}*:\n\n`;
+            textoMsg += `🔗 *Link de Acesso:* ${linkSistema}\n`;
+            textoMsg += `📧 *Login:* ${membro.email}\n`;
+            textoMsg += `👤 *Função:* ${cargoNomeAmigavel}\n\n`;
+            textoMsg += `Caso tenha esquecido sua senha, solicite a redefinição à gerência.`;
+
+            const urlWhatsapp = `https://wa.me/${zapLimpo}?text=${encodeURIComponent(textoMsg)}`;
+            window.open(urlWhatsapp, '_blank');
+        }
+
+        async function fazerLogout() {
+            await supabaseClient.auth.signOut();
+            window.location.href = 'index.html';
+        }
+
+        window.onload = protegerPagina;
+    </script>
+</body>
+</html>

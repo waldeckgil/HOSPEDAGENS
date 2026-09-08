@@ -26,11 +26,17 @@
                 <a href="relatorios.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition font-medium text-xs sm:text-sm">
                     <span>📋</span> <span>Gestão Completa</span>
                 </a>
+                <a href="hospedes.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition font-medium text-xs sm:text-sm">
+                    <span>👥</span> <span>Hóspedes</span>
+                </a>
                 <a href="configurar-pousada.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition font-medium text-xs sm:text-sm">
                     <span>⚙️</span> <span>Configuração de Suítes</span>
                 </a>
                 <a href="tarifas.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-xs sm:text-sm shadow-md">
                     <span>🏷️</span> <span>Tarifas & Assinatura</span>
+                </a>
+                <a href="equipe.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition font-medium text-xs sm:text-sm">
+                    <span>👥</span> <span>Minha Equipe</span>
                 </a>
                 <button type="button" onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-3 rounded-xl transition shadow text-xs sm:text-sm flex items-center justify-center gap-2 mt-3 cursor-pointer">
                     <i class="fa-solid fa-right-from-bracket"></i> Sair
@@ -57,7 +63,7 @@
         <main class="p-4 sm:p-6 md:p-8 flex-1 overflow-y-auto space-y-6">
             <div class="max-w-7xl mx-auto space-y-6">
                 
-                <!-- FAIXA DE MODO SUPER ADMINISTRADOR (QUANDO O MASTER ACESSA A POUSADA) -->
+                <!-- FAIXA DE MODO SUPER ADMINISTRADOR -->
                 <div id="banner-modo-master" class="hidden p-3.5 sm:p-4 rounded-2xl shadow-md border border-slate-800 bg-slate-950 text-amber-300 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div class="flex items-center gap-3">
                         <span class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-sm border border-amber-500/30">👑</span>
@@ -71,7 +77,7 @@
                     </a>
                 </div>
 
-                <!-- CARD NO TOPO: MINHA ASSINATURA (CONECTADO DINAMICAMENTE AO ADMIN-MASTER) -->
+                <!-- CARD NO TOPO: MINHA ASSINATURA -->
                 <div id="card-minha-assinatura" class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 p-6 rounded-3xl shadow-xl border border-slate-800 text-white relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-48 h-48 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -414,7 +420,6 @@
         const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
         const EMAIL_MASTER_ADMIN = 'waldeckgil@gmail.com';
 
-        // INTEGRAÇÃO COM SESSÃO MASTER OU POUSADA COMUM
         const paramsUrl = new URLSearchParams(window.location.search);
         const pousadaIdUrl = paramsUrl.get('pousada_id');
         const temSessaoMaster = localStorage.getItem('supabase_master_admin_session');
@@ -429,6 +434,7 @@
         }
 
         let usuarioIdAtual = null;
+        let cargoUsuarioAtual = 'dono';
         let pousadaCache = null;
         let suitesCache = [];
         let tarifasCache = [];
@@ -464,27 +470,49 @@
                     return;
                 }
 
-                const emailUsuario = (session.user.email || '').toLowerCase();
-                const params = new URLSearchParams(window.location.search);
-                const pousadaIdParam = params.get('pousada_id');
+                // RESOLUÇÃO DE TENANT E CARGO NO BANCO DE DADOS
+                const { data: usuarioPerfil } = await supabaseClient
+                    .from('usuarios')
+                    .select('pousada_id, cargo, ativo, nome_completo')
+                    .eq('user_id', session.user.id)
+                    .maybeSingle();
 
-                // RECONHECIMENTO DO MASTER ADMIN
-                if (emailUsuario === EMAIL_MASTER_ADMIN.toLowerCase() && pousadaIdParam) {
-                    usuarioIdAtual = pousadaIdParam;
+                if (usuarioPerfil && usuarioPerfil.ativo === false) {
+                    await supabaseClient.auth.signOut();
+                    alert("Seu acesso foi desativado pelo gestor da pousada.");
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                const emailUsuario = (session.user.email || '').toLowerCase();
+                const isMaster = (emailUsuario === EMAIL_MASTER_ADMIN.toLowerCase());
+
+                cargoUsuarioAtual = isMaster ? 'dono' : (usuarioPerfil?.cargo || 'dono');
+                usuarioIdAtual = isMaster && pousadaIdUrl ? pousadaIdUrl : (usuarioPerfil?.pousada_id || session.user.id);
+
+                // BLINDAGEM ABSOLUTA: APENAS O DONO OU MASTER PODE ACESSAR ESTA TELA
+                if (!isMaster && cargoUsuarioAtual !== 'dono') {
+                    alert("Acesso restrito: Apenas o gestor/proprietário da pousada pode acessar regras e tarifas financeiras.");
+                    if (cargoUsuarioAtual === 'limpeza') {
+                        window.location.href = 'limpeza.html';
+                    } else {
+                        window.location.href = 'dashboard.html';
+                    }
+                    return;
+                }
+
+                if (isMaster && pousadaIdUrl) {
                     document.getElementById('banner-modo-master')?.classList.remove('hidden');
 
-                    // Preserva o contexto da pousada nos links
                     document.querySelectorAll('aside nav a').forEach(link => {
                         const href = link.getAttribute('href');
                         if (href && href !== '#' && !href.startsWith('http')) {
                             const sep = href.includes('?') ? '&' : '?';
-                            link.setAttribute('href', `${href}${sep}pousada_id=${pousadaIdParam}`);
+                            link.setAttribute('href', `${href}${sep}pousada_id=${pousadaIdUrl}`);
                         }
                     });
                     const btnVoltar = document.getElementById('btn-voltar-dash');
-                    if (btnVoltar) btnVoltar.setAttribute('href', `dashboard.html?pousada_id=${pousadaIdParam}`);
-                } else {
-                    usuarioIdAtual = session.user.id;
+                    if (btnVoltar) btnVoltar.setAttribute('href', `dashboard.html?pousada_id=${pousadaIdUrl}`);
                 }
 
                 // Busca a pousada ativa
@@ -502,10 +530,8 @@
                 const elModoMaster = document.getElementById('nome-pousada-modo-master');
                 if (elModoMaster) elModoMaster.innerText = nomePousada;
 
-                // Atualiza o Card de Assinatura com a regra dinâmica corrigida
                 await atualizarCardAssinatura(pousadaCache);
 
-                // Preenche as regras da pousada
                 if (pousadaCache) {
                     document.getElementById('pousada-checkin').value = pousadaCache.horario_checkin || '13:00';
                     document.getElementById('pousada-checkout').value = pousadaCache.horario_checkout || '14:00';
@@ -547,11 +573,7 @@
             }
         }
 
-        // =========================================================================
-        // ATUALIZAÇÃO REAL E DINÂMICA DO CARD DE ASSINATURA
-        // =========================================================================
         async function atualizarCardAssinatura(pousada) {
-            // 1. Contagem real de suítes ativas
             const { data: suites } = await supabaseClient
                 .from('suites')
                 .select('id, ativa')
@@ -560,7 +582,6 @@
             const totalAtivas = suites ? suites.filter(s => s.ativa === true).length : 0;
             document.getElementById('assinatura-suites').innerText = totalAtivas;
 
-            // 2. Consulta a Tabela de Preços oficial (config_faixas_preco)
             let faixaEncontrada = null;
             try {
                 const { data: faixas } = await supabaseClient.from('config_faixas_preco').select('*').order('min_suites');
@@ -583,9 +604,6 @@
                 if (config && config.dias_aviso_vencimento) diasAviso = config.dias_aviso_vencimento;
             } catch(e) {}
 
-            // 3. Regra de Ouro:
-            // SE TEM plano_valor no banco -> É Fixo Manual (Definido pelo Admin Master)
-            // SE ESTÁ EM BRANCO (null) -> É 100% Automático e assume o valor da Faixa (ex: R$ 50,07)
             const ehPersonalizado = (pousada.plano_valor !== null && pousada.plano_valor !== undefined && pousada.plano_valor !== '');
             const valorFinal = ehPersonalizado 
                 ? Number(pousada.plano_valor) 
@@ -593,7 +611,6 @@
 
             document.getElementById('assinatura-valor').innerText = 'R$ ' + valorFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
             
-            // Subtítulo explicativo
             const subValorEl = document.getElementById('assinatura-valor-sub');
             if (subValorEl) {
                 subValorEl.innerText = ehPersonalizado 
@@ -601,7 +618,6 @@
                     : "Cálculo Automático por Suítes";
             }
 
-            // Nome do plano
             const planoNomeEl = document.getElementById('assinatura-plano-nome');
             if (planoNomeEl) {
                 planoNomeEl.innerText = ehPersonalizado 
@@ -615,7 +631,6 @@
                 document.getElementById('assinatura-limite-desc').innerText = 'Limite do plano: Sem limite (∞)';
             }
 
-            // 4. Vencimento e Status
             const dataVencStr = pousada.data_vencimento || '2026-09-02';
             const badge = document.getElementById('assinatura-badge');
             const vencimento = document.getElementById('assinatura-vencimento');
@@ -727,8 +742,9 @@
 
         function renderizarFotosSalvas(tipo, fotosJson) {
             const containerId = tipo === 'pousada' ? 'lista-fotos-salvas-pousada' : 'lista-fotos-salvas-atracoes';
-            const container = document.getElementById(containerId);
-            if (!container) return;
+            const container = document.getElementById('containerId');
+            const targetEl = document.getElementById(containerId);
+            if (!targetEl) return;
 
             let listaFotos = [];
             try {
@@ -738,8 +754,8 @@
             }
 
             if (listaFotos.length === 0) {
-                container.innerHTML = '';
-                container.dataset.fotosSalvas = JSON.stringify([]);
+                targetEl.innerHTML = '';
+                targetEl.dataset.fotosSalvas = JSON.stringify([]);
                 return;
             }
 
@@ -758,8 +774,8 @@
             });
 
             html += `</div></div>`;
-            container.innerHTML = html;
-            container.dataset.fotosSalvas = JSON.stringify(listaFotos);
+            targetEl.innerHTML = html;
+            targetEl.dataset.fotosSalvas = JSON.stringify(listaFotos);
         }
 
         function removerFotoSalva(tipo, index) {

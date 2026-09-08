@@ -4,21 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel 360 - Hub de Consultas do Gestor</title>
-    <!-- Tailwind CSS para estilização rápida e moderna -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- FontAwesome para Ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-100 font-sans antialiased">
 
-    <!-- ESTRUTURA PRINCIPAL RESPONSIVA (COLUNA NO MOBILE, LADO A LADO NO DESKTOP) -->
     <div class="min-h-screen md:h-screen flex flex-col md:flex-row bg-gray-100 md:overflow-hidden">
         
-        <!-- MENU LATERAL / BARRA SUPERIOR NO MOBILE -->
+        <!-- MENU LATERAL -->
         <aside class="w-full md:w-56 bg-slate-800 text-white flex flex-col shadow-lg flex-shrink-0 z-20">
-            <!-- CABEÇALHO DO MENU -->
             <div class="p-3 sm:p-4 border-b border-slate-700 flex justify-between items-center md:block">
                 <div>
                     <h1 class="text-sm sm:text-base font-bold tracking-wide text-amber-400">
@@ -27,7 +22,6 @@
                     <p id="nomePousadaMenu" class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 truncate max-w-[160px] sm:max-w-none">Carregando...</p>
                 </div>
                 
-                <!-- BOTÕES RÁPIDOS EXCLUSIVOS DO CELULAR -->
                 <div class="flex items-center gap-2 md:hidden">
                     <a href="dashboard.html" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs">
                         <i class="fa-solid fa-chart-pie"></i> <span>Painel</span>
@@ -43,9 +37,17 @@
                 <a href="dashboard.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition text-xs font-medium">
                     <i class="fa-solid fa-chart-pie w-4"></i> Painel Principal
                 </a>
+                <a href="hospedes.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition text-xs font-medium">
+                    <i class="fa-solid fa-users w-4"></i> Hóspedes
+                </a>
+                <a id="link-menu-tarifas" href="tarifas.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition text-xs font-medium">
+                    <i class="fa-solid fa-tags w-4"></i> Tarifas & Assinatura
+                </a>
+                <a id="link-menu-equipe" href="equipe.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition text-xs font-medium">
+                    <i class="fa-solid fa-user-gear w-4"></i> Minha Equipe
+                </a>
             </nav>
 
-            <!-- BOTÃO SAIR DESKTOP -->
             <div class="hidden md:block p-3 border-t border-slate-700">
                 <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white transition font-medium text-xs">
                     <i class="fa-solid fa-right-from-bracket"></i> Sair
@@ -58,7 +60,7 @@
             <div class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-3 sm:p-5 md:p-6">
                 <div class="w-full max-w-full sm:max-w-[98%] mx-auto">
                     
-                    <!-- FAIXA INTELIGENTE DE STATUS DA ASSINATURA -->
+                    <!-- FAIXA INTELIGENTE DE STATUS DA ASSINATURA (Ocultada para Recepção) -->
                     <div id="banner-assinatura-relatorios" class="hidden mb-4 sm:mb-5 p-3 sm:p-4 rounded-2xl shadow-xs border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-all">
                         <div class="flex items-center gap-3">
                             <span id="banner-assinatura-icone" class="text-xl sm:text-2xl">⚠️</span>
@@ -67,24 +69,24 @@
                                 <p id="banner-assinatura-sub" class="text-[11px] mt-0.5 font-medium"></p>
                             </div>
                         </div>
-                        <a href="tarifas.html" class="w-full sm:w-auto text-center px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white/90 hover:bg-white text-slate-800 border border-black/10 shadow-xs transition shrink-0">
+                        <a id="link-assinatura-banner" href="tarifas.html" class="w-full sm:w-auto text-center px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white/90 hover:bg-white text-slate-800 border border-black/10 shadow-xs transition shrink-0">
                             Ver Assinatura &rarr;
                         </a>
                     </div>
 
-                    <!-- Cabeçalho - SISTEMA DE CONSULTAS CENTRALIZADO -->
+                    <!-- Cabeçalho -->
                     <div class="flex flex-col items-center justify-center mb-5 gap-1 text-center">
                         <h1 class="text-base sm:text-xl md:text-2xl font-extrabold text-gray-800 tracking-wide leading-snug">
-                            Gestão completa de reservas, ocupação e financeiro
+                            Gestão completa de reservas e ocupação
                         </h1>
                         <p id="nomePousadaLogada" class="text-xs sm:text-sm font-bold text-blue-600 uppercase tracking-wider">Carregando dados...</p>
                         <p class="text-[10px] sm:text-[11px] text-gray-500">Sistema de Consultas detalhadas</p>
                     </div>
 
                     <!-- Cards de Seleção de Views -->
-                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3.5 mb-4">
-                        <!-- Card 1: Financeiro -->
-                        <div onclick="selecionarView('vw_gestor_financeiro_relatorio', 'Extrato Detalhado de Pagamentos', this)" 
+                    <div id="containerCardsSelecaoViews" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3.5 mb-4">
+                        <!-- Card 1: Financeiro (EXCLUSIVO DONO) -->
+                        <div id="cardViewFinanceiro" onclick="selecionarView('vw_gestor_financeiro_relatorio', 'Extrato Detalhado de Pagamentos', this)" 
                              class="card-view cursor-pointer bg-slate-50 p-3 sm:p-4 rounded-xl shadow-xs border-2 border-amber-400 hover:border-amber-600 hover:shadow-md transition group flex flex-col justify-between">
                             <div>
                                 <div class="flex items-center justify-between mb-1.5">
@@ -99,7 +101,7 @@
                         </div>
 
                         <!-- Card 2: Hospedagens -->
-                        <div onclick="selecionarView('vw_gestor_hospedagens_relatorio', 'Hospedagens, Suítes e Movimentações', this)" 
+                        <div id="cardViewHospedagens" onclick="selecionarView('vw_gestor_hospedagens_relatorio', 'Hospedagens, Suítes e Movimentações', this)" 
                              class="card-view cursor-pointer bg-slate-50 p-3 sm:p-4 rounded-xl shadow-xs border-2 border-emerald-400 hover:border-emerald-600 hover:shadow-md transition group flex flex-col justify-between">
                             <div>
                                 <div class="flex items-center justify-between mb-1.5">
@@ -114,7 +116,7 @@
                         </div>
 
                         <!-- Card 3: Calendário -->
-                        <div onclick="abrirCalendarioGeralRelatorios()" 
+                        <div id="cardViewCalendario" onclick="abrirCalendarioGeralRelatorios()" 
                              class="card-view cursor-pointer bg-slate-50 p-3 sm:p-4 rounded-xl shadow-xs border-2 border-indigo-400 hover:border-indigo-600 hover:shadow-md transition group flex flex-col justify-between">
                             <div>
                                 <div class="flex items-center justify-between mb-1.5">
@@ -128,8 +130,8 @@
                             <p class="text-[10px] sm:text-[11px] text-gray-500 mt-1 truncate">Mês a mês por suíte.</p>
                         </div>
 
-                        <!-- Card 4: Tarifas -->
-                        <div onclick="selecionarView('vw_gestor_tarifas_relatorio', 'Auditoria de Tarifas Especiais', this)" 
+                        <!-- Card 4: Tarifas (EXCLUSIVO DONO) -->
+                        <div id="cardViewTarifas" onclick="selecionarView('vw_gestor_tarifas_relatorio', 'Auditoria de Tarifas Especiais', this)" 
                              class="card-view cursor-pointer bg-slate-50 p-3 sm:p-4 rounded-xl shadow-xs border-2 border-amber-400 hover:border-amber-600 hover:shadow-md transition group flex flex-col justify-between">
                             <div>
                                 <div class="flex items-center justify-between mb-1.5">
@@ -144,7 +146,7 @@
                         </div>
 
                         <!-- Card 5: Reservas -->
-                        <div onclick="selecionarView('vw_gestor_reservas_relatorio', 'Reservas', this)" 
+                        <div id="cardViewReservas" onclick="selecionarView('vw_gestor_reservas_relatorio', 'Reservas', this)" 
                              class="card-view col-span-2 sm:col-span-1 cursor-pointer bg-slate-50 p-3 sm:p-4 rounded-xl shadow-xs border-2 border-pink-400 hover:border-pink-600 hover:shadow-md transition group flex flex-col justify-between">
                             <div>
                                 <div class="flex items-center justify-between mb-1.5">
@@ -159,11 +161,11 @@
                         </div>
                     </div>
 
-                    <!-- CONTAINER DE KPIS FINANCEIROS OU GERAIS -->
+                    <!-- CONTAINER DE KPIS -->
                     <div id="wrapperTopoHospedagens" class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4">
                         <div id="containerKpis" class="flex flex-wrap gap-2.5 sm:gap-3 w-full lg:w-auto"></div>
                         
-                        <!-- FILTRO DATA AO LADO DOS CARDS DE OCUPAÇÃO -->
+                        <!-- FILTRO DATA -->
                         <div id="containerFiltroDataHospedagens" class="hidden flex flex-wrap items-center gap-2 bg-white p-2.5 rounded-xl border border-gray-200 shadow-xs w-full lg:w-auto">
                             <div class="flex-1 sm:flex-initial flex items-center gap-1.5 bg-gray-50 border border-gray-300 rounded-lg px-2.5 py-1.5">
                                 <span class="text-[10px] font-bold text-gray-500 uppercase">De:</span>
@@ -182,7 +184,7 @@
                         </div>
                     </div>
 
-                    <!-- CARDS DE OCUPAÇÃO POR SUÍTE - SOMENTE HOSPEDAGENS -->
+                    <!-- CARDS DE OCUPAÇÃO POR SUÍTE -->
                     <div id="containerCardsOcupacaoSuites" class="hidden mb-5">
                         <div class="bg-white rounded-xl shadow-xs border border-emerald-100 p-3 sm:p-4">
                             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 mb-3">
@@ -197,7 +199,7 @@
                             </div>
                         </div>
 
-                        <!-- DASHBOARD GRÁFICO DE OCUPAÇÃO POR SUÍTE -->
+                        <!-- DASHBOARD GRÁFICO DE OCUPAÇÃO -->
                         <div id="containerGraficoOcupacao" class="hidden mt-4">
                             <div class="bg-white rounded-xl shadow-xs border border-amber-200 p-3 sm:p-4">
                                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3">
@@ -239,7 +241,6 @@
 
                     <!-- FILTRO RÁPIDO DE STATUS DE RESERVAS E CARDS HOJE -->
                     <div id="containerFiltroStatusReservas" class="mb-4 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
-                        <!-- STATUS PILLS SEPARADOS -->
                         <div class="flex items-center gap-1.5 bg-white p-2.5 rounded-xl border border-gray-200 shadow-xs overflow-x-auto">
                             <span class="text-[10px] font-extrabold text-gray-500 uppercase tracking-widest mr-1 flex-shrink-0">
                                 <i class="fa-solid fa-filter mr-1"></i> Status:
@@ -250,7 +251,6 @@
                             <button id="btnTodas" onclick="alterarFiltroStatusReservas('TODAS')" class="px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 whitespace-nowrap">TODAS</button>
                         </div>
 
-                        <!-- CARDS DE CONTROLE HOJE RESPONSIVOS -->
                         <div id="containerCardsControleHoje" class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5">
                             <div id="cardCheckInHoje" onclick="filtrarPorCardHoje('checkin')" class="bg-white p-2.5 rounded-xl border border-gray-200 shadow-xs flex items-center gap-2.5 cursor-pointer hover:shadow-md hover:border-violet-300 transition-all group">
                                 <div class="w-8 h-8 sm:w-9 sm:h-9 bg-violet-100 text-violet-600 rounded-full flex items-center justify-center text-xs shadow-xs"><i class="fa-solid fa-calendar-days"></i></div>
@@ -317,7 +317,6 @@
                             </div>
                         </div>
 
-                        <!-- TABELA COM ROLAGEM HORIZONTAL SUAVE NO CELULAR -->
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse">
                                 <thead>
@@ -333,7 +332,7 @@
         </main>
     </div>
 
-    <!-- TOAST NATIVO DO SISTEMA (SUBSTITUI OS ALERTS DO NAVEGADOR) -->
+    <!-- TOAST NATIVO -->
     <div id="toast-notificacao" class="fixed bottom-6 right-6 z-[9999] transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
         <div id="toast-content" class="bg-gray-900 text-white px-5 sm:px-6 py-3.5 sm:py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
             <span id="toast-icone" class="text-xl">✨</span>
@@ -344,7 +343,7 @@
         </div>
     </div>
 
-    <!-- MODAL ELEGANTE DE MODO SOMENTE LEITURA -->
+    <!-- MODAL DE MODO SOMENTE LEITURA -->
     <div id="modal-modo-leitura" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-[999]">
         <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-red-100 text-center space-y-4">
             <div class="w-14 h-14 sm:w-16 sm:h-16 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto text-xl sm:text-2xl font-bold shadow-inner">
@@ -355,47 +354,11 @@
                 <p class="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
                     A criação de novas reservas está temporariamente pausada devido a uma pendência na assinatura da pousada.
                 </p>
-                <div class="mt-3 bg-amber-50 border border-amber-200 p-3 rounded-xl text-[11px] text-amber-900 font-medium text-left flex items-start gap-2">
-                    <span class="text-amber-600 text-base">💡</span>
-                    <span>Seus relatórios e consultas continuam 100% disponíveis. Para reativar a criação de reservas, regularize seu plano.</span>
-                </div>
             </div>
-            <div class="grid grid-cols-2 gap-3 pt-2">
-                <button onclick="fecharModalModoLeitura()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 px-4 rounded-xl transition text-xs">
+            <div class="pt-2">
+                <button onclick="fecharModalModoLeitura()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 px-4 rounded-xl transition text-xs">
                     Entendido
                 </button>
-                <a href="tarifas.html" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl transition text-xs shadow-md flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-crown text-amber-300"></i> Ver Assinatura
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL CALENDÁRIO SUÍTE -->
-    <div id="modal-calendario-suite" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-3 sm:p-4 z-[100]">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-4 sm:p-6 relative">
-            <button onclick="fecharCalendarioSuite()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
-            <div class="flex items-center gap-2 mb-1">
-                <span class="text-xl">📅</span>
-                <h3 id="cal-suite-nome" class="text-base sm:text-lg font-bold text-gray-900">Calendário da Suíte</h3>
-            </div>
-            <p class="text-[11px] sm:text-xs text-gray-600 font-medium mb-3">Dias em <strong class="bg-emerald-100 text-emerald-700 px-1 py-0.5 rounded">verde</strong> livres. <strong class="bg-red-100 text-red-700 border border-red-200 px-1 py-0.5 rounded">vermelho com X</strong> ocupados.</p>
-            <div class="flex justify-between items-center mb-3 bg-gray-50 p-2 rounded-xl border border-gray-200">
-                <button onclick="mudarMesCalendario(-1)" class="px-2.5 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-2xs">◀ Anterior</button>
-                <strong id="cal-mes-ano" class="text-xs sm:text-sm font-bold text-gray-800 uppercase">MÊS / ANO</strong>
-                <button onclick="mudarMesCalendario(1)" class="px-2.5 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-2xs">Próximo ▶</button>
-            </div>
-            <div class="grid grid-cols-7 gap-1 text-center font-bold text-[10px] sm:text-[11px] text-gray-500 mb-2">
-                <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
-            </div>
-            <div id="cal-grid-dias" class="grid grid-cols-7 gap-1 sm:gap-1.5 text-center text-xs"></div>
-            <div class="mt-4 flex items-center justify-center gap-3 text-[10px]">
-                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-100 border border-emerald-200 rounded"></span> Livre</span>
-                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-red-100 border border-red-200 rounded relative flex items-center justify-center"><span class="text-[8px] text-red-600 font-bold">✕</span></span> Ocupado</span>
-                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-gray-100 border rounded"></span> Passado</span>
-            </div>
-            <div class="mt-5 flex justify-end">
-                <button onclick="fecharCalendarioSuite()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold text-xs sm:text-sm py-2 rounded-xl transition">Fechar</button>
             </div>
         </div>
     </div>
@@ -413,7 +376,6 @@
                 </div>
             </div>
 
-            <!-- PAINEL COM TODAS AS SUÍTES -->
             <div class="mb-3">
                 <div class="flex justify-between items-center mb-1.5">
                     <span class="text-[10px] sm:text-[11px] font-extrabold text-slate-700 uppercase tracking-widest flex items-center gap-1.5"><i class="fa-solid fa-layer-group text-indigo-600"></i> SUÍTES (<span id="cal-geral-rel-total">0</span>)</span>
@@ -425,10 +387,9 @@
             <p class="text-[10px] sm:text-[11px] text-emerald-700 font-medium mb-1 text-center">Dias em <span class="bg-emerald-100 px-1 py-0.5 rounded font-bold">verde</span> livres, <span class="bg-red-100 px-1 py-0.5 rounded font-bold">vermelho com X</span> ocupados.</p>
             <p id="cal-geral-instrucao" class="text-[10px] sm:text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-full px-2.5 py-1 text-center mb-3">Clique em uma data livre para definir CHECK-IN</p>
 
-            <!-- NAVEGAÇÃO DE MÊS -->
             <div class="flex justify-between items-center mb-3 bg-gray-50 p-2 rounded-xl border border-gray-200">
                 <button onclick="mudarMesCalendarioGeralRelatorios(-1)" class="px-2.5 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-2xs flex items-center gap-1"><i class="fa-solid fa-chevron-left text-[9px]"></i> Anterior</button>
-                <strong id="cal-geral-rel-mes-ano" class="text-xs sm:text-sm font-extrabold text-gray-800 uppercase tracking-wide">SETEMBRO DE 2026</strong>
+                <strong id="cal-geral-rel-mes-ano" class="text-xs sm:text-sm font-extrabold text-gray-800 uppercase tracking-wide">MÊS / ANO</strong>
                 <button onclick="mudarMesCalendarioGeralRelatorios(1)" class="px-2.5 py-1 bg-white hover:bg-gray-100 rounded-lg text-xs font-bold border shadow-2xs flex items-center gap-1">Próximo <i class="fa-solid fa-chevron-right text-[9px]"></i></button>
             </div>
 
@@ -450,12 +411,12 @@
         </div>
     </div>
 
-    <!-- MODAL NOVA RESERVA DIRETO DO CALENDÁRIO (FICHA COMPLETA COM NÚMERO E COMPLEMENTO DEDICADOS) -->
+    <!-- MODAL NOVA RESERVA DIRETO DO CALENDÁRIO -->
     <div id="modal-nova-reserva-calendario" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-3 sm:p-4 z-[70]">
         <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-4 sm:p-7 relative max-h-[92vh] overflow-y-auto">
             <button onclick="fecharModalNovaReservaCalendario()" class="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold">✕</button>
-            <h3 id="nova-reserva-titulo" class="text-base sm:text-lg font-extrabold text-blue-700 mb-1 pr-8">Criar Nova Reserva: Suíte</h3>
-            <p class="text-[10px] sm:text-[11px] text-gray-500 mb-3">Datas preenchidas automaticamente pelo calendário geral</p>
+            <h3 id="nova-reserva-titulo" class="text-base sm:text-lg font-extrabold text-blue-700 mb-1 pr-8">Criar Nova Reserva</h3>
+            <p class="text-[10px] sm:text-[11px] text-gray-500 mb-3">Datas preenchidas pelo calendário</p>
             
             <div id="nova-reserva-resumo" class="bg-blue-50 border border-blue-200 p-2.5 rounded-xl space-y-1 text-xs text-blue-900 mb-3">
                 <div class="flex justify-between"><span>Qtd. Diárias:</span><strong id="nova-reserva-qtd-diarias">0</strong></div>
@@ -467,7 +428,6 @@
                 <input type="hidden" id="nova-reserva-suite-id">
                 <div id="nova-reserva-capacidade-info" class="mb-1 bg-blue-50 border border-blue-200 p-2 rounded-xl text-xs font-bold text-blue-900 flex items-center gap-2"><span>🏨</span> <span id="nova-reserva-capacidade-texto">Capacidade: carregando...</span></div>
 
-                <!-- CAMPO CPF OBRIGATÓRIO COM INTELIGÊNCIA DE AUTOCOMPLETE -->
                 <div>
                     <label class="block text-[11px] font-bold text-gray-700 mb-0.5">
                         CPF do Hóspede <span class="text-red-600 font-extrabold">* (Obrigatório)</span>
@@ -479,7 +439,7 @@
                         </div>
                     </div>
                     <span id="nova-reserva-msg-encontrado" class="hidden text-[10px] font-bold text-emerald-700 mt-1 block">
-                        <i class="fa-solid fa-check-circle"></i> Hóspede localizado! Dados cadastrais preenchidos automaticamente.
+                        <i class="fa-solid fa-check-circle"></i> Hóspede localizado! Dados preenchidos automaticamente.
                     </span>
                 </div>
 
@@ -490,11 +450,8 @@
                     <input type="text" id="nova-reserva-rg" placeholder="RG (Opcional)" class="p-2.5 sm:p-3 border rounded-xl text-xs sm:text-sm">
                 </div>
 
-                <!-- BLOCO DE ENDEREÇO COM CAMPOS DEDICADOS (RUA, NÚMERO, COMPLEMENTO, BAIRRO, CIDADE, UF) -->
                 <div class="bg-gray-50/80 border border-gray-200 p-2.5 sm:p-3 rounded-2xl space-y-2">
                     <span class="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block">Endereço do Hóspede (com Busca por CEP)</span>
-                    
-                    <!-- LINHA 1: CEP + RUA / LOGRADOURO -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                         <div class="sm:col-span-1">
                             <label class="block text-[10px] font-bold text-gray-600 mb-0.5">CEP:</label>
@@ -502,35 +459,31 @@
                         </div>
                         <div class="sm:col-span-2">
                             <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Rua / Logradouro:</label>
-                            <input type="text" id="nova-reserva-endereco" placeholder="Ex: Rua Simões Lopes" class="w-full p-2 border rounded-xl text-xs bg-white">
+                            <input type="text" id="nova-reserva-endereco" placeholder="Ex: Rua das Flores" class="w-full p-2 border rounded-xl text-xs bg-white">
                         </div>
                     </div>
-
-                    <!-- LINHA 2: NÚMERO + COMPLEMENTO -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                         <div>
                             <label class="block text-[10px] font-bold text-gray-700 mb-0.5">Número <span class="text-red-500">*</span>:</label>
                             <input type="text" id="nova-reserva-numero" placeholder="Ex: 120" class="w-full p-2 border-2 border-blue-200 focus:border-blue-500 rounded-xl text-xs bg-white font-bold">
                         </div>
                         <div class="sm:col-span-2">
-                            <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Complemento (Casa, Apto, Bloco...):</label>
-                            <input type="text" id="nova-reserva-complemento" placeholder="Ex: Casa 2, Apto 302, Bloco B" class="w-full p-2 border rounded-xl text-xs bg-white">
+                            <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Complemento:</label>
+                            <input type="text" id="nova-reserva-complemento" placeholder="Ex: Apto 101" class="w-full p-2 border rounded-xl text-xs bg-white">
                         </div>
                     </div>
-
-                    <!-- LINHA 3: BAIRRO + MUNICÍPIO + UF -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                         <div>
                             <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Bairro:</label>
-                            <input type="text" id="nova-reserva-bairro" placeholder="Ex: Gradim" class="w-full p-2 border rounded-xl text-xs bg-white">
+                            <input type="text" id="nova-reserva-bairro" placeholder="Bairro" class="w-full p-2 border rounded-xl text-xs bg-white">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Município (Cidade):</label>
-                            <input type="text" id="nova-reserva-cidade" placeholder="Ex: São Gonçalo" class="w-full p-2 border rounded-xl text-xs bg-white">
+                            <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Cidade:</label>
+                            <input type="text" id="nova-reserva-cidade" placeholder="Cidade" class="w-full p-2 border rounded-xl text-xs bg-white">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-600 mb-0.5">UF (Estado):</label>
-                            <input type="text" id="nova-reserva-uf" placeholder="Ex: RJ" maxlength="2" class="w-full p-2 border rounded-xl text-xs bg-white uppercase font-bold text-center">
+                            <label class="block text-[10px] font-bold text-gray-600 mb-0.5">UF:</label>
+                            <input type="text" id="nova-reserva-uf" placeholder="UF" maxlength="2" class="w-full p-2 border rounded-xl text-xs bg-white uppercase font-bold text-center">
                         </div>
                     </div>
                 </div>
@@ -552,12 +505,12 @@
                     <div><label class="block text-[11px] font-bold text-gray-700 mb-0.5">Check-out</label><input type="date" id="nova-reserva-checkout" readonly class="w-full p-2.5 border rounded-xl text-xs sm:text-sm bg-blue-50/50 font-bold"></div>
                 </div>
                 <div class="pt-1 space-y-2">
-                    <div><label class="block text-[11px] font-bold text-emerald-700 mb-0.5">Registrar Novo Pagamento / Sinal (R$)</label><input type="number" step="0.01" id="nova-reserva-valor-sinal" placeholder="0.00" class="w-full p-2.5 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-xs sm:text-sm" oninput="recalcularNovaReservaCalendario()"></div>
+                    <div><label class="block text-[11px] font-bold text-emerald-700 mb-0.5">Registrar Pagamento / Sinal (R$)</label><input type="number" step="0.01" id="nova-reserva-valor-sinal" placeholder="0.00" class="w-full p-2.5 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-xs sm:text-sm" oninput="recalcularNovaReservaCalendario()"></div>
                     <div><label class="block text-[11px] font-bold text-emerald-700 mb-0.5">Forma de Pagamento</label><select id="nova-reserva-forma-pagamento" class="w-full p-2.5 border border-emerald-300 bg-emerald-50/50 rounded-xl font-bold text-xs sm:text-sm"><option>Pix / Sinal</option><option>Dinheiro</option><option>Cartão de Crédito</option><option>Cartão de Débito</option><option>Transferência Bancária</option></select></div>
-                    <div><label class="block text-[11px] font-bold text-amber-700 mb-0.5">⚠️ Observação / Alerta</label><textarea id="nova-reserva-observacao" rows="2" placeholder="Ex: Hóspede solicitou late checkout, etc." class="w-full p-2.5 border border-amber-300 bg-amber-50/40 rounded-xl text-xs sm:text-sm"></textarea></div>
+                    <div><label class="block text-[11px] font-bold text-amber-700 mb-0.5">⚠️ Observação</label><textarea id="nova-reserva-observacao" rows="2" placeholder="Observações" class="w-full p-2.5 border border-amber-300 bg-amber-50/40 rounded-xl text-xs sm:text-sm"></textarea></div>
                 </div>
                 <button onclick="salvarNovaReservaCalendario()" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-2.5 sm:p-3 rounded-xl font-bold mt-3 text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-check"></i> Salvar Alterações
+                    <i class="fa-solid fa-check"></i> Salvar Reserva
                 </button>
                 <button onclick="fecharModalNovaReservaCalendario()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 p-2.5 rounded-xl font-bold mt-1.5 text-xs sm:text-sm transition">Cancelar</button>
             </div>
@@ -570,18 +523,16 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let usuarioIdAtual = null;
+        let cargoUsuarioAtual = 'dono';
+        let usuarioSessaoRealId = null;
         let viewAtualSelecionada = 'vw_gestor_financeiro_relatorio';
         var filtroStatusReservasAtual = 'APROVADA';
         var filtroCheckTipoHoje = null;
-        var hojeStrGlobal = new Date().toLocaleDateString('sv-SE'); 
         let suiteFiltroAtual = null;
         let suitesDaPousadaCache = []; 
         let tituloBaseAtual = 'Extrato Detalhado de Pagamentos';
         let pousadaEmDiaCache = true;
 
-        // =========================================================================
-        // NOTIFICAÇÕES NATIVAS DO SISTEMA (SUBSTITUEM OS ALERTS DO NAVEGADOR)
-        // =========================================================================
         let toastTimerRelatorios = null;
         function mostrarToast(titulo, mensagem, tipo = 'sucesso', duracaoMs = 4000) {
             const toast = document.getElementById('toast-notificacao');
@@ -614,9 +565,6 @@
             }, duracaoMs);
         }
 
-        // =========================================================================
-        // FUNÇÕES DE MÁSCARA, VALIDAÇÃO DE CPF E AUTOCOMPLETE
-        // =========================================================================
         function formatarCPF(v) {
             v = v.replace(/\D/g, "");
             if (v.length > 11) v = v.substring(0, 11);
@@ -659,7 +607,6 @@
             timerBuscaCpfRelatorios = setTimeout(async () => {
                 if (feedbackSpinner) feedbackSpinner.classList.remove('hidden');
                 try {
-                    // 1. Busca na tabela hospedes da pousada
                     const { data: hospedeBase } = await supabaseClient
                         .from('hospedes')
                         .select('*')
@@ -669,7 +616,6 @@
 
                     let dados = hospedeBase;
 
-                    // 2. Busca sem máscara ou na tabela de reservas anteriores
                     if (!dados) {
                         const { data: hospedeBaseSemMasc } = await supabaseClient
                             .from('hospedes')
@@ -744,9 +690,6 @@
             }, 300);
         }
 
-        // =========================================================================
-        // BUSCA AUTOMÁTICA DE ENDEREÇO VIA CEP COM FOCO AUTOMÁTICO NO NÚMERO
-        // =========================================================================
         async function aoDigitarCepCalendario(input) {
             let cepLimpo = input.value.replace(/\D/g, "");
             if (cepLimpo.length > 8) cepLimpo = cepLimpo.substring(0, 8);
@@ -773,8 +716,6 @@
                         if (data.uf && elUf) elUf.value = data.uf;
 
                         mostrarToast("CEP Localizado!", `${data.localidade}/${data.uf} preenchido. Informe o número.`, "sucesso", 3000);
-                        
-                        // Joga o foco automaticamente para o campo Número
                         if (elNumero) elNumero.focus();
                     }
                 } catch(e) {
@@ -828,6 +769,9 @@
             document.getElementById('filtroDataFim').value = '';
         }
 
+        // =========================================================================
+        // PROTEÇÃO E BLINDAGEM DE TENANT / RBAC EM RELATÓRIOS
+        // =========================================================================
         async function protegerPagina() {
             supabaseClient.auth.onAuthStateChange((event, session) => {
                 if (event === 'SIGNED_OUT' || !session) {
@@ -841,7 +785,53 @@
                 return;
             }
 
-            usuarioIdAtual = session.user.id;
+            usuarioSessaoRealId = session.user.id;
+
+            // 1. Resolução oficial de Tenant e Cargo via tabela usuarios
+            const { data: usuarioPerfil } = await supabaseClient
+                .from('usuarios')
+                .select('pousada_id, cargo, ativo, nome_completo')
+                .eq('user_id', session.user.id)
+                .maybeSingle();
+
+            if (usuarioPerfil && usuarioPerfil.ativo === false) {
+                await supabaseClient.auth.signOut();
+                alert("Seu acesso foi desativado pelo gestor da pousada.");
+                window.location.href = 'index.html';
+                return;
+            }
+
+            cargoUsuarioAtual = usuarioPerfil?.cargo || 'dono';
+
+            if (cargoUsuarioAtual === 'limpeza') {
+                window.location.href = 'limpeza.html';
+                return;
+            }
+
+            usuarioIdAtual = usuarioPerfil?.pousada_id || session.user.id;
+
+            // 2. BLINDAGEM PARA O PERFIL RECEPÇÃO:
+            if (cargoUsuarioAtual === 'recepcao') {
+                // Remove Card 1 (Financeiro) e Card 4 (Tarifas Aplicadas)
+                document.getElementById('cardViewFinanceiro')?.remove();
+                document.getElementById('cardViewTarifas')?.remove();
+                
+                // Oculta banner de assinatura e menus restritos
+                document.getElementById('banner-assinatura-relatorios')?.remove();
+                document.getElementById('link-menu-tarifas')?.remove();
+                document.getElementById('link-menu-equipe')?.remove();
+
+                // Define view padrão operacional: Hospedagens
+                viewAtualSelecionada = 'vw_gestor_hospedagens_relatorio';
+                tituloBaseAtual = 'Hospedagens, Suítes e Movimentações';
+                
+                const cardHosp = document.getElementById('cardViewHospedagens');
+                if (cardHosp) {
+                    document.querySelectorAll('.card-view').forEach(c => c.classList.remove('border-emerald-500', 'shadow-md'));
+                    cardHosp.classList.add('border-emerald-500', 'shadow-md');
+                }
+            }
+
             inicializarFiltroDatas();
             await identificarPousada();
         }
@@ -860,53 +850,60 @@
                 labelPousada.textContent = `${pousada.nome}`.toUpperCase();
                 labelMenu.textContent = pousada.nome.toUpperCase();
             } else {
-                labelPousada.textContent = `POUSADA ID: ${usuarioIdAtual}`;
-                labelMenu.textContent = "PAINEL ADMINISTRATIVO";
+                labelPousada.textContent = `POUSADA`;
+                labelMenu.textContent = "PAINEL POUSADA";
             }
 
-            try {
-                let diasAviso = 5;
+            // Assinatura exibida apenas para o Dono
+            if (cargoUsuarioAtual === 'dono') {
                 try {
-                    const { data: config } = await supabaseClient.from('config_sistema').select('dias_aviso_vencimento').eq('id', 1).maybeSingle();
-                    if (config && config.dias_aviso_vencimento) diasAviso = Number(config.dias_aviso_vencimento);
-                } catch (e) {}
+                    let diasAviso = 5;
+                    try {
+                        const { data: config } = await supabaseClient.from('config_sistema').select('dias_aviso_vencimento').eq('id', 1).maybeSingle();
+                        if (config && config.dias_aviso_vencimento) diasAviso = Number(config.dias_aviso_vencimento);
+                    } catch (e) {}
 
-                if (pousada) {
-                    const banner = document.getElementById('banner-assinatura-relatorios');
-                    const tit = document.getElementById('banner-assinatura-titulo');
-                    const sub = document.getElementById('banner-assinatura-sub');
-                    const icone = document.getElementById('banner-assinatura-icone');
+                    if (pousada) {
+                        const banner = document.getElementById('banner-assinatura-relatorios');
+                        const tit = document.getElementById('banner-assinatura-titulo');
+                        const sub = document.getElementById('banner-assinatura-sub');
+                        const icone = document.getElementById('banner-assinatura-icone');
 
-                    let diasRest = null;
-                    let dVenc = null;
-                    if (pousada.data_vencimento) {
-                        dVenc = new Date(pousada.data_vencimento + 'T12:00:00');
-                        const hoje = new Date(); hoje.setHours(0,0,0,0);
-                        diasRest = Math.ceil((dVenc - hoje) / (1000 * 60 * 60 * 24));
+                        let diasRest = null;
+                        let dVenc = null;
+                        if (pousada.data_vencimento) {
+                            dVenc = new Date(pousada.data_vencimento + 'T12:00:00');
+                            const hoje = new Date(); hoje.setHours(0,0,0,0);
+                            diasRest = Math.ceil((dVenc - hoje) / (1000 * 60 * 60 * 24));
+                        }
+
+                        const st = (pousada.status || 'active').toLowerCase();
+
+                        if (st === 'blocked' || (diasRest !== null && diasRest < 0)) {
+                            pousadaEmDiaCache = false;
+                            if (banner) {
+                                banner.className = "mb-4 sm:mb-5 p-3.5 sm:p-4 rounded-2xl shadow-xs border-2 border-red-300 bg-red-50 text-red-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3";
+                                icone.innerText = "🚫";
+                                tit.innerText = "Plano Suspenso por Inadimplência (Modo Somente Leitura)";
+                                sub.innerText = `Sua assinatura venceu em ${dVenc ? dVenc.toLocaleDateString('pt-BR') : 'data anterior'}. Novas reservas estão travadas.`;
+                                banner.classList.remove('hidden');
+                            }
+                        } else if (diasRest !== null && diasRest <= diasAviso) {
+                            pousadaEmDiaCache = true;
+                            if (banner) {
+                                banner.className = "mb-4 sm:mb-5 p-3.5 sm:p-4 rounded-2xl shadow-xs border-2 border-amber-300 bg-amber-50 text-amber-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3";
+                                icone.innerText = "⚠️";
+                                tit.innerText = `Atenção: Seu plano vence em ${diasRest === 0 ? 'HOJE' : diasRest + ' dia(s)'}!`;
+                                sub.innerText = `Vencimento: ${dVenc.toLocaleDateString('pt-BR')}. Confirme o pagamento para manter reservas liberadas.`;
+                                banner.classList.remove('hidden');
+                            }
+                        } else {
+                            pousadaEmDiaCache = true;
+                            banner?.classList.add('hidden');
+                        }
                     }
-
-                    const st = (pousada.status || 'active').toLowerCase();
-
-                    if (st === 'blocked' || (diasRest !== null && diasRest < 0)) {
-                        pousadaEmDiaCache = false;
-                        banner.className = "mb-4 sm:mb-5 p-3.5 sm:p-4 rounded-2xl shadow-xs border-2 border-red-300 bg-red-50 text-red-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3";
-                        icone.innerText = "🚫";
-                        tit.innerText = "Plano Suspenso por Inadimplência (Modo Somente Leitura)";
-                        sub.innerText = `Sua assinatura venceu em ${dVenc ? dVenc.toLocaleDateString('pt-BR') : 'data anterior'}. Novas reservas estão travadas.`;
-                        banner.classList.remove('hidden');
-                    } else if (diasRest !== null && diasRest <= diasAviso) {
-                        pousadaEmDiaCache = true;
-                        banner.className = "mb-4 sm:mb-5 p-3.5 sm:p-4 rounded-2xl shadow-xs border-2 border-amber-300 bg-amber-50 text-amber-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3";
-                        icone.innerText = "⚠️";
-                        tit.innerText = `Atenção: Seu plano vence em ${diasRest === 0 ? 'HOJE' : diasRest + ' dia(s)'}!`;
-                        sub.innerText = `Vencimento: ${dVenc.toLocaleDateString('pt-BR')}. Confirme o pagamento para manter reservas liberadas.`;
-                        banner.classList.remove('hidden');
-                    } else {
-                        pousadaEmDiaCache = true;
-                        banner.classList.add('hidden');
-                    }
-                }
-            } catch(e) {}
+                } catch(e) {}
+            }
 
             await carregarSuitesParaFiltro();
             carregarDadosView();
@@ -1756,7 +1753,7 @@
                         </div>
                     `;
                     renderizarFiltroSuites(registros);
-                    document.getElementById('containerFiltroSuites').classList.remove('hidden');
+                    document.getElementById('containerFiltroSuites')?.classList.remove('hidden');
                     const contOcupFin = document.getElementById('containerCardsOcupacaoSuites');
                     if (contOcupFin) contOcupFin.classList.add('hidden');
                 } else if (ehViewHospedagens) {
@@ -1795,7 +1792,7 @@
                             </div>
                         </div>
                     `;
-                    document.getElementById('containerFiltroSuites').classList.add('hidden');
+                    document.getElementById('containerFiltroSuites')?.classList.add('hidden');
                     
                     const containerOcupacao = document.getElementById('containerCardsOcupacaoSuites');
                     const gridOcupacao = document.getElementById('gridOcupacaoSuites');
@@ -1838,7 +1835,7 @@
                     }
                 } else {
                     containerKpis.className = "hidden";
-                    document.getElementById('containerFiltroSuites').classList.add('hidden');
+                    document.getElementById('containerFiltroSuites')?.classList.add('hidden');
                     const contOcupElse = document.getElementById('containerCardsOcupacaoSuites');
                     if (contOcupElse) contOcupElse.classList.add('hidden');
                 }
@@ -2445,8 +2442,6 @@
             document.getElementById('nova-reserva-whatsapp').value = '';
             document.getElementById('nova-reserva-cpf').value = '';
             document.getElementById('nova-reserva-rg').value = '';
-            
-            // Novos campos de endereço dedicados limpos
             document.getElementById('nova-reserva-endereco').value = '';
             document.getElementById('nova-reserva-numero').value = '';
             document.getElementById('nova-reserva-complemento').value = '';
@@ -2454,7 +2449,6 @@
             document.getElementById('nova-reserva-cidade').value = '';
             document.getElementById('nova-reserva-uf').value = '';
             document.getElementById('nova-reserva-cep').value = '';
-            
             document.getElementById('nova-reserva-email').value = '';
             document.getElementById('nova-reserva-valor-sinal').value = '';
             document.getElementById('nova-reserva-observacao').value = '';
@@ -2567,9 +2561,6 @@
             const checkin = document.getElementById('nova-reserva-checkin').value;
             const checkout = document.getElementById('nova-reserva-checkout').value;
 
-            // =================================================================
-            // REGRA: CPF OBRIGATÓRIO NA CRIAÇÃO DE NOVA RESERVA
-            // =================================================================
             const cpfInformado = (document.getElementById('nova-reserva-cpf').value || '').trim();
             const cpfLimpo = cpfInformado.replace(/\D/g, "");
 
@@ -2615,7 +2606,6 @@
             const obs = document.getElementById('nova-reserva-observacao').value;
             const rg = document.getElementById('nova-reserva-rg').value;
             
-            // Novos campos atômicos de endereço
             const logradouro = document.getElementById('nova-reserva-endereco').value.trim();
             const numero = document.getElementById('nova-reserva-numero').value.trim();
             const complemento = document.getElementById('nova-reserva-complemento').value.trim();
@@ -2631,7 +2621,6 @@
             const inputsIdades = document.querySelectorAll('.nova-reserva-input-idade-crianca');
             const idadesStr = Array.from(inputsIdades).map(el=>parseInt(el.value)||0).join(',');
 
-            // Gravação direta nas colunas dedicadas criadas na tabela reservas
             try {
                 const dadosReserva = {
                     pousada_id: usuarioIdAtual,
@@ -2670,7 +2659,7 @@
                     throw error;
                 }
 
-                // Sincronização no CRM de hóspedes
+                // Sincronização no CRM
                 try {
                     const dadosHospede = {
                         pousada_id: usuarioIdAtual,

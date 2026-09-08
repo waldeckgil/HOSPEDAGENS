@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Governança & Limpeza - Painel 360</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-100 min-h-screen flex flex-col text-slate-800 font-sans pb-10">
+
+    <!-- CABEÇALHO MOBILE EXECUTIVO -->
+    <header class="bg-slate-900 text-white p-4 shadow-lg sticky top-0 z-30 border-b border-slate-800">
+        <div class="max-w-md mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-pink-600/20 text-pink-400 border border-pink-500/30 rounded-2xl flex items-center justify-center text-lg font-bold shadow-inner">
+                    <i class="fa-solid fa-broom"></i>
+                </div>
+                <div>
+                    <h1 id="nome-pousada-topo" class="text-sm font-extrabold tracking-wide truncate max-w-[190px]">Pousada</h1>
+                    <p class="text-[11px] text-pink-300 font-medium flex items-center gap-1">
+                        <i class="fa-solid fa-user-check text-[10px]"></i> <span id="nome-operador-topo">Governança</span>
+                    </p>
+                </div>
+            </div>
+            <button onclick="fazerLogout()" class="bg-slate-800 hover:bg-red-600 text-slate-300 hover:text-white px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-slate-700">
+                <i class="fa-solid fa-right-from-bracket"></i> Sair
+            </button>
+        </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL (FOCADO EM DISPOSITIVO MÓVEL) -->
+    <main class="flex-1 p-4 max-w-md mx-auto w-full space-y-4">
+        
+        <!-- CARD DE STATUS DO DIA -->
+        <div class="bg-gradient-to-br from-pink-600 to-purple-700 p-5 rounded-3xl text-white shadow-lg relative overflow-hidden">
+            <div class="relative z-10 flex justify-between items-center">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-pink-200 block">Quartos Pendentes</span>
+                    <div class="flex items-baseline gap-2 mt-0.5">
+                        <span id="contador-quartos-limpeza" class="text-3xl font-black">0</span>
+                        <span class="text-xs font-bold text-pink-100">aguardando limpeza</span>
+                    </div>
+                </div>
+                <button onclick="carregarQuartosParaLimpar(true)" title="Atualizar Lista" class="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-2xl flex items-center justify-center text-sm font-bold transition">
+                    <i id="icone-refresh" class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+            <p class="text-[10px] text-pink-200/90 mt-2 relative z-10 font-medium">
+                Conclua a higienização para que a recepção possa liberar o quarto.
+            </p>
+        </div>
+
+        <!-- LISTA DE CARDS DE QUARTOS -->
+        <div id="lista-quartos-container" class="space-y-3">
+            <div class="py-12 text-center text-slate-400 text-xs font-medium">
+                <i class="fa-solid fa-spinner fa-spin text-xl text-pink-600 mb-2 block"></i>
+                Buscando quartos para limpar...
+            </div>
+        </div>
+
+    </main>
+
+    <!-- TOAST DE NOTIFICAÇÃO -->
+    <div id="toast-notificacao" class="fixed bottom-6 right-6 left-6 max-w-md mx-auto z-[9999] transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+        <div id="toast-content" class="bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-800">
+            <span id="toast-icone" class="text-xl">✨</span>
+            <div>
+                <h4 id="toast-titulo" class="font-bold text-xs">Sucesso</h4>
+                <p id="toast-mensagem" class="text-[11px] text-slate-300">Quarto liberado!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
+        const EMAIL_MASTER_ADMIN = 'waldeckgil@gmail.com';
+
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let usuarioIdAtual = null; // ID da Pousada
+        let nomePousadaAtual = 'Pousada';
+        let suitesEmLimpezaCache = [];
+        let reservasAtivasCache = [];
+        let canalRealtime = null;
+        let toastTimer = null;
+
+        function mostrarToast(titulo, mensagem, tipo = 'sucesso') {
+            const toast = document.getElementById('toast-notificacao');
+            const toastTitulo = document.getElementById('toast-titulo');
+            const toastMsg = document.getElementById('toast-mensagem');
+            const toastIcone = document.getElementById('toast-icone');
+            const toastContent = document.getElementById('toast-content');
+
+            if (!toast) return;
+            if (toastTimer) clearTimeout(toastTimer);
+
+            toastTitulo.innerText = titulo;
+            toastMsg.innerText = mensagem;
+
+            if (tipo === 'sucesso') {
+                toastContent.className = "bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-800";
+                toastIcone.innerText = "✨";
+            } else if (tipo === 'alerta') {
+                toastContent.className = "bg-amber-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-amber-700";
+                toastIcone.innerText = "⚠️";
+            } else {
+                toastContent.className = "bg-red-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-red-700";
+                toastIcone.innerText = "🚨";
+            }
+
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            toastTimer = setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3000);
+        }
+
+        async function protegerPagina() {
+            const { data: { session }, error } = await supabaseClient.auth.getSession();
+            if (error || !session) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const emailLogado = (session.user.email || '').toLowerCase();
+            const params = new URLSearchParams(window.location.search);
+            const pousadaIdParam = params.get('pousada_id');
+
+            // 1. Resolução do perfil na tabela usuarios (RBAC)
+            const { data: perfil } = await supabaseClient
+                .from('usuarios')
+                .select('pousada_id, cargo, ativo, nome_completo')
+                .eq('user_id', session.user.id)
+                .maybeSingle();
+
+            // Bloqueio de colaborador desativado
+            if (perfil && perfil.ativo === false) {
+                await supabaseClient.auth.signOut();
+                alert("Seu acesso foi desativado pelo gestor da pousada.");
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const isMaster = (emailLogado === EMAIL_MASTER_ADMIN.toLowerCase());
+            const cargo = perfil?.cargo || 'dono';
+
+            if (isMaster && pousadaIdParam) {
+                usuarioIdAtual = pousadaIdParam;
+            } else {
+                usuarioIdAtual = perfil?.pousada_id || session.user.id;
+            }
+
+            // Exibe nome do operador no topo
+            const elNomeOp = document.getElementById('nome-operador-topo');
+            if (elNomeOp) {
+                elNomeOp.innerText = perfil?.nome_completo || (cargo === 'limpeza' ? 'Camareira' : 'Gestor');
+            }
+
+            // Busca nome da pousada
+            const { data: pousada } = await supabaseClient
+                .from('pousadas')
+                .select('nome')
+                .eq('id', usuarioIdAtual)
+                .maybeSingle();
+
+            nomePousadaAtual = pousada?.nome || 'Minha Pousada';
+            document.getElementById('nome-pousada-topo').innerText = nomePousadaAtual;
+
+            await carregarQuartosParaLimpar();
+            iniciarRealtime();
+        }
+
+        async function carregarQuartosParaLimpar(animarIcone = false) {
+            const icone = document.getElementById('icone-refresh');
+            if (animarIcone && icone) icone.classList.add('fa-spin');
+
+            const hojeStr = new Date().toLocaleDateString('sv-SE');
+
+            // 1. Busca todas as suítes em Limpeza
+            const { data: suites, error: errSuites } = await supabaseClient
+                .from('suites')
+                .select('*')
+                .eq('pousada_id', usuarioIdAtual)
+                .eq('status', 'Limpeza')
+                .order('nome');
+
+            // 2. Busca reservas ativas para saber se o hóspede ainda está hospedado hoje
+            const { data: reservas, error: errRes } = await supabaseClient
+                .from('reservas')
+                .select('id, suite_id, checkin, checkout, status')
+                .eq('pousada_id', usuarioIdAtual)
+                .eq('status', 'Aprovada');
+
+            if (animarIcone && icone) {
+                setTimeout(() => icone.classList.remove('fa-spin'), 600);
+            }
+
+            if (errSuites) {
+                document.getElementById('lista-quartos-container').innerHTML = `
+                    <div class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl text-xs font-bold text-center">
+                        Erro ao carregar quartos: ${errSuites.message}
+                    </div>`;
+                return;
+            }
+
+            suitesEmLimpezaCache = suites || [];
+            reservasAtivasCache = reservas || [];
+
+            const total = suitesEmLimpezaCache.length;
+            document.getElementById('contador-quartos-limpeza').innerText = total;
+
+            const container = document.getElementById('lista-quartos-container');
+
+            // Cenário: Tudo limpo!
+            if (total === 0) {
+                container.innerHTML = `
+                    <div class="bg-white border border-slate-200 p-8 rounded-3xl text-center shadow-xs space-y-2 mt-4">
+                        <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center text-2xl mx-auto shadow-inner">
+                            <i class="fa-solid fa-sparkles"></i>
+                        </div>
+                        <h3 class="text-base font-black text-slate-900">Tudo limpo por aqui!</h3>
+                        <p class="text-xs text-slate-500 max-w-xs mx-auto leading-relaxed">
+                            Nenhum quarto pendente de higienização no momento. Quando a recepção liberar uma saída, o quarto aparecerá aqui automaticamente.
+                        </p>
+                    </div>`;
+                return;
+            }
+
+            // Renderiza os cards das suítes
+            let html = '';
+            suitesEmLimpezaCache.forEach(suite => {
+                // Checa se tem hóspede alojado hoje nesta suíte (arrumação diária)
+                const temHospedeHoje = reservasAtivasCache.some(r => 
+                    r.suite_id === suite.id && r.checkin <= hojeStr && r.checkout > hojeStr
+                );
+
+                let badgeTipo = '';
+                let bordaCard = '';
+                let textoOrientacao = '';
+
+                if (temHospedeHoje) {
+                    badgeTipo = `<span class="bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase">
+                        <i class="fa-solid fa-bed mr-1"></i> Arrumação Diária
+                    </span>`;
+                    bordaCard = 'border-amber-300 bg-amber-50/40';
+                    textoOrientacao = 'Hóspede continua hospedado na pousada. Realize a arrumação e reposição diária.';
+                } else {
+                    badgeTipo = `<span class="bg-pink-100 text-pink-900 border border-pink-300 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase">
+                        <i class="fa-solid fa-door-open mr-1"></i> Checkout Realizado
+                    </span>`;
+                    bordaCard = 'border-pink-300 bg-white';
+                    textoOrientacao = 'Hóspede já desocupou o quarto. Realizar limpeza pesada e troca completa de enxoval.';
+                }
+
+                html += `
+                    <div class="border-2 ${bordaCard} p-5 rounded-3xl shadow-sm space-y-3 transition-all hover:shadow-md">
+                        <div class="flex justify-between items-start gap-2">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-2xl bg-pink-100 text-pink-700 flex items-center justify-center text-lg font-black shadow-2xs">
+                                    <i class="fa-solid fa-broom"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-base font-black text-slate-900 leading-tight">${suite.nome}</h3>
+                                    <p class="text-[11px] text-slate-500 font-semibold mt-0.5">${textoOrientacao}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-2 border-t border-slate-200/60">
+                            <span class="text-[11px] font-bold text-slate-600">Serviço:</span>
+                            ${badgeTipo}
+                        </div>
+
+                        <button onclick="concluirLimpezaQuarto('${suite.id}', '${suite.nome.replace(/'/g, "\\'")}', ${temHospedeHoje})" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-extrabold py-3.5 px-4 rounded-2xl shadow-md transition flex items-center justify-center gap-2 text-sm">
+                            <i class="fa-solid fa-circle-check text-base"></i> Marcar como Limpa
+                        </button>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        async function concluirLimpezaQuarto(suiteId, nomeSuite, temHospedeHoje) {
+            const statusDestino = temHospedeHoje ? 'Ocupada' : 'Disponível';
+
+            // Feedback tátil imediato
+            const { error } = await supabaseClient
+                .from('suites')
+                .update({ status: statusDestino })
+                .eq('id', suiteId);
+
+            if (error) {
+                mostrarToast("Erro", "Falha ao liberar quarto: " + error.message, 'erro');
+                return;
+            }
+
+            const msg = temHospedeHoje 
+                ? `${nomeSuite} limpa! Quarto voltou para OCUPADA (hóspede na casa).` 
+                : `${nomeSuite} limpa e liberada como DISPONÍVEL para a recepção!`;
+
+            mostrarToast("Sucesso!", msg, "sucesso");
+            await carregarQuartosParaLimpar();
+        }
+
+        function iniciarRealtime() {
+            if (canalRealtime) supabaseClient.removeChannel(canalRealtime);
+
+            // Escuta mudanças na tabela suites em tempo real
+            canalRealtime = supabaseClient
+                .channel(`governanca-${usuarioIdAtual}`)
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'suites', filter: `pousada_id=eq.${usuarioIdAtual}` }, () => {
+                    carregarQuartosParaLimpar();
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'reservas', filter: `pousada_id=eq.${usuarioIdAtual}` }, () => {
+                    carregarQuartosParaLimpar();
+                })
+                .subscribe();
+        }
+
+        async function fazerLogout() {
+            await supabaseClient.auth.signOut();
+            window.location.href = 'index.html';
+        }
+
+        window.onload = protegerPagina;
+    </script>
+</body>
+</html>

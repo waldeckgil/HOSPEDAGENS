@@ -9,7 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row" onload="inicializarPagina()">
+<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row">
 
     <!-- MENU LATERAL / TOPO NO MOBILE -->
     <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl flex-shrink-0 z-20">
@@ -22,7 +22,7 @@
                 <!-- AÇÕES RÁPIDAS NO TOPO (MOBILE) -->
                 <div class="flex items-center gap-2 md:hidden">
                     <a href="dashboard.html" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-xs">
-                        <span>🏠</span> <span>Painel Principal</span>
+                        <span>🏠</span> <span>Painel</span>
                     </a>
                     <button onclick="fazerLogout()" class="bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white px-2.5 py-1.5 rounded-xl font-bold text-xs transition">
                         <i class="fa-solid fa-right-from-bracket"></i>
@@ -34,6 +34,21 @@
             <nav class="hidden md:flex flex-col space-y-2 mt-4 md:mt-0">
                 <a href="dashboard.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm text-slate-200">
                     <span>🏠</span> <span>Painel Principal</span>
+                </a>
+                <a href="relatorios.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm text-slate-200">
+                    <span>📋</span> <span>Gestão Completa</span>
+                </a>
+                <a href="hospedes.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-blue-600 text-white transition font-medium text-sm">
+                    <span>👥</span> <span>Hóspedes</span>
+                </a>
+                <a id="link-menu-config" href="configurar-pousada.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm text-slate-200">
+                    <span>⚙️</span> <span>Configuração de Suítes</span>
+                </a>
+                <a id="link-menu-tarifas" href="tarifas.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm text-slate-200">
+                    <span>💰</span> <span>Tarifas & Assinatura</span>
+                </a>
+                <a id="link-menu-equipe" href="equipe.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm text-slate-200">
+                    <span>👥</span> <span>Minha Equipe</span>
                 </a>
                 
                 <div class="pt-3 border-t border-slate-800">
@@ -114,7 +129,6 @@
                     </span>
                 </div>
 
-                <!-- CONTAINER DE ROLAGEM TOUCH -->
                 <div class="overflow-x-auto" style="-webkit-overflow-scrolling: touch;">
                     <table class="w-full text-left border-collapse min-w-[760px]">
                         <thead>
@@ -141,7 +155,7 @@
         </main>
     </div>
 
-    <!-- TOAST / NOTIFICAÇÃO -->
+    <!-- TOAST -->
     <div id="toast-notificacao" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
         <div id="toast-content" class="bg-gray-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
             <span id="toast-icone" class="text-lg">✨</span>
@@ -158,6 +172,7 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let usuarioIdAtual = null;
+        let cargoUsuarioAtual = 'dono';
         let todasReservasCache = [];
         let mapaSuitesGlobal = {};
         let pagamentosPorReservaGlobal = {};
@@ -196,14 +211,40 @@
                 return;
             }
 
-            const user = session.user;
-            usuarioIdAtual = user.id;
+            // RESOLUÇÃO DE TENANT E CARGO NO BANCO DE DADOS
+            const { data: usuarioPerfil } = await supabaseClient
+                .from('usuarios')
+                .select('pousada_id, cargo, ativo, nome_completo')
+                .eq('user_id', session.user.id)
+                .maybeSingle();
 
-            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', user.id).maybeSingle();
-            const nomePousada = (pousada && pousada.nome) ? pousada.nome : "Minha Pousada";
+            if (usuarioPerfil && usuarioPerfil.ativo === false) {
+                await supabaseClient.auth.signOut();
+                alert("Seu acesso foi desativado pelo gestor da pousada.");
+                window.location.href = 'index.html';
+                return;
+            }
 
-            document.getElementById('nome-pousada-sidebar').innerText = nomePousada;
-            document.getElementById('titulo-pousada').innerText = nomePousada;
+            cargoUsuarioAtual = usuarioPerfil?.cargo || 'dono';
+            if (cargoUsuarioAtual === 'limpeza') {
+                window.location.href = 'limpeza.html';
+                return;
+            }
+
+            usuarioIdAtual = usuarioPerfil?.pousada_id || session.user.id;
+
+            // BLINDAGEM DE MENUS PARA RECEPÇÃO
+            if (cargoUsuarioAtual === 'recepcao') {
+                document.getElementById('link-menu-config')?.classList.add('hidden');
+                document.getElementById('link-menu-tarifas')?.classList.add('hidden');
+                document.getElementById('link-menu-equipe')?.classList.add('hidden');
+            }
+
+            const { data: pousada } = await supabaseClient.from('pousadas').select('nome').eq('id', usuarioIdAtual).maybeSingle();
+            nomePousadaAtual = (pousada && pousada.nome) ? pousada.nome : "Minha Pousada";
+
+            document.getElementById('nome-pousada-sidebar').innerText = nomePousadaAtual;
+            document.getElementById('titulo-pousada').innerText = nomePousadaAtual;
 
             carregarHistoricoHospedes();
         }
@@ -252,19 +293,17 @@
             const suites = resSuites.data || [];
 
             mapaSuitesGlobal = {};
-            const mapaSuites = mapaSuitesGlobal;
             suites.forEach(s => {
-                mapaSuites[s.id] = s.nome || s.titulo || 'Suíte sem nome';
+                mapaSuitesGlobal[s.id] = s.nome || s.titulo || 'Suíte sem nome';
             });
 
             pagamentosPorReservaGlobal = {};
-            const pagamentosPorReserva = pagamentosPorReservaGlobal;
             pagamentos.forEach(p => {
                 if (p.reserva_id) {
-                    if (!pagamentosPorReserva[p.reserva_id]) {
-                        pagamentosPorReserva[p.reserva_id] = 0;
+                    if (!pagamentosPorReservaGlobal[p.reserva_id]) {
+                        pagamentosPorReservaGlobal[p.reserva_id] = 0;
                     }
-                    pagamentosPorReserva[p.reserva_id] += Number(p.valor_pago || 0);
+                    pagamentosPorReservaGlobal[p.reserva_id] += Number(p.valor_pago || 0);
                 }
             });
 
@@ -326,7 +365,7 @@
                 else if (r.status === 'Finalizada') badgeStatus = 'bg-blue-100 text-blue-800';
                 else if (r.status === 'Recusada' || r.status === 'Cancelada') badgeStatus = 'bg-red-100 text-red-800';
 
-                const nomeSuite = mapaSuites[r.suite_id] || 'Suíte não informada';
+                const nomeSuite = mapaSuitesGlobal[r.suite_id] || 'Suíte não informada';
 
                 let whatsAppHtml = '<span class="text-gray-400 italic text-[11px]">Sem WhatsApp</span>';
                 if (r.whatsapp_hospede) {
@@ -337,7 +376,7 @@
 
                 const valorTotal = Number(r.valor_total || 0);
                 const valorSinalCadastrado = Number(r.valor_sinal || 0);
-                const totalPagoTabela = pagamentosPorReserva[r.id] || 0;
+                const totalPagoTabela = pagamentosPorReservaGlobal[r.id] || 0;
                 const totalPago = Math.max(totalPagoTabela, valorSinalCadastrado);
                 const quitado = totalPago >= valorTotal && valorTotal > 0;
 
@@ -412,12 +451,7 @@
         async function reenviarWhatsappPDF(reservaId) {
             try {
                 mostrarToast("Processando comprovante PDF...");
-                let reserva = null;
-                try { 
-                    if (typeof todasReservasCache !== 'undefined' && todasReservasCache && todasReservasCache.length > 0) { 
-                        reserva = todasReservasCache.find(r => r.id === reservaId); 
-                    } 
-                } catch(e) {}
+                let reserva = todasReservasCache.find(r => r.id === reservaId);
 
                 let rData = reserva;
                 if (!rData) {
@@ -439,7 +473,6 @@
                     doc.setFont(undefined, 'bold');
                     const nomePousadaEl = document.getElementById('titulo-pousada');
                     const nomePousadaTxt = nomePousadaEl ? nomePousadaEl.innerText : 'Pousada';
-                    nomePousadaAtual = nomePousadaTxt;
                     doc.text(nomePousadaTxt.toUpperCase(), 105, 15, { align: 'center' });
                     doc.setTextColor(0,0,0);
                     doc.setFontSize(12);
@@ -450,8 +483,8 @@
                     let y = 50;
                     const nomeHospede = rData.hospede_nome || 'Hóspede';
                     const suiteNome = mapaSuitesGlobal[rData.suite_id] || 'Suíte';
-                    doc.text(`Hospede: ${nomeHospede}`, 15, y); y+=8;
-                    doc.text(`Suite: ${suiteNome}`, 15, y); y+=8;
+                    doc.text(`Hóspede: ${nomeHospede}`, 15, y); y+=8;
+                    doc.text(`Suíte: ${suiteNome}`, 15, y); y+=8;
                     doc.text(`Check-in: ${formatarDataSimples(rData.checkin)}`, 15, y); y+=8;
                     doc.text(`Check-out: ${formatarDataSimples(rData.checkout)}`, 15, y); y+=8;
                     doc.text(`Valor Total: R$ ${Number(rData.valor_total||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}`, 15, y); y+=8;
@@ -463,7 +496,7 @@
                     doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 15, y); y+=6;
                     doc.text(`Pousada ID: ${usuarioIdAtual}`, 15, y);
                     doc.setFontSize(9);
-                    doc.text("Obrigado pela preferencia!", 105, 280, { align: 'center' });
+                    doc.text("Obrigado pela preferência!", 105, 280, { align: 'center' });
                     const pdfBlob = doc.output('blob');
                     const filePath = `aprovadas/${usuarioIdAtual}/${reservaId}.pdf`;
                     const { error: uploadError } = await supabaseClient.storage.from('comprovantes').upload(filePath, pdfBlob, { contentType: 'application/pdf', upsert: true });
@@ -521,6 +554,8 @@
         document.getElementById('filtro-texto').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') carregarHistoricoHospedes();
         });
+
+        window.onload = inicializarPagina;
     </script>
 </body>
 </html>
