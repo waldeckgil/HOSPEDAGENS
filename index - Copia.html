@@ -211,10 +211,10 @@
 
                 const userId = resultado.data.user.id;
 
-                // 3. CONSULTA DE PERFIL NA TABELA USUARIOS (RBAC + PERMISSÕES GRANULARES)
+                // 3. CONSULTA DE PERFIL NA TABELA USUARIOS (RBAC)
                 const { data: usuarioPerfil, error: errPerfil } = await supabaseClient
                     .from('usuarios')
-                    .select('pousada_id, cargo, ativo, nome_completo, permissoes')
+                    .select('pousada_id, cargo, ativo, nome_completo')
                     .eq('user_id', userId)
                     .maybeSingle();
 
@@ -285,21 +285,10 @@
 
                 document.getElementById('login-form-container').classList.add('hidden');
 
-                // =========================================================================
-                // 6. ROTEAMENTO BASEADO NOS PRIVILÉGIOS CONCEDIDOS (E CARGO)
-                // =========================================================================
-                const permissoes = usuarioPerfil?.permissoes || {};
-
-                // Checa se o colaborador tem acesso ao ecossistema do painel completo (dashboard)
-                const temAcessoPainelCompleto = 
-                    cargoUsuario === 'dono' ||
-                    permissoes.reservas === true ||
-                    permissoes.hospedes === true ||
-                    permissoes.financeiro === true ||
-                    permissoes.configuracoes === true;
-
-                // CASO 6.1: EXCLUSIVAMENTE LIMPEZA (Camareira que não recebeu nenhum outro privilégio)
-                if (cargoUsuario === 'limpeza' && !temAcessoPainelCompleto) {
+                // 6. ROTEAMENTO BASEADO NO CARGO DO OPERADOR
+                
+                // CASO 6.1: CAMAREIRA / GOVERNANÇA (Entra direto no checklist de limpeza)
+                if(cargoUsuario === 'limpeza'){
                     if(status === 'blocked' || (diasRestantes !== null && diasRestantes < 0)){
                         mostrarAvisoLogin('bloqueado', 'Plano da Pousada Vencido', 'O acesso aos serviços está temporariamente suspenso por pendência na assinatura.', `Pousada: ${pousada.nome}`, false);
                         await supabaseClient.auth.signOut();
@@ -310,19 +299,19 @@
                     return;
                 }
 
-                // CASO 6.2: RECEPÇÃO OU COLABORADOR COM PRIVILÉGIOS AMPLIADOS (Ex: Mariana com Hóspedes/Reservas/Financeiro)
-                if (cargoUsuario === 'recepcao' || (cargoUsuario === 'limpeza' && temAcessoPainelCompleto)) {
+                // CASO 6.2: RECEPÇÃO (Entra no dashboard operacional)
+                if(cargoUsuario === 'recepcao'){
                     if(status === 'blocked' || (diasRestantes !== null && diasRestantes < 0)){
                         mostrarAvisoLogin('alerta', 'Plano da Pousada em Modo Leitura', 'Acesso operacional liberado em modo somente leitura.', `Pousada: ${pousada.nome}`);
                         iniciarContagemERedirecionar('dashboard.html');
                     } else {
-                        mostrarAvisoLogin('sucesso', `Olá, ${usuarioPerfil?.nome_completo || 'Colaborador'}!`, 'Acesso liberado ao painel do sistema.', `Pousada: ${pousada.nome}`);
+                        mostrarAvisoLogin('sucesso', `Olá, ${usuarioPerfil?.nome_completo || 'Recepção'}!`, 'Acesso liberado ao painel operacional.', `Pousada: ${pousada.nome}`);
                         iniciarContagemERedirecionar('dashboard.html');
                     }
                     return;
                 }
 
-                // CASO 6.3: GESTOR / DONO DA POUSADA (Acesso total)
+                // CASO 6.3: GESTOR / DONO DA POUSADA (Acesso total com status de plano)
                 if(status === 'pending'){
                     mostrarAvisoLogin('alerta', 'Aguardando aprovação', 'Seu cadastro está em análise. Acesso em modo somente leitura.', `Pousada: ${pousada.nome}`);
                     iniciarContagemERedirecionar('dashboard.html');
