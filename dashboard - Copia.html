@@ -26,17 +26,23 @@
             <div class="flex justify-between items-center md:block mb-4 md:mb-6">
                 <h1 id="titulo-menu-pousada" class="text-xl sm:text-2xl font-extrabold text-white tracking-wider text-center">Painel 360</h1>
             </div>
-            <nav class="space-y-1.5 flex flex-wrap md:flex-col gap-1 md:gap-0">
+            <nav id="menu-lateral-links" class="space-y-1.5 flex flex-wrap md:flex-col gap-1 md:gap-0">
                 <a href="dashboard.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold shadow-md text-xs sm:text-sm">
                     <span>🏠</span> <span>Painel Principal</span>
                 </a>
 
-                <a href="relatorios.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
+                <a id="link-menu-relatorios" href="relatorios.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
                     <span>📋</span> <span>Gestão Completa</span>
                 </a>
-                <a href="hospedes.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
+                <a id="link-menu-hospedes" href="hospedes.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
                     <span>👥</span> <span>Hóspedes</span>
                 </a>
+                
+                <!-- LINK DE LIMPEZA (DINÂMICO PARA QUEM POSSUI O PRIVILÉGIO OU É O DONO) -->
+                <a id="link-menu-limpeza" href="limpeza.html" class="hidden flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-pink-900/40 text-pink-300 hover:text-pink-200 transition font-medium text-xs sm:text-sm border border-pink-500/20">
+                    <span>🧹</span> <span>Governança & Limpeza</span>
+                </a>
+
                 <a id="link-menu-config" href="configurar-pousada.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
                     <span>⚙️</span> <span>Configuração de Suítes</span>
                 </a>
@@ -280,7 +286,7 @@
                 </div>
             </div>
 
-            <!-- PAINEL FINANCEIRO DE ESTADIA INTERROMPIDA (EXCLUSIVO DONO) -->
+            <!-- PAINEL FINANCEIRO DE ESTADIA INTERROMPIDA (CONTROLADO POR PRIVILÉGIO FINANCEIRO) -->
             <div id="box-financeiro-cancelamento-estadia" class="hidden mt-3.5 bg-amber-50 border border-amber-200 p-3 rounded-xl space-y-1 text-xs text-amber-950">
                 <div class="flex justify-between items-center">
                     <span class="text-gray-600">Diárias consumidas até hoje:</span>
@@ -615,6 +621,7 @@
 
         let usuarioIdAtual = null;
         let cargoUsuarioAtual = 'dono';
+        let permissoesUsuarioAtual = {};
         let usuarioSessaoRealId = null;
         let nomePousadaAtual = "nossa pousada";
         let diariaMinimaPousadaCache = 1;
@@ -739,7 +746,21 @@
         }
 
         // =========================================================================
-        // PROTEÇÃO DA PÁGINA (RBAC + PERSISTÊNCIA MASTER)
+        // FUNÇÃO DE VERIFICAÇÃO DE PERMISSÕES GRANULARES
+        // =========================================================================
+        function temPermissao(chave) {
+            if (cargoUsuarioAtual === 'dono') return true;
+            if (permissoesUsuarioAtual && permissoesUsuarioAtual[chave] !== undefined) {
+                return permissoesUsuarioAtual[chave] === true;
+            }
+            // Padrão caso não exista o objeto permissoes gravado
+            if (chave === 'hospedes' || chave === 'reservas') return cargoUsuarioAtual === 'recepcao';
+            if (chave === 'limpeza') return cargoUsuarioAtual === 'limpeza';
+            return false;
+        }
+
+        // =========================================================================
+        // PROTEÇÃO DA PÁGINA (RBAC + PRIVILÉGIOS GRANULARES)
         // =========================================================================
         async function protegerPagina() {
             supabaseClient.auth.onAuthStateChange((event, session) => {
@@ -768,10 +789,10 @@
                     sessionStorage.setItem('master_pousada_ativa', pousadaAlvoMaster);
                     usuarioIdAtual = pousadaAlvoMaster;
                     cargoUsuarioAtual = 'dono';
+                    permissoesUsuarioAtual = { hospedes: true, reservas: true, limpeza: true, financeiro: true, configuracoes: true };
 
                     document.getElementById('banner-modo-master')?.classList.remove('hidden');
 
-                    // PROPAGAÇÃO AUTOMÁTICA NOS LINKS DO MENU
                     document.querySelectorAll('aside nav a, header a').forEach(link => {
                         const href = link.getAttribute('href');
                         if (href && href !== '#' && !href.startsWith('http') && !href.includes('admin-master.html')) {
@@ -791,7 +812,7 @@
             // 2. CONTEXTO DE USUÁRIO COMUM (DONO, RECEPÇÃO OU CAMAREIRA)
             const { data: usuarioPerfil } = await supabaseClient
                 .from('usuarios')
-                .select('pousada_id, cargo, ativo, nome_completo')
+                .select('pousada_id, cargo, ativo, nome_completo, permissoes')
                 .eq('user_id', session.user.id)
                 .maybeSingle();
 
@@ -803,31 +824,60 @@
             }
 
             cargoUsuarioAtual = isMaster ? 'dono' : (usuarioPerfil?.cargo || 'dono');
+            permissoesUsuarioAtual = usuarioPerfil?.permissoes || {};
+            usuarioIdAtual = usuarioPerfil?.pousada_id || session.user.id;
 
-            // Se for camareira, redireciona imediatamente para o checklist mobile
-            if (cargoUsuarioAtual === 'limpeza') {
+            // Se for camareira e NÃO tiver nenhum outro privilégio operacional, vai direto para limpeza
+            const temOutrosPrivilegios = cargoUsuarioAtual === 'dono' || 
+                temPermissao('reservas') || 
+                temPermissao('hospedes') || 
+                temPermissao('financeiro') || 
+                temPermissao('configuracoes');
+
+            if (cargoUsuarioAtual === 'limpeza' && !temOutrosPrivilegios) {
                 window.location.href = 'limpeza.html';
                 return;
             }
 
-            // Garante que o ID da pousada seja o do perfil (e não o ID pessoal do colaborador)
-            usuarioIdAtual = usuarioPerfil?.pousada_id || session.user.id;
-
-            // BLINDAGEM DE MENUS PARA RECEPÇÃO
+            // APLICAÇÃO DINÂMICA DE VISIBILIDADE DO MENU E ELEMENTOS
             const badgeCargo = document.getElementById('badge-perfil-cargo');
-            if (cargoUsuarioAtual === 'recepcao') {
-                if (badgeCargo) badgeCargo.innerText = "Perfil: Recepção";
-                document.getElementById('link-menu-config')?.remove();
-                document.getElementById('link-menu-tarifas')?.remove();
-                document.getElementById('link-menu-equipe')?.remove();
-                document.getElementById('banner-assinatura-dashboard')?.remove();
-                document.getElementById('card-aviso-pausadas')?.remove();
-                document.getElementById('banner-modo-master')?.remove();
-                document.getElementById('bloco-financeiro-modal-resumo')?.remove();
-                document.getElementById('bloco-antecipacao-valores')?.remove();
-                document.getElementById('container-checkout-financeiro')?.remove();
-            } else {
+            if (cargoUsuarioAtual === 'dono') {
                 if (badgeCargo) badgeCargo.innerText = isMaster ? "Perfil: Super Admin" : "Perfil: Gestor (Dono)";
+                document.getElementById('link-menu-limpeza')?.classList.remove('hidden');
+            } else {
+                let rotuloCargo = (cargoUsuarioAtual === 'recepcao') ? 'Recepção' : 'Camareira';
+                if (badgeCargo) badgeCargo.innerText = `Perfil: ${rotuloCargo}`;
+
+                // Acesso ao menu Hóspedes
+                if (!temPermissao('hospedes')) {
+                    document.getElementById('link-menu-hospedes')?.remove();
+                }
+
+                // Acesso ao menu Governança & Limpeza
+                if (temPermissao('limpeza')) {
+                    document.getElementById('link-menu-limpeza')?.classList.remove('hidden');
+                } else {
+                    document.getElementById('link-menu-limpeza')?.remove();
+                }
+
+                // Acesso às Configurações e Tarifas
+                if (!temPermissao('configuracoes')) {
+                    document.getElementById('link-menu-config')?.remove();
+                    document.getElementById('link-menu-tarifas')?.remove();
+                    document.getElementById('banner-assinatura-dashboard')?.remove();
+                    document.getElementById('card-aviso-pausadas')?.remove();
+                }
+
+                // Apenas Dono gerencia a Equipe
+                document.getElementById('link-menu-equipe')?.remove();
+                document.getElementById('banner-modo-master')?.remove();
+
+                // Controle Financeiro Granular
+                if (!temPermissao('financeiro')) {
+                    document.getElementById('bloco-financeiro-modal-resumo')?.remove();
+                    document.getElementById('bloco-antecipacao-valores')?.remove();
+                    document.getElementById('container-checkout-financeiro')?.remove();
+                }
             }
 
             await carregarDashboard();
@@ -1058,7 +1108,6 @@
 
         async function carregarPousada() {
             if (!usuarioIdAtual) return;
-            // .maybeSingle() resolve o erro 406!
             const { data: pousada } = await supabaseClient
                 .from('pousadas')
                 .select('nome, aceita_pet, diaria_minima, status, data_vencimento')
@@ -1078,8 +1127,8 @@
 
             document.getElementById('link-ver-vitrine').href = `${window.location.origin}/vitrine.html?pousada_id=${usuarioIdAtual}`;
 
-            // Assinatura exibida apenas para o Dono
-            if (cargoUsuarioAtual === 'dono') {
+            // Assinatura exibida para quem possui privilégio de configurações ou é o Dono
+            if (cargoUsuarioAtual === 'dono' || temPermissao('configuracoes')) {
                 try {
                     let diasAviso = 5;
                     const { data: config } = await supabaseClient.from('config_sistema').select('dias_aviso_vencimento').eq('id', 1).maybeSingle();
@@ -1224,7 +1273,6 @@
 
         function renderizarSeletorSuitesTopo() {
             const grid = document.getElementById('grid-seletor-suites-dash');
-            const btnTodas = document.getElementById('btn-ver-todas-suites-dash');
             if (!grid) return;
 
             grid.innerHTML = '';
@@ -1237,8 +1285,8 @@
                     ? `border-2 ${tema.borderActive} bg-slate-900 text-white shadow-md scale-105` 
                     : `border-2 ${tema.border} bg-white hover:${tema.bgLight} text-slate-800 shadow-xs`;
 
-                // Blindagem de diária no seletor do topo
-                const subTexto = cargoUsuarioAtual === 'dono' && suite.valor_diaria
+                // Subtexto respeitando privilégio financeiro
+                const subTexto = temPermissao('financeiro') && suite.valor_diaria
                     ? `${formatarMoeda(suite.valor_diaria)}/dia`
                     : `Acomodação`;
 
@@ -1355,9 +1403,9 @@
                         const totalPago = pags.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
                         const saldoRestante = valorTotal - totalPago;
 
-                        // BLINDAGEM FINANCEIRA DO CARD
+                        // CONTROLE FINANCEIRO RESPEITANDO PRIVILÉGIOS GRANULARES
                         let blocoFinanceiroCard = '';
-                        if (cargoUsuarioAtual === 'dono') {
+                        if (temPermissao('financeiro')) {
                             blocoFinanceiroCard = `
                                 <div class="mt-3 p-2.5 rounded-xl bg-white/85 border border-black/10 shadow-2xs">
                                     <div class="grid grid-cols-3 gap-2 text-center divide-x divide-black/5">
@@ -1384,7 +1432,6 @@
                                 </div>
                             `;
                         } else {
-                            // Bloco operacional para a recepção (sem números de faturamento)
                             blocoFinanceiroCard = `
                                 <div class="mt-3 p-2.5 rounded-xl bg-white/85 border border-blue-100 shadow-2xs text-xs space-y-1">
                                     <div class="flex justify-between items-center text-slate-700">
@@ -1462,7 +1509,7 @@
 
                 // CASO 3: SUÍTE DISPONÍVEL
                 if (aprovadasDaSuite.length === 0 && pendentesDaSuite.length === 0) {
-                    const textoDiariaOuCapacidade = cargoUsuarioAtual === 'dono' 
+                    const textoDiariaOuCapacidade = temPermissao('financeiro') 
                         ? `Diária (2 Ad.): ${formatarMoeda(suite.valor_diaria)}` 
                         : `Acomodação Livre`;
 
@@ -1672,7 +1719,7 @@
             if (tipo === 'estadia') {
                 titEl.innerText = "Interromper / Cancelar Estadia?";
                 subEl.innerHTML = `Tem certeza que deseja cancelar a estadia de <strong>${nomeHospede || 'hóspede'}</strong>?`;
-                if (cargoUsuarioAtual === 'dono') {
+                if (temPermissao('financeiro')) {
                     boxFinanc?.classList.remove('hidden');
                 } else {
                     boxFinanc?.classList.add('hidden');
@@ -1763,7 +1810,7 @@
             const qtdDiarias = calcularQuantidadeDiarias(checkinStr, checkoutStr);
             document.getElementById('modal-qtd-diarias').innerText = `${qtdDiarias} diária(s)`;
 
-            if (cargoUsuarioAtual === 'dono') {
+            if (temPermissao('financeiro')) {
                 let valorTotal = 0;
                 try {
                     const { data: valorCalc } = await supabaseClient.rpc('calcular_total_reserva', {
@@ -1805,8 +1852,8 @@
                 return;
             }
 
-            if (status === 'Checkout' && cargoUsuarioAtual === 'dono') {
-                document.getElementById('container-checkout-financeiro').classList.remove('hidden');
+            if (status === 'Checkout' && temPermissao('financeiro')) {
+                document.getElementById('container-checkout-financeiro')?.classList.remove('hidden');
             } else {
                 document.getElementById('container-checkout-financeiro')?.classList.add('hidden');
             }
@@ -1823,7 +1870,6 @@
             const cpfInformado = (document.getElementById('edit-cpf').value || '').trim();
             const cpfLimpo = cpfInformado.replace(/\D/g, "");
 
-            // Validação de CPF para novas reservas
             const criandoNova = (!reservaIdEditada || status === 'Reservado');
             if (criandoNova) {
                 if (!cpfInformado || cpfLimpo.length !== 11 || !validarCPF(cpfLimpo)) {
@@ -1868,7 +1914,6 @@
                 await supabaseClient.from('reservas').insert([dadosReserva]);
             }
 
-            // Sincronização automática no CRM
             if (cpfLimpo.length === 11 && dadosReserva.hospede_nome) {
                 try {
                     const dadosHosp = {

@@ -45,10 +45,10 @@
         <div class="bg-gradient-to-br from-pink-600 to-purple-700 p-5 rounded-3xl text-white shadow-lg relative overflow-hidden">
             <div class="relative z-10 flex justify-between items-center">
                 <div>
-                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-pink-200 block">Quartos na Governança</span>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-pink-200 block">Quartos Pendentes</span>
                     <div class="flex items-baseline gap-2 mt-0.5">
                         <span id="contador-quartos-limpeza" class="text-3xl font-black">0</span>
-                        <span id="subtexto-contador-limpeza" class="text-xs font-bold text-pink-100">aguardando limpeza</span>
+                        <span class="text-xs font-bold text-pink-100">aguardando limpeza</span>
                     </div>
                 </div>
                 <button onclick="carregarQuartosParaLimpar(true)" title="Atualizar Lista" class="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-2xl flex items-center justify-center text-sm font-bold transition">
@@ -56,7 +56,7 @@
                 </button>
             </div>
             <p class="text-[10px] text-pink-200/90 mt-2 relative z-10 font-medium">
-                Inicie a limpeza e conclua a higienização para que a recepção possa liberar o quarto.
+                Conclua a higienização para que a recepção possa liberar o quarto.
             </p>
         </div>
 
@@ -207,12 +207,12 @@
 
             const hojeStr = new Date().toLocaleDateString('sv-SE');
 
-            // 1. Busca todas as suítes em Limpeza (Pendente) ou Em Limpeza (Em Andamento)
+            // 1. Busca todas as suítes em Limpeza
             const { data: suites, error: errSuites } = await supabaseClient
                 .from('suites')
                 .select('*')
                 .eq('pousada_id', usuarioIdAtual)
-                .in('status', ['Limpeza', 'Em Limpeza'])
+                .eq('status', 'Limpeza')
                 .order('nome');
 
             // 2. Busca reservas ativas para saber se o hóspede ainda está hospedado hoje
@@ -238,11 +238,7 @@
             reservasAtivasCache = reservas || [];
 
             const total = suitesEmLimpezaCache.length;
-            const pendentes = suitesEmLimpezaCache.filter(s => s.status === 'Limpeza').length;
-            const emAndamento = suitesEmLimpezaCache.filter(s => s.status === 'Em Limpeza').length;
-
             document.getElementById('contador-quartos-limpeza').innerText = total;
-            document.getElementById('subtexto-contador-limpeza').innerText = `${pendentes} pendente(s) • ${emAndamento} em andamento`;
 
             const container = document.getElementById('lista-quartos-container');
 
@@ -255,7 +251,7 @@
                         </div>
                         <h3 class="text-base font-black text-slate-900">Tudo limpo por aqui!</h3>
                         <p class="text-xs text-slate-500 max-w-xs mx-auto leading-relaxed">
-                            Nenhum quarto pendente ou em higienização no momento. Quando a recepção liberar uma saída, o quarto aparecerá aqui automaticamente.
+                            Nenhum quarto pendente de higienização no momento. Quando a recepção liberar uma saída, o quarto aparecerá aqui automaticamente.
                         </p>
                     </div>`;
                 return;
@@ -269,126 +265,51 @@
                     r.suite_id === suite.id && r.checkin <= hojeStr && r.checkout > hojeStr
                 );
 
-                const estaEmAndamento = (suite.status === 'Em Limpeza');
-
                 let badgeTipo = '';
                 let bordaCard = '';
                 let textoOrientacao = '';
-                let badgeStatusHigienizacao = '';
 
                 if (temHospedeHoje) {
                     badgeTipo = `<span class="bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase">
                         <i class="fa-solid fa-bed mr-1"></i> Arrumação Diária
                     </span>`;
+                    bordaCard = 'border-amber-300 bg-amber-50/40';
                     textoOrientacao = 'Hóspede continua hospedado na pousada. Realize a arrumação e reposição diária.';
                 } else {
                     badgeTipo = `<span class="bg-pink-100 text-pink-900 border border-pink-300 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase">
                         <i class="fa-solid fa-door-open mr-1"></i> Checkout Realizado
                     </span>`;
+                    bordaCard = 'border-pink-300 bg-white';
                     textoOrientacao = 'Hóspede já desocupou o quarto. Realizar limpeza pesada e troca completa de enxoval.';
-                }
-
-                // Configuração visual específica de acordo com o status (Limpeza vs Em Limpeza)
-                let botoesAcao = '';
-                let avisoEmAndamento = '';
-
-                if (estaEmAndamento) {
-                    bordaCard = 'border-amber-400 bg-amber-50/40';
-                    badgeStatusHigienizacao = `<span class="bg-amber-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase shadow-xs flex items-center gap-1">
-                        <i class="fa-solid fa-spinner fa-spin text-[9px]"></i> Em Andamento
-                    </span>`;
-                    
-                    avisoEmAndamento = `
-                        <div class="bg-amber-100/90 text-amber-900 border border-amber-300 px-3 py-2 rounded-2xl flex items-center gap-2 text-xs font-bold">
-                            <i class="fa-solid fa-clock-rotate-left text-amber-700"></i>
-                            <span>Higienização ocorrendo no momento</span>
-                        </div>
-                    `;
-
-                    botoesAcao = `
-                        <div class="grid grid-cols-3 gap-2">
-                            <button onclick="pausarLimpezaQuarto('${suite.id}', '${suite.nome.replace(/'/g, "\\'")}')" class="col-span-1 bg-slate-200 hover:bg-slate-300 active:scale-98 text-slate-800 font-bold py-3.5 px-3 rounded-2xl transition flex items-center justify-center gap-1.5 text-xs cursor-pointer">
-                                <i class="fa-solid fa-pause"></i> Pausar
-                            </button>
-                            <button onclick="concluirLimpezaQuarto('${suite.id}', '${suite.nome.replace(/'/g, "\\'")}', ${temHospedeHoje})" class="col-span-2 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-extrabold py-3.5 px-4 rounded-2xl shadow-md transition flex items-center justify-center gap-2 text-xs sm:text-sm cursor-pointer">
-                                <i class="fa-solid fa-circle-check text-base"></i> Concluir Limpeza
-                            </button>
-                        </div>
-                    `;
-                } else {
-                    // Status 'Limpeza' (Pendente de início)
-                    bordaCard = temHospedeHoje ? 'border-amber-300 bg-amber-50/20' : 'border-pink-300 bg-white';
-                    badgeStatusHigienizacao = `<span class="bg-slate-200 text-slate-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase border border-slate-300">
-                        <i class="fa-solid fa-clock mr-1"></i> Aguardando Início
-                    </span>`;
-
-                    botoesAcao = `
-                        <button onclick="iniciarLimpezaQuarto('${suite.id}', '${suite.nome.replace(/'/g, "\\'")}')" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-extrabold py-3.5 px-4 rounded-2xl shadow-md transition flex items-center justify-center gap-2 text-sm cursor-pointer">
-                            <i class="fa-solid fa-play text-xs"></i> Iniciar Limpeza
-                        </button>
-                    `;
                 }
 
                 html += `
                     <div class="border-2 ${bordaCard} p-5 rounded-3xl shadow-sm space-y-3 transition-all hover:shadow-md">
                         <div class="flex justify-between items-start gap-2">
                             <div class="flex items-center gap-3">
-                                <div class="w-12 h-12 rounded-2xl ${estaEmAndamento ? 'bg-amber-100 text-amber-700' : 'bg-pink-100 text-pink-700'} flex items-center justify-center text-lg font-black shadow-2xs">
-                                    <i class="fa-solid ${estaEmAndamento ? 'fa-spray-can-sparkles' : 'fa-broom'}"></i>
+                                <div class="w-12 h-12 rounded-2xl bg-pink-100 text-pink-700 flex items-center justify-center text-lg font-black shadow-2xs">
+                                    <i class="fa-solid fa-broom"></i>
                                 </div>
                                 <div>
                                     <h3 class="text-base font-black text-slate-900 leading-tight">${suite.nome}</h3>
                                     <p class="text-[11px] text-slate-500 font-semibold mt-0.5">${textoOrientacao}</p>
                                 </div>
                             </div>
-                            <div>
-                                ${badgeStatusHigienizacao}
-                            </div>
                         </div>
-
-                        ${avisoEmAndamento}
 
                         <div class="flex items-center justify-between pt-2 border-t border-slate-200/60">
                             <span class="text-[11px] font-bold text-slate-600">Serviço:</span>
                             ${badgeTipo}
                         </div>
 
-                        ${botoesAcao}
+                        <button onclick="concluirLimpezaQuarto('${suite.id}', '${suite.nome.replace(/'/g, "\\'")}', ${temHospedeHoje})" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-extrabold py-3.5 px-4 rounded-2xl shadow-md transition flex items-center justify-center gap-2 text-sm cursor-pointer">
+                            <i class="fa-solid fa-circle-check text-base"></i> Marcar como Limpa
+                        </button>
                     </div>
                 `;
             });
 
             container.innerHTML = html;
-        }
-
-        async function iniciarLimpezaQuarto(suiteId, nomeSuite) {
-            const { error } = await supabaseClient
-                .from('suites')
-                .update({ status: 'Em Limpeza' })
-                .eq('id', suiteId);
-
-            if (error) {
-                mostrarToast("Erro", "Falha ao iniciar limpeza: " + error.message, 'erro');
-                return;
-            }
-
-            mostrarToast("Iniciada!", `${nomeSuite} está em higienização agora.`, "sucesso");
-            await carregarQuartosParaLimpar();
-        }
-
-        async function pausarLimpezaQuarto(suiteId, nomeSuite) {
-            const { error } = await supabaseClient
-                .from('suites')
-                .update({ status: 'Limpeza' })
-                .eq('id', suiteId);
-
-            if (error) {
-                mostrarToast("Erro", "Falha ao pausar limpeza: " + error.message, 'erro');
-                return;
-            }
-
-            mostrarToast("Pausada", `${nomeSuite} retornou para limpeza pendente.`, "alerta");
-            await carregarQuartosParaLimpar();
         }
 
         async function concluirLimpezaQuarto(suiteId, nomeSuite, temHospedeHoje) {

@@ -158,7 +158,7 @@
                         <h3 class="text-xs sm:text-sm font-extrabold text-gray-800 uppercase tracking-wider flex items-center gap-2">
                             <i class="fa-solid fa-layer-group text-blue-600"></i> Navegação por Suíte - Clique para Focar ou Veja Todas
                         </h3>
-                        <p class="text-[11px] text-gray-400 mt-0.5">Cards em <strong class="text-slate-600">cinza claro</strong> indicam suítes ocupadas e em <strong class="text-emerald-700">verde claro</strong> indicam suítes livres para novas estadias.</p>
+                        <p class="text-[11px] text-gray-400 mt-0.5">Clique em qualquer quarto para visualização focada ou use o botão para ver todos.</p>
                     </div>
                     <button id="btn-ver-todas-suites-dash" onclick="filtrarDashboardPorSuite(null)" class="text-[11px] font-bold bg-slate-900 hover:bg-black text-white px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1.5 ring-2 ring-blue-500 cursor-pointer">
                         <i class="fa-solid fa-border-all"></i> Ver Todas as Suítes
@@ -386,7 +386,8 @@
                         <option id="opt-status-disponivel" value="Disponível">Disponível</option>
                         <option value="Ocupada">Ocupada (Agora)</option>
                         <option value="Reservado">Criar Nova Reserva</option>
-                        <option value="Limpeza">Limpeza</option>
+                        <option value="Limpeza">Limpeza (Pendente)</option>
+                        <option value="Em Limpeza">Em Limpeza (Em Andamento)</option>
                         <option id="opt-status-checkout" value="Checkout">Checkout (Finalizar Estadia)</option>
                         <option id="opt-status-cancelar-reserva" value="CancelarReserva" class="text-red-600 font-extrabold">❌ Cancelar Reserva</option>
                         <option id="opt-status-cancelar-estadia" value="CancelarEstadia" class="text-red-700 font-extrabold">⛔ Cancelar Estadia (Interrupção)</option>
@@ -753,7 +754,6 @@
             if (permissoesUsuarioAtual && permissoesUsuarioAtual[chave] !== undefined) {
                 return permissoesUsuarioAtual[chave] === true;
             }
-            // Padrão caso não exista o objeto permissoes gravado
             if (chave === 'hospedes' || chave === 'reservas') return cargoUsuarioAtual === 'recepcao';
             if (chave === 'limpeza') return cargoUsuarioAtual === 'limpeza';
             return false;
@@ -1090,22 +1090,6 @@
             return { texto: `Chegada em ${dias} dias`, classe: 'bg-blue-100 text-blue-800 border-blue-200' };
         }
 
-        function obterConflitosDatas(suiteId, checkin, checkout, reservaIdIgnorar = null) {
-            if (!suiteId || !checkin || !checkout) return [];
-            return reservasGlobaisCache.filter(r => {
-                if (r.suite_id !== suiteId) return false;
-                if (reservaIdIgnorar && r.id === reservaIdIgnorar) return false;
-                if (r.status === 'Cancelada' || r.status === 'Recusada' || r.status === 'Finalizada') return false;
-                return (checkin < r.checkout && checkout > r.checkin);
-            });
-        }
-
-        function gerarMensagemErroConflito(conflitos, nomeSuite = '') {
-            if (!conflitos || conflitos.length === 0) return `Já existe uma reserva confirmada para estas datas!`;
-            const c = conflitos[0];
-            return `⚠️ <strong>Conflito de Datas:</strong> Já existe uma reserva de <strong>${(c.hospede_nome || 'outro hóspede').toUpperCase()}</strong> de <strong>${formatarDataSimples(c.checkin)} a ${formatarDataSimples(c.checkout)}</strong>!`;
-        }
-
         async function carregarPousada() {
             if (!usuarioIdAtual) return;
             const { data: pousada } = await supabaseClient
@@ -1285,6 +1269,16 @@
                     ? `border-2 ${tema.borderActive} bg-slate-900 text-white shadow-md scale-105` 
                     : `border-2 ${tema.border} bg-white hover:${tema.bgLight} text-slate-800 shadow-xs`;
 
+                // Badge de status no topo com suporte completo a 'Em Limpeza' e 'Limpeza'
+                let badgeStatusClass = 'bg-emerald-100 text-emerald-700';
+                if (statusSuite === 'Ocupada') {
+                    badgeStatusClass = 'bg-red-100 text-red-700';
+                } else if (statusSuite === 'Em Limpeza') {
+                    badgeStatusClass = 'bg-amber-100 text-amber-800 border border-amber-300';
+                } else if (statusSuite === 'Limpeza') {
+                    badgeStatusClass = 'bg-pink-100 text-pink-700 border border-pink-300';
+                }
+
                 // Subtexto respeitando privilégio financeiro
                 const subTexto = temPermissao('financeiro') && suite.valor_diaria
                     ? `${formatarMoeda(suite.valor_diaria)}/dia`
@@ -1294,7 +1288,7 @@
                     <div onclick="filtrarDashboardPorSuite('${suite.id}')" class="cursor-pointer p-2.5 rounded-xl transition-all flex flex-col justify-between ${cardClass}">
                         <div class="flex justify-between items-center mb-1">
                             <i class="fa-solid fa-bed text-xs ${isAtiva ? 'text-amber-300' : tema.iconText}"></i>
-                            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full ${statusSuite === 'Ocupada' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}">${statusSuite}</span>
+                            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full ${badgeStatusClass}">${statusSuite}</span>
                         </div>
                         <div>
                             <span class="text-xs font-bold truncate uppercase block">${suite.nome}</span>
@@ -1362,26 +1356,40 @@
                 const aprovadasDaSuite = reservasDaSuite.filter(r => r.status === 'Aprovada');
                 const pendentesDaSuite = reservasDaSuite.filter(r => r.status === 'Pendente');
 
-                // CASO 1: SUÍTE EM LIMPEZA
-                if (suite.status === 'Limpeza') {
+                // CASO 1: SUÍTE EM GOVERNANÇA (LIMPEZA PENDENTE OU EM ANDAMENTO)
+                if (suite.status === 'Limpeza' || suite.status === 'Em Limpeza') {
                     const ocupandoHoje = aprovadasDaSuite.find(r => r.checkin <= hojeStr && r.checkout > hojeStr);
+                    const estaEmAndamento = (suite.status === 'Em Limpeza');
+
+                    const estiloCard = estaEmAndamento 
+                        ? 'bg-amber-50 border-2 border-amber-300 text-amber-950' 
+                        : 'bg-pink-50 border-2 border-pink-300 text-pink-950';
+
+                    const badgeCard = estaEmAndamento
+                        ? `<span class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-amber-500 text-white uppercase shadow-xs flex items-center gap-1.5"><i class="fa-solid fa-spinner fa-spin text-[10px]"></i> Em Limpeza</span>`
+                        : `<span class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-pink-600 text-white uppercase shadow-xs">Limpeza</span>`;
+
+                    const textoStatus = estaEmAndamento 
+                        ? '✨ Higienização em andamento no momento' 
+                        : '🧹 Quarto aguardando início de higienização';
+
                     container.innerHTML += `
-                        <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-sm bg-pink-50 border-2 border-pink-300 text-pink-950 flex flex-col justify-between">
+                        <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-sm ${estiloCard} flex flex-col justify-between transition hover:shadow-md">
                             <div>
                                 <div class="flex justify-between items-start gap-2 mb-2">
                                     <div>
                                         <h2 class="text-base font-extrabold text-gray-900">${suite.nome}</h2>
-                                        <p class="text-xs font-bold text-pink-700">🧹 Em processo de higienização</p>
+                                        <p class="text-xs font-bold ${estaEmAndamento ? 'text-amber-800' : 'text-pink-700'}">${textoStatus}</p>
                                     </div>
-                                    <span class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-pink-600 text-white uppercase">Limpeza</span>
+                                    ${badgeCard}
                                 </div>
-                                ${ocupandoHoje ? `<p class="text-xs text-gray-600">Hóspede: <strong>${ocupandoHoje.hospede_nome}</strong> (na casa)</p>` : ''}
+                                ${ocupandoHoje ? `<p class="text-xs text-gray-600 mt-1">Hóspede: <strong>${ocupandoHoje.hospede_nome}</strong> (permanece na casa)</p>` : ''}
                             </div>
                             <div class="mt-4 pt-2.5 border-t border-black/10 flex justify-end gap-2">
-                                <button onclick="liberarLimpezaSuite('${suite.id}')" class="text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-xl transition shadow-xs cursor-pointer">
-                                    <i class="fa-solid fa-check mr-1"></i> Concluir Limpeza
+                                <button onclick="liberarLimpezaSuite('${suite.id}')" class="text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-xl transition shadow-xs cursor-pointer flex items-center gap-1">
+                                    <i class="fa-solid fa-check"></i> Concluir Limpeza
                                 </button>
-                                <button onclick="abrirModal('${suite.id}', '${suite.nome}', 'Limpeza', '${ocupandoHoje?.id || ''}')" class="text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-xl transition shadow-xs cursor-pointer">
+                                <button onclick="abrirModal('${suite.id}', '${suite.nome}', '${suite.status}', '${ocupandoHoje?.id || ''}')" class="text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-xl transition shadow-xs cursor-pointer">
                                     Editar
                                 </button>
                             </div>
