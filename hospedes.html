@@ -31,7 +31,7 @@
             </div>
 
             <!-- NAVEGAÇÃO DESKTOP -->
-            <nav class="hidden md:flex flex-col space-y-1.5 mt-4 md:mt-0">
+            <nav id="menu-lateral-links" class="hidden md:flex flex-col space-y-1.5 mt-4 md:mt-0">
                 <a href="dashboard.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm text-slate-300">
                     <span>🏠</span> <span>Painel Principal</span>
                 </a>
@@ -41,6 +41,12 @@
                 <a href="hospedes.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-blue-600 text-white font-bold text-xs sm:text-sm shadow-md">
                     <span>👥</span> <span>Hóspedes</span>
                 </a>
+
+                <!-- LINK DINÂMICO DE GOVERNANÇA / LIMPEZA -->
+                <a id="link-menu-limpeza" href="limpeza.html" class="hidden flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-pink-900/40 text-pink-300 hover:text-pink-200 transition font-medium text-xs sm:text-sm border border-pink-500/20">
+                    <span>🧹</span> <span>Governança & Limpeza</span>
+                </a>
+
                 <a id="link-menu-config" href="configurar-pousada.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm text-slate-300">
                     <span>⚙️</span> <span>Configuração de Suítes</span>
                 </a>
@@ -146,12 +152,12 @@
                 <div class="overflow-x-auto" style="-webkit-overflow-scrolling: touch;">
                     <table class="w-full text-left border-collapse min-w-[760px]">
                         <thead>
-                            <tr class="bg-gray-50 text-gray-600 uppercase text-[10px] sm:text-xs tracking-wider border-b border-gray-200">
+                            <tr id="tabela-cabecalho-hospedes" class="bg-gray-50 text-gray-600 uppercase text-[10px] sm:text-xs tracking-wider border-b border-gray-200">
                                 <th class="p-3 sm:p-4 font-bold">Hóspede / Contato</th>
                                 <th class="p-3 sm:p-4 font-bold">Documentos</th>
                                 <th class="p-3 sm:p-4 font-bold">Suíte</th>
                                 <th class="p-3 sm:p-4 font-bold">Estadia</th>
-                                <th class="p-3 sm:p-4 font-bold">Financeiro</th>
+                                <th id="th-col-financeiro" class="p-3 sm:p-4 font-bold">Financeiro</th>
                                 <th class="p-3 sm:p-4 font-bold">Status</th>
                                 <th class="p-3 sm:p-4 font-bold">Data Reserva</th>
                                 <th class="p-3 sm:p-4 font-bold text-center">Comprovante</th>
@@ -200,6 +206,7 @@
 
         let usuarioIdAtual = null;
         let cargoUsuarioAtual = 'dono';
+        let permissoesUsuarioAtual = {};
         let todasReservasCache = [];
         let mapaSuitesGlobal = {};
         let pagamentosPorReservaGlobal = {};
@@ -225,6 +232,16 @@
             setTimeout(() => { toast.classList.add('translate-y-24', 'opacity-0'); }, 3000);
         }
 
+        function temPermissao(chave) {
+            if (cargoUsuarioAtual === 'dono') return true;
+            if (permissoesUsuarioAtual && permissoesUsuarioAtual[chave] !== undefined) {
+                return permissoesUsuarioAtual[chave] === true;
+            }
+            if (chave === 'hospedes' || chave === 'reservas') return cargoUsuarioAtual === 'recepcao';
+            if (chave === 'limpeza') return cargoUsuarioAtual === 'limpeza';
+            return false;
+        }
+
         async function inicializarPagina() {
             supabaseClient.auth.onAuthStateChange((event, session) => {
                 if (event === 'SIGNED_OUT' || !session) {
@@ -243,17 +260,17 @@
             const params = new URLSearchParams(window.location.search);
             const pousadaIdParam = params.get('pousada_id');
 
-            // 1. MODO MASTER COM PERSISTÊNCIA DE SESSÃO
+            // 1. MODO MASTER
             if (isMaster) {
                 const pousadaAlvoMaster = pousadaIdParam || sessionStorage.getItem('master_pousada_ativa');
                 if (pousadaAlvoMaster) {
                     sessionStorage.setItem('master_pousada_ativa', pousadaAlvoMaster);
                     usuarioIdAtual = pousadaAlvoMaster;
                     cargoUsuarioAtual = 'dono';
+                    permissoesUsuarioAtual = { hospedes: true, reservas: true, limpeza: true, financeiro: true, configuracoes: true };
 
                     document.getElementById('banner-modo-master')?.classList.remove('hidden');
 
-                    // PROPAGA AUTOMATICAMENTE O ID NOS LINKS DO MENU
                     document.querySelectorAll('aside nav a, header a').forEach(link => {
                         const href = link.getAttribute('href');
                         if (href && href !== '#' && !href.startsWith('http') && !href.includes('admin-master.html')) {
@@ -264,11 +281,11 @@
                 }
             }
 
-            // 2. MODO COMUM (DONO OU RECEPÇÃO)
+            // 2. MODO COMUM (USUÁRIO DA POUSADA)
             if (!usuarioIdAtual) {
                 const { data: usuarioPerfil } = await supabaseClient
                     .from('usuarios')
-                    .select('pousada_id, cargo, ativo, nome_completo')
+                    .select('pousada_id, cargo, ativo, nome_completo, permissoes')
                     .eq('user_id', session.user.id)
                     .maybeSingle();
 
@@ -280,24 +297,42 @@
                 }
 
                 cargoUsuarioAtual = usuarioPerfil?.cargo || 'dono';
+                permissoesUsuarioAtual = usuarioPerfil?.permissoes || {};
+                usuarioIdAtual = usuarioPerfil?.pousada_id || session.user.id;
 
-                if (cargoUsuarioAtual === 'limpeza') {
-                    window.location.href = 'limpeza.html';
+                // 🚨 TRAVA DE SEGURANÇA: Se o colaborador NÃO tiver permissão de Hóspedes, bloqueia o acesso
+                if (!temPermissao('hospedes')) {
+                    alert("Acesso restrito: você não possui permissão para visualizar o cadastro e histórico de hóspedes.");
+                    window.location.href = 'dashboard.html';
                     return;
                 }
 
-                usuarioIdAtual = usuarioPerfil?.pousada_id || session.user.id;
+                // BLINDAGEM DE MENUS CONFORME PRIVILÉGIOS
+                if (cargoUsuarioAtual !== 'dono') {
+                    if (temPermissao('limpeza')) {
+                        document.getElementById('link-menu-limpeza')?.classList.remove('hidden');
+                    } else {
+                        document.getElementById('link-menu-limpeza')?.remove();
+                    }
 
-                // BLINDAGEM DE MENUS PARA RECEPÇÃO
-                if (cargoUsuarioAtual === 'recepcao') {
-                    document.getElementById('link-menu-config')?.remove();
-                    document.getElementById('link-menu-tarifas')?.remove();
+                    if (!temPermissao('configuracoes')) {
+                        document.getElementById('link-menu-config')?.remove();
+                        document.getElementById('link-menu-tarifas')?.remove();
+                    }
+
                     document.getElementById('link-menu-equipe')?.remove();
                     document.getElementById('banner-modo-master')?.remove();
+                } else {
+                    document.getElementById('link-menu-limpeza')?.classList.remove('hidden');
                 }
             }
 
-            // Busca nome da pousada usando .maybeSingle()
+            // Se o usuário não tiver permissão financeira, ajusta o cabeçalho da tabela
+            if (!temPermissao('financeiro')) {
+                const thFin = document.getElementById('th-col-financeiro');
+                if (thFin) thFin.innerText = 'Ocupação';
+            }
+
             const { data: pousada } = await supabaseClient
                 .from('pousadas')
                 .select('nome')
@@ -427,6 +462,8 @@
                 return;
             }
 
+            const podeVerFinanceiro = temPermissao('financeiro');
+
             tbody.innerHTML = '';
             filtrados.forEach(r => {
                 let badgeStatus = 'bg-gray-100 text-gray-800';
@@ -444,21 +481,37 @@
                     whatsAppHtml = `<a href="https://wa.me/${numeroLimpo}" target="_blank" class="text-emerald-700 hover:text-emerald-900 font-bold flex items-center gap-1 transition hover:underline" title="Falar no WhatsApp"><i class="fa-brands fa-whatsapp text-xs"></i> ${r.whatsapp_hospede}</a>`;
                 }
 
-                const valorTotal = Number(r.valor_total || 0);
-                const valorSinalCadastrado = Number(r.valor_sinal || 0);
-                const totalPagoTabela = pagamentosPorReservaGlobal[r.id] || 0;
-                const totalPago = Math.max(totalPagoTabela, valorSinalCadastrado);
-                const quitado = totalPago >= valorTotal && valorTotal > 0;
+                // CONTROLE DE VISIBILIDADE DO FINANCEIRO NA LINHA
+                let conteudoColunaFinanceiro = '';
+                if (podeVerFinanceiro) {
+                    const valorTotal = Number(r.valor_total || 0);
+                    const valorSinalCadastrado = Number(r.valor_sinal || 0);
+                    const totalPagoTabela = pagamentosPorReservaGlobal[r.id] || 0;
+                    const totalPago = Math.max(totalPagoTabela, valorSinalCadastrado);
+                    const quitado = totalPago >= valorTotal && valorTotal > 0;
 
-                let badgeQuitacao = '';
-                if (valorTotal === 0) {
-                    badgeQuitacao = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-gray-100 text-gray-600 font-bold">Sem Custo</span>`;
-                } else if (quitado) {
-                    badgeQuitacao = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-green-100 text-green-800 font-bold">Quitado</span>`;
-                } else if (totalPago > 0 && totalPago < valorTotal) {
-                    badgeQuitacao = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-blue-100 text-blue-800 font-bold">Parcial</span>`;
+                    let badgeQuitacao = '';
+                    if (valorTotal === 0) {
+                        badgeQuitacao = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-gray-100 text-gray-600 font-bold">Sem Custo</span>`;
+                    } else if (quitado) {
+                        badgeQuitacao = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-green-100 text-green-800 font-bold">Quitado</span>`;
+                    } else if (totalPago > 0 && totalPago < valorTotal) {
+                        badgeQuitacao = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-blue-100 text-blue-800 font-bold">Parcial</span>`;
+                    } else {
+                        badgeQuitacao = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-amber-100 text-amber-800 font-bold">Pendente</span>`;
+                    }
+
+                    conteudoColunaFinanceiro = `
+                        <div><strong class="text-gray-500">Total:</strong> ${formatarMoeda(valorTotal)}</div>
+                        <div><strong class="text-gray-500">Pago:</strong> ${formatarMoeda(totalPago)}</div>
+                        <div class="mt-1">${badgeQuitacao}</div>
+                    `;
                 } else {
-                    badgeQuitacao = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-amber-100 text-amber-800 font-bold">Pendente</span>`;
+                    conteudoColunaFinanceiro = `
+                        <div class="font-bold text-slate-800 text-xs">${r.qtd_adultos || 2} Adulto(s)</div>
+                        <div class="text-[11px] text-gray-500">${r.qtd_criancas ? `${r.qtd_criancas} Criança(s)` : 'Sem crianças'}</div>
+                        <div class="text-[10px] text-gray-400 mt-0.5">${r.tem_pet ? '🐶 Com Pet' : 'Sem Pet'}</div>
+                    `;
                 }
 
                 let comprovanteHtml = '';
@@ -500,9 +553,7 @@
                             <div>Out: <span class="text-gray-900">${formatarDataSimples(r.checkout)}</span></div>
                         </td>
                         <td class="p-3 sm:p-4 text-xs">
-                            <div><strong class="text-gray-500">Total:</strong> ${formatarMoeda(valorTotal)}</div>
-                            <div><strong class="text-gray-500">Pago:</strong> ${formatarMoeda(totalPago)}</div>
-                            <div class="mt-1">${badgeQuitacao}</div>
+                            ${conteudoColunaFinanceiro}
                         </td>
                         <td class="p-3 sm:p-4">
                             <span class="px-2 py-0.5 rounded-full text-[10px] uppercase ${badgeStatus}">${r.status}</span>
@@ -558,7 +609,11 @@
                     doc.text(`Suíte: ${suiteNome}`, 15, y); y+=8;
                     doc.text(`Check-in: ${formatarDataSimples(rData.checkin)}`, 15, y); y+=8;
                     doc.text(`Check-out: ${formatarDataSimples(rData.checkout)}`, 15, y); y+=8;
-                    doc.text(`Valor Total: R$ ${Number(rData.valor_total||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}`, 15, y); y+=8;
+                    
+                    if (temPermissao('financeiro')) {
+                        doc.text(`Valor Total: R$ ${Number(rData.valor_total||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}`, 15, y); y+=8;
+                    }
+
                     doc.text(`WhatsApp: ${rData.whatsapp_hospede||''}`, 15, y); y+=8;
                     doc.text(`Status: APROVADA`, 15, y); y+=15;
                     doc.setFontSize(10);
@@ -591,7 +646,13 @@
                 textoMensagem += `Reserva efetuada:\n`;
                 textoMensagem += `Check-in: ${formatarDataSimples(rData.checkin)} | Check-out: ${formatarDataSimples(rData.checkout)}\n`;
                 textoMensagem += `Suíte: ${suiteNome}\n`;
-                textoMensagem += `Valor: R$ ${valorTotal.toLocaleString('pt-BR',{minimumFractionDigits:2})}\n\n`;
+                
+                if (temPermissao('financeiro')) {
+                    textoMensagem += `Valor: R$ ${valorTotal.toLocaleString('pt-BR',{minimumFractionDigits:2})}\n\n`;
+                } else {
+                    textoMensagem += `\n`;
+                }
+
                 textoMensagem += `Acesse o comprovante completo no link abaixo:\n${pdfPublicUrl}\n\n`;
                 textoMensagem += `Qualquer dúvida estamos à disposição!`;
 

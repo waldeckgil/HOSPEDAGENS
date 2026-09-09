@@ -36,16 +36,22 @@
             </div>
 
             <!-- NAVEGAÇÃO DESKTOP -->
-            <nav class="hidden md:flex flex-col flex-1 px-3 py-3 space-y-1.5 overflow-y-auto">
+            <nav id="menu-lateral-links" class="hidden md:flex flex-col flex-1 px-3 py-3 space-y-1.5 overflow-y-auto">
                 <a href="dashboard.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition text-xs font-medium">
                     <i class="fa-solid fa-chart-pie w-4"></i> Painel Principal
                 </a>
                 <a href="relatorios.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-blue-600 text-white font-bold text-xs shadow-md">
                     <i class="fa-solid fa-clipboard-list w-4"></i> Gestão Completa
                 </a>
-                <a href="hospedes.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition text-xs font-medium">
+                <a id="link-menu-hospedes" href="hospedes.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition text-xs font-medium">
                     <i class="fa-solid fa-users w-4"></i> Hóspedes
                 </a>
+                
+                <!-- ATALHO DE GOVERNANÇA / LIMPEZA (DINÂMICO) -->
+                <a id="link-menu-limpeza" href="limpeza.html" class="hidden flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-pink-900/40 text-pink-300 hover:text-pink-200 transition font-medium text-xs border border-pink-500/20">
+                    <i class="fa-solid fa-broom w-4"></i> Governança / Limpeza
+                </a>
+
                 <a id="link-menu-config" href="configurar-pousada.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition text-xs font-medium">
                     <i class="fa-solid fa-gear w-4"></i> Configuração Suítes
                 </a>
@@ -84,7 +90,7 @@
                         </button>
                     </div>
 
-                    <!-- FAIXA INTELIGENTE DE STATUS DA ASSINATURA (OCULTA PARA RECEPÇÃO) -->
+                    <!-- FAIXA INTELIGENTE DE STATUS DA ASSINATURA -->
                     <div id="banner-assinatura-relatorios" class="hidden mb-4 sm:mb-5 p-3 sm:p-4 rounded-2xl shadow-xs border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-all">
                         <div class="flex items-center gap-3">
                             <span id="banner-assinatura-icone" class="text-xl sm:text-2xl">⚠️</span>
@@ -109,7 +115,7 @@
 
                     <!-- Cards de Seleção de Views -->
                     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3.5 mb-4">
-                        <!-- Card 1: Financeiro (EXCLUSIVO DONO/MASTER) -->
+                        <!-- Card 1: Financeiro (CONDICIONADO AO PRIVILÉGIO FINANCEIRO) -->
                         <div id="cardViewFinanceiro" onclick="selecionarView('vw_gestor_financeiro_relatorio', 'Extrato Detalhado de Pagamentos', this)" 
                              class="card-view cursor-pointer bg-slate-50 p-3 sm:p-4 rounded-xl shadow-xs border-2 border-amber-400 hover:border-amber-600 hover:shadow-md transition group flex flex-col justify-between">
                             <div>
@@ -140,7 +146,7 @@
                         </div>
 
                         <!-- Card 3: Calendário -->
-                        <div onclick="abrirCalendarioGeralRelatorios()" 
+                        <div id="cardViewCalendario" onclick="abrirCalendarioGeralRelatorios()" 
                              class="card-view cursor-pointer bg-slate-50 p-3 sm:p-4 rounded-xl shadow-xs border-2 border-indigo-400 hover:border-indigo-600 hover:shadow-md transition group flex flex-col justify-between">
                             <div>
                                 <div class="flex items-center justify-between mb-1.5">
@@ -154,7 +160,7 @@
                             <p class="text-[10px] sm:text-[11px] text-gray-500 mt-1 truncate">Mês a mês por suíte.</p>
                         </div>
 
-                        <!-- Card 4: Tarifas (EXCLUSIVO DONO/MASTER) -->
+                        <!-- Card 4: Tarifas (CONDICIONADO AO PRIVILÉGIO CONFIGURAÇÕES / DONO) -->
                         <div id="cardViewTarifas" onclick="selecionarView('vw_gestor_tarifas_relatorio', 'Auditoria de Tarifas Especiais', this)" 
                              class="card-view cursor-pointer bg-slate-50 p-3 sm:p-4 rounded-xl shadow-xs border-2 border-amber-400 hover:border-amber-600 hover:shadow-md transition group flex flex-col justify-between">
                             <div>
@@ -170,7 +176,7 @@
                         </div>
 
                         <!-- Card 5: Reservas -->
-                        <div onclick="selecionarView('vw_gestor_reservas_relatorio', 'Reservas', this)" 
+                        <div id="cardViewReservas" onclick="selecionarView('vw_gestor_reservas_relatorio', 'Reservas', this)" 
                              class="card-view col-span-2 sm:col-span-1 cursor-pointer bg-slate-50 p-3 sm:p-4 rounded-xl shadow-xs border-2 border-pink-400 hover:border-pink-600 hover:shadow-md transition group flex flex-col justify-between">
                             <div>
                                 <div class="flex items-center justify-between mb-1.5">
@@ -594,6 +600,7 @@
 
         let usuarioIdAtual = null; // ID DA POUSADA OPERADA
         let cargoUsuarioAtual = 'dono';
+        let permissoesUsuarioAtual = {};
         let usuarioSessaoRealId = null;
         let viewAtualSelecionada = 'vw_gestor_financeiro_relatorio';
         var filtroStatusReservasAtual = 'APROVADA';
@@ -633,6 +640,19 @@
             toastTimerRelatorios = setTimeout(() => {
                 toast.classList.add('translate-y-24', 'opacity-0');
             }, duracaoMs);
+        }
+
+        // =========================================================================
+        // FUNÇÃO DE VERIFICAÇÃO DE PERMISSÕES GRANULARES
+        // =========================================================================
+        function temPermissao(chave) {
+            if (cargoUsuarioAtual === 'dono') return true;
+            if (permissoesUsuarioAtual && permissoesUsuarioAtual[chave] !== undefined) {
+                return permissoesUsuarioAtual[chave] === true;
+            }
+            if (chave === 'hospedes' || chave === 'reservas') return cargoUsuarioAtual === 'recepcao';
+            if (chave === 'limpeza') return cargoUsuarioAtual === 'limpeza';
+            return false;
         }
 
         function formatarCPF(v) {
@@ -836,7 +856,7 @@
         }
 
         // =========================================================================
-        // PROTEÇÃO DA PÁGINA (RBAC + PERSISTÊNCIA MASTER)
+        // PROTEÇÃO DA PÁGINA (RBAC + PERSISTÊNCIA MASTER + PRIVILÉGIOS)
         // =========================================================================
         async function protegerPagina() {
             supabaseClient.auth.onAuthStateChange((event, session) => {
@@ -864,10 +884,10 @@
                     sessionStorage.setItem('master_pousada_ativa', pousadaAlvoMaster);
                     usuarioIdAtual = pousadaAlvoMaster;
                     cargoUsuarioAtual = 'dono';
+                    permissoesUsuarioAtual = { hospedes: true, reservas: true, limpeza: true, financeiro: true, configuracoes: true };
 
                     document.getElementById('banner-modo-master')?.classList.remove('hidden');
 
-                    // PROPAGAÇÃO AUTOMÁTICA NOS LINKS
                     document.querySelectorAll('aside nav a, header a').forEach(link => {
                         const href = link.getAttribute('href');
                         if (href && href !== '#' && !href.startsWith('http') && !href.includes('admin-master.html')) {
@@ -882,10 +902,10 @@
                 }
             }
 
-            // 2. CONTEXTO DE USUÁRIO COMUM (DONO OU RECEPÇÃO)
+            // 2. CONTEXTO DE USUÁRIO COMUM (DONO, RECEPÇÃO OU CAMAREIRA)
             const { data: usuarioPerfil } = await supabaseClient
                 .from('usuarios')
-                .select('pousada_id, cargo, ativo, nome_completo')
+                .select('pousada_id, cargo, ativo, nome_completo, permissoes')
                 .eq('user_id', session.user.id)
                 .maybeSingle();
 
@@ -897,32 +917,62 @@
             }
 
             cargoUsuarioAtual = isMaster ? 'dono' : (usuarioPerfil?.cargo || 'dono');
+            permissoesUsuarioAtual = usuarioPerfil?.permissoes || {};
+            usuarioIdAtual = usuarioPerfil?.pousada_id || session.user.id;
 
-            if (cargoUsuarioAtual === 'limpeza') {
+            // Se for camareira SEM acesso ao painel de gestão, volta para limpeza
+            const temAcessoPainel = cargoUsuarioAtual === 'dono' || 
+                temPermissao('reservas') || 
+                temPermissao('hospedes') || 
+                temPermissao('financeiro') || 
+                temPermissao('configuracoes');
+
+            if (cargoUsuarioAtual === 'limpeza' && !temAcessoPainel) {
                 window.location.href = 'limpeza.html';
                 return;
             }
 
-            usuarioIdAtual = usuarioPerfil?.pousada_id || session.user.id;
+            // SEGURANÇA E BLINDAGEM VISUAL DE MENU E CARDS CONFORME PRIVILÉGIOS
+            if (cargoUsuarioAtual === 'dono') {
+                document.getElementById('link-menu-limpeza')?.classList.remove('hidden');
+            } else {
+                // Hóspedes
+                if (!temPermissao('hospedes')) {
+                    document.getElementById('link-menu-hospedes')?.remove();
+                }
 
-            // BLINDAGEM DE RECEPÇÃO: Remove relatórios confidenciais
-            if (cargoUsuarioAtual === 'recepcao') {
-                document.getElementById('cardViewFinanceiro')?.remove();
-                document.getElementById('cardViewTarifas')?.remove();
-                document.getElementById('banner-assinatura-relatorios')?.remove();
-                document.getElementById('link-menu-config')?.remove();
-                document.getElementById('link-menu-tarifas')?.remove();
+                // Limpeza
+                if (temPermissao('limpeza')) {
+                    document.getElementById('link-menu-limpeza')?.classList.remove('hidden');
+                } else {
+                    document.getElementById('link-menu-limpeza')?.remove();
+                }
+
+                // Configurações & Tarifas
+                if (!temPermissao('configuracoes')) {
+                    document.getElementById('link-menu-config')?.remove();
+                    document.getElementById('link-menu-tarifas')?.remove();
+                    document.getElementById('cardViewTarifas')?.remove();
+                    document.getElementById('banner-assinatura-relatorios')?.remove();
+                }
+
+                // Minha Equipe (exclusivo proprietário)
                 document.getElementById('link-menu-equipe')?.remove();
                 document.getElementById('banner-modo-master')?.remove();
 
-                // Padrão de tela da recepção: Hospedagens (Ocupação das Suítes)
-                viewAtualSelecionada = 'vw_gestor_hospedagens_relatorio';
-                tituloBaseAtual = 'Hospedagens, Suítes e Movimentações';
-                
-                const cardHosp = document.getElementById('cardViewHospedagens');
-                if (cardHosp) {
-                    document.querySelectorAll('.card-view').forEach(c => c.classList.remove('border-emerald-500', 'shadow-md'));
-                    cardHosp.classList.add('border-emerald-500', 'shadow-md');
+                // Financeiro (Se desativado, remove os cards e define padrão para Hospedagens)
+                if (!temPermissao('financeiro')) {
+                    document.getElementById('cardViewFinanceiro')?.remove();
+
+                    // Se a tela tentaria abrir no financeiro, muda para hospedagens
+                    viewAtualSelecionada = 'vw_gestor_hospedagens_relatorio';
+                    tituloBaseAtual = 'Hospedagens, Suítes e Movimentações';
+                    
+                    const cardHosp = document.getElementById('cardViewHospedagens');
+                    if (cardHosp) {
+                        document.querySelectorAll('.card-view').forEach(c => c.classList.remove('border-emerald-500', 'shadow-md'));
+                        cardHosp.classList.add('border-emerald-500', 'shadow-md');
+                    }
                 }
             }
 
@@ -940,7 +990,6 @@
             const labelPousada = document.getElementById('nomePousadaLogada');
             const labelMenu = document.getElementById('nomePousadaMenu');
             
-            // .maybeSingle() resolve o erro 406!
             const { data: pousada } = await supabaseClient
                 .from('pousadas')
                 .select('nome, status, data_vencimento')
@@ -957,8 +1006,8 @@
                 labelMenu.textContent = "PAINEL POUSADA";
             }
 
-            // Alertas de Assinatura (Apenas para o Dono)
-            if (cargoUsuarioAtual === 'dono') {
+            // Alertas de Assinatura (Para Dono ou quem possui privilégio de configurações)
+            if (cargoUsuarioAtual === 'dono' || temPermissao('configuracoes')) {
                 try {
                     let diasAviso = 5;
                     const { data: config } = await supabaseClient.from('config_sistema').select('dias_aviso_vencimento').eq('id', 1).maybeSingle();
@@ -1822,7 +1871,7 @@
                 }
 
                 containerKpis.classList.remove("hidden");
-                if (ehViewFinanceiro) {
+                if (ehViewFinanceiro && temPermissao('financeiro')) {
                     containerKpis.className = "flex flex-wrap gap-2.5 sm:gap-3 mb-4 sm:mb-5 w-full lg:w-auto";
                     let totalGeralBruto = registrosFiltrados.reduce((acc, r) => acc + Number(r.valor_total || 0), 0);
                     let totalJaPago = registrosFiltrados.reduce((acc, r) => acc + Number(r.valor_pago || 0), 0);
@@ -1964,52 +2013,25 @@
                         'observacao'
                     ];
                 } else if (ehViewReservas) {
+                    const colunasBase = [
+                        'status', 
+                        'suite', 
+                        'hospede', 
+                        'whatsapp', 
+                        'checkin', 
+                        'checkout'
+                    ];
+
+                    if (temPermissao('financeiro')) {
+                        colunasBase.push('valor_total', 'valor_pago', 'saldo_restante');
+                    }
+
                     if (filtroCheckTipoHoje) {
-                        colunas = [
-                            'status', 
-                            'suite', 
-                            'hospede', 
-                            'whatsapp', 
-                            'checkin', 
-                            'checkout', 
-                            'valor_total', 
-                            'valor_pago', 
-                            'saldo_restante', 
-                            'ocupacao', 
-                            'obs'
-                        ];
+                        colunas = [...colunasBase, 'ocupacao', 'obs'];
                     } else if (filtroStatusReservasAtual === 'CANCELADA' || filtroStatusReservasAtual === 'RECUSADA') {
-                        colunas = [
-                            'status', 
-                            'suite', 
-                            'hospede', 
-                            'whatsapp', 
-                            'checkin', 
-                            'checkout', 
-                            'valor_total', 
-                            'valor_pago', 
-                            'saldo_restante', 
-                            'motivo_ocorrencia', 
-                            'data_ocorrencia',
-                            'obs'
-                        ];
+                        colunas = [...colunasBase, 'motivo_ocorrencia', 'data_ocorrencia', 'obs'];
                     } else {
-                        colunas = [
-                            'status', 
-                            'suite', 
-                            'hospede', 
-                            'whatsapp', 
-                            'checkin', 
-                            'checkout', 
-                            'dias_restantes', 
-                            'valor_total', 
-                            'valor_pago', 
-                            'saldo_restante', 
-                            'ocupacao', 
-                            'tem_pet', 
-                            'cpf', 
-                            'obs'
-                        ];
+                        colunas = [...colunasBase, 'dias_restantes', 'ocupacao', 'tem_pet', 'cpf', 'obs'];
                     }
                 } else if (ehViewHospedagens) {
                     colunas = ['status_ocupacao', 'suite', 'hospede', 'checkin', 'checkout', 'status'];
@@ -2634,20 +2656,26 @@
             const diarias=calcularDiariasCalendario(checkin, checkout);
             const qtdEl=document.getElementById('nova-reserva-qtd-diarias');
             if(qtdEl) qtdEl.innerText=`${diarias} diária(s)`;
+            
+            // Cálculo financeiro da reserva só se tiver privilégio financeiro
             let total=0;
-            try{ 
-                const {data, error} = await supabaseClient.rpc('calcular_total_reserva',{p_suite_id:suiteId,p_checkin:checkin,p_checkout:checkout,p_adultos:adultos,p_criancas:criancas,p_idades_criancas:idadesStr,p_pet:pet}); 
-                if(!error && data!==null) total=Number(data); 
-                else {
-                    const {data:fb} = await supabaseClient.rpc('calcular_total_reserva',{p_suite_id:suiteId,p_checkin:checkin,p_checkout:checkout,p_adultos:adultos,p_criancas:criancas,p_pet:pet});
-                    if(fb!==null) total=Number(fb);
-                }
-            }catch(e){ const suite=calGeralRelSuitesCache.find(s=>s.id===suiteId); total=(suite?.valor_diaria||0)*diarias; if(pet) total+=50*diarias; }
-            const totalEl=document.getElementById('nova-reserva-valor-total');
-            if(totalEl) totalEl.innerText=total.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-            const sinal=Number(document.getElementById('nova-reserva-valor-sinal').value||0);
-            const saldoEl=document.getElementById('nova-reserva-saldo-restante');
-            if(saldoEl){ saldoEl.innerText=(total-sinal).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); saldoEl.dataset.valorTotal=total; }
+            if (temPermissao('financeiro')) {
+                try{ 
+                    const {data, error} = await supabaseClient.rpc('calcular_total_reserva',{p_suite_id:suiteId,p_checkin:checkin,p_checkout:checkout,p_adultos:adultos,p_criancas:criancas,p_idades_criancas:idadesStr,p_pet:pet}); 
+                    if(!error && data!==null) total=Number(data); 
+                    else {
+                        const {data:fb} = await supabaseClient.rpc('calcular_total_reserva',{p_suite_id:suiteId,p_checkin:checkin,p_checkout:checkout,p_adultos:adultos,p_criancas:criancas,p_pet:pet});
+                        if(fb!==null) total=Number(fb);
+                    }
+                }catch(e){ const suite=calGeralRelSuitesCache.find(s=>s.id===suiteId); total=(suite?.valor_diaria||0)*diarias; if(pet) total+=50*diarias; }
+                const totalEl=document.getElementById('nova-reserva-valor-total');
+                if(totalEl) totalEl.innerText=total.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+                const sinal=Number(document.getElementById('nova-reserva-valor-sinal').value||0);
+                const saldoEl=document.getElementById('nova-reserva-saldo-restante');
+                if(saldoEl){ saldoEl.innerText=(total-sinal).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); saldoEl.dataset.valorTotal=total; }
+            } else {
+                document.getElementById('nova-reserva-resumo')?.classList.add('hidden');
+            }
         }
 
         async function salvarNovaReservaCalendario(){
@@ -2702,7 +2730,7 @@
                 }
             } catch(e){ console.warn('Erro verificar conflito',e); }
 
-            const valorTotal = Number(document.getElementById('nova-reserva-saldo-restante').dataset.valorTotal||0);
+            const valorTotal = Number(document.getElementById('nova-reserva-saldo-restante')?.dataset?.valorTotal||0);
             const valorSinal = Number(document.getElementById('nova-reserva-valor-sinal').value||0);
             const forma = document.getElementById('nova-reserva-forma-pagamento').value;
             const obs = document.getElementById('nova-reserva-observacao').value;
@@ -2809,4 +2837,4 @@
         };
     </script>
 </body>
-</html>
+</html> 

@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configuração de Suítes</title>
+    <title>Configuração de Suítes - Painel 360</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row" onload="protegerPagina()">
+<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row text-slate-800 font-sans" onload="protegerPagina()">
 
     <!-- MENU LATERAL / BARRA SUPERIOR NO MOBILE -->
     <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl flex-shrink-0 z-20">
@@ -21,22 +21,37 @@
                 <!-- ATALHOS RÁPIDOS NO MOBILE -->
                 <div class="flex items-center gap-2 md:hidden">
                     <a href="dashboard.html" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-xs">
-                        <span>🏠</span> <span>Painel Principal</span>
+                        <span>🏠</span> <span>Painel</span>
                     </a>
-                    <button onclick="fazerLogout()" class="bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white px-2.5 py-1.5 rounded-xl font-bold text-xs transition">
+                    <button onclick="fazerLogout()" class="bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white px-2.5 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer">
                         <i class="fa-solid fa-right-from-bracket"></i>
                     </button>
                 </div>
             </div>
 
             <!-- NAVEGAÇÃO DESKTOP -->
-            <nav class="hidden md:flex flex-col space-y-2 mt-4 md:mt-0">
-                <a href="dashboard.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl hover:bg-slate-800 transition font-medium text-sm text-slate-200">
+            <nav id="menu-lateral-links" class="hidden md:flex flex-col space-y-1.5 mt-4 md:mt-0">
+                <a href="dashboard.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm text-slate-300">
                     <span>🏠</span> <span>Painel Principal</span>
+                </a>
+                <a href="relatorios.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm text-slate-300">
+                    <span>📋</span> <span>Gestão Completa</span>
+                </a>
+                <a id="link-menu-hospedes" href="hospedes.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm text-slate-300">
+                    <span>👥</span> <span>Hóspedes</span>
+                </a>
+                <a id="link-menu-config" href="configurar-pousada.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-blue-600 text-white font-bold text-xs sm:text-sm shadow-md">
+                    <span>⚙️</span> <span>Configuração de Suítes</span>
+                </a>
+                <a id="link-menu-tarifas" href="tarifas.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm text-slate-300">
+                    <span>💰</span> <span>Tarifas & Assinatura</span>
+                </a>
+                <a id="link-menu-equipe" href="equipe.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm text-slate-300">
+                    <span>👤</span> <span>Minha Equipe</span>
                 </a>
                 
                 <div class="pt-3 border-t border-slate-800">
-                    <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-3 rounded-xl transition shadow text-sm flex items-center justify-center gap-2">
+                    <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl transition shadow text-xs flex items-center justify-center gap-2 cursor-pointer">
                         <i class="fa-solid fa-right-from-bracket"></i> Sair
                     </button>
                 </div>
@@ -60,32 +75,45 @@
         <!-- CORPO DA PÁGINA -->
         <main class="p-3 sm:p-6 md:p-8 flex-1 overflow-y-auto">
             
+            <!-- FAIXA DE MODO MASTER -->
+            <div id="banner-modo-master" class="hidden mb-4 p-3.5 rounded-2xl shadow-md border border-slate-800 bg-slate-950 text-amber-300 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-sm border border-amber-500/30">👑</span>
+                    <div>
+                        <h4 class="text-xs font-extrabold uppercase tracking-wider text-amber-400">Modo Super Administrador Master</h4>
+                        <p class="text-xs text-slate-300">Configurando suítes de: <strong id="nome-pousada-modo-master" class="text-white underline"></strong></p>
+                    </div>
+                </div>
+                <button type="button" onclick="sairDoModoMaster()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3.5 py-1.5 rounded-xl font-bold text-xs transition shadow-xs flex items-center gap-1.5 shrink-0 cursor-pointer">
+                    <i class="fa-solid fa-arrow-left"></i> Voltar ao Master SaaS
+                </button>
+            </div>
+
             <!-- Feedback Banner / Alertas no Front-end -->
             <div id="mensagem-container" class="hidden mb-4 sm:mb-6 p-3.5 sm:p-4 rounded-2xl text-xs sm:text-sm font-semibold border flex items-center gap-3 shadow-xs transition-all"></div>
 
-
-<!-- MODAL DE CONFIRMAÇÃO FIXO (RODAPÉ NO CELULAR / CENTRALIZADO NO NOTEBOOK) -->
-<div id="modal-confirmacao" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-3 sm:p-4 transition-all">
-    <div class="bg-white rounded-3xl p-5 sm:p-6 w-full max-w-md shadow-2xl border border-slate-100 space-y-4 animate-in fade-in zoom-in-95 duration-150">
-        <div class="flex items-start gap-3.5">
-            <div id="icone-modal-confirmacao" class="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center text-xl flex-shrink-0">
-                <i class="fa-solid fa-triangle-exclamation"></i>
+            <!-- MODAL DE CONFIRMAÇÃO FIXO -->
+            <div id="modal-confirmacao" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-3 sm:p-4 transition-all">
+                <div class="bg-white rounded-3xl p-5 sm:p-6 w-full max-w-md shadow-2xl border border-slate-100 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+                    <div class="flex items-start gap-3.5">
+                        <div id="icone-modal-confirmacao" class="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center text-xl flex-shrink-0">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 id="titulo-modal" class="text-base sm:text-lg font-extrabold text-slate-900 leading-snug">Confirmação</h3>
+                            <p id="texto-confirmacao" class="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed"></p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2.5 pt-1">
+                        <button id="btn-confirma-nao" type="button" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">
+                            Cancelar
+                        </button>
+                        <button id="btn-confirma-sim" type="button" class="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer">
+                            Sim, Excluir
+                        </button>
+                    </div>
+                </div>
             </div>
-            <div class="flex-1 min-w-0">
-                <h3 id="titulo-modal" class="text-base sm:text-lg font-extrabold text-slate-900 leading-snug">Confirmação</h3>
-                <p id="texto-confirmacao" class="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed"></p>
-            </div>
-        </div>
-        <div class="grid grid-cols-2 gap-2.5 pt-1">
-            <button id="btn-confirma-nao" type="button" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition">
-                Cancelar
-            </button>
-            <button id="btn-confirma-sim" type="button" class="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold shadow-md transition flex items-center justify-center gap-1.5">
-                Sim, Excluir
-            </button>
-        </div>
-    </div>
-</div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                 
@@ -176,7 +204,7 @@
                                 </h2>
                                 <p class="text-[11px] text-slate-500">Unidades disponíveis para hóspedes.</p>
                             </div>
-                            <button onclick="adicionarCampo()" class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-2xs">
+                            <button onclick="adicionarCampo()" class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer">
                                 <i class="fa-solid fa-plus"></i> Nova Suíte
                             </button>
                         </div>
@@ -187,7 +215,7 @@
                         </div>
 
                         <div class="pt-3 border-t border-slate-100 flex justify-end">
-                            <button onclick="salvarConfiguracao()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold shadow-md shadow-blue-500/20 transition flex items-center justify-center gap-2">
+                            <button onclick="salvarConfiguracao()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold shadow-md shadow-blue-500/20 transition flex items-center justify-center gap-2 cursor-pointer">
                                 <i class="fa-solid fa-floppy-disk"></i> Salvar Alterações
                             </button>
                         </div>
@@ -216,20 +244,36 @@
                 <h3 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
                     <i class="fa-solid fa-images text-blue-600"></i> Fotos da Suíte
                 </h3>
-                <button onclick="fecharGaleria()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition">
+                <button onclick="fecharGaleria()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition cursor-pointer">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
-            <div id="galeria-fotos" class="grid grid-cols-2 md:grid-cols-3 gap-2.5 overflow-y-auto pr-1 pb-1">
-                <!-- Fotos injetadas via JS -->
-            </div>
+            <div id="galeria-fotos" class="grid grid-cols-2 md:grid-cols-3 gap-2.5 overflow-y-auto pr-1 pb-1"></div>
         </div>
     </div>
 
     <script>
-        const supabaseClient = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
+        const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
+        const EMAIL_MASTER_ADMIN = 'waldeckgil@gmail.com';
+
+        const paramsUrl = new URLSearchParams(window.location.search);
+        const pousadaIdUrl = paramsUrl.get('pousada_id');
+        const temSessaoMaster = localStorage.getItem('supabase_master_admin_session');
+
+        let supabaseClient;
+        if (pousadaIdUrl && temSessaoMaster) {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+                auth: { storageKey: 'supabase_master_admin_session' }
+            });
+        } else {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
+
         let nomePousadaOriginal = '';
         let usuarioIdAtual = null;
+        let cargoUsuarioAtual = 'dono';
+        let permissoesUsuarioAtual = {};
 
         function mostrarToast(titulo, mensagem, tipo = 'sucesso') {
             const toast = document.getElementById('toast-notificacao');
@@ -271,6 +315,14 @@
             document.getElementById('mensagem-container').className = 'hidden';
         }
 
+        function temPermissao(chave) {
+            if (cargoUsuarioAtual === 'dono') return true;
+            if (permissoesUsuarioAtual && permissoesUsuarioAtual[chave] !== undefined) {
+                return permissoesUsuarioAtual[chave] === true;
+            }
+            return false;
+        }
+
         async function protegerPagina() {
             supabaseClient.auth.onAuthStateChange((event, session) => {
                 if (event === 'SIGNED_OUT' || !session) {
@@ -279,22 +331,87 @@
             });
 
             const { data: { session }, error } = await supabaseClient.auth.getSession();
-            
             if (error || !session) {
                 mostrarMensagem('Sessão expirada. Redirecionando para login...', 'erro');
-                setTimeout(() => window.location.href = 'index.html', 2000);
+                setTimeout(() => window.location.href = 'index.html', 1500);
                 return;
             }
 
-            usuarioIdAtual = session.user.id;
+            const emailLogado = (session.user.email || '').toLowerCase();
+            const isMaster = (emailLogado === EMAIL_MASTER_ADMIN.toLowerCase());
+            const params = new URLSearchParams(window.location.search);
+            const pousadaIdParam = params.get('pousada_id');
+
+            // 1. MODO MASTER
+            if (isMaster) {
+                const pousadaAlvoMaster = pousadaIdParam || sessionStorage.getItem('master_pousada_ativa');
+                if (pousadaAlvoMaster) {
+                    sessionStorage.setItem('master_pousada_ativa', pousadaAlvoMaster);
+                    usuarioIdAtual = pousadaAlvoMaster;
+                    cargoUsuarioAtual = 'dono';
+                    permissoesUsuarioAtual = { configuracoes: true, financeiro: true, hospedes: true, reservas: true, limpeza: true };
+
+                    document.getElementById('banner-modo-master')?.classList.remove('hidden');
+
+                    document.querySelectorAll('aside nav a, header a').forEach(link => {
+                        const href = link.getAttribute('href');
+                        if (href && href !== '#' && !href.startsWith('http') && !href.includes('admin-master.html')) {
+                            const limpo = href.split('?')[0];
+                            link.setAttribute('href', `${limpo}?pousada_id=${pousadaAlvoMaster}`);
+                        }
+                    });
+                }
+            }
+
+            // 2. MODO COMUM (COLABORADOR OU DONO)
+            if (!usuarioIdAtual) {
+                const { data: usuarioPerfil } = await supabaseClient
+                    .from('usuarios')
+                    .select('pousada_id, cargo, ativo, nome_completo, permissoes')
+                    .eq('user_id', session.user.id)
+                    .maybeSingle();
+
+                if (usuarioPerfil && usuarioPerfil.ativo === false) {
+                    await supabaseClient.auth.signOut();
+                    alert("Seu acesso foi desativado pelo gestor da pousada.");
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                cargoUsuarioAtual = usuarioPerfil?.cargo || 'dono';
+                permissoesUsuarioAtual = usuarioPerfil?.permissoes || {};
+                usuarioIdAtual = usuarioPerfil?.pousada_id || session.user.id;
+
+                // 🚨 TRAVA DE SEGURANÇA: Se não for dono e não tiver o privilégio 'configuracoes'
+                if (cargoUsuarioAtual !== 'dono' && !temPermissao('configuracoes')) {
+                    alert("Acesso restrito: você não possui privilégio para alterar a configuração de suítes da pousada.");
+                    window.location.href = 'dashboard.html';
+                    return;
+                }
+
+                // Ajusta os menus laterais
+                if (cargoUsuarioAtual !== 'dono') {
+                    if (!temPermissao('hospedes')) document.getElementById('link-menu-hospedes')?.remove();
+                    if (!temPermissao('configuracoes')) document.getElementById('link-menu-tarifas')?.remove();
+                    document.getElementById('link-menu-equipe')?.remove();
+                    document.getElementById('banner-modo-master')?.remove();
+                }
+            }
+
             carregarConfiguracao(usuarioIdAtual);
         }
 
-        async function carregarConfiguracao(userId) {
+        function sairDoModoMaster() {
+            sessionStorage.removeItem('master_pousada_ativa');
+            sessionStorage.removeItem('master_pousada_nome');
+            window.location.href = 'admin-master.html';
+        }
+
+        async function carregarConfiguracao(pousadaId) {
             const { data: pousada } = await supabaseClient
                 .from('pousadas')
                 .select('nome, valor_pet, valor_hospede_extra, idade_limite_crianca, aceita_pet, diaria_minima, horario_checkin, horario_checkout')
-                .eq('id', userId)
+                .eq('id', pousadaId)
                 .maybeSingle();
 
             const nomePousada = (pousada && pousada.nome) ? pousada.nome : "Minha Pousada";
@@ -303,6 +420,8 @@
             document.getElementById('nome-pousada').value = nomePousadaOriginal;
             document.getElementById('titulo-pousada').innerText = nomePousada;
             document.getElementById('nome-pousada-sidebar').innerText = nomePousada;
+            const elModoMaster = document.getElementById('nome-pousada-modo-master');
+            if (elModoMaster) elModoMaster.innerText = nomePousada;
 
             if (pousada) {
                 document.getElementById('valor-pet').value = pousada.valor_pet ?? '';
@@ -317,7 +436,8 @@
             const { data: suites } = await supabaseClient
                 .from('suites')
                 .select('id, nome, fotos, ativa, valor_diaria, hospedes_inclusos, capacidade_hospedes, usa_adicional_customizado, valor_hospede_extra_customizado')
-                .eq('pousada_id', userId);
+                .eq('pousada_id', pousadaId)
+                .order('nome');
 
             const container = document.getElementById('suites-container');
             container.innerHTML = '';
@@ -418,46 +538,45 @@
                 textoStatus.className = 'text-[11px] sm:text-xs font-bold text-amber-700 status-texto';
             }
         }
-async function removerCampo(botao) {
-    const rowDiv = botao.closest('.suite-row');
-    if (!rowDiv) return;
-    const suiteId = rowDiv.dataset.suiteId;
 
-    if (suiteId) {
-        const modal = document.getElementById('modal-confirmacao');
-        const titulo = document.getElementById('titulo-modal');
-        const texto = document.getElementById('texto-confirmacao');
-        const btnSim = document.getElementById('btn-confirma-sim');
-        const btnNao = document.getElementById('btn-confirma-nao');
-        const iconeModal = document.getElementById('icone-modal-confirmacao');
+        async function removerCampo(botao) {
+            const rowDiv = botao.closest('.suite-row');
+            if (!rowDiv) return;
+            const suiteId = rowDiv.dataset.suiteId;
 
-        // Configura visual de exclusão (Vermelho)
-        titulo.innerText = "Excluir Suíte Permanentemente?";
-        texto.innerText = "Esta ação apagará a acomodação do sistema. Deseja prosseguir com a exclusão?";
-        iconeModal.className = "w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center text-xl flex-shrink-0";
-        btnSim.className = "w-full bg-red-600 hover:bg-red-700 text-white py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold shadow-md transition flex items-center justify-center gap-1.5";
-        btnSim.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i> Sim, Excluir';
+            if (suiteId) {
+                const modal = document.getElementById('modal-confirmacao');
+                const titulo = document.getElementById('titulo-modal');
+                const texto = document.getElementById('texto-confirmacao');
+                const btnSim = document.getElementById('btn-confirma-sim');
+                const btnNao = document.getElementById('btn-confirma-nao');
+                const iconeModal = document.getElementById('icone-modal-confirmacao');
 
-        modal.classList.remove('hidden');
+                titulo.innerText = "Excluir Suíte Permanentemente?";
+                texto.innerText = "Esta ação apagará a acomodação do sistema. Deseja prosseguir com a exclusão?";
+                iconeModal.className = "w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center text-xl flex-shrink-0";
+                btnSim.className = "w-full bg-red-600 hover:bg-red-700 text-white py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer";
+                btnSim.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i> Sim, Excluir';
 
-        btnSim.onclick = async () => {
-            modal.classList.add('hidden');
-            const { error } = await supabaseClient.from('suites').delete().eq('id', suiteId);
-            if (error) {
-                mostrarMensagem('Erro ao excluir suíte do banco de dados.', 'erro');
-                mostrarToast('Erro', 'Não foi possível excluir a suíte.', 'erro');
-                return;
+                modal.classList.remove('hidden');
+
+                btnSim.onclick = async () => {
+                    modal.classList.add('hidden');
+                    const { error } = await supabaseClient.from('suites').delete().eq('id', suiteId);
+                    if (error) {
+                        mostrarMensagem('Erro ao excluir suíte do banco de dados.', 'erro');
+                        mostrarToast('Erro', 'Não foi possível excluir a suíte.', 'erro');
+                        return;
+                    }
+                    rowDiv.remove();
+                    mostrarToast('Sucesso', 'Suíte excluída com sucesso!');
+                };
+
+                btnNao.onclick = () => { modal.classList.add('hidden'); };
+            } else {
+                rowDiv.remove();
             }
-            rowDiv.remove();
-            mostrarToast('Sucesso', 'Suíte excluída com sucesso!');
-        };
-
-        btnNao.onclick = () => { modal.classList.add('hidden'); };
-    } else {
-        // Se for uma linha recém-adicionada que ainda não foi pro banco
-        rowDiv.remove();
-    }
-}
+        }
 
         async function salvarFotos(suiteId, rowDiv) {
             if (!rowDiv) return null;
@@ -492,10 +611,6 @@ async function removerCampo(botao) {
         async function executarSalvamento() {
             const nomePousada = document.getElementById('nome-pousada').value;
             const linhasSuites = document.querySelectorAll('#suites-container > .suite-row');
-            
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) return;
-            const userId = session.user.id;
 
             const valorPetRaw = document.getElementById('valor-pet')?.value;
             const valorHospedeExtraRaw = document.getElementById('valor-hospede-extra')?.value;
@@ -506,7 +621,7 @@ async function removerCampo(botao) {
             const aceitaPet = document.getElementById('aceita-pet')?.checked || false;
 
             const dadosPousada = {
-                id: userId,
+                id: usuarioIdAtual,
                 nome: nomePousada.trim(),
                 valor_pet: valorPetRaw !== '' ? parseFloat(valorPetRaw) : null,
                 valor_hospede_extra: valorHospedeExtraRaw !== '' ? parseFloat(valorHospedeExtraRaw) : null,
@@ -578,7 +693,7 @@ async function removerCampo(botao) {
                         .insert({ 
                             nome: valorNome, 
                             status: 'Disponível',
-                            pousada_id: userId,
+                            pousada_id: usuarioIdAtual,
                             fotos: [],
                             ativa: estaAtiva,
                             valor_diaria: valorDiaria,
@@ -604,7 +719,7 @@ async function removerCampo(botao) {
 
             mostrarMensagem('Configurações salvas com sucesso!', 'sucesso');
             mostrarToast("Sucesso!", "Alterações salvas com sucesso!");
-            carregarConfiguracao(userId);
+            carregarConfiguracao(usuarioIdAtual);
         }
 
         async function salvarConfiguracao() {
@@ -613,12 +728,6 @@ async function removerCampo(botao) {
             
             if (!nomePousada) {
                 mostrarMensagem('O nome da pousada não pode ficar em branco.', 'erro');
-                return;
-            }
-
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                mostrarMensagem('Sessão expirada. Faça login novamente.', 'erro');
                 return;
             }
 
@@ -641,6 +750,8 @@ async function removerCampo(botao) {
         }
 
         async function fazerLogout() { 
+            sessionStorage.removeItem('master_pousada_ativa');
+            sessionStorage.removeItem('master_pousada_nome');
             await supabaseClient.auth.signOut(); 
             window.location.href = 'index.html'; 
         }
