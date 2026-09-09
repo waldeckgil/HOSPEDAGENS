@@ -179,6 +179,27 @@
         </div>
     </div>
 
+    <!-- MODAL DE CONFIRMAÇÃO GENÉRICO ESTILIZADO (SUBSTITUI O CONFIRM DO NAVEGADOR) -->
+    <div id="modal-confirmacao" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-[70]">
+        <div class="bg-white rounded-3xl p-6 sm:p-7 max-w-sm w-full shadow-2xl border border-gray-200 text-center space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div id="modal-confirm-icone-box" class="w-14 h-14 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto text-2xl font-bold">
+                <i id="modal-confirm-icone" class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <h3 id="modal-confirm-titulo" class="text-base sm:text-lg font-black text-gray-900 leading-tight">Confirmar Ação</h3>
+                <p id="modal-confirm-msg" class="text-xs text-gray-600 mt-2 leading-relaxed">Você tem certeza que deseja prosseguir?</p>
+            </div>
+            <div class="pt-2 grid grid-cols-2 gap-2 border-t border-gray-100">
+                <button type="button" onclick="fecharModalConfirmacao(false)" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 rounded-xl text-xs transition">
+                    Cancelar
+                </button>
+                <button type="button" id="btn-confirm-acao" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-md flex items-center justify-center gap-1.5">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL DE SUCESSO COM BOTÃO DE DISPARO PARA O WHATSAPP -->
     <div id="modal-sucesso-whatsapp" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-[60]">
         <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-emerald-200 text-center space-y-4">
@@ -233,6 +254,9 @@
         let membrosEquipeCache = [];
         let toastTimer = null;
 
+        // Callback da Promise do Modal de Confirmação
+        let confirmacaoResolver = null;
+
         function mostrarToast(titulo, mensagem, tipo = 'sucesso') {
             const toast = document.getElementById('toast-notificacao');
             const toastTitulo = document.getElementById('toast-titulo');
@@ -261,6 +285,50 @@
             toastTimer = setTimeout(() => {
                 toast.classList.add('translate-y-24', 'opacity-0');
             }, 3500);
+        }
+
+        // =========================================================================
+        // MODAL DE CONFIRMAÇÃO CUSTOMIZADO (SUBSTITUTO ELEGANTE DE confirm())
+        // =========================================================================
+        function exibirConfirmacaoCustomizada({ titulo, mensagem, textoBtnConfirmar = 'Confirmar', corTema = 'red', icone = 'fa-triangle-exclamation' }) {
+            return new Promise((resolve) => {
+                confirmacaoResolver = resolve;
+
+                const modal = document.getElementById('modal-confirmacao');
+                const boxIcone = document.getElementById('modal-confirm-icone-box');
+                const tagIcone = document.getElementById('modal-confirm-icone');
+                const tagTitulo = document.getElementById('modal-confirm-titulo');
+                const tagMsg = document.getElementById('modal-confirm-msg');
+                const btnConfirm = document.getElementById('btn-confirm-acao');
+
+                tagTitulo.innerText = titulo;
+                tagMsg.innerHTML = mensagem;
+                btnConfirm.innerText = textoBtnConfirmar;
+                tagIcone.className = `fa-solid ${icone}`;
+
+                if (corTema === 'red') {
+                    boxIcone.className = "w-14 h-14 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto text-2xl font-bold";
+                    btnConfirm.className = "w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-md flex items-center justify-center gap-1.5";
+                } else if (corTema === 'amber') {
+                    boxIcone.className = "w-14 h-14 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mx-auto text-2xl font-bold";
+                    btnConfirm.className = "w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-md flex items-center justify-center gap-1.5";
+                } else {
+                    boxIcone.className = "w-14 h-14 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto text-2xl font-bold";
+                    btnConfirm.className = "w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-md flex items-center justify-center gap-1.5";
+                }
+
+                btnConfirm.onclick = () => fecharModalConfirmacao(true);
+                modal.classList.remove('hidden');
+            });
+        }
+
+        function fecharModalConfirmacao(resultado) {
+            const modal = document.getElementById('modal-confirmacao');
+            modal.classList.add('hidden');
+            if (confirmacaoResolver) {
+                confirmacaoResolver(resultado);
+                confirmacaoResolver = null;
+            }
         }
 
         function mascaraTelefone(input) {
@@ -312,8 +380,8 @@
 
             // SEGURANÇA: Apenas Dono ou Master gerencia equipe
             if (!isMaster && cargo !== 'dono') {
-                alert("Acesso restrito: apenas o gestor proprietário da pousada pode gerenciar a equipe.");
-                window.location.href = 'dashboard.html';
+                mostrarToast("Acesso Restrito", "Apenas o proprietário da pousada pode gerenciar a equipe.", "erro");
+                setTimeout(() => { window.location.href = 'dashboard.html'; }, 2000);
                 return;
             }
 
@@ -478,7 +546,7 @@
         }
 
         // =========================================================================
-        // SALVAMENTO SEGURO DO COLABORADOR
+        // CADASTRO SEGURO DE NOVO MEMBRO
         // =========================================================================
         async function salvarNovoMembro(e) {
             e.preventDefault();
@@ -494,7 +562,7 @@
             const senha = document.getElementById('cad-senha').value;
 
             try {
-                // 1. VALIDAÇÃO PRÉVIA NA TABELA USUARIOS
+                // 1. Validação se já existe na tabela de usuários
                 const { data: usuarioExistente } = await supabaseClient
                     .from('usuarios')
                     .select('id, email')
@@ -502,10 +570,10 @@
                     .maybeSingle();
 
                 if (usuarioExistente) {
-                    throw new Error(`O e-mail "${email}" já está cadastrado.`);
+                    throw new Error(`O e-mail "${email}" já está cadastrado nesta ou em outra conta.`);
                 }
 
-                // 2. CRIAÇÃO ISOLADA NO SUPABASE AUTH (Sem derrubar a sessão do Dono)
+                // 2. Instância isolada para não derrubar a sessão do Dono
                 const tempAuthClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
                     auth: {
                         persistSession: false,
@@ -536,12 +604,12 @@
                 }
 
                 if (authData.user.identities && authData.user.identities.length === 0) {
-                    throw new Error(`O e-mail "${email}" já possui cadastro ativo no Supabase Auth. Use outro e-mail.`);
+                    throw new Error(`O e-mail "${email}" já possui conta ativa no Supabase Auth. Use outro e-mail.`);
                 }
 
                 const novoUserId = authData.user.id;
 
-                // 3. VINCULAÇÃO NA TABELA USUARIOS
+                // 3. Vinculação na tabela usuarios
                 const { error: dbError } = await supabaseClient
                     .from('usuarios')
                     .upsert([{
@@ -559,7 +627,7 @@
                     throw new Error("Erro ao vincular na equipe: " + dbError.message);
                 }
 
-                // 4. MENSAGEM INICIAL DE CADASTRO COM SENHA
+                // 4. Mensagem inicial de cadastro com senha
                 const cargoNomeAmigavel = cargo === 'recepcao' ? 'Recepção' : 'Camareira / Governança';
 
                 let zapLimpo = whatsapp.replace(/\D/g, '');
@@ -585,16 +653,28 @@
 
             } catch (err) {
                 console.error("Erro no cadastro:", err);
-                alert(err.message);
+                mostrarToast("Falha no Cadastro", err.message, 'erro');
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-check"></i> Cadastrar e Gerar Acesso';
             }
         }
 
+        // =========================================================================
+        // ATIVAR / DESATIVAR COM MODAL CUSTOMIZADO
+        // =========================================================================
         async function alternarStatusMembro(userId, statusAtual, nomeMembro) {
             const novoStatus = !statusAtual;
-            const confirmou = confirm(`Deseja ${novoStatus ? 'REATIVAR' : 'DESATIVAR'} o acesso de ${nomeMembro}?`);
+            const acaoTexto = novoStatus ? 'REATIVAR' : 'DESATIVAR';
+
+            const confirmou = await exibirConfirmacaoCustomizada({
+                titulo: `${acaoTexto.charAt(0) + acaoTexto.slice(1).toLowerCase()} Acesso`,
+                mensagem: `Deseja realmente <strong>${acaoTexto}</strong> o acesso do colaborador <strong>${nomeMembro}</strong>?`,
+                textoBtnConfirmar: novoStatus ? 'Sim, Reativar' : 'Sim, Desativar',
+                corTema: novoStatus ? 'blue' : 'amber',
+                icone: novoStatus ? 'fa-user-check' : 'fa-user-slash'
+            });
+
             if (!confirmou) return;
 
             const { error } = await supabaseClient
@@ -613,20 +693,26 @@
         }
 
         // =========================================================================
-        // EXCLUIR DEFINITIVAMENTE O COLABORADOR
-        // Tenta via RPC (deleta do Auth e Usuarios); caso não exista a RPC, deleta direto de Usuarios
+        // EXCLUIR DEFINITIVAMENTE COM MODAL CUSTOMIZADO
         // =========================================================================
         async function excluirColaborador(userId, nomeMembro) {
-            const confirmou = confirm(`⚠️ ATENÇÃO: Tem certeza de que deseja EXCLUIR DEFINITIVAMENTE o colaborador "${nomeMembro}"?\n\nEsta ação não poderá ser desfeita.`);
+            const confirmou = await exibirConfirmacaoCustomizada({
+                titulo: 'Excluir Definitivamente',
+                mensagem: `⚠️ Tem certeza de que deseja <strong>EXCLUIR DEFINITIVAMENTE</strong> o colaborador <strong>"${nomeMembro}"</strong>?<br><br><span class="text-[11px] text-gray-500">Esta ação não poderá ser desfeita.</span>`,
+                textoBtnConfirmar: 'Sim, Excluir',
+                corTema: 'red',
+                icone: 'fa-trash-can'
+            });
+
             if (!confirmou) return;
 
-            // 1. Tenta deletar por RPC para limpar também o auth.users
+            // 1. Tenta deletar por RPC para limpar auth.users e a tabela usuarios
             const { error: rpcError } = await supabaseClient.rpc('excluir_colaborador_equipe', { target_user_id: userId });
 
             if (rpcError) {
-                console.warn("RPC indisponível ou erro na execução, aplicando exclusão direta na tabela usuarios:", rpcError);
+                console.warn("Fallback de exclusão direta na tabela usuarios:", rpcError);
                 
-                // 2. Fallback direto na tabela usuarios caso a RPC não tenha sido criada
+                // 2. Fallback direto caso o RPC não esteja criado no banco
                 const { error: dbError } = await supabaseClient
                     .from('usuarios')
                     .delete()
@@ -644,7 +730,7 @@
         }
 
         // =========================================================================
-        // ENVIAR APENAS O LINK DE LOGIN VIA WHATSAPP (FORMATO EXATO PEDIDO)
+        // ENVIAR APENAS O LINK DE LOGIN VIA WHATSAPP
         // =========================================================================
         function reenviarAcessoWhatsapp(userId) {
             const membro = membrosEquipeCache.find(m => m.user_id === userId);
