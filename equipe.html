@@ -7,6 +7,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #2563eb;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #2563eb;
+        }
+    </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col md:flex-row text-slate-800 font-sans">
 
@@ -100,7 +109,7 @@
                     <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                         <div>
                             <h3 class="font-extrabold text-gray-900 text-base">Colaboradores da Pousada</h3>
-                            <p class="text-xs text-gray-500 mt-0.5">Gerencie os acessos de quem trabalha na sua recepção ou na limpeza dos quartos.</p>
+                            <p class="text-xs text-gray-500 mt-0.5">Gerencie os acessos e permissões individuais de cada membro da sua equipe.</p>
                         </div>
                         <span id="badge-total-equipe" class="text-xs bg-slate-100 text-slate-700 font-bold px-3 py-1 rounded-full border border-slate-200">
                             0 colaboradores
@@ -116,6 +125,107 @@
 
             </div>
         </main>
+    </div>
+
+    <!-- MODAL DE GESTÃO DE PRIVILÉGIOS / PERMISSÕES -->
+    <div id="modal-permissoes" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-3xl p-6 sm:p-7 max-w-lg w-full shadow-2xl border border-gray-200 animate-in fade-in zoom-in-95 duration-150">
+            <div class="flex justify-between items-center pb-3 border-b border-gray-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-indigo-100 text-indigo-700 rounded-2xl flex items-center justify-center text-lg font-bold">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-extrabold text-gray-900">Permissões de Acesso</h3>
+                        <p id="perm-colaborador-nome" class="text-xs font-semibold text-blue-600 mt-0.5">Nome do Colaborador</p>
+                    </div>
+                </div>
+                <button onclick="fecharModalPermissoes()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">✕</button>
+            </div>
+
+            <div class="py-4 space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+                <p class="text-xs text-gray-500 mb-2">Marque ou desmarque as áreas que este colaborador pode visualizar ou operar no sistema:</p>
+
+                <!-- 1. Hóspedes -->
+                <label class="flex items-center justify-between p-3 rounded-2xl border border-gray-200 hover:bg-slate-50 transition cursor-pointer">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-xs">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-gray-800 block">Gestão de Hóspedes</span>
+                            <span class="text-[11px] text-gray-400 block">Visualizar cadastro, contatos e histórico</span>
+                        </div>
+                    </div>
+                    <input type="checkbox" id="perm-hospedes" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                </label>
+
+                <!-- 2. Reservas -->
+                <label class="flex items-center justify-between p-3 rounded-2xl border border-gray-200 hover:bg-slate-50 transition cursor-pointer">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs">
+                            <i class="fa-solid fa-calendar-days"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-gray-800 block">Reservas & Check-in / Out</span>
+                            <span class="text-[11px] text-gray-400 block">Mapa de reservas, check-in e check-out</span>
+                        </div>
+                    </div>
+                    <input type="checkbox" id="perm-reservas" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                </label>
+
+                <!-- 3. Limpeza / Governança -->
+                <label class="flex items-center justify-between p-3 rounded-2xl border border-gray-200 hover:bg-slate-50 transition cursor-pointer">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-pink-100 text-pink-700 flex items-center justify-center text-xs">
+                            <i class="fa-solid fa-broom"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-gray-800 block">Governança & Limpeza</span>
+                            <span class="text-[11px] text-gray-400 block">Marcar suítes como limpas ou em faxina</span>
+                        </div>
+                    </div>
+                    <input type="checkbox" id="perm-limpeza" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                </label>
+
+                <!-- 4. Financeiro -->
+                <label class="flex items-center justify-between p-3 rounded-2xl border border-amber-200 bg-amber-50/40 hover:bg-amber-50 transition cursor-pointer">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xs">
+                            <i class="fa-solid fa-sack-dollar"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-amber-900 block">Visão Financeira & Caixa</span>
+                            <span class="text-[11px] text-amber-700 block">Visualizar totais recebidos e lançar pagamentos</span>
+                        </div>
+                    </div>
+                    <input type="checkbox" id="perm-financeiro" class="w-4 h-4 text-amber-600 rounded focus:ring-amber-500">
+                </label>
+
+                <!-- 5. Configurações e Tarifas -->
+                <label class="flex items-center justify-between p-3 rounded-2xl border border-gray-200 hover:bg-slate-50 transition cursor-pointer">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center text-xs">
+                            <i class="fa-solid fa-gear"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-gray-800 block">Configurar Suítes & Tarifas</span>
+                            <span class="text-[11px] text-gray-400 block">Alterar valores de diárias e dados da pousada</span>
+                        </div>
+                    </div>
+                    <input type="checkbox" id="perm-configuracoes" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                </label>
+            </div>
+
+            <div class="pt-3 flex justify-end gap-2 border-t border-gray-100">
+                <button type="button" onclick="fecharModalPermissoes()" class="px-4 py-2 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-100">
+                    Cancelar
+                </button>
+                <button type="button" id="btn-salvar-permissoes" onclick="salvarPermissoesModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-md transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-check"></i> Salvar Privilégios
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- MODAL DE CADASTRO DE NOVO MEMBRO -->
@@ -141,10 +251,10 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Cargo / Função *</label>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Cargo / Função Padrão *</label>
                     <select id="cad-cargo" required class="w-full p-2.5 border rounded-xl text-xs font-bold bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option value="recepcao">Recepção (Check-in, Check-out, Sem financeiro)</option>
-                        <option value="limpeza">Camareira / Limpeza (Somente quartos sujos)</option>
+                        <option value="recepcao">Recepção (Reservas e Hóspedes)</option>
+                        <option value="limpeza">Camareira / Limpeza (Foco em Governança)</option>
                     </select>
                 </div>
 
@@ -179,7 +289,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE CONFIRMAÇÃO GENÉRICO ESTILIZADO (SUBSTITUI O CONFIRM DO NAVEGADOR) -->
+    <!-- MODAL DE CONFIRMAÇÃO GENÉRICO ESTILIZADO -->
     <div id="modal-confirmacao" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-[70]">
         <div class="bg-white rounded-3xl p-6 sm:p-7 max-w-sm w-full shadow-2xl border border-gray-200 text-center space-y-4 animate-in fade-in zoom-in-95 duration-150">
             <div id="modal-confirm-icone-box" class="w-14 h-14 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto text-2xl font-bold">
@@ -211,7 +321,6 @@
                 <p class="text-xs text-gray-500 mt-1">O colaborador já pode acessar o sistema com o e-mail e senha cadastrados.</p>
             </div>
 
-            <!-- CARD COM CREDENCIAIS PARA CONFERÊNCIA -->
             <div class="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl text-left text-xs space-y-1.5 font-medium text-slate-800">
                 <div class="flex justify-between"><span class="text-gray-500">Colaborador:</span><strong id="cred-nome">-</strong></div>
                 <div class="flex justify-between"><span class="text-gray-500">Cargo:</span><strong id="cred-cargo" class="uppercase text-blue-700">-</strong></div>
@@ -253,9 +362,8 @@
         let nomePousadaAtual = 'Pousada';
         let membrosEquipeCache = [];
         let toastTimer = null;
-
-        // Callback da Promise do Modal de Confirmação
         let confirmacaoResolver = null;
+        let colaboradorSelecionadoParaPermissoes = null;
 
         function mostrarToast(titulo, mensagem, tipo = 'sucesso') {
             const toast = document.getElementById('toast-notificacao');
@@ -287,9 +395,6 @@
             }, 3500);
         }
 
-        // =========================================================================
-        // MODAL DE CONFIRMAÇÃO CUSTOMIZADO (SUBSTITUTO ELEGANTE DE confirm())
-        // =========================================================================
         function exibirConfirmacaoCustomizada({ titulo, mensagem, textoBtnConfirmar = 'Confirmar', corTema = 'red', icone = 'fa-triangle-exclamation' }) {
             return new Promise((resolve) => {
                 confirmacaoResolver = resolve;
@@ -368,7 +473,6 @@
             const params = new URLSearchParams(window.location.search);
             const pousadaIdParam = params.get('pousada_id');
 
-            // 1. Resolução de Perfil na tabela usuarios (RBAC)
             const { data: perfil } = await supabaseClient
                 .from('usuarios')
                 .select('pousada_id, cargo, ativo, nome_completo')
@@ -378,7 +482,6 @@
             const isMaster = (emailLogado === EMAIL_MASTER_ADMIN.toLowerCase());
             const cargo = perfil?.cargo || 'dono';
 
-            // SEGURANÇA: Apenas Dono ou Master gerencia equipe
             if (!isMaster && cargo !== 'dono') {
                 mostrarToast("Acesso Restrito", "Apenas o proprietário da pousada pode gerenciar a equipe.", "erro");
                 setTimeout(() => { window.location.href = 'dashboard.html'; }, 2000);
@@ -452,7 +555,7 @@
                 if (isDono) {
                     badgeCargo = '<span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300">👑 Gestor (Dono)</span>';
                     iconeCargo = 'bg-amber-100 text-amber-700';
-                    cargoDescricao = 'Acesso irrestrito ao sistema';
+                    cargoDescricao = 'Acesso irrestrito a todos os recursos';
                 } else if (isRecepcao) {
                     badgeCargo = '<span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-blue-100 text-blue-900 border border-blue-300">🎧 Recepção</span>';
                     iconeCargo = 'bg-blue-100 text-blue-700';
@@ -476,6 +579,20 @@
 
                 const nomeEscapado = (m.nome_completo || 'Colaborador').replace(/'/g, "\\'");
 
+                // Badges com os privilégios ativos
+                const p = m.permissoes || {};
+                let pBadges = '';
+                if (!isDono) {
+                    const lista = [];
+                    if (p.hospedes ?? (m.cargo === 'recepcao')) lista.push('👥 Hóspedes');
+                    if (p.reservas ?? (m.cargo === 'recepcao')) lista.push('📅 Reservas');
+                    if (p.limpeza ?? (m.cargo === 'limpeza')) lista.push('🧹 Limpeza');
+                    if (p.financeiro) lista.push('💰 Financeiro');
+                    if (p.configuracoes) lista.push('⚙️ Ajustes');
+
+                    pBadges = lista.map(l => `<span class="inline-block text-[9px] font-semibold bg-gray-200 text-gray-700 px-1.5 py-0.5 rounded">${l}</span>`).join(' ');
+                }
+
                 html += `
                     <div class="bg-gray-50/70 border ${m.ativo ? 'border-gray-200' : 'border-red-200 opacity-75'} p-4 rounded-2xl flex flex-col justify-between transition hover:shadow-md">
                         <div>
@@ -492,7 +609,7 @@
                                 ${statusBadge}
                             </div>
 
-                            <div class="mt-2.5 pt-2 border-t border-gray-200 space-y-1 text-xs">
+                            <div class="mt-2.5 pt-2 border-t border-gray-200 space-y-1.5 text-xs">
                                 <div class="flex items-center justify-between">
                                     <span class="text-[11px] text-gray-500">Função:</span>
                                     ${badgeCargo}
@@ -501,22 +618,33 @@
                                     <span class="text-[11px] text-gray-500">WhatsApp:</span>
                                     ${m.whatsapp ? `<a href="${whatsLink}" target="_blank" class="text-emerald-700 font-bold hover:underline flex items-center gap-1"><i class="fa-brands fa-whatsapp text-emerald-600"></i> ${m.whatsapp}</a>` : '<span class="text-gray-400">Não informado</span>'}
                                 </div>
-                                <div class="text-[10px] text-gray-400 italic pt-0.5">${cargoDescricao}</div>
+
+                                ${!isDono ? `
+                                    <div class="pt-1.5 border-t border-dashed border-gray-200">
+                                        <span class="text-[10px] text-gray-400 block mb-1 uppercase font-bold">Privilégios Habilitados:</span>
+                                        <div class="flex flex-wrap gap-1">${pBadges || '<span class="text-[10px] text-gray-400 italic">Nenhum privilégio especial</span>'}</div>
+                                    </div>
+                                ` : `
+                                    <div class="text-[10px] text-gray-400 italic pt-0.5">${cargoDescricao}</div>
+                                `}
                             </div>
                         </div>
 
                         ${!isDono ? `
                             <div class="mt-4 pt-3 border-t border-gray-200 flex flex-wrap items-center justify-between gap-1.5">
                                 <div class="flex items-center gap-1.5">
-                                    <button onclick="alternarStatusMembro('${m.user_id}', ${m.ativo}, '${nomeEscapado}')" title="${m.ativo ? 'Desativar Acesso' : 'Reativar Acesso'}" class="text-xs font-bold px-2.5 py-1.5 rounded-xl border transition ${m.ativo ? 'bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-300' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300'}">
-                                        <i class="fa-solid ${m.ativo ? 'fa-user-slash' : 'fa-user-check'}"></i> ${m.ativo ? 'Desativar' : 'Reativar'}
+                                    <button onclick="abrirModalPermissoes('${m.user_id}')" title="Gerenciar privilégios e permissões" class="text-xs font-bold px-2.5 py-1.5 rounded-xl border bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200 transition flex items-center gap-1">
+                                        <i class="fa-solid fa-key text-[10px]"></i> Privilégios
                                     </button>
-                                    <button onclick="excluirColaborador('${m.user_id}', '${nomeEscapado}')" title="Excluir Colaborador em definitivo" class="text-xs font-bold px-2.5 py-1.5 rounded-xl border bg-red-50 hover:bg-red-100 text-red-700 border-red-200 transition">
+                                    <button onclick="alternarStatusMembro('${m.user_id}', ${m.ativo}, '${nomeEscapado}')" title="${m.ativo ? 'Desativar Acesso' : 'Reativar Acesso'}" class="text-xs font-bold px-2 py-1.5 rounded-xl border transition ${m.ativo ? 'bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-300' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300'}">
+                                        <i class="fa-solid ${m.ativo ? 'fa-user-slash' : 'fa-user-check'}"></i>
+                                    </button>
+                                    <button onclick="excluirColaborador('${m.user_id}', '${nomeEscapado}')" title="Excluir Colaborador" class="text-xs font-bold px-2 py-1.5 rounded-xl border bg-red-50 hover:bg-red-100 text-red-700 border-red-200 transition">
                                         <i class="fa-solid fa-trash-can"></i>
                                     </button>
                                 </div>
-                                <button onclick="reenviarAcessoWhatsapp('${m.user_id}')" title="Enviar link de login via WhatsApp" class="text-xs font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl shadow-xs transition flex items-center gap-1">
-                                    <i class="fa-brands fa-whatsapp"></i> Enviar Link
+                                <button onclick="reenviarAcessoWhatsapp('${m.user_id}')" title="Enviar link via WhatsApp" class="text-xs font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl shadow-xs transition flex items-center gap-1">
+                                    <i class="fa-brands fa-whatsapp"></i> Link
                                 </button>
                             </div>
                         ` : `
@@ -531,6 +659,69 @@
             grid.innerHTML = html;
         }
 
+        // =========================================================================
+        // GESTÃO DE PRIVILÉGIOS / PERMISSÕES GRANULARES
+        // =========================================================================
+        function abrirModalPermissoes(userId) {
+            const membro = membrosEquipeCache.find(m => m.user_id === userId);
+            if (!membro) return;
+
+            colaboradorSelecionadoParaPermissoes = membro;
+            document.getElementById('perm-colaborador-nome').innerText = `${membro.nome_completo} (${membro.email})`;
+
+            const p = membro.permissoes || {};
+            // Valores padrão conforme o cargo, caso ainda não existam permissões gravadas
+            document.getElementById('perm-hospedes').checked = p.hospedes ?? (membro.cargo === 'recepcao');
+            document.getElementById('perm-reservas').checked = p.reservas ?? (membro.cargo === 'recepcao');
+            document.getElementById('perm-limpeza').checked = p.limpeza ?? (membro.cargo === 'limpeza');
+            document.getElementById('perm-financeiro').checked = p.financeiro ?? false;
+            document.getElementById('perm-configuracoes').checked = p.configuracoes ?? false;
+
+            document.getElementById('modal-permissoes').classList.remove('hidden');
+        }
+
+        function fecharModalPermissoes() {
+            document.getElementById('modal-permissoes').classList.add('hidden');
+            colaboradorSelecionadoParaPermissoes = null;
+        }
+
+        async function salvarPermissoesModal() {
+            if (!colaboradorSelecionadoParaPermissoes) return;
+
+            const btn = document.getElementById('btn-salvar-permissoes');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
+
+            const novasPermissoes = {
+                hospedes: document.getElementById('perm-hospedes').checked,
+                reservas: document.getElementById('perm-reservas').checked,
+                limpeza: document.getElementById('perm-limpeza').checked,
+                financeiro: document.getElementById('perm-financeiro').checked,
+                configuracoes: document.getElementById('perm-configuracoes').checked
+            };
+
+            const { error } = await supabaseClient
+                .from('usuarios')
+                .update({ permissoes: novasPermissoes })
+                .eq('user_id', colaboradorSelecionadoParaPermissoes.user_id)
+                .eq('pousada_id', usuarioIdAtual);
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Salvar Privilégios';
+
+            if (error) {
+                mostrarToast("Erro", "Não foi possível salvar privilégios: " + error.message, 'erro');
+                return;
+            }
+
+            mostrarToast("Privilégios Atualizados", `Permissões de ${colaboradorSelecionadoParaPermissoes.nome_completo} salvas com sucesso!`);
+            fecharModalPermissoes();
+            carregarEquipe();
+        }
+
+        // =========================================================================
+        // CADASTRO DE NOVO MEMBRO
+        // =========================================================================
         function abrirModalNovoMembro() {
             document.getElementById('form-novo-membro').reset();
             document.getElementById('modal-novo-membro').classList.remove('hidden');
@@ -545,9 +736,6 @@
             carregarEquipe();
         }
 
-        // =========================================================================
-        // CADASTRO SEGURO DE NOVO MEMBRO
-        // =========================================================================
         async function salvarNovoMembro(e) {
             e.preventDefault();
 
@@ -562,7 +750,6 @@
             const senha = document.getElementById('cad-senha').value;
 
             try {
-                // 1. Validação se já existe na tabela de usuários
                 const { data: usuarioExistente } = await supabaseClient
                     .from('usuarios')
                     .select('id, email')
@@ -570,10 +757,9 @@
                     .maybeSingle();
 
                 if (usuarioExistente) {
-                    throw new Error(`O e-mail "${email}" já está cadastrado nesta ou em outra conta.`);
+                    throw new Error(`O e-mail "${email}" já está cadastrado.`);
                 }
 
-                // 2. Instância isolada para não derrubar a sessão do Dono
                 const tempAuthClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
                     auth: {
                         persistSession: false,
@@ -595,21 +781,20 @@
                     }
                 });
 
-                if (authError) {
-                    throw new Error("Falha ao registrar login: " + authError.message);
-                }
-
-                if (!authData.user) {
-                    throw new Error("Não foi possível gerar a conta de acesso.");
-                }
-
-                if (authData.user.identities && authData.user.identities.length === 0) {
-                    throw new Error(`O e-mail "${email}" já possui conta ativa no Supabase Auth. Use outro e-mail.`);
-                }
+                if (authError) throw new Error("Falha ao registrar login: " + authError.message);
+                if (!authData.user) throw new Error("Não foi possível gerar a conta de acesso.");
 
                 const novoUserId = authData.user.id;
 
-                // 3. Vinculação na tabela usuarios
+                // Permissões padrão iniciais conforme o cargo
+                const permissoesPadrao = {
+                    hospedes: (cargo === 'recepcao'),
+                    reservas: (cargo === 'recepcao'),
+                    limpeza: (cargo === 'limpeza'),
+                    financeiro: false,
+                    configuracoes: false
+                };
+
                 const { error: dbError } = await supabaseClient
                     .from('usuarios')
                     .upsert([{
@@ -619,15 +804,12 @@
                         whatsapp: whatsapp,
                         email: email,
                         cargo: cargo,
+                        permissoes: permissoesPadrao,
                         ativo: true
                     }], { onConflict: 'user_id' });
 
-                if (dbError) {
-                    console.error("Erro ao vincular na tabela usuarios:", dbError);
-                    throw new Error("Erro ao vincular na equipe: " + dbError.message);
-                }
+                if (dbError) throw new Error("Erro ao vincular na equipe: " + dbError.message);
 
-                // 4. Mensagem inicial de cadastro com senha
                 const cargoNomeAmigavel = cargo === 'recepcao' ? 'Recepção' : 'Camareira / Governança';
 
                 let zapLimpo = whatsapp.replace(/\D/g, '');
@@ -660,9 +842,6 @@
             }
         }
 
-        // =========================================================================
-        // ATIVAR / DESATIVAR COM MODAL CUSTOMIZADO
-        // =========================================================================
         async function alternarStatusMembro(userId, statusAtual, nomeMembro) {
             const novoStatus = !statusAtual;
             const acaoTexto = novoStatus ? 'REATIVAR' : 'DESATIVAR';
@@ -692,9 +871,6 @@
             carregarEquipe();
         }
 
-        // =========================================================================
-        // EXCLUIR DEFINITIVAMENTE COM MODAL CUSTOMIZADO
-        // =========================================================================
         async function excluirColaborador(userId, nomeMembro) {
             const confirmou = await exibirConfirmacaoCustomizada({
                 titulo: 'Excluir Definitivamente',
@@ -706,13 +882,9 @@
 
             if (!confirmou) return;
 
-            // 1. Tenta deletar por RPC para limpar auth.users e a tabela usuarios
             const { error: rpcError } = await supabaseClient.rpc('excluir_colaborador_equipe', { target_user_id: userId });
 
             if (rpcError) {
-                console.warn("Fallback de exclusão direta na tabela usuarios:", rpcError);
-                
-                // 2. Fallback direto caso o RPC não esteja criado no banco
                 const { error: dbError } = await supabaseClient
                     .from('usuarios')
                     .delete()
@@ -729,9 +901,6 @@
             carregarEquipe();
         }
 
-        // =========================================================================
-        // ENVIAR APENAS O LINK DE LOGIN VIA WHATSAPP
-        // =========================================================================
         function reenviarAcessoWhatsapp(userId) {
             const membro = membrosEquipeCache.find(m => m.user_id === userId);
             if (!membro) return;
