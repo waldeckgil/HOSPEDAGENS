@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Tarifas, Regras e Assinatura - Painel 360</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row text-slate-800 font-sans">
+
+    <!-- MENU LATERAL -->
+    <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl shrink-0 z-20">
+        <div class="p-4 sm:p-6">
+            <div class="flex justify-between items-center md:block mb-4 md:mb-6">
+                <div>
+                    <h1 id="nome-pousada-sidebar" class="text-lg sm:text-xl font-extrabold text-white tracking-wider truncate">Pousada</h1>
+                    <span class="text-[10px] text-slate-400 uppercase tracking-widest font-semibold block">Painel 360</span>
+                </div>
+            </div>
+            <nav id="menu-lateral-links" class="space-y-1.5 flex flex-wrap md:flex-col gap-1 md:gap-0">
+                <a href="dashboard.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition font-medium text-xs sm:text-sm">
+                    <span>🏠</span> <span>Painel Principal</span>
+                </a>
+                <a href="relatorios.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition font-medium text-xs sm:text-sm">
+                    <span>📋</span> <span>Gestão Completa</span>
+                </a>
+                <a id="link-menu-hospedes" href="hospedes.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition font-medium text-xs sm:text-sm">
+                    <span>👥</span> <span>Hóspedes</span>
+                </a>
+
+                <!-- LINK DINÂMICO DE GOVERNANÇA / LIMPEZA -->
+                <a id="link-menu-limpeza" href="limpeza.html" class="hidden flex items-center gap-2.5 px-3 sm:px-4 py-2.5 rounded-xl hover:bg-pink-900/40 text-pink-300 hover:text-pink-200 transition font-medium text-xs sm:text-sm border border-pink-500/20">
+                    <span>🧹</span> <span>Governança & Limpeza</span>
+                </a>
+
+                <a id="link-menu-config" href="configurar-pousada.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition font-medium text-xs sm:text-sm">
+                    <span>⚙️</span> <span>Configuração de Suítes</span>
+                </a>
+                <a id="link-menu-tarifas" href="tarifas.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-xs sm:text-sm shadow-md">
+                    <span>🏷️</span> <span>Tarifas & Assinatura</span>
+                </a>
+                <a id="link-menu-equipe" href="equipe.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2.5 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition font-medium text-xs sm:text-sm">
+                    <span>👤</span> <span>Minha Equipe</span>
+                </a>
+                <button type="button" onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-3 rounded-xl transition shadow text-xs sm:text-sm flex items-center justify-center gap-2 mt-3 cursor-pointer">
+                    <i class="fa-solid fa-right-from-bracket"></i> Sair
+                </button>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="flex-1 flex flex-col min-w-0">
+        
+        <!-- CABEÇALHO -->
+        <header class="bg-white border-b border-gray-200 p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                <h2 class="text-lg sm:text-xl font-bold text-gray-800">Gerenciamento de Tarifas e Regras</h2>
+                <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold w-fit">Pousada</span>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <!-- BADGE DO USUÁRIO LOGADO -->
+                <span id="badge-usuario-logado" class="text-xs font-bold text-slate-800 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-300 flex items-center gap-1.5 shadow-2xs">
+                    <i class="fa-solid fa-user text-blue-600"></i>
+                    <strong id="texto-nome-usuario">Carregando...</strong>
+                </span>
+
+                <a id="btn-voltar-dash" href="dashboard.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 border border-slate-200 shadow-xs">
+                    <i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard
+                </a>
+            </div>
+        </header>
+
+        <!-- CORPO DA PÁGINA -->
+        <main class="p-4 sm:p-6 md:p-8 flex-1 overflow-y-auto space-y-6">
+            <div class="max-w-7xl mx-auto space-y-6">
+                
+                <!-- FAIXA DE MODO SUPER ADMINISTRADOR -->
+                <div id="banner-modo-master" class="hidden p-3.5 sm:p-4 rounded-2xl shadow-md border border-slate-800 bg-slate-950 text-amber-300 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div class="flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-sm border border-amber-500/30">👑</span>
+                        <div>
+                            <h4 class="text-xs font-extrabold uppercase tracking-wider text-amber-400">Modo Super Administrador Master</h4>
+                            <p class="text-xs text-slate-300">Você está gerenciando as tarifas de: <strong id="nome-pousada-modo-master" class="text-white underline"></strong></p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="sairDoModoMaster()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3.5 py-1.5 rounded-xl font-bold text-xs transition shadow-xs flex items-center gap-1.5 shrink-0 cursor-pointer">
+                        <i class="fa-solid fa-arrow-left"></i> Voltar ao Master SaaS
+                    </button>
+                </div>
+
+                <!-- CARD NO TOPO: MINHA ASSINATURA (EXCLUSIVO PROPRIETÁRIO / MASTER) -->
+                <div id="card-minha-assinatura" class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 p-6 rounded-3xl shadow-xl border border-slate-800 text-white relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-48 h-48 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                    <div class="flex flex-col lg:flex-row justify-between gap-6 relative z-10">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="bg-amber-400 text-slate-950 px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase flex items-center gap-1 shadow">
+                                    <i class="fa-solid fa-crown"></i> Minha Assinatura
+                                </span>
+                                <span id="assinatura-badge" class="px-3 py-0.5 rounded-full text-[10px] font-extrabold border bg-slate-800 text-slate-300 border-slate-700">
+                                    Verificando...
+                                </span>
+                            </div>
+
+                            <h3 class="text-xl font-extrabold tracking-wide">
+                                Plano: <span id="assinatura-plano-nome" class="text-amber-300">Carregando...</span>
+                            </h3>
+
+                            <!-- MÉTRICAS DO PLANO -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4 text-xs">
+                                <div class="bg-white/5 border border-white/10 p-3.5 rounded-2xl backdrop-blur-xs">
+                                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Suítes Ativas</p>
+                                    <p id="assinatura-suites" class="text-xl font-black mt-1 text-white">0</p>
+                                    <p id="assinatura-limite-desc" class="text-[10px] text-slate-400 mt-1">Limite do plano: -</p>
+                                </div>
+                                <div class="bg-white/5 border border-white/10 p-3.5 rounded-2xl backdrop-blur-xs">
+                                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Valor Mensal</p>
+                                    <p id="assinatura-valor" class="text-xl font-black mt-1 text-emerald-400">R$ 0,00</p>
+                                    <p id="assinatura-valor-sub" class="text-[10px] text-slate-400 mt-1">Cálculo Automático por Suítes</p>
+                                </div>
+                                <div class="bg-white/5 border border-white/10 p-3.5 rounded-2xl backdrop-blur-xs">
+                                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Vencimento</p>
+                                    <p id="assinatura-vencimento" class="text-xl font-black mt-1 text-white">--/--/----</p>
+                                    <p id="assinatura-dias" class="text-[10px] text-slate-400 font-bold mt-1">Calculando...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="lg:w-80 flex flex-col justify-between">
+                            <div id="assinatura-msg-box" class="bg-white text-slate-900 p-4 rounded-2xl shadow-lg border-l-4 border-slate-400 transition-all">
+                                <p id="assinatura-msg-titulo" class="text-xs font-extrabold text-slate-900 leading-snug">
+                                    Consultando situação...
+                                </p>
+                                <p id="assinatura-msg-sub" class="text-[11px] text-slate-600 mt-1.5 leading-relaxed">
+                                    Aguarde enquanto verificamos os dados de acesso da pousada.
+                                </p>
+                            </div>
+                            <p class="text-[10px] text-slate-400 mt-3 text-center italic">
+                                * Para alteração de plano ou renovação via PIX, contate o administrador.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEÇÃO 1: REGRAS GERAIS, CANAIS E POLÍTICAS DA POUSADA -->
+                <div class="bg-white p-5 sm:p-8 rounded-3xl shadow-md border border-gray-200">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2 border-b border-gray-100 pb-3">
+                        <div>
+                            <h2 class="text-base sm:text-xl font-extrabold text-blue-600 flex items-center gap-2">
+                                <i class="fa-solid fa-hotel"></i> Regras da Pousada, Políticas e Canais de Contato
+                            </h2>
+                            <p class="text-xs text-gray-500 mt-0.5">Defina horários, redes sociais, políticas de estadias e mídias exibidas na vitrine.</p>
+                        </div>
+                        <button type="button" id="btn-salvar-pousada" onclick="salvarRegrasPousada()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl transition text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-floppy-disk"></i> Salvar Regras da Pousada
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-5">
+                        <div class="lg:col-span-6 space-y-4">
+                            <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-200 space-y-3">
+                                <span class="block text-xs font-extrabold text-blue-900 uppercase tracking-wider mb-2 flex items-center gap-2">
+                                    <i class="fa-solid fa-clock text-blue-600"></i> Horários e Regras de Entrada/Saída
+                                </span>
+                                
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Check-in Padrão</label>
+                                        <input type="time" id="pousada-checkin" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Check-out Padrão</label>
+                                        <input type="time" id="pousada-checkout" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Diária Mínima</label>
+                                        <input type="number" min="1" id="pousada-diaria-minima" placeholder="Ex: 1" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Criança Grátis Até</label>
+                                        <input type="number" min="0" max="18" id="pousada-idade-crianca" placeholder="Ex: 5" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm" title="Até que idade a criança não paga?">
+                                    </div>
+                                </div>
+
+                                <div class="pt-2 border-t border-gray-200">
+                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Hóspede Extra Global (R$) / noite</label>
+                                    <input type="number" step="0.01" id="pousada-valor-hospede-extra" placeholder="Ex: 50.00" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm">
+                                </div>
+
+                                <div class="pt-2 border-t border-gray-200 space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <label class="block text-[11px] font-bold text-gray-700 uppercase">Aceita Pet na Pousada?</label>
+                                        <select id="pousada-aceita-pet" onchange="alternarCampoPet()" class="p-2 border rounded-xl font-bold bg-white text-xs">
+                                            <option value="nao">Não</option>
+                                            <option value="sim">Sim</option>
+                                        </select>
+                                    </div>
+                                    <div id="container-valor-pet" class="hidden">
+                                        <label class="block text-[11px] font-bold text-amber-800 uppercase mb-1">Valor Taxa Única de Pet (R$)</label>
+                                        <input type="number" step="0.01" id="pousada-valor-pet" placeholder="Ex: 50.00" class="w-full p-2.5 border border-amber-300 rounded-xl font-bold bg-amber-50/50 text-xs sm:text-sm">
+                                    </div>
+                                </div>
+
+                                <div class="pt-3 border-t border-gray-200">
+                                    <label class="flex items-start gap-2.5 cursor-pointer bg-white p-3 rounded-xl border border-blue-200 shadow-2xs hover:bg-blue-50/40 transition">
+                                        <input type="checkbox" id="pousada-exigir-documento" class="w-4 h-4 text-blue-600 rounded mt-0.5">
+                                        <div>
+                                            <span class="text-xs font-extrabold text-blue-950 block">Exigir Documento do Hóspede na Vitrine</span>
+                                            <span class="text-[11px] text-gray-500 leading-tight block mt-0.5">
+                                                Se marcado, o hóspede será obrigado a preencher documento ao solicitar reserva na vitrine.
+                                            </span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-200 space-y-3">
+                                <span class="block text-xs font-extrabold text-blue-900 uppercase tracking-wider mb-1 flex items-center gap-2">
+                                    <i class="fa-solid fa-utensils text-blue-600"></i> Regime de Alimentação / Café
+                                </span>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Qual regime a pousada oferece?</label>
+                                    <select id="pousada-tipo-pensao" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm">
+                                        <option value="">Selecione o regime</option>
+                                        <option value="sem_cafe">🚫 Sem café</option>
+                                        <option value="cafe_completo">☕ Café da manhã Completo Incluso</option>
+                                        <option value="meia_pensao">🍽️ Meia pensão</option>
+                                        <option value="pensao_completa">🍽️ Pensão completa</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Descrição do Regime (Opcional - Exibido na vitrine)</label>
+                                    <textarea id="pousada-descricao-pensao" rows="2" placeholder="Ex: Café colonial servido das 08h às 10h com produtos artesanais..." class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-6 space-y-4">
+                            <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-200 space-y-3">
+                                <span class="block text-xs font-extrabold text-blue-900 uppercase tracking-wider mb-1 flex items-center gap-2">
+                                    <i class="fa-solid fa-share-nodes text-blue-600"></i> Canais Oficiais de Contato e Redes
+                                </span>
+                                <p class="text-[11px] text-gray-500">Exibidos na vitrine pública do hóspede para contato e credibilidade.</p>
+                                
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-emerald-800 uppercase mb-1 flex items-center gap-1">
+                                            <i class="fa-brands fa-whatsapp text-emerald-600"></i> WhatsApp de Atendimento
+                                        </label>
+                                        <input type="text" id="pousada-whatsapp-contato" placeholder="Ex: 21999999999" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1 flex items-center gap-1">
+                                            <i class="fa-solid fa-file-invoice text-gray-500"></i> CNPJ ou CPF da Pousada
+                                        </label>
+                                        <input type="text" id="pousada-cnpj-cpf" placeholder="Ex: 00.000.000/0001-00" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-pink-800 uppercase mb-1 flex items-center gap-1">
+                                            <i class="fa-brands fa-instagram text-pink-600"></i> Instagram da Pousada
+                                        </label>
+                                        <input type="text" id="pousada-instagram" placeholder="Ex: @minhapousada" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-blue-800 uppercase mb-1 flex items-center gap-1">
+                                            <i class="fa-brands fa-facebook text-blue-600"></i> Facebook da Pousada
+                                        </label>
+                                        <input type="text" id="pousada-facebook" placeholder="Ex: /minhapousada" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-200 space-y-2">
+                                <span class="block text-xs font-extrabold text-blue-900 uppercase tracking-wider flex items-center gap-2">
+                                    <i class="fa-solid fa-pen-nib text-blue-600"></i> Descrição da Pousada (Vitrine)
+                                </span>
+                                <textarea id="pousada-descricao-pousada" rows="3" placeholder="Ex: Você desfruta de um ambiente ideal para descanso e lazer da família..." class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs"></textarea>
+                            </div>
+
+                            <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-200 space-y-3">
+                                <span class="block text-xs font-extrabold text-blue-900 uppercase tracking-wider flex items-center gap-2">
+                                    <i class="fa-solid fa-images text-blue-600"></i> Galerias e Mídias
+                                </span>
+
+                                <div>
+                                    <label class="flex items-center gap-2 cursor-pointer font-bold text-xs text-gray-800 mb-1">
+                                        <input type="checkbox" id="check-exibir-fotos" class="w-4 h-4 text-blue-600 rounded" onchange="toggleSecaoFotos()">
+                                        Habilitar Fotos da Pousada na Vitrine
+                                    </label>
+                                    <div id="container-upload-fotos" class="hidden space-y-2 mt-2 bg-white p-3 rounded-xl border border-gray-200">
+                                        <div id="lista-fotos-salvas-pousada"></div>
+                                        <label class="block text-[10px] font-bold text-gray-500 uppercase">Adicionar novas fotos da pousada:</label>
+                                        <input type="file" id="input-fotos-pousada" multiple accept="image/*" class="w-full text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700" onchange="gerarCamposDescricaoFotos('pousada')">
+                                        <div id="lista-descricoes-fotos" class="space-y-1.5 mt-2"></div>
+                                    </div>
+                                </div>
+
+                                <div class="pt-2 border-t border-gray-200">
+                                    <label class="flex items-center gap-2 cursor-pointer font-bold text-xs text-gray-800 mb-1">
+                                        <input type="checkbox" id="check-exibir-atracoes" class="w-4 h-4 text-blue-600 rounded" onchange="toggleSecaoAtracoes()">
+                                        Habilitar Atrações Turísticas da Região
+                                    </label>
+                                    <div id="container-upload-atracoes" class="hidden space-y-2 mt-2 bg-white p-3 rounded-xl border border-gray-200">
+                                        <div id="lista-fotos-salvas-atracoes"></div>
+                                        <label class="block text-[10px] font-bold text-gray-500 uppercase">Adicionar novas fotos de atrações:</label>
+                                        <input type="file" id="input-fotos-atracoes" multiple accept="image/*" class="w-full text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700" onchange="gerarCamposDescricaoFotos('atracoes')">
+                                        <div id="lista-descricoes-atracoes" class="space-y-1.5 mt-2"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEÇÃO 2: MOTOR DE TARIFAS ESPECIAIS E SAZONALIDADE -->
+                <div class="bg-white p-5 sm:p-8 rounded-3xl shadow-md border border-gray-200">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2 border-b border-gray-100 pb-3">
+                        <div>
+                            <h2 id="titulo-form-regra" class="text-base sm:text-xl font-extrabold text-blue-600 flex items-center gap-2">
+                                <i class="fa-solid fa-sliders"></i> Regras de Tarifas Especiais e Sazonalidade
+                            </h2>
+                            <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Defina acréscimos percentuais (%) ou valores fixos (R$) para feriados, pacotes ou fins de semana.</p>
+                        </div>
+                        <button id="btn-cancelar-edicao" onclick="cancelarEdicao()" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1.5 px-4 rounded-xl text-xs transition cursor-pointer">
+                            Cancelar Edição
+                        </button>
+                    </div>
+                    
+                    <form id="form-tarifa-especial" class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 sm:p-6 rounded-2xl border border-gray-200 my-4">
+                        <input type="hidden" id="tarifa-editando-id" value="">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Aplicar a:</label>
+                            <select id="select-suite-tarifa" class="campo-editavel w-full p-3 border rounded-xl font-bold bg-white text-sm">
+                                <option value="">Todas as Suítes da Pousada (Geral)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Data Início</label>
+                            <input type="date" id="tarifa-inicio" required class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Data Fim</label>
+                            <input type="date" id="tarifa-fim" required class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tipo de Ajuste</label>
+                            <select id="tipo-ajuste" onchange="alternarTipoAjuste()" class="campo-editavel w-full p-3 border rounded-xl font-bold bg-white text-sm">
+                                <option value="percentual">Acréscimo Percentual (%)</option>
+                                <option value="fixo">Valor Fixo em Reais (R$)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label id="label-valor-ajuste" class="block text-xs font-bold text-gray-700 uppercase mb-1">Percentual a mais (%)</label>
+                            <input type="number" step="0.01" id="tarifa-valor" placeholder="Ex: 20" required class="campo-editavel w-full p-3 border rounded-xl font-bold bg-white text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Descrição / Motivo</label>
+                            <input type="text" id="tarifa-descricao" placeholder="Ex: Fim de Semana / Alta Temporada" required class="campo-editavel w-full p-3 border rounded-xl font-medium bg-white text-sm">
+                        </div>
+                        <div class="md:col-span-3 bg-white p-4 rounded-xl border border-gray-200">
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Dias da semana aplicáveis (Opcional - se vazio aplica a todos):</label>
+                            <div class="flex flex-wrap gap-4 text-xs sm:text-sm font-medium text-gray-700">
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="0" class="w-4 h-4 text-blue-600 rounded"> Domingo</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="1" class="w-4 h-4 text-blue-600 rounded"> Segunda</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="2" class="w-4 h-4 text-blue-600 rounded"> Terça</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="3" class="w-4 h-4 text-blue-600 rounded"> Quarta</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="4" class="w-4 h-4 text-blue-600 rounded"> Quinta</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="5" class="w-4 h-4 text-blue-600 rounded"> Sexta</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="dias_semana" value="6" class="w-4 h-4 text-blue-600 rounded"> Sábado</label>
+                            </div>
+                        </div>
+                        <div class="md:col-span-3 flex justify-end">
+                            <button type="submit" id="btn-submit-regra" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition text-sm shadow-md cursor-pointer">
+                                + Salvar Regra de Tarifa Especial
+                            </button>
+                        </div>
+                    </form>
+
+                    <h3 class="font-extrabold text-gray-800 mb-3 text-sm uppercase tracking-wide">Regras Cadastradas Atuais</h3>
+                    <div id="lista-tarifas-especiais" class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[600px]">
+                            <thead>
+                                <tr class="border-b text-xs text-gray-500 uppercase bg-gray-50">
+                                    <th class="p-3">Descrição</th>
+                                    <th class="p-3">Aplicável a</th>
+                                    <th class="p-3">Período</th>
+                                    <th class="p-3">Regra</th>
+                                    <th class="p-3 text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-tarifas-corpo" class="text-sm divide-y text-gray-700">
+                                <tr><td colspan="5" class="p-4 text-center text-gray-500">Carregando tarifas especiais...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast-notificacao" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+        <div id="toast-content" class="bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
+            <span id="toast-icone" class="text-xl">✨</span>
+            <div>
+                <h4 id="toast-titulo" class="font-bold text-sm">Sucesso</h4>
+                <p id="toast-mensagem" class="text-xs text-gray-300">Alterações salvas com sucesso!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EXCLUSÃO -->
+    <div id="modal-confirmacao" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-8 rounded-3xl max-w-md w-full shadow-2xl space-y-6 text-center">
+            <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto text-xl font-bold">⚠️</div>
+            <div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Excluir Regra</h3>
+                <p id="modal-texto-exclusao" class="text-sm text-gray-600">Deseja realmente remover esta regra?</p>
+            </div>
+            <div class="flex justify-center gap-3 pt-2">
+                <button type="button" onclick="fecharModalExclusao()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-5 py-2.5 rounded-xl text-sm cursor-pointer">Cancelar</button>
+                <button type="button" id="btn-confirmar-exclusao" class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow-md cursor-pointer">Sim, Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
+        const EMAIL_MASTER_ADMIN = 'waldeckgil@gmail.com';
+
+        const paramsUrl = new URLSearchParams(window.location.search);
+        const pousadaIdUrl = paramsUrl.get('pousada_id');
+        const temSessaoMaster = localStorage.getItem('supabase_master_admin_session');
+
+        let supabaseClient;
+        if (pousadaIdUrl && temSessaoMaster) {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+                auth: { storageKey: 'supabase_master_admin_session' }
+            });
+        } else {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
+
+        let usuarioIdAtual = null;
+        let cargoUsuarioAtual = 'dono';
+        let permissoesUsuarioAtual = {};
+        let pousadaCache = null;
+        let suitesCache = [];
+        let tarifasCache = [];
+        let idParaExcluir = null;
+        let nomeUsuarioLogadoAtual = '';
+
+        function mostrarToast(mensagem, tipo = 'sucesso') {
+            const toast = document.getElementById('toast-notificacao');
+            const toastMsg = document.getElementById('toast-mensagem');
+            const toastIcone = document.getElementById('toast-icone');
+            const toastContent = document.getElementById('toast-content');
+
+            toastMsg.innerText = mensagem;
+            if (tipo === 'sucesso') {
+                toastContent.className = "bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800";
+                toastIcone.innerText = "✨";
+            } else {
+                toastContent.className = "bg-red-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-red-800";
+                toastIcone.innerText = "🚨";
+            }
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => { toast.classList.add('translate-y-24', 'opacity-0'); }, 3000);
+        }
+
+        function temPermissao(chave) {
+            if (cargoUsuarioAtual === 'dono') return true;
+            if (permissoesUsuarioAtual && permissoesUsuarioAtual[chave] !== undefined) {
+                return permissoesUsuarioAtual[chave] === true;
+            }
+            return false;
+        }
+
+        // =========================================================================
+        // PROTEÇÃO DA PÁGINA (RBAC + PRIVILÉGIOS GRANULARES)
+        // =========================================================================
+        async function protegerPagina() {
+            try {
+                const { data: { session }, error } = await supabaseClient.auth.getSession();
+                if (error || !session) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                const emailLogado = (session.user.email || '').toLowerCase();
+                const isMaster = (emailLogado === EMAIL_MASTER_ADMIN.toLowerCase());
+                const params = new URLSearchParams(window.location.search);
+                const pousadaIdParam = params.get('pousada_id');
+
+                // 1. MODO MASTER
+                if (isMaster) {
+                    const pousadaAlvoMaster = pousadaIdParam || sessionStorage.getItem('master_pousada_ativa');
+                    if (pousadaAlvoMaster) {
+                        sessionStorage.setItem('master_pousada_ativa', pousadaAlvoMaster);
+                        usuarioIdAtual = pousadaAlvoMaster;
+                        cargoUsuarioAtual = 'dono';
+                        permissoesUsuarioAtual = { configuracoes: true, financeiro: true, hospedes: true, reservas: true, limpeza: true };
+
+                        document.getElementById('banner-modo-master')?.classList.remove('hidden');
+
+                        document.querySelectorAll('aside nav a, header a, a#btn-voltar-dash').forEach(link => {
+                            const href = link.getAttribute('href');
+                            if (href && href !== '#' && !href.startsWith('http') && !href.includes('admin-master.html')) {
+                                const limpo = href.split('?')[0];
+                                link.setAttribute('href', `${limpo}?pousada_id=${pousadaAlvoMaster}`);
+                            }
+                        });
+
+                        const elNomeUsuario = document.getElementById('texto-nome-usuario');
+                        if (elNomeUsuario) elNomeUsuario.innerText = "Administrador Master";
+                    }
+                }
+
+                // 2. MODO COMUM (USUÁRIO DA POUSADA)
+                if (!usuarioIdAtual) {
+                    const { data: usuarioPerfil } = await supabaseClient
+                        .from('usuarios')
+                        .select('pousada_id, cargo, ativo, nome_completo, permissoes')
+                        .eq('user_id', session.user.id)
+                        .maybeSingle();
+
+                    if (usuarioPerfil && usuarioPerfil.ativo === false) {
+                        await supabaseClient.auth.signOut();
+                        alert("Seu acesso foi desativado pelo gestor da pousada.");
+                        window.location.href = 'index.html';
+                        return;
+                    }
+
+                    cargoUsuarioAtual = usuarioPerfil?.cargo || 'dono';
+                    permissoesUsuarioAtual = usuarioPerfil?.permissoes || {};
+                    usuarioIdAtual = usuarioPerfil?.pousada_id || session.user.id;
+
+                    nomeUsuarioLogadoAtual = usuarioPerfil?.nome_completo || session.user.user_metadata?.nome_completo || session.user.user_metadata?.nome || (session.user.email ? session.user.email.split('@')[0] : 'Gestor');
+                    const elNomeUsuario = document.getElementById('texto-nome-usuario');
+                    if (elNomeUsuario) elNomeUsuario.innerText = nomeUsuarioLogadoAtual;
+
+                    // 🚨 TRAVA DE SEGURANÇA: Se não for dono e não tiver o privilégio 'configuracoes'
+                    if (cargoUsuarioAtual !== 'dono' && !temPermissao('configuracoes')) {
+                        alert("Acesso restrito: você não possui privilégio para gerenciar tarifas e regras da pousada.");
+                        if (cargoUsuarioAtual === 'limpeza') {
+                            window.location.href = 'limpeza.html';
+                        } else {
+                            window.location.href = 'dashboard.html';
+                        }
+                        return;
+                    }
+
+                    // Se for colaborador com permissão de configurações (mas NÃO é o Dono):
+                    if (cargoUsuarioAtual !== 'dono') {
+                        // Oculta card de assinatura (privacidade financeira da empresa)
+                        document.getElementById('card-minha-assinatura')?.remove();
+
+                        // Ajusta links do menu
+                        if (!temPermissao('hospedes')) document.getElementById('link-menu-hospedes')?.remove();
+                        if (temPermissao('limpeza')) {
+                            document.getElementById('link-menu-limpeza')?.classList.remove('hidden');
+                        } else {
+                            document.getElementById('link-menu-limpeza')?.remove();
+                        }
+                        document.getElementById('link-menu-equipe')?.remove();
+                        document.getElementById('banner-modo-master')?.remove();
+                    }
+                }
+
+                // 3. Busca a pousada ativa
+                const { data: pousada } = await supabaseClient
+                    .from('pousadas')
+                    .select('*')
+                    .eq('id', usuarioIdAtual)
+                    .maybeSingle();
+
+                pousadaCache = pousada || {};
+                const nomePousada = pousadaCache.nome || "Pousada";
+
+                document.getElementById('titulo-pousada').innerText = nomePousada;
+                document.getElementById('nome-pousada-sidebar').innerText = nomePousada;
+                const elModoMaster = document.getElementById('nome-pousada-modo-master');
+                if (elModoMaster) elModoMaster.innerText = nomePousada;
+
+                // Só atualiza métricas de assinatura se o card estiver no DOM (Dono/Master)
+                if (document.getElementById('card-minha-assinatura')) {
+                    await atualizarCardAssinatura(pousadaCache);
+                }
+
+                // Preenche as regras da pousada
+                if (pousadaCache) {
+                    document.getElementById('pousada-checkin').value = pousadaCache.horario_checkin || '13:00';
+                    document.getElementById('pousada-checkout').value = pousadaCache.horario_checkout || '14:00';
+                    document.getElementById('pousada-diaria-minima').value = pousadaCache.diaria_minima || '2';
+                    document.getElementById('pousada-idade-crianca').value = pousadaCache.idade_limite_crianca || '5';
+                    
+                    const aceitaPetVal = pousadaCache.aceita_pet ? 'sim' : 'nao';
+                    document.getElementById('pousada-aceita-pet').value = aceitaPetVal;
+                    alternarCampoPet();
+                    
+                    if (pousadaCache.aceita_pet) {
+                        document.getElementById('pousada-valor-pet').value = pousadaCache.valor_pet || '40';
+                    }
+                    document.getElementById('pousada-valor-hospede-extra').value = pousadaCache.valor_hospede_extra || '50';
+
+                    document.getElementById('pousada-whatsapp-contato').value = pousadaCache.whatsapp_contato || '';
+                    document.getElementById('pousada-cnpj-cpf').value = pousadaCache.cnpj_cpf || '';
+                    document.getElementById('pousada-instagram').value = pousadaCache.instagram || '';
+                    document.getElementById('pousada-facebook').value = pousadaCache.facebook || '';
+                    document.getElementById('pousada-exigir-documento').checked = pousadaCache.exigir_documento === true || pousadaCache.exigir_documento === 'true';
+
+                    document.getElementById('pousada-tipo-pensao').value = pousadaCache.tipo_pensao || '';
+                    document.getElementById('pousada-descricao-pensao').value = pousadaCache.descricao_pensao || '';
+                    document.getElementById('pousada-descricao-pousada').value = pousadaCache.descricao_pousada || '';
+
+                    document.getElementById('check-exibir-fotos').checked = pousadaCache.exibir_fotos_pousada || false;
+                    toggleSecaoFotos();
+                    renderizarFotosSalvas('pousada', pousadaCache.fotos_pousada);
+
+                    document.getElementById('check-exibir-atracoes').checked = pousadaCache.exibir_atracoes || false;
+                    toggleSecaoAtracoes();
+                    renderizarFotosSalvas('atracoes', pousadaCache.atracoes_turisticas);
+                }
+
+                await carregarSuitesETarifas();
+
+            } catch (err) {
+                console.error("Erro na inicialização:", err);
+            }
+        }
+
+        function sairDoModoMaster() {
+            sessionStorage.removeItem('master_pousada_ativa');
+            sessionStorage.removeItem('master_pousada_nome');
+            window.location.href = 'admin-master.html';
+        }
+
+        async function atualizarCardAssinatura(pousada) {
+            const { data: suites } = await supabaseClient
+                .from('suites')
+                .select('id, ativa')
+                .eq('pousada_id', usuarioIdAtual);
+
+            const totalAtivas = suites ? suites.filter(s => s.ativa === true).length : 0;
+            const elTotalSuites = document.getElementById('assinatura-suites');
+            if (elTotalSuites) elTotalSuites.innerText = totalAtivas;
+
+            let faixaEncontrada = null;
+            try {
+                const { data: faixas } = await supabaseClient.from('config_faixas_preco').select('*').order('min_suites');
+                if (faixas && faixas.length > 0) {
+                    for (let f of faixas) {
+                        const min = Number(f.min_suites);
+                        const max = f.max_suites !== null && f.max_suites !== '' ? Number(f.max_suites) : null;
+                        if (totalAtivas >= min && (max === null || totalAtivas <= max)) {
+                            faixaEncontrada = f;
+                            break;
+                        }
+                    }
+                    if (!faixaEncontrada) faixaEncontrada = faixas[faixas.length - 1];
+                }
+            } catch(e) {}
+
+            let diasAviso = 5;
+            try {
+                const { data: config } = await supabaseClient.from('config_sistema').select('dias_aviso_vencimento').eq('id', 1).maybeSingle();
+                if (config && config.dias_aviso_vencimento) diasAviso = config.dias_aviso_vencimento;
+            } catch(e) {}
+
+            const ehPersonalizado = (pousada.plano_valor !== null && pousada.plano_valor !== undefined && pousada.plano_valor !== '');
+            const valorFinal = ehPersonalizado 
+                ? Number(pousada.plano_valor) 
+                : (faixaEncontrada ? Number(faixaEncontrada.valor_mensal) : 149.90);
+
+            const elValor = document.getElementById('assinatura-valor');
+            if (elValor) elValor.innerText = 'R$ ' + valorFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            
+            const subValorEl = document.getElementById('assinatura-valor-sub');
+            if (subValorEl) {
+                subValorEl.innerText = ehPersonalizado 
+                    ? "Definido pelo Admin Master (Fixo)" 
+                    : "Cálculo Automático por Suítes";
+            }
+
+            const planoNomeEl = document.getElementById('assinatura-plano-nome');
+            if (planoNomeEl) {
+                planoNomeEl.innerText = ehPersonalizado 
+                    ? "Personalizado (Valor Fixo)" 
+                    : (faixaEncontrada ? faixaEncontrada.descricao : "Até 10 suítes");
+            }
+            
+            const elLimiteDesc = document.getElementById('assinatura-limite-desc');
+            if (elLimiteDesc) {
+                if (faixaEncontrada && faixaEncontrada.max_suites) {
+                    elLimiteDesc.innerText = `Limite do plano: ${faixaEncontrada.max_suites}`;
+                } else {
+                    elLimiteDesc.innerText = 'Limite do plano: Sem limite (∞)';
+                }
+            }
+
+            const dataVencStr = pousada.data_vencimento || '2026-09-02';
+            const badge = document.getElementById('assinatura-badge');
+            const vencimento = document.getElementById('assinatura-vencimento');
+            const dias = document.getElementById('assinatura-dias');
+            const msgBox = document.getElementById('assinatura-msg-box');
+            const msgTitulo = document.getElementById('assinatura-msg-titulo');
+            const msgSub = document.getElementById('assinatura-msg-sub');
+
+            if (!badge || !vencimento || !dias || !msgBox) return;
+
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+
+            const dVenc = new Date(dataVencStr + 'T12:00:00');
+            vencimento.innerText = dVenc.toLocaleDateString('pt-BR');
+            const diffDias = Math.ceil((dVenc - hoje) / (1000 * 60 * 60 * 24));
+
+            if (pousada.status === 'blocked' || diffDias < 0) {
+                badge.className = 'px-3 py-0.5 rounded-full text-[10px] font-extrabold border bg-red-500/20 text-red-300 border-red-500/30';
+                badge.innerText = pousada.status === 'blocked' ? 'BLOQUEADA' : 'VENCIDA';
+                
+                dias.innerText = diffDias < 0 ? `Vencido há ${Math.abs(diffDias)} dia(s)` : 'Acesso suspenso';
+                dias.className = 'text-[10px] text-red-400 font-extrabold mt-1';
+
+                msgBox.className = 'bg-red-50 text-red-950 p-4 rounded-2xl shadow-lg border-l-4 border-red-500';
+                msgTitulo.innerText = 'Plano Suspenso por Falta de Pagamento';
+                msgSub.innerText = 'Seu painel está em modo de aviso. Para voltar a aprovar reservas e atualizar regras, regularize sua assinatura com o administrador.';
+
+            } else if (diffDias <= diasAviso) {
+                badge.className = 'px-3 py-0.5 rounded-full text-[10px] font-extrabold border bg-amber-500/20 text-amber-300 border-amber-500/30';
+                badge.innerText = 'VENCIMENTO PRÓXIMO';
+                
+                dias.innerText = `Faltam ${diffDias} dia(s) para vencer!`;
+                dias.className = 'text-[10px] text-amber-300 font-bold mt-1 animate-pulse';
+
+                msgBox.className = 'bg-amber-50 text-amber-950 p-4 rounded-2xl shadow-lg border-l-4 border-amber-500';
+                msgTitulo.innerText = `Lembrete: Seu plano vence em ${diffDias} dias!`;
+                msgSub.innerText = 'Envie o comprovante do PIX ao administrador para evitar a interrupção da aprovação de reservas.';
+
+            } else {
+                badge.className = 'px-3 py-0.5 rounded-full text-[10px] font-extrabold border bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+                badge.innerText = 'ATIVA - Em dia';
+                
+                dias.innerText = `Faltam ${diffDias} dias`;
+                dias.className = 'text-[10px] text-emerald-300 font-bold mt-1';
+
+                msgBox.className = 'bg-white text-slate-900 p-4 rounded-2xl shadow-lg border-l-4 border-emerald-500';
+                msgTitulo.innerText = 'Parabéns, sua pousada está em dia!';
+                msgSub.innerText = 'Seu acesso para aprovar reservas, cadastrar suítes e criar tarifas está 100% liberado.';
+            }
+        }
+
+        function alternarTipoAjuste() {
+            const tipo = document.getElementById('tipo-ajuste').value;
+            const label = document.getElementById('label-valor-ajuste');
+            const input = document.getElementById('tarifa-valor');
+            if (tipo === 'percentual') {
+                label.innerText = "Percentual a mais (%)";
+                input.placeholder = "Ex: 20";
+            } else {
+                label.innerText = "Valor Fixo da Diária (R$)";
+                input.placeholder = "Ex: 250.00";
+            }
+        }
+
+        function alternarCampoPet() {
+            const aceitaPet = document.getElementById('pousada-aceita-pet').value;
+            const containerPet = document.getElementById('container-valor-pet');
+            if (aceitaPet === 'sim') {
+                containerPet.classList.remove('hidden');
+            } else {
+                containerPet.classList.add('hidden');
+                document.getElementById('pousada-valor-pet').value = '';
+            }
+        }
+
+        function toggleSecaoFotos() {
+            const ativo = document.getElementById('check-exibir-fotos').checked;
+            document.getElementById('container-upload-fotos').classList.toggle('hidden', !ativo);
+        }
+
+        function toggleSecaoAtracoes() {
+            const ativo = document.getElementById('check-exibir-atracoes').checked;
+            document.getElementById('container-upload-atracoes').classList.toggle('hidden', !ativo);
+        }
+
+        function gerarCamposDescricaoFotos(tipo) {
+            const inputId = tipo === 'pousada' ? 'input-fotos-pousada' : 'input-fotos-atracoes';
+            const containerId = tipo === 'pousada' ? 'lista-descricoes-fotos' : 'lista-descricoes-atracoes';
+            const inputFiles = document.getElementById(inputId);
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            if (inputFiles.files.length > 0) {
+                Array.from(inputFiles.files).forEach((file, index) => {
+                    const divItem = document.createElement('div');
+                    divItem.className = 'flex items-center gap-2 bg-gray-50 p-2 rounded-lg border border-gray-200';
+                    
+                    const nomePousadaAtual = document.getElementById('titulo-pousada').innerText || "Pousada";
+                    const sugestaoPadrao = tipo === 'pousada' ? `Veja as fotos da nossa pousada - ${nomePousadaAtual}` : `Atração Turística: ${file.name.split('.')[0]}`;
+
+                    divItem.innerHTML = `
+                        <span class="text-[10px] font-bold text-blue-600 truncate w-1/3">📷 ${file.name}</span>
+                        <input type="text" value="${sugestaoPadrao}" data-index="${index}" placeholder="Nome do local / Legenda" 
+                               class="input-desc-${tipo} w-2/3 p-1.5 text-xs border rounded bg-white focus:outline-none focus:border-blue-500" required>
+                    `;
+                    container.appendChild(divItem);
+                });
+            }
+        }
+
+        function renderizarFotosSalvas(tipo, fotosJson) {
+            const containerId = tipo === 'pousada' ? 'lista-fotos-salvas-pousada' : 'lista-fotos-salvas-atracoes';
+            const targetEl = document.getElementById(containerId);
+            if (!targetEl) return;
+
+            let listaFotos = [];
+            try {
+                listaFotos = typeof fotosJson === 'string' ? JSON.parse(fotosJson) : (fotosJson || []);
+            } catch (e) {
+                listaFotos = [];
+            }
+
+            if (listaFotos.length === 0) {
+                targetEl.innerHTML = '';
+                targetEl.dataset.fotosSalvas = JSON.stringify([]);
+                return;
+            }
+
+            let html = `<div class="mb-3 p-2.5 bg-blue-50 rounded-xl border border-blue-100">
+                <span class="block text-[10px] font-bold text-blue-700 uppercase mb-2">Fotos salvas no banco (${listaFotos.length}):</span>
+                <div class="space-y-1.5">`;
+
+            listaFotos.forEach((foto, idx) => {
+                html += `
+                    <div class="flex items-center justify-between gap-2 bg-white p-2 rounded-lg border border-blue-200 text-xs">
+                        <a href="${foto.url}" target="_blank" class="text-blue-600 hover:underline truncate flex-1 font-medium" title="Visualizar imagem">
+                            👁️ ${foto.legenda || 'Foto ' + (idx + 1)}
+                        </a>
+                        <button type="button" onclick="removerFotoSalva('${tipo}', ${idx})" class="text-red-600 hover:text-red-800 font-bold px-2 py-0.5 text-xs bg-red-50 rounded border border-red-100 cursor-pointer">Remover</button>
+                    </div>`;
+            });
+
+            html += `</div></div>`;
+            targetEl.innerHTML = html;
+            targetEl.dataset.fotosSalvas = JSON.stringify(listaFotos);
+        }
+
+        function removerFotoSalva(tipo, index) {
+            const containerId = tipo === 'pousada' ? 'lista-fotos-salvas-pousada' : 'lista-fotos-salvas-atracoes';
+            const container = document.getElementById(containerId);
+            if (!container || !container.dataset.fotosSalvas) return;
+
+            try {
+                let listaFotos = JSON.parse(container.dataset.fotosSalvas);
+                listaFotos.splice(index, 1);
+                renderizarFotosSalvas(tipo, listaFotos);
+            } catch (e) {}
+        }
+
+        async function salvarRegrasPousada() {
+            const nomeAtualPousada = document.getElementById('titulo-pousada').innerText || "Pousada";
+
+            let fotosPousadaArray = [];
+            try {
+                const containerPousada = document.getElementById('lista-fotos-salvas-pousada');
+                if (containerPousada && containerPousada.dataset.fotosSalvas) {
+                    fotosPousadaArray = JSON.parse(containerPousada.dataset.fotosSalvas);
+                }
+            } catch (e) {}
+
+            const inputFotos = document.getElementById('input-fotos-pousada');
+            if (inputFotos && inputFotos.files && inputFotos.files.length > 0) {
+                const inputsDesc = document.querySelectorAll('.input-desc-pousada');
+                for (let i = 0; i < inputFotos.files.length; i++) {
+                    const file = inputFotos.files[i];
+                    const legenda = inputsDesc[i] ? inputsDesc[i].value : `Foto da pousada - ${nomeAtualPousada}`;
+                    const filePath = `${usuarioIdAtual}/pousada_${Date.now()}_${i}_${file.name}`;
+                    
+                    const { error: uploadError } = await supabaseClient.storage
+                        .from('suites-fotos')
+                        .upload(filePath, file, { upsert: true });
+
+                    if (!uploadError) {
+                        const { data: { publicUrl } } = supabaseClient.storage.from('suites-fotos').getPublicUrl(filePath);
+                        fotosPousadaArray.push({ url: publicUrl, legenda: legenda });
+                    }
+                }
+            }
+
+            let fotosAtracoesArray = [];
+            try {
+                const containerAtracoes = document.getElementById('lista-fotos-salvas-atracoes');
+                if (containerAtracoes && containerAtracoes.dataset.fotosSalvas) {
+                    fotosAtracoesArray = JSON.parse(containerAtracoes.dataset.fotosSalvas);
+                }
+            } catch (e) {}
+
+            const inputAtracoes = document.getElementById('input-fotos-atracoes');
+            if (inputAtracoes && inputAtracoes.files && inputAtracoes.files.length > 0) {
+                const inputsDescAtra = document.querySelectorAll('.input-desc-atracoes');
+                for (let i = 0; i < inputAtracoes.files.length; i++) {
+                    const file = inputAtracoes.files[i];
+                    const legenda = inputsDescAtra[i] ? inputsDescAtra[i].value : `Atração Turística`;
+                    const filePath = `${usuarioIdAtual}/atracao_${Date.now()}_${i}_${file.name}`;
+                    
+                    const { error: uploadError } = await supabaseClient.storage
+                        .from('suites-fotos')
+                        .upload(filePath, file, { upsert: true });
+
+                    if (!uploadError) {
+                        const { data: { publicUrl } } = supabaseClient.storage.from('suites-fotos').getPublicUrl(filePath);
+                        fotosAtracoesArray.push({ url: publicUrl, legenda: legenda });
+                    }
+                }
+            }
+
+            const dadosAtualizacao = {
+                horario_checkin: document.getElementById('pousada-checkin').value || null,
+                horario_checkout: document.getElementById('pousada-checkout').value || null,
+                diaria_minima: Number(document.getElementById('pousada-diaria-minima').value) || null,
+                idade_limite_crianca: Number(document.getElementById('pousada-idade-crianca').value) || 0,
+                aceita_pet: document.getElementById('pousada-aceita-pet').value === 'sim',
+                valor_pet: document.getElementById('pousada-aceita-pet').value === 'sim' ? (Number(document.getElementById('pousada-valor-pet').value) || 0) : null,
+                valor_hospede_extra: Number(document.getElementById('pousada-valor-hospede-extra').value) || 0,
+                
+                whatsapp_contato: document.getElementById('pousada-whatsapp-contato').value.trim() || null,
+                cnpj_cpf: document.getElementById('pousada-cnpj-cpf').value.trim() || null,
+                instagram: document.getElementById('pousada-instagram').value.trim() || null,
+                facebook: document.getElementById('pousada-facebook').value.trim() || null,
+                exigir_documento: document.getElementById('pousada-exigir-documento').checked,
+
+                tipo_pensao: document.getElementById('pousada-tipo-pensao').value || null,
+                descricao_pensao: document.getElementById('pousada-descricao-pensao').value || null,
+                descricao_pousada: document.getElementById('pousada-descricao-pousada').value || null,
+                exibir_fotos_pousada: document.getElementById('check-exibir-fotos').checked,
+                fotos_pousada: fotosPousadaArray,
+                exibir_atracoes: document.getElementById('check-exibir-atracoes').checked,
+                atracoes_turisticas: fotosAtracoesArray
+            };
+
+            const { error } = await supabaseClient
+                .from('pousadas')
+                .update(dadosAtualizacao)
+                .eq('id', usuarioIdAtual);
+
+            if (error) { 
+                alert("Erro ao salvar regras: " + error.message); 
+                return; 
+            }
+            
+            mostrarToast("Regras da pousada salvas com sucesso!");
+            await protegerPagina();
+        }
+
+        async function carregarSuitesETarifas() {
+            let { data: suites } = await supabaseClient.from('suites').select('*').eq('pousada_id', usuarioIdAtual).order('nome');
+            suitesCache = suites || [];
+            
+            const selectSuiteTarifa = document.getElementById('select-suite-tarifa');
+            selectSuiteTarifa.innerHTML = '<option value="">Todas as Suítes da Pousada (Geral)</option>';
+
+            suitesCache.forEach(suite => {
+                selectSuiteTarifa.innerHTML += `<option value="${suite.id}">${suite.nome || 'Suíte'}</option>`;
+            });
+
+            await carregarTabelaTarifasEspeciais();
+        }
+
+        async function carregarTabelaTarifasEspeciais() {
+            const { data: tarifas, error } = await supabaseClient
+                .from('tarifas_especiais')
+                .select('*')
+                .eq('pousada_id', usuarioIdAtual)
+                .order('data_inicio', { ascending: true });
+
+            tarifasCache = tarifas || [];
+            const tbody = document.getElementById('tabela-tarifas-corpo');
+            tbody.innerHTML = '';
+
+            if (error) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-600 font-bold">Erro ao carregar tarifas: ${error.message}</td></tr>`;
+                return;
+            }
+
+            if (!tarifasCache || tarifasCache.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">Nenhuma tarifa especial cadastrada.</td></tr>`;
+                return;
+            }
+
+            const nomesDias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+            const hoje = new Date().toISOString().split('T')[0];
+
+            tarifasCache.forEach(t => {
+                let nomeSuiteObj = "Todas as Suítes (Geral)";
+                if (t.suite_id) {
+                    const found = suitesCache.find(s => s.id === t.suite_id);
+                    if (found) nomeSuiteObj = found.nome;
+                }
+
+                const dInicioStr = t.data_inicio ? t.data_inicio.split('T')[0] : '';
+                const dFimStr = t.data_fim ? t.data_fim.split('T')[0] : '';
+
+                const dInicioBR = dInicioStr.split('-').reverse().join('/');
+                const dFimBR = dFimStr.split('-').reverse().join('/');
+                let textoRegra = t.tipo_ajuste === 'percentual' ? `+${t.valor_especial}%` : `R$ ${Number(t.valor_especial).toFixed(2)}`;
+
+                if (t.dias_semana && t.dias_semana.length > 0) {
+                    const diasArray = typeof t.dias_semana === 'string' ? JSON.parse(t.dias_semana) : t.dias_semana;
+                    const diasStr = diasArray.map(d => nomesDias[d]).join(', ');
+                    textoRegra += `<br><span class="text-[11px] text-gray-500">Dias: ${diasStr}</span>`;
+                }
+
+                let statusBadge = '';
+                const ativaHoje = (hoje >= dInicioStr && hoje <= dFimStr);
+                if (ativaHoje) {
+                    statusBadge = '<br><span style="background-color: #d1fae5; color: #065f46; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block; margin-top: 4px;">🟢 Ativa Hoje</span>';
+                } else if (dInicioStr > hoje) {
+                    statusBadge = '<br><span style="background-color: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block; margin-top: 4px;">⏳ Futura</span>';
+                } else {
+                    statusBadge = '<br><span style="background-color: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block; margin-top: 4px;">🔴 Expirada</span>';
+                }
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-3 font-semibold text-gray-900">${t.descricao || 'Especial'}</td>
+                        <td class="p-3 text-gray-700 font-bold">${nomeSuiteObj}</td>
+                        <td class="p-3 text-gray-600">${dInicioBR} até ${dFimBR} ${statusBadge}</td>
+                        <td class="p-3 font-bold text-blue-600">${textoRegra}</td>
+                        <td class="p-3 text-right space-x-2">
+                            <button type="button" onclick="prepararEdicaoTarifa('${t.id}')" class="text-blue-600 hover:text-blue-800 font-bold text-xs bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 transition cursor-pointer">Editar</button>
+                            <button type="button" onclick="abrirModalExclusao('${t.id}')" class="text-red-600 hover:text-red-800 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-lg border border-red-100 transition cursor-pointer">Excluir</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function prepararEdicaoTarifa(id) {
+            const tarifa = tarifasCache.find(t => t.id === id);
+            if (!tarifa) return;
+
+            document.getElementById('tarifa-editando-id').value = tarifa.id;
+            document.getElementById('select-suite-tarifa').value = tarifa.suite_id || '';
+            
+            document.getElementById('tarifa-inicio').value = tarifa.data_inicio ? tarifa.data_inicio.split('T')[0] : '';
+            document.getElementById('tarifa-fim').value = tarifa.data_fim ? tarifa.data_fim.split('T')[0] : '';
+            
+            document.getElementById('tipo-ajuste').value = tarifa.tipo_ajuste || 'percentual';
+            alternarTipoAjuste();
+            
+            document.getElementById('tarifa-valor').value = tarifa.valor_especial;
+            document.getElementById('tarifa-descricao').value = tarifa.descricao || '';
+
+            const checkboxes = document.querySelectorAll('input[name="dias_semana"]');
+            let diasArray = [];
+            if (tarifa.dias_semana) {
+                diasArray = typeof tarifa.dias_semana === 'string' ? JSON.parse(tarifa.dias_semana) : tarifa.dias_semana;
+            }
+            
+            checkboxes.forEach(cb => {
+                cb.checked = diasArray.includes(Number(cb.value));
+            });
+
+            document.getElementById('titulo-form-regra').innerText = "Editando Regra de Tarifa";
+            document.getElementById('btn-submit-regra').innerText = "Atualizar Regra";
+            document.getElementById('btn-cancelar-edicao').classList.remove('hidden');
+            
+            document.getElementById('titulo-form-regra').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function cancelarEdicao() {
+            document.getElementById('form-tarifa-especial').reset();
+            document.getElementById('tarifa-editando-id').value = '';
+            alternarTipoAjuste();
+            document.getElementById('titulo-form-regra').innerText = "Regras de Tarifas Especiais e Sazonalidade";
+            document.getElementById('btn-submit-regra').innerText = "+ Salvar Regra de Tarifa Especial";
+            document.getElementById('btn-cancelar-edicao').classList.add('hidden');
+        }
+
+        function abrirModalExclusao(id) {
+            idParaExcluir = id;
+            document.getElementById('modal-confirmacao').classList.remove('hidden');
+        }
+
+        function fecharModalExclusao() {
+            idParaExcluir = null;
+            document.getElementById('modal-confirmacao').classList.add('hidden');
+        }
+
+        document.getElementById('btn-confirmar-exclusao').onclick = async () => {
+            if (!idParaExcluir) return;
+            const { error } = await supabaseClient.from('tarifas_especiais').delete().eq('id', idParaExcluir);
+            fecharModalExclusao();
+            if (error) { alert("Erro ao excluir: " + error.message); return; }
+            mostrarToast("Regra removida com sucesso!");
+            await carregarTabelaTarifasEspeciais();
+        };
+
+        document.getElementById('form-tarifa-especial').onsubmit = async (e) => {
+            e.preventDefault();
+
+            const idEditando = document.getElementById('tarifa-editando-id').value;
+            const checkboxes = document.querySelectorAll('input[name="dias_semana"]:checked');
+            const diasSelecionados = Array.from(checkboxes).map(cb => Number(cb.value));
+
+            const dadosRegra = {
+                pousada_id: usuarioIdAtual,
+                suite_id: document.getElementById('select-suite-tarifa').value || null,
+                data_inicio: document.getElementById('tarifa-inicio').value,
+                data_fim: document.getElementById('tarifa-fim').value,
+                tipo_ajuste: document.getElementById('tipo-ajuste').value,
+                valor_especial: Number(document.getElementById('tarifa-valor').value),
+                dias_semana: diasSelecionados.length > 0 ? diasSelecionados : null,
+                descricao: document.getElementById('tarifa-descricao').value
+            };
+
+            let error;
+            if (idEditando) {
+                const res = await supabaseClient.from('tarifas_especiais').update(dadosRegra).eq('id', idEditando);
+                error = res.error;
+            } else {
+                const res = await supabaseClient.from('tarifas_especiais').insert([dadosRegra]);
+                error = res.error;
+            }
+
+            if (error) { 
+                alert("Erro ao salvar regra: " + error.message); 
+                return; 
+            }
+
+            cancelarEdicao();
+            mostrarToast("Regra de tarifa salva com sucesso!");
+            await carregarTabelaTarifasEspeciais();
+        };
+
+        async function fazerLogout() { 
+            sessionStorage.removeItem('master_pousada_ativa');
+            sessionStorage.removeItem('master_pousada_nome');
+            try {
+                await supabaseClient.auth.signOut();
+            } finally {
+                window.location.href = 'index.html';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            await protegerPagina();
+        });
+    </script>
+</body>
+</html>
