@@ -514,26 +514,6 @@
                     `;
                 }
 
-                // =========================================================================
-                // COLUNA DOCUMENTOS: RG/CPF + "OLHINHO" (VER ANEXO) + BOTÃO DE BAIXAR
-                // =========================================================================
-                let documentoAnexoHtml = '';
-                if (r.documento_url) {
-                    const nomeDownload = `doc_${(r.hospede_nome || 'hospede').replace(/[^a-zA-Z0-9]/g, '_')}`;
-                    documentoAnexoHtml = `
-                        <div class="mt-1.5 pt-1.5 border-t border-gray-100 flex items-center gap-1.5">
-                            <a href="${r.documento_url}" target="_blank" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[10px] border border-blue-200 transition shadow-2xs" title="Visualizar Documento">
-                                <i class="fa-solid fa-eye text-blue-600"></i> Ver Anexo
-                            </a>
-                            <a href="${r.documento_url}" download="${nomeDownload}" target="_blank" class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px] border border-slate-200 transition shadow-2xs" title="Baixar Arquivo">
-                                <i class="fa-solid fa-download text-slate-600"></i> Baixar
-                            </a>
-                        </div>
-                    `;
-                } else {
-                    documentoAnexoHtml = `<div class="mt-1 text-[10px] text-gray-400 italic">Sem anexo</div>`;
-                }
-
                 let comprovanteHtml = '';
                 if (r.pdf_url) {
                     comprovanteHtml = `
@@ -564,7 +544,6 @@
                         <td class="p-3 sm:p-4 text-xs">
                             <div><strong class="text-gray-500">CPF:</strong> ${r.cpf || '-'}</div>
                             <div><strong class="text-gray-500">RG:</strong> ${r.rg || '-'}</div>
-                            ${documentoAnexoHtml}
                         </td>
                         <td class="p-3 sm:p-4 text-xs font-semibold">
                             <div class="text-blue-700 bg-blue-50 px-2 py-0.5 rounded-lg inline-block border border-blue-100">🏨 ${nomeSuite}</div>
