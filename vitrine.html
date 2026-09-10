@@ -27,10 +27,13 @@
 </head>
 <body class="bg-pousada text-white p-3 sm:p-4 md:p-8 flex flex-col min-h-screen" onload="inicializarVitrine()">
 
+    <!-- NOTIFICAÇÃO TOAST VISUAL DO SISTEMA (SUBSTITUTO DOS ALERTS DO NAVEGADOR) -->
+    <div id="toast-container" class="fixed top-5 right-5 z-[9999] flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
     <div class="max-w-5xl mx-auto w-full flex-1">
         <h1 id="titulo-pousada" class="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-2 text-center drop-shadow-lg px-2">Carregando Pousada...</h1>
         
-        <!-- BANNERS INSTITUCIONAIS LIMPOS: APENAS HORÁRIOS, PENSÃO, FOTOS E ATRAÇÕES (SEM REDES NO TOPO) -->
+        <!-- BANNERS INSTITUCIONAIS LIMPOS: HORÁRIOS, PENSÃO, FOTOS E ATRAÇÕES -->
         <div id="container-institucional" class="flex flex-wrap justify-center items-center gap-2 sm:gap-3 mb-6 text-xs sm:text-sm font-semibold">
             <!-- Injetado dinamicamente via JS -->
         </div>
@@ -86,7 +89,7 @@
             </div>
 
             <div class="mt-4">
-                <button onclick="filtrarSuitesDisponiveisPorPeriodo()" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-2.5 sm:p-3 rounded-xl font-bold transition shadow-md text-sm sm:text-base">
+                <button onclick="filtrarSuitesDisponiveisPorPeriodo()" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-2.5 sm:p-3 rounded-xl font-bold transition shadow-md text-sm sm:text-base cursor-pointer">
                     Consultar Disponibilidade
                 </button>
             </div>
@@ -195,7 +198,7 @@
         <div class="bg-white p-5 md:p-8 rounded-2xl w-full max-w-4xl text-gray-800 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
                 <h3 class="text-xl font-extrabold text-blue-600">📷 Fotos da Pousada</h3>
-                <button onclick="fecharModalGenerico('modal-fotos-pousada')" class="text-gray-500 hover:text-gray-800 font-bold text-lg px-2">✕</button>
+                <button onclick="fecharModalGenerico('modal-fotos-pousada')" class="text-gray-500 hover:text-gray-800 font-bold text-lg px-2 cursor-pointer">✕</button>
             </div>
             <div id="descricao-pousada-modal" class="hidden"></div>
             <div id="grid-fotos-pousada" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
@@ -207,19 +210,19 @@
         <div class="bg-white p-5 md:p-8 rounded-2xl w-full max-w-4xl text-gray-800 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
                 <h3 class="text-xl font-extrabold text-blue-600">🌴 Atrações da Região</h3>
-                <button onclick="fecharModalGenerico('modal-atracoes')" class="text-gray-500 hover:text-gray-800 font-bold text-lg px-2">✕</button>
+                <button onclick="fecharModalGenerico('modal-atracoes')" class="text-gray-500 hover:text-gray-800 font-bold text-lg px-2 cursor-pointer">✕</button>
             </div>
             <div id="grid-atracoes" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
         </div>
     </div>
 
-    <!-- Modal de Solicitação de Reserva -->
+    <!-- MODAL DE SOLICITAÇÃO DE RESERVA -->
     <div id="modal-reserva" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-3 sm:p-4 z-50">
         <div class="bg-white p-5 md:p-8 rounded-2xl w-full max-w-3xl text-gray-800 shadow-2xl relative max-h-[95vh] overflow-y-auto">
             <h2 class="text-xl sm:text-2xl font-bold mb-1 text-center text-blue-600">Solicitar Reserva</h2>
-            <p class="text-[11px] sm:text-xs text-center text-gray-500 mb-4">Preencha seus dados para enviar o pedido ao gestor.</p>
+            <p class="text-[11px] sm:text-xs text-center text-gray-500 mb-4">Preencha seus dados para enviar o pedido à pousada.</p>
             
-            <div id="aviso-cadastro-encontrado" class="text-xs text-center text-emerald-700 bg-emerald-50 border border-emerald-200 p-2 rounded-xl font-semibold mb-4 hidden">
+            <div id="aviso-cadastro-encontrado" class="text-xs text-center text-emerald-700 bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl font-semibold mb-4 hidden">
                 ✨ CPF encontrado! Seus dados foram preenchidos automaticamente.
             </div>
 
@@ -228,26 +231,34 @@
                 <span>⚠️</span> <span>A pousada exige o preenchimento de documento oficial de identificação (RG).</span>
             </div>
             
-            <div id="feedback-sucesso" class="hidden mb-4 p-3 sm:p-4 bg-green-100 border border-green-400 text-green-700 rounded-xl text-center font-semibold text-sm">
-                🎉 Solicitação enviada com sucesso! O gestor analisará seu pedido em breve.
+            <!-- FEEDBACK DE SUCESSO COM BOTÃO DESTACADO PARA ABRIR O WHATSAPP -->
+            <div id="feedback-sucesso" class="hidden mb-4 p-5 bg-emerald-50 border border-emerald-300 text-emerald-950 rounded-2xl text-center space-y-3">
+                <div class="text-3xl">🎉</div>
+                <h3 class="text-base sm:text-lg font-extrabold text-emerald-900">Solicitação Enviada com Sucesso!</h3>
+                <p class="text-xs text-emerald-800 leading-relaxed max-w-md mx-auto" id="texto-sucesso-detalhes">
+                    Seu pedido de pré-reserva foi registrado. Clique no botão abaixo para abrir a conversa oficial com a pousada e salvar seu comprovante com o protocolo.
+                </p>
+                <div id="btn-container-whatsapp-sucesso" class="pt-2"></div>
             </div>
 
-            <div id="feedback-erro" class="hidden mb-4 p-3 sm:p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl text-center font-semibold text-sm"></div>
+            <div id="feedback-erro" class="hidden mb-4 p-3 sm:p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl text-center font-semibold text-xs sm:text-sm"></div>
 
             <form id="form-reserva" class="space-y-4">
                 <input type="hidden" id="suite-id-reserva">
                 
+                <!-- BUSCA RÁPIDA POR CPF -->
                 <div class="bg-blue-50 p-3 sm:p-4 rounded-xl border border-blue-200">
                     <label class="block text-[11px] sm:text-xs font-extrabold text-blue-800 uppercase mb-1">Informe seu CPF para iniciar</label>
                     <div class="flex flex-col sm:flex-row gap-2">
                         <input type="text" id="cpf-hospede" placeholder="Digite apenas números" required 
                                class="w-full p-2.5 bg-white text-blue-800 font-extrabold border border-blue-300 rounded-xl outline-none text-sm">
-                        <button type="button" onclick="buscarHospedePorCpf()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs transition whitespace-nowrap shadow flex justify-center items-center gap-2">
+                        <button type="button" onclick="buscarHospedePorCpf()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs transition whitespace-nowrap shadow flex justify-center items-center gap-2 cursor-pointer">
                             <span>🔍</span> Buscar CPF
                         </button>
                     </div>
                 </div>
 
+                <!-- DADOS PESSOAIS DO HÓSPEDE -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     <div>
                         <label class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">Nome Completo</label>
@@ -269,17 +280,67 @@
                         <label id="label-documento-hospede" class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">RG (Opcional)</label>
                         <input type="text" id="rg-hospede" placeholder="Documento" class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
                     </div>
+                </div>
 
-                    <div>
-                        <label class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">CEP</label>
-                        <input type="text" id="cep-hospede" placeholder="00000-000" class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
+                <!-- BUSCA POR CEP INTELIGENTE E ENDEREÇO ESTRUTURADO -->
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-3">
+                    <span class="block text-xs font-extrabold text-blue-900 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-map-location-dot text-blue-600"></i> Endereço do Titular
+                    </span>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                        <div class="sm:col-span-1">
+                            <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1">CEP (Busca Automática)</label>
+                            <div class="relative">
+                                <input type="text" id="cep-hospede" maxlength="9" placeholder="00000-000" onblur="buscarEnderecoPorCep()" class="w-full p-2.5 bg-white text-blue-900 font-bold border border-gray-300 rounded-xl outline-none text-sm">
+                                <span id="icone-loading-cep" class="hidden absolute right-3 top-3 text-blue-600 text-xs animate-spin"><i class="fa-solid fa-spinner"></i></span>
+                            </div>
+                        </div>
+                        <div class="sm:col-span-2 text-right">
+                            <button type="button" onclick="buscarEnderecoPorCep()" class="w-full sm:w-auto bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-xs transition cursor-pointer">
+                                Preencher pelo CEP
+                            </button>
+                        </div>
                     </div>
 
-                    <div>
-                        <label class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">Endereço Completo</label>
-                        <input type="text" id="endereco-hospede" placeholder="Rua, número, bairro, cidade..." required class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="sm:col-span-2">
+                            <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1">Logradouro (Rua / Av)</label>
+                            <input type="text" id="endereco-hospede" placeholder="Rua, Avenida..." required class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1">Número</label>
+                            <input type="text" id="numero-hospede" placeholder="Ex: 120" required class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
+                        </div>
                     </div>
 
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1">Bairro</label>
+                            <input type="text" id="bairro-hospede" placeholder="Bairro" required class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1">Município (Cidade)</label>
+                            <input type="text" id="cidade-hospede" placeholder="Cidade" required class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1">UF (Estado)</label>
+                            <input type="text" id="uf-hospede" maxlength="2" placeholder="Ex: RJ" required class="w-full p-2.5 bg-white text-blue-900 font-bold uppercase border border-gray-300 rounded-xl outline-none text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CAMPO PARA ANEXAR DOCUMENTO (NÃO OBRIGATÓRIO) -->
+                <div class="bg-blue-50/60 p-3 rounded-xl border border-blue-200">
+                    <label class="block text-[11px] font-extrabold text-blue-900 uppercase mb-1 flex items-center gap-1.5">
+                        <i class="fa-solid fa-file-arrow-up text-blue-600"></i> Anexar Foto do Documento / CNH / RG (Opcional)
+                    </label>
+                    <input type="file" id="arquivo-documento-hospede" accept="image/*,.pdf" class="w-full text-xs text-gray-600 file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
+                    <p class="text-[10px] text-gray-500 mt-1">Facilita a conferência e agiliza seu check-in na chegada.</p>
+                </div>
+
+                <!-- DATAS DA RESERVA -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     <div>
                         <label class="block text-[11px] sm:text-xs font-bold text-blue-700 uppercase mb-1">📅 Data de Check-in</label>
                         <input type="date" id="checkin" required class="w-full p-2.5 bg-gray-100 text-blue-900 font-extrabold border border-gray-300 rounded-xl outline-none text-sm" readonly>
@@ -312,8 +373,10 @@
                 </div>
 
                 <div class="flex flex-col-reverse sm:flex-row gap-3 pt-3">
-                    <button type="button" onclick="fecharModal()" class="w-full sm:w-1/3 bg-gray-200 hover:bg-gray-300 text-gray-800 p-3 rounded-xl font-bold transition text-sm">Cancelar</button>
-                    <button type="submit" id="btn-enviar" class="w-full sm:w-2/3 bg-green-600 hover:bg-green-700 text-white p-3 rounded-xl font-bold transition shadow-md text-sm">Enviar Solicitação</button>
+                    <button type="button" onclick="fecharModal()" class="w-full sm:w-1/3 bg-gray-200 hover:bg-gray-300 text-gray-800 p-3 rounded-xl font-bold transition text-sm cursor-pointer">Cancelar</button>
+                    <button type="submit" id="btn-enviar" class="w-full sm:w-2/3 bg-green-600 hover:bg-green-700 text-white p-3 rounded-xl font-bold transition shadow-md text-sm flex items-center justify-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-paper-plane"></i> Enviar Solicitação
+                    </button>
                 </div>
             </form>
         </div>
@@ -331,12 +394,50 @@
         let dadosPousadaGlobal = {};
         let estadoMesCalendario = {};
 
-        const hojeISO = new Date().toISOString().split('T')[0];
+        // =========================================================================
+        // SISTEMA DE NOTIFICAÇÃO ELEGANTE (SUBSTITUTO DOS ALERTS DO NAVEGADOR)
+        // =========================================================================
+        function mostrarAviso(mensagem, tipo = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let bgCor = 'bg-slate-900 border-slate-700 text-white';
+            let icone = 'ℹ️';
+
+            if (tipo === 'erro') {
+                bgCor = 'bg-red-900 border-red-700 text-white';
+                icone = '⚠️';
+            } else if (tipo === 'sucesso') {
+                bgCor = 'bg-emerald-900 border-emerald-700 text-white';
+                icone = '✅';
+            } else if (tipo === 'aviso') {
+                bgCor = 'bg-amber-900 border-amber-700 text-white';
+                icone = '🔔';
+            }
+
+            toast.className = `${bgCor} p-3.5 rounded-2xl shadow-2xl border text-xs sm:text-sm font-semibold flex items-center gap-2.5 transition-all transform duration-300 translate-y-2 pointer-events-auto`;
+            toast.innerHTML = `<span class="text-base">${icone}</span> <span class="flex-1">${mensagem}</span>`;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', '-translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3800);
+        }
+
+        const hojeObj = new Date();
+        const hojeISO = hojeObj.toISOString().split('T')[0];
         document.getElementById('filtro-checkin').setAttribute('min', hojeISO);
         document.getElementById('filtro-checkout').setAttribute('min', hojeISO);
 
-        document.getElementById('filtro-checkin').value = '2026-09-11';
-        document.getElementById('filtro-checkout').value = '2026-09-13';
+        const checkinPadrao = new Date(hojeObj);
+        checkinPadrao.setDate(checkinPadrao.getDate() + 1);
+        const checkoutPadrao = new Date(hojeObj);
+        checkoutPadrao.setDate(checkoutPadrao.getDate() + 3);
+
+        document.getElementById('filtro-checkin').value = checkinPadrao.toISOString().split('T')[0];
+        document.getElementById('filtro-checkout').value = checkoutPadrao.toISOString().split('T')[0];
 
         async function inicializarVitrine() {
             const params = new URLSearchParams(window.location.search);
@@ -347,6 +448,7 @@
             if (error || !vitrineData) {
                 console.error("Erro ao carregar dados da vitrine:", error);
                 document.getElementById('titulo-pousada').innerText = "Erro ao carregar dados da pousada";
+                mostrarAviso("Não foi possível carregar as informações da pousada.", "erro");
                 return;
             }
 
@@ -362,6 +464,42 @@
             verificarSecaoPetFiltro();
             gerarCamposIdadeCriancas();
             filtrarSuitesDisponiveisPorPeriodo();
+        }
+
+        // =========================================================================
+        // BUSCA DE ENDEREÇO POR CEP INTELIGENTE (VIACEP)
+        // =========================================================================
+        async function buscarEnderecoPorCep() {
+            const inputCep = document.getElementById('cep-hospede');
+            const cepLimpo = (inputCep.value || '').replace(/\D/g, '');
+            const iconeLoading = document.getElementById('icone-loading-cep');
+
+            if (cepLimpo.length !== 8) {
+                return;
+            }
+
+            iconeLoading.classList.remove('hidden');
+            try {
+                const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+                const data = await response.json();
+
+                if (data.erro) {
+                    mostrarAviso("CEP não encontrado. Preencha o endereço manualmente.", "aviso");
+                    return;
+                }
+
+                document.getElementById('endereco-hospede').value = data.logradouro || '';
+                document.getElementById('bairro-hospede').value = data.bairro || '';
+                document.getElementById('cidade-hospede').value = data.localidade || '';
+                document.getElementById('uf-hospede').value = data.uf || '';
+                document.getElementById('numero-hospede').focus();
+
+                mostrarAviso("Endereço preenchido com sucesso!", "sucesso");
+            } catch (err) {
+                console.error("Erro ao buscar CEP:", err);
+            } finally {
+                iconeLoading.classList.add('hidden');
+            }
         }
         
         function verificarSecaoPetFiltro() {
@@ -382,7 +520,7 @@
         }
 
         // =========================================================================
-        // BARRA INSTITUCIONAL SUPERIOR (LIMPA: SEM REDES SOCIAIS NO TOPO)
+        // BARRA INSTITUCIONAL SUPERIOR (FOTOS, ATRAÇÕES, HORÁRIOS E PENSÃO)
         // =========================================================================
         function renderizarBarraInstitucional() {
             const container = document.getElementById('container-institucional');
@@ -399,7 +537,7 @@
 
             if (dadosPousadaGlobal.exibir_fotos_pousada && dadosPousadaGlobal.fotos_pousada && dadosPousadaGlobal.fotos_pousada.length > 0) {
                 html += `
-                    <button onclick="abrirModalFotosPousada()" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-xl shadow transition flex items-center gap-1.5 font-bold">
+                    <button onclick="abrirModalFotosPousada()" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-xl shadow transition flex items-center gap-1.5 font-bold cursor-pointer">
                         <span>📷</span> Conheça a Pousada
                     </button>
                 `;
@@ -407,7 +545,7 @@
 
             if (dadosPousadaGlobal.exibir_atracoes && dadosPousadaGlobal.atracoes_turisticas && dadosPousadaGlobal.atracoes_turisticas.length > 0) {
                 html += `
-                    <button onclick="abrirModalAtracoes()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-xl shadow transition flex items-center gap-1.5 font-bold">
+                    <button onclick="abrirModalAtracoes()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-xl shadow transition flex items-center gap-1.5 font-bold cursor-pointer">
                         <span>🌴</span> Atrações da Região
                     </button>
                 `;
@@ -517,6 +655,9 @@
             elRedes.innerHTML = htmlRedes;
         }
 
+        // =========================================================================
+        // MODAL DE FOTOS DA POUSADA (COM TEXTO SOBRE A POUSADA)
+        // =========================================================================
         function abrirModalFotosPousada() {
             const grid = document.getElementById('grid-fotos-pousada');
             const containerDescricao = document.getElementById('descricao-pousada-modal');
@@ -546,6 +687,9 @@
             document.getElementById('modal-fotos-pousada').classList.remove('hidden');
         }
 
+        // =========================================================================
+        // MODAL DE ATRAÇÕES TURÍSTICAS DA REGIÃO
+        // =========================================================================
         function abrirModalAtracoes() {
             const grid = document.getElementById('grid-atracoes');
             const atracoes = dadosPousadaGlobal.atracoes_turisticas || [];
@@ -779,19 +923,19 @@
             const container = document.getElementById('vitrine-container');
 
             if (!checkinFiltro || !checkoutFiltro) {
-                alert("Por favor, selecione as datas de Check-in e Check-out para consultar.");
+                mostrarAviso("Por favor, selecione as datas de Check-in e Check-out para consultar.", "aviso");
                 return;
             }
 
             if (checkinFiltro >= checkoutFiltro) {
-                alert("A data de check-out deve ser posterior à data de check-in.");
+                mostrarAviso("A data de check-out deve ser posterior à data de check-in.", "erro");
                 return;
             }
 
             const qtdNoitesTemp = Math.round((new Date(checkoutFiltro + 'T00:00:00') - new Date(checkinFiltro + 'T00:00:00')) / (1000 * 60 * 60 * 24));
             const diariaMinimaPousada = Number(dadosPousadaGlobal.diaria_minima) || 1;
             if (qtdNoitesTemp < diariaMinimaPousada) {
-                alert(`A pousada exige um período mínimo de ${diariaMinimaPousada} noite(s) para reservas.`);
+                mostrarAviso(`A pousada exige um período mínimo de ${diariaMinimaPousada} noite(s) para reservas.`, "aviso");
                 return;
             }
 
@@ -941,8 +1085,8 @@
                     : '<span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-green-600 bg-green-50 px-2.5 py-1 rounded-full border border-green-200">Disponível</span>';
 
                 let botaoReservaHTML = temConflitoNoPeriodo
-                    ? `<button onclick="alert('Este período selecionado possui dias ocupados. Consulte o calendário mensal abaixo para escolher um período livre.')" class="w-full bg-gray-400 text-white py-3 md:py-3.5 px-4 rounded-xl font-bold transition shadow-md text-center text-sm md:text-base cursor-not-allowed">Período Indisponível</button>`
-                    : `<button onclick="abrirModal('${suite.id}')" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 md:py-3.5 px-4 rounded-xl font-bold transition shadow-md text-center text-sm md:text-base">Solicitar Reserva</button>`;
+                    ? `<button onclick="mostrarAviso('Este período selecionado possui dias ocupados. Consulte o calendário mensal abaixo para escolher um período livre.', 'aviso')" class="w-full bg-gray-400 text-white py-3 md:py-3.5 px-4 rounded-xl font-bold transition shadow-md text-center text-sm md:text-base cursor-not-allowed">Período Indisponível</button>`
+                    : `<button onclick="abrirModal('${suite.id}')" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 md:py-3.5 px-4 rounded-xl font-bold transition shadow-md text-center text-sm md:text-base cursor-pointer">Solicitar Reserva</button>`;
 
                 let precoExibidoTopo = calc.temTarifaEspecialAplicada ? calc.primeiraDiariaAplicada : precoBase;
                 let rotuloPrecoDiaria = `R$ ${precoExibidoTopo.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
@@ -1057,7 +1201,7 @@
                                     </div>
 
                                     <div class="mb-3">
-                                        <button onclick="toggleCalendarioMensal('${suite.id}')" id="btn-toggle-cal-${suite.id}" class="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm">
+                                        <button onclick="toggleCalendarioMensal('${suite.id}')" id="btn-toggle-cal-${suite.id}" class="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm cursor-pointer">
                                             <span>📅</span> Ver Calendário Mensal de Ocupação 🔽
                                         </button>
                                         
@@ -1207,14 +1351,14 @@
             const avisoEncontrado = document.getElementById('aviso-cadastro-encontrado');
             
             if (!cpfInput) {
-                alert("Por favor, digite o CPF antes de buscar.");
+                mostrarAviso("Por favor, digite o CPF antes de buscar.", "aviso");
                 document.getElementById('cpf-hospede').focus();
                 return;
             }
 
             const { data: historico, error } = await supabaseClient
                 .from('reservas')
-                .select('hospede_nome, email, whatsapp_hospede, rg, cep, endereco')
+                .select('hospede_nome, email, whatsapp_hospede, rg, cep, endereco, numero, bairro, cidade, uf')
                 .eq('pousada_id', pousadaIdGlobal)
                 .eq('cpf', cpfInput)
                 .order('criado_em', { ascending: false })
@@ -1228,10 +1372,15 @@
                 document.getElementById('rg-hospede').value = dados.rg || '';
                 document.getElementById('cep-hospede').value = dados.cep || '';
                 document.getElementById('endereco-hospede').value = dados.endereco || '';
+                document.getElementById('numero-hospede').value = dados.numero || '';
+                document.getElementById('bairro-hospede').value = dados.bairro || '';
+                document.getElementById('cidade-hospede').value = dados.cidade || '';
+                document.getElementById('uf-hospede').value = dados.uf || '';
                 avisoEncontrado.classList.remove('hidden');
+                mostrarAviso("Cadastro encontrado! Seus dados foram preenchidos automaticamente.", "sucesso");
             } else {
                 avisoEncontrado.classList.add('hidden');
-                alert("Nenhum cadastro anterior encontrado com este CPF.");
+                mostrarAviso("Nenhum cadastro anterior encontrado com este CPF.", "info");
             }
         }
 
@@ -1312,6 +1461,9 @@
             filtrarSuitesDisponiveisPorPeriodo();
         }
 
+        // =========================================================================
+        // ENVIO DA RESERVA + UPLOAD DOCUMENTO + GERAÇÃO WHATSAPP COM CANCELAMENTO
+        // =========================================================================
         document.getElementById('form-reserva').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -1327,14 +1479,16 @@
             if (exigirDoc && !rgVal) {
                 msgErro.innerText = "Por favor, informe seu documento oficial (RG) conforme exigido pela pousada.";
                 msgErro.classList.remove('hidden');
+                mostrarAviso("Informe seu documento oficial (RG) conforme exigido pela pousada.", "erro");
                 document.getElementById('rg-hospede').focus();
                 return;
             }
 
             btnEnviar.disabled = true;
-            btnEnviar.innerText = "Enviando...";
+            btnEnviar.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Enviando...`;
 
             const suiteId = document.getElementById('suite-id-reserva').value;
+            const suiteObj = cacheSuites.find(s => s.id === suiteId) || {};
             const checkinVal = document.getElementById('checkin').value;
             const checkoutVal = document.getElementById('checkout').value;
             const qtdAdultos = parseInt(document.getElementById('filtro-adultos').value) || 2;
@@ -1349,8 +1503,7 @@
             }
             const idadesCriancasStr = idadesCriancasArr.join(', ');
 
-            const suiteData = cacheSuites.find(s => s.id === suiteId) || {};
-            const precoBase = suiteData ? (suiteData.valor_diaria || suiteData.preco || 150.00) : 150.00;
+            const precoBase = suiteObj ? (suiteObj.valor_diaria || suiteObj.preco || 150.00) : 150.00;
             const calc = await calcularValorTotalEstadiaCompleto(suiteId, checkinVal, checkoutVal, precoBase, qtdAdultos, qtdCriancas);
 
             const aceitaPetGlobal = dadosPousadaGlobal.aceita_pet === true || dadosPousadaGlobal.aceita_pet === 'true' || dadosPousadaGlobal.aceita_pet === 'Sim';
@@ -1365,16 +1518,40 @@
 
             const valorTotalFinal = calc.valorTotalGeral + valorPetTotal;
 
-            const { error: errReserva } = await supabaseClient.from('reservas').insert([{
+            // 1. UPLOAD DE DOCUMENTO (OPCIONAL)
+            let urlDocumentoAnexo = null;
+            const inputArquivo = document.getElementById('arquivo-documento-hospede');
+            if (inputArquivo && inputArquivo.files && inputArquivo.files.length > 0) {
+                const arquivo = inputArquivo.files[0];
+                const extensao = arquivo.name.split('.').pop();
+                const caminhoDoc = `${pousadaIdGlobal}/doc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${extensao}`;
+
+                const { error: errUpload } = await supabaseClient.storage
+                    .from('documentos-reservas')
+                    .upload(caminhoDoc, arquivo, { upsert: true });
+
+                if (!errUpload) {
+                    const { data: { publicUrl } } = supabaseClient.storage.from('documentos-reservas').getPublicUrl(caminhoDoc);
+                    urlDocumentoAnexo = publicUrl;
+                }
+            }
+
+            // 2. INSERÇÃO NA TABELA RESERVAS
+            const { data: novaReserva, error: errReserva } = await supabaseClient.from('reservas').insert([{
                 pousada_id: pousadaIdGlobal,
                 suite_id: suiteId,
-                hospede_nome: document.getElementById('nome-hospede').value,
-                email: document.getElementById('email-hospede').value,
-                whatsapp_hospede: document.getElementById('whatsapp-hospede').value,
-                cpf: document.getElementById('cpf-hospede').value,
+                hospede_nome: document.getElementById('nome-hospede').value.trim(),
+                email: document.getElementById('email-hospede').value.trim(),
+                whatsapp_hospede: document.getElementById('whatsapp-hospede').value.trim(),
+                cpf: document.getElementById('cpf-hospede').value.trim(),
                 rg: rgVal || null,
-                cep: document.getElementById('cep-hospede').value || null,
-                endereco: document.getElementById('endereco-hospede').value,
+                cep: document.getElementById('cep-hospede').value.trim() || null,
+                endereco: document.getElementById('endereco-hospede').value.trim(),
+                numero: document.getElementById('numero-hospede').value.trim(),
+                bairro: document.getElementById('bairro-hospede').value.trim(),
+                cidade: document.getElementById('cidade-hospede').value.trim(),
+                uf: document.getElementById('uf-hospede').value.trim().toUpperCase(),
+                documento_url: urlDocumentoAnexo,
                 checkin: checkinVal,
                 checkout: checkoutVal,
                 qtd_adultos: qtdAdultos,
@@ -1385,24 +1562,67 @@
                 valor_total: valorTotalFinal,
                 status: 'Pendente',
                 criado_em: new Date().toISOString()
-            }]);
+            }]).select();
             
             if (errReserva) {
                 btnEnviar.disabled = false;
-                btnEnviar.innerText = "Enviar Solicitação";
+                btnEnviar.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Enviar Solicitação`;
                 msgErro.innerText = "Erro ao enviar solicitação: " + errReserva.message;
                 msgErro.classList.remove('hidden');
+                mostrarAviso("Ocorreu um erro ao salvar a solicitação.", "erro");
                 return;
             }
 
-            btnEnviar.disabled = false;
-            btnEnviar.innerText = "Enviar Solicitação";
+            const reservaCriada = (novaReserva && novaReserva.length > 0) ? novaReserva[0] : {};
+            const protocoloID = reservaCriada.id ? reservaCriada.id.substring(0, 8).toUpperCase() : 'REC-' + Date.now().toString().slice(-6);
+
+            // 3. CÁLCULO DA DATA LIMITE DE CANCELAMENTO (COM BASE NO TARIFAS.HTML)
+            const diasAntecedencia = Number(dadosPousadaGlobal.dias_antecedencia_cancelamento ?? 7);
+            const [anoCk, mesCk, diaCk] = checkinVal.split('-');
+            const dataCheckinObj = new Date(Number(anoCk), Number(mesCk) - 1, Number(diaCk));
+            dataCheckinObj.setDate(dataCheckinObj.getDate() - diasAntecedencia);
+            const dataLimiteBR = dataCheckinObj.toLocaleDateString('pt-BR');
+
+            // 4. ESTRUTURAÇÃO DA MENSAGEM DO WHATSAPP
+            const nomePousada = dadosPousadaGlobal.nome || "Pousada";
+            const nomeHospede = document.getElementById('nome-hospede').value.trim();
+            const dInicioBR = checkinVal.split('-').reverse().join('/');
+            const dFimBR = checkoutVal.split('-').reverse().join('/');
+            const nomeSuite = suiteObj.nome || "Suíte";
+
+            const msgZap = 
+                `Olá *${nomeHospede}*!\n\n` +
+                `Agradecemos seu interesse na *${nomePousada}*! 🌿\n\n` +
+                `Recebemos sua solicitação de pré-reserva com sucesso:\n` +
+                `🏨 *Acomodação:* ${nomeSuite}\n` +
+                `📅 *Período:* ${dInicioBR} até ${dFimBR}\n` +
+                `👥 *Ocupantes:* ${qtdAdultos} Adulto(s)` + (qtdCriancas > 0 ? ` e ${qtdCriancas} Criança(s)` : '') + `\n` +
+                `💰 *Valor Estimado:* R$ ${valorTotalFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}\n\n` +
+                `Nossa equipe analisará seu pedido para confirmação da reserva.\n\n` +
+                `────────────────────\n` +
+                `📌 *PROTOCOLO DA RESERVA:* #${protocoloID}\n` +
+                `⚠️ *Cancelamento Gratuito:* Permitido até *${dataLimiteBR}* (${diasAntecedencia} dias antes do check-in).\n` +
+                `────────────────────`;
+
+            let zapDestino = String(dadosPousadaGlobal.whatsapp_contato || '5521964120231').replace(/\D/g, '');
+            if (zapDestino.length <= 11 && !zapDestino.startsWith('55')) zapDestino = '55' + zapDestino;
+            const urlZapEnvio = `https://wa.me/${zapDestino}?text=${encodeURIComponent(msgZap)}`;
+
+            // 5. EXIBIÇÃO DE SUCESSO E ABERTURA DO WHATSAPP
             document.getElementById('form-reserva').style.display = 'none';
             msgSucesso.classList.remove('hidden');
-            
+
+            document.getElementById('btn-container-whatsapp-sucesso').innerHTML = `
+                <a href="${urlZapEnvio}" target="_blank" class="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-6 py-3.5 rounded-2xl shadow-lg transition text-sm">
+                    <i class="fa-brands fa-whatsapp text-lg"></i> Abrir WhatsApp da Pousada e Salvar Comprovante
+                </a>
+            `;
+
+            mostrarAviso("Solicitação enviada com sucesso!", "sucesso");
+
             setTimeout(() => {
-                fecharModal();
-            }, 2500);
+                window.open(urlZapEnvio, '_blank');
+            }, 1200);
         });
     </script>
 </body>

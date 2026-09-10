@@ -163,6 +163,8 @@
 
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-5">
                         <div class="lg:col-span-6 space-y-4">
+                            
+                            <!-- HORÁRIOS E REGRAS DE ENTRADA/SAÍDA -->
                             <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-200 space-y-3">
                                 <span class="block text-xs font-extrabold text-blue-900 uppercase tracking-wider mb-2 flex items-center gap-2">
                                     <i class="fa-solid fa-clock text-blue-600"></i> Horários e Regras de Entrada/Saída
@@ -219,6 +221,42 @@
                                 </div>
                             </div>
 
+                            <!-- CARD NOVO: POLÍTICA DE CANCELAMENTO DE RESERVAS PELO HÓSPEDE -->
+                            <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-200 space-y-3">
+                                <span class="block text-xs font-extrabold text-blue-900 uppercase tracking-wider mb-2 flex items-center gap-2">
+                                    <i class="fa-solid fa-ban text-red-500"></i> Cancelamento de Reservas pelo Hóspede
+                                </span>
+                                
+                                <div class="pt-1">
+                                    <label class="flex items-start gap-2.5 cursor-pointer bg-white p-3 rounded-xl border border-blue-200 shadow-2xs hover:bg-blue-50/40 transition">
+                                        <input type="checkbox" id="pousada-permite-cancelamento" onchange="alternarCamposCancelamento()" class="w-4 h-4 text-blue-600 rounded mt-0.5">
+                                        <div>
+                                            <span class="text-xs font-extrabold text-blue-950 block">Permitir Cancelamento Online pelo Hóspede</span>
+                                            <span class="text-[11px] text-gray-500 leading-tight block mt-0.5">
+                                                Se ativado, o hóspede receberá o protocolo e poderá solicitar o cancelamento dentro do prazo estipulado.
+                                            </span>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div id="container-regras-cancelamento" class="space-y-3">
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Prazo Limite de Antecedência</label>
+                                        <div class="relative">
+                                            <input type="number" min="0" max="90" id="pousada-dias-cancelamento" placeholder="Ex: 7" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm">
+                                            <span class="absolute right-3 top-2.5 text-xs text-gray-400 font-semibold">dias antes</span>
+                                        </div>
+                                        <span class="text-[10px] text-gray-500 mt-1 block">Ex: 7 dias antes do check-in. Reservas com menos dias não poderão ser canceladas pelo hóspede.</span>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Termos da Política de Cancelamento / Reembolso</label>
+                                        <textarea id="pousada-politica-cancelamento-texto" rows="2" placeholder="Ex: Cancelamento gratuito até 7 dias antes da entrada. Após este prazo, o valor do sinal será retido..." class="w-full p-2.5 border rounded-xl font-medium bg-white text-xs"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- REGIME DE ALIMENTAÇÃO / CAFÉ -->
                             <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-200 space-y-3">
                                 <span class="block text-xs font-extrabold text-blue-900 uppercase tracking-wider mb-1 flex items-center gap-2">
                                     <i class="fa-solid fa-utensils text-blue-600"></i> Regime de Alimentação / Café
@@ -483,6 +521,15 @@
             return false;
         }
 
+        // Alterna campos visíveis de cancelamento de acordo com o checkbox
+        function alternarCamposCancelamento() {
+            const ativo = document.getElementById('pousada-permite-cancelamento').checked;
+            const container = document.getElementById('container-regras-cancelamento');
+            if (container) {
+                container.classList.toggle('hidden', !ativo);
+            }
+        }
+
         // =========================================================================
         // PROTEÇÃO DA PÁGINA (RBAC + PRIVILÉGIOS GRANULARES)
         // =========================================================================
@@ -546,7 +593,7 @@
                     const elNomeUsuario = document.getElementById('texto-nome-usuario');
                     if (elNomeUsuario) elNomeUsuario.innerText = nomeUsuarioLogadoAtual;
 
-                    // 🚨 TRAVA DE SEGURANÇA: Se não for dono e não tiver o privilégio 'configuracoes'
+                    // TRAVA DE SEGURANÇA: Se não for dono e não tiver o privilégio 'configuracoes'
                     if (cargoUsuarioAtual !== 'dono' && !temPermissao('configuracoes')) {
                         alert("Acesso restrito: você não possui privilégio para gerenciar tarifas e regras da pousada.");
                         if (cargoUsuarioAtual === 'limpeza') {
@@ -559,10 +606,7 @@
 
                     // Se for colaborador com permissão de configurações (mas NÃO é o Dono):
                     if (cargoUsuarioAtual !== 'dono') {
-                        // Oculta card de assinatura (privacidade financeira da empresa)
                         document.getElementById('card-minha-assinatura')?.remove();
-
-                        // Ajusta links do menu
                         if (!temPermissao('hospedes')) document.getElementById('link-menu-hospedes')?.remove();
                         if (temPermissao('limpeza')) {
                             document.getElementById('link-menu-limpeza')?.classList.remove('hidden');
@@ -589,7 +633,6 @@
                 const elModoMaster = document.getElementById('nome-pousada-modo-master');
                 if (elModoMaster) elModoMaster.innerText = nomePousada;
 
-                // Só atualiza métricas de assinatura se o card estiver no DOM (Dono/Master)
                 if (document.getElementById('card-minha-assinatura')) {
                     await atualizarCardAssinatura(pousadaCache);
                 }
@@ -615,6 +658,13 @@
                     document.getElementById('pousada-instagram').value = pousadaCache.instagram || '';
                     document.getElementById('pousada-facebook').value = pousadaCache.facebook || '';
                     document.getElementById('pousada-exigir-documento').checked = pousadaCache.exigir_documento === true || pousadaCache.exigir_documento === 'true';
+
+                    // CARREGA REGRAS DE CANCELAMENTO PELO HÓSPEDE
+                    const permiteCanc = pousadaCache.permite_cancelamento_hospede !== false;
+                    document.getElementById('pousada-permite-cancelamento').checked = permiteCanc;
+                    document.getElementById('pousada-dias-cancelamento').value = pousadaCache.dias_antecedencia_cancelamento ?? 7;
+                    document.getElementById('pousada-politica-cancelamento-texto').value = pousadaCache.politica_cancelamento_texto || '';
+                    alternarCamposCancelamento();
 
                     document.getElementById('pousada-tipo-pensao').value = pousadaCache.tipo_pensao || '';
                     document.getElementById('pousada-descricao-pensao').value = pousadaCache.descricao_pensao || '';
@@ -936,6 +986,11 @@
                 instagram: document.getElementById('pousada-instagram').value.trim() || null,
                 facebook: document.getElementById('pousada-facebook').value.trim() || null,
                 exigir_documento: document.getElementById('pousada-exigir-documento').checked,
+
+                // SALVANDO A POLÍTICA DE CANCELAMENTO PELO HÓSPEDE
+                permite_cancelamento_hospede: document.getElementById('pousada-permite-cancelamento').checked,
+                dias_antecedencia_cancelamento: Number(document.getElementById('pousada-dias-cancelamento').value) || 0,
+                politica_cancelamento_texto: document.getElementById('pousada-politica-cancelamento-texto').value.trim() || null,
 
                 tipo_pensao: document.getElementById('pousada-tipo-pensao').value || null,
                 descricao_pensao: document.getElementById('pousada-descricao-pensao').value || null,
