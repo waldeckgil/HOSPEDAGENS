@@ -11,7 +11,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- FontAwesome para ícones do rodapé executivo e botões -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <title>Nossas Suítes</title>
     <style>
@@ -27,16 +26,24 @@
 </head>
 <body class="bg-pousada text-white p-3 sm:p-4 md:p-8 flex flex-col min-h-screen" onload="inicializarVitrine()">
 
-    <!-- NOTIFICAÇÃO TOAST VISUAL DO SISTEMA (SUBSTITUTO DOS ALERTS DO NAVEGADOR) -->
+    <!-- NOTIFICAÇÃO TOAST VISUAL DO SISTEMA -->
     <div id="toast-container" class="fixed top-5 right-5 z-[9999] flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
 
     <div class="max-w-5xl mx-auto w-full flex-1">
-        <h1 id="titulo-pousada" class="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-2 text-center drop-shadow-lg px-2">Carregando Pousada...</h1>
         
-        <!-- BANNERS INSTITUCIONAIS LIMPOS: HORÁRIOS, PENSÃO, FOTOS E ATRAÇÕES -->
-        <div id="container-institucional" class="flex flex-wrap justify-center items-center gap-2 sm:gap-3 mb-6 text-xs sm:text-sm font-semibold">
-            <!-- Injetado dinamicamente via JS -->
+        <!-- CABEÇALHO COM TÍTULO E BOTÃO DE CONSULTAR/CANCELAR RESERVA -->
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-3 mb-2">
+            <div class="w-full sm:w-auto text-center sm:text-left"></div>
+            <h1 id="titulo-pousada" class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-center drop-shadow-lg px-2">Carregando Pousada...</h1>
+            <div class="w-full sm:w-auto text-center sm:text-right">
+                <button onclick="abrirModalConsultaReserva()" class="bg-white/20 hover:bg-white/30 text-white border border-white/40 px-4 py-2 rounded-xl text-xs font-bold transition shadow backdrop-blur-md inline-flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-receipt text-amber-300"></i> Minha Reserva / Cancelar
+                </button>
+            </div>
         </div>
+        
+        <!-- BANNERS INSTITUCIONAIS LIMPOS -->
+        <div id="container-institucional" class="flex flex-wrap justify-center items-center gap-2 sm:gap-3 mb-6 text-xs sm:text-sm font-semibold"></div>
 
         <!-- BARRA DE FILTRO PRÉVIO DE PERÍODO E OCUPANTES -->
         <div class="bg-white text-gray-800 p-4 sm:p-6 rounded-2xl shadow-xl mb-6 sm:mb-8">
@@ -96,35 +103,21 @@
             <p id="aviso-filtro" class="text-[11px] sm:text-xs text-gray-500 mt-2 sm:mt-3 italic">Selecione o período e os ocupantes desejados e veja as opções.</p>
         </div>
 
-        <!-- Container onde as suítes serão injetadas -->
-        <div id="vitrine-container" class="grid gap-4 sm:gap-6 mb-10">
-            <div class="bg-white/90 backdrop-blur-md text-gray-700 p-6 sm:p-8 rounded-2xl text-center shadow-lg">
-                <span class="text-3xl">🗓️</span>
-                <p class="font-bold text-sm sm:text-base mt-2 text-gray-800">Selecione as datas e filtros acima.</p>
-            </div>
-        </div>
+        <div id="vitrine-container" class="grid gap-4 sm:gap-6 mb-10"></div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- RODAPÉ EXECUTIVO DE 2 NÍVEIS (MODELO HOTELEIRO SÃO MORITZ)                -->
-    <!-- ========================================================================= -->
+    <!-- RODAPÉ EXECUTIVO -->
     <footer class="mt-auto w-full max-w-5xl mx-auto rounded-3xl overflow-hidden shadow-2xl border border-gray-200/40 backdrop-blur-md">
-        
-        <!-- NÍVEL 1: IDENTIFICAÇÃO, TELEFONES, ENDEREÇO, REDES DA POUSADA -->
         <div class="bg-white/95 text-gray-800 p-6 sm:p-8">
             <div class="border-b border-gray-200 pb-4 mb-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                 <div>
                     <h3 id="rodape-pousada-nome" class="text-base sm:text-xl font-extrabold uppercase tracking-wide text-gray-900">Nossa Pousada</h3>
                     <p id="rodape-pousada-cnpj" class="text-xs text-gray-500 font-semibold mt-0.5"></p>
                 </div>
-                <div class="text-amber-400 text-sm tracking-widest hidden sm:block">
-                    ★ ★ ★ ★ ☆
-                </div>
+                <div class="text-amber-400 text-sm tracking-widest hidden sm:block">★ ★ ★ ★ ☆</div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-5 text-xs">
-                
-                <!-- Coluna 1: Telefones / WhatsApp Pousada -->
                 <div class="flex items-start gap-3">
                     <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-sm flex-shrink-0 shadow-2xs">
                         <i class="fa-solid fa-phone"></i>
@@ -136,7 +129,6 @@
                     </div>
                 </div>
 
-                <!-- Coluna 2: E-mail da Pousada -->
                 <div class="flex items-start gap-3">
                     <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-sm flex-shrink-0 shadow-2xs">
                         <i class="fa-solid fa-envelope"></i>
@@ -147,7 +139,6 @@
                     </div>
                 </div>
 
-                <!-- Coluna 3: Localização Física / CEP -->
                 <div class="flex items-start gap-3">
                     <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-sm flex-shrink-0 shadow-2xs">
                         <i class="fa-solid fa-location-dot"></i>
@@ -158,18 +149,13 @@
                     </div>
                 </div>
 
-                <!-- Coluna 4: Redes Sociais da Pousada -->
                 <div class="flex flex-col items-start md:items-end justify-start space-y-2">
                     <span class="font-bold uppercase text-[10px] text-gray-400 block">Siga a Pousada</span>
-                    <div id="rodape-redes-sociais" class="flex items-center gap-2">
-                        <!-- Botões quadrados modernos injetados via JS -->
-                    </div>
+                    <div id="rodape-redes-sociais" class="flex items-center gap-2"></div>
                 </div>
-
             </div>
         </div>
 
-        <!-- NÍVEL 2: FAIXA INFERIOR DE CRÉDITOS OFICIAIS (DESENVOLVIDO POR WB PROJETOS) -->
         <div class="bg-[#8b1818] text-white px-5 py-3 text-[11px] sm:text-xs flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
             <div class="flex items-center justify-center gap-2 flex-wrap">
                 <span class="text-white/80">Desenvolvido por</span>
@@ -183,17 +169,15 @@
                 <span>Selo de Segurança & Proteção de Dados</span>
             </div>
         </div>
-
     </footer>
 
-    <!-- BOTÃO FLUTUANTE DE WHATSAPP DA POUSADA (CANTO INFERIOR DIREITO) -->
     <div id="btn-flutuante-whatsapp" class="hidden fixed bottom-6 right-6 z-40">
         <a id="link-flutuante-whatsapp" href="#" target="_blank" class="w-14 h-14 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center text-3xl shadow-2xl hover:scale-110 transition duration-300" title="Fale conosco no WhatsApp">
             <i class="fa-brands fa-whatsapp"></i>
         </a>
     </div>
 
-    <!-- MODAL DE GALERIA DE FOTOS DA POUSADA -->
+    <!-- MODAL DE FOTOS DA POUSADA -->
     <div id="modal-fotos-pousada" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-3 sm:p-4 z-50">
         <div class="bg-white p-5 md:p-8 rounded-2xl w-full max-w-4xl text-gray-800 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
@@ -216,29 +200,36 @@
         </div>
     </div>
 
-    <!-- MODAL DE SOLICITAÇÃO DE RESERVA -->
+    <!-- MODAL DE SOLICITAÇÃO DE RESERVA (COM CORREÇÃO PARA NÃO TRAVAR A TELA) -->
     <div id="modal-reserva" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-3 sm:p-4 z-50">
         <div class="bg-white p-5 md:p-8 rounded-2xl w-full max-w-3xl text-gray-800 shadow-2xl relative max-h-[95vh] overflow-y-auto">
-            <h2 class="text-xl sm:text-2xl font-bold mb-1 text-center text-blue-600">Solicitar Reserva</h2>
-            <p class="text-[11px] sm:text-xs text-center text-gray-500 mb-4">Preencha seus dados para enviar o pedido à pousada.</p>
+            
+            <!-- BOTÃO DE FECHAR FIXO NO TOPO DIREITO (NUNCA MAIS DEIXA A TELA TRAVADA) -->
+            <button type="button" onclick="fecharModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 font-bold text-2xl p-1 z-10 cursor-pointer" title="Fechar janela">
+                ✕
+            </button>
+
+            <div id="cabecalho-modal-reserva">
+                <h2 class="text-xl sm:text-2xl font-bold mb-1 text-center text-blue-600">Solicitar Reserva</h2>
+                <p class="text-[11px] sm:text-xs text-center text-gray-500 mb-4">Preencha seus dados para enviar o pedido à pousada.</p>
+            </div>
             
             <div id="aviso-cadastro-encontrado" class="text-xs text-center text-emerald-700 bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl font-semibold mb-4 hidden">
                 ✨ CPF encontrado! Seus dados foram preenchidos automaticamente.
             </div>
 
-            <!-- AVISO DE DOCUMENTO OBRIGATÓRIO (QUANDO EXIGIDO PELA POUSADA) -->
             <div id="aviso-documento-obrigatorio" class="hidden text-xs text-center text-amber-900 bg-amber-50 border border-amber-200 p-2.5 rounded-xl font-semibold mb-4 flex items-center justify-center gap-2">
                 <span>⚠️</span> <span>A pousada exige o preenchimento de documento oficial de identificação (RG).</span>
             </div>
             
-            <!-- FEEDBACK DE SUCESSO COM BOTÃO DESTACADO PARA ABRIR O WHATSAPP -->
+            <!-- FEEDBACK DE SUCESSO LIMPO COM BOTÃO DE FECHAR/CONCLUIR -->
             <div id="feedback-sucesso" class="hidden mb-4 p-5 bg-emerald-50 border border-emerald-300 text-emerald-950 rounded-2xl text-center space-y-3">
                 <div class="text-3xl">🎉</div>
                 <h3 class="text-base sm:text-lg font-extrabold text-emerald-900">Solicitação Enviada com Sucesso!</h3>
                 <p class="text-xs text-emerald-800 leading-relaxed max-w-md mx-auto" id="texto-sucesso-detalhes">
                     Seu pedido de pré-reserva foi registrado. Clique no botão abaixo para abrir a conversa oficial com a pousada e salvar seu comprovante com o protocolo.
                 </p>
-                <div id="btn-container-whatsapp-sucesso" class="pt-2"></div>
+                <div id="btn-container-whatsapp-sucesso" class="pt-2 flex flex-col sm:flex-row justify-center gap-2"></div>
             </div>
 
             <div id="feedback-erro" class="hidden mb-4 p-3 sm:p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl text-center font-semibold text-xs sm:text-sm"></div>
@@ -275,7 +266,6 @@
                         <input type="text" id="whatsapp-hospede" placeholder="(DDD+Número)" required class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
                     </div>
 
-                    <!-- CAMPO DE DOCUMENTO CONDICIONAL -->
                     <div>
                         <label id="label-documento-hospede" class="block text-[11px] sm:text-xs font-bold text-gray-600 uppercase mb-1">RG (Opcional)</label>
                         <input type="text" id="rg-hospede" placeholder="Documento" class="w-full p-2.5 bg-white text-blue-900 font-semibold border border-gray-300 rounded-xl outline-none text-sm">
@@ -382,8 +372,40 @@
         </div>
     </div>
 
+    <!-- MODAL DE AUTOATENDIMENTO: CONSULTAR E CANCELAR RESERVA PELO PROTOCOLO -->
+    <div id="modal-consulta-reserva" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-3 sm:p-4 z-50">
+        <div class="bg-white p-5 md:p-8 rounded-2xl w-full max-w-xl text-gray-800 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button type="button" onclick="fecharModalGenerico('modal-consulta-reserva')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 font-bold text-2xl p-1 cursor-pointer">✕</button>
+            
+            <div class="text-center mb-5">
+                <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto text-xl font-bold mb-2">
+                    <i class="fa-solid fa-ticket"></i>
+                </div>
+                <h3 class="text-xl font-extrabold text-gray-900">Consultar Minha Reserva</h3>
+                <p class="text-xs text-gray-500">Informe o protocolo e o CPF do titular para consultar ou cancelar sua estadia.</p>
+            </div>
+
+            <!-- FORMULÁRIO DE BUSCA POR PROTOCOLO -->
+            <div id="box-busca-protocolo" class="space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Protocolo da Reserva</label>
+                    <input type="text" id="consulta-protocolo" placeholder="Ex: 99C5DBC0" class="w-full p-2.5 bg-white border border-gray-300 rounded-xl font-mono uppercase font-bold text-sm outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">CPF do Titular</label>
+                    <input type="text" id="consulta-cpf" placeholder="Apenas números" class="w-full p-2.5 bg-white border border-gray-300 rounded-xl font-bold text-sm outline-none focus:border-blue-500">
+                </div>
+                <button type="button" onclick="consultarReservaPorProtocolo()" id="btn-buscar-protocolo" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition text-xs sm:text-sm shadow flex items-center justify-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-search"></i> Localizar Reserva
+                </button>
+            </div>
+
+            <!-- RESULTADO DA RESERVA CONSULTADA -->
+            <div id="box-resultado-reserva" class="hidden mt-4 space-y-4"></div>
+        </div>
+    </div>
+
     <script>
-        // SINGLETON SEGURO: IMPEDE QUALQUER SYNTAXERROR DE IDENTIFICADOR DUPLICADO
         var supabaseClient = window.supabaseClient || supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
         window.supabaseClient = supabaseClient;
 
@@ -394,9 +416,6 @@
         let dadosPousadaGlobal = {};
         let estadoMesCalendario = {};
 
-        // =========================================================================
-        // SISTEMA DE NOTIFICAÇÃO ELEGANTE (SUBSTITUTO DOS ALERTS DO NAVEGADOR)
-        // =========================================================================
         function mostrarAviso(mensagem, tipo = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -466,17 +485,12 @@
             filtrarSuitesDisponiveisPorPeriodo();
         }
 
-        // =========================================================================
-        // BUSCA DE ENDEREÇO POR CEP INTELIGENTE (VIACEP)
-        // =========================================================================
         async function buscarEnderecoPorCep() {
             const inputCep = document.getElementById('cep-hospede');
             const cepLimpo = (inputCep.value || '').replace(/\D/g, '');
             const iconeLoading = document.getElementById('icone-loading-cep');
 
-            if (cepLimpo.length !== 8) {
-                return;
-            }
+            if (cepLimpo.length !== 8) return;
 
             iconeLoading.classList.remove('hidden');
             try {
@@ -519,9 +533,6 @@
             }
         }
 
-        // =========================================================================
-        // BARRA INSTITUCIONAL SUPERIOR (FOTOS, ATRAÇÕES, HORÁRIOS E PENSÃO)
-        // =========================================================================
         function renderizarBarraInstitucional() {
             const container = document.getElementById('container-institucional');
             let html = '';
@@ -560,20 +571,13 @@
                 else if (tipoGlobal === 'meia_pensao' || tipoGlobal.includes('meia')) { textoPensao = '🍽️ Meia pensão'; corPensao = 'bg-blue-500/20 backdrop-blur-md border-blue-300/30'; }
                 else if (tipoGlobal === 'pensao_completa' || tipoGlobal.includes('completa')) { textoPensao = '🍽️ Pensão completa'; corPensao = 'bg-emerald-500/20 backdrop-blur-md border-emerald-300/30'; }
                 if (textoPensao) {
-                    html += `
-                        <div class="${corPensao} px-3 py-1.5 rounded-xl border shadow">
-                            ${textoPensao}
-                        </div>
-                    `;
+                    html += `<div class="${corPensao} px-3 py-1.5 rounded-xl border shadow">${textoPensao}</div>`;
                 }
             }
 
             container.innerHTML = html;
         }
 
-        // =========================================================================
-        // RODAPÉ EXECUTIVO DE 2 NÍVEIS (MODELO SÃO MORITZ + ASSINATURA WB PROJETOS)
-        // =========================================================================
         function renderizarRodapeExecutivo() {
             document.getElementById('rodape-pousada-nome').innerText = dadosPousadaGlobal.nome || "Nossa Pousada";
             const elCnpj = document.getElementById('rodape-pousada-cnpj');
@@ -649,15 +653,10 @@
                 `;
             }
 
-            if (!htmlRedes) {
-                htmlRedes = '<span class="text-[11px] text-gray-400">@pousada</span>';
-            }
+            if (!htmlRedes) htmlRedes = '<span class="text-[11px] text-gray-400">@pousada</span>';
             elRedes.innerHTML = htmlRedes;
         }
 
-        // =========================================================================
-        // MODAL DE FOTOS DA POUSADA (COM TEXTO SOBRE A POUSADA)
-        // =========================================================================
         function abrirModalFotosPousada() {
             const grid = document.getElementById('grid-fotos-pousada');
             const containerDescricao = document.getElementById('descricao-pousada-modal');
@@ -687,9 +686,6 @@
             document.getElementById('modal-fotos-pousada').classList.remove('hidden');
         }
 
-        // =========================================================================
-        // MODAL DE ATRAÇÕES TURÍSTICAS DA REGIÃO
-        // =========================================================================
         function abrirModalAtracoes() {
             const grid = document.getElementById('grid-atracoes');
             const atracoes = dadosPousadaGlobal.atracoes_turisticas || [];
@@ -881,15 +877,11 @@
 
             while (dataAtual < checkout) {
                 const precoDaNoite = calcularPrecoDiaSuite(dataAtual, suiteId, precoBaseDiaria);
-                if (precoDaNoite !== precoBaseDiaria) {
-                    temTarifaEspecialAplicada = true;
-                }
-
+                if (precoDaNoite !== precoBaseDiaria) temTarifaEspecialAplicada = true;
                 if (!primeiroDiaCalculado) {
                     primeiraDiariaAplicada = precoDaNoite;
                     primeiroDiaCalculado = true;
                 }
-
                 valorDiariasTotal += precoDaNoite;
                 dataAtual.setDate(dataAtual.getDate() + 1);
             }
@@ -949,54 +941,8 @@
             const suitesBrutas = cacheSuites.filter(s => {
                 const nomeLower = (s.nome || '').toLowerCase();
                 if (nomeLower.includes('teste')) return false;
-                if (!s.nome) return false;
-                return true;
+                return !!s.nome;
             });
-
-            try {
-                const capacidades = suitesBrutas.map(s => Number(s.capacidade_hospedes) || 0).filter(n => n > 0);
-                const capacidadeMaximaGeral = capacidades.length > 0 ? Math.max(...capacidades) : 0;
-                const limiteAdultos = capacidadeMaximaGeral > 0 ? Math.min(capacidadeMaximaGeral, 20) : 10;
-                const selAdultos = document.getElementById('filtro-adultos');
-                const selCriancas = document.getElementById('filtro-criancas');
-                if (selAdultos && !selAdultos.dataset.dinamicoInicial) {
-                    const atualAd = parseInt(selAdultos.value) || 2;
-                    selAdultos.innerHTML = '';
-                    for (let i = 1; i <= limiteAdultos; i++) {
-                        const o = document.createElement('option');
-                        o.value = i;
-                        o.textContent = i === 1 ? '1 Adulto' : `${i} Adultos`;
-                        if (i === atualAd) o.selected = true;
-                        selAdultos.appendChild(o);
-                    }
-                    if (atualAd > limiteAdultos) {
-                        const o = document.createElement('option');
-                        o.value = atualAd;
-                        o.textContent = `${atualAd} Adultos (acima máx ${limiteAdultos})`;
-                        o.selected = true;
-                        selAdultos.appendChild(o);
-                    }
-                    selAdultos.dataset.dinamicoInicial = '1';
-                }
-                if (selAdultos && selCriancas) {
-                    const ad = parseInt(selAdultos.value) || 2;
-                    const maxCri = Math.max(0, (capacidadeMaximaGeral || 10) - ad);
-                    const atualCr = parseInt(selCriancas.value) || 0;
-                    if (!selCriancas.dataset.ultimoAdultos || selCriancas.dataset.ultimoAdultos != ad) {
-                        selCriancas.innerHTML = '';
-                        const limiteExibir = Math.max(maxCri, atualCr);
-                        for (let c = 0; c <= Math.min(limiteExibir, 10); c++) {
-                            const opt = document.createElement('option');
-                            opt.value = c;
-                            opt.textContent = c === 0 ? '0 Crianças' : c === 1 ? '1 Criança' : `${c} Crianças`;
-                            if (c === atualCr) opt.selected = true;
-                            if (c > maxCri) opt.textContent += ` (máx ${maxCri} c/ ${ad} adultos)`;
-                            selCriancas.appendChild(opt);
-                        }
-                        selCriancas.dataset.ultimoAdultos = ad;
-                    }
-                }
-            } catch (e) { console.warn(e); }
 
             const novoInicio = new Date(checkinFiltro + 'T00:00:00');
             const novoFim = new Date(checkoutFiltro + 'T00:00:00');
@@ -1012,17 +958,13 @@
 
                 while (cursorChecagem < novoFim) {
                     const diaIsoStr = cursorChecagem.toISOString().split('T')[0];
-                    let diaOcupado = false;
                     for (let res of reservasDaSuite) {
                         if (diaIsoStr >= res.checkin && diaIsoStr < res.checkout) {
-                            diaOcupado = true;
+                            temConflitoNoPeriodo = true;
                             break;
                         }
                     }
-                    if (diaOcupado) {
-                        temConflitoNoPeriodo = true;
-                        break;
-                    }
+                    if (temConflitoNoPeriodo) break;
                     cursorChecagem.setDate(cursorChecagem.getDate() + 1);
                 }
 
@@ -1066,15 +1008,11 @@
                 let descricaoPensaoTexto = '';
                 if (dadosPousadaGlobal.tipo_pensao) {
                     const tipo = String(dadosPousadaGlobal.tipo_pensao).toLowerCase();
-                    if (tipo === 'sem_cafe') {
-                        regimePensaoBadge = '<span class="inline-flex items-center gap-1.5 bg-gray-100 text-gray-700 border border-gray-200 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">🚫 Sem café</span>';
-                    } else if (tipo === 'cafe_completo' || tipo === 'cafe' || tipo.includes('cafe')) {
-                        regimePensaoBadge = '<span class="inline-flex items-center gap-1.5 bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">☕ Café da manhã completo incluso</span>';
-                    } else if (tipo === 'meia_pensao' || tipo.includes('meia')) {
-                        regimePensaoBadge = '<span class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-800 border border-blue-200 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">🍽️ Meia pensão</span>';
-                    } else if (tipo === 'pensao_completa' || tipo.includes('completa')) {
-                        regimePensaoBadge = '<span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">🍽️ Pensão completa</span>';
-                    }
+                    if (tipo === 'sem_cafe') regimePensaoBadge = '<span class="inline-flex items-center gap-1.5 bg-gray-100 text-gray-700 border border-gray-200 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">🚫 Sem café</span>';
+                    else if (tipo.includes('cafe')) regimePensaoBadge = '<span class="inline-flex items-center gap-1.5 bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">☕ Café da manhã incluso</span>';
+                    else if (tipo.includes('meia')) regimePensaoBadge = '<span class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-800 border border-blue-200 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">🍽️ Meia pensão</span>';
+                    else if (tipo.includes('completa')) regimePensaoBadge = '<span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">🍽️ Pensão completa</span>';
+                    
                     if (dadosPousadaGlobal.descricao_pensao) {
                         descricaoPensaoTexto = `<p class="text-[11px] text-gray-600 mt-1.5 italic bg-gray-50 p-2 rounded-lg border border-gray-100">ℹ️ ${dadosPousadaGlobal.descricao_pensao}</p>`;
                     }
@@ -1098,7 +1036,6 @@
                 let detalhamentoOcupantesHTML = `
                     <div class="bg-blue-50/70 border border-blue-100 p-3 rounded-xl mb-3 text-xs space-y-1.5 text-gray-700">
                         <div class="font-extrabold text-blue-900 border-b border-blue-200 pb-1 mb-1">👥 Detalhes da Estadia:</div>
-                        
                         <div class="flex justify-between font-semibold">
                             <span>Diárias (${calc.qtdNoites} noite${calc.qtdNoites > 1 ? 's' : ''}):</span>
                             <span>R$ ${calc.valorDiariasTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
@@ -1168,7 +1105,6 @@
                     <div class="bg-white rounded-2xl shadow-xl overflow-hidden text-gray-800 border-l-8 ${temConflitoNoPeriodo ? 'border-amber-400' : 'border-green-500'} p-4 md:p-6 mb-4">
                         <div class="flex flex-col md:flex-row gap-4 md:gap-6">
                             
-                            <!-- Bloco da Imagem -->
                             <div class="flex flex-col md:flex-row gap-3 w-full md:w-2/3">
                                 <div class="relative w-full h-48 sm:h-64 md:h-80 bg-gray-100 rounded-xl overflow-hidden shadow-inner flex items-center justify-center">
                                     <img id="img-principal-${suite.id}" src="${fotoPrincipal}" alt="${suite.nome}" class="w-full h-full object-cover">
@@ -1179,7 +1115,6 @@
                                 ${miniaturasHTML}
                             </div>
 
-                            <!-- Detalhes e Ação -->
                             <div class="flex flex-col justify-between w-full md:w-1/3">
                                 <div>
                                     <div class="flex items-center justify-between mb-2">
@@ -1204,7 +1139,6 @@
                                         <button onclick="toggleCalendarioMensal('${suite.id}')" id="btn-toggle-cal-${suite.id}" class="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm cursor-pointer">
                                             <span>📅</span> Ver Calendário Mensal de Ocupação 🔽
                                         </button>
-                                        
                                         <div id="container-cal-${suite.id}" class="hidden mt-2 bg-gray-50 p-3 rounded-xl border border-gray-200 shadow-inner"></div>
                                     </div>
 
@@ -1413,6 +1347,8 @@
 
             await atualizarResumoModal(sId, checkinFiltro, checkoutFiltro, qtdAdultos, qtdCriancas);
 
+            // RESTAURAÇÃO DE ESTADO LIMPO (NUNCA DEIXA AVISOS ANTIGOS POLUÍREM)
+            document.getElementById('cabecalho-modal-reserva').classList.remove('hidden');
             document.getElementById('feedback-sucesso').classList.add('hidden');
             document.getElementById('feedback-erro').classList.add('hidden');
             document.getElementById('aviso-cadastro-encontrado').classList.add('hidden');
@@ -1461,8 +1397,13 @@
             filtrarSuitesDisponiveisPorPeriodo();
         }
 
+        // FECHA O MODAL SE O USUÁRIO CLICAR FORA DA JANELA (BACKDROP)
+        document.getElementById('modal-reserva').addEventListener('click', (e) => {
+            if (e.target.id === 'modal-reserva') fecharModal();
+        });
+
         // =========================================================================
-        // ENVIO DA RESERVA + UPLOAD DOCUMENTO + GERAÇÃO WHATSAPP COM CANCELAMENTO
+        // ENVIO DA RESERVA COM FEEDBACK LIMPO E BOTÃO DE VOLTAR
         // =========================================================================
         document.getElementById('form-reserva').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1497,11 +1438,8 @@
             let idadesCriancasArr = [];
             for (let i = 1; i <= qtdCriancas; i++) {
                 const elIdade = document.getElementById(`idade-crianca-${i}`);
-                if (elIdade) {
-                    idadesCriancasArr.push(elIdade.value);
-                }
+                if (elIdade) idadesCriancasArr.push(elIdade.value);
             }
-            const idadesCriancasStr = idadesCriancasArr.join(', ');
 
             const precoBase = suiteObj ? (suiteObj.valor_diaria || suiteObj.preco || 150.00) : 150.00;
             const calc = await calcularValorTotalEstadiaCompleto(suiteId, checkinVal, checkoutVal, precoBase, qtdAdultos, qtdCriancas);
@@ -1556,7 +1494,7 @@
                 checkout: checkoutVal,
                 qtd_adultos: qtdAdultos,
                 qtd_criancas: qtdCriancas,
-                idades_criancas: idadesCriancasStr,
+                idades_criancas: idadesCriancasArr.join(', '),
                 tem_pet: temPetCheck,
                 taxa_pet: valorPetTotal,
                 valor_total: valorTotalFinal,
@@ -1576,14 +1514,14 @@
             const reservaCriada = (novaReserva && novaReserva.length > 0) ? novaReserva[0] : {};
             const protocoloID = reservaCriada.id ? reservaCriada.id.substring(0, 8).toUpperCase() : 'REC-' + Date.now().toString().slice(-6);
 
-            // 3. CÁLCULO DA DATA LIMITE DE CANCELAMENTO (COM BASE NO TARIFAS.HTML)
+            // 3. CÁLCULO DA DATA LIMITE DE CANCELAMENTO
             const diasAntecedencia = Number(dadosPousadaGlobal.dias_antecedencia_cancelamento ?? 7);
             const [anoCk, mesCk, diaCk] = checkinVal.split('-');
             const dataCheckinObj = new Date(Number(anoCk), Number(mesCk) - 1, Number(diaCk));
             dataCheckinObj.setDate(dataCheckinObj.getDate() - diasAntecedencia);
             const dataLimiteBR = dataCheckinObj.toLocaleDateString('pt-BR');
 
-            // 4. ESTRUTURAÇÃO DA MENSAGEM DO WHATSAPP
+            // 4. MENSAGEM DO WHATSAPP
             const nomePousada = dadosPousadaGlobal.nome || "Pousada";
             const nomeHospede = document.getElementById('nome-hospede').value.trim();
             const dInicioBR = checkinVal.split('-').reverse().join('/');
@@ -1608,14 +1546,21 @@
             if (zapDestino.length <= 11 && !zapDestino.startsWith('55')) zapDestino = '55' + zapDestino;
             const urlZapEnvio = `https://wa.me/${zapDestino}?text=${encodeURIComponent(msgZap)}`;
 
-            // 5. EXIBIÇÃO DE SUCESSO E ABERTURA DO WHATSAPP
+            // 5. LIMPEZA VISUAL IMEDIATA DA TELA (OCULTA FORMULÁRIO E AVISOS ANTIGOS)
+            document.getElementById('cabecalho-modal-reserva').classList.add('hidden');
+            document.getElementById('aviso-cadastro-encontrado').classList.add('hidden');
+            document.getElementById('aviso-documento-obrigatorio').classList.add('hidden');
             document.getElementById('form-reserva').style.display = 'none';
             msgSucesso.classList.remove('hidden');
 
+            // BOTÃO DUPLO: WHATSAPP + CONCLUIR E VOLTAR (NUNCA MAIS TRAVA)
             document.getElementById('btn-container-whatsapp-sucesso').innerHTML = `
-                <a href="${urlZapEnvio}" target="_blank" class="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-6 py-3.5 rounded-2xl shadow-lg transition text-sm">
-                    <i class="fa-brands fa-whatsapp text-lg"></i> Abrir WhatsApp da Pousada e Salvar Comprovante
+                <a href="${urlZapEnvio}" target="_blank" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-6 py-3 rounded-xl shadow-lg transition text-xs sm:text-sm">
+                    <i class="fa-brands fa-whatsapp text-lg"></i> Abrir WhatsApp da Pousada
                 </a>
+                <button type="button" onclick="fecharModal()" class="w-full sm:w-auto bg-white border border-emerald-300 hover:bg-emerald-100 text-emerald-900 font-bold px-5 py-3 rounded-xl transition text-xs sm:text-sm cursor-pointer">
+                    Concluir e Voltar
+                </button>
             `;
 
             mostrarAviso("Solicitação enviada com sucesso!", "sucesso");
@@ -1624,6 +1569,145 @@
                 window.open(urlZapEnvio, '_blank');
             }, 1200);
         });
+
+        // =========================================================================
+        // AUTOATENDIMENTO: CONSULTAR E CANCELAR RESERVA PELO PROTOCOLO
+        // =========================================================================
+        function abrirModalConsultaReserva() {
+            document.getElementById('box-busca-protocolo').classList.remove('hidden');
+            document.getElementById('box-resultado-reserva').classList.add('hidden');
+            document.getElementById('box-resultado-reserva').innerHTML = '';
+            document.getElementById('consulta-protocolo').value = '';
+            document.getElementById('consulta-cpf').value = '';
+            document.getElementById('modal-consulta-reserva').classList.remove('hidden');
+        }
+
+        async function consultarReservaPorProtocolo() {
+            const proto = document.getElementById('consulta-protocolo').value.trim();
+            const cpf = document.getElementById('consulta-cpf').value.trim();
+            const btn = document.getElementById('btn-buscar-protocolo');
+
+            if (!proto || !cpf) {
+                mostrarAviso("Informe o Protocolo e o CPF para consultar.", "aviso");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Localizando...`;
+
+            const { data, error } = await supabaseClient.rpc('fn_consultar_reserva_hospede', {
+                p_protocolo: proto,
+                p_cpf: cpf
+            });
+
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fa-solid fa-search"></i> Localizar Reserva`;
+
+            if (error || !data || !data.sucesso) {
+                mostrarAviso(data?.mensagem || "Reserva não localizada com estes dados.", "erro");
+                return;
+            }
+
+            const r = data.reserva;
+            const suiteNome = data.suite_nome;
+            const diasLimite = Number(data.dias_antecedencia || 7);
+            const permiteCancel = data.permite_cancelamento !== false;
+
+            const dCheckin = new Date(r.checkin + 'T00:00:00');
+            const dCancelLimite = new Date(dCheckin);
+            dCancelLimite.setDate(dCancelLimite.getDate() - diasLimite);
+
+            const hojeZero = new Date();
+            hojeZero.setHours(0,0,0,0);
+
+            const diffDias = Math.ceil((dCheckin - hojeZero) / (1000 * 60 * 60 * 24));
+            const dentroDoPrazo = diffDias >= diasLimite;
+
+            const boxResultado = document.getElementById('box-resultado-reserva');
+            boxResultado.classList.remove('hidden');
+
+            const statusCor = r.status === 'Aprovada' ? 'bg-green-100 text-green-800' :
+                             (r.status === 'Cancelada' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800');
+
+            let acaoCancelamentoHtml = '';
+
+            if (r.status === 'Cancelada') {
+                acaoCancelamentoHtml = `
+                    <div class="p-3 bg-red-50 border border-red-200 text-red-800 text-xs rounded-xl font-bold text-center">
+                        Esta reserva já se encontra CANCELADA.
+                    </div>
+                `;
+            } else if (!permiteCancel) {
+                acaoCancelamentoHtml = `
+                    <div class="p-3 bg-gray-100 border border-gray-200 text-gray-700 text-xs rounded-xl text-center">
+                        Esta pousada não aceita cancelamento online. Contate o atendimento no WhatsApp.
+                    </div>
+                `;
+            } else if (dentroDoPrazo) {
+                acaoCancelamentoHtml = `
+                    <div class="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl space-y-2">
+                        <div class="text-xs text-emerald-900 font-semibold">
+                            ✅ <strong>Cancelamento Gratuito Disponível:</strong> Você pode cancelar sua reserva até <strong>${dCancelLimite.toLocaleDateString('pt-BR')}</strong> (${diasLimite} dias antes da entrada).
+                        </div>
+                        <button type="button" onclick="confirmarCancelamentoHospede('${r.id}', '${cpf}')" id="btn-cancelar-reserva-hospede" class="w-full bg-red-600 hover:bg-red-700 text-white font-extrabold py-2.5 rounded-xl transition text-xs shadow cursor-pointer flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-ban"></i> Confirmar Cancelamento da Reserva
+                        </button>
+                    </div>
+                `;
+            } else {
+                acaoCancelamentoHtml = `
+                    <div class="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900">
+                        ⚠️ <strong>Prazo Expirado:</strong> O cancelamento online só era permitido com no mínimo ${diasLimite} dias de antecedência (até ${dCancelLimite.toLocaleDateString('pt-BR')}). Faltam ${diffDias} dia(s). Contate a pousada pelo WhatsApp.
+                    </div>
+                `;
+            }
+
+            boxResultado.innerHTML = `
+                <div class="bg-gray-50 border border-gray-200 p-4 rounded-xl space-y-2 text-xs">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <span class="font-bold text-gray-500">Status da Reserva:</span>
+                        <span class="px-2.5 py-0.5 rounded-full font-bold uppercase text-[10px] ${statusCor}">${r.status}</span>
+                    </div>
+                    <div class="flex justify-between"><span class="text-gray-500">Titular:</span><strong class="text-gray-900">${r.hospede_nome}</strong></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Acomodação:</span><strong class="text-blue-800">${suiteNome}</strong></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Período:</span><strong class="text-gray-900">${r.checkin.split('-').reverse().join('/')} até ${r.checkout.split('-').reverse().join('/')}</strong></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Valor Estimado:</span><strong class="text-emerald-700 font-bold">R$ ${Number(r.valor_total || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong></div>
+                </div>
+                ${acaoCancelamentoHtml}
+            `;
+        }
+
+        async function confirmarCancelamentoHospede(reservaId, cpf) {
+            if (!confirm("Tem certeza de que deseja cancelar esta reserva? Esta ação é definitiva e liberará o quarto.")) {
+                return;
+            }
+
+            const btn = document.getElementById('btn-cancelar-reserva-hospede');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Cancelando...`;
+            }
+
+            const { data, error } = await supabaseClient.rpc('fn_cancelar_reserva_hospede', {
+                p_reserva_id: reservaId,
+                p_cpf: cpf
+            });
+
+            if (error || !data || !data.sucesso) {
+                mostrarAviso(data?.mensagem || "Erro ao cancelar reserva.", "erro");
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid fa-ban"></i> Confirmar Cancelamento da Reserva`;
+                }
+                return;
+            }
+
+            mostrarAviso("Reserva cancelada com sucesso!", "sucesso");
+            fecharModalGenerico('modal-consulta-reserva');
+            
+            // Recarrega a vitrine para liberar os dias cancelados no calendário na hora!
+            await inicializarVitrine();
+        }
     </script>
 </body>
 </html>
