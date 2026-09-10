@@ -15,6 +15,7 @@
         
         <!-- MENU LATERAL / BARRA SUPERIOR NO MOBILE -->
         <aside class="w-full md:w-56 bg-slate-800 text-white flex flex-col shadow-lg flex-shrink-0 z-20">
+            <!-- CABEÇALHO DO MENU -->
             <div class="p-3 sm:p-4 border-b border-slate-700 flex justify-between items-center md:block">
                 <div>
                     <h1 class="text-sm sm:text-base font-bold tracking-wide text-amber-400">
@@ -23,6 +24,7 @@
                     <p id="nomePousadaMenu" class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 truncate max-w-[160px] sm:max-w-none">Carregando...</p>
                 </div>
                 
+                <!-- BOTÕES RÁPIDOS EXCLUSIVOS DO CELULAR -->
                 <div class="flex items-center gap-2 md:hidden">
                     <a href="dashboard.html" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs">
                         <i class="fa-solid fa-chart-pie"></i> <span>Painel</span>
@@ -45,6 +47,7 @@
                     <i class="fa-solid fa-users w-4"></i> Hóspedes
                 </a>
                 
+                <!-- ATALHO DE GOVERNANÇA / LIMPEZA (DINÂMICO) -->
                 <a id="link-menu-limpeza" href="limpeza.html" class="hidden flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-pink-900/40 text-pink-300 hover:text-pink-200 transition font-medium text-xs border border-pink-500/20">
                     <i class="fa-solid fa-broom w-4"></i> Governança / Limpeza
                 </a>
@@ -60,6 +63,7 @@
                 </a>
             </nav>
 
+            <!-- BOTÃO SAIR DESKTOP -->
             <div class="hidden md:block p-3 border-t border-slate-700">
                 <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white transition font-medium text-xs cursor-pointer">
                     <i class="fa-solid fa-right-from-bracket"></i> Sair
@@ -100,9 +104,10 @@
                         </a>
                     </div>
 
-                    <!-- Cabeçalho -->
+                    <!-- Cabeçalho com Crachá do Usuário Logado -->
                     <div class="flex flex-col items-center justify-center mb-5 gap-1.5 text-center">
                         <div class="flex items-center justify-center gap-2 flex-wrap">
+                            <!-- BADGE DO USUÁRIO LOGADO -->
                             <span id="badge-usuario-logado" class="text-xs font-bold text-slate-800 bg-white px-3 py-1 rounded-full border border-slate-300 flex items-center gap-1.5 shadow-2xs">
                                 <i class="fa-solid fa-user text-blue-600"></i>
                                 <strong id="texto-nome-usuario">Carregando...</strong>
@@ -117,6 +122,7 @@
 
                     <!-- Cards de Seleção de Views -->
                     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3.5 mb-4">
+                        <!-- Card 1: Financeiro (CONDICIONADO AO PRIVILÉGIO FINANCEIRO) -->
                         <div id="cardViewFinanceiro" onclick="selecionarView('vw_gestor_financeiro_relatorio', 'Extrato Detalhado de Pagamentos', this)" 
                              class="card-view cursor-pointer bg-slate-50 p-3 sm:p-4 rounded-xl shadow-xs border-2 border-amber-400 hover:border-amber-600 hover:shadow-md transition group flex flex-col justify-between">
                             <div>
@@ -131,6 +137,7 @@
                             <p class="text-[10px] sm:text-[11px] text-gray-500 mt-1 truncate">Extrato de pagamentos.</p>
                         </div>
 
+                        <!-- Card 2: Hospedagens -->
                         <div id="cardViewHospedagens" onclick="selecionarView('vw_gestor_hospedagens_relatorio', 'Hospedagens, Suítes e Movimentações', this)" 
                              class="card-view cursor-pointer bg-slate-50 p-3 sm:p-4 rounded-xl shadow-xs border-2 border-emerald-400 hover:border-emerald-600 hover:shadow-md transition group flex flex-col justify-between">
                             <div>
@@ -145,6 +152,7 @@
                             <p class="text-[10px] sm:text-[11px] text-gray-500 mt-1 truncate">Nomes e acomodações.</p>
                         </div>
 
+                        <!-- Card 3: Calendário -->
                         <div id="cardViewCalendario" onclick="abrirCalendarioGeralRelatorios()" 
                              class="card-view cursor-pointer bg-slate-50 p-3 sm:p-4 rounded-xl shadow-xs border-2 border-indigo-400 hover:border-indigo-600 hover:shadow-md transition group flex flex-col justify-between">
                             <div>
@@ -159,6 +167,7 @@
                             <p class="text-[10px] sm:text-[11px] text-gray-500 mt-1 truncate">Mês a mês por suíte.</p>
                         </div>
 
+                        <!-- Card 4: Tarifas (CONDICIONADO AO PRIVILÉGIO CONFIGURAÇÕES / DONO) -->
                         <div id="cardViewTarifas" onclick="selecionarView('vw_gestor_tarifas_relatorio', 'Auditoria de Tarifas Especiais', this)" 
                              class="card-view cursor-pointer bg-slate-50 p-3 sm:p-4 rounded-xl shadow-xs border-2 border-amber-400 hover:border-amber-600 hover:shadow-md transition group flex flex-col justify-between">
                             <div>
@@ -173,6 +182,7 @@
                             <p class="text-[10px] sm:text-[11px] text-gray-500 mt-1 truncate">Regras e valores vigentes.</p>
                         </div>
 
+                        <!-- Card 5: Reservas -->
                         <div id="cardViewReservas" onclick="selecionarView('vw_gestor_reservas_relatorio', 'Reservas', this)" 
                              class="card-view col-span-2 sm:col-span-1 cursor-pointer bg-slate-50 p-3 sm:p-4 rounded-xl shadow-xs border-2 border-pink-400 hover:border-pink-600 hover:shadow-md transition group flex flex-col justify-between">
                             <div>
@@ -192,6 +202,7 @@
                     <div id="wrapperTopoHospedagens" class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4">
                         <div id="containerKpis" class="flex flex-wrap gap-2.5 sm:gap-3 w-full lg:w-auto"></div>
                         
+                        <!-- FILTRO DATA -->
                         <div id="containerFiltroDataHospedagens" class="hidden flex flex-wrap items-center gap-2 bg-white p-2.5 rounded-xl border border-gray-200 shadow-xs w-full lg:w-auto">
                             <div class="flex-1 sm:flex-initial flex items-center gap-1.5 bg-gray-50 border border-gray-300 rounded-lg px-2.5 py-1.5">
                                 <span class="text-[10px] font-bold text-gray-500 uppercase">De:</span>
@@ -210,7 +221,7 @@
                         </div>
                     </div>
 
-                    <!-- CARDS DE OCUPAÇÃO POR SUÍTE -->
+                    <!-- CARDS DE OCUPAÇÃO POR SUÍTE - SOMENTE HOSPEDAGENS -->
                     <div id="containerCardsOcupacaoSuites" class="hidden mb-5">
                         <div class="bg-white rounded-xl shadow-xs border border-emerald-100 p-3 sm:p-4">
                             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 mb-3">
@@ -225,6 +236,7 @@
                             </div>
                         </div>
 
+                        <!-- DASHBOARD GRÁFICO DE OCUPAÇÃO -->
                         <div id="containerGraficoOcupacao" class="hidden mt-4">
                             <div class="bg-white rounded-xl shadow-xs border border-amber-200 p-3 sm:p-4">
                                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3">
@@ -276,6 +288,7 @@
                             <button id="btnTodas" onclick="alterarFiltroStatusReservas('TODAS')" class="px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 whitespace-nowrap cursor-pointer">TODAS</button>
                         </div>
 
+                        <!-- CARDS DE CONTROLE HOJE -->
                         <div id="containerCardsControleHoje" class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5">
                             <div id="cardCheckInHoje" onclick="filtrarPorCardHoje('checkin')" class="bg-white p-2.5 rounded-xl border border-gray-200 shadow-xs flex items-center gap-2.5 cursor-pointer hover:shadow-md hover:border-violet-300 transition-all group">
                                 <div class="w-8 h-8 sm:w-9 sm:h-9 bg-violet-100 text-violet-600 rounded-full flex items-center justify-center text-xs shadow-xs"><i class="fa-solid fa-calendar-days"></i></div>
@@ -592,7 +605,7 @@
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         }
 
-        let usuarioIdAtual = null;
+        let usuarioIdAtual = null; // ID DA POUSADA OPERADA
         let cargoUsuarioAtual = 'dono';
         let permissoesUsuarioAtual = {};
         let usuarioSessaoRealId = null;
@@ -611,6 +624,7 @@
             const toast = document.getElementById('toast-notificacao');
             const toastTitulo = document.getElementById('toast-titulo');
             const toastMsg = document.getElementById('toast-mensagem');
+            const toastIcone = document.getElementById('toast-icone');
             const toastContent = document.getElementById('toast-content');
 
             if (!toast || !toastTitulo || !toastMsg) return;
@@ -621,10 +635,13 @@
 
             if (tipo === 'sucesso') {
                 toastContent.className = "bg-gray-900 text-white px-5 sm:px-6 py-3.5 sm:py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800";
+                toastIcone.innerText = "✨";
             } else if (tipo === 'alerta') {
                 toastContent.className = "bg-amber-900 text-white px-5 sm:px-6 py-3.5 sm:py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-amber-700";
+                toastIcone.innerText = "⚠️";
             } else {
                 toastContent.className = "bg-red-900 text-white px-5 sm:px-6 py-3.5 sm:py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-red-700";
+                toastIcone.innerText = "🚨";
             }
 
             toast.classList.remove('translate-y-24', 'opacity-0');
@@ -862,6 +879,7 @@
             const params = new URLSearchParams(window.location.search);
             const pousadaIdParam = params.get('pousada_id');
 
+            // 1. CONTEXTO DO MASTER INSPECIONANDO OUTRA POUSADA
             if (isMaster) {
                 const pousadaAlvoMaster = pousadaIdParam || sessionStorage.getItem('master_pousada_ativa');
                 if (pousadaAlvoMaster) {
@@ -889,6 +907,7 @@
                 }
             }
 
+            // 2. CONTEXTO DE USUÁRIO COMUM (DONO, RECEPÇÃO OU CAMAREIRA)
             const { data: usuarioPerfil } = await supabaseClient
                 .from('usuarios')
                 .select('pousada_id, cargo, ativo, nome_completo, permissoes')
@@ -1587,9 +1606,6 @@
                         });
                     }
 
-                // =========================================================================
-                // VISÃO FINANCEIRA: CORREÇÃO CONTÁBIL E DIFERENCIAÇÃO DE CANCELAMENTO
-                // =========================================================================
                 } else if (ehViewFinanceiro) {
                     if (!suitesDaPousadaCache || suitesDaPousadaCache.length === 0) {
                         const { data: suData } = await supabaseClient.from('suites').select('id,nome').eq('pousada_id', usuarioIdAtual).order('nome');
@@ -1624,60 +1640,33 @@
                         }
                     });
 
-                    registros = (reservasFin || []).map(r => {
+                    registros = (reservasFin || []).filter(r => {
+                        if (r.status === 'Cancelada') {
+                            const temValor = Number(r.valor_total || 0) > 0;
+                            const temPagamentos = (pagamentosPorReserva[r.id] && pagamentosPorReserva[r.id].length > 0);
+                            const eInterrompida = Boolean(r.motivo_cancelamento && r.motivo_cancelamento.includes('ESTADIA INTERROMPIDA'));
+                            return temValor || temPagamentos || eInterrompida;
+                        }
+                        return true;
+                    }).map(r => {
                         const suiteObj = (suitesDaPousadaCache || []).find(s => s.id === r.suite_id);
                         const nomeSuite = suiteObj ? suiteObj.nome : (r.suite || 'SUÍTE');
                         
                         const pags = pagamentosPorReserva[r.id] || [];
                         const totalPago = pags.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
-                        const valorTotalOriginal = Number(r.valor_total || 0);
-
-                        // IDENTIFICAÇÃO CORRETA: Estadia Interrompida x Cancelamento do Hóspede
-                        const motivoTexto = (r.motivo_cancelamento || '').toLowerCase();
-                        const isInterrompida = Boolean(r.motivo_cancelamento && r.motivo_cancelamento.includes('ESTADIA INTERROMPIDA'));
-                        const isCanceladaHospede = (r.status === 'Cancelada' && !isInterrompida && (motivoTexto.includes('hóspede') || motivoTexto.includes('hospede') || motivoTexto.includes('autoatendimento')));
-                        const isCanceladaGeral = (r.status === 'Cancelada' && !isInterrompida && !isCanceladaHospede);
-
-                        let statusExib = r.status || '-';
-                        if (isInterrompida) {
-                            statusExib = 'ESTADIA INTERROMPIDA';
-                        } else if (isCanceladaHospede) {
-                            statusExib = 'CANCELADA (HÓSPEDE)';
-                        } else if (isCanceladaGeral) {
-                            statusExib = 'CANCELADA';
-                        }
-
-                        // CORREÇÃO CONTÁBIL: Reserva cancelada NÃO tem saldo a receber!
-                        let saldoRestante = 0;
-                        let valorTotalContabil = valorTotalOriginal;
-
-                        if (isCanceladaHospede || isCanceladaGeral) {
-                            saldoRestante = 0; // Se foi cancelada, saldo a receber é ZERO!
-                            valorTotalContabil = totalPago; // O valor que efetivamente entrou/ficou retido
-                        } else {
-                            saldoRestante = Math.max(0, valorTotalOriginal - totalPago);
-                        }
+                        const valorTotal = Number(r.valor_total || 0);
+                        const saldoRestante = valorTotal - totalPago;
 
                         let formasPag = pags.map(p => p.forma_pagamento).filter(Boolean).join(', ');
                         if (!formasPag) {
-                            if (isCanceladaHospede || isCanceladaGeral) {
-                                formasPag = totalPago > 0 ? 'Sinal Retido' : 'Cancelado / Sem Cobrança';
-                            } else {
-                                formasPag = totalPago === 0 ? 'Pendente / No Checkout' : '-';
-                            }
+                            formasPag = totalPago === 0 ? 'Pendente / No Checkout' : '-';
                         }
 
                         let dataUltimoPag = pags.length > 0 ? pags[pags.length - 1].criado_em : r.criado_em;
-
-                        // PROTOCOLO EXTRAÍDO DO ID DA RESERVA
-                        const protoCurto = r.id ? r.id.substring(0, 8).toUpperCase() : '';
-
                         let obsPag = pags.map(p => p.observacao).filter(Boolean).join(' | ') || r.observacao || '-';
-                        if (isCanceladaHospede) {
-                            obsPag = `Cancelado pelo Hóspede (Protocolo: #${protoCurto})${obsPag !== '-' ? ' | ' + obsPag : ''}`;
-                        } else if (r.motivo_cancelamento) {
-                            obsPag = `${r.motivo_cancelamento}${obsPag !== '-' ? ' | ' + obsPag : ''}`;
-                        }
+
+                        const isInterrompida = (r.status === 'Cancelada' && (r.motivo_cancelamento?.includes('ESTADIA INTERROMPIDA') || valorTotal > 0));
+                        const statusExib = isInterrompida ? 'ESTADIA INTERROMPIDA' : (r.status || '-');
 
                         return {
                             hospede: r.hospede_nome || 'HÓSPEDE NÃO IDENTIFICADO',
@@ -1686,16 +1675,14 @@
                             checkin: r.checkin || '',
                             checkout: r.checkout || '',
                             diarias: calcularDiarias(r.checkin, r.checkout),
-                            valor_total: valorTotalContabil,
-                            valor_total_original: valorTotalOriginal,
+                            valor_total: valorTotal,
                             valor_pago: totalPago,
                             saldo_restante: saldoRestante,
                             forma_pagamento: formasPag,
                             data_pagamento: dataUltimoPag,
                             status: statusExib,
                             observacao: obsPag,
-                            motivo_cancelamento: r.motivo_cancelamento || null,
-                            protocolo: protoCurto
+                            motivo_cancelamento: r.motivo_cancelamento || null
                         };
                     });
                 } else if (ehViewHospedagens) {
@@ -1798,11 +1785,7 @@
                         const suiteAtual = (suitesDaPousadaCache || []).find(s => s.id === r.suite_id);
                         const suiteOrigem = (suitesDaPousadaCache || []).find(s => s.id === r.suite_origem_id);
 
-                        const protoCurto = r.id ? r.id.substring(0, 8).toUpperCase() : '';
-                        let motivoOcorrencia = r.motivo_cancelamento || r.motivo_recusa || '-';
-                        if (r.status === 'Cancelada' && motivoOcorrencia.toLowerCase().includes('hóspede')) {
-                            motivoOcorrencia = `Cancelado pelo Hóspede (Protocolo #${protoCurto})`;
-                        }
+                        const motivoOcorrencia = r.motivo_cancelamento || r.motivo_recusa || '-';
                         const dataOcorrencia = r.cancelado_em || r.recusado_em || null;
 
                         return {
@@ -1819,7 +1802,7 @@
                             valor_pago: totalPago,
                             saldo_restante: saldo,
                             ocupacao: detalhesOcup,
-                          tem_pet: r.tem_pet === true || r.tem_pet === 'true' || Number(r.taxa_pet || 0) > 0,
+                            tem_pet: r.tem_pet === true || r.tem_pet === 'true' || r.taxa_pet > 0,
                             motivo_ocorrencia: motivoOcorrencia,
                             data_ocorrencia: dataOcorrencia,
                             obs: r.observacao || '-'
@@ -1887,19 +1870,12 @@
                     registrosFiltrados = registrosFiltrados.filter(r => String(r.suite || '').trim().toUpperCase() === String(suiteFiltroAtual).trim().toUpperCase());
                 }
 
-                // =========================================================================
-                // CORREÇÃO DOS KPIS: SALDO BRUTO E A RECEBER REALISTAS
-                // =========================================================================
                 containerKpis.classList.remove("hidden");
                 if (ehViewFinanceiro && temPermissao('financeiro')) {
                     containerKpis.className = "flex flex-wrap gap-2.5 sm:gap-3 mb-4 sm:mb-5 w-full lg:w-auto";
-                    
-                    // Saldo Bruto: ignora o valor de reservas canceladas sem pagamento
                     let totalGeralBruto = registrosFiltrados.reduce((acc, r) => acc + Number(r.valor_total || 0), 0);
                     let totalJaPago = registrosFiltrados.reduce((acc, r) => acc + Number(r.valor_pago || 0), 0);
-                    
-                    // A Receber: soma apenas o saldo real a receber (reservas canceladas têm saldo 0)
-                    let saldoRestanteGeral = registrosFiltrados.reduce((acc, r) => acc + Number(r.saldo_restante || 0), 0);
+                    let saldoRestanteGeral = totalGeralBruto - totalJaPago;
 
                     containerKpis.innerHTML = `
                         <div class="flex-1 min-w-[140px] sm:min-w-[160px] bg-white p-2.5 sm:p-3 rounded-xl border border-blue-200 shadow-xs flex items-center gap-2.5 hover:shadow-md transition">
@@ -2072,16 +2048,14 @@
                 let htmlLinhas = '';
                 registrosFiltrados.forEach((row, index) => {
                     let statusRow = String(row.status || row.status_reserva || '').toUpperCase();
-                    let isInterrompida = (statusRow === 'ESTADIA INTERROMPIDA');
-                    let isCanceladaHospede = (statusRow === 'CANCELADA (HÓSPEDE)');
-                    let isCancelada = (statusRow === 'CANCELADA' || isCanceladaHospede);
+                    let isInterrompida = (statusRow === 'ESTADIA INTERROMPIDA' || (row.motivo_cancelamento && row.motivo_cancelamento.includes('ESTADIA INTERROMPIDA')));
+                    let isCancelada = (statusRow === 'CANCELADA');
                     let isRecusada = (statusRow === 'RECUSADA');
                     let isAprovada = (statusRow === 'APROVADA');
                     let classeCorFundo = ''; 
                     
                     if (isInterrompida) classeCorFundo = 'bg-amber-50/70 hover:bg-amber-100/80 border-l-4 border-amber-600';
-                    else if (isCanceladaHospede) classeCorFundo = 'bg-rose-50/80 hover:bg-rose-100 border-l-4 border-rose-500';
-                    else if (isCancelada) classeCorFundo = 'bg-rose-50 hover:bg-rose-100 border-l-4 border-rose-400';
+                    else if (isCancelada) classeCorFundo = 'bg-rose-50 hover:bg-rose-100 border-l-4 border-rose-500';
                     else if (isRecusada) classeCorFundo = 'bg-red-50 hover:bg-red-100 border-l-4 border-red-400'; 
                     else if (isAprovada) classeCorFundo = 'bg-emerald-50 hover:bg-emerald-100 border-l-4 border-emerald-500'; 
                     else classeCorFundo = (index%2===0 ? 'bg-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100');
@@ -2120,7 +2094,6 @@
                                 valorExibicao = `<span class="font-bold text-slate-800 text-[11px] bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">${valorBruto}</span>`;
                             } else if (colLower === 'status') {
                                 if (isInterrompida) valorExibicao = '<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-200 text-amber-950 border border-amber-400">ESTADIA INTERROMPIDA</span>';
-                                else if (isCanceladaHospede) valorExibicao = '<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-100 text-rose-900 border border-rose-400 shadow-2xs">CANCELADA (HÓSPEDE)</span>';
                                 else if (isAprovada) valorExibicao = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">APROVADA</span>';
                                 else if (statusRow === 'FINALIZADA') valorExibicao = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-700 border border-slate-300">FINALIZADA</span>';
                                 else if (isCancelada) valorExibicao = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-100 text-rose-800 border border-rose-300">CANCELADA</span>';
@@ -2134,12 +2107,6 @@
                                 valorExibicao = formatarDataBr(valorBruto);
                             } else if (colLower === 'motivo_ocorrencia') {
                                 valorExibicao = `<span class="font-semibold text-red-900 bg-red-50 px-2 py-0.5 rounded border border-red-200 text-[11px]">${String(valorBruto).toUpperCase()}</span>`;
-                            } else if (colLower === 'observacao' || colLower === 'obs') {
-                                if (isCanceladaHospede) {
-                                    valorExibicao = `<span class="text-rose-900 font-semibold bg-rose-50 border border-rose-200 px-2 py-0.5 rounded text-[11px]">${valorBruto}</span>`;
-                                } else {
-                                    valorExibicao = String(valorBruto);
-                                }
                             } else if (colLower === 'dias_restantes') { 
                                 if (isRecusada || isCancelada) { 
                                     valorExibicao = '<span class="text-gray-400">-</span>'; 
@@ -2159,28 +2126,15 @@
                             }
                         }
 
-                        // Formatação de Valores Financeiros
                         if ((colLower === 'valor_total' || colLower === 'valor_pago' || colLower === 'saldo_restante') && !isNaN(valorBruto)) {
                             let num = Number(valorBruto);
                             let corTexto = 'text-gray-800';
-
                             if (colLower === 'saldo_restante') {
-                                if (isCanceladaHospede || isCancelada) {
-                                    corTexto = 'text-slate-400 font-normal italic';
-                                    valorExibicao = `<span class="${corTexto}">R$ 0,00 (Cancelado)</span>`;
-                                } else if (num > 0) {
-                                    corTexto = 'text-amber-700 font-extrabold bg-amber-50 px-1.5 py-0.5 rounded-md border border-amber-200';
-                                    valorExibicao = `<span class="${corTexto}">${num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>`;
-                                } else {
-                                    corTexto = 'text-emerald-700 font-bold';
-                                    valorExibicao = `<span class="${corTexto}">${num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>`;
-                                }
-                            } else if (colLower === 'valor_total' && (isCanceladaHospede || isCancelada) && num === 0) {
-                                valorExibicao = `<span class="text-slate-400 font-normal line-through">R$ ${(row.valor_total_original || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>`;
-                            } else {
-                                if (colLower === 'valor_pago') corTexto = 'text-emerald-700 font-bold';
-                                valorExibicao = `<span class="${corTexto}">${num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>`;
+                                corTexto = num > 0 ? 'text-amber-700 font-extrabold bg-amber-50 px-1.5 py-0.5 rounded-md border border-amber-200' : 'text-emerald-700 font-bold';
+                            } else if (colLower === 'valor_pago') {
+                                corTexto = 'text-emerald-700 font-bold';
                             }
+                            valorExibicao = `<span class="${corTexto}">${num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>`;
                         }
 
                         if (colLower === 'status_ocupacao') {
@@ -2203,7 +2157,7 @@
         }
 
         // =========================================================================
-        // SUÍTES - CALENDÁRIO VISUAL E RESTANTE DOS RECURSOS PRESERVADOS
+        // SUÍTES - CALENDÁRIO VISUAL
         // =========================================================================
         let suitesVisivel = false;
         let reservasFuturasCache = [];
@@ -2383,6 +2337,9 @@
             }
         }
 
+        // =========================================================================
+        // CALENDÁRIO GERAL NO RELATÓRIOS
+        // =========================================================================
         let calGeralRelSuiteIndex = 0;
         let calGeralRelDataRef = new Date();
         let calGeralRelReservasCache = [];
@@ -2429,6 +2386,7 @@
 
         function renderizarPainelSuitesRelatorios() {
             const container = document.getElementById('cal-geral-rel-painel-suites');
+
             const totalEl = document.getElementById('cal-geral-rel-total');
             if (!container) return;
             
@@ -2830,6 +2788,7 @@
                     throw error;
                 }
 
+                // Sincronização no CRM de hóspedes
                 try {
                     const dadosHospede = {
                         pousada_id: usuarioIdAtual,
