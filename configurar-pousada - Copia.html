@@ -270,14 +270,10 @@
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         }
 
-
-let nomePousadaOriginal = '';
+        let nomePousadaOriginal = '';
         let usuarioIdAtual = null;
         let cargoUsuarioAtual = 'dono';
         let permissoesUsuarioAtual = {};
-        let tarifasEspeciaisCache = [];
-
-
 
         function mostrarToast(titulo, mensagem, tipo = 'sucesso') {
             const toast = document.getElementById('toast-notificacao');
@@ -437,25 +433,14 @@ let nomePousadaOriginal = '';
                 document.getElementById('aceita-pet').checked = pousada.aceita_pet === true || pousada.aceita_pet === 'true';
             }
 
-           
-
-
             const { data: suites } = await supabaseClient
                 .from('suites')
                 .select('id, nome, fotos, ativa, valor_diaria, hospedes_inclusos, capacidade_hospedes, usa_adicional_customizado, valor_hospede_extra_customizado')
                 .eq('pousada_id', pousadaId)
                 .order('nome');
 
-            const { data: tarifas } = await supabaseClient
-                .from('tarifas_especiais')
-                .select('*')
-                .eq('pousada_id', pousadaId);
-            tarifasEspeciaisCache = tarifas || [];
-
             const container = document.getElementById('suites-container');
             container.innerHTML = '';
-
-
 
             if (suites && suites.length > 0) {
                 suites.forEach(suite => {
@@ -486,51 +471,16 @@ let nomePousadaOriginal = '';
             } else {
                 fotosInfoHtml = `<span class="text-[10px] sm:text-[11px] bg-gray-200 text-gray-600 px-2 py-1 rounded-md border border-gray-300">Sem fotos</span>`;
             }
-const checkedCustom = usa_adicional_customizado === true || usa_adicional_customizado === 'true';
 
-            // Identifica se há tarifa especial para esta suíte
-            let badgeTarifaHtml = '';
-            if (id && tarifasEspeciaisCache.length > 0) {
-                const hojeStr = new Date().toLocaleDateString('sv-SE');
-                const tarifaAtiva = tarifasEspeciaisCache.find(t => {
-                    const atende = (t.suite_id === id);
-                    const vigente = (t.data_inicio && t.data_fim && hojeStr >= t.data_inicio && hojeStr <= t.data_fim);
-                    return atende && vigente;
-                }) || tarifasEspeciaisCache.find(t => t.suite_id === id && t.data_fim >= hojeStr);
-
-                if (tarifaAtiva) {
-                    const vBase = Number(valor_diaria) || 0;
-                    let valorFormatado = '';
-                    if (tarifaAtiva.tipo_ajuste === 'percentual') {
-                        const vCalculado = vBase * (1 + (Number(tarifaAtiva.valor_especial) / 100));
-                        valorFormatado = `+${tarifaAtiva.valor_especial}% (R$ ${vCalculado.toFixed(2)})`;
-                    } else {
-                        valorFormatado = `R$ ${Number(tarifaAtiva.valor_especial).toFixed(2)}`;
-                    }
-                    const rotuloStatus = (hojeStr >= tarifaAtiva.data_inicio && hojeStr <= tarifaAtiva.data_fim)
-                        ? '🟢 Ativa Hoje'
-                        : '⏳ Programada';
-
-                    badgeTarifaHtml = `
-                        <div class="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-300 text-amber-950 px-2.5 py-1 rounded-xl text-[10px] sm:text-xs font-extrabold shadow-2xs" title="${tarifaAtiva.descricao || 'Tarifa Especial'} (${tarifaAtiva.data_inicio} até ${tarifaAtiva.data_fim})">
-                            <span>🚩</span>
-                            <span class="text-amber-800 uppercase tracking-wider font-bold">Tarifa Especial:</span>
-                            <strong class="text-blue-900">${valorFormatado}</strong>
-                            <span class="text-[9px] font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-1.5 py-0.5 rounded-full">${rotuloStatus}</span>
-                        </div>
-                    `;
-                }
-            }
+            const checkedCustom = usa_adicional_customizado === true || usa_adicional_customizado === 'true';
 
             div.innerHTML = `
-                <div class="flex items-center justify-between gap-2.5 w-full flex-wrap">
-                    <div class="flex items-center gap-2.5 flex-1 min-w-[200px]">
-                        <div class="text-slate-400 text-xs sm:text-sm"><i class="fa-solid fa-bed"></i></div>
+                <div class="flex items-center gap-2.5 w-full">
+                    <div class="text-slate-400 text-xs sm:text-sm"><i class="fa-solid fa-bed"></i></div>
+                    <div class="flex-1">
                         <input type="text" class="suite-input w-full p-2 sm:p-2.5 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="Nome da Suíte (ex: Suíte Master 01)" value="${nome}">
                     </div>
-                    ${badgeTarifaHtml}
                 </div>
-
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-2 w-full">
                     <div>
                         <label class="block text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase mb-0.5">Diária Base (R$)</label>
