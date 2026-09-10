@@ -76,10 +76,15 @@
                 <h2 class="text-lg sm:text-xl font-bold text-gray-800">Painel Principal - Controle de Suítes</h2>
                 <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold w-fit">Carregando...</span>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
                 <div id="kpi-mes-container" class="hidden bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-full text-indigo-900 text-xs font-bold flex items-center gap-1.5">
                     <span>📊</span> <span id="kpi-texto-mes">Reservas no mês: 0</span>
                 </div>
+                <!-- NOME DO USUÁRIO LOGADO -->
+                <span id="badge-usuario-logado" class="text-xs font-bold text-slate-800 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-300 flex items-center gap-1.5 shadow-2xs">
+                    <i class="fa-solid fa-user text-blue-600"></i>
+                    <strong id="texto-nome-usuario">Carregando...</strong>
+                </span>
                 <span id="badge-perfil-cargo" class="text-xs font-bold text-slate-700 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-300 w-fit">Perfil: Gestor</span>
                 <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200 w-fit">Sistema Online</span>
             </div>
@@ -634,6 +639,7 @@
         let cargoUsuarioAtual = 'dono';
         let permissoesUsuarioAtual = {};
         let usuarioSessaoRealId = null;
+        let nomeUsuarioLogadoAtual = '';
         let nomePousadaAtual = "nossa pousada";
         let diariaMinimaPousadaCache = 1;
         let reservasGlobaisCache = [];
@@ -860,6 +866,9 @@
                     const badgeCargo = document.getElementById('badge-perfil-cargo');
                     if (badgeCargo) badgeCargo.innerText = "Perfil: Super Admin";
 
+                    const elNomeUsuario = document.getElementById('texto-nome-usuario');
+                    if (elNomeUsuario) elNomeUsuario.innerText = "Administrador Master";
+
                     await carregarDashboard();
                     return;
                 }
@@ -881,6 +890,10 @@
             cargoUsuarioAtual = isMaster ? 'dono' : (usuarioPerfil?.cargo || 'dono');
             permissoesUsuarioAtual = usuarioPerfil?.permissoes || {};
             usuarioIdAtual = usuarioPerfil?.pousada_id || session.user.id;
+
+            nomeUsuarioLogadoAtual = usuarioPerfil?.nome_completo || session.user.user_metadata?.nome_completo || session.user.user_metadata?.nome || (session.user.email ? session.user.email.split('@')[0] : 'Gestor');
+            const elNomeUsuario = document.getElementById('texto-nome-usuario');
+            if (elNomeUsuario) elNomeUsuario.innerText = nomeUsuarioLogadoAtual;
 
             const temOutrosPrivilegios = cargoUsuarioAtual === 'dono' || 
                 temPermissao('reservas') || 
@@ -1681,7 +1694,7 @@
                         : 'bg-pink-50 border-2 border-pink-300 text-pink-950';
 
                     const badgeCard = estaEmAndamento
-                        ? `<span class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-amber-500 text-white uppercase shadow-xs flex items-center gap-1.5"><i class="fa-solid fa-spinner fa-spin text-[10px]"></i> Em Limpeza</span>`
+                        ? `<span class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-amber-500 text-white uppercase shadow-xs flex items-center gap-1.5"><i class="fa-solid fa-spinner fa-spin text-[8px]"></i> Em Limpeza</span>`
                         : `<span class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-pink-600 text-white uppercase shadow-xs">Limpeza</span>`;
 
                     const subTextoLimpeza = estadiaOcupandoHoje 
