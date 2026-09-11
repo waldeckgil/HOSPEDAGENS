@@ -128,17 +128,23 @@
                 
                 <!-- Coluna Esquerda: Dados da Pousada e Regras -->
                 <div class="md:col-span-1 space-y-4 sm:space-y-6">
-                    <!-- DADOS DA POUSADA -->
+                    <!-- DADOS DA POUSADA E DO GESTOR -->
                     <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-xs border border-gray-200">
                         <h2 class="text-sm sm:text-base font-bold text-slate-900 mb-3 flex items-center gap-2">
-                            <i class="fa-solid fa-building text-blue-600"></i> Dados da Pousada
+                            <i class="fa-solid fa-building text-blue-600"></i> Dados da Pousada & Gestor
                         </h2>
                         
                         <div class="space-y-3">
                             <div>
-                                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Nome da Pousada</label>
-                                <input type="text" id="nome-pousada" class="w-full p-2.5 sm:p-3 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="Carregando...">
+                                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Nome da Pousada *</label>
+                                <input type="text" id="nome-pousada" required class="w-full p-2.5 sm:p-3 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="Ex: Pousada Recanto dos Lagos">
                                 <p class="text-[10px] text-slate-400 mt-1">Nome exibido para os clientes no sistema.</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Nome Completo do Gestor *</label>
+                                <input type="text" id="nome-gestor" required class="w-full p-2.5 sm:p-3 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="Ex: Carlos Eduardo Silva">
+                                <p class="text-[10px] text-slate-400 mt-1">Responsável titular pela pousada no sistema.</p>
                             </div>
                         </div>
                     </div>
@@ -196,8 +202,8 @@
                         <div class="flex items-start gap-2.5">
                             <div class="text-blue-600"><i class="fa-solid fa-circle-info text-sm mt-0.5"></i></div>
                             <div class="text-[11px] text-blue-900 leading-relaxed">
-                                <span class="font-bold block mb-0.5">Dica de Gestão:</span>
-                                Você pode pausar uma suíte temporariamente para ocultá-la da vitrine de reservas sem precisar apagá-la.
+                                <span class="font-bold block mb-0.5">Regra Operacional:</span>
+                                Para iniciar as operações da pousada, é obrigatório manter pelo menos 1 (uma) suíte com nome e valor cadastrados.
                             </div>
                         </div>
                     </div>
@@ -210,8 +216,9 @@
                             <div>
                                 <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
                                     <i class="fa-solid fa-door-open text-blue-600"></i> Suítes da Pousada
+                                    <span class="text-xs text-red-500 font-bold">* (Pelo menos 1 obrigatória)</span>
                                 </h2>
-                                <p class="text-[11px] text-slate-500">Unidades disponíveis para hóspedes.</p>
+                                <p class="text-[11px] text-slate-500">Cadastre as acomodações disponíveis para reserva.</p>
                             </div>
                             <button onclick="adicionarCampo()" class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer">
                                 <i class="fa-solid fa-plus"></i> Nova Suíte
@@ -300,6 +307,9 @@
             if (tipo === 'sucesso') {
                 toastContent.className = "bg-gray-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800";
                 toastIcone.innerText = "🎉";
+            } else if (tipo === 'alerta') {
+                toastContent.className = "bg-amber-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-amber-800";
+                toastIcone.innerText = "⚠️";
             } else {
                 toastContent.className = "bg-red-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-red-800";
                 toastIcone.innerText = "🚨";
@@ -316,6 +326,9 @@
             if (tipo === 'erro') {
                 container.classList.add('bg-red-50', 'border-red-200', 'text-red-700');
                 container.innerHTML = `<i class="fa-solid fa-circle-exclamation text-red-500 text-sm"></i> <span>${texto}</span>`;
+            } else if (tipo === 'alerta') {
+                container.classList.add('bg-amber-50', 'border-amber-200', 'text-amber-800');
+                container.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-500 text-sm"></i> <span>${texto}</span>`;
             } else {
                 container.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-700');
                 container.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500 text-sm"></i> <span>${texto}</span>`;
@@ -380,7 +393,7 @@
 
             // 2. MODO COMUM (COLABORADOR OU DONO)
             if (!usuarioIdAtual) {
-                const { data: usuarioPerfil, error: errPerfil } = await supabaseClient
+                const { data: usuarioPerfil } = await supabaseClient
                     .from('usuarios')
                     .select('pousada_id, cargo, ativo, nome_completo, permissoes')
                     .eq('user_id', session.user.id)
@@ -395,15 +408,13 @@
 
                 cargoUsuarioAtual = usuarioPerfil?.cargo || 'dono';
                 permissoesUsuarioAtual = usuarioPerfil?.permissoes || {};
-                
-                // Se pousada_id for nulo, o ID da pousada do Dono é o seu próprio auth UID
                 usuarioIdAtual = usuarioPerfil?.pousada_id || session.user.id;
 
-                nomeUsuarioLogadoAtual = usuarioPerfil?.nome_completo || session.user.user_metadata?.nome_completo || session.user.user_metadata?.nome || (session.user.email ? session.user.email.split('@')[0] : 'Gestor');
+                nomeUsuarioLogadoAtual = usuarioPerfil?.nome_completo || session.user.user_metadata?.nome_completo || session.user.user_metadata?.nome || '';
                 const elNomeUsuario = document.getElementById('texto-nome-usuario');
-                if (elNomeUsuario) elNomeUsuario.innerText = nomeUsuarioLogadoAtual;
+                if (elNomeUsuario) elNomeUsuario.innerText = nomeUsuarioLogadoAtual || 'Gestor';
 
-                // Trava de segurança para colaboradores sem permissão
+                // Trava de segurança para colaboradores sem privilégio
                 if (cargoUsuarioAtual !== 'dono' && !temPermissao('configuracoes')) {
                     alert("Acesso restrito: você não possui privilégio para alterar a configuração de suítes da pousada.");
                     window.location.href = 'dashboard.html';
@@ -430,7 +441,8 @@
 
         async function carregarConfiguracao(pousadaId) {
             esconderMensagem();
-            
+
+            // Busca dados da pousada
             const { data: pousada, error: errPousada } = await supabaseClient
                 .from('pousadas')
                 .select('id, nome, valor_pet, valor_hospede_extra, idade_limite_crianca, aceita_pet, diaria_minima, horario_checkin, horario_checkout')
@@ -438,20 +450,37 @@
                 .maybeSingle();
 
             if (errPousada) {
-                mostrarMensagem('Erro ao consultar dados da pousada: ' + errPousada.message, 'erro');
+                mostrarMensagem('Erro ao carregar dados da pousada: ' + errPousada.message, 'erro');
                 return;
             }
 
             pousadaExisteNoBanco = !!pousada;
 
-            const nomePousada = (pousada && pousada.nome) ? pousada.nome : "Minha Pousada";
-            nomePousadaOriginal = (pousada && pousada.nome) ? pousada.nome : '';
+            const nomePousada = (pousada && pousada.nome) ? pousada.nome : "";
+            nomePousadaOriginal = nomePousada;
 
-            document.getElementById('nome-pousada').value = nomePousadaOriginal;
-            document.getElementById('titulo-pousada').innerText = nomePousada;
-            document.getElementById('nome-pousada-sidebar').innerText = nomePousada;
+            document.getElementById('nome-pousada').value = nomePousada;
+            document.getElementById('titulo-pousada').innerText = nomePousada || "Nova Pousada";
+            document.getElementById('nome-pousada-sidebar').innerText = nomePousada || "Painel 360";
             const elModoMaster = document.getElementById('nome-pousada-modo-master');
-            if (elModoMaster) elModoMaster.innerText = nomePousada;
+            if (elModoMaster) elModoMaster.innerText = nomePousada || "Nova Pousada";
+
+            // Busca o nome completo do gestor
+            const { data: usuarioPerfil } = await supabaseClient
+                .from('usuarios')
+                .select('nome_completo')
+                .eq('pousada_id', pousadaId)
+                .eq('cargo', 'dono')
+                .maybeSingle();
+
+            if (usuarioPerfil && usuarioPerfil.nome_completo) {
+                document.getElementById('nome-gestor').value = usuarioPerfil.nome_completo;
+                nomeUsuarioLogadoAtual = usuarioPerfil.nome_completo;
+                const elNomeUsuario = document.getElementById('texto-nome-usuario');
+                if (elNomeUsuario) elNomeUsuario.innerText = usuarioPerfil.nome_completo;
+            } else if (nomeUsuarioLogadoAtual) {
+                document.getElementById('nome-gestor').value = nomeUsuarioLogadoAtual;
+            }
 
             if (pousada) {
                 document.getElementById('valor-pet').value = pousada.valor_pet ?? '';
@@ -471,10 +500,10 @@
                 .order('nome');
 
             if (errSuites) {
-                mostrarMensagem('Aviso ao carregar suítes: ' + errSuites.message, 'erro');
+                mostrarMensagem('Aviso ao consultar suítes: ' + errSuites.message, 'alerta');
             }
 
-            // Busca as tarifas especiais
+            // Busca as tarifas especiais para exibição de badges
             const { data: tarifas } = await supabaseClient
                 .from('tarifas_especiais')
                 .select('*')
@@ -516,7 +545,7 @@
 
             const checkedCustom = usa_adicional_customizado === true || usa_adicional_customizado === 'true';
 
-            // Identifica se há tarifa especial para esta suíte
+            // Tarifa especial badge
             let badgeTarifaHtml = '';
             if (id && tarifasEspeciaisCache.length > 0) {
                 const hojeStr = new Date().toLocaleDateString('sv-SE');
@@ -554,14 +583,14 @@
                 <div class="flex items-center justify-between gap-2.5 w-full flex-wrap">
                     <div class="flex items-center gap-2.5 flex-1 min-w-[200px]">
                         <div class="text-slate-400 text-xs sm:text-sm"><i class="fa-solid fa-bed"></i></div>
-                        <input type="text" class="suite-input w-full p-2 sm:p-2.5 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="Nome da Suíte (ex: Suíte Master 01)" value="${nome}">
+                        <input type="text" class="suite-input w-full p-2 sm:p-2.5 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="Nome da Suíte (ex: Suíte Master 01) *" value="${nome}">
                     </div>
                     ${badgeTarifaHtml}
                 </div>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-2 w-full">
                     <div>
-                        <label class="block text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase mb-0.5">Diária Base (R$)</label>
-                        <input type="number" step="0.01" class="suite-valor-diaria w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-bold focus:ring-2 focus:ring-blue-500 outline-none" placeholder="100.00" value="${valor_diaria ?? ''}">
+                        <label class="block text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase mb-0.5">Diária Base (R$) *</label>
+                        <input type="number" step="0.01" min="1" class="suite-valor-diaria w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-bold focus:ring-2 focus:ring-blue-500 outline-none" placeholder="150.00" value="${valor_diaria ?? ''}">
                     </div>
                     <div>
                         <label class="block text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase mb-0.5">Inclusos</label>
@@ -617,6 +646,13 @@
         }
 
         async function removerCampo(botao) {
+            const totalLinhas = document.querySelectorAll('#suites-container > .suite-row').length;
+            if (totalLinhas <= 1) {
+                mostrarMensagem('A pousada precisa ter pelo menos 1 (uma) suíte cadastrada no sistema.', 'alerta');
+                mostrarToast('Ação Bloqueada', 'A pousada precisa de pelo menos uma suíte.', 'alerta');
+                return;
+            }
+
             const rowDiv = botao.closest('.suite-row');
             if (!rowDiv) return;
             const suiteId = rowDiv.dataset.suiteId;
@@ -692,10 +728,11 @@
             esconderMensagem();
             const btnSalvar = document.getElementById('btn-salvar-config');
             btnSalvar.disabled = true;
-            btnSalvar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
+            btnSalvar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando dados...';
 
             try {
                 const nomePousada = document.getElementById('nome-pousada').value.trim();
+                const nomeGestor = document.getElementById('nome-gestor').value.trim();
                 const linhasSuites = document.querySelectorAll('#suites-container > .suite-row');
 
                 const valorPetRaw = document.getElementById('valor-pet')?.value;
@@ -718,34 +755,37 @@
                     aceita_pet: aceitaPet
                 };
 
-                // Se a pousada ainda não existe na tabela pousadas, garante o status active
                 if (!pousadaExisteNoBanco) {
                     dadosPousada.status = 'active';
                 }
 
-                // UPSERT na tabela pousadas
+                // 1. UPSERT NA TABELA POUSADAS
                 const { error: errPousada } = await supabaseClient
                     .from('pousadas')
                     .upsert(dadosPousada, { onConflict: 'id' });
 
                 if (errPousada) {
-                    mostrarMensagem('Erro ao salvar os dados da pousada: ' + errPousada.message, 'erro');
-                    mostrarToast('Erro no Banco', errPousada.message, 'erro');
-                    return;
+                    throw new Error('Falha ao salvar dados da pousada: ' + errPousada.message);
                 }
                 pousadaExisteNoBanco = true;
 
-                // Garante que a tabela usuarios tem o pousada_id preenchido
+                // 2. ATUALIZAÇÃO DA TABELA USUARIOS (NOME COMPLETO E POUSADA_ID)
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 if (session && session.user) {
-                    await supabaseClient
+                    const { error: errUsuario } = await supabaseClient
                         .from('usuarios')
-                        .update({ pousada_id: usuarioIdAtual })
-                        .eq('user_id', session.user.id)
-                        .is('pousada_id', null);
+                        .update({ 
+                            nome_completo: nomeGestor,
+                            pousada_id: usuarioIdAtual 
+                        })
+                        .eq('user_id', session.user.id);
+
+                    if (errUsuario) {
+                        console.warn("Aviso ao atualizar perfil do usuário:", errUsuario.message);
+                    }
                 }
-                
-                // Processa cada suíte
+
+                // 3. PERSISTÊNCIA DAS SUÍTES
                 for (const div of linhasSuites) {
                     const input = div.querySelector('.suite-input');
                     const checkboxAtiva = div.querySelector('.suite-ativa-checkbox');
@@ -800,9 +840,7 @@
                             .eq('pousada_id', usuarioIdAtual);
 
                         if (errUpdateSuite) {
-                            mostrarMensagem(`Erro ao atualizar a suíte "${valorNome}": ${errUpdateSuite.message}`, 'erro');
-                            mostrarToast('Erro ao Salvar Suíte', errUpdateSuite.message, 'erro');
-                            return;
+                            throw new Error(`Erro ao atualizar suíte "${valorNome}": ${errUpdateSuite.message}`);
                         }
                     } else {
                         const { data: novaSuiteInserida, error: errInserir } = await supabaseClient
@@ -823,9 +861,7 @@
                             .single();
 
                         if (errInserir) {
-                            mostrarMensagem(`Erro ao cadastrar a suíte "${valorNome}": ${errInserir.message}`, 'erro');
-                            mostrarToast('Erro de Permissão (RLS)', errInserir.message, 'erro');
-                            return;
+                            throw new Error(`Erro ao cadastrar suíte "${valorNome}": ${errInserir.message}`);
                         }
 
                         if (novaSuiteInserida) {
@@ -845,8 +881,8 @@
                 await carregarConfiguracao(usuarioIdAtual);
 
             } catch (errGeral) {
-                mostrarMensagem('Erro inesperado: ' + errGeral.message, 'erro');
-                mostrarToast('Erro', errGeral.message, 'erro');
+                mostrarMensagem(errGeral.message, 'erro');
+                mostrarToast('Erro ao Salvar', errGeral.message, 'erro');
             } finally {
                 btnSalvar.disabled = false;
                 btnSalvar.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar Alterações';
@@ -856,12 +892,57 @@
         async function salvarConfiguracao() {
             esconderMensagem();
             const nomePousada = document.getElementById('nome-pousada').value.trim();
+            const nomeGestor = document.getElementById('nome-gestor').value.trim();
+            const linhasSuites = document.querySelectorAll('#suites-container > .suite-row');
             
+            // 1. Validação do Nome da Pousada
             if (!nomePousada) {
-                mostrarMensagem('O nome da pousada não pode ficar em branco.', 'erro');
+                mostrarMensagem('O Nome da Pousada é obrigatório.', 'erro');
+                document.getElementById('nome-pousada').focus();
                 return;
             }
 
+            // 2. Validação do Nome do Gestor
+            if (!nomeGestor) {
+                mostrarMensagem('O Nome Completo do Gestor é obrigatório.', 'erro');
+                document.getElementById('nome-gestor').focus();
+                return;
+            }
+
+            // 3. Validação da Regra de Negócio: Obrigatório Pelo Menos 1 Suíte Válida
+            let encontrouSuiteValida = false;
+            let suiteInvalidaMotivo = '';
+
+            for (const div of linhasSuites) {
+                const inputNome = div.querySelector('.suite-input');
+                const inputDiaria = div.querySelector('.suite-valor-diaria');
+
+                const nomeSuite = inputNome ? inputNome.value.trim() : '';
+                const valorDiaria = inputDiaria ? parseFloat(inputDiaria.value) : 0;
+
+                if (nomeSuite !== '') {
+                    if (isNaN(valorDiaria) || valorDiaria <= 0) {
+                        suiteInvalidaMotivo = `A suíte "${nomeSuite}" precisa ter um valor de diária base válido (maior que zero).`;
+                        inputDiaria.focus();
+                        break;
+                    }
+                    encontrouSuiteValida = true;
+                }
+            }
+
+            if (suiteInvalidaMotivo) {
+                mostrarMensagem(suiteInvalidaMotivo, 'erro');
+                return;
+            }
+
+            if (!encontrouSuiteValida) {
+                mostrarMensagem('É obrigatório cadastrar pelo menos 1 (uma) suíte com nome e diária base para operar a pousada.', 'erro');
+                const primeiroInputSuite = document.querySelector('.suite-input');
+                if (primeiroInputSuite) primeiroInputSuite.focus();
+                return;
+            }
+
+            // Confirmação caso o nome da pousada tenha mudado
             if (nomePousadaOriginal && nomePousadaOriginal !== nomePousada) {
                 const modal = document.getElementById('modal-confirmacao');
                 const titulo = document.getElementById('titulo-modal');
