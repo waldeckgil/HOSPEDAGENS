@@ -202,58 +202,44 @@
         </div>
     </div>
 
-    <!-- MODAL CENTRALIZADO DE PRÉVIA / CONFIRMAÇÃO DE NOVA RESERVA -->
-    <div id="modal-confirmacao-nova-reserva" class="hidden fixed inset-0 bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-4 z-[85]">
-        <div class="bg-white p-6 sm:p-7 rounded-3xl w-full max-w-md shadow-2xl border border-blue-100 space-y-4">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-xl font-bold flex-shrink-0 shadow-2xs">
-                    <i class="fa-solid fa-calendar-check"></i>
-                </div>
-                <div>
-                    <h3 class="text-base sm:text-lg font-extrabold text-gray-900">Confirmar Nova Reserva?</h3>
-                    <p class="text-xs text-gray-500">Revise os dados antes de gerar a reserva e notificar o hóspede.</p>
-                </div>
+    <!-- MODAL CENTRALIZADO DE SUCESSO AO CRIAR RESERVA -->
+    <div id="modal-sucesso-reserva" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4 z-[90]">
+        <div class="bg-white p-6 sm:p-8 rounded-3xl w-full max-w-md shadow-2xl border border-emerald-100 text-center space-y-4">
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl font-extrabold shadow-sm">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+                <h3 class="text-xl font-extrabold text-gray-900">Reserva Criada com Sucesso!</h3>
+                <p class="text-xs sm:text-sm text-gray-500 mt-1">A acomodação foi reservada com sucesso para o hóspede.</p>
             </div>
 
-            <div class="bg-blue-50/70 border border-blue-200 rounded-2xl p-3.5 space-y-2 text-xs text-blue-950">
-                <div class="flex justify-between items-center pb-1.5 border-b border-blue-200/60">
+            <div class="bg-emerald-50/80 border border-emerald-200 rounded-2xl p-4 text-xs text-left space-y-2 text-emerald-950">
+                <div class="flex justify-between items-center pb-1.5 border-b border-emerald-200/60">
                     <span class="text-gray-500 font-bold uppercase text-[10px]">Hóspede:</span>
-                    <strong id="conf-nova-hospede" class="font-bold text-gray-900">-</strong>
+                    <strong id="modal-sucesso-hospede" class="text-gray-900 text-xs">-</strong>
                 </div>
-                <div class="flex justify-between items-center pb-1.5 border-b border-blue-200/60">
-                    <span class="text-gray-500 font-bold uppercase text-[10px]">WhatsApp:</span>
-                    <strong id="conf-nova-whatsapp" class="font-bold text-gray-900">-</strong>
+                <div class="flex justify-between items-center pb-1.5 border-b border-emerald-200/60">
+                    <span class="text-gray-500 font-bold uppercase text-[10px]">Suíte:</span>
+                    <strong id="modal-sucesso-suite" class="text-blue-900 text-xs">-</strong>
                 </div>
-                <div class="flex justify-between items-center pb-1.5 border-b border-blue-200/60">
-                    <span class="text-gray-500 font-bold uppercase text-[10px]">Acomodação:</span>
-                    <strong id="conf-nova-suite" class="font-bold text-blue-900">-</strong>
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <div class="bg-white/80 p-2 rounded-xl border border-emerald-200 text-center">
+                        <span class="text-[10px] text-gray-500 uppercase font-bold block">Check-in</span>
+                        <strong id="modal-sucesso-checkin" class="text-xs text-emerald-800 block">-</strong>
+                    </div>
+                    <div class="bg-white/80 p-2 rounded-xl border border-emerald-200 text-center">
+                        <span class="text-[10px] text-gray-500 uppercase font-bold block">Check-out</span>
+                        <strong id="modal-sucesso-checkout" class="text-xs text-emerald-800 block">-</strong>
+                    </div>
                 </div>
-                <div class="flex justify-between items-center pb-1.5 border-b border-blue-200/60">
-                    <span class="text-gray-500 font-bold uppercase text-[10px]">Período de Estadia:</span>
-                    <strong id="conf-nova-periodo" class="text-emerald-800 font-extrabold">-</strong>
-                </div>
-                <div class="flex justify-between items-center pb-1.5 border-b border-blue-200/60">
-                    <span class="text-gray-500 font-bold uppercase text-[10px]">Total Calculado:</span>
-                    <strong id="conf-nova-total" class="text-blue-900 font-extrabold text-sm">R$ 0,00</strong>
-                </div>
-                <div class="flex justify-between items-center pt-0.5">
-                    <span class="text-amber-900 font-bold uppercase text-[10px]">Sinal / Pagamento:</span>
-                    <strong id="conf-nova-sinal" class="text-emerald-700 font-extrabold text-sm">R$ 0,00</strong>
+                <div class="text-center pt-1 text-[11px] font-bold text-emerald-900" id="modal-sucesso-diarias">
+                    0 diária(s) calculada(s)
                 </div>
             </div>
 
-            <p class="text-[11px] text-gray-500 leading-snug">
-                Ao confirmar, o sistema gerará o comprovante oficial e abrirá o WhatsApp do hóspede com todos os dados da reserva.
-            </p>
-
-            <div class="grid grid-cols-2 gap-3 pt-1">
-                <button type="button" onclick="fecharModalConfirmacaoNovaReserva()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-4 rounded-xl transition text-xs sm:text-sm cursor-pointer">
-                    ✕ Revisar / Cancelar
-                </button>
-                <button type="button" id="btn-confirmar-gerar-reserva-final" class="bg-green-600 hover:bg-green-700 text-white font-extrabold py-2.5 px-4 rounded-xl transition text-xs sm:text-sm shadow-md flex items-center justify-center gap-1.5 cursor-pointer">
-                    <i class="fa-solid fa-check"></i> Confirmar Reserva
-                </button>
-            </div>
+            <button type="button" onclick="fecharModalSucessoReserva()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 px-4 rounded-xl transition shadow-md text-sm cursor-pointer">
+                Entendido / Continuar
+            </button>
         </div>
     </div>
 
@@ -415,16 +401,11 @@
                 <input type="hidden" id="edit-status-original">
                 <input type="hidden" id="edit-reserva-id">
                 
-                <!-- SELETOR DE SUÍTE COM BOTÃO DE VER CALENDÁRIO / DISPONIBILIDADE -->
+                <!-- SELETOR DE SUÍTE -->
                 <div>
                     <label class="block text-xs font-bold text-gray-700 uppercase mb-1 flex items-center justify-between">
                         <span>Acomodação / Suíte</span>
-                        <div class="flex items-center gap-1.5">
-                            <button type="button" onclick="abrirCalendarioDaSuiteModal()" class="inline-flex items-center gap-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-md transition cursor-pointer shadow-2xs">
-                                <i class="fa-solid fa-calendar-days text-emerald-700"></i> Ver Calendário da Suíte
-                            </button>
-                            <span id="badge-transferencia-topo" class="hidden text-[10px] bg-purple-100 text-purple-800 px-2 py-0.5 rounded-md font-extrabold uppercase">🔄 Transferência</span>
-                        </div>
+                        <span id="badge-transferencia-topo" class="hidden text-[10px] bg-purple-100 text-purple-800 px-2 py-0.5 rounded-md font-extrabold uppercase">🔄 Transferência</span>
                     </label>
                     <select id="edit-suite-id" class="w-full p-3 border-2 border-blue-200 focus:border-blue-600 rounded-xl font-bold bg-white text-sm" onchange="aoMudarSuiteModal()">
                     </select>
@@ -476,7 +457,7 @@
                 <div id="resumo-dinamico-container" class="bg-blue-50 border border-blue-200 p-3 rounded-xl space-y-1 text-xs text-blue-900">
                     <div class="flex justify-between">
                         <span>Qtd. Diárias Calculadas:</span>
-                        <strong id="modal-qtd-diarias">0 diária(s)</strong>
+                        <strong id="modal-qtd-diarias">1 diária(s)</strong>
                     </div>
                     <div id="bloco-financeiro-modal-resumo" class="space-y-1">
                         <div class="flex justify-between">
@@ -518,7 +499,7 @@
                             </div>
                             <div>
                                 <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1">WhatsApp *</label>
-                                <input type="text" id="edit-whatsapp" placeholder="WhatsApp com DDD *" maxlength="15" class="w-full p-3 border rounded-xl text-sm font-semibold" oninput="aoDigitarWhatsApp(this)">
+                                <input type="text" id="edit-whatsapp" placeholder="WhatsApp com DDD (mínimo 10 dígitos) *" maxlength="15" class="w-full p-3 border rounded-xl text-sm font-semibold" oninput="aoDigitarWhatsApp(this)">
                             </div>
                         </div>
 
@@ -584,20 +565,6 @@
                                     <input type="text" id="edit-uf" maxlength="2" placeholder="EX: RJ" class="w-full p-2.5 border rounded-xl text-xs uppercase font-extrabold text-center bg-white" oninput="this.value = this.value.toUpperCase()">
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- ANEXAR DOCUMENTO / CNH / RG (OPCIONAL) -->
-                        <div class="bg-blue-50/70 p-3.5 rounded-2xl border border-blue-200 space-y-1.5">
-                            <label class="block text-[11px] font-extrabold text-blue-900 uppercase flex items-center justify-between">
-                                <span class="flex items-center gap-1.5">
-                                    <i class="fa-solid fa-file-arrow-up text-blue-600"></i> Anexar Foto do Documento / CNH / RG (Opcional)
-                                </span>
-                                <a id="link-doc-anexo-atual" href="#" target="_blank" class="hidden text-[10px] font-bold text-blue-700 hover:text-blue-900 underline flex items-center gap-1">
-                                    <i class="fa-solid fa-eye"></i> Ver Anexo Atual
-                                </a>
-                            </label>
-                            <input type="file" id="edit-arquivo-documento" accept="image/*,.pdf" class="w-full text-xs text-gray-600 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
-                            <p class="text-[10px] text-gray-500">Facilita a conferência e agiliza seu check-in na chegada.</p>
                         </div>
 
                     </div>
@@ -832,12 +799,6 @@
             document.getElementById('modal-calendario-suite').classList.remove('hidden');
         }
 
-        function abrirCalendarioDaSuiteModal() {
-            const suiteId = document.getElementById('edit-suite-id').value;
-            const suiteObj = suitesGlobaisCache.find(s => s.id === suiteId);
-            abrirCalendarioSuite(suiteId, suiteObj ? suiteObj.nome : 'Suíte');
-        }
-
         function fecharModalCalendario() {
             document.getElementById('modal-calendario-suite').classList.add('hidden');
         }
@@ -846,8 +807,8 @@
             document.getElementById('modal-confirmacao-antecipacao')?.classList.add('hidden');
         }
 
-        function fecharModalConfirmacaoNovaReserva() {
-            document.getElementById('modal-confirmacao-nova-reserva')?.classList.add('hidden');
+        function fecharModalSucessoReserva() {
+            document.getElementById('modal-sucesso-reserva')?.classList.add('hidden');
         }
 
         function mudarMesCalendario(direcao) {
@@ -1341,13 +1302,13 @@
         }
 
         function calcularQuantidadeDiarias(checkinStr, checkoutStr) {
-            if (!checkinStr || !checkoutStr) return 0;
+            if (!checkinStr || !checkoutStr) return 1;
             const [anoIn, mesIn, diaIn] = checkinStr.split('-');
             const [anoOut, mesOut, diaOut] = checkoutStr.split('-');
             const d1 = new Date(anoIn, mesIn - 1, diaIn);
             const d2 = new Date(anoOut, mesOut - 1, diaOut);
             const diffDays = Math.round((d2.getTime() - d1.getTime()) / (1000 * 3600 * 24));
-            return diffDays > 0 ? diffDays : 0;
+            return diffDays > 0 ? diffDays : 1;
         }
 
         function somarDiasData(dataStr, dias) {
@@ -2031,15 +1992,16 @@
                             `;
                         }
 
-                        // CABEÇALHO LIMPO: APENAS O BADGE DE DIAS/STATUS (SEM DUPLICAR AS DATAS)
                         let tagDataPrazoTopo = isFutura 
                             ? `<div class="inline-flex items-center gap-1.5 bg-blue-100 text-blue-900 border border-blue-300 text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-2xs">
                                     <i class="fa-solid fa-calendar-days text-blue-700 text-xs"></i>
-                                    <span class="bg-blue-600 text-white text-[9px] px-1.5 py-0.5 rounded-md font-extrabold uppercase">${indicador.texto}</span>
+                                    <span>In: <strong>${formatarDataSimples(aprovada.checkin)}</strong></span>
+                                    <span class="bg-blue-600 text-white text-[9px] px-1.5 py-0.5 rounded-md font-extrabold uppercase ml-0.5">${indicador.texto}</span>
                                </div>`
                             : `<div class="inline-flex items-center gap-1.5 bg-slate-100 text-slate-900 border border-slate-300 text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-2xs">
                                     <i class="fa-solid fa-door-open text-slate-700 text-xs"></i>
-                                    <span class="bg-slate-800 text-white text-[9px] px-1.5 py-0.5 rounded-md font-extrabold uppercase">${indicador.texto}</span>
+                                    <span>Out: <strong>${formatarDataSimples(aprovada.checkout)}</strong></span>
+                                    <span class="bg-slate-800 text-white text-[9px] px-1.5 py-0.5 rounded-md font-extrabold uppercase ml-0.5">${indicador.texto}</span>
                                </div>`;
 
                         let htmlAlertaTopo = '';
@@ -2114,21 +2076,6 @@
                             </div>
                         `;
 
-                        // BOTÃO DE OLHINHO PARA DOCUMENTO ANEXADO
-                        let htmlOlhoDocumento = '';
-                        if (aprovada.documento_url) {
-                            htmlOlhoDocumento = `
-                                <div class="flex justify-between items-center bg-blue-50/80 p-2 rounded-xl border border-blue-200 text-xs">
-                                    <span class="font-bold text-blue-900 flex items-center gap-1.5">
-                                        <i class="fa-solid fa-id-card text-blue-600"></i> Documento Oficial:
-                                    </span>
-                                    <a href="${aprovada.documento_url}" target="_blank" class="inline-flex items-center gap-1 bg-white hover:bg-blue-100 text-blue-700 border border-blue-300 px-2.5 py-1 rounded-lg text-xs font-bold transition shadow-2xs" title="Visualizar CNH / RG">
-                                        <i class="fa-solid fa-eye text-blue-600"></i> Ver Documento
-                                    </a>
-                                </div>
-                            `;
-                        }
-
                         container.innerHTML += `
                             <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-sm ${isFutura ? 'bg-blue-50/70 border-2 border-blue-200 text-blue-950' : 'bg-gray-50 border-2 border-gray-200 text-gray-900'} border-l-4 ${temaSuite.borderActive} flex flex-col justify-between transition hover:shadow-md">
                                 <div>
@@ -2200,7 +2147,6 @@
                                             ${aprovada.endereco ? `<div class="flex justify-between"><span class="text-gray-500">Endereço:</span><strong class="text-gray-800 truncate">${aprovada.endereco}${aprovada.numero ? ', ' + aprovada.numero : ''}${aprovada.bairro ? ' - ' + aprovada.bairro : ''}</strong></div>` : ''}
                                         </div>
 
-                                        ${htmlOlhoDocumento}
                                         ${tagTransferenciaHtml}
                                     </div>
 
@@ -2329,20 +2275,6 @@
                         `;
                     }
 
-                    let htmlOlhoDocPend = '';
-                    if (pend.documento_url) {
-                        htmlOlhoDocPend = `
-                            <div class="flex justify-between items-center bg-white/85 p-2 rounded-xl border border-amber-200 text-xs">
-                                <span class="font-bold text-amber-900 flex items-center gap-1.5">
-                                    <i class="fa-solid fa-id-card text-amber-700"></i> Documento Oficial:
-                                </span>
-                                <a href="${pend.documento_url}" target="_blank" class="inline-flex items-center gap-1 bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 px-2.5 py-1 rounded-lg text-xs font-bold transition shadow-2xs" title="Visualizar CNH / RG">
-                                    <i class="fa-solid fa-eye text-amber-700"></i> Ver Documento
-                                </a>
-                            </div>
-                        `;
-                    }
-
                     container.innerHTML += `
                         <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-sm bg-amber-100 border-2 border-amber-400 border-l-4 ${temaSuite.borderActive} text-amber-950 flex flex-col justify-between transition hover:shadow-md">
                             <div>
@@ -2399,7 +2331,6 @@
                                             <span>🕒</span> <span>Solicitado em: <strong>${dataSolicitacaoFormatada}</strong></span>
                                         </div>
                                     </div>
-                                    ${htmlOlhoDocPend}
                                 </div>
 
                                 <div class="mt-3 bg-amber-200/70 border border-amber-300 rounded-xl p-2 flex gap-2 shadow-2xs">
@@ -2457,10 +2388,6 @@
             document.getElementById('edit-observacao').value = '';
             document.getElementById('modal-titulo').innerText = `Gerenciar Suíte: ${nome}`;
 
-            const inputArquivo = document.getElementById('edit-arquivo-documento');
-            if (inputArquivo) inputArquivo.value = '';
-            const linkAnexoAtual = document.getElementById('link-doc-anexo-atual');
-
             let reserva = null;
             if (reservaId && reservaId !== 'null' && reservaId !== 'undefined' && reservaId !== '') {
                 reserva = reservasGlobaisCache.find(r => r.id === reservaId);
@@ -2486,13 +2413,6 @@
                 document.getElementById('edit-checkin').value = reserva.checkin || '';
                 document.getElementById('edit-checkout').value = reserva.checkout || '';
                 document.getElementById('edit-observacao').value = (reserva.observacao || '').toUpperCase();
-
-                if (reserva.documento_url && linkAnexoAtual) {
-                    linkAnexoAtual.href = reserva.documento_url;
-                    linkAnexoAtual.classList.remove('hidden');
-                } else if (linkAnexoAtual) {
-                    linkAnexoAtual.classList.add('hidden');
-                }
                 
                 document.getElementById('modal-edicao').classList.remove('hidden');
                 aplicarVisibilidadeTaxaPet();
@@ -2518,11 +2438,10 @@
                 document.getElementById('edit-criancas').value = '0';
                 document.getElementById('edit-pet').value = 'false';
                 
-                // INICIA DATAS ZERADAS PARA QUE O GESTOR PREENCHA DO ZERO
-                document.getElementById('edit-checkin').value = '';
-                document.getElementById('edit-checkout').value = '';
+                const hojeStr = new Date().toLocaleDateString('sv-SE');
+                document.getElementById('edit-checkin').value = hojeStr;
+                document.getElementById('edit-checkout').value = somarDiasData(hojeStr, Math.max(diariaMinimaPousadaCache, 1));
                 document.getElementById('edit-observacao').value = '';
-                if (linkAnexoAtual) linkAnexoAtual.classList.add('hidden');
             }
             
             document.getElementById('modal-edicao').classList.remove('hidden');
@@ -2648,16 +2567,16 @@
                     ...(pdfPublicUrl ? { pdf_url: pdfPublicUrl } : {})
                 }).eq('id', reservaId);
 
-                let textoMensagem = `Olá *${nomeHospede}*, sua reserva na *${pousadaNome}* foi aprovada com sucesso! 🎉\n\n`;
-                textoMensagem += `🏨 *Acomodação:* ${suiteNome}\n`;
-                textoMensagem += `📅 *Período:* ${formatarDataSimples(checkin)} até ${formatarDataSimples(checkout)}\n`;
+                let textoMensagem = `Olá ${nomeHospede}, sua reserva na ${pousadaNome} foi aprovada! 🎉\n`;
+                textoMensagem += `Check-in: ${formatarDataSimples(checkin)} | Check-out: ${formatarDataSimples(checkout)}\n`;
+                textoMensagem += `Suíte: ${suiteNome}\n`;
                 if (temPermissao('financeiro')) {
-                    textoMensagem += `💰 *Valor Total:* ${formatarMoeda(valorTotal)}\n\n`;
+                    textoMensagem += `Valor: ${formatarMoeda(valorTotal)}\n\n`;
                 }
                 if (pdfPublicUrl) {
-                    textoMensagem += `📄 *Acesse seu comprovante oficial em PDF no link:*\n${pdfPublicUrl}\n\n`;
+                    textoMensagem += `Acesse o comprovante completo no link abaixo:\n${pdfPublicUrl}\n\n`;
                 }
-                textoMensagem += `Agradecemos a preferência e esperamos por você! 🌿`;
+                textoMensagem += `Esperamos você!`;
 
                 let apenasNumeros = whatsappRaw.replace(/\D/g, '');
                 if (apenasNumeros.length <= 11 && !apenasNumeros.startsWith('55')) apenasNumeros = '55' + apenasNumeros;
@@ -2996,17 +2915,7 @@
             });
             const idadesStr = idadesArr.join(',');
 
-            // SE NÃO HOUVER DATAS (OU ESTIVER ZERADO PARA NOVA RESERVA), MANTÉM ZERADO
-            if (!checkinStr || !checkoutStr) {
-                document.getElementById('modal-qtd-diarias').innerText = `0 diária(s)`;
-                if (temPermissao('financeiro')) {
-                    const elTotal = document.getElementById('modal-valor-total');
-                    if (elTotal) elTotal.innerText = formatarMoeda(0);
-                    const elSaldo = document.getElementById('modal-saldo-restante');
-                    if (elSaldo) elSaldo.innerText = formatarMoeda(0);
-                }
-                return;
-            }
+            if (!checkinStr || !checkoutStr) return;
 
             let d1 = new Date(checkinStr);
             let d2 = new Date(checkoutStr);
@@ -3127,7 +3036,7 @@
                 tagObrigatorioCpf?.classList.add('hidden');
             }
 
-if (status === 'CancelarReserva') {
+            if (status === 'CancelarReserva') {
                 if (!reservaIdAtual) {
                     mostrarErroModal("Esta suíte não possui uma reserva ativa vinculada.");
                     document.getElementById('edit-status').value = statusOriginal || 'Disponível';
@@ -3201,9 +3110,9 @@ if (status === 'CancelarReserva') {
                     document.getElementById('edit-criancas').value = '0';
                     document.getElementById('edit-pet').value = 'false';
                     
-                    // ZERA AS DATAS E OS VALORES PARA O GESTOR DIGITAR DO ZERO
-                    document.getElementById('edit-checkin').value = '';
-                    document.getElementById('edit-checkout').value = '';
+                    const hojeStr = new Date().toLocaleDateString('sv-SE');
+                    document.getElementById('edit-checkin').value = hojeStr;
+                    document.getElementById('edit-checkout').value = somarDiasData(hojeStr, Math.max(diariaMinimaPousadaCache, 1));
                     
                     document.getElementById('edit-valor-sinal').value = '';
                     document.getElementById('edit-forma-pagamento').value = 'Pix / Sinal';
@@ -3211,18 +3120,6 @@ if (status === 'CancelarReserva') {
                     const listaIdades = document.getElementById('lista-idades-criancas');
                     if (listaIdades) listaIdades.innerHTML = '';
                     document.getElementById('container-idades-criancas')?.classList.add('hidden');
-                    
-                    const inputArq = document.getElementById('edit-arquivo-documento');
-                    if (inputArq) inputArq.value = '';
-                    document.getElementById('link-doc-anexo-atual')?.classList.add('hidden');
-
-                    document.getElementById('modal-qtd-diarias').innerText = '0 diária(s)';
-                    if (temPermissao('financeiro')) {
-                        const elTot = document.getElementById('modal-valor-total');
-                        if (elTot) elTot.innerText = formatarMoeda(0);
-                        const elSal = document.getElementById('modal-saldo-restante');
-                        if (elSal) elSal.innerText = formatarMoeda(0);
-                    }
                     limparErroModal();
                 }
                 camposLimposParaNovaReserva = true;
@@ -3283,8 +3180,7 @@ if (status === 'CancelarReserva') {
                     return;
                 }
             }
-
-            if (status === 'Checkout' && temPermissao('financeiro')) {
+if (status === 'Checkout' && temPermissao('financeiro')) {
                 const saldoDevedorMinimo = await calcularSaldoDevedorReservaAtual();
                 if (campoSinalStr === '' || isNaN(valorSinalInformado) || valorSinalInformado < saldoDevedorMinimo) {
                     mostrarErroModal(`O valor informado (${formatarMoeda(valorSinalInformado)}) é menor que o saldo devedor (${formatarMoeda(saldoDevedorMinimo)}).`);
@@ -3298,28 +3194,6 @@ if (status === 'CancelarReserva') {
                 const msgErro = gerarMensagemErroConflito(conflitosDetectados, suiteAlvoObj?.nome || '');
                 mostrarErroModal(msgErro);
                 return;
-            }
-
-            // UPLOAD DO DOCUMENTO ANEXADO (SE INFORMADO)
-            let urlDocumentoAnexo = null;
-            const inputArquivo = document.getElementById('edit-arquivo-documento');
-            if (inputArquivo && inputArquivo.files && inputArquivo.files.length > 0) {
-                const arquivo = inputArquivo.files[0];
-                const extensao = arquivo.name.split('.').pop();
-                const caminhoDoc = `${usuarioIdAtual}/doc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${extensao}`;
-
-                try {
-                    await supabaseClient.storage.createBucket('documentos-reservas', { public: true });
-                } catch(e) {}
-
-                const { error: errUpload } = await supabaseClient.storage
-                    .from('documentos-reservas')
-                    .upload(caminhoDoc, arquivo, { upsert: true });
-
-                if (!errUpload) {
-                    const { data: { publicUrl } } = supabaseClient.storage.from('documentos-reservas').getPublicUrl(caminhoDoc);
-                    urlDocumentoAnexo = publicUrl;
-                }
             }
 
             // DADOS ESTRUTURADOS DE RESERVA (ALINHADOS COM RESERVAS E VITRINE)
@@ -3347,10 +3221,6 @@ if (status === 'CancelarReserva') {
                 observacao: observacaoInformada,
                 status: status === 'Checkout' ? 'Finalizada' : 'Aprovada'
             };
-
-            if (urlDocumentoAnexo) {
-                dadosReserva.documento_url = urlDocumentoAnexo;
-            }
 
             const houveTransferencia = (reservaIdEditada && suiteIdOriginal && suiteId !== suiteIdOriginal);
             if (houveTransferencia) {
@@ -3467,102 +3337,22 @@ if (status === 'CancelarReserva') {
                 }]);
             }
 
-            // SE FOI UMA NOVA RESERVA CRIADA, GERA PDF E ABRE WHATSAPP AUTOMATICAMENTE
-            if (criandoNovaReserva && reservaIdFinal) {
+            fecharModal();
+            await carregarDashboard();
+
+            // SE FOI UMA NOVA RESERVA CRIADA, DISPARA O MODAL CENTRALIZADO DE SUCESSO
+            if (criandoNovaReserva) {
                 const suiteAlvoObj = suitesGlobaisCache.find(s => s.id === suiteId);
-                const suiteNome = suiteAlvoObj ? suiteAlvoObj.nome : 'Suíte';
-                const pousadaNome = nomePousadaAtual || 'Pousada';
-                let pdfPublicUrl = null;
-
-                if (window.jspdf) {
-                    try {
-                        const { jsPDF } = window.jspdf;
-                        const doc = new jsPDF();
-                        
-                        doc.setFillColor(37, 99, 235);
-                        doc.rect(0, 0, 210, 25, 'F');
-                        doc.setTextColor(255,255,255);
-                        doc.setFontSize(16);
-                        doc.setFont(undefined, 'bold');
-                        doc.text(pousadaNome.toUpperCase(), 105, 15, { align: 'center' });
-                        
-                        doc.setTextColor(0,0,0);
-                        doc.setFontSize(12);
-                        doc.setFont(undefined, 'bold');
-                        doc.text("COMPROVANTE DE RESERVA CONFIRMADA", 105, 35, { align: 'center' });
-                        
-                        doc.setFont(undefined, 'normal');
-                        doc.setFontSize(11);
-                        let y = 50;
-                        doc.text(`Hóspede: ${dadosReserva.hospede_nome}`, 15, y); y += 8;
-                        doc.text(`CPF: ${dadosReserva.cpf || 'Não informado'}`, 15, y); y += 8;
-                        doc.text(`Acomodação: ${suiteNome}`, 15, y); y += 8;
-                        doc.text(`Check-in: ${formatarDataSimples(checkinVal)}`, 15, y); y += 8;
-                        doc.text(`Check-out: ${formatarDataSimples(checkoutVal)}`, 15, y); y += 8;
-                        doc.text(`Valor Total: ${formatarMoeda(valorTotalCalculado)}`, 15, y); y += 8;
-                        if (valorSinalInformado > 0) {
-                            doc.text(`Sinal Pago: ${formatarMoeda(valorSinalInformado)} (${formaPagamentoSelecionada})`, 15, y); y += 8;
-                            const saldoRest = valorTotalCalculado - valorSinalInformado;
-                            doc.text(`Saldo Restante: ${formatarMoeda(saldoRest > 0 ? saldoRest : 0)}`, 15, y); y += 8;
-                        }
-                        doc.text(`Status: CONFIRMADA`, 15, y); y += 15;
-                        
-                        doc.setFontSize(10);
-                        doc.setTextColor(100,100,100);
-                        doc.text(`Reserva ID: ${reservaIdFinal}`, 15, y); y += 6;
-                        doc.text(`Emitido em: ${new Date().toLocaleString('pt-BR')}`, 15, y); y += 6;
-
-                        doc.setFontSize(9);
-                        doc.text("Obrigado pela preferência! Esperamos por você!", 105, 280, { align: 'center' });
-
-                        const pdfBlob = doc.output('blob');
-                        const filePath = `aprovadas/${usuarioIdAtual}/${reservaIdFinal}.pdf`;
-
-                        try { await supabaseClient.storage.createBucket('comprovantes', { public: true }); } catch(e) {}
-
-                        const { error: uploadError } = await supabaseClient.storage
-                            .from('comprovantes')
-                            .upload(filePath, pdfBlob, { contentType: 'application/pdf', upsert: true });
-                        
-                        if (!uploadError) {
-                            const { data: urlData } = supabaseClient.storage.from('comprovantes').getPublicUrl(filePath);
-                            pdfPublicUrl = urlData.publicUrl;
-                            await supabaseClient.from('reservas').update({ pdf_url: pdfPublicUrl }).eq('id', reservaIdFinal);
-                        }
-                    } catch(errPdf) {
-                        console.warn("Erro ao gerar PDF:", errPdf);
-                    }
-                }
-
-                // FORMATAÇÃO E ABERTURA DA MENSAGEM DE WHATSAPP
-                let msgZap = `Olá *${dadosReserva.hospede_nome}*, sua reserva na *${pousadaNome}* foi confirmada com sucesso! 🎉\n\n`;
-                msgZap += `🏨 *Acomodação:* ${suiteNome}\n`;
-                msgZap += `📅 *Período:* ${formatarDataSimples(checkinVal)} até ${formatarDataSimples(checkoutVal)}\n`;
-                if (temPermissao('financeiro')) {
-                    msgZap += `💰 *Valor Total:* ${formatarMoeda(valorTotalCalculado)}\n`;
-                    if (valorSinalInformado > 0) {
-                        msgZap += `💵 *Sinal Pago:* ${formatarMoeda(valorSinalInformado)}\n`;
-                        const saldoRest = valorTotalCalculado - valorSinalInformado;
-                        msgZap += `💳 *Saldo Restante:* ${formatarMoeda(saldoRest > 0 ? saldoRest : 0)}\n`;
-                    }
-                    msgZap += `\n`;
-                }
-                if (pdfPublicUrl) {
-                    msgZap += `📄 *Acesse seu comprovante oficial em PDF no link:*\n${pdfPublicUrl}\n\n`;
-                }
-                msgZap += `Agradecemos a preferência e esperamos por você! 🌿`;
-
-                let apenasNumeros = (dadosReserva.whatsapp_hospede || '').replace(/\D/g, '');
-                if (apenasNumeros.length <= 11 && !apenasNumeros.startsWith('55')) apenasNumeros = '55' + apenasNumeros;
-                const urlWhatsapp = `https://wa.me/${apenasNumeros}?text=${encodeURIComponent(msgZap)}`;
-
-                fecharModal();
-                await carregarDashboard();
-                mostrarToast("Reserva Criada!", "Reserva criada com sucesso. Abrindo WhatsApp do hóspede... ✅", "sucesso", 5000);
-                window.open(urlWhatsapp, '_blank');
+                const qtdD = calcularQuantidadeDiarias(checkinVal, checkoutVal);
+                
+                document.getElementById('modal-sucesso-hospede').innerText = dadosReserva.hospede_nome;
+                document.getElementById('modal-sucesso-suite').innerText = suiteAlvoObj?.nome || 'Suíte';
+                document.getElementById('modal-sucesso-checkin').innerText = formatarDataSimples(checkinVal);
+                document.getElementById('modal-sucesso-checkout').innerText = formatarDataSimples(checkoutVal);
+                document.getElementById('modal-sucesso-diarias').innerText = `Período confirmado: ${qtdD} diária(s) calculada(s)`;
+                
+                document.getElementById('modal-sucesso-reserva')?.classList.remove('hidden');
             } else {
-                fecharModal();
-                await carregarDashboard();
                 const msgSucesso = status === 'Checkout' 
                     ? "Checkout concluído com sucesso! Suíte enviada para Limpeza." 
                     : ((status === 'Limpeza' || status === 'Em Limpeza') && reservaIdEditada 
@@ -3601,10 +3391,6 @@ if (status === 'CancelarReserva') {
             }
 
             if (status === 'Reservado' || (status === 'Ocupada' && !reservaIdEditada)) {
-                if (!checkinInformado || !checkoutInformado) {
-                    mostrarErroModal("⚠️ <strong>Datas Obrigatórias:</strong> Informe a Data de Check-in e Check-out para continuar.");
-                    return;
-                }
                 const qtdDiariasInformadas = calcularQuantidadeDiarias(checkinInformado, checkoutInformado);
                 if (qtdDiariasInformadas < diariaMinimaPousadaCache) {
                     mostrarErroModal(`Não é possível salvar: esta pousada exige um período mínimo de <strong>${diariaMinimaPousadaCache} diária(s)</strong>.`);
@@ -3685,30 +3471,6 @@ if (status === 'CancelarReserva') {
                 return;
             }
 
-            // SE FOR UMA NOVA RESERVA (OU NOVO CARD), ABRE O MODAL CENTRAL DE CONFERÊNCIA ANTES DE GRAVAR
-            const criandoNovaReserva = (!reservaIdEditada || status === 'Reservado' || (status === 'Ocupada' && !reservaIdEditada));
-            if (criandoNovaReserva) {
-                const nomeH = (document.getElementById('edit-hospede').value || 'Hóspede').toUpperCase();
-                const whatsH = document.getElementById('edit-whatsapp').value;
-                const totalCalculadoStr = document.getElementById('modal-valor-total')?.innerText || 'R$ 0,00';
-                const valorSinalNum = parseFloat(document.getElementById('edit-valor-sinal')?.value) || 0;
-                const suiteNome = suiteObj ? suiteObj.nome : 'Suíte';
-
-                document.getElementById('conf-nova-hospede').innerText = nomeH;
-                document.getElementById('conf-nova-whatsapp').innerText = whatsH;
-                document.getElementById('conf-nova-suite').innerText = suiteNome;
-                document.getElementById('conf-nova-periodo').innerText = `${formatarDataSimples(checkinInformado)} até ${formatarDataSimples(checkoutInformado)} (${calcularQuantidadeDiarias(checkinInformado, checkoutInformado)}d)`;
-                document.getElementById('conf-nova-total').innerText = totalCalculadoStr;
-                document.getElementById('conf-nova-sinal').innerText = formatarMoeda(valorSinalNum);
-
-                document.getElementById('modal-confirmacao-nova-reserva')?.classList.remove('hidden');
-                document.getElementById('btn-confirmar-gerar-reserva-final').onclick = async () => {
-                    fecharModalConfirmacaoNovaReserva();
-                    await executarSalvamento(suiteId, status);
-                };
-                return;
-            }
-
             await executarSalvamento(suiteId, status);
         };
 
@@ -3767,7 +3529,7 @@ if (status === 'CancelarReserva') {
                 'modal-recusa-profissional',
                 'modal-tarifa-especial',
                 'modal-calendario-suite',
-                'modal-confirmacao-nova-reserva'
+                'modal-sucesso-reserva'
             ];
             return modais.some(id => {
                 const el = document.getElementById(id);
