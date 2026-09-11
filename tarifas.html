@@ -221,7 +221,7 @@
                                 </div>
                             </div>
 
-                            <!-- CARD NOVO: POLÍTICA DE CANCELAMENTO DE RESERVAS PELO HÓSPEDE -->
+                            <!-- CARD: POLÍTICA DE CANCELAMENTO DE RESERVAS PELO HÓSPEDE -->
                             <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-200 space-y-3">
                                 <span class="block text-xs font-extrabold text-blue-900 uppercase tracking-wider mb-2 flex items-center gap-2">
                                     <i class="fa-solid fa-ban text-red-500"></i> Cancelamento de Reservas pelo Hóspede
@@ -279,6 +279,8 @@
                         </div>
 
                         <div class="lg:col-span-6 space-y-4">
+                            
+                            <!-- CANAIS OFICIAIS DE CONTATO E REDES (COM E-MAIL OFICIAL ADICIONADO) -->
                             <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-200 space-y-3">
                                 <span class="block text-xs font-extrabold text-blue-900 uppercase tracking-wider mb-1 flex items-center gap-2">
                                     <i class="fa-solid fa-share-nodes text-blue-600"></i> Canais Oficiais de Contato e Redes
@@ -297,6 +299,12 @@
                                             <i class="fa-solid fa-file-invoice text-gray-500"></i> CNPJ ou CPF da Pousada
                                         </label>
                                         <input type="text" id="pousada-cnpj-cpf" placeholder="Ex: 00.000.000/0001-00" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm">
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <label class="block text-[11px] font-bold text-blue-800 uppercase mb-1 flex items-center gap-1">
+                                            <i class="fa-solid fa-envelope text-blue-600"></i> E-mail Oficial de Contato / Reservas
+                                        </label>
+                                        <input type="email" id="pousada-email-admin" placeholder="Ex: contato@minhapousada.com.br" class="w-full p-2.5 border rounded-xl font-bold bg-white text-xs sm:text-sm">
                                     </div>
                                     <div>
                                         <label class="block text-[11px] font-bold text-pink-800 uppercase mb-1 flex items-center gap-1">
@@ -521,7 +529,6 @@
             return false;
         }
 
-        // Alterna campos visíveis de cancelamento de acordo com o checkbox
         function alternarCamposCancelamento() {
             const ativo = document.getElementById('pousada-permite-cancelamento').checked;
             const container = document.getElementById('container-regras-cancelamento');
@@ -530,9 +537,6 @@
             }
         }
 
-        // =========================================================================
-        // PROTEÇÃO DA PÁGINA (RBAC + PRIVILÉGIOS GRANULARES)
-        // =========================================================================
         async function protegerPagina() {
             try {
                 const { data: { session }, error } = await supabaseClient.auth.getSession();
@@ -593,7 +597,6 @@
                     const elNomeUsuario = document.getElementById('texto-nome-usuario');
                     if (elNomeUsuario) elNomeUsuario.innerText = nomeUsuarioLogadoAtual;
 
-                    // TRAVA DE SEGURANÇA: Se não for dono e não tiver o privilégio 'configuracoes'
                     if (cargoUsuarioAtual !== 'dono' && !temPermissao('configuracoes')) {
                         alert("Acesso restrito: você não possui privilégio para gerenciar tarifas e regras da pousada.");
                         if (cargoUsuarioAtual === 'limpeza') {
@@ -604,7 +607,6 @@
                         return;
                     }
 
-                    // Se for colaborador com permissão de configurações (mas NÃO é o Dono):
                     if (cargoUsuarioAtual !== 'dono') {
                         document.getElementById('card-minha-assinatura')?.remove();
                         if (!temPermissao('hospedes')) document.getElementById('link-menu-hospedes')?.remove();
@@ -637,7 +639,7 @@
                     await atualizarCardAssinatura(pousadaCache);
                 }
 
-                // Preenche as regras da pousada
+                // Preenche as regras da pousada e os canais de contato
                 if (pousadaCache) {
                     document.getElementById('pousada-checkin').value = pousadaCache.horario_checkin || '13:00';
                     document.getElementById('pousada-checkout').value = pousadaCache.horario_checkout || '14:00';
@@ -653,13 +655,15 @@
                     }
                     document.getElementById('pousada-valor-hospede-extra').value = pousadaCache.valor_hospede_extra || '50';
 
+                    // CANAIS DE CONTATO (COM E-MAIL CARREGADO DO BANCO)
                     document.getElementById('pousada-whatsapp-contato').value = pousadaCache.whatsapp_contato || '';
                     document.getElementById('pousada-cnpj-cpf').value = pousadaCache.cnpj_cpf || '';
+                    document.getElementById('pousada-email-admin').value = pousadaCache.email_admin || '';
                     document.getElementById('pousada-instagram').value = pousadaCache.instagram || '';
                     document.getElementById('pousada-facebook').value = pousadaCache.facebook || '';
                     document.getElementById('pousada-exigir-documento').checked = pousadaCache.exigir_documento === true || pousadaCache.exigir_documento === 'true';
 
-                    // CARREGA REGRAS DE CANCELAMENTO PELO HÓSPEDE
+                    // REGRAS DE CANCELAMENTO PELO HÓSPEDE
                     const permiteCanc = pousadaCache.permite_cancelamento_hospede !== false;
                     document.getElementById('pousada-permite-cancelamento').checked = permiteCanc;
                     document.getElementById('pousada-dias-cancelamento').value = pousadaCache.dias_antecedencia_cancelamento ?? 7;
@@ -981,13 +985,15 @@
                 valor_pet: document.getElementById('pousada-aceita-pet').value === 'sim' ? (Number(document.getElementById('pousada-valor-pet').value) || 0) : null,
                 valor_hospede_extra: Number(document.getElementById('pousada-valor-hospede-extra').value) || 0,
                 
+                // CANAIS DE CONTATO E REDES (COM E-MAIL PERSISTIDO NO BANCO)
                 whatsapp_contato: document.getElementById('pousada-whatsapp-contato').value.trim() || null,
                 cnpj_cpf: document.getElementById('pousada-cnpj-cpf').value.trim() || null,
+                email_admin: document.getElementById('pousada-email-admin').value.trim() || null,
                 instagram: document.getElementById('pousada-instagram').value.trim() || null,
                 facebook: document.getElementById('pousada-facebook').value.trim() || null,
                 exigir_documento: document.getElementById('pousada-exigir-documento').checked,
 
-                // SALVANDO A POLÍTICA DE CANCELAMENTO PELO HÓSPEDE
+                // REGRAS DE CANCELAMENTO PELO HÓSPEDE
                 permite_cancelamento_hospede: document.getElementById('pousada-permite-cancelamento').checked,
                 dias_antecedencia_cancelamento: Number(document.getElementById('pousada-dias-cancelamento').value) || 0,
                 politica_cancelamento_texto: document.getElementById('pousada-politica-cancelamento-texto').value.trim() || null,
