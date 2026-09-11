@@ -202,6 +202,47 @@
         </div>
     </div>
 
+    <!-- MODAL CENTRALIZADO DE SUCESSO AO CRIAR RESERVA -->
+    <div id="modal-sucesso-reserva" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4 z-[90]">
+        <div class="bg-white p-6 sm:p-8 rounded-3xl w-full max-w-md shadow-2xl border border-emerald-100 text-center space-y-4">
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl font-extrabold shadow-sm">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+                <h3 class="text-xl font-extrabold text-gray-900">Reserva Criada com Sucesso!</h3>
+                <p class="text-xs sm:text-sm text-gray-500 mt-1">A acomodação foi reservada com sucesso para o hóspede.</p>
+            </div>
+
+            <div class="bg-emerald-50/80 border border-emerald-200 rounded-2xl p-4 text-xs text-left space-y-2 text-emerald-950">
+                <div class="flex justify-between items-center pb-1.5 border-b border-emerald-200/60">
+                    <span class="text-gray-500 font-bold uppercase text-[10px]">Hóspede:</span>
+                    <strong id="modal-sucesso-hospede" class="text-gray-900 text-xs">-</strong>
+                </div>
+                <div class="flex justify-between items-center pb-1.5 border-b border-emerald-200/60">
+                    <span class="text-gray-500 font-bold uppercase text-[10px]">Suíte:</span>
+                    <strong id="modal-sucesso-suite" class="text-blue-900 text-xs">-</strong>
+                </div>
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <div class="bg-white/80 p-2 rounded-xl border border-emerald-200 text-center">
+                        <span class="text-[10px] text-gray-500 uppercase font-bold block">Check-in</span>
+                        <strong id="modal-sucesso-checkin" class="text-xs text-emerald-800 block">-</strong>
+                    </div>
+                    <div class="bg-white/80 p-2 rounded-xl border border-emerald-200 text-center">
+                        <span class="text-[10px] text-gray-500 uppercase font-bold block">Check-out</span>
+                        <strong id="modal-sucesso-checkout" class="text-xs text-emerald-800 block">-</strong>
+                    </div>
+                </div>
+                <div class="text-center pt-1 text-[11px] font-bold text-emerald-900" id="modal-sucesso-diarias">
+                    0 diária(s) calculada(s)
+                </div>
+            </div>
+
+            <button type="button" onclick="fecharModalSucessoReserva()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 px-4 rounded-xl transition shadow-md text-sm cursor-pointer">
+                Entendido / Continuar
+            </button>
+        </div>
+    </div>
+
     <!-- MODAL DE CONFIRMAÇÃO DE SAÍDA / LIMPEZA -->
     <div id="modal-confirmacao" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-6 sm:p-8 rounded-3xl w-full max-w-md shadow-2xl text-center space-y-4">
@@ -291,7 +332,7 @@
                 </div>
             </div>
 
-            <!-- PAINEL FINANCEIRO DE ESTADIA INTERROMPIDA (CONTROLADO POR PRIVILÉGIO FINANCEIRO) -->
+            <!-- PAINEL FINANCEIRO DE ESTADIA INTERROMPIDA -->
             <div id="box-financeiro-cancelamento-estadia" class="hidden mt-3.5 bg-amber-50 border border-amber-200 p-3 rounded-xl space-y-1 text-xs text-amber-950">
                 <div class="flex justify-between items-center">
                     <span class="text-gray-600">Diárias consumidas até hoje:</span>
@@ -315,16 +356,16 @@
                 <label class="block text-xs font-extrabold text-red-700 uppercase tracking-wider mb-1.5">
                     <i class="fa-solid fa-pen-to-square mr-1"></i> Motivo do cancelamento <span class="text-red-600">*</span> (obrigatório)
                 </label>
-                <textarea id="motivo-cancelamento-input" rows="3" maxlength="500" placeholder="Ex: Desistência do hóspede, problemas de saúde, saída antecipada..." class="w-full p-3 border-2 border-red-200 bg-red-50/30 focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-100 rounded-xl text-sm font-medium text-gray-900 placeholder:text-gray-400 outline-none transition"></textarea>
+                <textarea id="motivo-cancelamento-input" rows="3" maxlength="500" placeholder="Ex: Desistência do hóspede, problemas de saúde, saída antecipada..." class="w-full p-3 border-2 border-red-200 bg-red-50/30 focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-100 rounded-xl text-sm font-medium text-gray-900 uppercase placeholder:normal-case placeholder:text-gray-400 outline-none transition" oninput="this.value = this.value.toUpperCase()"></textarea>
                 <div class="flex justify-between items-center mt-1.5">
                     <span id="erro-motivo-cancelamento" class="hidden text-[11px] font-bold text-red-600 flex items-center gap-1"><i class="fa-solid fa-circle-exclamation"></i> Informe o motivo do cancelamento</span>
                     <span class="text-[10px] text-gray-400 ml-auto"><span id="contador-motivo-cancelamento">0</span>/500</span>
                 </div>
                 <div class="mt-2 flex flex-wrap gap-1.5">
-                    <button type="button" onclick="document.getElementById('motivo-cancelamento-input').value='Desistência do hóspede'; document.getElementById('motivo-cancelamento-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition cursor-pointer">Desistência</button>
-                    <button type="button" onclick="document.getElementById('motivo-cancelamento-input').value='Saída antecipada / Imprevisto na viagem'; document.getElementById('motivo-cancelamento-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition cursor-pointer">Saída antecipada</button>
-                    <button type="button" onclick="document.getElementById('motivo-cancelamento-input').value='Problemas de saúde'; document.getElementById('motivo-cancelamento-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition cursor-pointer">Saúde</button>
-                    <button type="button" onclick="document.getElementById('motivo-cancelamento-input').value='No-show (não compareceu)'; document.getElementById('motivo-cancelamento-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition cursor-pointer">No-show</button>
+                    <button type="button" onclick="document.getElementById('motivo-cancelamento-input').value='DESISTÊNCIA DO HÓSPEDE'; document.getElementById('motivo-cancelamento-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition cursor-pointer">Desistência</button>
+                    <button type="button" onclick="document.getElementById('motivo-cancelamento-input').value='SAÍDA ANTECIPADA / IMPREVISTO NA VIAGEM'; document.getElementById('motivo-cancelamento-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition cursor-pointer">Saída antecipada</button>
+                    <button type="button" onclick="document.getElementById('motivo-cancelamento-input').value='PROBLEMAS DE SAÚDE'; document.getElementById('motivo-cancelamento-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition cursor-pointer">Saúde</button>
+                    <button type="button" onclick="document.getElementById('motivo-cancelamento-input').value='NO-SHOW (NÃO COMPARECEU)'; document.getElementById('motivo-cancelamento-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition cursor-pointer">No-show</button>
                 </div>
             </div>
 
@@ -339,9 +380,9 @@
         </div>
     </div>
 
-    <!-- MODAL DE EDIÇÃO -->
+    <!-- MODAL DE EDIÇÃO / CRIAÇÃO DE RESERVAS -->
     <div id="modal-edicao" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-hidden">
-        <div id="modal-edicao-card" class="bg-white p-5 sm:p-8 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto relative cursor-default" style="-webkit-overflow-scrolling: touch; overscroll-behavior-y: contain;">
+        <div id="modal-edicao-card" class="bg-white p-5 sm:p-8 rounded-2xl w-full max-w-xl shadow-2xl max-h-[90vh] overflow-y-auto relative cursor-default" style="-webkit-overflow-scrolling: touch; overscroll-behavior-y: contain;">
             <div id="modal-drag-handle" class="flex justify-between items-center mb-4 cursor-move select-none">
                 <h2 id="modal-titulo" class="text-xl sm:text-2xl font-bold text-blue-600 m-0">Gerenciar Suíte</h2>
                 <div class="flex items-center gap-2">
@@ -381,11 +422,11 @@
                     </p>
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-wider text-purple-900 mb-1">Motivo da Transferência (Opcional):</label>
-                        <input type="text" id="edit-motivo-transferencia" placeholder="Ex: Upgrade, pedido do cliente, manutenção..." class="w-full p-2.5 border border-purple-300 rounded-xl text-xs bg-white">
+                        <input type="text" id="edit-motivo-transferencia" placeholder="Ex: Upgrade, pedido do cliente, manutenção..." class="w-full p-2.5 border border-purple-300 rounded-xl text-xs bg-white uppercase placeholder:normal-case" oninput="this.value = this.value.toUpperCase()">
                         <div class="mt-1.5 flex flex-wrap gap-1.5">
-                            <button type="button" onclick="document.getElementById('edit-motivo-transferencia').value='Upgrade de quarto';" class="text-[9px] bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-200 px-2 py-0.5 rounded-md font-bold cursor-pointer">Upgrade</button>
-                            <button type="button" onclick="document.getElementById('edit-motivo-transferencia').value='Solicitação do hóspede';" class="text-[9px] bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-200 px-2 py-0.5 rounded-md font-bold cursor-pointer">Pedido do Hóspede</button>
-                            <button type="button" onclick="document.getElementById('edit-motivo-transferencia').value='Manutenção no quarto anterior';" class="text-[9px] bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-200 px-2 py-0.5 rounded-md font-bold cursor-pointer">Manutenção</button>
+                            <button type="button" onclick="document.getElementById('edit-motivo-transferencia').value='UPGRADE DE QUARTO';" class="text-[9px] bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-200 px-2 py-0.5 rounded-md font-bold cursor-pointer">Upgrade</button>
+                            <button type="button" onclick="document.getElementById('edit-motivo-transferencia').value='SOLICITAÇÃO DO HÓSPEDE';" class="text-[9px] bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-200 px-2 py-0.5 rounded-md font-bold cursor-pointer">Pedido do Hóspede</button>
+                            <button type="button" onclick="document.getElementById('edit-motivo-transferencia').value='MANUTENÇÃO NO QUARTO ANTERIOR';" class="text-[9px] bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-200 px-2 py-0.5 rounded-md font-bold cursor-pointer">Manutenção</button>
                         </div>
                     </div>
                 </div>
@@ -430,11 +471,11 @@
                     </div>
                 </div>
 
+                <!-- CAMPOS DE DADOS DO HÓSPEDE E ENDEREÇO -->
                 <div id="campos-hospede-container" class="space-y-3 transition-all">
-                    <div class="grid grid-cols-1 gap-2">
-                        <input type="text" id="edit-hospede" placeholder="Nome Hóspede *" class="p-3 border rounded-xl text-sm">
-                        <input type="text" id="edit-whatsapp" placeholder="WhatsApp *" class="p-3 border rounded-xl text-sm">
+                    <div class="grid grid-cols-1 gap-2.5">
                         
+                        <!-- BUSCA POR CPF -->
                         <div>
                             <label id="lbl-cpf-hospede" class="block text-xs font-bold text-gray-700 mb-1">
                                 CPF <span id="tag-obrigatorio-cpf" class="text-red-600 hidden">* (Obrigatório)</span>
@@ -450,14 +491,85 @@
                             </span>
                         </div>
 
+                        <!-- NOME E WHATSAPP -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <input type="text" id="edit-rg" placeholder="RG (Opcional)" class="p-3 border rounded-xl text-sm">
-                            <input type="text" id="edit-cep" placeholder="CEP" class="p-3 border rounded-xl text-sm">
+                            <div>
+                                <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1">Nome do Hóspede *</label>
+                                <input type="text" id="edit-hospede" placeholder="Nome Completo *" class="w-full p-3 border rounded-xl text-sm uppercase placeholder:normal-case font-semibold" oninput="this.value = this.value.toUpperCase()">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1">WhatsApp *</label>
+                                <input type="text" id="edit-whatsapp" placeholder="WhatsApp com DDD (mínimo 10 dígitos) *" maxlength="15" class="w-full p-3 border rounded-xl text-sm font-semibold" oninput="aoDigitarWhatsApp(this)">
+                            </div>
                         </div>
-                        <input type="text" id="edit-endereco" placeholder="Endereço" class="p-3 border rounded-xl text-sm">
-                        <input type="email" id="edit-email" placeholder="E-mail" class="p-3 border rounded-xl text-sm">
+
+                        <!-- E-MAIL E RG -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1">E-mail</label>
+                                <input type="email" id="edit-email" placeholder="email@exemplo.com" class="w-full p-3 border rounded-xl text-sm" oninput="this.value = this.value.toLowerCase()">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1">RG (Documento)</label>
+                                <input type="text" id="edit-rg" placeholder="RG / Documento Oficial" class="w-full p-3 border rounded-xl text-sm uppercase placeholder:normal-case" oninput="this.value = this.value.toUpperCase()">
+                            </div>
+                        </div>
+
+                        <!-- BLOCO ESTRUTURADO DE ENDEREÇO (ALINHADO COM A VITRINE) -->
+                        <div class="bg-gray-50/90 p-3.5 rounded-2xl border border-gray-200 space-y-2.5">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-extrabold text-blue-900 uppercase tracking-wider flex items-center gap-1.5">
+                                    <i class="fa-solid fa-map-location-dot text-blue-600"></i> Endereço do Titular
+                                </span>
+                                <button type="button" onclick="buscarCepDashboard()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-3 py-1 rounded-lg text-[10px] font-bold transition shadow-2xs cursor-pointer">
+                                    Preencher pelo CEP
+                                </button>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-600 uppercase mb-0.5">CEP (Busca Automática)</label>
+                                    <div class="relative">
+                                        <input type="text" id="edit-cep" placeholder="00000-000" maxlength="9" class="w-full p-2.5 border rounded-xl text-xs font-bold bg-white" oninput="aoDigitarCep(this)" onblur="buscarCepDashboard()">
+                                        <span id="icone-loading-cep-dash" class="hidden absolute right-2.5 top-2.5 text-blue-600 text-xs animate-spin"><i class="fa-solid fa-spinner"></i></span>
+                                    </div>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label class="block text-[10px] font-bold text-gray-600 uppercase mb-0.5">Logradouro (Rua / Av)</label>
+                                    <input type="text" id="edit-endereco" placeholder="Rua, Avenida..." class="w-full p-2.5 border rounded-xl text-xs uppercase placeholder:normal-case bg-white" oninput="this.value = this.value.toUpperCase()">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-600 uppercase mb-0.5">Número</label>
+                                    <input type="text" id="edit-numero" placeholder="Ex: 120" class="w-full p-2.5 border rounded-xl text-xs uppercase placeholder:normal-case bg-white" oninput="this.value = this.value.toUpperCase()">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-600 uppercase mb-0.5">Complemento</label>
+                                    <input type="text" id="edit-complemento" placeholder="Apto, Bloco..." class="w-full p-2.5 border rounded-xl text-xs uppercase placeholder:normal-case bg-white" oninput="this.value = this.value.toUpperCase()">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-600 uppercase mb-0.5">Bairro</label>
+                                    <input type="text" id="edit-bairro" placeholder="Bairro" class="w-full p-2.5 border rounded-xl text-xs uppercase placeholder:normal-case bg-white" oninput="this.value = this.value.toUpperCase()">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                <div class="sm:col-span-2">
+                                    <label class="block text-[10px] font-bold text-gray-600 uppercase mb-0.5">Município (Cidade)</label>
+                                    <input type="text" id="edit-cidade" placeholder="Cidade" class="w-full p-2.5 border rounded-xl text-xs uppercase placeholder:normal-case bg-white" oninput="this.value = this.value.toUpperCase()">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-600 uppercase mb-0.5">UF (Estado)</label>
+                                    <input type="text" id="edit-uf" maxlength="2" placeholder="EX: RJ" class="w-full p-2.5 border rounded-xl text-xs uppercase font-extrabold text-center bg-white" oninput="this.value = this.value.toUpperCase()">
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
+                    <!-- OCUPANTES E PET -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Adultos</label>
@@ -481,6 +593,7 @@
                         <div id="lista-idades-criancas" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
                     </div>
 
+                    <!-- DATAS DE CHECK-IN E CHECK-OUT -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-in</label>
@@ -497,6 +610,7 @@
                         <span id="texto-diaria-minima-modal">A pousada exige um período mínimo de diárias.</span>
                     </div>
 
+                    <!-- BLOCO DE PAGAMENTO -->
                     <div id="bloco-pagamento-modal" class="pt-2 space-y-2">
                         <div>
                             <label id="lbl-valor-sinal" class="block text-xs font-bold text-emerald-700 mb-1">Registrar Novo Pagamento / Sinal (R$)</label>
@@ -514,7 +628,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-amber-700 mb-1">⚠️ Observação / Mensagem de Alerta Importante</label>
-                            <textarea id="edit-observacao" rows="2" placeholder="Ex: Hóspede solicitou late checkout, alergia, etc." class="w-full p-3 border border-amber-300 bg-amber-50/40 rounded-xl text-sm font-medium text-amber-950"></textarea>
+                            <textarea id="edit-observacao" rows="2" placeholder="Ex: Hóspede solicitou late checkout, alergia, etc." class="w-full p-3 border border-amber-300 bg-amber-50/40 rounded-xl text-sm font-medium text-amber-950 uppercase placeholder:normal-case" oninput="this.value = this.value.toUpperCase()"></textarea>
                         </div>
                     </div>
                 </div>
@@ -594,15 +708,15 @@
                 <label class="block text-xs font-extrabold text-red-700 uppercase tracking-wider mb-1.5">
                     <i class="fa-solid fa-pen-to-square mr-1"></i> Motivo da recusa <span class="text-red-600">*</span> (obrigatório)
                 </label>
-                <textarea id="motivo-recusa-input" rows="3" maxlength="500" placeholder="Ex: Sem pagamento do sinal, datas indisponíveis..." class="w-full p-3 border-2 border-red-200 bg-red-50/30 focus:bg-white focus:border-red-500 rounded-xl text-sm font-medium text-gray-900 outline-none transition"></textarea>
+                <textarea id="motivo-recusa-input" rows="3" maxlength="500" placeholder="Ex: Sem pagamento do sinal, datas indisponíveis..." class="w-full p-3 border-2 border-red-200 bg-red-50/30 focus:bg-white focus:border-red-500 rounded-xl text-sm font-medium text-gray-900 uppercase placeholder:normal-case outline-none transition" oninput="this.value = this.value.toUpperCase()"></textarea>
                 <div class="flex justify-between items-center mt-1.5">
                     <span id="erro-motivo-recusa" class="hidden text-[11px] font-bold text-red-600 flex items-center gap-1"><i class="fa-solid fa-circle-exclamation"></i> Informe o motivo (mínimo 1 caractere)</span>
                     <span class="text-[10px] text-gray-400 ml-auto"><span id="contador-motivo">0</span>/500</span>
                 </div>
                 <div class="mt-2 flex flex-wrap gap-1.5">
-                    <button type="button" onclick="document.getElementById('motivo-recusa-input').value='Sem pagamento do sinal'; document.getElementById('motivo-recusa-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition cursor-pointer">Sem pagamento</button>
-                    <button type="button" onclick="document.getElementById('motivo-recusa-input').value='Datas indisponíveis'; document.getElementById('motivo-recusa-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition cursor-pointer">Datas indisponíveis</button>
-                    <button type="button" onclick="document.getElementById('motivo-recusa-input').value='Cliente não respondeu WhatsApp'; document.getElementById('motivo-recusa-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition cursor-pointer">Sem resposta</button>
+                    <button type="button" onclick="document.getElementById('motivo-recusa-input').value='SEM PAGAMENTO DO SINAL'; document.getElementById('motivo-recusa-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition cursor-pointer">Sem pagamento</button>
+                    <button type="button" onclick="document.getElementById('motivo-recusa-input').value='DATAS INDISPONÍVEIS'; document.getElementById('motivo-recusa-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition cursor-pointer">Datas indisponíveis</button>
+                    <button type="button" onclick="document.getElementById('motivo-recusa-input').value='CLIENTE NÃO RESPONDEU WHATSAPP'; document.getElementById('motivo-recusa-input').dispatchEvent(new Event('input'))" class="text-[10px] bg-gray-100 hover:bg-gray-200 border border-gray-200 px-2.5 py-1 rounded-full font-bold text-gray-600 transition cursor-pointer">Sem resposta</button>
                 </div>
             </div>
 
@@ -691,6 +805,10 @@
 
         function fecharModalAntecipacao() {
             document.getElementById('modal-confirmacao-antecipacao')?.classList.add('hidden');
+        }
+
+        function fecharModalSucessoReserva() {
+            document.getElementById('modal-sucesso-reserva')?.classList.add('hidden');
         }
 
         function mudarMesCalendario(direcao) {
@@ -998,6 +1116,67 @@
             return v;
         }
 
+        function formatarCEP(v) {
+            v = v.replace(/\D/g, "");
+            if (v.length > 8) v = v.substring(0, 8);
+            if (v.length > 5) return v.replace(/(\d{5})(\d{1,3})/, "$1-$2");
+            return v;
+        }
+
+        function formatarTelefone(v) {
+            v = v.replace(/\D/g, "");
+            if (v.length > 11) v = v.substring(0, 11);
+            if (v.length > 10) return v.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+            if (v.length > 6) return v.replace(/(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3");
+            if (v.length > 2) return v.replace(/(\d{2})(\d{0,5})/, "($1) $2");
+            return v;
+        }
+
+        function aoDigitarWhatsApp(input) {
+            input.value = formatarTelefone(input.value);
+        }
+
+        function aoDigitarCep(input) {
+            input.value = formatarCEP(input.value);
+            const limpo = input.value.replace(/\D/g, '');
+            if (limpo.length === 8) {
+                buscarCepDashboard();
+            }
+        }
+
+        async function buscarCepDashboard() {
+            const inputCep = document.getElementById('edit-cep');
+            const cepLimpo = (inputCep.value || '').replace(/\D/g, '');
+            const iconeLoading = document.getElementById('icone-loading-cep-dash');
+
+            if (cepLimpo.length !== 8) return;
+
+            iconeLoading?.classList.remove('hidden');
+            try {
+                const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+                const data = await response.json();
+
+                if (data.erro) {
+                    mostrarToast("Aviso", "CEP não localizado. Preencha o endereço manualmente.", "alerta");
+                    return;
+                }
+
+                document.getElementById('edit-endereco').value = (data.logradouro || '').toUpperCase();
+                document.getElementById('edit-bairro').value = (data.bairro || '').toUpperCase();
+                document.getElementById('edit-cidade').value = (data.localidade || '').toUpperCase();
+                document.getElementById('edit-uf').value = (data.uf || '').toUpperCase();
+                
+                const inputNum = document.getElementById('edit-numero');
+                if (inputNum) inputNum.focus();
+
+                mostrarToast("CEP Localizado!", "Logradouro, Bairro e Município preenchidos!", "sucesso", 2500);
+            } catch (err) {
+                console.warn("Erro busca CEP:", err);
+            } finally {
+                iconeLoading?.classList.add('hidden');
+            }
+        }
+
         function validarCPF(cpfLimpo) {
             if (!cpfLimpo || cpfLimpo.length !== 11) return false;
             if (/^(\d)\1{10}$/.test(cpfLimpo)) return false;
@@ -1065,6 +1244,11 @@
                                 telefone: reservaAntiga.whatsapp_hospede,
                                 rg: reservaAntiga.rg,
                                 endereco: reservaAntiga.endereco,
+                                numero: reservaAntiga.numero,
+                                complemento: reservaAntiga.complemento,
+                                bairro: reservaAntiga.bairro,
+                                cidade: reservaAntiga.cidade,
+                                uf: reservaAntiga.uf,
                                 cep: reservaAntiga.cep,
                                 email: reservaAntiga.email
                             };
@@ -1076,16 +1260,26 @@
                         const elWhats = document.getElementById('edit-whatsapp');
                         const elRg = document.getElementById('edit-rg');
                         const elEnd = document.getElementById('edit-endereco');
+                        const elNum = document.getElementById('edit-numero');
+                        const elComp = document.getElementById('edit-complemento');
+                        const elBairro = document.getElementById('edit-bairro');
+                        const elCidade = document.getElementById('edit-cidade');
+                        const elUf = document.getElementById('edit-uf');
                         const elCep = document.getElementById('edit-cep');
                         const elEmail = document.getElementById('edit-email');
 
-                        if (dados.nome && elNome) elNome.value = dados.nome;
-                        if (dados.telefone && elWhats) elWhats.value = dados.telefone;
-                        if (dados.whatsapp_hospede && elWhats) elWhats.value = dados.whatsapp_hospede;
-                        if (dados.rg && elRg) elRg.value = dados.rg;
-                        if (dados.endereco && elEnd) elEnd.value = dados.endereco;
-                        if (dados.cep && elCep) elCep.value = dados.cep;
-                        if (dados.email && elEmail) elEmail.value = dados.email;
+                        if (dados.nome && elNome) elNome.value = dados.nome.toUpperCase();
+                        if (dados.telefone && elWhats) elWhats.value = formatarTelefone(dados.telefone);
+                        if (dados.whatsapp_hospede && elWhats) elWhats.value = formatarTelefone(dados.whatsapp_hospede);
+                        if (dados.rg && elRg) elRg.value = dados.rg.toUpperCase();
+                        if (dados.endereco && elEnd) elEnd.value = dados.endereco.toUpperCase();
+                        if (dados.numero && elNum) elNum.value = dados.numero.toUpperCase();
+                        if (dados.complemento && elComp) elComp.value = dados.complemento.toUpperCase();
+                        if (dados.bairro && elBairro) elBairro.value = dados.bairro.toUpperCase();
+                        if (dados.cidade && elCidade) elCidade.value = dados.cidade.toUpperCase();
+                        if (dados.uf && elUf) elUf.value = dados.uf.toUpperCase();
+                        if (dados.cep && elCep) elCep.value = formatarCEP(dados.cep);
+                        if (dados.email && elEmail) elEmail.value = dados.email.toLowerCase();
 
                         if (msgEncontrado) msgEncontrado.classList.remove('hidden');
                         mostrarToast("Hóspede Localizado!", `Cadastro de ${dados.nome || 'Hóspede'} preenchido automaticamente!`, "sucesso", 4000);
@@ -1865,6 +2059,23 @@
                             `;
                         }
 
+                        // FAIXA VISÍVEL DE CHECK-IN E CHECKOUT NO CARD ANTES DE EXPANDIR
+                        const faixaDatasVisivelCard = `
+                            <div class="mt-3 p-2.5 bg-slate-900/5 border border-slate-300/60 rounded-xl flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-1.5">
+                                    <i class="fa-solid fa-calendar-check text-blue-600 text-xs"></i>
+                                    <span class="text-slate-600 font-bold uppercase text-[10px]">Entrada:</span>
+                                    <strong class="text-slate-900 font-extrabold">${formatarDataSimples(aprovada.checkin)}</strong>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <i class="fa-solid fa-calendar-xmark text-red-600 text-xs"></i>
+                                    <span class="text-slate-600 font-bold uppercase text-[10px]">Saída:</span>
+                                    <strong class="text-slate-900 font-extrabold">${formatarDataSimples(aprovada.checkout)}</strong>
+                                    <span class="text-[10px] font-bold text-slate-500">(${qtdDiarias}d)</span>
+                                </div>
+                            </div>
+                        `;
+
                         container.innerHTML += `
                             <div class="card-suite p-4 sm:p-5 rounded-2xl shadow-sm ${isFutura ? 'bg-blue-50/70 border-2 border-blue-200 text-blue-950' : 'bg-gray-50 border-2 border-gray-200 text-gray-900'} border-l-4 ${temaSuite.borderActive} flex flex-col justify-between transition hover:shadow-md">
                                 <div>
@@ -1900,6 +2111,7 @@
                                         </div>
                                     </div>
 
+                                    ${faixaDatasVisivelCard}
                                     ${blocoFinanceiroCard}
                                     ${htmlAlertaTopo}
 
@@ -1929,16 +2141,10 @@
                                             </div>
                                         </div>
 
-                                        <div class="grid grid-cols-2 gap-2 bg-white/80 p-2 rounded-xl border border-black/5 text-[11px]">
-                                            <div>
-                                                <span class="text-gray-500 block text-[10px]">Entrada (Check-in):</span>
-                                                <strong class="text-gray-900">${formatarDataSimples(aprovada.checkin)}</strong>
-                                            </div>
-                                            <div>
-                                                <span class="text-gray-500 block text-[10px]">Saída (Check-out):</span>
-                                                <strong class="text-gray-900">${formatarDataSimples(aprovada.checkout)}</strong>
-                                                <span class="text-gray-500 text-[10px]">(${qtdDiarias}d)</span>
-                                            </div>
+                                        <div class="bg-white/80 p-2.5 rounded-xl border border-black/5 text-[11px] space-y-1">
+                                            <div class="flex justify-between"><span class="text-gray-500">CPF:</span><strong class="text-gray-800">${aprovada.cpf || 'Não informado'}</strong></div>
+                                            ${aprovada.rg ? `<div class="flex justify-between"><span class="text-gray-500">RG:</span><strong class="text-gray-800">${aprovada.rg}</strong></div>` : ''}
+                                            ${aprovada.endereco ? `<div class="flex justify-between"><span class="text-gray-500">Endereço:</span><strong class="text-gray-800 truncate">${aprovada.endereco}${aprovada.numero ? ', ' + aprovada.numero : ''}${aprovada.bairro ? ' - ' + aprovada.bairro : ''}</strong></div>` : ''}
                                         </div>
 
                                         ${tagTransferenciaHtml}
@@ -2189,19 +2395,24 @@
 
             if (reserva) {
                 document.getElementById('edit-reserva-id').value = reserva.id;
-                document.getElementById('edit-hospede').value = reserva.hospede_nome || '';
-                document.getElementById('edit-whatsapp').value = reserva.whatsapp_hospede || '';
+                document.getElementById('edit-hospede').value = (reserva.hospede_nome || '').toUpperCase();
+                document.getElementById('edit-whatsapp').value = formatarTelefone(reserva.whatsapp_hospede || '');
                 document.getElementById('edit-cpf').value = reserva.cpf ? formatarCPF(reserva.cpf) : '';
-                document.getElementById('edit-rg').value = reserva.rg || '';
-                document.getElementById('edit-endereco').value = reserva.endereco || '';
-                document.getElementById('edit-cep').value = reserva.cep || '';
-                document.getElementById('edit-email').value = reserva.email || '';
+                document.getElementById('edit-rg').value = (reserva.rg || '').toUpperCase();
+                document.getElementById('edit-cep').value = reserva.cep ? formatarCEP(reserva.cep) : '';
+                document.getElementById('edit-endereco').value = (reserva.endereco || '').toUpperCase();
+                document.getElementById('edit-numero').value = (reserva.numero || '').toUpperCase();
+                document.getElementById('edit-complemento').value = (reserva.complemento || '').toUpperCase();
+                document.getElementById('edit-bairro').value = (reserva.bairro || '').toUpperCase();
+                document.getElementById('edit-cidade').value = (reserva.cidade || '').toUpperCase();
+                document.getElementById('edit-uf').value = (reserva.uf || '').toUpperCase();
+                document.getElementById('edit-email').value = (reserva.email || '').toLowerCase();
                 document.getElementById('edit-adultos').value = reserva.qtd_adultos || 2;
                 document.getElementById('edit-criancas').value = reserva.qtd_criancas || 0;
                 document.getElementById('edit-pet').value = reserva.tem_pet ? 'true' : 'false';
                 document.getElementById('edit-checkin').value = reserva.checkin || '';
                 document.getElementById('edit-checkout').value = reserva.checkout || '';
-                document.getElementById('edit-observacao').value = reserva.observacao || '';
+                document.getElementById('edit-observacao').value = (reserva.observacao || '').toUpperCase();
                 
                 document.getElementById('modal-edicao').classList.remove('hidden');
                 aplicarVisibilidadeTaxaPet();
@@ -2215,8 +2426,13 @@
                 document.getElementById('edit-whatsapp').value = '';
                 document.getElementById('edit-cpf').value = '';
                 document.getElementById('edit-rg').value = '';
-                document.getElementById('edit-endereco').value = '';
                 document.getElementById('edit-cep').value = '';
+                document.getElementById('edit-endereco').value = '';
+                document.getElementById('edit-numero').value = '';
+                document.getElementById('edit-complemento').value = '';
+                document.getElementById('edit-bairro').value = '';
+                document.getElementById('edit-cidade').value = '';
+                document.getElementById('edit-uf').value = '';
                 document.getElementById('edit-email').value = '';
                 document.getElementById('edit-adultos').value = '2';
                 document.getElementById('edit-criancas').value = '0';
@@ -2387,7 +2603,7 @@
             reservaIdParaCancelar = reservaId;
             tipoCancelamentoAtual = tipo;
 
-            document.getElementById('nome-hospede-cancelamento').innerText = nomeHospede || 'hóspede';
+            document.getElementById('nome-hospede-cancelamento').innerText = (nomeHospede || 'hóspede').toUpperCase();
             const titEl = document.getElementById('titulo-modal-cancelamento');
             const subEl = document.getElementById('subtitulo-modal-cancelamento');
             const efeitoEl = document.getElementById('texto-efeito-cancelamento');
@@ -2396,7 +2612,7 @@
 
             if (tipo === 'estadia') {
                 titEl.innerText = "Interromper / Cancelar Estadia?";
-                subEl.innerHTML = `Tem certeza que deseja cancelar a <strong>estadia em andamento</strong> de <strong class="text-gray-900">${nomeHospede || 'hóspede'}</strong>?`;
+                subEl.innerHTML = `Tem certeza que deseja cancelar a <strong>estadia em andamento</strong> de <strong class="text-gray-900">${(nomeHospede || 'hóspede').toUpperCase()}</strong>?`;
                 efeitoEl.innerHTML = `O encerramento será computado na data de hoje, o valor das diárias consumidas será recalculado e a suíte física irá imediatamente para <strong>LIMPEZA</strong>.`;
                 btnConfirmar.innerHTML = `<i class="fa-solid fa-ban"></i> Confirmar Saída / Cancelamento`;
 
@@ -2448,7 +2664,7 @@
                 }
             } else {
                 titEl.innerText = "Cancelar Reserva?";
-                subEl.innerHTML = `Tem certeza que deseja cancelar a reserva futura de <strong class="text-gray-900">${nomeHospede || 'hóspede'}</strong>?`;
+                subEl.innerHTML = `Tem certeza que deseja cancelar a reserva futura de <strong class="text-gray-900">${(nomeHospede || 'hóspede').toUpperCase()}</strong>?`;
                 efeitoEl.innerHTML = `A acomodação será liberada imediatamente para novas consultas e a ocorrência será auditada no relatório.`;
                 btnConfirmar.innerHTML = `<i class="fa-solid fa-ban"></i> Confirmar Cancelamento`;
                 boxFinanc?.classList.add('hidden');
@@ -2479,7 +2695,7 @@
             if (!reservaIdParaCancelar) return;
             const input = document.getElementById('motivo-cancelamento-input');
             const erro = document.getElementById('erro-motivo-cancelamento');
-            const motivo = input ? input.value.trim() : '';
+            const motivo = input ? input.value.trim().toUpperCase() : '';
             if (!motivo) {
                 if (erro) erro.classList.remove('hidden');
                 if (input) { input.classList.add('border-red-500','ring-2','ring-red-200'); input.focus(); }
@@ -2882,8 +3098,13 @@
                     document.getElementById('edit-whatsapp').value = '';
                     document.getElementById('edit-cpf').value = '';
                     document.getElementById('edit-rg').value = '';
-                    document.getElementById('edit-endereco').value = '';
                     document.getElementById('edit-cep').value = '';
+                    document.getElementById('edit-endereco').value = '';
+                    document.getElementById('edit-numero').value = '';
+                    document.getElementById('edit-complemento').value = '';
+                    document.getElementById('edit-bairro').value = '';
+                    document.getElementById('edit-cidade').value = '';
+                    document.getElementById('edit-uf').value = '';
                     document.getElementById('edit-email').value = '';
                     document.getElementById('edit-adultos').value = '2';
                     document.getElementById('edit-criancas').value = '0';
@@ -2917,7 +3138,7 @@
             const campoSinalStr = document.getElementById('edit-valor-sinal')?.value?.trim() || '';
             const valorSinalInformado = parseFloat(campoSinalStr) || 0;
             const formaPagamentoSelecionada = document.getElementById('edit-forma-pagamento')?.value || 'Pix / Sinal';
-            const observacaoInformada = document.getElementById('edit-observacao')?.value || '';
+            const observacaoInformada = (document.getElementById('edit-observacao')?.value || '').toUpperCase();
 
             const checkinVal = document.getElementById('edit-checkin').value || new Date().toLocaleDateString('sv-SE');
             let checkoutVal = document.getElementById('edit-checkout').value || somarDiasData(checkinVal, Math.max(diariaMinimaPousadaCache, 1));
@@ -2944,6 +3165,14 @@
                 }
             }
 
+            // VALIDAÇÃO DE WHATSAPP COM NO MÍNIMO 10 DÍGITOS
+            const whatsappBruto = (document.getElementById('edit-whatsapp').value || '').trim();
+            const whatsNumeros = whatsappBruto.replace(/\D/g, "");
+            if (whatsNumeros.length < 10) {
+                mostrarErroModal("⚠️ <strong>WhatsApp Inválido:</strong> Informe o WhatsApp com DDD (mínimo de 10 dígitos numéricos). Ex: (11) 99999-8888.");
+                return;
+            }
+
             if (status === 'Reservado' || (status === 'Ocupada' && !reservaIdEditada)) {
                 const qtdDiariasCalculadas = calcularQuantidadeDiarias(checkinVal, checkoutVal);
                 if (qtdDiariasCalculadas < diariaMinimaPousadaCache) {
@@ -2951,8 +3180,9 @@
                     return;
                 }
             }
+const saldo
 
-            if (status === 'Checkout' && temPermissao('financeiro')) {
+if (status === 'Checkout' && temPermissao('financeiro')) {
                 const saldoDevedorMinimo = await calcularSaldoDevedorReservaAtual();
                 if (campoSinalStr === '' || isNaN(valorSinalInformado) || valorSinalInformado < saldoDevedorMinimo) {
                     mostrarErroModal(`O valor informado (${formatarMoeda(valorSinalInformado)}) é menor que o saldo devedor (${formatarMoeda(saldoDevedorMinimo)}).`);
@@ -2968,16 +3198,22 @@
                 return;
             }
 
+            // DADOS ESTRUTURADOS DE RESERVA (ALINHADOS COM RESERVAS E VITRINE)
             const dadosReserva = {
                 pousada_id: usuarioIdAtual,
                 suite_id: suiteId,
-                hospede_nome: document.getElementById('edit-hospede').value || 'Hóspede',
-                whatsapp_hospede: document.getElementById('edit-whatsapp').value,
+                hospede_nome: (document.getElementById('edit-hospede').value || 'HÓSPEDE').trim().toUpperCase(),
+                whatsapp_hospede: document.getElementById('edit-whatsapp').value.trim(),
                 cpf: cpfInformado,
-                rg: document.getElementById('edit-rg').value,
-                endereco: document.getElementById('edit-endereco').value,
-                cep: document.getElementById('edit-cep').value,
-                email: document.getElementById('edit-email').value,
+                rg: (document.getElementById('edit-rg').value || '').trim().toUpperCase(),
+                cep: (document.getElementById('edit-cep').value || '').trim(),
+                endereco: (document.getElementById('edit-endereco').value || '').trim().toUpperCase(),
+                numero: (document.getElementById('edit-numero').value || '').trim().toUpperCase(),
+                complemento: (document.getElementById('edit-complemento').value || '').trim().toUpperCase(),
+                bairro: (document.getElementById('edit-bairro').value || '').trim().toUpperCase(),
+                cidade: (document.getElementById('edit-cidade').value || '').trim().toUpperCase(),
+                uf: (document.getElementById('edit-uf').value || '').trim().toUpperCase(),
+                email: (document.getElementById('edit-email').value || '').trim().toLowerCase(),
                 qtd_adultos: adultosVal,
                 qtd_criancas: criancasVal,
                 idades_criancas: idadesCriancasStr,
@@ -2992,7 +3228,7 @@
             if (houveTransferencia) {
                 dadosReserva.suite_origem_id = suiteIdOriginal;
                 dadosReserva.transferido_em = new Date().toISOString();
-                dadosReserva.motivo_transferencia = document.getElementById('edit-motivo-transferencia')?.value?.trim() || 'Transferência de acomodação';
+                dadosReserva.motivo_transferencia = (document.getElementById('edit-motivo-transferencia')?.value || 'TRANSFERÊNCIA DE ACOMODAÇÃO').trim().toUpperCase();
                 dadosReserva.transferido_por = usuarioSessaoRealId;
             }
 
@@ -3065,6 +3301,7 @@
                 }
             }
 
+            // PERSISTÊNCIA NO CRM DE HÓSPEDES (TABELA HOSPEDES)
             if (cpfLimpo.length === 11 && dadosReserva.hospede_nome) {
                 try {
                     const dadosHospede = {
@@ -3098,18 +3335,33 @@
                     reserva_id: reservaIdFinal,
                     valor_pago: valorSinalInformado,
                     forma_pagamento: formaPagamentoSelecionada,
-                    observacao: status === 'Checkout' ? 'Quitado no encerramento (Checkout)' : (houveTransferencia ? 'Lançado após transferência' : 'Lançado via painel')
+                    observacao: status === 'Checkout' ? 'QUITADO NO ENCERRAMENTO (CHECKOUT)' : (houveTransferencia ? 'LANÇADO APÓS TRANSFERÊNCIA' : 'LANÇADO VIA PAINEL')
                 }]);
             }
 
             fecharModal();
             await carregarDashboard();
-            const msgSucesso = status === 'Checkout' 
-                ? "Checkout concluído com sucesso! Suíte enviada para Limpeza." 
-                : ((status === 'Limpeza' || status === 'Em Limpeza') && reservaIdEditada 
-                    ? "Suíte em governança! A estadia do hóspede permanece ativa." 
-                    : (houveTransferencia ? "Hóspede transferido de suíte com sucesso!" : "Dados salvos com sucesso!"));
-            mostrarToast("Sucesso", msgSucesso, "sucesso", 4500);
+
+            // SE FOI UMA NOVA RESERVA CRIADA, DISPARA O MODAL CENTRALIZADO DE SUCESSO
+            if (criandoNovaReserva) {
+                const suiteAlvoObj = suitesGlobaisCache.find(s => s.id === suiteId);
+                const qtdD = calcularQuantidadeDiarias(checkinVal, checkoutVal);
+                
+                document.getElementById('modal-sucesso-hospede').innerText = dadosReserva.hospede_nome;
+                document.getElementById('modal-sucesso-suite').innerText = suiteAlvoObj?.nome || 'Suíte';
+                document.getElementById('modal-sucesso-checkin').innerText = formatarDataSimples(checkinVal);
+                document.getElementById('modal-sucesso-checkout').innerText = formatarDataSimples(checkoutVal);
+                document.getElementById('modal-sucesso-diarias').innerText = `Período confirmado: ${qtdD} diária(s) calculada(s)`;
+                
+                document.getElementById('modal-sucesso-reserva')?.classList.remove('hidden');
+            } else {
+                const msgSucesso = status === 'Checkout' 
+                    ? "Checkout concluído com sucesso! Suíte enviada para Limpeza." 
+                    : ((status === 'Limpeza' || status === 'Em Limpeza') && reservaIdEditada 
+                        ? "Suíte em governança! A estadia do hóspede permanece ativa." 
+                        : (houveTransferencia ? "Hóspede transferido de suíte com sucesso!" : "Dados salvos com sucesso!"));
+                mostrarToast("Sucesso", msgSucesso, "sucesso", 4500);
+            }
         }
 
         document.getElementById('form-edicao').onsubmit = async (e) => {
@@ -3226,7 +3478,7 @@
 
         function abrirModalRecusa(reservaId, nomeHospede) {
             reservaIdParaRecusar = reservaId;
-            document.getElementById('nome-hospede-recusa').innerText = nomeHospede || 'hóspede';
+            document.getElementById('nome-hospede-recusa').innerText = (nomeHospede || 'hóspede').toUpperCase();
             const input = document.getElementById('motivo-recusa-input');
             const erro = document.getElementById('erro-motivo-recusa');
             const contador = document.getElementById('contador-motivo');
@@ -3246,7 +3498,7 @@
             if (!reservaIdParaRecusar) return;
             const input = document.getElementById('motivo-recusa-input');
             const erro = document.getElementById('erro-motivo-recusa');
-            const motivo = input ? input.value.trim() : '';
+            const motivo = input ? input.value.trim().toUpperCase() : '';
             if (!motivo) {
                 if (erro) erro.classList.remove('hidden');
                 if (input) { input.classList.add('border-red-500'); input.focus(); }
@@ -3278,7 +3530,8 @@
                 'modal-cancelamento-profissional',
                 'modal-recusa-profissional',
                 'modal-tarifa-especial',
-                'modal-calendario-suite'
+                'modal-calendario-suite',
+                'modal-sucesso-reserva'
             ];
             return modais.some(id => {
                 const el = document.getElementById(id);
