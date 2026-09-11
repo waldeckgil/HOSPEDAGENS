@@ -257,64 +257,17 @@
         </div>
     </div>
 
-    <!-- MODAL DE CONFIRMAÇÃO DE SAÍDA / CHECKOUT DETALHADO -->
-    <div id="modal-confirmacao" class="hidden fixed inset-0 bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-        <div class="bg-white p-6 sm:p-7 rounded-3xl w-full max-w-md shadow-2xl space-y-4 border border-gray-100">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-xl font-bold flex-shrink-0">
-                    <i class="fa-solid fa-receipt"></i>
-                </div>
-                <div>
-                    <h3 class="text-base sm:text-lg font-extrabold text-gray-900" id="conf-checkout-titulo">Conferência de Checkout</h3>
-                    <p class="text-xs text-gray-500">Revise os valores antes de finalizar a estadia e enviar para limpeza.</p>
-                </div>
-            </div>
-
-            <!-- QUADRO FINANCEIRO DE AUDITORIA DO CHECKOUT -->
-            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-2 text-xs text-slate-800">
-                <div class="flex justify-between items-center pb-1.5 border-b border-slate-200">
-                    <span class="text-gray-500 font-bold uppercase text-[10px]">Hóspede:</span>
-                    <strong id="conf-checkout-hospede" class="text-gray-900">-</strong>
-                </div>
-                <div class="flex justify-between items-center pb-1.5 border-b border-slate-200">
-                    <span class="text-gray-500 font-bold uppercase text-[10px]">Período Original:</span>
-                    <span id="conf-checkout-periodo-original" class="text-gray-500 line-through text-[11px]">-</span>
-                </div>
-                <div class="flex justify-between items-center pb-1.5 border-b border-slate-200">
-                    <span class="text-gray-500 font-bold uppercase text-[10px]">Período Efetivo:</span>
-                    <strong id="conf-checkout-periodo-efetivo" class="text-blue-900 font-extrabold">-</strong>
-                </div>
-                <div class="flex justify-between items-center pb-1.5 border-b border-slate-200">
-                    <span class="text-gray-500 font-bold uppercase text-[10px]">Diárias Usufruídas:</span>
-                    <span id="conf-checkout-diarias-consumidas" class="font-bold text-gray-900">-</span>
-                </div>
-                <div class="flex justify-between items-center pb-1.5 border-b border-slate-200">
-                    <span class="text-gray-500 font-bold uppercase text-[10px]">Consumo Recalculado:</span>
-                    <strong id="conf-checkout-total-consumido" class="text-gray-900 font-extrabold">-</strong>
-                </div>
-                <div class="flex justify-between items-center pb-1.5 border-b border-slate-200">
-                    <span class="text-gray-500 font-bold uppercase text-[10px]">Total Pago (Sinal):</span>
-                    <strong id="conf-checkout-total-pago" class="text-emerald-700 font-extrabold">-</strong>
-                </div>
-
-                <!-- DESTAQUE DO SALDO / CRÉDITO -->
-                <div id="box-destaque-resultado-checkout" class="p-2.5 rounded-xl text-center mt-2 border">
-                    <span id="lbl-destaque-resultado-checkout" class="block uppercase text-[10px] font-extrabold"></span>
-                    <strong id="val-destaque-resultado-checkout" class="text-base font-extrabold block"></strong>
-                </div>
-            </div>
-
-            <p class="text-[11px] text-gray-500 leading-snug">
-                Ao confirmar, a estadia será finalizada com as diárias consumidas e o quarto será colocado em <strong>LIMPEZA</strong>.
+    <!-- MODAL DE CONFIRMAÇÃO DE SAÍDA / LIMPEZA -->
+    <div id="modal-confirmacao" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-6 sm:p-8 rounded-3xl w-full max-w-md shadow-2xl text-center space-y-4">
+            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">🧹</div>
+            <h3 class="text-lg sm:text-xl font-bold text-gray-900">Confirmar Checkout e Enviar para Limpeza?</h3>
+            <p id="modal-confirmacao-texto" class="text-xs sm:text-sm text-gray-600">
+                Esta ação encerrará a estadia atual do hóspede e colocará a acomodação em <strong>LIMPEZA</strong> automaticamente. Deseja prosseguir?
             </p>
-
-            <div class="grid grid-cols-2 gap-3 pt-1">
-                <button type="button" onclick="fecharModalConfirmacao()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2.5 px-4 rounded-xl transition text-xs sm:text-sm cursor-pointer">
-                    Cancelar
-                </button>
-                <button type="button" id="btn-confirmar-acao" class="bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-2.5 px-4 rounded-xl transition text-xs sm:text-sm shadow-md flex items-center justify-center gap-1.5 cursor-pointer">
-                    <i class="fa-solid fa-check"></i> Concluir Checkout
-                </button>
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <button type="button" onclick="fecharModalConfirmacao()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-xl transition text-xs sm:text-sm cursor-pointer">Cancelar</button>
+                <button type="button" id="btn-confirmar-acao" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition text-xs sm:text-sm shadow-md cursor-pointer">Sim, Concluir Checkout</button>
             </div>
         </div>
     </div>
@@ -490,9 +443,9 @@
                         <label class="block text-[10px] font-bold uppercase tracking-wider text-purple-900 mb-1">Motivo da Transferência (Opcional):</label>
                         <input type="text" id="edit-motivo-transferencia" placeholder="Ex: Upgrade, pedido do cliente, manutenção..." class="w-full p-2.5 border border-purple-300 rounded-xl text-xs bg-white uppercase placeholder:normal-case" oninput="this.value = this.value.toUpperCase()">
                         <div class="mt-1.5 flex flex-wrap gap-1.5">
-                            <button type="button" onclick="document.getElementById('edit-motivo-transferencia').value='UPGRADE DE QUARTO';" class="text-[9px] bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-200 px-2.5 py-0.5 rounded-md font-bold cursor-pointer">Upgrade</button>
-                            <button type="button" onclick="document.getElementById('edit-motivo-transferencia').value='SOLICITAÇÃO DO HÓSPEDE';" class="text-[9px] bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-200 px-2.5 py-0.5 rounded-md font-bold cursor-pointer">Pedido do Hóspede</button>
-                            <button type="button" onclick="document.getElementById('edit-motivo-transferencia').value='MANUTENÇÃO NO QUARTO ANTERIOR';" class="text-[9px] bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-200 px-2.5 py-0.5 rounded-md font-bold cursor-pointer">Manutenção</button>
+                            <button type="button" onclick="document.getElementById('edit-motivo-transferencia').value='UPGRADE DE QUARTO';" class="text-[9px] bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-200 px-2 py-0.5 rounded-md font-bold cursor-pointer">Upgrade</button>
+                            <button type="button" onclick="document.getElementById('edit-motivo-transferencia').value='SOLICITAÇÃO DO HÓSPEDE';" class="text-[9px] bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-200 px-2 py-0.5 rounded-md font-bold cursor-pointer">Pedido do Hóspede</button>
+                            <button type="button" onclick="document.getElementById('edit-motivo-transferencia').value='MANUTENÇÃO NO QUARTO ANTERIOR';" class="text-[9px] bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-200 px-2 py-0.5 rounded-md font-bold cursor-pointer">Manutenção</button>
                         </div>
                     </div>
                 </div>
@@ -581,7 +534,7 @@
                             </div>
                         </div>
 
-                        <!-- BLOCO ESTRUTURADO DE ENDEREÇO -->
+                        <!-- BLOCO ESTRUTURADO DE ENDEREÇO (ALINHADO COM A VITRINE) -->
                         <div class="bg-gray-50/90 p-3.5 rounded-2xl border border-gray-200 space-y-2.5">
                             <div class="flex items-center justify-between">
                                 <span class="text-[11px] font-extrabold text-blue-900 uppercase tracking-wider flex items-center gap-1.5">
@@ -2078,6 +2031,7 @@
                             `;
                         }
 
+                        // CABEÇALHO LIMPO: APENAS O BADGE DE DIAS/STATUS (SEM DUPLICAR AS DATAS)
                         let tagDataPrazoTopo = isFutura 
                             ? `<div class="inline-flex items-center gap-1.5 bg-blue-100 text-blue-900 border border-blue-300 text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-2xs">
                                     <i class="fa-solid fa-calendar-days text-blue-700 text-xs"></i>
@@ -2143,6 +2097,7 @@
                             `;
                         }
 
+                        // FAIXA VISÍVEL DE CHECK-IN E CHECKOUT NO CARD ANTES DE EXPANDIR
                         const faixaDatasVisivelCard = `
                             <div class="mt-3 p-2.5 bg-slate-900/5 border border-slate-300/60 rounded-xl flex items-center justify-between text-xs">
                                 <div class="flex items-center gap-1.5">
@@ -2159,6 +2114,7 @@
                             </div>
                         `;
 
+                        // BOTÃO DE OLHINHO PARA DOCUMENTO ANEXADO
                         let htmlOlhoDocumento = '';
                         if (aprovada.documento_url) {
                             htmlOlhoDocumento = `
@@ -2562,6 +2518,7 @@
                 document.getElementById('edit-criancas').value = '0';
                 document.getElementById('edit-pet').value = 'false';
                 
+                // INICIA DATAS ZERADAS PARA QUE O GESTOR PREENCHA DO ZERO
                 document.getElementById('edit-checkin').value = '';
                 document.getElementById('edit-checkout').value = '';
                 document.getElementById('edit-observacao').value = '';
@@ -2970,8 +2927,7 @@
 
             let valorTotalCalculado = 0;
             try {
-                const { data: valorCalculado } = await supabase
-Client.rpc('calcular_total_reserva', { 
+                const { data: valorCalculado } = await supabaseClient.rpc('calcular_total_reserva', { 
                     p_suite_id: suiteId, 
                     p_checkin: checkinVal, 
                     p_checkout: checkoutVal,
@@ -3012,7 +2968,6 @@ Client.rpc('calcular_total_reserva', {
             const criancasVal = parseInt(document.getElementById('edit-criancas').value) || 0;
             const petRaw = document.getElementById('edit-pet').value;
             const petVal = (pousadaAceitaPetCache && (petRaw === 'true' || petRaw === true));
-            const statusAtualModal = document.getElementById('edit-status').value;
 
             try {
                 const suiteCap = suitesGlobaisCache.find(s => s.id === suiteId);
@@ -3048,7 +3003,7 @@ Client.rpc('calcular_total_reserva', {
             });
             const idadesStr = idadesArr.join(',');
 
-            // SE NÃO HOUVER DATAS, MANTÉM ZERADO
+            // SE NÃO HOUVER DATAS (OU ESTIVER ZERADO PARA NOVA RESERVA), MANTÉM ZERADO
             if (!checkinStr || !checkoutStr) {
                 document.getElementById('modal-qtd-diarias').innerText = `0 diária(s)`;
                 if (temPermissao('financeiro')) {
@@ -3063,7 +3018,7 @@ Client.rpc('calcular_total_reserva', {
             let d1 = new Date(checkinStr);
             let d2 = new Date(checkoutStr);
             if (d2 <= d1) {
-                checkoutStr = somarDiasData(checkinStr, Math.max(statusAtualModal === 'Checkout' ? 1 : diariaMinimaPousadaCache, 1));
+                checkoutStr = somarDiasData(checkinStr, Math.max(diariaMinimaPousadaCache, 1));
                 document.getElementById('edit-checkout').value = checkoutStr;
             }
 
@@ -3073,8 +3028,7 @@ Client.rpc('calcular_total_reserva', {
             const avisoDiariaMinEl = document.getElementById('aviso-diaria-minima-modal');
             const textoDiariaMinEl = document.getElementById('texto-diaria-minima-modal');
             if (avisoDiariaMinEl && textoDiariaMinEl) {
-                // Em checkout antecipado não se bloqueia por diária mínima
-                if (statusAtualModal !== 'Checkout' && diariaMinimaPousadaCache > 1 && qtdDiarias < diariaMinimaPousadaCache) {
+                if (diariaMinimaPousadaCache > 1 && qtdDiarias < diariaMinimaPousadaCache) {
                     textoDiariaMinEl.innerHTML = `A pousada exige no mínimo <strong>${diariaMinimaPousadaCache} diária(s)</strong>. Selecionado: <strong>${qtdDiarias} diária(s)</strong>.`;
                     avisoDiariaMinEl.className = "bg-red-50 border border-red-300 p-2.5 rounded-xl text-xs text-red-900 font-bold flex items-center gap-2";
                     avisoDiariaMinEl.classList.remove('hidden');
@@ -3111,84 +3065,18 @@ Client.rpc('calcular_total_reserva', {
                     const pags = pagamentosGlobaisCache.filter(p => p.reserva_id === reservaId);
                     totalPago = pags.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
                 }
-
-                // APURAÇÃO DE CRÉDITO OU SALDO DEVEDOR
                 const saldo = valorTotal - totalPago;
                 const elSaldo = document.getElementById('modal-saldo-restante');
                 if (elSaldo) {
-                    if (saldo < 0) {
-                        elSaldo.innerText = `${formatarMoeda(Math.abs(saldo))} (Crédito do Hóspede)`;
-                        elSaldo.className = "text-emerald-700 font-extrabold";
-                    } else if (saldo > 0) {
-                        elSaldo.innerText = formatarMoeda(saldo);
-                        elSaldo.className = "text-amber-700 font-extrabold";
-                    } else {
-                        elSaldo.innerText = "R$ 0,00 (Quitado)";
-                        elSaldo.className = "text-emerald-600 font-extrabold";
-                    }
+                    elSaldo.innerText = formatarMoeda(saldo);
+                    elSaldo.className = (saldo > 0) ? "text-amber-700 font-extrabold" : "text-emerald-600 font-extrabold";
                 }
 
-                // ADAPTAÇÃO DA CAIXA DE CHECKOUT (SALDO OU CRÉDITO)
-                if (statusAtualModal === 'Checkout') {
-                    const containerCheckout = document.getElementById('container-checkout-financeiro');
-                    const lblValorSinal = document.getElementById('lbl-valor-sinal');
+                if (document.getElementById('edit-status').value === 'Checkout') {
+                    const displayCheckout = document.getElementById('display-saldo-devedor-checkout');
+                    if (displayCheckout) displayCheckout.innerText = formatarMoeda(saldo);
                     const elSinal = document.getElementById('edit-valor-sinal');
-
-                    if (saldo < 0) {
-                        // CRÉDITO / REEMBOLSO AO HÓSPEDE
-                        const credito = Math.abs(saldo);
-                        if (containerCheckout) {
-                            containerCheckout.className = "bg-emerald-50 border-2 border-emerald-300 p-4 rounded-xl space-y-2";
-                            containerCheckout.innerHTML = `
-                                <div class="flex justify-between items-center text-xs sm:text-sm">
-                                    <span class="font-bold text-emerald-900 uppercase">Crédito / Reembolso ao Hóspede:</span>
-                                    <strong class="text-emerald-700 font-extrabold text-base">${formatarMoeda(credito)}</strong>
-                                </div>
-                                <p class="text-[11px] text-emerald-800 leading-tight">
-                                    O hóspede pagou mais do que consumiu devido ao checkout antecipado. A pousada deve estornar ou creditar ${formatarMoeda(credito)}.
-                                </p>
-                            `;
-                        }
-                        if (lblValorSinal) {
-                            lblValorSinal.innerText = "Registrar Devolução / Ajuste Financeiro (Opcional)";
-                            lblValorSinal.className = "block text-xs font-bold text-emerald-700 mb-1";
-                        }
-                        if (elSinal) elSinal.value = '0.00';
-                    } else if (saldo > 0) {
-                        // SALDO DEVEDOR A COBRAR
-                        if (containerCheckout) {
-                            containerCheckout.className = "bg-red-50 border-2 border-red-300 p-4 rounded-xl space-y-2";
-                            containerCheckout.innerHTML = `
-                                <div class="flex justify-between items-center text-xs sm:text-sm">
-                                    <span class="font-bold text-red-900 uppercase">Saldo Devedor do Hóspede:</span>
-                                    <strong id="display-saldo-devedor-checkout" class="text-red-700 font-extrabold text-base">${formatarMoeda(saldo)}</strong>
-                                </div>
-                                <p class="text-[11px] text-red-700 leading-tight">O saldo devedor foi preenchido automaticamente como valor mínimo para quitar a estadia.</p>
-                            `;
-                        }
-                        if (lblValorSinal) {
-                            lblValorSinal.innerText = "Valor do Pagamento no Checkout (R$) * Mínimo Obrigatório";
-                            lblValorSinal.className = "block text-xs font-bold text-red-700 mb-1";
-                        }
-                        if (elSinal) elSinal.value = saldo.toFixed(2);
-                    } else {
-                        // ESTADIA QUITADA
-                        if (containerCheckout) {
-                            containerCheckout.className = "bg-blue-50 border border-blue-200 p-4 rounded-xl space-y-1";
-                            containerCheckout.innerHTML = `
-                                <div class="flex justify-between items-center text-xs sm:text-sm">
-                                    <span class="font-bold text-blue-900 uppercase">Status Financeiro:</span>
-                                    <strong class="text-emerald-700 font-extrabold text-base">ESTADIA QUITADA</strong>
-                                </div>
-                                <p class="text-[11px] text-blue-800 leading-tight">Não há débitos pendentes nem créditos a reembolsar.</p>
-                            `;
-                        }
-                        if (lblValorSinal) {
-                            lblValorSinal.innerText = "Registrar Pagamento Adicional (Opcional)";
-                            lblValorSinal.className = "block text-xs font-bold text-gray-700 mb-1";
-                        }
-                        if (elSinal) elSinal.value = '0.00';
-                    }
+                    if (elSinal) elSinal.value = saldo > 0 ? saldo.toFixed(2) : '0.00';
                 }
             }
         }
@@ -3274,30 +3162,19 @@ Client.rpc('calcular_total_reserva', {
                 containerCampos.classList.remove('opacity-50');
             }
 
-            // AJUSTE AUTOMÁTICO DE DATA AO FAZER CHECKOUT
-            if (status === 'Checkout') {
-                const hojeStr = new Date().toLocaleDateString('sv-SE');
-                const checkinInput = document.getElementById('edit-checkin');
-                const checkoutInput = document.getElementById('edit-checkout');
-
-                // Se a saída contratada for futura, antecipa para hoje (com no mínimo 1 diária)
-                if (checkoutInput.value > hojeStr) {
-                    if (checkinInput.value >= hojeStr) {
-                        checkoutInput.value = somarDiasData(checkinInput.value, 1);
-                    } else {
-                        checkoutInput.value = hojeStr;
-                    }
-                }
-            }
-
             if (status === 'Checkout' && temPermissao('financeiro')) {
                 containerCheckout?.classList.remove('hidden');
+                if (lblValorSinal) {
+                    lblValorSinal.innerText = "Valor do Pagamento no Checkout (R$) * Mínimo Obrigatório";
+                    lblValorSinal.classList.add('text-red-700');
+                    lblValorSinal.classList.remove('text-emerald-700');
+                }
                 await recalcularValoresModalEdicao();
             } else {
                 containerCheckout?.classList.add('hidden');
                 if (lblValorSinal) {
                     lblValorSinal.innerText = "Registrar Novo Pagamento / Sinal (R$)";
-                    lblValorSinal.classList.remove('text-red-700', 'text-amber-700');
+                    lblValorSinal.classList.remove('text-red-700');
                     lblValorSinal.classList.add('text-emerald-700');
                 }
             }
@@ -3331,8 +3208,10 @@ Client.rpc('calcular_total_reserva', {
                     document.getElementById('edit-criancas').value = '0';
                     document.getElementById('edit-pet').value = 'false';
                     
+                    // ZERA AS DATAS E OS VALORES PARA O GESTOR DIGITAR DO ZERO
                     document.getElementById('edit-checkin').value = '';
                     document.getElementById('edit-checkout').value = '';
+                    
                     document.getElementById('edit-valor-sinal').value = '';
                     document.getElementById('edit-forma-pagamento').value = 'Pix / Sinal';
                     document.getElementById('edit-observacao').value = '';
@@ -3396,6 +3275,7 @@ Client.rpc('calcular_total_reserva', {
                 }
             }
 
+            // VALIDAÇÃO DE WHATSAPP COM NO MÍNIMO 10 DÍGITOS
             const whatsappBruto = (document.getElementById('edit-whatsapp').value || '').trim();
             const whatsNumeros = whatsappBruto.replace(/\D/g, "");
             if (whatsNumeros.length < 10) {
@@ -3411,10 +3291,9 @@ Client.rpc('calcular_total_reserva', {
                 }
             }
 
-            // Em Checkout, só obriga pagamento se de fato houver saldo devedor
             if (status === 'Checkout' && temPermissao('financeiro')) {
                 const saldoDevedorMinimo = await calcularSaldoDevedorReservaAtual();
-                if (saldoDevedorMinimo > 0 && (campoSinalStr === '' || isNaN(valorSinalInformado) || valorSinalInformado < saldoDevedorMinimo)) {
+                if (campoSinalStr === '' || isNaN(valorSinalInformado) || valorSinalInformado < saldoDevedorMinimo) {
                     mostrarErroModal(`O valor informado (${formatarMoeda(valorSinalInformado)}) é menor que o saldo devedor (${formatarMoeda(saldoDevedorMinimo)}).`);
                     return;
                 }
@@ -3428,6 +3307,7 @@ Client.rpc('calcular_total_reserva', {
                 return;
             }
 
+            // UPLOAD DO DOCUMENTO ANEXADO (SE INFORMADO)
             let urlDocumentoAnexo = null;
             const inputArquivo = document.getElementById('edit-arquivo-documento');
             if (inputArquivo && inputArquivo.files && inputArquivo.files.length > 0) {
@@ -3449,6 +3329,7 @@ Client.rpc('calcular_total_reserva', {
                 }
             }
 
+            // DADOS ESTRUTURADOS DE RESERVA (ALINHADOS COM RESERVAS E VITRINE)
             const dadosReserva = {
                 pousada_id: usuarioIdAtual,
                 suite_id: suiteId,
@@ -3503,24 +3384,6 @@ Client.rpc('calcular_total_reserva', {
                 }
             } catch (err) {
                 console.error("Erro RPC cálculo salvamento:", err);
-            }
-
-            // REGISTRO DETALHADO DO CHECKOUT ANTECIPADO E CRÉDITO PARA O RELATÓRIO
-            if (status === 'Checkout') {
-                const pags = pagamentosGlobaisCache.filter(p => p.reserva_id === reservaIdEditada);
-                const totalPago = pags.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
-                const saldoDev = valorTotalCalculado - totalPago;
-                const rOriginal = reservasGlobaisCache.find(r => r.id === reservaIdEditada);
-                
-                let logCheckout = `[CHECKOUT EM ${formatarDataSimples(checkoutVal)}] Diárias consumidas: ${calcularQuantidadeDiarias(checkinVal, checkoutVal)}`;
-                if (rOriginal && rOriginal.checkout && rOriginal.checkout > checkoutVal) {
-                    logCheckout += ` (original até ${formatarDataSimples(rOriginal.checkout)})`;
-                }
-                logCheckout += `. Consumo: ${formatarMoeda(valorTotalCalculado)}. Total pago: ${formatarMoeda(totalPago)}.`;
-                if (saldoDev < 0) {
-                    logCheckout += ` Crédito apurado ao hóspede: ${formatarMoeda(Math.abs(saldoDev))}.`;
-                }
-                dadosReserva.observacao = dadosReserva.observacao ? `${dadosReserva.observacao} | ${logCheckout}` : logCheckout;
             }
 
             let reservaIdFinal = reservaIdEditada;
@@ -3601,16 +3464,17 @@ Client.rpc('calcular_total_reserva', {
                 }
             }
 
-            if (temPermissao('financeiro') && valorSinalInformado > 0 && reservaIdFinal) {
+            if (temPermissao('financeiro') && (valorSinalInformado > 0 || status === 'Checkout') && reservaIdFinal) {
                 await supabaseClient.from('hospede_pagamentos').insert([{
                     pousada_id: usuarioIdAtual,
                     reserva_id: reservaIdFinal,
                     valor_pago: valorSinalInformado,
                     forma_pagamento: formaPagamentoSelecionada,
-                    observacao: status === 'Checkout' ? 'PAGAMENTO ADICIONAL NO CHECKOUT' : (houveTransferencia ? 'LANÇADO APÓS TRANSFERÊNCIA' : 'LANÇADO VIA PAINEL')
+                    observacao: status === 'Checkout' ? 'QUITADO NO ENCERRAMENTO (CHECKOUT)' : (houveTransferencia ? 'LANÇADO APÓS TRANSFERÊNCIA' : 'LANÇADO VIA PAINEL')
                 }]);
             }
 
+            // SE FOI UMA NOVA RESERVA CRIADA, GERA PDF E ABRE WHATSAPP AUTOMATICAMENTE
             if (criandoNovaReserva && reservaIdFinal) {
                 const suiteAlvoObj = suitesGlobaisCache.find(s => s.id === suiteId);
                 const suiteNome = suiteAlvoObj ? suiteAlvoObj.nome : 'Suíte';
@@ -3677,6 +3541,7 @@ Client.rpc('calcular_total_reserva', {
                     }
                 }
 
+                // FORMATAÇÃO E ABERTURA DA MENSAGEM DE WHATSAPP
                 let msgZap = `Olá *${dadosReserva.hospede_nome}*, sua reserva na *${pousadaNome}* foi confirmada com sucesso! 🎉\n\n`;
                 msgZap += `🏨 *Acomodação:* ${suiteNome}\n`;
                 msgZap += `📅 *Período:* ${formatarDataSimples(checkinVal)} até ${formatarDataSimples(checkoutVal)}\n`;
@@ -3709,7 +3574,7 @@ Client.rpc('calcular_total_reserva', {
                     ? "Checkout concluído com sucesso! Suíte enviada para Limpeza." 
                     : ((status === 'Limpeza' || status === 'Em Limpeza') && reservaIdEditada 
                         ? "Suíte em governança! A estadia do hóspede permanece ativa." 
-                        : (houveTransferencia ? "Hóspede transferido de suíte com sucesso!" : "Dados salvos com sucesso!"));
+  : (houveTransferencia ? "Hóspede transferido de suíte com sucesso!" : "Dados salvos com sucesso!"));
                 mostrarToast("Sucesso", msgSucesso, "sucesso", 4500);
             }
         }
@@ -3778,66 +3643,8 @@ Client.rpc('calcular_total_reserva', {
                 return;
             }
 
-            // SE FOR CHECKOUT (FINALIZAR ESTADIA), EXIBE CONFERÊNCIA DETALHADA
-            if (status === 'Checkout') {
-                const rAtual = reservasGlobaisCache.find(r => r.id === reservaIdEditada);
-                const checkinConsumido = document.getElementById('edit-checkin').value;
-                const checkoutConsumido = document.getElementById('edit-checkout').value;
-                const diariasConsumidas = Math.max(1, calcularQuantidadeDiarias(checkinConsumido, checkoutConsumido));
-                
-                let valorConsumoReal = 0;
-                try {
-                    const inputsIdades = document.querySelectorAll('.input-idade-crianca');
-                    const idadesStr = Array.from(inputsIdades).map(i => parseInt(i.value) || 0).join(',');
-                    const { data: vCalc } = await supabaseClient.rpc('calcular_total_reserva', {
-                        p_suite_id: suiteId,
-                        p_checkin: checkinConsumido,
-                        p_checkout: checkoutConsumido,
-                        p_adultos: parseInt(document.getElementById('edit-adultos').value) || 2,
-                        p_criancas: parseInt(document.getElementById('edit-criancas').value) || 0,
-                        p_idades_criancas: idadesStr,
-                        p_pet: (pousadaAceitaPetCache && document.getElementById('edit-pet').value === 'true')
-                    });
-                    if (vCalc !== null) valorConsumoReal = Number(vCalc);
-                } catch(e) {
-                    const sObj = suitesGlobaisCache.find(s => s.id === suiteId);
-                    valorConsumoReal = diariasConsumidas * Number(sObj?.valor_diaria || 0);
-                }
-
-                const pags = pagamentosGlobaisCache.filter(p => p.reserva_id === reservaIdEditada);
-                const totalPagoHospede = pags.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
-                const saldoCheckout = valorConsumoReal - totalPagoHospede;
-
-                document.getElementById('conf-checkout-hospede').innerText = (document.getElementById('edit-hospede').value || 'Hóspede').toUpperCase();
-                document.getElementById('conf-checkout-periodo-original').innerText = rAtual ? `${formatarDataSimples(rAtual.checkin)} até ${formatarDataSimples(rAtual.checkout)} (${calcularQuantidadeDiarias(rAtual.checkin, rAtual.checkout)}d)` : '-';
-                document.getElementById('conf-checkout-periodo-efetivo').innerText = `${formatarDataSimples(checkinConsumido)} até ${formatarDataSimples(checkoutConsumido)} (${diariasConsumidas}d)`;
-                document.getElementById('conf-checkout-diarias-consumidas').innerText = `${diariasConsumidas} diária(s) consumida(s)`;
-                document.getElementById('conf-checkout-total-consumido').innerText = formatarMoeda(valorConsumoReal);
-                document.getElementById('conf-checkout-total-pago').innerText = formatarMoeda(totalPagoHospede);
-
-                const boxResultado = document.getElementById('box-destaque-resultado-checkout');
-                const lblResultado = document.getElementById('lbl-destaque-resultado-checkout');
-                const valResultado = document.getElementById('val-destaque-resultado-checkout');
-
-                if (saldoCheckout < 0) {
-                    const credito = Math.abs(saldoCheckout);
-                    boxResultado.className = "p-3 rounded-2xl text-center mt-2 border-2 border-emerald-400 bg-emerald-100 text-emerald-950";
-                    lblResultado.innerText = "CRÉDITO A REEMBOLSAR AO HÓSPEDE";
-                    valResultado.className = "text-xl font-black text-emerald-800";
-                    valResultado.innerText = formatarMoeda(credito);
-                } else if (saldoCheckout > 0) {
-                    boxResultado.className = "p-3 rounded-2xl text-center mt-2 border-2 border-red-300 bg-red-100 text-red-950";
-                    lblResultado.innerText = "SALDO DEVEDOR RESTANTE A COBRAR";
-                    valResultado.className = "text-xl font-black text-red-700";
-                    valResultado.innerText = formatarMoeda(saldoCheckout);
-                } else {
-                    boxResultado.className = "p-3 rounded-2xl text-center mt-2 border-2 border-blue-300 bg-blue-100 text-blue-950";
-                    lblResultado.innerText = "STATUS FINANCEIRO";
-                    valResultado.className = "text-lg font-black text-blue-900";
-                    valResultado.innerText = "ESTADIA QUITADA / SEM PENDÊNCIAS";
-                }
-
-                fecharModal();
+            if (statusOriginal === 'Ocupada' && status === 'Checkout') {
+                fecharModal(); 
                 document.getElementById('modal-confirmacao').classList.remove('hidden');
                 document.getElementById('btn-confirmar-acao').onclick = async () => {
                     fecharModalConfirmacao();
@@ -3885,6 +3692,7 @@ Client.rpc('calcular_total_reserva', {
                 return;
             }
 
+            // SE FOR UMA NOVA RESERVA (OU NOVO CARD), ABRE O MODAL CENTRAL DE CONFERÊNCIA ANTES DE GRAVAR
             const criandoNovaReserva = (!reservaIdEditada || status === 'Reservado' || (status === 'Ocupada' && !reservaIdEditada));
             if (criandoNovaReserva) {
                 const nomeH = (document.getElementById('edit-hospede').value || 'Hóspede').toUpperCase();
@@ -3951,6 +3759,9 @@ Client.rpc('calcular_total_reserva', {
             window.location.href = 'index.html'; 
         }
 
+        // =========================================================================
+        // Sincronização em Tempo Real (Realtime Supabase) e Auto-Refresh Seguro
+        // =========================================================================
         let intervaloAutoRefresh = null;
         let canalRealtime = null;
 
@@ -4121,3 +3932,5 @@ Client.rpc('calcular_total_reserva', {
     </script>
 </body>
 </html>
+
+
