@@ -224,7 +224,7 @@
                         </div>
 
                         <div class="pt-3 border-t border-slate-100 flex justify-end">
-                            <button id="btn-salvar-config" onclick="salvarConfiguracao()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold shadow-md shadow-blue-500/20 transition flex items-center justify-center gap-2 cursor-pointer">
+                            <button onclick="salvarConfiguracao()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold shadow-md shadow-blue-500/20 transition flex items-center justify-center gap-2 cursor-pointer">
                                 <i class="fa-solid fa-floppy-disk"></i> Salvar Alterações
                             </button>
                         </div>
@@ -285,7 +285,6 @@
         let permissoesUsuarioAtual = {};
         let nomeUsuarioLogadoAtual = '';
         let tarifasEspeciaisCache = [];
-        let pousadaExisteNoBanco = false;
 
         function mostrarToast(titulo, mensagem, tipo = 'sucesso') {
             const toast = document.getElementById('toast-notificacao');
@@ -380,7 +379,7 @@
 
             // 2. MODO COMUM (COLABORADOR OU DONO)
             if (!usuarioIdAtual) {
-                const { data: usuarioPerfil, error: errPerfil } = await supabaseClient
+                const { data: usuarioPerfil } = await supabaseClient
                     .from('usuarios')
                     .select('pousada_id, cargo, ativo, nome_completo, permissoes')
                     .eq('user_id', session.user.id)
@@ -395,15 +394,13 @@
 
                 cargoUsuarioAtual = usuarioPerfil?.cargo || 'dono';
                 permissoesUsuarioAtual = usuarioPerfil?.permissoes || {};
-                
-                // Se pousada_id for nulo, o ID da pousada do Dono é o seu próprio auth UID
                 usuarioIdAtual = usuarioPerfil?.pousada_id || session.user.id;
 
                 nomeUsuarioLogadoAtual = usuarioPerfil?.nome_completo || session.user.user_metadata?.nome_completo || session.user.user_metadata?.nome || (session.user.email ? session.user.email.split('@')[0] : 'Gestor');
                 const elNomeUsuario = document.getElementById('texto-nome-usuario');
                 if (elNomeUsuario) elNomeUsuario.innerText = nomeUsuarioLogadoAtual;
 
-                // Trava de segurança para colaboradores sem permissão
+                // 🚨 TRAVA DE SEGURANÇA: Se não for dono e não tiver o privilégio 'configuracoes'
                 if (cargoUsuarioAtual !== 'dono' && !temPermissao('configuracoes')) {
                     alert("Acesso restrito: você não possui privilégio para alterar a configuração de suítes da pousada.");
                     window.location.href = 'dashboard.html';
@@ -429,20 +426,11 @@
         }
 
         async function carregarConfiguracao(pousadaId) {
-            esconderMensagem();
-            
-            const { data: pousada, error: errPousada } = await supabaseClient
+            const { data: pousada } = await supabaseClient
                 .from('pousadas')
-                .select('id, nome, valor_pet, valor_hospede_extra, idade_limite_crianca, aceita_pet, diaria_minima, horario_checkin, horario_checkout')
+                .select('nome, valor_pet, valor_hospede_extra, idade_limite_crianca, aceita_pet, diaria_minima, horario_checkin, horario_checkout')
                 .eq('id', pousadaId)
                 .maybeSingle();
-
-            if (errPousada) {
-                mostrarMensagem('Erro ao consultar dados da pousada: ' + errPousada.message, 'erro');
-                return;
-            }
-
-            pousadaExisteNoBanco = !!pousada;
 
             const nomePousada = (pousada && pousada.nome) ? pousada.nome : "Minha Pousada";
             nomePousadaOriginal = (pousada && pousada.nome) ? pousada.nome : '';
@@ -463,18 +451,12 @@
                 document.getElementById('aceita-pet').checked = pousada.aceita_pet === true || pousada.aceita_pet === 'true';
             }
 
-            // Busca as suítes
-            const { data: suites, error: errSuites } = await supabaseClient
+            const { data: suites } = await supabaseClient
                 .from('suites')
                 .select('id, nome, fotos, ativa, valor_diaria, hospedes_inclusos, capacidade_hospedes, usa_adicional_customizado, valor_hospede_extra_customizado')
                 .eq('pousada_id', pousadaId)
                 .order('nome');
 
-            if (errSuites) {
-                mostrarMensagem('Aviso ao carregar suítes: ' + errSuites.message, 'erro');
-            }
-
-            // Busca as tarifas especiais
             const { data: tarifas } = await supabaseClient
                 .from('tarifas_especiais')
                 .select('*')
@@ -641,7 +623,7 @@
                     modal.classList.add('hidden');
                     const { error } = await supabaseClient.from('suites').delete().eq('id', suiteId);
                     if (error) {
-                        mostrarMensagem('Erro ao excluir suíte: ' + error.message, 'erro');
+                        mostrarMensagem('Erro ao excluir suíte do banco de dados.', 'erro');
                         mostrarToast('Erro', 'Não foi possível excluir a suíte.', 'erro');
                         return;
                     }
@@ -672,10 +654,7 @@
                     .from('suites-fotos')
                     .upload(caminhoStorage, arquivo, { cacheControl: '3600', upsert: false });
 
-                if (uploadError) {
-                    console.warn("Aviso upload:", uploadError.message);
-                    continue;
-                }
+                if (uploadError) continue;
 
                 const { data: urlData } = supabaseClient.storage
                     .from('suites-fotos')
@@ -689,168 +668,119 @@
         }
 
         async function executarSalvamento() {
-            esconderMensagem();
-            const btnSalvar = document.getElementById('btn-salvar-config');
-            btnSalvar.disabled = true;
-            btnSalvar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
+            const nomePousada = document.getElementById('nome-pousada').value;
+            const linhasSuites = document.querySelectorAll('#suites-container > .suite-row');
 
-            try {
-                const nomePousada = document.getElementById('nome-pousada').value.trim();
-                const linhasSuites = document.querySelectorAll('#suites-container > .suite-row');
+            const valorPetRaw = document.getElementById('valor-pet')?.value;
+            const valorHospedeExtraRaw = document.getElementById('valor-hospede-extra')?.value;
+            const idadeLimiteRaw = document.getElementById('idade-limite-crianca')?.value;
+            const diariaMinimaRaw = document.getElementById('diaria-minima')?.value;
+            const horarioCheckin = document.getElementById('horario-checkin')?.value?.trim() || null;
+            const horarioCheckout = document.getElementById('horario-checkout')?.value?.trim() || null;
+            const aceitaPet = document.getElementById('aceita-pet')?.checked || false;
 
-                const valorPetRaw = document.getElementById('valor-pet')?.value;
-                const valorHospedeExtraRaw = document.getElementById('valor-hospede-extra')?.value;
-                const idadeLimiteRaw = document.getElementById('idade-limite-crianca')?.value;
-                const diariaMinimaRaw = document.getElementById('diaria-minima')?.value;
-                const horarioCheckin = document.getElementById('horario-checkin')?.value?.trim() || null;
-                const horarioCheckout = document.getElementById('horario-checkout')?.value?.trim() || null;
-                const aceitaPet = document.getElementById('aceita-pet')?.checked || false;
+            const dadosPousada = {
+                nome: nomePousada.trim(),
+                valor_pet: valorPetRaw !== '' ? parseFloat(valorPetRaw) : null,
+                valor_hospede_extra: valorHospedeExtraRaw !== '' ? parseFloat(valorHospedeExtraRaw) : null,
+                idade_limite_crianca: idadeLimiteRaw !== '' ? parseFloat(idadeLimiteRaw) : null,
+                diaria_minima: diariaMinimaRaw !== '' ? parseInt(diariaMinimaRaw) : null,
+                horario_checkin: horarioCheckin,
+                horario_checkout: horarioCheckout,
+                aceita_pet: aceitaPet
+            };
 
-                const dadosPousada = {
-                    id: usuarioIdAtual,
-                    nome: nomePousada,
-                    valor_pet: valorPetRaw !== '' ? parseFloat(valorPetRaw) : null,
-                    valor_hospede_extra: valorHospedeExtraRaw !== '' ? parseFloat(valorHospedeExtraRaw) : null,
-                    idade_limite_crianca: idadeLimiteRaw !== '' ? parseFloat(idadeLimiteRaw) : null,
-                    diaria_minima: diariaMinimaRaw !== '' ? parseInt(diariaMinimaRaw) : null,
-                    horario_checkin: horarioCheckin,
-                    horario_checkout: horarioCheckout,
-                    aceita_pet: aceitaPet
-                };
+            const { error: errPousada } = await supabaseClient
+                .from('pousadas')
+                .update(dadosPousada)
+                .eq('id', usuarioIdAtual);
 
-                // Se a pousada ainda não existe na tabela pousadas, garante o status active
-                if (!pousadaExisteNoBanco) {
-                    dadosPousada.status = 'active';
-                }
+            if (errPousada) {
+                mostrarMensagem('Erro ao salvar os dados da pousada: ' + errPousada.message, 'erro');
+                return;
+            }
+            
+            for (const div of linhasSuites) {
+                const input = div.querySelector('.suite-input');
+                const checkboxAtiva = div.querySelector('.suite-ativa-checkbox');
+                const inputValorDiaria = div.querySelector('.suite-valor-diaria');
+                const inputInclusos = div.querySelector('.suite-hospedes-inclusos');
+                const inputCapacidade = div.querySelector('.suite-capacidade');
+                const checkboxUsaCustom = div.querySelector('.suite-usa-custom');
+                const inputValorExtraCustom = div.querySelector('.suite-valor-extra-custom');
 
-                // UPSERT na tabela pousadas
-                const { error: errPousada } = await supabaseClient
-                    .from('pousadas')
-                    .upsert(dadosPousada, { onConflict: 'id' });
-
-                if (errPousada) {
-                    mostrarMensagem('Erro ao salvar os dados da pousada: ' + errPousada.message, 'erro');
-                    mostrarToast('Erro no Banco', errPousada.message, 'erro');
-                    return;
-                }
-                pousadaExisteNoBanco = true;
-
-                // Garante que a tabela usuarios tem o pousada_id preenchido
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                if (session && session.user) {
-                    await supabaseClient
-                        .from('usuarios')
-                        .update({ pousada_id: usuarioIdAtual })
-                        .eq('user_id', session.user.id)
-                        .is('pousada_id', null);
-                }
+                if (!input) continue;
                 
-                // Processa cada suíte
-                for (const div of linhasSuites) {
-                    const input = div.querySelector('.suite-input');
-                    const checkboxAtiva = div.querySelector('.suite-ativa-checkbox');
-                    const inputValorDiaria = div.querySelector('.suite-valor-diaria');
-                    const inputInclusos = div.querySelector('.suite-hospedes-inclusos');
-                    const inputCapacidade = div.querySelector('.suite-capacidade');
-                    const checkboxUsaCustom = div.querySelector('.suite-usa-custom');
-                    const inputValorExtraCustom = div.querySelector('.suite-valor-extra-custom');
+                const suiteId = div.dataset.suiteId;
+                const valorNome = input.value.trim();
+                const estaAtiva = checkboxAtiva ? checkboxAtiva.checked : true;
 
-                    if (!input) continue;
+                if (valorNome === "") continue;
+
+                const valorDiaria = inputValorDiaria?.value !== '' ? parseFloat(inputValorDiaria.value) : null;
+                const hospedesInclusos = inputInclusos?.value !== '' ? parseInt(inputInclusos.value) : null;
+                const capacidade = inputCapacidade?.value !== '' ? parseInt(inputCapacidade.value) : null;
+                const usaCustom = checkboxUsaCustom ? checkboxUsaCustom.checked : false;
+                const valorExtraCustom = inputValorExtraCustom?.value !== '' ? parseFloat(inputValorExtraCustom.value) : null;
+
+                if (suiteId) {
+                    const novasFotos = await salvarFotos(suiteId, div);
                     
-                    const suiteId = div.dataset.suiteId;
-                    const valorNome = input.value.trim();
-                    const estaAtiva = checkboxAtiva ? checkboxAtiva.checked : true;
+                    const updateData = { 
+                        nome: valorNome,
+                        ativa: estaAtiva,
+                        valor_diaria: valorDiaria,
+                        hospedes_inclusos: hospedesInclusos,
+                        capacidade_hospedes: capacidade,
+                        usa_adicional_customizado: usaCustom,
+                        valor_hospede_extra_customizado: valorExtraCustom
+                    };
 
-                    if (valorNome === "") continue;
-
-                    const valorDiaria = inputValorDiaria?.value !== '' ? parseFloat(inputValorDiaria.value) : null;
-                    const hospedesInclusos = inputInclusos?.value !== '' ? parseInt(inputInclusos.value) : null;
-                    const capacidade = inputCapacidade?.value !== '' ? parseInt(inputCapacidade.value) : null;
-                    const usaCustom = checkboxUsaCustom ? checkboxUsaCustom.checked : false;
-                    const valorExtraCustom = inputValorExtraCustom?.value !== '' ? parseFloat(inputValorExtraCustom.value) : null;
-
-                    if (suiteId) {
-                        const novasFotos = await salvarFotos(suiteId, div);
+                    if (novasFotos && novasFotos.length > 0) {
+                        const { data: suiteAtual } = await supabaseClient
+                            .from('suites')
+                            .select('fotos')
+                            .eq('id', suiteId)
+                            .single();
                         
-                        const updateData = { 
-                            nome: valorNome,
+                        const fotosExistentes = suiteAtual?.fotos || [];
+                        updateData.fotos = [...fotosExistentes, ...novasFotos];
+                    }
+
+                    await supabaseClient.from('suites').update(updateData).eq('id', suiteId).eq('pousada_id', usuarioIdAtual);
+                } else {
+                    const { data: novaSuiteInserida, error: errInserir } = await supabaseClient
+                        .from('suites')
+                        .insert({ 
+                            nome: valorNome, 
+                            status: 'Disponível',
+                            pousada_id: usuarioIdAtual,
+                            fotos: [],
                             ativa: estaAtiva,
                             valor_diaria: valorDiaria,
                             hospedes_inclusos: hospedesInclusos,
                             capacidade_hospedes: capacidade,
                             usa_adicional_customizado: usaCustom,
                             valor_hospede_extra_customizado: valorExtraCustom
-                        };
+                        })
+                        .select()
+                        .single();
 
-                        if (novasFotos && novasFotos.length > 0) {
-                            const { data: suiteAtual } = await supabaseClient
+                    if (!errInserir && novaSuiteInserida) {
+                        const fotosNovasSuite = await salvarFotos(novaSuiteInserida.id, div);
+                        if (fotosNovasSuite && fotosNovasSuite.length > 0) {
+                            await supabaseClient
                                 .from('suites')
-                                .select('fotos')
-                                .eq('id', suiteId)
-                                .single();
-                            
-                            const fotosExistentes = suiteAtual?.fotos || [];
-                            updateData.fotos = [...fotosExistentes, ...novasFotos];
-                        }
-
-                        const { error: errUpdateSuite } = await supabaseClient
-                            .from('suites')
-                            .update(updateData)
-                            .eq('id', suiteId)
-                            .eq('pousada_id', usuarioIdAtual);
-
-                        if (errUpdateSuite) {
-                            mostrarMensagem(`Erro ao atualizar a suíte "${valorNome}": ${errUpdateSuite.message}`, 'erro');
-                            mostrarToast('Erro ao Salvar Suíte', errUpdateSuite.message, 'erro');
-                            return;
-                        }
-                    } else {
-                        const { data: novaSuiteInserida, error: errInserir } = await supabaseClient
-                            .from('suites')
-                            .insert({ 
-                                nome: valorNome, 
-                                status: 'Disponível',
-                                pousada_id: usuarioIdAtual,
-                                fotos: [],
-                                ativa: estaAtiva,
-                                valor_diaria: valorDiaria,
-                                hospedes_inclusos: hospedesInclusos,
-                                capacidade_hospedes: capacidade,
-                                usa_adicional_customizado: usaCustom,
-                                valor_hospede_extra_customizado: valorExtraCustom
-                            })
-                            .select()
-                            .single();
-
-                        if (errInserir) {
-                            mostrarMensagem(`Erro ao cadastrar a suíte "${valorNome}": ${errInserir.message}`, 'erro');
-                            mostrarToast('Erro de Permissão (RLS)', errInserir.message, 'erro');
-                            return;
-                        }
-
-                        if (novaSuiteInserida) {
-                            const fotosNovasSuite = await salvarFotos(novaSuiteInserida.id, div);
-                            if (fotosNovasSuite && fotosNovasSuite.length > 0) {
-                                await supabaseClient
-                                    .from('suites')
-                                    .update({ fotos: fotosNovasSuite })
-                                    .eq('id', novaSuiteInserida.id);
-                            }
+                                .update({ fotos: fotosNovasSuite })
+                                .eq('id', novaSuiteInserida.id);
                         }
                     }
                 }
-
-                mostrarMensagem('Configurações salvas com sucesso!', 'sucesso');
-                mostrarToast("Sucesso!", "Alterações salvas com sucesso!");
-                await carregarConfiguracao(usuarioIdAtual);
-
-            } catch (errGeral) {
-                mostrarMensagem('Erro inesperado: ' + errGeral.message, 'erro');
-                mostrarToast('Erro', errGeral.message, 'erro');
-            } finally {
-                btnSalvar.disabled = false;
-                btnSalvar.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar Alterações';
             }
+
+            mostrarMensagem('Configurações salvas com sucesso!', 'sucesso');
+            mostrarToast("Sucesso!", "Alterações salvas com sucesso!");
+            carregarConfiguracao(usuarioIdAtual);
         }
 
         async function salvarConfiguracao() {
