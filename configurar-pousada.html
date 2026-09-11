@@ -178,11 +178,11 @@
                             <div class="grid grid-cols-2 gap-2.5">
                                 <div>
                                     <label class="block text-[10px] sm:text-[11px] font-bold text-slate-600 uppercase mb-1">Check-in (ex: 14:00)</label>
-                                    <input type="text" id="horario-checkin" class="w-full p-2 sm:p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="14:00">
+                                    <input type="text" id="horario-checkin" class="w-full p-2.5 sm:p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="14:00">
                                 </div>
                                 <div>
                                     <label class="block text-[10px] sm:text-[11px] font-bold text-slate-600 uppercase mb-1">Check-out (ex: 12:00)</label>
-                                    <input type="text" id="horario-checkout" class="w-full p-2 sm:p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="12:00">
+                                    <input type="text" id="horario-checkout" class="w-full p-2.5 sm:p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="12:00">
                                 </div>
                             </div>
                             <div class="pt-1">
@@ -202,8 +202,9 @@
                         <div class="flex items-start gap-2.5">
                             <div class="text-blue-600"><i class="fa-solid fa-circle-info text-sm mt-0.5"></i></div>
                             <div class="text-[11px] text-blue-900 leading-relaxed">
-                                <span class="font-bold block mb-0.5">Regra Operacional:</span>
-                                Para iniciar as operações da pousada, é obrigatório manter pelo menos 1 (uma) suíte com nome e valor cadastrados.
+                                <span class="font-bold block mb-0.5">Regras de Validação:</span>
+                                • Pelo menos 1 (uma) suíte com nome e diária base válida.<br>
+                                • Cada suíte deve conter <strong>pelo menos 1 foto real</strong> para ser exibida na vitrine.
                             </div>
                         </div>
                     </div>
@@ -218,7 +219,7 @@
                                     <i class="fa-solid fa-door-open text-blue-600"></i> Suítes da Pousada
                                     <span class="text-xs text-red-500 font-bold">* (Pelo menos 1 obrigatória)</span>
                                 </h2>
-                                <p class="text-[11px] text-slate-500">Cadastre as acomodações disponíveis para reserva.</p>
+                                <p class="text-[11px] text-slate-500">Cadastre as acomodações disponíveis com suas respectivas fotos reais.</p>
                             </div>
                             <button onclick="adicionarCampo()" class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer">
                                 <i class="fa-solid fa-plus"></i> Nova Suíte
@@ -503,7 +504,7 @@
                 mostrarMensagem('Aviso ao consultar suítes: ' + errSuites.message, 'alerta');
             }
 
-            // Busca as tarifas especiais para exibição de badges
+            // Busca as tarifas especiais
             const { data: tarifas } = await supabaseClient
                 .from('tarifas_especiais')
                 .select('*')
@@ -533,14 +534,17 @@
             div.className = `suite-row flex flex-col gap-2.5 items-start sm:items-center p-3 sm:p-4 rounded-2xl border transition ${ativa === false ? 'bg-amber-50/60 border-amber-200' : 'bg-slate-50 border-slate-200'}`;
             div.dataset.suiteId = id;
             
+            const arrayFotosValidas = Array.isArray(fotos) ? fotos.filter(f => !!f) : [];
+            div.dataset.totalFotos = arrayFotosValidas.length;
+
             let fotosInfoHtml = '';
-            if (fotos && fotos.length > 0) {
-                const fotosJsonEscapado = JSON.stringify(fotos).replace(/"/g, '&quot;');
+            if (arrayFotosValidas.length > 0) {
+                const fotosJsonEscapado = JSON.stringify(arrayFotosValidas).replace(/"/g, '&quot;');
                 fotosInfoHtml = `<button type="button" onclick="abrirGaleria(${fotosJsonEscapado})" class="text-[10px] sm:text-[11px] bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md font-bold hover:bg-emerald-200 transition cursor-pointer flex items-center gap-1 shadow-2xs border border-emerald-200" title="Clique para visualizar">
-                    <i class="fa-regular fa-image"></i> ${fotos.length} foto(s)
+                    <i class="fa-regular fa-image"></i> ${arrayFotosValidas.length} foto(s) salvas
                 </button>`;
             } else {
-                fotosInfoHtml = `<span class="text-[10px] sm:text-[11px] bg-gray-200 text-gray-600 px-2 py-1 rounded-md border border-gray-300">Sem fotos</span>`;
+                fotosInfoHtml = `<span class="text-[10px] sm:text-[11px] bg-red-100 text-red-700 px-2 py-1 rounded-md border border-red-200 font-bold flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation"></i> Sem fotos</span>`;
             }
 
             const checkedCustom = usa_adicional_customizado === true || usa_adicional_customizado === 'true';
@@ -614,8 +618,11 @@
                 </div>
                 <div class="flex items-center justify-between w-full pt-2 border-t border-slate-200 flex-wrap gap-2">
                     <div class="flex items-center gap-2 flex-wrap">
-                        ${fotosInfoHtml}
-                        <input type="file" class="upload-fotos text-[10px] sm:text-xs text-slate-600 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-[10px] sm:file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer max-w-[170px] sm:max-w-none" multiple accept="image/*">
+                        <div class="flex items-center gap-1">
+                            <span class="text-[10px] font-bold text-slate-600 uppercase">Fotos da Suíte <span class="text-red-600">*</span>:</span>
+                            ${fotosInfoHtml}
+                        </div>
+                        <input type="file" class="upload-fotos text-[10px] sm:text-xs text-slate-600 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-[10px] sm:file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer max-w-[170px] sm:max-w-none" multiple accept="image/*" title="Selecione pelo menos 1 foto para esta suíte">
                     </div>
                     <div class="flex items-center gap-2 sm:gap-3 ml-auto">
                         <label class="flex items-center gap-1 cursor-pointer select-none bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs">
@@ -692,9 +699,9 @@
         }
 
         async function salvarFotos(suiteId, rowDiv) {
-            if (!rowDiv) return null;
+            if (!rowDiv) return [];
             const fileInput = rowDiv.querySelector('.upload-fotos');
-            if (!fileInput || !fileInput.files || fileInput.files.length === 0) return null;
+            if (!fileInput || !fileInput.files || fileInput.files.length === 0) return [];
 
             const arquivos = fileInput.files;
             const urlsPublicas = [];
@@ -709,8 +716,8 @@
                     .upload(caminhoStorage, arquivo, { cacheControl: '3600', upsert: false });
 
                 if (uploadError) {
-                    console.warn("Aviso upload:", uploadError.message);
-                    continue;
+                    console.error("Erro no upload de foto da suíte:", uploadError);
+                    throw new Error(`Falha no upload da foto "${arquivo.name}": ${uploadError.message}`);
                 }
 
                 const { data: urlData } = supabaseClient.storage
@@ -728,7 +735,7 @@
             esconderMensagem();
             const btnSalvar = document.getElementById('btn-salvar-config');
             btnSalvar.disabled = true;
-            btnSalvar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando dados...';
+            btnSalvar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando dados e fotos...';
 
             try {
                 const nomePousada = document.getElementById('nome-pousada').value.trim();
@@ -785,7 +792,7 @@
                     }
                 }
 
-                // 3. PERSISTÊNCIA DAS SUÍTES
+                // 3. PERSISTÊNCIA DAS SUÍTES E FOTOS
                 for (const div of linhasSuites) {
                     const input = div.querySelector('.suite-input');
                     const checkboxAtiva = div.querySelector('.suite-ativa-checkbox');
@@ -812,6 +819,19 @@
                     if (suiteId) {
                         const novasFotos = await salvarFotos(suiteId, div);
                         
+                        const { data: suiteAtual } = await supabaseClient
+                            .from('suites')
+                            .select('fotos')
+                            .eq('id', suiteId)
+                            .single();
+                        
+                        const fotosExistentes = suiteAtual?.fotos || [];
+                        const fotosAtualizadas = [...fotosExistentes, ...novasFotos];
+
+                        if (fotosAtualizadas.length === 0) {
+                            throw new Error(`A suíte "${valorNome}" precisa ter pelo menos 1 foto cadastrada.`);
+                        }
+
                         const updateData = { 
                             nome: valorNome,
                             ativa: estaAtiva,
@@ -819,19 +839,9 @@
                             hospedes_inclusos: hospedesInclusos,
                             capacidade_hospedes: capacidade,
                             usa_adicional_customizado: usaCustom,
-                            valor_hospede_extra_customizado: valorExtraCustom
+                            valor_hospede_extra_customizado: valorExtraCustom,
+                            fotos: fotosAtualizadas
                         };
-
-                        if (novasFotos && novasFotos.length > 0) {
-                            const { data: suiteAtual } = await supabaseClient
-                                .from('suites')
-                                .select('fotos')
-                                .eq('id', suiteId)
-                                .single();
-                            
-                            const fotosExistentes = suiteAtual?.fotos || [];
-                            updateData.fotos = [...fotosExistentes, ...novasFotos];
-                        }
 
                         const { error: errUpdateSuite } = await supabaseClient
                             .from('suites')
@@ -843,6 +853,7 @@
                             throw new Error(`Erro ao atualizar suíte "${valorNome}": ${errUpdateSuite.message}`);
                         }
                     } else {
+                        // Inserção da nova suíte
                         const { data: novaSuiteInserida, error: errInserir } = await supabaseClient
                             .from('suites')
                             .insert({ 
@@ -866,17 +877,21 @@
 
                         if (novaSuiteInserida) {
                             const fotosNovasSuite = await salvarFotos(novaSuiteInserida.id, div);
-                            if (fotosNovasSuite && fotosNovasSuite.length > 0) {
-                                await supabaseClient
-                                    .from('suites')
-                                    .update({ fotos: fotosNovasSuite })
-                                    .eq('id', novaSuiteInserida.id);
+                            if (!fotosNovasSuite || fotosNovasSuite.length === 0) {
+                                // Se falhou em enviar fotos para a nova suíte, remove o registro para manter consistência
+                                await supabaseClient.from('suites').delete().eq('id', novaSuiteInserida.id);
+                                throw new Error(`É obrigatório enviar pelo menos 1 foto para a nova suíte "${valorNome}".`);
                             }
+
+                            await supabaseClient
+                                .from('suites')
+                                .update({ fotos: fotosNovasSuite })
+                                .eq('id', novaSuiteInserida.id);
                         }
                     }
                 }
 
-                mostrarMensagem('Configurações salvas com sucesso!', 'sucesso');
+                mostrarMensagem('Configurações e fotos salvas com sucesso!', 'sucesso');
                 mostrarToast("Sucesso!", "Alterações salvas com sucesso!");
                 await carregarConfiguracao(usuarioIdAtual);
 
@@ -909,16 +924,19 @@
                 return;
             }
 
-            // 3. Validação da Regra de Negócio: Obrigatório Pelo Menos 1 Suíte Válida
+            // 3. Validação das Suítes: Nome, Diária Base e Fotos Obrigatórias
             let encontrouSuiteValida = false;
             let suiteInvalidaMotivo = '';
 
             for (const div of linhasSuites) {
                 const inputNome = div.querySelector('.suite-input');
                 const inputDiaria = div.querySelector('.suite-valor-diaria');
+                const fileInput = div.querySelector('.upload-fotos');
+                const totalFotosSalvas = parseInt(div.dataset.totalFotos || '0', 10);
 
                 const nomeSuite = inputNome ? inputNome.value.trim() : '';
                 const valorDiaria = inputDiaria ? parseFloat(inputDiaria.value) : 0;
+                const arquivosSelecionados = fileInput && fileInput.files ? fileInput.files.length : 0;
 
                 if (nomeSuite !== '') {
                     if (isNaN(valorDiaria) || valorDiaria <= 0) {
@@ -926,17 +944,26 @@
                         inputDiaria.focus();
                         break;
                     }
+
+                    // Checagem de obrigatoriedade de foto
+                    if (totalFotosSalvas === 0 && arquivosSelecionados === 0) {
+                        suiteInvalidaMotivo = `A suíte "${nomeSuite}" precisa ter pelo menos 1 (uma) foto real anexada para exibição na vitrine.`;
+                        if (fileInput) fileInput.focus();
+                        break;
+                    }
+
                     encontrouSuiteValida = true;
                 }
             }
 
             if (suiteInvalidaMotivo) {
                 mostrarMensagem(suiteInvalidaMotivo, 'erro');
+                mostrarToast('Foto / Dados Obrigatórios', suiteInvalidaMotivo, 'alerta');
                 return;
             }
 
             if (!encontrouSuiteValida) {
-                mostrarMensagem('É obrigatório cadastrar pelo menos 1 (uma) suíte com nome e diária base para operar a pousada.', 'erro');
+                mostrarMensagem('É obrigatório cadastrar pelo menos 1 (uma) suíte com nome, diária base e foto real para operar a pousada.', 'erro');
                 const primeiroInputSuite = document.querySelector('.suite-input');
                 if (primeiroInputSuite) primeiroInputSuite.focus();
                 return;
