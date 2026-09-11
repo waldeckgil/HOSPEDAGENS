@@ -125,7 +125,7 @@
             <div id="card-aviso-pausadas" class="hidden mb-6 bg-slate-800 border-l-8 border-slate-500 p-4 sm:p-5 rounded-2xl shadow-sm text-white flex flex-col gap-1">
                 <div class="flex items-center gap-2">
                     <span class="text-xl">⚠️</span>
-                    <h3 class="text-sm sm:base font-bold">Aviso: Existem suítes pausadas no momento</h3>
+                    <h3 class="text-sm sm:text-base font-bold">Aviso: Existem suítes pausadas no momento</h3>
                 </div>
                 <p id="texto-suites-pausadas" class="text-xs text-slate-300 pl-7"></p>
             </div>
@@ -2684,10 +2684,7 @@
             reservaIdParaCancelar = reservaId;
             tipoCancelamentoAtual = tipo;
 
-            const nomeHospedeFormatado = (nomeHospede || 'hóspede').toUpperCase();
-            const elNomeHospede = document.getElementById('nome-hospede-cancelamento');
-            if (elNomeHospede) elNomeHospede.innerText = nomeHospedeFormatado;
-
+            document.getElementById('nome-hospede-cancelamento').innerText = (nomeHospede || 'hóspede').toUpperCase();
             const titEl = document.getElementById('titulo-modal-cancelamento');
             const subEl = document.getElementById('subtitulo-modal-cancelamento');
             const efeitoEl = document.getElementById('texto-efeito-cancelamento');
@@ -2695,16 +2692,16 @@
             const boxFinanc = document.getElementById('box-financeiro-cancelamento-estadia');
 
             if (tipo === 'estadia') {
-                if (titEl) titEl.innerText = "Interromper / Cancelar Estadia?";
-                if (subEl) subEl.innerHTML = `Tem certeza que deseja cancelar a <strong>estadia em andamento</strong> de <strong id="nome-hospede-cancelamento" class="text-gray-900">${nomeHospedeFormatado}</strong>?`;
-                if (efeitoEl) efeitoEl.innerHTML = `O encerramento será computado na data de hoje, o valor das diárias consumidas será recalculado e a suíte física irá imediatamente para <strong>LIMPEZA</strong>.`;
-                if (btnConfirmar) btnConfirmar.innerHTML = `<i class="fa-solid fa-ban"></i> Confirmar Saída / Cancelamento`;
+                titEl.innerText = "Interromper / Cancelar Estadia?";
+                subEl.innerHTML = `Tem certeza que deseja cancelar a <strong>estadia em andamento</strong> de <strong class="text-gray-900">${(nomeHospede || 'hóspede').toUpperCase()}</strong>?`;
+                efeitoEl.innerHTML = `O encerramento será computado na data de hoje, o valor das diárias consumidas será recalculado e a suíte física irá imediatamente para <strong>LIMPEZA</strong>.`;
+                btnConfirmar.innerHTML = `<i class="fa-solid fa-ban"></i> Confirmar Saída / Cancelamento`;
 
                 if (temPermissao('financeiro')) {
                     try {
                         const hojeStr = new Date().toLocaleDateString('sv-SE');
                         const rAtual = reservasGlobaisCache.find(r => r.id === reservaId);
-                        const suiteId = rAtual?.suite_id || document.getElementById('edit-suite-id')?.value;
+                        const suiteId = rAtual?.suite_id || document.getElementById('edit-suite-id').value;
                         let dCons = 1;
                         if (rAtual?.checkin && rAtual.checkin < hojeStr) {
                             dCons = Math.max(1, calcularQuantidadeDiarias(rAtual.checkin, hojeStr));
@@ -2735,14 +2732,10 @@
                         const tPago = pags.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
                         const saldoDev = vCons - tPago;
 
-                        const elDCons = document.getElementById('canc-diarias-consumidas');
-                        if (elDCons) elDCons.innerText = `${dCons} diária(s)`;
-                        const elVCons = document.getElementById('canc-valor-consumido');
-                        if (elVCons) elVCons.innerText = formatarMoeda(vCons);
-                        const elTPago = document.getElementById('canc-total-pago');
-                        if (elTPago) elTPago.innerText = formatarMoeda(tPago);
-                        const elSaldoRec = document.getElementById('canc-saldo-receber');
-                        if (elSaldoRec) elSaldoRec.innerText = formatarMoeda(saldoDev > 0 ? saldoDev : 0);
+                        document.getElementById('canc-diarias-consumidas').innerText = `${dCons} diária(s)`;
+                        document.getElementById('canc-valor-consumido').innerText = formatarMoeda(vCons);
+                        document.getElementById('canc-total-pago').innerText = formatarMoeda(tPago);
+                        document.getElementById('canc-saldo-receber').innerText = formatarMoeda(saldoDev > 0 ? saldoDev : 0);
                         boxFinanc?.classList.remove('hidden');
                     } catch(eFin) {
                         boxFinanc?.classList.add('hidden');
@@ -2751,10 +2744,10 @@
                     boxFinanc?.classList.add('hidden');
                 }
             } else {
-                if (titEl) titEl.innerText = "Cancelar Reserva?";
-                if (subEl) subEl.innerHTML = `Tem certeza que deseja cancelar a reserva futura de <strong id="nome-hospede-cancelamento" class="text-gray-900">${nomeHospedeFormatado}</strong>?`;
-                if (efeitoEl) efeitoEl.innerHTML = `A acomodação será liberada imediatamente para novas consultas e a ocorrência será auditada no relatório.`;
-                if (btnConfirmar) btnConfirmar.innerHTML = `<i class="fa-solid fa-ban"></i> Confirmar Cancelamento`;
+                titEl.innerText = "Cancelar Reserva?";
+                subEl.innerHTML = `Tem certeza que deseja cancelar a reserva futura de <strong class="text-gray-900">${(nomeHospede || 'hóspede').toUpperCase()}</strong>?`;
+                efeitoEl.innerHTML = `A acomodação será liberada imediatamente para novas consultas e a ocorrência será auditada no relatório.`;
+                btnConfirmar.innerHTML = `<i class="fa-solid fa-ban"></i> Confirmar Cancelamento`;
                 boxFinanc?.classList.add('hidden');
             }
 
@@ -2765,13 +2758,13 @@
             if (erro) erro.classList.add('hidden');
             if (contador) contador.innerText = '0';
 
-            document.getElementById('modal-cancelamento-profissional')?.classList.remove('hidden');
+            document.getElementById('modal-cancelamento-profissional').classList.remove('hidden');
             setTimeout(() => { if (input) input.focus(); }, 150);
         }
 
         function fecharModalCancelamento() {
             reservaIdParaCancelar = null;
-            document.getElementById('modal-cancelamento-profissional')?.classList.add('hidden');
+            document.getElementById('modal-cancelamento-profissional').classList.add('hidden');
             const statusSel = document.getElementById('edit-status');
             const statusOrig = document.getElementById('edit-status-original');
             if (statusSel && (statusSel.value === 'CancelarReserva' || statusSel.value === 'CancelarEstadia')) {
@@ -3134,7 +3127,7 @@
                 tagObrigatorioCpf?.classList.add('hidden');
             }
 
-            if (status === 'CancelarReserva') {
+if (status === 'CancelarReserva') {
                 if (!reservaIdAtual) {
                     mostrarErroModal("Esta suíte não possui uma reserva ativa vinculada.");
                     document.getElementById('edit-status').value = statusOriginal || 'Disponível';
@@ -3574,7 +3567,7 @@
                     ? "Checkout concluído com sucesso! Suíte enviada para Limpeza." 
                     : ((status === 'Limpeza' || status === 'Em Limpeza') && reservaIdEditada 
                         ? "Suíte em governança! A estadia do hóspede permanece ativa." 
-  : (houveTransferencia ? "Hóspede transferido de suíte com sucesso!" : "Dados salvos com sucesso!"));
+                        : (houveTransferencia ? "Hóspede transferido de suíte com sucesso!" : "Dados salvos com sucesso!"));
                 mostrarToast("Sucesso", msgSucesso, "sucesso", 4500);
             }
         }
@@ -3932,5 +3925,3 @@
     </script>
 </body>
 </html>
-
-
