@@ -777,8 +777,26 @@
                 pousadaExisteNoBanco = true;
 
                 // 2. ATUALIZAÇÃO DA TABELA USUARIOS (NOME COMPLETO E POUSADA_ID)
+  
+
+                // 2. ATUALIZAÇÃO INTELIGENTE DA TABELA USUARIOS (PROTEGE O PERFIL DO MASTER)
                 const { data: { session } } = await supabaseClient.auth.getSession();
-                if (session && session.user) {
+                const emailSessao = (session?.user?.email || '').toLowerCase();
+                const isMaster = (emailSessao === EMAIL_MASTER_ADMIN.toLowerCase());
+
+                if (isMaster) {
+                    // Se você é o Master, atualiza o gestor "dono" daquela pousada sem alterar a conta do Master!
+                    const { error: errUsuarioDono } = await supabaseClient
+                        .from('usuarios')
+                        .update({ nome_completo: nomeGestor })
+                        .eq('pousada_id', usuarioIdAtual)
+                        .eq('cargo', 'dono');
+
+                    if (errUsuarioDono) {
+                        console.warn("Aviso ao atualizar nome do gestor:", errUsuarioDono.message);
+                    }
+                } else if (session && session.user) {
+                    // Se for o próprio dono da pousada logado, atualiza o seu próprio cadastro
                     const { error: errUsuario } = await supabaseClient
                         .from('usuarios')
                         .update({ 

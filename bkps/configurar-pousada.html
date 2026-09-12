@@ -3,26 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configuração de Suítes</title>
+    <title>Configuração de Suítes - Painel 360</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row" onload="protegerPagina()">
+<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row text-slate-800 font-sans" onload="protegerPagina()">
 
-    <!-- MENU LATERAL (Adaptado para mobile e desktop) -->
-    <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl">
-        <div class="p-4 sm:p-6">
+    <!-- MENU LATERAL / BARRA SUPERIOR NO MOBILE -->
+    <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl flex-shrink-0 z-20">
+        <div class="p-3 sm:p-6">
             <div class="flex justify-between items-center md:block">
-                <h1 id="nome-pousada-sidebar" class="text-xl sm:text-2xl font-extrabold text-white mb-0 md:mb-6 tracking-wider">Painel 360</h1>
+                <h1 id="nome-pousada-sidebar" class="text-base sm:text-2xl font-extrabold text-white mb-0 md:mb-6 tracking-wider truncate max-w-[180px] sm:max-w-none">
+                    Painel 360
+                </h1>
+
+                <!-- ATALHOS RÁPIDOS NO MOBILE -->
+                <div class="flex items-center gap-2 md:hidden">
+                    <a href="dashboard.html" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-xs">
+                        <span>🏠</span> <span>Painel</span>
+                    </a>
+                    <button onclick="fazerLogout()" class="bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white px-2.5 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
             </div>
-            <nav class="mt-4 md:mt-0 space-y-1.5 sm:space-y-2 flex flex-wrap md:flex-col gap-1.5 md:gap-0">
-                <a href="dashboard.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
-                    <span>🏠</span> <span class="hidden sm:inline">Painel Principal</span><span class="sm:hidden">Suítes</span>
+
+            <!-- NAVEGAÇÃO DESKTOP -->
+            <nav id="menu-lateral-links" class="hidden md:flex flex-col space-y-1.5 mt-4 md:mt-0">
+                <a href="dashboard.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm text-slate-300">
+                    <span>🏠</span> <span>Painel Principal</span>
+                </a>
+                <a href="relatorios.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm text-slate-300">
+                    <span>📋</span> <span>Gestão Completa</span>
+                </a>
+                <a id="link-menu-hospedes" href="hospedes.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm text-slate-300">
+                    <span>👥</span> <span>Hóspedes</span>
+                </a>
+                <a id="link-menu-config" href="configurar-pousada.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-blue-600 text-white font-bold text-xs sm:text-sm shadow-md">
+                    <span>⚙️</span> <span>Configuração de Suítes</span>
+                </a>
+                <a id="link-menu-tarifas" href="tarifas.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm text-slate-300">
+                    <span>💰</span> <span>Tarifas & Assinatura</span>
+                </a>
+                <a id="link-menu-equipe" href="equipe.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm text-slate-300">
+                    <span>👤</span> <span>Minha Equipe</span>
                 </a>
                 
-                
-                    <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl transition shadow text-xs sm:text-sm flex items-center justify-center gap-2 mt-1">
+                <div class="pt-3 border-t border-slate-800">
+                    <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl transition shadow text-xs flex items-center justify-center gap-2 cursor-pointer">
                         <i class="fa-solid fa-right-from-bracket"></i> Sair
                     </button>
                 </div>
@@ -33,61 +62,149 @@
     <!-- CONTEÚDO PRINCIPAL -->
     <div class="flex-1 flex flex-col min-w-0">
         <!-- CABEÇALHO -->
-        <header class="bg-white shadow-xs border-b border-gray-200 p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                <h2 class="text-lg sm:text-xl font-bold text-gray-800">Configuração de Suítes</h2>
-                <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-xs font-bold w-fit">Carregando...</span>
+        <header class="bg-white shadow-xs border-b border-gray-200 p-3 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
+                <h2 class="text-base sm:text-xl font-extrabold text-gray-800">Configuração de Suítes</h2>
+                <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-0.5 rounded-full text-xs font-bold w-fit">Carregando...</span>
             </div>
-            <a href="dashboard.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 border border-slate-200 shadow-sm">
-                <i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard
-            </a>
+            
+            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <!-- BADGE DO USUÁRIO LOGADO -->
+                <span id="badge-usuario-logado" class="text-xs font-bold text-slate-800 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-300 flex items-center gap-1.5 shadow-2xs">
+                    <i class="fa-solid fa-user text-blue-600"></i>
+                    <strong id="texto-nome-usuario">Carregando...</strong>
+                </span>
+
+                <a href="dashboard.html" class="hidden sm:inline-flex bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition items-center gap-2 border border-slate-200 shadow-xs w-fit">
+                    <i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard
+                </a>
+            </div>
         </header>
 
         <!-- CORPO DA PÁGINA -->
-        <main class="p-4 sm:p-6 md:p-8 flex-1 overflow-y-auto">
+        <main class="p-3 sm:p-6 md:p-8 flex-1 overflow-y-auto">
             
-            <!-- Feedback Banner / Alertas no Front-end -->
-            <div id="mensagem-container" class="hidden mb-6 p-4 rounded-2xl text-sm font-semibold border flex items-center gap-3 shadow-sm transition-all"></div>
+            <!-- FAIXA DE MODO MASTER -->
+            <div id="banner-modo-master" class="hidden mb-4 p-3.5 rounded-2xl shadow-md border border-slate-800 bg-slate-950 text-amber-300 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-sm border border-amber-500/30">👑</span>
+                    <div>
+                        <h4 class="text-xs font-extrabold uppercase tracking-wider text-amber-400">Modo Super Administrador Master</h4>
+                        <p class="text-xs text-slate-300">Configurando suítes de: <strong id="nome-pousada-modo-master" class="text-white underline"></strong></p>
+                    </div>
+                </div>
+                <button type="button" onclick="sairDoModoMaster()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3.5 py-1.5 rounded-xl font-bold text-xs transition shadow-xs flex items-center gap-1.5 shrink-0 cursor-pointer">
+                    <i class="fa-solid fa-arrow-left"></i> Voltar ao Master SaaS
+                </button>
+            </div>
 
-            <!-- Modal de Confirmação Inline para Renomeação / Exclusão -->
-            <div id="modal-confirmacao" class="hidden mb-6 p-5 bg-amber-50 border border-amber-200 rounded-2xl shadow-sm">
-                <div class="flex items-start gap-3">
-                    <div class="text-amber-600 mt-0.5"><i class="fa-solid fa-triangle-exclamation text-xl"></i></div>
-                    <div class="flex-1">
-                        <h3 id="titulo-modal" class="text-amber-900 font-bold mb-1">Confirmação de Alteração</h3>
-                        <p id="texto-confirmacao" class="text-amber-800 text-sm mb-4"></p>
-                        <div class="flex flex-col sm:flex-row gap-3">
-                            <button id="btn-confirma-sim" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition">Sim, Continuar</button>
-                            <button id="btn-confirma-nao" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 px-4 py-2 rounded-xl text-sm font-bold transition">Cancelar</button>
+            <!-- Feedback Banner / Alertas no Front-end -->
+            <div id="mensagem-container" class="hidden mb-4 sm:mb-6 p-3.5 sm:p-4 rounded-2xl text-xs sm:text-sm font-semibold border flex items-center gap-3 shadow-xs transition-all"></div>
+
+            <!-- MODAL DE CONFIRMAÇÃO FIXO -->
+            <div id="modal-confirmacao" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-3 sm:p-4 transition-all">
+                <div class="bg-white rounded-3xl p-5 sm:p-6 w-full max-w-md shadow-2xl border border-slate-100 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+                    <div class="flex items-start gap-3.5">
+                        <div id="icone-modal-confirmacao" class="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center text-xl flex-shrink-0">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
                         </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 id="titulo-modal" class="text-base sm:text-lg font-extrabold text-slate-900 leading-snug">Confirmação</h3>
+                            <p id="texto-confirmacao" class="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed"></p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2.5 pt-1">
+                        <button id="btn-confirma-nao" type="button" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer">
+                            Cancelar
+                        </button>
+                        <button id="btn-confirma-sim" type="button" class="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer">
+                            Sim, Excluir
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                 
-                <!-- Coluna Esquerda: Dados da Pousada -->
-                <div class="md:col-span-1 space-y-6">
-                    <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-md border border-gray-200">
-                        <h2 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
-                            <i class="fa-solid fa-building text-blue-600"></i> Dados da Pousada
+                <!-- Coluna Esquerda: Dados da Pousada e Regras -->
+                <div class="md:col-span-1 space-y-4 sm:space-y-6">
+                    <!-- DADOS DA POUSADA E DO GESTOR -->
+                    <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-xs border border-gray-200">
+                        <h2 class="text-sm sm:text-base font-bold text-slate-900 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-building text-blue-600"></i> Dados da Pousada & Gestor
                         </h2>
                         
-                        <div class="space-y-4">
+                        <div class="space-y-3">
                             <div>
-                                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Nome da Pousada</label>
-                                <input type="text" id="nome-pousada" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="Carregando...">
-                                <p class="text-xs text-slate-400 mt-1.5">Nome exibido para os clientes no sistema.</p>
+                                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Nome da Pousada *</label>
+                                <input type="text" id="nome-pousada" required class="w-full p-2.5 sm:p-3 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="Ex: Pousada Recanto dos Lagos">
+                                <p class="text-[10px] text-slate-400 mt-1">Nome exibido para os clientes no sistema.</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Nome Completo do Gestor *</label>
+                                <input type="text" id="nome-gestor" required class="w-full p-2.5 sm:p-3 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="Ex: Carlos Eduardo Silva">
+                                <p class="text-[10px] text-slate-400 mt-1">Responsável titular pela pousada no sistema.</p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-blue-50 border border-blue-100 p-5 rounded-2xl">
-                        <div class="flex items-start gap-3">
-                            <div class="text-blue-600"><i class="fa-solid fa-circle-info text-base mt-0.5"></i></div>
-                            <div class="text-xs text-blue-900 leading-relaxed">
-                                <span class="font-bold block mb-1">Dica de Gestão:</span>
-                                Suas suítes cadastradas aparecem ao lado. Você pode adicionar novas unidades ou gerenciar as existentes de forma independente.
+                    <!-- REGRAS DE NEGÓCIO DA POUSADA -->
+                    <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-xs border border-gray-200">
+                        <h2 class="text-sm sm:text-base font-bold text-slate-900 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-coins text-amber-600"></i> Regras Gerais da Pousada
+                        </h2>
+                        <div class="space-y-3">
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block text-[10px] sm:text-[11px] font-bold text-slate-600 uppercase mb-1">Taxa Pet (R$)</label>
+                                    <input type="number" step="0.01" id="valor-pet" class="w-full p-2 sm:p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="50.00">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] sm:text-[11px] font-bold text-slate-600 uppercase mb-1">Extra (R$) / noite</label>
+                                    <input type="number" step="0.01" id="valor-hospede-extra" class="w-full p-2 sm:p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="30.00">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block text-[10px] sm:text-[11px] font-bold text-slate-600 uppercase mb-1">Idade Criança Grátis</label>
+                                    <input type="number" min="0" max="17" id="idade-limite-crianca" class="w-full p-2 sm:p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="5">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] sm:text-[11px] font-bold text-slate-600 uppercase mb-1">Diária Mínima</label>
+                                    <input type="number" min="1" id="diaria-minima" class="w-full p-2 sm:p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="1">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block text-[10px] sm:text-[11px] font-bold text-slate-600 uppercase mb-1">Check-in (ex: 14:00)</label>
+                                    <input type="text" id="horario-checkin" class="w-full p-2.5 sm:p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="14:00">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] sm:text-[11px] font-bold text-slate-600 uppercase mb-1">Check-out (ex: 12:00)</label>
+                                    <input type="text" id="horario-checkout" class="w-full p-2.5 sm:p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="12:00">
+                                </div>
+                            </div>
+                            <div class="pt-1">
+                                <label class="flex items-center gap-2 cursor-pointer bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl">
+                                    <input type="checkbox" id="aceita-pet" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-xs font-bold text-slate-700">Aceita Pet na Pousada</span>
+                                </label>
+                            </div>
+                            <div class="bg-amber-50 border border-amber-200 p-2.5 rounded-xl text-[10px] sm:text-[11px] text-amber-900 leading-snug">
+                                <strong>Cálculo:</strong> Diárias base + (adicionais - inclusos) × valor extra × noites + taxa pet.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DICA DE GESTÃO -->
+                    <div class="bg-blue-50 border border-blue-100 p-4 rounded-2xl">
+                        <div class="flex items-start gap-2.5">
+                            <div class="text-blue-600"><i class="fa-solid fa-circle-info text-sm mt-0.5"></i></div>
+                            <div class="text-[11px] text-blue-900 leading-relaxed">
+                                <span class="font-bold block mb-0.5">Regras de Validação:</span>
+                                • Pelo menos 1 (uma) suíte com nome e diária base válida.<br>
+                                • Cada suíte deve conter <strong>pelo menos 1 foto real</strong> para ser exibida na vitrine.
                             </div>
                         </div>
                     </div>
@@ -95,26 +212,27 @@
 
                 <!-- Coluna Direita: Gerenciamento de Suítes -->
                 <div class="md:col-span-2">
-                    <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-md border border-gray-200">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 pb-4 border-b border-slate-100 gap-3">
+                    <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-xs border border-gray-200">
+                        <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100 gap-2">
                             <div>
-                                <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                                <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
                                     <i class="fa-solid fa-door-open text-blue-600"></i> Suítes da Pousada
+                                    <span class="text-xs text-red-500 font-bold">* (Pelo menos 1 obrigatória)</span>
                                 </h2>
-                                <p class="text-xs text-slate-500">Configure os quartos e unidades disponíveis para reserva.</p>
+                                <p class="text-[11px] text-slate-500">Cadastre as acomodações disponíveis com suas respectivas fotos reais.</p>
                             </div>
-                            <button onclick="adicionarCampo()" class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                            <button onclick="adicionarCampo()" class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer">
                                 <i class="fa-solid fa-plus"></i> Nova Suíte
                             </button>
                         </div>
 
-                        <!-- Container onde as suítes serão injetadas -->
-                        <div id="suites-container" class="space-y-3 mb-8">
-                            <p class="text-sm text-slate-400 italic">Carregando suítes...</p>
+                        <!-- Container onde as suítes são injetadas -->
+                        <div id="suites-container" class="space-y-3 mb-6">
+                            <p class="text-xs sm:text-sm text-slate-400 italic">Carregando suítes...</p>
                         </div>
 
-                        <div class="pt-4 border-t border-slate-100 flex justify-end">
-                            <button onclick="salvarConfiguracao()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl text-sm font-bold shadow-md shadow-blue-500/20 transition flex items-center justify-center gap-2">
+                        <div class="pt-3 border-t border-slate-100 flex justify-end">
+                            <button id="btn-salvar-config" onclick="salvarConfiguracao()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold shadow-md shadow-blue-500/20 transition flex items-center justify-center gap-2 cursor-pointer">
                                 <i class="fa-solid fa-floppy-disk"></i> Salvar Alterações
                             </button>
                         </div>
@@ -125,38 +243,57 @@
         </main>
     </div>
 
-    <!-- 💬 TOAST / NOTIFICAÇÃO INTERNA MODERNA -->
+    <!-- TOAST / NOTIFICAÇÃO -->
     <div id="toast-notificacao" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
-        <div id="toast-content" class="bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
-            <span id="toast-icone" class="text-xl">✨</span>
+        <div id="toast-content" class="bg-gray-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
+            <span id="toast-icone" class="text-lg">✨</span>
             <div>
-                <h4 id="toast-titulo" class="font-bold text-sm">Sucesso</h4>
-                <p id="toast-mensagem" class="text-xs text-gray-300">Alterações salvas com sucesso!</p>
+                <h4 id="toast-titulo" class="font-bold text-xs sm:text-sm">Sucesso</h4>
+                <p id="toast-mensagem" class="text-[11px] sm:text-xs text-gray-300">Alterações salvas com sucesso!</p>
             </div>
         </div>
     </div>
 
-    <!-- 🖼️ MODAL DE VISUALIZAÇÃO DE FOTOS -->
-    <div id="modal-fotos" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 transition-opacity">
+    <!-- MODAL DE VISUALIZAÇÃO DE FOTOS -->
+    <div id="modal-fotos" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-3 sm:p-4 transition-opacity">
         <div class="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl">
-            <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-100">
-                <h3 class="font-bold text-slate-800 text-base sm:text-lg flex items-center gap-2">
+            <div class="flex justify-between items-center mb-3 pb-3 border-b border-gray-100">
+                <h3 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
                     <i class="fa-solid fa-images text-blue-600"></i> Fotos da Suíte
                 </h3>
-                <button onclick="fecharGaleria()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition">
-                    <i class="fa-solid fa-xmark text-xl"></i>
+                <button onclick="fecharGaleria()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
-            <div id="galeria-fotos" class="grid grid-cols-2 md:grid-cols-3 gap-3 overflow-y-auto pr-2 pb-2">
-                <!-- As fotos serão injetadas aqui pelo JS -->
-            </div>
+            <div id="galeria-fotos" class="grid grid-cols-2 md:grid-cols-3 gap-2.5 overflow-y-auto pr-1 pb-1"></div>
         </div>
     </div>
 
     <script>
-        const supabaseClient = supabase.createClient('https://evrkniykafvydnhxycit.supabase.co', 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs');
+        const SUPABASE_URL = 'https://evrkniykafvydnhxycit.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_TCHdTjTVsu652onrjqjptw_RUCJaqTs';
+        const EMAIL_MASTER_ADMIN = 'waldeckgil@gmail.com';
+
+        const paramsUrl = new URLSearchParams(window.location.search);
+        const pousadaIdUrl = paramsUrl.get('pousada_id');
+        const temSessaoMaster = localStorage.getItem('supabase_master_admin_session');
+
+        let supabaseClient;
+        if (pousadaIdUrl && temSessaoMaster) {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+                auth: { storageKey: 'supabase_master_admin_session' }
+            });
+        } else {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
+
         let nomePousadaOriginal = '';
         let usuarioIdAtual = null;
+        let cargoUsuarioAtual = 'dono';
+        let permissoesUsuarioAtual = {};
+        let nomeUsuarioLogadoAtual = '';
+        let tarifasEspeciaisCache = [];
+        let pousadaExisteNoBanco = false;
 
         function mostrarToast(titulo, mensagem, tipo = 'sucesso') {
             const toast = document.getElementById('toast-notificacao');
@@ -169,10 +306,13 @@
             toastMsg.innerText = mensagem;
 
             if (tipo === 'sucesso') {
-                toastContent.className = "bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800";
+                toastContent.className = "bg-gray-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800";
                 toastIcone.innerText = "🎉";
+            } else if (tipo === 'alerta') {
+                toastContent.className = "bg-amber-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-amber-800";
+                toastIcone.innerText = "⚠️";
             } else {
-                toastContent.className = "bg-red-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-red-800";
+                toastContent.className = "bg-red-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-red-800";
                 toastIcone.innerText = "🚨";
             }
 
@@ -182,14 +322,17 @@
 
         function mostrarMensagem(texto, tipo = 'erro') {
             const container = document.getElementById('mensagem-container');
-            container.className = 'mb-6 p-4 rounded-2xl text-sm font-semibold border flex items-center gap-3 shadow-sm transition-all';
+            container.className = 'mb-4 sm:mb-6 p-3.5 sm:p-4 rounded-2xl text-xs sm:text-sm font-semibold border flex items-center gap-2.5 shadow-xs transition-all';
             
             if (tipo === 'erro') {
                 container.classList.add('bg-red-50', 'border-red-200', 'text-red-700');
-                container.innerHTML = `<i class="fa-solid fa-circle-exclamation text-red-500 text-base"></i> <span>${texto}</span>`;
+                container.innerHTML = `<i class="fa-solid fa-circle-exclamation text-red-500 text-sm"></i> <span>${texto}</span>`;
+            } else if (tipo === 'alerta') {
+                container.classList.add('bg-amber-50', 'border-amber-200', 'text-amber-800');
+                container.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-500 text-sm"></i> <span>${texto}</span>`;
             } else {
                 container.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-700');
-                container.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500 text-base"></i> <span>${texto}</span>`;
+                container.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500 text-sm"></i> <span>${texto}</span>`;
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -198,69 +341,189 @@
             document.getElementById('mensagem-container').className = 'hidden';
         }
 
-        // --- PROTEÇÃO DE SESSÃO UNIFICADA (VALIDAÇÃO IMEDIATA + TEMPO REAL) ---
+        function temPermissao(chave) {
+            if (cargoUsuarioAtual === 'dono') return true;
+            if (permissoesUsuarioAtual && permissoesUsuarioAtual[chave] !== undefined) {
+                return permissoesUsuarioAtual[chave] === true;
+            }
+            return false;
+        }
+
         async function protegerPagina() {
-            // 1. Ouve alterações de estado em tempo real (logout, expiração, etc.)
             supabaseClient.auth.onAuthStateChange((event, session) => {
                 if (event === 'SIGNED_OUT' || !session) {
                     window.location.href = 'index.html';
                 }
             });
 
-            // 2. Validação imediata ao carregar a página
             const { data: { session }, error } = await supabaseClient.auth.getSession();
-            
             if (error || !session) {
                 mostrarMensagem('Sessão expirada. Redirecionando para login...', 'erro');
-                setTimeout(() => window.location.href = 'index.html', 2000);
+                setTimeout(() => window.location.href = 'index.html', 1500);
                 return;
             }
 
-            usuarioIdAtual = session.user.id;
+            const emailLogado = (session.user.email || '').toLowerCase();
+            const isMaster = (emailLogado === EMAIL_MASTER_ADMIN.toLowerCase());
+            const params = new URLSearchParams(window.location.search);
+            const pousadaIdParam = params.get('pousada_id');
+
+            // 1. MODO MASTER
+            if (isMaster) {
+                const pousadaAlvoMaster = pousadaIdParam || sessionStorage.getItem('master_pousada_ativa');
+                if (pousadaAlvoMaster) {
+                    sessionStorage.setItem('master_pousada_ativa', pousadaAlvoMaster);
+                    usuarioIdAtual = pousadaAlvoMaster;
+                    cargoUsuarioAtual = 'dono';
+                    permissoesUsuarioAtual = { configuracoes: true, financeiro: true, hospedes: true, reservas: true, limpeza: true };
+
+                    document.getElementById('banner-modo-master')?.classList.remove('hidden');
+
+                    document.querySelectorAll('aside nav a, header a').forEach(link => {
+                        const href = link.getAttribute('href');
+                        if (href && href !== '#' && !href.startsWith('http') && !href.includes('admin-master.html')) {
+                            const limpo = href.split('?')[0];
+                            link.setAttribute('href', `${limpo}?pousada_id=${pousadaAlvoMaster}`);
+                        }
+                    });
+
+                    const elNomeUsuario = document.getElementById('texto-nome-usuario');
+                    if (elNomeUsuario) elNomeUsuario.innerText = "Administrador Master";
+                }
+            }
+
+            // 2. MODO COMUM (COLABORADOR OU DONO)
+            if (!usuarioIdAtual) {
+                const { data: usuarioPerfil } = await supabaseClient
+                    .from('usuarios')
+                    .select('pousada_id, cargo, ativo, nome_completo, permissoes')
+                    .eq('user_id', session.user.id)
+                    .maybeSingle();
+
+                if (usuarioPerfil && usuarioPerfil.ativo === false) {
+                    await supabaseClient.auth.signOut();
+                    alert("Seu acesso foi desativado pelo gestor da pousada.");
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                cargoUsuarioAtual = usuarioPerfil?.cargo || 'dono';
+                permissoesUsuarioAtual = usuarioPerfil?.permissoes || {};
+                usuarioIdAtual = usuarioPerfil?.pousada_id || session.user.id;
+
+                nomeUsuarioLogadoAtual = usuarioPerfil?.nome_completo || session.user.user_metadata?.nome_completo || session.user.user_metadata?.nome || '';
+                const elNomeUsuario = document.getElementById('texto-nome-usuario');
+                if (elNomeUsuario) elNomeUsuario.innerText = nomeUsuarioLogadoAtual || 'Gestor';
+
+                // Trava de segurança para colaboradores sem privilégio
+                if (cargoUsuarioAtual !== 'dono' && !temPermissao('configuracoes')) {
+                    alert("Acesso restrito: você não possui privilégio para alterar a configuração de suítes da pousada.");
+                    window.location.href = 'dashboard.html';
+                    return;
+                }
+
+                // Ajusta os menus laterais
+                if (cargoUsuarioAtual !== 'dono') {
+                    if (!temPermissao('hospedes')) document.getElementById('link-menu-hospedes')?.remove();
+                    if (!temPermissao('configuracoes')) document.getElementById('link-menu-tarifas')?.remove();
+                    document.getElementById('link-menu-equipe')?.remove();
+                    document.getElementById('banner-modo-master')?.remove();
+                }
+            }
+
             carregarConfiguracao(usuarioIdAtual);
         }
 
-        async function carregarConfiguracao(userId) {
+        function sairDoModoMaster() {
+            sessionStorage.removeItem('master_pousada_ativa');
+            sessionStorage.removeItem('master_pousada_nome');
+            window.location.href = 'admin-master.html';
+        }
+
+        async function carregarConfiguracao(pousadaId) {
+            esconderMensagem();
+
+            // Busca dados da pousada
             const { data: pousada, error: errPousada } = await supabaseClient
                 .from('pousadas')
-                .select('nome')
-                .eq('id', userId)
+                .select('id, nome, valor_pet, valor_hospede_extra, idade_limite_crianca, aceita_pet, diaria_minima, horario_checkin, horario_checkout')
+                .eq('id', pousadaId)
                 .maybeSingle();
 
-            const nomePousada = (pousada && pousada.nome) ? pousada.nome : "Minha Pousada";
-            nomePousadaOriginal = (pousada && pousada.nome) ? pousada.nome : '';
+            if (errPousada) {
+                mostrarMensagem('Erro ao carregar dados da pousada: ' + errPousada.message, 'erro');
+                return;
+            }
 
-            document.getElementById('nome-pousada').value = nomePousadaOriginal;
-            document.getElementById('titulo-pousada').innerText = nomePousada;
-            document.getElementById('nome-pousada-sidebar').innerText = nomePousada;
+            pousadaExisteNoBanco = !!pousada;
 
-            document.getElementById('link-ver-vitrine').href = window.location.origin + `/vitrine.html?pousada_id=${userId}`;
+            const nomePousada = (pousada && pousada.nome) ? pousada.nome : "";
+            nomePousadaOriginal = nomePousada;
 
+            document.getElementById('nome-pousada').value = nomePousada;
+            document.getElementById('titulo-pousada').innerText = nomePousada || "Nova Pousada";
+            document.getElementById('nome-pousada-sidebar').innerText = nomePousada || "Painel 360";
+            const elModoMaster = document.getElementById('nome-pousada-modo-master');
+            if (elModoMaster) elModoMaster.innerText = nomePousada || "Nova Pousada";
+
+            // Busca o nome completo do gestor
+            const { data: usuarioPerfil } = await supabaseClient
+                .from('usuarios')
+                .select('nome_completo')
+                .eq('pousada_id', pousadaId)
+                .eq('cargo', 'dono')
+                .maybeSingle();
+
+            if (usuarioPerfil && usuarioPerfil.nome_completo) {
+                document.getElementById('nome-gestor').value = usuarioPerfil.nome_completo;
+                nomeUsuarioLogadoAtual = usuarioPerfil.nome_completo;
+                const elNomeUsuario = document.getElementById('texto-nome-usuario');
+                if (elNomeUsuario) elNomeUsuario.innerText = usuarioPerfil.nome_completo;
+            } else if (nomeUsuarioLogadoAtual) {
+                document.getElementById('nome-gestor').value = nomeUsuarioLogadoAtual;
+            }
+
+            if (pousada) {
+                document.getElementById('valor-pet').value = pousada.valor_pet ?? '';
+                document.getElementById('valor-hospede-extra').value = pousada.valor_hospede_extra ?? '';
+                document.getElementById('idade-limite-crianca').value = pousada.idade_limite_crianca ?? 5;
+                document.getElementById('diaria-minima').value = pousada.diaria_minima ?? '';
+                document.getElementById('horario-checkin').value = pousada.horario_checkin ?? '';
+                document.getElementById('horario-checkout').value = pousada.horario_checkout ?? '';
+                document.getElementById('aceita-pet').checked = pousada.aceita_pet === true || pousada.aceita_pet === 'true';
+            }
+
+            // Busca as suítes
             const { data: suites, error: errSuites } = await supabaseClient
                 .from('suites')
-                .select('id, nome, fotos')
-                .eq('pousada_id', userId);
+                .select('id, nome, fotos, ativa, valor_diaria, hospedes_inclusos, capacidade_hospedes, usa_adicional_customizado, valor_hospede_extra_customizado')
+                .eq('pousada_id', pousadaId)
+                .order('nome');
+
+            if (errSuites) {
+                mostrarMensagem('Aviso ao consultar suítes: ' + errSuites.message, 'alerta');
+            }
+
+            // Busca as tarifas especiais
+            const { data: tarifas } = await supabaseClient
+                .from('tarifas_especiais')
+                .select('*')
+                .eq('pousada_id', pousadaId);
+            tarifasEspeciaisCache = tarifas || [];
 
             const container = document.getElementById('suites-container');
             container.innerHTML = '';
 
             if (suites && suites.length > 0) {
                 suites.forEach(suite => {
-                    adicionarCampo(suite.id, suite.nome, suite.fotos);
+                    adicionarCampo(suite.id, suite.nome, suite.fotos, suite.ativa, suite.valor_diaria, suite.hospedes_inclusos, suite.capacidade_hospedes, suite.usa_adicional_customizado, suite.valor_hospede_extra_customizado);
                 });
             } else {
                 adicionarCampo();
             }
         }
 
-        function copiarLinkVitrine() {
-            if (!usuarioIdAtual) return;
-            navigator.clipboard.writeText(window.location.origin + `/vitrine.html?pousada_id=${usuarioIdAtual}`).then(() => {
-                mostrarToast("Copiado!", "Link da vitrine copiado para a área de transferência!");
-            });
-        }
-
-        function adicionarCampo(id = '', nome = '', fotos = []) {
+        function adicionarCampo(id = '', nome = '', fotos = [], ativa = true, valor_diaria = '', hospedes_inclusos = '', capacidade_hospedes = '', usa_adicional_customizado = false, valor_hospede_extra_customizado = '') {
             const container = document.getElementById('suites-container');
             
             if (container.querySelector('p')) {
@@ -268,39 +531,106 @@
             }
 
             const div = document.createElement('div');
-            div.className = 'suite-row flex flex-col gap-3 items-start sm:items-center bg-slate-50 p-4 rounded-2xl border border-slate-200 transition';
+            div.className = `suite-row flex flex-col gap-2.5 items-start sm:items-center p-3 sm:p-4 rounded-2xl border transition ${ativa === false ? 'bg-amber-50/60 border-amber-200' : 'bg-slate-50 border-slate-200'}`;
             div.dataset.suiteId = id;
             
-            const badgeTag = id ? '<span class="text-[10px] bg-slate-200 text-slate-600 px-2 py-1 rounded-md font-bold uppercase">Cadastrada</span>' : '<span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-1 rounded-md font-bold uppercase">Nova</span>';
-            
+            const arrayFotosValidas = Array.isArray(fotos) ? fotos.filter(f => !!f) : [];
+            div.dataset.totalFotos = arrayFotosValidas.length;
+
             let fotosInfoHtml = '';
-            if (fotos && fotos.length > 0) {
-                const fotosJsonEscapado = JSON.stringify(fotos).replace(/"/g, '&quot;');
-                fotosInfoHtml = `<button type="button" onclick="abrirGaleria(${fotosJsonEscapado})" class="text-[11px] bg-emerald-100 text-emerald-800 px-2.5 py-1.5 rounded-md font-bold hover:bg-emerald-200 transition cursor-pointer flex items-center gap-1 shadow-sm border border-emerald-200" title="Clique para visualizar">
-                    <i class="fa-regular fa-image"></i> ${fotos.length} foto(s) (Ver)
+            if (arrayFotosValidas.length > 0) {
+                const fotosJsonEscapado = JSON.stringify(arrayFotosValidas).replace(/"/g, '&quot;');
+                fotosInfoHtml = `<button type="button" onclick="abrirGaleria(${fotosJsonEscapado})" class="text-[10px] sm:text-[11px] bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md font-bold hover:bg-emerald-200 transition cursor-pointer flex items-center gap-1 shadow-2xs border border-emerald-200" title="Clique para visualizar">
+                    <i class="fa-regular fa-image"></i> ${arrayFotosValidas.length} foto(s) salvas
                 </button>`;
             } else {
-                fotosInfoHtml = `<span class="text-[11px] bg-gray-200 text-gray-600 px-2.5 py-1.5 rounded-md border border-gray-300">Sem fotos</span>`;
+                fotosInfoHtml = `<span class="text-[10px] sm:text-[11px] bg-red-100 text-red-700 px-2 py-1 rounded-md border border-red-200 font-bold flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation"></i> Sem fotos</span>`;
+            }
+
+            const checkedCustom = usa_adicional_customizado === true || usa_adicional_customizado === 'true';
+
+            // Tarifa especial badge
+            let badgeTarifaHtml = '';
+            if (id && tarifasEspeciaisCache.length > 0) {
+                const hojeStr = new Date().toLocaleDateString('sv-SE');
+                const tarifaAtiva = tarifasEspeciaisCache.find(t => {
+                    const atende = (t.suite_id === id);
+                    const vigente = (t.data_inicio && t.data_fim && hojeStr >= t.data_inicio && hojeStr <= t.data_fim);
+                    return atende && vigente;
+                }) || tarifasEspeciaisCache.find(t => t.suite_id === id && t.data_fim >= hojeStr);
+
+                if (tarifaAtiva) {
+                    const vBase = Number(valor_diaria) || 0;
+                    let valorFormatado = '';
+                    if (tarifaAtiva.tipo_ajuste === 'percentual') {
+                        const vCalculado = vBase * (1 + (Number(tarifaAtiva.valor_especial) / 100));
+                        valorFormatado = `+${tarifaAtiva.valor_especial}% (R$ ${vCalculado.toFixed(2)})`;
+                    } else {
+                        valorFormatado = `R$ ${Number(tarifaAtiva.valor_especial).toFixed(2)}`;
+                    }
+                    const rotuloStatus = (hojeStr >= tarifaAtiva.data_inicio && hojeStr <= tarifaAtiva.data_fim)
+                        ? '🟢 Ativa Hoje'
+                        : '⏳ Programada';
+
+                    badgeTarifaHtml = `
+                        <div class="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-300 text-amber-950 px-2.5 py-1 rounded-xl text-[10px] sm:text-xs font-extrabold shadow-2xs" title="${tarifaAtiva.descricao || 'Tarifa Especial'} (${tarifaAtiva.data_inicio} até ${tarifaAtiva.data_fim})">
+                            <span>🚩</span>
+                            <span class="text-amber-800 uppercase tracking-wider font-bold">Tarifa Especial:</span>
+                            <strong class="text-blue-900">${valorFormatado}</strong>
+                            <span class="text-[9px] font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-1.5 py-0.5 rounded-full">${rotuloStatus}</span>
+                        </div>
+                    `;
+                }
             }
 
             div.innerHTML = `
-                <div class="flex items-center gap-3 w-full">
-                    <div class="text-slate-400"><i class="fa-solid fa-bed"></i></div>
-                    <div class="flex-1">
-                        <input type="text" class="suite-input w-full p-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="Nome da Suíte (ex: Suíte Master 01)" value="${nome}">
+                <div class="flex items-center justify-between gap-2.5 w-full flex-wrap">
+                    <div class="flex items-center gap-2.5 flex-1 min-w-[200px]">
+                        <div class="text-slate-400 text-xs sm:text-sm"><i class="fa-solid fa-bed"></i></div>
+                        <input type="text" class="suite-input w-full p-2 sm:p-2.5 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="Nome da Suíte (ex: Suíte Master 01) *" value="${nome}">
+                    </div>
+                    ${badgeTarifaHtml}
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2 w-full">
+                    <div>
+                        <label class="block text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase mb-0.5">Diária Base (R$) *</label>
+                        <input type="number" step="0.01" min="1" class="suite-valor-diaria w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-bold focus:ring-2 focus:ring-blue-500 outline-none" placeholder="150.00" value="${valor_diaria ?? ''}">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase mb-0.5">Inclusos</label>
+                        <input type="number" min="1" class="suite-hospedes-inclusos w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-bold focus:ring-2 focus:ring-blue-500 outline-none" placeholder="2" value="${hospedes_inclusos ?? ''}">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase mb-0.5">Capacidade Máx.</label>
+                        <input type="number" min="1" class="suite-capacidade w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-bold focus:ring-2 focus:ring-blue-500 outline-none" placeholder="4" value="${capacidade_hospedes ?? ''}">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase mb-0.5">Extra Custom (R$)</label>
+                        <input type="number" step="0.01" class="suite-valor-extra-custom w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-bold focus:ring-2 focus:ring-blue-500 outline-none" placeholder="30.00" value="${valor_hospede_extra_customizado ?? ''}">
                     </div>
                 </div>
-                <div class="flex items-center justify-between w-full pt-2 border-t border-slate-200 sm:border-0 sm:pt-0 flex-wrap gap-2">
+                <div class="flex items-center gap-2 w-full flex-wrap">
+                    <label class="flex items-center gap-1.5 cursor-pointer select-none bg-white px-2 py-1 rounded-lg border border-slate-200 shadow-2xs">
+                        <input type="checkbox" class="suite-usa-custom w-3 h-3 text-amber-600 rounded focus:ring-amber-500" ${checkedCustom ? 'checked' : ''}>
+                        <span class="text-[10px] sm:text-[11px] font-bold text-slate-700">Usar extra customizado</span>
+                    </label>
+                    <span class="text-[9px] sm:text-[10px] text-slate-400">Ignora regra da pousada</span>
+                </div>
+                <div class="flex items-center justify-between w-full pt-2 border-t border-slate-200 flex-wrap gap-2">
                     <div class="flex items-center gap-2 flex-wrap">
-                        ${fotosInfoHtml}
-                        <div class="flex flex-col">
-                            <input type="file" class="upload-fotos text-xs text-slate-600 file:mr-2 file:py-1 file:px-2.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer w-full sm:w-auto" multiple accept="image/*">
+                        <div class="flex items-center gap-1">
+                            <span class="text-[10px] font-bold text-slate-600 uppercase">Fotos da Suíte <span class="text-red-600">*</span>:</span>
+                            ${fotosInfoHtml}
                         </div>
+                        <input type="file" class="upload-fotos text-[10px] sm:text-xs text-slate-600 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-[10px] sm:file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer max-w-[170px] sm:max-w-none" multiple accept="image/*" title="Selecione pelo menos 1 foto para esta suíte">
                     </div>
-                    <div class="flex items-center gap-2">
-                        ${badgeTag}
-                        <button type="button" onclick="removerCampo(this)" class="bg-white hover:bg-red-50 text-red-500 hover:text-red-700 border border-slate-200 p-2.5 rounded-xl transition cursor-pointer" title="Excluir Suíte">
-                            <i class="fa-solid fa-trash-can text-sm"></i>
+                    <div class="flex items-center gap-2 sm:gap-3 ml-auto">
+                        <label class="flex items-center gap-1 cursor-pointer select-none bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs">
+                            <input type="checkbox" class="suite-ativa-checkbox w-3.5 h-3.5 text-blue-600 rounded focus:ring-blue-500" ${ativa !== false ? 'checked' : ''} onchange="atualizarEstiloLinha(this)">
+                            <span class="text-[11px] sm:text-xs font-bold ${ativa !== false ? 'text-emerald-700' : 'text-amber-700'} status-texto">${ativa !== false ? 'Ativa' : 'Pausada'}</span>
+                        </label>
+                        <button type="button" onclick="removerCampo(this)" class="bg-white hover:bg-red-50 text-red-500 hover:text-red-700 border border-slate-200 p-1.5 sm:p-2 rounded-lg transition cursor-pointer" title="Excluir Suíte">
+                            <i class="fa-solid fa-trash-can text-xs sm:text-sm"></i>
                         </button>
                     </div>
                 </div>
@@ -308,7 +638,28 @@
             container.appendChild(div);
         }
 
+        function atualizarEstiloLinha(checkbox) {
+            const rowDiv = checkbox.closest('.suite-row');
+            const textoStatus = rowDiv.querySelector('.status-texto');
+            if (checkbox.checked) {
+                rowDiv.className = 'suite-row flex flex-col gap-2.5 items-start sm:items-center p-3 sm:p-4 rounded-2xl border transition bg-slate-50 border-slate-200';
+                textoStatus.innerText = 'Ativa';
+                textoStatus.className = 'text-[11px] sm:text-xs font-bold text-emerald-700 status-texto';
+            } else {
+                rowDiv.className = 'suite-row flex flex-col gap-2.5 items-start sm:items-center p-3 sm:p-4 rounded-2xl border transition bg-amber-50/60 border-amber-200';
+                textoStatus.innerText = 'Pausada';
+                textoStatus.className = 'text-[11px] sm:text-xs font-bold text-amber-700 status-texto';
+            }
+        }
+
         async function removerCampo(botao) {
+            const totalLinhas = document.querySelectorAll('#suites-container > .suite-row').length;
+            if (totalLinhas <= 1) {
+                mostrarMensagem('A pousada precisa ter pelo menos 1 (uma) suíte cadastrada no sistema.', 'alerta');
+                mostrarToast('Ação Bloqueada', 'A pousada precisa de pelo menos uma suíte.', 'alerta');
+                return;
+            }
+
             const rowDiv = botao.closest('.suite-row');
             if (!rowDiv) return;
             const suiteId = rowDiv.dataset.suiteId;
@@ -319,34 +670,38 @@
                 const texto = document.getElementById('texto-confirmacao');
                 const btnSim = document.getElementById('btn-confirma-sim');
                 const btnNao = document.getElementById('btn-confirma-nao');
+                const iconeModal = document.getElementById('icone-modal-confirmacao');
 
-                titulo.innerText = "Excluir Suíte";
-                texto.innerText = "Deseja realmente excluir esta suíte do sistema permanentemente?";
+                titulo.innerText = "Excluir Suíte Permanentemente?";
+                texto.innerText = "Esta ação apagará a acomodação do sistema. Deseja prosseguir com a exclusão?";
+                iconeModal.className = "w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center text-xl flex-shrink-0";
+                btnSim.className = "w-full bg-red-600 hover:bg-red-700 text-white py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer";
+                btnSim.innerHTML = '<i class="fa-solid fa-trash-can mr-1"></i> Sim, Excluir';
+
                 modal.classList.remove('hidden');
 
                 btnSim.onclick = async () => {
                     modal.classList.add('hidden');
                     const { error } = await supabaseClient.from('suites').delete().eq('id', suiteId);
                     if (error) {
-                        mostrarMensagem('Erro ao excluir suíte do banco de dados.', 'erro');
+                        mostrarMensagem('Erro ao excluir suíte: ' + error.message, 'erro');
+                        mostrarToast('Erro', 'Não foi possível excluir a suíte.', 'erro');
                         return;
                     }
                     rowDiv.remove();
-                    mostrarMensagem('Suíte excluída com sucesso.', 'sucesso');
+                    mostrarToast('Sucesso', 'Suíte excluída com sucesso!');
                 };
 
-                btnNao.onclick = () => {
-                    modal.classList.add('hidden');
-                };
+                btnNao.onclick = () => { modal.classList.add('hidden'); };
             } else {
                 rowDiv.remove();
             }
         }
 
         async function salvarFotos(suiteId, rowDiv) {
-            if (!rowDiv) return null;
+            if (!rowDiv) return [];
             const fileInput = rowDiv.querySelector('.upload-fotos');
-            if (!fileInput || !fileInput.files || fileInput.files.length === 0) return null;
+            if (!fileInput || !fileInput.files || fileInput.files.length === 0) return [];
 
             const arquivos = fileInput.files;
             const urlsPublicas = [];
@@ -356,16 +711,13 @@
                 const nomeArquivoLimpo = arquivo.name.replace(/[^a-zA-Z0-9_.-]/g, '_');
                 const caminhoStorage = `suite_${suiteId}/${Date.now()}_${nomeArquivoLimpo}`;
 
-                const { data, error: uploadError } = await supabaseClient.storage
+                const { error: uploadError } = await supabaseClient.storage
                     .from('suites-fotos')
-                    .upload(caminhoStorage, arquivo, {
-                        cacheControl: '3600',
-                        upsert: false
-                    });
+                    .upload(caminhoStorage, arquivo, { cacheControl: '3600', upsert: false });
 
                 if (uploadError) {
-                    console.error("Erro ao enviar imagem:", uploadError.message);
-                    continue;
+                    console.error("Erro no upload de foto da suíte:", uploadError);
+                    throw new Error(`Falha no upload da foto "${arquivo.name}": ${uploadError.message}`);
                 }
 
                 const { data: urlData } = supabaseClient.storage
@@ -376,42 +728,97 @@
                     urlsPublicas.push(urlData.publicUrl);
                 }
             }
-
             return urlsPublicas;
         }
 
         async function executarSalvamento() {
-            const nomePousada = document.getElementById('nome-pousada').value;
-            const linhasSuites = document.querySelectorAll('#suites-container > .suite-row');
-            
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) return;
-            const userId = session.user.id;
+            esconderMensagem();
+            const btnSalvar = document.getElementById('btn-salvar-config');
+            btnSalvar.disabled = true;
+            btnSalvar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando dados e fotos...';
 
-            const { error: errPousada } = await supabaseClient.from('pousadas').upsert({ 
-                id: userId, 
-                nome: nomePousada.trim() 
-            }, { onConflict: 'id' });
+            try {
+                const nomePousada = document.getElementById('nome-pousada').value.trim();
+                const nomeGestor = document.getElementById('nome-gestor').value.trim();
+                const linhasSuites = document.querySelectorAll('#suites-container > .suite-row');
 
-            if (errPousada) {
-                mostrarMensagem('Erro ao salvar os dados da pousada: ' + errPousada.message, 'erro');
-                return;
-            }
-            
-            for (const div of linhasSuites) {
-                const input = div.querySelector('.suite-input');
-                if (!input) continue;
-                
-                const suiteId = div.dataset.suiteId;
-                const valorNome = input.value.trim();
+                const valorPetRaw = document.getElementById('valor-pet')?.value;
+                const valorHospedeExtraRaw = document.getElementById('valor-hospede-extra')?.value;
+                const idadeLimiteRaw = document.getElementById('idade-limite-crianca')?.value;
+                const diariaMinimaRaw = document.getElementById('diaria-minima')?.value;
+                const horarioCheckin = document.getElementById('horario-checkin')?.value?.trim() || null;
+                const horarioCheckout = document.getElementById('horario-checkout')?.value?.trim() || null;
+                const aceitaPet = document.getElementById('aceita-pet')?.checked || false;
 
-                if (valorNome === "") continue;
+                const dadosPousada = {
+                    id: usuarioIdAtual,
+                    nome: nomePousada,
+                    valor_pet: valorPetRaw !== '' ? parseFloat(valorPetRaw) : null,
+                    valor_hospede_extra: valorHospedeExtraRaw !== '' ? parseFloat(valorHospedeExtraRaw) : null,
+                    idade_limite_crianca: idadeLimiteRaw !== '' ? parseFloat(idadeLimiteRaw) : null,
+                    diaria_minima: diariaMinimaRaw !== '' ? parseInt(diariaMinimaRaw) : null,
+                    horario_checkin: horarioCheckin,
+                    horario_checkout: horarioCheckout,
+                    aceita_pet: aceitaPet
+                };
 
-                if (suiteId) {
-                    const novasFotos = await salvarFotos(suiteId, div);
+                if (!pousadaExisteNoBanco) {
+                    dadosPousada.status = 'active';
+                }
+
+                // 1. UPSERT NA TABELA POUSADAS
+                const { error: errPousada } = await supabaseClient
+                    .from('pousadas')
+                    .upsert(dadosPousada, { onConflict: 'id' });
+
+                if (errPousada) {
+                    throw new Error('Falha ao salvar dados da pousada: ' + errPousada.message);
+                }
+                pousadaExisteNoBanco = true;
+
+                // 2. ATUALIZAÇÃO DA TABELA USUARIOS (NOME COMPLETO E POUSADA_ID)
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (session && session.user) {
+                    const { error: errUsuario } = await supabaseClient
+                        .from('usuarios')
+                        .update({ 
+                            nome_completo: nomeGestor,
+                            pousada_id: usuarioIdAtual 
+                        })
+                        .eq('user_id', session.user.id);
+
+                    if (errUsuario) {
+                        console.warn("Aviso ao atualizar perfil do usuário:", errUsuario.message);
+                    }
+                }
+
+                // 3. PERSISTÊNCIA DAS SUÍTES E FOTOS
+                for (const div of linhasSuites) {
+                    const input = div.querySelector('.suite-input');
+                    const checkboxAtiva = div.querySelector('.suite-ativa-checkbox');
+                    const inputValorDiaria = div.querySelector('.suite-valor-diaria');
+                    const inputInclusos = div.querySelector('.suite-hospedes-inclusos');
+                    const inputCapacidade = div.querySelector('.suite-capacidade');
+                    const checkboxUsaCustom = div.querySelector('.suite-usa-custom');
+                    const inputValorExtraCustom = div.querySelector('.suite-valor-extra-custom');
+
+                    if (!input) continue;
                     
-                    const updateData = { nome: valorNome };
-                    if (novasFotos && novasFotos.length > 0) {
+                    const suiteId = div.dataset.suiteId;
+                    const valorNome = input.value.trim();
+                    const estaAtiva = checkboxAtiva ? checkboxAtiva.checked : true;
+
+                    if (valorNome === "") continue;
+
+                    const valorDiaria = inputValorDiaria?.value !== '' ? parseFloat(inputValorDiaria.value) : null;
+                    const hospedesInclusos = inputInclusos?.value !== '' ? parseInt(inputInclusos.value) : null;
+                    const capacidade = inputCapacidade?.value !== '' ? parseInt(inputCapacidade.value) : null;
+                    const usaCustom = checkboxUsaCustom ? checkboxUsaCustom.checked : false;
+                    const valorExtraCustom = inputValorExtraCustom?.value !== '' ? parseFloat(inputValorExtraCustom.value) : null;
+
+                    if (suiteId) {
+                        const novasFotos = await salvarFotos(suiteId, div);
+                        
                         const { data: suiteAtual } = await supabaseClient
                             .from('suites')
                             .select('fotos')
@@ -419,25 +826,63 @@
                             .single();
                         
                         const fotosExistentes = suiteAtual?.fotos || [];
-                        updateData.fotos = [...fotosExistentes, ...novasFotos];
-                    }
+                        const fotosAtualizadas = [...fotosExistentes, ...novasFotos];
 
-                    await supabaseClient.from('suites').update(updateData).eq('id', suiteId);
-                } else {
-                    const { data: novaSuiteInserida, error: errInserir } = await supabaseClient
-                        .from('suites')
-                        .insert({ 
-                            nome: valorNome, 
-                            status: 'Disponível',
-                            pousada_id: userId,
-                            fotos: []
-                        })
-                        .select()
-                        .single();
+                        if (fotosAtualizadas.length === 0) {
+                            throw new Error(`A suíte "${valorNome}" precisa ter pelo menos 1 foto cadastrada.`);
+                        }
 
-                    if (!errInserir && novaSuiteInserida) {
-                        const fotosNovasSuite = await salvarFotos(novaSuiteInserida.id, div);
-                        if (fotosNovasSuite && fotosNovasSuite.length > 0) {
+                        const updateData = { 
+                            nome: valorNome,
+                            ativa: estaAtiva,
+                            valor_diaria: valorDiaria,
+                            hospedes_inclusos: hospedesInclusos,
+                            capacidade_hospedes: capacidade,
+                            usa_adicional_customizado: usaCustom,
+                            valor_hospede_extra_customizado: valorExtraCustom,
+                            fotos: fotosAtualizadas
+                        };
+
+                        const { error: errUpdateSuite } = await supabaseClient
+                            .from('suites')
+                            .update(updateData)
+                            .eq('id', suiteId)
+                            .eq('pousada_id', usuarioIdAtual);
+
+                        if (errUpdateSuite) {
+                            throw new Error(`Erro ao atualizar suíte "${valorNome}": ${errUpdateSuite.message}`);
+                        }
+                    } else {
+                        // Inserção da nova suíte
+                        const { data: novaSuiteInserida, error: errInserir } = await supabaseClient
+                            .from('suites')
+                            .insert({ 
+                                nome: valorNome, 
+                                status: 'Disponível',
+                                pousada_id: usuarioIdAtual,
+                                fotos: [],
+                                ativa: estaAtiva,
+                                valor_diaria: valorDiaria,
+                                hospedes_inclusos: hospedesInclusos,
+                                capacidade_hospedes: capacidade,
+                                usa_adicional_customizado: usaCustom,
+                                valor_hospede_extra_customizado: valorExtraCustom
+                            })
+                            .select()
+                            .single();
+
+                        if (errInserir) {
+                            throw new Error(`Erro ao cadastrar suíte "${valorNome}": ${errInserir.message}`);
+                        }
+
+                        if (novaSuiteInserida) {
+                            const fotosNovasSuite = await salvarFotos(novaSuiteInserida.id, div);
+                            if (!fotosNovasSuite || fotosNovasSuite.length === 0) {
+                                // Se falhou em enviar fotos para a nova suíte, remove o registro para manter consistência
+                                await supabaseClient.from('suites').delete().eq('id', novaSuiteInserida.id);
+                                throw new Error(`É obrigatório enviar pelo menos 1 foto para a nova suíte "${valorNome}".`);
+                            }
+
                             await supabaseClient
                                 .from('suites')
                                 .update({ fotos: fotosNovasSuite })
@@ -445,27 +890,86 @@
                         }
                     }
                 }
-            }
 
-            mostrarMensagem('Configurações e fotos salvas com sucesso! Redirecionando...', 'sucesso');
-            setTimeout(() => window.location.href = 'dashboard.html', 1500);
+                mostrarMensagem('Configurações e fotos salvas com sucesso!', 'sucesso');
+                mostrarToast("Sucesso!", "Alterações salvas com sucesso!");
+                await carregarConfiguracao(usuarioIdAtual);
+
+            } catch (errGeral) {
+                mostrarMensagem(errGeral.message, 'erro');
+                mostrarToast('Erro ao Salvar', errGeral.message, 'erro');
+            } finally {
+                btnSalvar.disabled = false;
+                btnSalvar.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar Alterações';
+            }
         }
 
         async function salvarConfiguracao() {
             esconderMensagem();
             const nomePousada = document.getElementById('nome-pousada').value.trim();
+            const nomeGestor = document.getElementById('nome-gestor').value.trim();
+            const linhasSuites = document.querySelectorAll('#suites-container > .suite-row');
             
+            // 1. Validação do Nome da Pousada
             if (!nomePousada) {
-                mostrarMensagem('O nome da pousada não pode ficar em branco.', 'erro');
+                mostrarMensagem('O Nome da Pousada é obrigatório.', 'erro');
+                document.getElementById('nome-pousada').focus();
                 return;
             }
 
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                mostrarMensagem('Sessão expirada. Faça login novamente.', 'erro');
+            // 2. Validação do Nome do Gestor
+            if (!nomeGestor) {
+                mostrarMensagem('O Nome Completo do Gestor é obrigatório.', 'erro');
+                document.getElementById('nome-gestor').focus();
                 return;
             }
 
+            // 3. Validação das Suítes: Nome, Diária Base e Fotos Obrigatórias
+            let encontrouSuiteValida = false;
+            let suiteInvalidaMotivo = '';
+
+            for (const div of linhasSuites) {
+                const inputNome = div.querySelector('.suite-input');
+                const inputDiaria = div.querySelector('.suite-valor-diaria');
+                const fileInput = div.querySelector('.upload-fotos');
+                const totalFotosSalvas = parseInt(div.dataset.totalFotos || '0', 10);
+
+                const nomeSuite = inputNome ? inputNome.value.trim() : '';
+                const valorDiaria = inputDiaria ? parseFloat(inputDiaria.value) : 0;
+                const arquivosSelecionados = fileInput && fileInput.files ? fileInput.files.length : 0;
+
+                if (nomeSuite !== '') {
+                    if (isNaN(valorDiaria) || valorDiaria <= 0) {
+                        suiteInvalidaMotivo = `A suíte "${nomeSuite}" precisa ter um valor de diária base válido (maior que zero).`;
+                        inputDiaria.focus();
+                        break;
+                    }
+
+                    // Checagem de obrigatoriedade de foto
+                    if (totalFotosSalvas === 0 && arquivosSelecionados === 0) {
+                        suiteInvalidaMotivo = `A suíte "${nomeSuite}" precisa ter pelo menos 1 (uma) foto real anexada para exibição na vitrine.`;
+                        if (fileInput) fileInput.focus();
+                        break;
+                    }
+
+                    encontrouSuiteValida = true;
+                }
+            }
+
+            if (suiteInvalidaMotivo) {
+                mostrarMensagem(suiteInvalidaMotivo, 'erro');
+                mostrarToast('Foto / Dados Obrigatórios', suiteInvalidaMotivo, 'alerta');
+                return;
+            }
+
+            if (!encontrouSuiteValida) {
+                mostrarMensagem('É obrigatório cadastrar pelo menos 1 (uma) suíte com nome, diária base e foto real para operar a pousada.', 'erro');
+                const primeiroInputSuite = document.querySelector('.suite-input');
+                if (primeiroInputSuite) primeiroInputSuite.focus();
+                return;
+            }
+
+            // Confirmação caso o nome da pousada tenha mudado
             if (nomePousadaOriginal && nomePousadaOriginal !== nomePousada) {
                 const modal = document.getElementById('modal-confirmacao');
                 const titulo = document.getElementById('titulo-modal');
@@ -474,23 +978,19 @@
                 const btnNao = document.getElementById('btn-confirma-nao');
 
                 titulo.innerText = "Renomear Pousada";
-                texto.innerText = `Você está alterando o nome da sua pousada de "${nomePousadaOriginal}" para "${nomePousada}". Deseja continuar com a renomeação?`;
+                texto.innerText = `Você está alterando o nome da sua pousada de "${nomePousadaOriginal}" para "${nomePousada}". Deseja continuar?`;
                 modal.classList.remove('hidden');
 
-                btnSim.onclick = () => {
-                    modal.classList.add('hidden');
-                    executarSalvamento();
-                };
-
-                btnNao.onclick = () => {
-                    modal.classList.add('hidden');
-                };
+                btnSim.onclick = () => { modal.classList.add('hidden'); executarSalvamento(); };
+                btnNao.onclick = () => { modal.classList.add('hidden'); };
             } else {
                 executarSalvamento();
             }
         }
 
         async function fazerLogout() { 
+            sessionStorage.removeItem('master_pousada_ativa');
+            sessionStorage.removeItem('master_pousada_nome');
             await supabaseClient.auth.signOut(); 
             window.location.href = 'index.html'; 
         }
@@ -503,17 +1003,16 @@
             if (fotosArray && fotosArray.length > 0) {
                 fotosArray.forEach(url => {
                     galeria.innerHTML += `
-                        <a href="${url}" target="_blank" class="block border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition bg-gray-50 aspect-[4/3] relative group" title="Clique para abrir imagem original">
+                        <a href="${url}" target="_blank" class="block border border-gray-200 rounded-xl overflow-hidden shadow-xs hover:shadow-md transition bg-gray-50 aspect-[4/3] relative group" title="Clique para abrir imagem original">
                             <img src="${url}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                             <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition flex items-center justify-center">
-                                <i class="fa-solid fa-arrow-up-right-from-square text-white opacity-0 group-hover:opacity-100 drop-shadow-md text-xl"></i>
+                                <i class="fa-solid fa-arrow-up-right-from-square text-white opacity-0 group-hover:opacity-100 drop-shadow-md text-base sm:text-xl"></i>
                             </div>
                         </a>`;
                 });
             } else {
-                galeria.innerHTML = '<p class="text-sm text-slate-500 col-span-full py-4 text-center">Nenhuma foto disponível para esta suíte.</p>';
+                galeria.innerHTML = '<p class="text-xs sm:text-sm text-slate-500 col-span-full py-4 text-center">Nenhuma foto disponível para esta suíte.</p>';
             }
-            
             modal.classList.remove('hidden');
         }
 

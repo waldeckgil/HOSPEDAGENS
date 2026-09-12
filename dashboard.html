@@ -820,14 +820,14 @@
         const pousadaIdUrl = paramsUrl.get('pousada_id');
         const temSessaoMaster = localStorage.getItem('supabase_master_admin_session');
 
-        let supabaseClient;
-        if (pousadaIdUrl && temSessaoMaster) {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-                auth: { storageKey: 'supabase_master_admin_session' }
-            });
-        } else {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        }
+    let supabaseClient;
+    if (temSessaoMaster) {
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+            auth: { storageKey: 'supabase_master_admin_session' }
+        });
+    } else {
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    }
 
         let usuarioIdAtual = null;
         let cargoUsuarioAtual = 'dono';
@@ -1028,20 +1028,12 @@
             if (chave === 'limpeza') return cargoUsuarioAtual === 'limpeza';
             return false;
         }
-
-        async function protegerPagina() {
-            supabaseClient.auth.onAuthStateChange((event, session) => {
-                if (event === 'SIGNED_OUT' || !session) {
-                    window.location.href = 'index.html';
-                }
-            });
-
+async function protegerPagina() {
             const { data: { session }, error } = await supabaseClient.auth.getSession();
             if (error || !session) {
                 window.location.href = 'index.html';
                 return;
             }
-
             usuarioSessaoRealId = session.user.id;
             const emailLogado = (session.user.email || '').toLowerCase();
             const isMaster = (emailLogado === EMAIL_MASTER_ADMIN.toLowerCase());
