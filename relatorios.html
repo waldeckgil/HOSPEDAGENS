@@ -8,67 +8,35 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 font-sans antialiased">
+<body class="bg-gray-100 font-sans antialiased min-h-screen flex flex-col">
 
-    <!-- ESTRUTURA PRINCIPAL RESPONSIVA -->
-    <div class="min-h-screen md:h-screen flex flex-col md:flex-row bg-gray-100 md:overflow-hidden">
-        
-        <!-- MENU LATERAL / BARRA SUPERIOR NO MOBILE -->
-        <aside class="w-full md:w-56 bg-slate-800 text-white flex flex-col shadow-lg flex-shrink-0 z-20">
-            <div class="p-3 sm:p-4 border-b border-slate-700 flex justify-between items-center md:block">
-                <div>
-                    <h1 class="text-sm sm:text-base font-bold tracking-wide text-amber-400">
-                        <i class="fa-solid fa-umbrella-beach mr-1.5"></i>Pousada
-                    </h1>
-                    <p id="nomePousadaMenu" class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 truncate max-w-[160px] sm:max-w-none">Carregando...</p>
-                </div>
-                
-                <div class="flex items-center gap-2 md:hidden">
-                    <a href="dashboard.html" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs">
-                        <i class="fa-solid fa-chart-pie"></i> <span>Painel</span>
-                    </a>
-                    <button onclick="logout()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-red-600/20 text-red-300 hover:bg-red-600 hover:text-white text-xs font-semibold transition cursor-pointer">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                    </button>
+    <!-- CABEÇALHO SUPERIOR EXECUTIVO (SEM MENU LATERAL) -->
+    <header class="bg-white shadow-xs border-b border-gray-200 p-4 sm:p-5 sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div class="flex items-center gap-3">
+                <a id="btn-voltar-dash" href="dashboard.html" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 shadow-sm cursor-pointer">
+                    <i class="fa-solid fa-arrow-left"></i> <span>Voltar ao Painel</span>
+                </a>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <h2 class="text-base sm:text-lg font-extrabold text-gray-900">Gestão Completa</h2>
+                    <span id="nomePousadaLogada" class="text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full uppercase tracking-wider">Carregando dados...</span>
+                    <!-- Mantém elemento invisível para compatibilidade com o script -->
+                    <span id="nomePousadaMenu" class="hidden"></span>
                 </div>
             </div>
 
-            <!-- NAVEGAÇÃO DESKTOP -->
-            <nav id="menu-lateral-links" class="hidden md:flex flex-col flex-1 px-3 py-3 space-y-1.5 overflow-y-auto">
-                <a href="dashboard.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition text-xs font-medium">
-                    <i class="fa-solid fa-chart-pie w-4"></i> Painel Principal
-                </a>
-                <a href="relatorios.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-blue-600 text-white font-bold text-xs shadow-md">
-                    <i class="fa-solid fa-clipboard-list w-4"></i> Gestão Completa
-                </a>
-                <a id="link-menu-hospedes" href="hospedes.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition text-xs font-medium">
-                    <i class="fa-solid fa-users w-4"></i> Hóspedes
-                </a>
-                
-                <a id="link-menu-limpeza" href="limpeza.html" class="hidden flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-pink-900/40 text-pink-300 hover:text-pink-200 transition font-medium text-xs border border-pink-500/20">
-                    <i class="fa-solid fa-broom w-4"></i> Governança / Limpeza
-                </a>
-
-                <a id="link-menu-config" href="configurar-pousada.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition text-xs font-medium">
-                    <i class="fa-solid fa-gear w-4"></i> Configuração Suítes
-                </a>
-                <a id="link-menu-tarifas" href="tarifas.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition text-xs font-medium">
-                    <i class="fa-solid fa-tags w-4"></i> Tarifas & Assinatura
-                </a>
-                <a id="link-menu-equipe" href="equipe.html" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition text-xs font-medium">
-                    <i class="fa-solid fa-user-gear w-4"></i> Minha Equipe
-                </a>
-            </nav>
-
-            <div class="hidden md:block p-3 border-t border-slate-700">
-                <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white transition font-medium text-xs cursor-pointer">
+            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <button onclick="logout()" class="bg-slate-100 hover:bg-red-600 text-slate-600 hover:text-white px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-slate-200 cursor-pointer">
                     <i class="fa-solid fa-right-from-bracket"></i> Sair
                 </button>
             </div>
-        </aside>
+        </div>
+    </header>
 
+    <!-- ESTRUTURA PRINCIPAL RESPONSIVA EM TELA CHEIA -->
+    <div class="flex-1 flex flex-col bg-gray-100">
         <!-- CONTEÚDO PRINCIPAL -->
-        <main class="flex-1 flex flex-col min-w-0 md:overflow-hidden">
+        <main class="flex-1 flex flex-col min-w-0">
             <div class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-3 sm:p-5 md:p-6">
                 <div class="w-full max-w-full sm:max-w-[98%] mx-auto">
                     
@@ -843,18 +811,13 @@
             document.getElementById('filtroDataFim').value = '';
         }
 
-        async function protegerPagina() {
-            supabaseClient.auth.onAuthStateChange((event, session) => {
-                if (event === 'SIGNED_OUT' || !session) {
-                    window.location.href = 'index.html';
-                }
-            });
+     async function protegerPagina() {
+    const { data: { session }, error } = await supabaseClient.auth.getSession();
+    if (error || !session) {
+        window.location.href = 'index.html';
+        return;
+    }
 
-            const { data: { session }, error } = await supabaseClient.auth.getSession();
-            if (error || !session) {
-                window.location.href = 'index.html';
-                return;
-            }
 
             usuarioSessaoRealId = session.user.id;
             const emailLogado = (session.user.email || '').toLowerCase();

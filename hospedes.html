@@ -9,75 +9,33 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row text-slate-800 font-sans">
+<body class="bg-gray-100 min-h-screen flex flex-col text-slate-800 font-sans">
 
-    <!-- MENU LATERAL / TOPO NO MOBILE -->
-    <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl flex-shrink-0 z-20">
-        <div class="p-3 sm:p-6">
-            <div class="flex justify-between items-center md:block mb-0 md:mb-6">
-                <h1 id="nome-pousada-sidebar" class="text-base sm:text-2xl font-extrabold text-white tracking-wider truncate max-w-[180px] sm:max-w-none">
-                    Painel 360
-                </h1>
-
-                <!-- AÇÕES RÁPIDAS NO TOPO (MOBILE) -->
-                <div class="flex items-center gap-2 md:hidden">
-                    <a href="dashboard.html" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-xs">
-                        <span>🏠</span> <span>Painel</span>
-                    </a>
-                    <button onclick="fazerLogout()" class="bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white px-2.5 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                    </button>
+    <!-- CABEÇALHO SUPERIOR EXECUTIVO (SEM MENU LATERAL) -->
+    <header class="bg-white shadow-xs border-b border-gray-200 p-4 sm:p-5 sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div class="flex items-center gap-3">
+                <a id="btn-voltar-dash" href="dashboard.html" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 shadow-sm cursor-pointer">
+                    <i class="fa-solid fa-arrow-left"></i> <span>Voltar ao Painel</span>
+                </a>
+                <div class="flex items-center gap-2">
+                    <h2 class="text-base sm:text-lg font-extrabold text-gray-900">Gestão de Hóspedes</h2>
+                    <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-0.5 rounded-full text-xs font-bold">Carregando...</span>
+                    <!-- Mantém elemento invisível para compatibilidade com o script -->
+                    <span id="nome-pousada-sidebar" class="hidden"></span>
                 </div>
             </div>
 
-            <!-- NAVEGAÇÃO DESKTOP -->
-            <nav id="menu-lateral-links" class="hidden md:flex flex-col space-y-1.5 mt-4 md:mt-0">
-                <a href="dashboard.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm text-slate-300">
-                    <span>🏠</span> <span>Painel Principal</span>
-                </a>
-                <a href="relatorios.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm text-slate-300">
-                    <span>📋</span> <span>Gestão Completa</span>
-                </a>
-                <a href="hospedes.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-blue-600 text-white font-bold text-xs sm:text-sm shadow-md">
-                    <span>👥</span> <span>Hóspedes</span>
-                </a>
-
-                <!-- LINK DINÂMICO DE GOVERNANÇA / LIMPEZA -->
-                <a id="link-menu-limpeza" href="limpeza.html" class="hidden flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-pink-900/40 text-pink-300 hover:text-pink-200 transition font-medium text-xs sm:text-sm border border-pink-500/20">
-                    <span>🧹</span> <span>Governança & Limpeza</span>
-                </a>
-
-                <a id="link-menu-config" href="configurar-pousada.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm text-slate-300">
-                    <span>⚙️</span> <span>Configuração de Suítes</span>
-                </a>
-                <a id="link-menu-tarifas" href="tarifas.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm text-slate-300">
-                    <span>💰</span> <span>Tarifas & Assinatura</span>
-                </a>
-                <a id="link-menu-equipe" href="equipe.html" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm text-slate-300">
-                    <span>👤</span> <span>Minha Equipe</span>
-                </a>
-                
-                <div class="pt-3 border-t border-slate-800">
-                    <button onclick="fazerLogout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-xl transition shadow text-xs flex items-center justify-center gap-2 cursor-pointer">
-                        <i class="fa-solid fa-right-from-bracket"></i> Sair
-                    </button>
-                </div>
-            </nav>
+            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <button onclick="fazerLogout()" class="bg-slate-100 hover:bg-red-600 text-slate-600 hover:text-white px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-slate-200 cursor-pointer">
+                    <i class="fa-solid fa-right-from-bracket"></i> Sair
+                </button>
+            </div>
         </div>
-    </aside>
+    </header>
 
-    <!-- CONTEÚDO PRINCIPAL -->
+    <!-- CONTEÚDO PRINCIPAL EM TELA CHEIA -->
     <div class="flex-1 flex flex-col min-w-0">
-        <!-- CABEÇALHO -->
-        <header class="bg-white shadow-xs border-b border-gray-200 p-3 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5">
-            <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
-                <h2 class="text-base sm:text-xl font-extrabold text-gray-800">Gestão de Hóspedes</h2>
-                <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-0.5 rounded-full text-xs font-bold w-fit">Carregando...</span>
-            </div>
-            <a href="dashboard.html" class="hidden sm:inline-flex bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition items-center gap-2 border border-slate-200 w-fit">
-                <i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard
-            </a>
-        </header>
 
         <!-- CORPO DA PÁGINA -->
         <main class="p-3 sm:p-6 md:p-8 flex-1 overflow-y-auto space-y-4 sm:space-y-6">
