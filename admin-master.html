@@ -28,7 +28,7 @@
         </div>
     </div>
 
-    <!-- MODAL ESPECÍFICO: RESET OPERACIONAL (ZERAR RESERVAS E LIBERAR SUÍTES) -->
+    <!-- MODAL ESPECÍFICO: RESET OPERACIONAL -->
     <div id="modal-reset-operacional" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4 z-[9998] transition-opacity">
         <div class="bg-white rounded-3xl p-6 sm:p-7 max-w-lg w-full shadow-2xl border border-amber-200">
             <div class="flex items-center gap-3 mb-4">
@@ -41,7 +41,6 @@
                 </div>
             </div>
 
-            <!-- CARD DE IDENTIFICAÇÃO -->
             <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 mb-4 text-xs">
                 <div class="flex justify-between items-center mb-1">
                     <span class="text-slate-500 font-bold uppercase text-[10px]">Pousada:</span>
@@ -57,7 +56,6 @@
                 </div>
             </div>
 
-            <!-- DETALHAMENTO DE CAUSAS E CONSEQUÊNCIAS -->
             <div class="space-y-2.5 mb-5 text-xs">
                 <div class="bg-red-50/80 border border-red-200 rounded-xl p-3">
                     <p class="font-bold text-red-800 text-[11px] uppercase mb-1.5 flex items-center gap-1.5">
@@ -97,7 +95,7 @@
         </div>
     </div>
 
-    <!-- MODAL ESPECÍFICO: EXCLUSÃO DEFINITIVA DA POUSADA (EXPURGO TOTAL) -->
+    <!-- MODAL ESPECÍFICO: EXCLUSÃO DEFINITIVA -->
     <div id="modal-excluir-pousada" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4 z-[9998] transition-opacity">
         <div class="bg-white rounded-3xl p-6 sm:p-7 max-w-lg w-full shadow-2xl border border-red-300">
             <div class="flex items-center gap-3 mb-4">
@@ -110,7 +108,6 @@
                 </div>
             </div>
 
-            <!-- CARD DE IDENTIFICAÇÃO DA POUSADA A SER DELETADA -->
             <div class="bg-red-50/50 border border-red-200 rounded-2xl p-3.5 mb-4 text-xs space-y-1">
                 <div class="flex justify-between items-center">
                     <span class="text-slate-500 font-bold uppercase text-[10px]">Pousada:</span>
@@ -130,7 +127,6 @@
                 </div>
             </div>
 
-            <!-- ALERTA DO QUE SERÁ DELETADO -->
             <div class="bg-red-100/60 border border-red-200 rounded-xl p-3 mb-4 text-xs text-red-900">
                 <p class="font-extrabold uppercase text-[11px] mb-1.5 flex items-center gap-1.5 text-red-700">
                     <i class="fa-solid fa-trash-can"></i> Os seguintes dados serão destruídos permanentemente:
@@ -145,7 +141,6 @@
                 </ul>
             </div>
 
-            <!-- TRAVA DE SEGURANÇA: DIGITAR A PALAVRA 'EXCLUIR' -->
             <div class="mb-5">
                 <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">
                     Para confirmar, digite exatamente a palavra <span class="text-red-600 font-black">EXCLUIR</span> abaixo:
@@ -187,6 +182,9 @@
             </a>
             <a href="#sec-pousadas" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-900 text-slate-400 hover:text-slate-200 font-bold text-xs transition">
                 <i class="fa-solid fa-hotel text-sm w-4"></i> Pousadas Assinantes
+            </a>
+            <a href="#sec-comunicados" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-900 text-slate-400 hover:text-slate-200 font-bold text-xs transition">
+                <i class="fa-solid fa-bullhorn text-sm w-4"></i> Comunicados & Broadcast
             </a>
             <a href="#sec-configuracoes" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-900 text-slate-400 hover:text-slate-200 font-bold text-xs transition">
                 <i class="fa-solid fa-sliders text-sm w-4"></i> Lembrete & Planos
@@ -288,6 +286,63 @@
                 </div>
             </div>
 
+            <!-- SEÇÃO DE COMUNICADOS & BROADCAST (NOVA) -->
+            <div id="sec-comunicados" class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 sm:p-6 space-y-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <h3 class="font-extrabold text-slate-900 text-base flex items-center gap-2">
+                        <i class="fa-solid fa-bullhorn text-blue-600"></i> Central de Comunicados & Broadcast
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Envie mensagens que aparecem em destaque na tela do Gestor da Pousada ao acessar o painel.</p>
+                </div>
+
+                <!-- FORMULÁRIO DE ENVIO -->
+                <form id="form-novo-comunicado" onsubmit="salvarComunicado(event)" class="bg-slate-50 border border-slate-200 p-4 sm:p-5 rounded-2xl space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="sm:col-span-2">
+                            <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Título do Comunicado *</label>
+                            <input type="text" id="aviso-input-titulo" required placeholder="Ex: Manutenção Programada dos Servidores" class="w-full p-2.5 border rounded-xl text-xs font-bold bg-white outline-none focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Tipo de Mensagem</label>
+                            <select id="aviso-input-tipo" class="w-full p-2.5 border rounded-xl text-xs font-bold bg-white outline-none focus:border-blue-500">
+                                <option value="info">🔵 Informativo Geral</option>
+                                <option value="alerta">🟡 Atenção / Aviso</option>
+                                <option value="urgente">🔴 Urgente / Manutenção</option>
+                                <option value="sucesso">🟢 Novidade / Recurso</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Destinatário</label>
+                            <select id="aviso-input-destinatario" class="w-full p-2.5 border rounded-xl text-xs font-bold bg-white outline-none focus:border-blue-500">
+                                <option value="">🌐 Todas as Pousadas (Broadcast Global)</option>
+                                <!-- Injetado via JS com lista de pousadas -->
+                            </select>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Conteúdo da Mensagem *</label>
+                            <textarea id="aviso-input-mensagem" required rows="2" placeholder="Escreva aqui a mensagem clara e objetiva para o gestor..." class="w-full p-2.5 border rounded-xl text-xs font-medium bg-white outline-none focus:border-blue-500"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end pt-1">
+                        <button type="submit" id="btn-publicar-comunicado" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-md flex items-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid fa-paper-plane"></i> Publicar Comunicado
+                        </button>
+                    </div>
+                </form>
+
+                <!-- LISTA DE COMUNICADOS ATIVOS -->
+                <div>
+                    <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider mb-3">Comunicados Emitidos</h4>
+                    <div id="container-comunicados-lista" class="space-y-2 text-xs">
+                        <div class="p-4 text-center text-slate-400 font-medium">Carregando comunicados...</div>
+                    </div>
+                </div>
+            </div>
+
             <!-- TABELA DE PREÇOS EDITÁVEL -->
             <div id="sec-configuracoes" class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 sm:p-6">
                 <div class="border-b border-slate-100 pb-4 mb-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -380,6 +435,7 @@
 
         let pousadasCache = [];
         let faixasPreco = [];
+        let comunicadosCache = [];
         let diasAvisoGlobal = 5;
         let pousadaAlvoId = null;
 
@@ -475,6 +531,7 @@
             await carregarConfigSistema();
             await carregarFaixas();
             await carregarDados();
+            await carregarComunicados();
         }
 
         async function carregarConfigSistema(){
@@ -661,7 +718,6 @@
                 const valorFinal = ehPersonalizado ? Number(p.plano_valor) : (faixaCalculada ? Number(faixaCalculada.valor_mensal) : 149.90);
                 const gestor = usuarios.find(u => u.user_id === p.id || u.pousada_id === p.id);
 
-                // Cálculo preciso da situação do vencimento
                 let diffDias = null;
                 let situacaoTextoBusca = 'sem data';
                 if(p.data_vencimento){
@@ -686,8 +742,22 @@
                 };
             });
 
+            // Atualiza o select de destinatários de comunicados
+            atualizarSelectDestinatariosComunicados();
+
             atualizarKPIs();
             renderizarTabela(pousadasCache);
+        }
+
+        function atualizarSelectDestinatariosComunicados(){
+            const selectDest = document.getElementById('aviso-input-destinatario');
+            if(!selectDest) return;
+            const valorAtual = selectDest.value;
+            selectDest.innerHTML = '<option value="">🌐 Todas as Pousadas (Broadcast Global)</option>';
+            pousadasCache.forEach(p => {
+                selectDest.innerHTML += `<option value="${p.id}">🏨 ${p.nome}</option>`;
+            });
+            selectDest.value = valorAtual;
         }
 
         function atualizarKPIs(){
@@ -702,9 +772,6 @@
             document.getElementById('kpi-mrr').innerText = 'R$ ' + mrr.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
         }
 
-        // =========================================================================
-        // ACESSO MASTER COM MEMÓRIA DE SESSÃO ATIVA
-        // =========================================================================
         function acessarComoMaster(pousadaId, nomePousada) {
             sessionStorage.setItem('master_pousada_ativa', pousadaId);
             sessionStorage.setItem('master_pousada_nome', nomePousada);
@@ -728,16 +795,12 @@
                     ? `<span class="bg-red-100 text-red-700 border border-red-200 px-2.5 py-1 rounded-full font-bold text-[10px]" title="Excedeu o limite da faixa!">⚠️ ${p.totalSuitesAtivas} ativas</span>`
                     : `<span class="bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-full font-bold text-[10px]">${p.totalSuitesAtivas} ativas</span>`;
 
-                // =================================================================
-                // BLOCO INTELIGENTE: VENCIMENTO & DIAS DE ATRASO
-                // =================================================================
                 let vencHtml = '<span class="text-slate-400 text-xs italic">Sem data definida</span>';
                 if(p.data_vencimento && p.diffDias !== null){
                     const dVenc = new Date(p.data_vencimento + 'T12:00:00');
                     const dataFormatada = dVenc.toLocaleDateString('pt-BR');
 
                     if(p.diffDias < 0){
-                        // ATRASADA (INADIMPLENTE)
                         const diasAtraso = Math.abs(p.diffDias);
                         vencHtml = `
                             <div>
@@ -750,7 +813,6 @@
                             </div>
                         `;
                     } else if(p.diffDias === 0){
-                        // VENCE HOJE
                         vencHtml = `
                             <div>
                                 <div class="font-extrabold text-amber-600 text-xs tracking-tight">${dataFormatada}</div>
@@ -762,7 +824,6 @@
                             </div>
                         `;
                     } else if(p.diffDias <= diasAvisoGlobal){
-                        // PRÓXIMO DO VENCIMENTO
                         vencHtml = `
                             <div>
                                 <div class="font-bold text-slate-800 text-xs">${dataFormatada}</div>
@@ -774,7 +835,6 @@
                             </div>
                         `;
                     } else {
-                        // EM DIA
                         vencHtml = `
                             <div>
                                 <div class="font-bold text-slate-800 text-xs">${dataFormatada}</div>
@@ -850,32 +910,21 @@
                         <td class="p-4">${statusHtml}</td>
                         <td class="p-4 text-center">
                             <div class="inline-flex items-center gap-1.5 flex-wrap justify-center">
-                                <!-- ACESSAR PAINEL -->
                                 <button onclick="acessarComoMaster('${p.id}', '${p.nome.replace(/'/g, "\\'")}')" title="Acessar painel desta pousada como Master" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-xs cursor-pointer">
                                     <i class="fa-solid fa-arrow-up-right-from-square"></i> Acessar
                                 </button>
-
-                                <!-- RENOVAR 30 DIAS -->
                                 <button onclick="renovar30Dias('${p.id}', '${p.data_vencimento}', '${p.nome.replace(/'/g, "\\'")}')" title="Confirmar Pagamento (+30 dias)" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-xs">
                                     <i class="fa-solid fa-plus"></i> 30d
                                 </button>
-
-                                <!-- BLOQUEAR / ATIVAR -->
                                 <button onclick="alternarStatus('${p.id}', '${p.status === 'active' ? 'blocked' : 'active'}', '${p.nome.replace(/'/g, "\\'")}')" title="${p.status === 'active' ? 'Bloquear Pousada' : 'Ativar Pousada'}" class="${p.status === 'active' ? 'bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border border-red-200' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white border border-emerald-200'} px-2.5 py-1.5 rounded-lg text-xs font-bold transition">
                                     <i class="fa-solid ${p.status === 'active' ? 'fa-ban' : 'fa-check'}"></i>
                                 </button>
-
-                                <!-- EDITAR DADOS / GESTOR -->
                                 <button onclick="abrirModalEdicao('${p.id}')" title="Ajustar Dados, Gestor ou Assinatura" class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">
                                     <i class="fa-solid fa-pen"></i>
                                 </button>
-
-                                <!-- RESET OPERACIONAL -->
                                 <button onclick="abrirModalReset('${p.id}')" title="Reset Operacional: Zerar Reservas e Liberar Suítes (Modo Teste)" class="bg-amber-50 hover:bg-amber-600 text-amber-600 hover:text-white border border-amber-300 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">
                                     <i class="fa-solid fa-broom"></i>
                                 </button>
-
-                                <!-- EXCLUIR DEFINITIVO -->
                                 <button onclick="abrirModalExclusao('${p.id}')" title="Excluir Pousada e Dados Definitivamente" class="bg-red-50 hover:bg-red-600 text-red-600 hover:text-white border border-red-300 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">
                                     <i class="fa-solid fa-trash-can"></i>
                                 </button>
@@ -1122,6 +1171,141 @@
             } finally {
                 btn.disabled = false;
                 validarTextoExclusao();
+            }
+        }
+
+        // =========================================================================
+        // GESTÃO DE COMUNICADOS & BROADCAST (NOVO)
+        // =========================================================================
+        async function carregarComunicados(){
+            try {
+                const { data, error } = await supabaseClient
+                    .from('avisos_sistema')
+                    .select('*, pousadas(nome)')
+                    .order('criado_em', { ascending: false });
+
+                if(error) throw error;
+                comunicadosCache = data || [];
+                renderizarComunicados();
+            } catch(e){
+                console.warn("Aviso comunicados:", e);
+                document.getElementById('container-comunicados-lista').innerHTML = '<div class="p-4 text-center text-slate-400 font-medium">Nenhum comunicado cadastrado ainda.</div>';
+            }
+        }
+
+        function renderizarComunicados(){
+            const container = document.getElementById('container-comunicados-lista');
+            if(comunicadosCache.length === 0){
+                container.innerHTML = '<div class="p-6 text-center text-slate-400 font-medium border border-dashed rounded-xl">Nenhum comunicado ativo ou cadastrado no momento.</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            comunicadosCache.forEach(a => {
+                const isBroadcast = !a.pousada_id;
+                const nomeDestino = isBroadcast ? '🌐 Todas as Pousadas (Broadcast Global)' : `🏨 ${a.pousadas?.nome || 'Pousada Específica'}`;
+                
+                const coresTipo = {
+                    info: { badge: 'bg-blue-100 text-blue-800 border-blue-200', icone: 'fa-circle-info text-blue-600', label: 'Informativo' },
+                    alerta: { badge: 'bg-amber-100 text-amber-800 border-amber-200', icone: 'fa-triangle-exclamation text-amber-600', label: 'Aviso' },
+                    urgente: { badge: 'bg-red-100 text-red-800 border-red-200', icone: 'fa-screwdriver-wrench text-red-600', label: 'Manutenção / Urgente' },
+                    sucesso: { badge: 'bg-emerald-100 text-emerald-800 border-emerald-200', icone: 'fa-bullhorn text-emerald-600', label: 'Novidade' }
+                };
+                const t = coresTipo[a.tipo] || coresTipo.info;
+                const dataFormatada = new Date(a.criado_em).toLocaleDateString('pt-BR') + ' às ' + new Date(a.criado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+                container.innerHTML += `
+                    <div class="p-3.5 rounded-xl border ${a.ativo ? 'bg-white border-slate-200 shadow-xs' : 'bg-slate-100 border-slate-300 opacity-60'} flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                        <div class="space-y-1 flex-1">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold border ${t.badge} flex items-center gap-1">
+                                    <i class="fa-solid ${t.icone}"></i> ${t.label}
+                                </span>
+                                <span class="px-2 py-0.5 rounded-md text-[10px] font-bold ${isBroadcast ? 'bg-purple-100 text-purple-800 border border-purple-200' : 'bg-blue-50 text-blue-800 border border-blue-200'}">
+                                    ${nomeDestino}
+                                </span>
+                                <span class="text-[10px] text-slate-400">${dataFormatada}</span>
+                            </div>
+                            <h5 class="font-extrabold text-slate-900 text-xs">${a.titulo}</h5>
+                            <p class="text-[11px] text-slate-600 leading-snug">${a.mensagem}</p>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button onclick="alternarStatusComunicado('${a.id}', ${a.ativo})" class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 border ${a.ativo ? 'bg-amber-50 hover:bg-amber-600 text-amber-700 hover:text-white border-amber-200' : 'bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white border-emerald-200'}">
+                                <i class="fa-solid ${a.ativo ? 'fa-pause' : 'fa-play'}"></i> ${a.ativo ? 'Pausar' : 'Ativar'}
+                            </button>
+                            <button onclick="excluirComunicado('${a.id}')" class="px-2.5 py-1.5 rounded-lg text-xs font-bold text-red-600 hover:text-white bg-red-50 hover:bg-red-600 border border-red-200 transition">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function salvarComunicado(e){
+            e.preventDefault();
+            const titulo = document.getElementById('aviso-input-titulo').value.trim();
+            const tipo = document.getElementById('aviso-input-tipo').value;
+            const destinatarioVal = document.getElementById('aviso-input-destinatario').value;
+            const mensagem = document.getElementById('aviso-input-mensagem').value.trim();
+
+            if(!titulo || !mensagem) return;
+
+            const btn = document.getElementById('btn-publicar-comunicado');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Publicando...';
+
+            try {
+                const payload = {
+                    titulo,
+                    tipo,
+                    mensagem,
+                    pousada_id: destinatarioVal || null,
+                    ativo: true
+                };
+
+                const { error } = await supabaseClient.from('avisos_sistema').insert([payload]);
+                if(error) throw error;
+
+                mostrarToast("Comunicado publicado com sucesso!", "success");
+                document.getElementById('form-novo-comunicado').reset();
+                await carregarComunicados();
+            } catch(err){
+                mostrarToast("Erro ao publicar: " + err.message, "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Publicar Comunicado';
+            }
+        }
+
+        async function alternarStatusComunicado(id, statusAtual){
+            try {
+                const { error } = await supabaseClient.from('avisos_sistema').update({ ativo: !statusAtual }).eq('id', id);
+                if(error) throw error;
+                mostrarToast(`Comunicado ${!statusAtual ? 'ativado' : 'pausado'} com sucesso!`, "success");
+                await carregarComunicados();
+            } catch(err){
+                mostrarToast("Erro ao alterar status: " + err.message, "error");
+            }
+        }
+
+        async function excluirComunicado(id){
+            const confirmou = await confirmarAcao({
+                titulo: "Excluir Comunicado",
+                mensagem: "Deseja realmente remover este comunicado? Ele deixará de ser exibido para os gestores.",
+                textoBotao: "Sim, Excluir",
+                cor: "red",
+                icone: "fa-trash-can"
+            });
+            if(!confirmou) return;
+
+            try {
+                const { error } = await supabaseClient.from('avisos_sistema').delete().eq('id', id);
+                if(error) throw error;
+                mostrarToast("Comunicado excluído com sucesso!", "success");
+                await carregarComunicados();
+            } catch(err){
+                mostrarToast("Erro ao excluir: " + err.message, "error");
             }
         }
 
