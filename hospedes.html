@@ -21,7 +21,6 @@
                 <div class="flex items-center gap-2">
                     <h2 class="text-base sm:text-lg font-extrabold text-gray-900">Gestão de Hóspedes</h2>
                     <span id="titulo-pousada" class="bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-0.5 rounded-full text-xs font-bold">Carregando...</span>
-                    <!-- Mantém elemento invisível para compatibilidade com o script -->
                     <span id="nome-pousada-sidebar" class="hidden"></span>
                 </div>
             </div>
@@ -36,8 +35,6 @@
 
     <!-- CONTEÚDO PRINCIPAL EM TELA CHEIA -->
     <div class="flex-1 flex flex-col min-w-0">
-
-        <!-- CORPO DA PÁGINA -->
         <main class="p-3 sm:p-6 md:p-8 flex-1 overflow-y-auto space-y-4 sm:space-y-6">
             
             <!-- FAIXA DE MODO MASTER -->
@@ -85,7 +82,7 @@
                     </div>
                 </div>
 
-                <!-- BOTÕES DE AÇÃO RESPONSIVOS -->
+                <!-- BOTÕES DE AÇÃO -->
                 <div class="flex gap-2 sm:gap-3 mt-3.5">
                     <button onclick="carregarHistoricoHospedes()" class="flex-1 sm:flex-initial bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 sm:py-3 rounded-xl transition shadow-xs text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer">
                         <i class="fa-solid fa-search"></i> <span>Pesquisar</span>
@@ -100,7 +97,7 @@
             <div class="bg-white rounded-2xl shadow-xs border border-gray-200 overflow-hidden">
                 <div class="p-3.5 sm:p-5 border-b border-gray-100 flex justify-between items-center gap-2 bg-gray-50/50">
                     <h3 class="font-extrabold text-gray-800 text-xs sm:text-base flex items-center gap-1.5">
-                        <i class="fa-solid fa-address-book text-blue-600"></i> Histórico de Hóspedes
+                        <i class="fa-solid fa-address-book text-blue-600"></i> Histórico & Dossiê de Hóspedes
                     </h3>
                     <span id="contador-resultados" class="text-[10px] sm:text-xs bg-blue-50 text-blue-700 font-bold px-2.5 py-1 rounded-full border border-blue-200">
                         0 registros
@@ -108,17 +105,17 @@
                 </div>
 
                 <div class="overflow-x-auto" style="-webkit-overflow-scrolling: touch;">
-                    <table class="w-full text-left border-collapse min-w-[760px]">
+                    <table class="w-full text-left border-collapse min-w-[980px]">
                         <thead>
                             <tr id="tabela-cabecalho-hospedes" class="bg-gray-50 text-gray-600 uppercase text-[10px] sm:text-xs tracking-wider border-b border-gray-200">
-                                <th class="p-3 sm:p-4 font-bold">Hóspede / Contato</th>
+                                <th class="p-3 sm:p-4 font-bold">Hóspede / Contatos</th>
                                 <th class="p-3 sm:p-4 font-bold">Documentos</th>
-                                <th class="p-3 sm:p-4 font-bold">Suíte</th>
+                                <th class="p-3 sm:p-4 font-bold">Acomodação</th>
                                 <th class="p-3 sm:p-4 font-bold">Estadia</th>
                                 <th id="th-col-financeiro" class="p-3 sm:p-4 font-bold">Financeiro</th>
-                                <th class="p-3 sm:p-4 font-bold">Status</th>
-                                <th class="p-3 sm:p-4 font-bold">Data Reserva</th>
+                                <th class="p-3 sm:p-4 font-bold">Status / Auditoria</th>
                                 <th class="p-3 sm:p-4 font-bold text-center">Comprovante</th>
+                                <th class="p-3 sm:p-4 font-bold text-center">Gestão</th>
                             </tr>
                         </thead>
                         <tbody id="tabela-hospedes-corpo" class="divide-y divide-gray-100 text-xs sm:text-sm text-gray-700">
@@ -133,12 +130,217 @@
         </main>
     </div>
 
+    <!-- MODAL 1: FICHA COMPLETA DO HÓSPEDE (DOSSIÊ EXECUTIVO) -->
+    <div id="modal-ficha-hospede" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 z-50">
+        <div class="bg-white rounded-3xl p-5 sm:p-7 max-w-2xl w-full shadow-2xl border border-gray-200 max-h-[90vh] overflow-y-auto space-y-4">
+            <div class="flex justify-between items-start pb-3 border-b border-gray-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-xl font-bold shadow-2xs">
+                        <i class="fa-solid fa-address-card"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base sm:text-lg font-extrabold text-gray-900" id="ficha-nome">-</h3>
+                        <p class="text-xs text-blue-600 font-bold" id="ficha-protocolo">Protocolo: -</p>
+                    </div>
+                </div>
+                <button onclick="fecharModalFicha()" class="text-gray-400 hover:text-gray-600 font-bold text-xl p-1 cursor-pointer">✕</button>
+            </div>
+
+            <!-- BLOCO 1: DADOS PESSOAIS E DOCUMENTOS -->
+            <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2 text-xs">
+                <span class="font-extrabold uppercase text-[10px] text-slate-500 tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-user text-blue-600"></i> Identificação e Contato
+                </span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-800">
+                    <div><span class="text-gray-500 font-semibold">WhatsApp:</span> <strong id="ficha-whats" class="text-emerald-700">-</strong></div>
+                    <div><span class="text-gray-500 font-semibold">E-mail:</span> <strong id="ficha-email">-</strong></div>
+                    <div><span class="text-gray-500 font-semibold">CPF:</span> <strong id="ficha-cpf">-</strong></div>
+                    <div><span class="text-gray-500 font-semibold">RG:</span> <strong id="ficha-rg">-</strong></div>
+                </div>
+                <div id="ficha-doc-anexo-container" class="pt-2 border-t border-slate-200 hidden">
+                    <a id="ficha-link-doc" href="#" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-700 bg-blue-100/70 hover:bg-blue-100 px-3 py-1.5 rounded-xl border border-blue-200 transition">
+                        <i class="fa-solid fa-file-arrow-up text-blue-600"></i> Visualizar Foto do Documento / CNH Anexada
+                    </a>
+                </div>
+            </div>
+
+            <!-- BLOCO 2: ENDEREÇO RESIDENCIAL -->
+            <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2 text-xs">
+                <span class="font-extrabold uppercase text-[10px] text-slate-500 tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-location-dot text-blue-600"></i> Endereço Residencial do Hóspede
+                </span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-800">
+                    <div class="sm:col-span-2"><span class="text-gray-500 font-semibold">Logradouro:</span> <strong id="ficha-endereco">-</strong></div>
+                    <div><span class="text-gray-500 font-semibold">Número:</span> <strong id="ficha-numero">-</strong></div>
+                    <div><span class="text-gray-500 font-semibold">Complemento:</span> <strong id="ficha-complemento">-</strong></div>
+                    <div><span class="text-gray-500 font-semibold">Bairro:</span> <strong id="ficha-bairro">-</strong></div>
+                    <div><span class="text-gray-500 font-semibold">Cidade / UF:</span> <strong id="ficha-cidade-uf">-</strong></div>
+                    <div><span class="text-gray-500 font-semibold">CEP:</span> <strong id="ficha-cep">-</strong></div>
+                </div>
+            </div>
+
+            <!-- BLOCO 3: ESTADIA, ACOMODAÇÃO E OCUPANTES -->
+            <div class="bg-blue-50/60 p-3.5 rounded-2xl border border-blue-200 space-y-2 text-xs text-blue-950">
+                <span class="font-extrabold uppercase text-[10px] text-blue-800 tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-bed text-blue-600"></i> Detalhes da Hospedagem & Acompanhantes
+                </span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div><span class="text-gray-500 font-semibold">Suíte:</span> <strong id="ficha-suite">-</strong></div>
+                    <div><span class="text-gray-500 font-semibold">Período:</span> <strong id="ficha-periodo">-</strong></div>
+                    <div><span class="text-gray-500 font-semibold">Adultos:</span> <strong id="ficha-adultos">-</strong></div>
+                    <div><span class="text-gray-500 font-semibold">Crianças:</span> <strong id="ficha-criancas">-</strong></div>
+                    <div><span class="text-gray-500 font-semibold">Aceita Pet:</span> <strong id="ficha-pet">-</strong></div>
+                    <div><span class="text-gray-500 font-semibold">Status:</span> <span id="ficha-status" class="px-2 py-0.5 rounded-full font-bold uppercase text-[10px]">-</span></div>
+                </div>
+            </div>
+
+            <!-- BLOCO 4: AUDITORIA DE MOVIMENTAÇÕES (TRANSFERÊNCIAS OU CANCELAMENTOS) -->
+            <div id="ficha-box-ocorrencias" class="hidden p-3.5 rounded-2xl border text-xs space-y-1"></div>
+
+            <!-- BLOCO 5: OBSERVAÇÕES -->
+            <div id="ficha-box-observacao" class="hidden p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-950">
+                <span class="font-extrabold uppercase text-[10px] text-amber-800 block mb-0.5">⚠️ Observações / Alertas Cadastrados:</span>
+                <p id="ficha-observacao-texto" class="font-medium leading-relaxed"></p>
+            </div>
+
+            <div class="pt-2 flex justify-end">
+                <button onclick="fecharModalFicha()" class="bg-slate-900 hover:bg-black text-white px-5 py-2 rounded-xl text-xs font-bold transition cursor-pointer">
+                    Fechar Dossiê
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: EDIÇÃO RÁPIDA DE DADOS DO HÓSPEDE -->
+    <div id="modal-editar-hospede" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 z-50">
+        <div class="bg-white rounded-3xl p-5 sm:p-7 max-w-lg w-full shadow-2xl border border-gray-200 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center pb-3 border-b border-gray-100 mb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-lg font-bold">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-extrabold text-gray-900">Editar Dados do Hóspede</h3>
+                        <p class="text-[11px] text-gray-500">Atualize informações cadastrais e de contato.</p>
+                    </div>
+                </div>
+                <button onclick="fecharModalEditarHospede()" class="text-gray-400 hover:text-gray-600 font-bold text-lg cursor-pointer">✕</button>
+            </div>
+
+            <form id="form-editar-hospede" onsubmit="salvarEdicaoHospede(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="edit-reserva-id">
+
+                <div>
+                    <label class="block font-bold text-gray-700 uppercase mb-0.5">Nome Completo *</label>
+                    <input type="text" id="edit-nome" required class="w-full p-2.5 border rounded-xl font-semibold bg-gray-50 uppercase focus:bg-white outline-none">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-bold text-gray-700 uppercase mb-0.5">WhatsApp *</label>
+                        <input type="text" id="edit-whatsapp" required class="w-full p-2.5 border rounded-xl font-semibold bg-gray-50 focus:bg-white outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 uppercase mb-0.5">E-mail</label>
+                        <input type="email" id="edit-email" class="w-full p-2.5 border rounded-xl font-semibold bg-gray-50 focus:bg-white outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-bold text-gray-700 uppercase mb-0.5">CPF</label>
+                        <input type="text" id="edit-cpf" maxlength="14" class="w-full p-2.5 border rounded-xl font-semibold bg-gray-50 focus:bg-white outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 uppercase mb-0.5">RG</label>
+                        <input type="text" id="edit-rg" class="w-full p-2.5 border rounded-xl font-semibold bg-gray-50 uppercase focus:bg-white outline-none">
+                    </div>
+                </div>
+
+                <!-- ENDEREÇO COM BUSCA POR CEP -->
+                <div class="bg-gray-50 p-3 rounded-2xl border border-gray-200 space-y-2">
+                    <span class="font-bold text-gray-600 uppercase text-[10px] block">Endereço Residencial:</span>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase">CEP</label>
+                            <input type="text" id="edit-cep" placeholder="00000-000" maxlength="9" onblur="buscarCepEdicao()" class="w-full p-2 border rounded-xl bg-white font-semibold">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase">Logradouro / Rua</label>
+                            <input type="text" id="edit-endereco" class="w-full p-2 border rounded-xl bg-white uppercase">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase">Número</label>
+                            <input type="text" id="edit-numero" class="w-full p-2 border rounded-xl bg-white uppercase">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase">Complemento</label>
+                            <input type="text" id="edit-complemento" class="w-full p-2 border rounded-xl bg-white uppercase">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase">Bairro</label>
+                            <input type="text" id="edit-bairro" class="w-full p-2 border rounded-xl bg-white uppercase">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="col-span-2">
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase">Cidade</label>
+                            <input type="text" id="edit-cidade" class="w-full p-2 border rounded-xl bg-white uppercase">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase">UF</label>
+                            <input type="text" id="edit-uf" maxlength="2" class="w-full p-2 border rounded-xl bg-white uppercase font-bold text-center">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-amber-800 uppercase mb-0.5">Observações / Notas Importantes</label>
+                    <textarea id="edit-observacao" rows="2" class="w-full p-2.5 border border-amber-300 bg-amber-50/40 rounded-xl uppercase"></textarea>
+                </div>
+
+                <div class="pt-2 flex justify-end gap-2 border-t">
+                    <button type="button" onclick="fecharModalEditarHospede()" class="px-4 py-2 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-100 cursor-pointer">Cancelar</button>
+                    <button type="submit" id="btn-salvar-edicao" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-md transition flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-check"></i> Salvar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 3: CONFIRMAÇÃO DE EXCLUSÃO SEGURO -->
+    <div id="modal-confirmar-exclusao" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-[60]">
+        <div class="bg-white rounded-3xl p-6 sm:p-7 max-w-sm w-full shadow-2xl border border-gray-200 text-center space-y-4">
+            <div class="w-14 h-14 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto text-2xl font-bold">
+                <i class="fa-solid fa-trash-can"></i>
+            </div>
+            <div>
+                <h3 class="text-base sm:text-lg font-black text-gray-900 leading-tight">Excluir Registro?</h3>
+                <p class="text-xs text-gray-600 mt-2 leading-relaxed">
+                    Deseja realmente apagar o registro da reserva de <strong id="nome-exclusao-alvo" class="text-red-700">-</strong>?<br>
+                    <span class="text-[10px] text-gray-400 mt-1 block">Esta ação removerá o histórico e os pagamentos vinculados a ela.</span>
+                </p>
+            </div>
+            <div class="pt-2 grid grid-cols-2 gap-2 border-t border-gray-100">
+                <button type="button" onclick="fecharModalExcluir()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer">
+                    Cancelar
+                </button>
+                <button type="button" id="btn-confirmar-exclusao-final" onclick="executarExclusaoReserva()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-md flex items-center justify-center gap-1.5 cursor-pointer">
+                    Sim, Excluir
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- TOAST -->
     <div id="toast-notificacao" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
         <div id="toast-content" class="bg-gray-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
             <span id="toast-icone" class="text-lg">✨</span>
             <div>
-                <h4 class="font-bold text-xs sm:text-sm">Aviso</h4>
+                <h4 id="toast-titulo" class="font-bold text-xs sm:text-sm">Aviso</h4>
                 <p id="toast-mensagem" class="text-[11px] sm:text-xs text-gray-300">Ação realizada com sucesso!</p>
             </div>
         </div>
@@ -154,7 +356,7 @@
         const temSessaoMaster = localStorage.getItem('supabase_master_admin_session');
 
         let supabaseClient;
-        if (pousadaIdUrl && temSessaoMaster) {
+        if (temSessaoMaster) {
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
                 auth: { storageKey: 'supabase_master_admin_session' }
             });
@@ -169,6 +371,7 @@
         let mapaSuitesGlobal = {};
         let pagamentosPorReservaGlobal = {};
         let nomePousadaAtual = 'Pousada';
+        let reservaIdParaExcluir = null;
 
         function mostrarToast(mensagem, tipo = 'sucesso') {
             const toast = document.getElementById('toast-notificacao');
@@ -176,6 +379,7 @@
             const toastIcone = document.getElementById('toast-icone');
             const toastContent = document.getElementById('toast-content');
 
+            if (!toast || !toastMsg) return;
             toastMsg.innerText = mensagem;
 
             if (tipo === 'sucesso') {
@@ -201,12 +405,6 @@
         }
 
         async function inicializarPagina() {
-            supabaseClient.auth.onAuthStateChange((event, session) => {
-                if (event === 'SIGNED_OUT' || !session) {
-                    window.location.href = 'index.html';
-                }
-            });
-
             const { data: { session }, error } = await supabaseClient.auth.getSession();
             if (error || !session) {
                 window.location.href = 'index.html';
@@ -218,7 +416,6 @@
             const params = new URLSearchParams(window.location.search);
             const pousadaIdParam = params.get('pousada_id');
 
-            // 1. MODO MASTER
             if (isMaster) {
                 const pousadaAlvoMaster = pousadaIdParam || sessionStorage.getItem('master_pousada_ativa');
                 if (pousadaAlvoMaster) {
@@ -229,17 +426,11 @@
 
                     document.getElementById('banner-modo-master')?.classList.remove('hidden');
 
-                    document.querySelectorAll('aside nav a, header a').forEach(link => {
-                        const href = link.getAttribute('href');
-                        if (href && href !== '#' && !href.startsWith('http') && !href.includes('admin-master.html')) {
-                            const limpo = href.split('?')[0];
-                            link.setAttribute('href', `${limpo}?pousada_id=${pousadaAlvoMaster}`);
-                        }
-                    });
+                    const btnVoltar = document.getElementById('btn-voltar-dash');
+                    if (btnVoltar) btnVoltar.href = `dashboard.html?pousada_id=${pousadaAlvoMaster}`;
                 }
             }
 
-            // 2. MODO COMUM (USUÁRIO DA POUSADA)
             if (!usuarioIdAtual) {
                 const { data: usuarioPerfil } = await supabaseClient
                     .from('usuarios')
@@ -258,34 +449,13 @@
                 permissoesUsuarioAtual = usuarioPerfil?.permissoes || {};
                 usuarioIdAtual = usuarioPerfil?.pousada_id || session.user.id;
 
-                // 🚨 TRAVA DE SEGURANÇA: Se o colaborador NÃO tiver permissão de Hóspedes, bloqueia o acesso
                 if (!temPermissao('hospedes')) {
-                    alert("Acesso restrito: você não possui permissão para visualizar o cadastro e histórico de hóspedes.");
+                    alert("Acesso restrito: você não possui permissão para visualizar o histórico de hóspedes.");
                     window.location.href = 'dashboard.html';
                     return;
                 }
-
-                // BLINDAGEM DE MENUS CONFORME PRIVILÉGIOS
-                if (cargoUsuarioAtual !== 'dono') {
-                    if (temPermissao('limpeza')) {
-                        document.getElementById('link-menu-limpeza')?.classList.remove('hidden');
-                    } else {
-                        document.getElementById('link-menu-limpeza')?.remove();
-                    }
-
-                    if (!temPermissao('configuracoes')) {
-                        document.getElementById('link-menu-config')?.remove();
-                        document.getElementById('link-menu-tarifas')?.remove();
-                    }
-
-                    document.getElementById('link-menu-equipe')?.remove();
-                    document.getElementById('banner-modo-master')?.remove();
-                } else {
-                    document.getElementById('link-menu-limpeza')?.classList.remove('hidden');
-                }
             }
 
-            // Se o usuário não tiver permissão financeira, ajusta o cabeçalho da tabela
             if (!temPermissao('financeiro')) {
                 const thFin = document.getElementById('th-col-financeiro');
                 if (thFin) thFin.innerText = 'Ocupação';
@@ -298,7 +468,6 @@
                 .maybeSingle();
 
             nomePousadaAtual = (pousada && pousada.nome) ? pousada.nome : "Minha Pousada";
-            document.getElementById('nome-pousada-sidebar').innerText = nomePousadaAtual;
             document.getElementById('titulo-pousada').innerText = nomePousadaAtual;
             const elModoMaster = document.getElementById('nome-pousada-modo-master');
             if (elModoMaster) elModoMaster.innerText = nomePousadaAtual;
@@ -346,43 +515,39 @@
             ]);
 
             if (resReservas.error) {
-                console.error("Erro ao buscar histórico de reservas:", resReservas.error);
+                console.error("Erro reservas:", resReservas.error);
                 return;
             }
 
-            const reservas = resReservas.data || [];
-            todasReservasCache = reservas;
+            todasReservasCache = resReservas.data || [];
             const pagamentos = resPagamentos.data || [];
             const suites = resSuites.data || [];
 
             mapaSuitesGlobal = {};
             suites.forEach(s => {
-                mapaSuitesGlobal[s.id] = s.nome || s.titulo || 'Suíte sem nome';
+                mapaSuitesGlobal[s.id] = s.nome || 'Suíte';
             });
 
             pagamentosPorReservaGlobal = {};
             pagamentos.forEach(p => {
                 if (p.reserva_id) {
-                    if (!pagamentosPorReservaGlobal[p.reserva_id]) {
-                        pagamentosPorReservaGlobal[p.reserva_id] = 0;
-                    }
-                    pagamentosPorReservaGlobal[p.reserva_id] += Number(p.valor_pago || 0);
+                    pagamentosPorReservaGlobal[p.reserva_id] = (pagamentosPorReservaGlobal[p.reserva_id] || 0) + Number(p.valor_pago || 0);
                 }
             });
 
-            const textoBusca = document.getElementById('filtro-texto').value.trim();
+            const textoBusca = document.getElementById('filtro-texto').value.trim().toLowerCase();
             const statusBusca = document.getElementById('filtro-status').value;
             const dataInicio = document.getElementById('filtro-inicio').value;
             const dataFim = document.getElementById('filtro-fim').value;
 
-            let filtrados = reservas;
+            let filtrados = todasReservasCache;
 
             if (textoBusca !== '') {
-                const buscaLower = textoBusca.toLowerCase();
                 filtrados = filtrados.filter(r => 
-                    (r.hospede_nome && r.hospede_nome.toLowerCase().includes(buscaLower)) ||
-                    (r.cpf && r.cpf.toLowerCase().includes(buscaLower)) ||
-                    (r.email && r.email.toLowerCase().includes(buscaLower))
+                    (r.hospede_nome && r.hospede_nome.toLowerCase().includes(textoBusca)) ||
+                    (r.cpf && r.cpf.toLowerCase().includes(textoBusca)) ||
+                    (r.email && r.email.toLowerCase().includes(textoBusca)) ||
+                    (r.whatsapp_hospede && r.whatsapp_hospede.includes(textoBusca))
                 );
             }
 
@@ -394,143 +559,140 @@
                 }
             }
 
-            if (dataInicio) {
-                filtrados = filtrados.filter(r => r.checkout >= dataInicio);
-            }
-            if (dataFim) {
-                filtrados = filtrados.filter(r => r.checkin <= dataFim);
-            }
-
-            filtrados.sort((a, b) => {
-                const aAprovada = a.status === 'Aprovada' ? 1 : 0;
-                const bAprovada = b.status === 'Aprovada' ? 1 : 0;
-                if (aAprovada !== bAprovada) {
-                    return bAprovada - aAprovada;
-                }
-                const dataA = new Date(a.checkin || '1970-01-01');
-                const dataB = new Date(b.checkin || '1970-01-01');
-                return dataA - dataB;
-            });
+            if (dataInicio) filtrados = filtrados.filter(r => r.checkout >= dataInicio);
+            if (dataFim) filtrados = filtrados.filter(r => r.checkin <= dataFim);
 
             const tbody = document.getElementById('tabela-hospedes-corpo');
             document.getElementById('contador-resultados').innerText = `${filtrados.length} registro(s)`;
 
             if (filtrados.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-gray-500 italic">Nenhum hóspede encontrado com os critérios informados.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-gray-500 italic">Nenhum hóspede localizado com os filtros atuais.</td></tr>`;
                 return;
             }
 
             const podeVerFinanceiro = temPermissao('financeiro');
-
             tbody.innerHTML = '';
+
             filtrados.forEach(r => {
                 let badgeStatus = 'bg-gray-100 text-gray-800';
                 if (r.status === 'Aprovada') badgeStatus = 'bg-green-100 text-green-800 font-bold';
                 else if (r.status === 'Pendente') badgeStatus = 'bg-amber-100 text-amber-800 font-bold';
-                else if (r.status === 'Finalizada') badgeStatus = 'bg-blue-100 text-blue-800';
-                else if (r.status === 'Recusada' || r.status === 'Cancelada') badgeStatus = 'bg-red-100 text-red-800';
+                else if (r.status === 'Finalizada') badgeStatus = 'bg-blue-100 text-blue-800 font-bold';
+                else if (r.status === 'Recusada' || r.status === 'Cancelada') badgeStatus = 'bg-red-100 text-red-800 font-bold';
 
-                const nomeSuite = mapaSuitesGlobal[r.suite_id] || 'Suíte não informada';
+                const nomeSuite = mapaSuitesGlobal[r.suite_id] || 'Suíte';
 
                 let whatsAppHtml = '<span class="text-gray-400 italic text-[11px]">Sem WhatsApp</span>';
                 if (r.whatsapp_hospede) {
-                    let numeroLimpo = r.whatsapp_hospede.replace(/\D/g, '');
-                    if (numeroLimpo.length <= 11 && !numeroLimpo.startsWith('55')) numeroLimpo = '55' + numeroLimpo;
-                    whatsAppHtml = `<a href="https://wa.me/${numeroLimpo}" target="_blank" class="text-emerald-700 hover:text-emerald-900 font-bold flex items-center gap-1 transition hover:underline" title="Falar no WhatsApp"><i class="fa-brands fa-whatsapp text-xs"></i> ${r.whatsapp_hospede}</a>`;
+                    let num = r.whatsapp_hospede.replace(/\D/g, '');
+                    if (num.length <= 11 && !num.startsWith('55')) num = '55' + num;
+                    whatsAppHtml = `<a href="https://wa.me/${num}" target="_blank" class="text-emerald-700 hover:text-emerald-900 font-bold flex items-center gap-1 hover:underline"><i class="fa-brands fa-whatsapp text-xs text-emerald-600"></i> ${r.whatsapp_hospede}</a>`;
                 }
 
-                // CONTROLE DE VISIBILIDADE DO FINANCEIRO NA LINHA
-                let conteudoColunaFinanceiro = '';
+                // COLUNA FINANCEIRO
+                let conteudoFinanceiro = '';
                 if (podeVerFinanceiro) {
-                    const valorTotal = Number(r.valor_total || 0);
-                    const valorSinalCadastrado = Number(r.valor_sinal || 0);
-                    const totalPagoTabela = pagamentosPorReservaGlobal[r.id] || 0;
-                    const totalPago = Math.max(totalPagoTabela, valorSinalCadastrado);
-                    const quitado = totalPago >= valorTotal && valorTotal > 0;
+                    const total = Number(r.valor_total || 0);
+                    const totalPago = pagamentosPorReservaGlobal[r.id] || Number(r.valor_sinal || 0);
+                    const saldo = Math.max(0, total - totalPago);
+                    const quitado = totalPago >= total && total > 0;
 
-                    let badgeQuitacao = '';
-                    if (valorTotal === 0) {
-                        badgeQuitacao = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-gray-100 text-gray-600 font-bold">Sem Custo</span>`;
-                    } else if (quitado) {
-                        badgeQuitacao = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-green-100 text-green-800 font-bold">Quitado</span>`;
-                    } else if (totalPago > 0 && totalPago < valorTotal) {
-                        badgeQuitacao = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-blue-100 text-blue-800 font-bold">Parcial</span>`;
-                    } else {
-                        badgeQuitacao = `<span class="px-1.5 py-0.5 rounded text-[9px] bg-amber-100 text-amber-800 font-bold">Pendente</span>`;
-                    }
-
-                    conteudoColunaFinanceiro = `
-                        <div><strong class="text-gray-500">Total:</strong> ${formatarMoeda(valorTotal)}</div>
-                        <div><strong class="text-gray-500">Pago:</strong> ${formatarMoeda(totalPago)}</div>
-                        <div class="mt-1">${badgeQuitacao}</div>
+                    conteudoFinanceiro = `
+                        <div><span class="text-gray-500">Total:</span> <strong>${formatarMoeda(total)}</strong></div>
+                        <div><span class="text-gray-500">Pago:</span> <strong class="text-emerald-700">${formatarMoeda(totalPago)}</strong></div>
+                        <div class="mt-1">
+                            ${quitado 
+                                ? '<span class="px-2 py-0.5 rounded text-[9px] bg-green-100 text-green-800 font-extrabold">Quitado</span>' 
+                                : (totalPago > 0 ? `<span class="px-2 py-0.5 rounded text-[9px] bg-blue-100 text-blue-800 font-extrabold">Saldo: ${formatarMoeda(saldo)}</span>` : '<span class="px-2 py-0.5 rounded text-[9px] bg-amber-100 text-amber-800 font-extrabold">Pendente</span>')}
+                        </div>
                     `;
                 } else {
-                    conteudoColunaFinanceiro = `
-                        <div class="font-bold text-slate-800 text-xs">${r.qtd_adultos || 2} Adulto(s)</div>
+                    conteudoFinanceiro = `
+                        <div class="font-bold text-slate-800">${r.qtd_adultos || 2} Adulto(s)</div>
                         <div class="text-[11px] text-gray-500">${r.qtd_criancas ? `${r.qtd_criancas} Criança(s)` : 'Sem crianças'}</div>
                         <div class="text-[10px] text-gray-400 mt-0.5">${r.tem_pet ? '🐶 Com Pet' : 'Sem Pet'}</div>
                     `;
                 }
 
-                // =========================================================================
-                // COLUNA DOCUMENTOS: RG/CPF + "OLHINHO" (VER ANEXO) + BOTÃO DE BAIXAR
-                // =========================================================================
-                let documentoAnexoHtml = '';
+                // ALERTA DE OBSERVAÇÃO
+                let badgeObservacaoHtml = '';
+                if (r.observacao && r.observacao.trim() !== '') {
+                    badgeObservacaoHtml = `
+                        <div class="mt-1.5 p-1.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-[10px] flex items-start gap-1 max-w-[200px]" title="${r.observacao}">
+                            <i class="fa-solid fa-triangle-exclamation text-amber-600 mt-0.5"></i>
+                            <span class="truncate font-semibold">Obs: ${r.observacao}</span>
+                        </div>
+                    `;
+                }
+
+                // AUDITORIA DE CANCELAMENTO OU RECUSA
+                let auditoriaCancelamentoHtml = '';
+                if (r.status === 'Cancelada' || r.status === 'Recusada') {
+                    const motivo = r.motivo_cancelamento || r.motivo_recusa || 'Sem motivo registrado';
+                    const dataOcorrencia = r.cancelado_em || r.recusado_em;
+                    auditoriaCancelamentoHtml = `
+                        <div class="mt-1.5 p-2 rounded-xl bg-red-50 border border-red-200 text-red-950 text-[10px] space-y-0.5 max-w-[200px]">
+                            <div class="font-extrabold text-red-800 flex items-center gap-1">
+                                <i class="fa-solid fa-ban text-red-600"></i> ${r.status === 'Cancelada' ? 'Cancelamento' : 'Recusa'}
+                            </div>
+                            <div class="truncate font-medium" title="${motivo}"><strong>Motivo:</strong> ${motivo}</div>
+                            ${dataOcorrencia ? `<div class="text-[9px] text-red-700">🕒 ${formatarDataHora(dataOcorrencia)}</div>` : ''}
+                        </div>
+                    `;
+                }
+
+                // DOCUMENTO ANEXO
+                let docHtml = '';
                 if (r.documento_url) {
-                    const nomeDownload = `doc_${(r.hospede_nome || 'hospede').replace(/[^a-zA-Z0-9]/g, '_')}`;
-                    documentoAnexoHtml = `
-                        <div class="mt-1.5 pt-1.5 border-t border-gray-100 flex items-center gap-1.5">
-                            <a href="${r.documento_url}" target="_blank" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[10px] border border-blue-200 transition shadow-2xs" title="Visualizar Documento">
+                    docHtml = `
+                        <div class="mt-1">
+                            <a href="${r.documento_url}" target="_blank" class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 text-[10px] font-bold border border-blue-200">
                                 <i class="fa-solid fa-eye text-blue-600"></i> Ver Anexo
-                            </a>
-                            <a href="${r.documento_url}" download="${nomeDownload}" target="_blank" class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px] border border-slate-200 transition shadow-2xs" title="Baixar Arquivo">
-                                <i class="fa-solid fa-download text-slate-600"></i> Baixar
                             </a>
                         </div>
                     `;
                 } else {
-                    documentoAnexoHtml = `<div class="mt-1 text-[10px] text-gray-400 italic">Sem anexo</div>`;
+                    docHtml = `<div class="text-[10px] text-gray-400 italic mt-0.5">Sem anexo</div>`;
                 }
 
+                // COMPROVANTE PDF
                 let comprovanteHtml = '';
                 if (r.pdf_url) {
                     comprovanteHtml = `
-                        <div class="flex flex-col gap-1 min-w-[110px]">
-                            <a href="${r.pdf_url}" target="_blank" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-2 py-1 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1 transition">
+                        <div class="flex flex-col gap-1 min-w-[100px]">
+                            <a href="${r.pdf_url}" target="_blank" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-2 py-1 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 transition">
                                 📄 Ver PDF
                             </a>
-                            <button onclick="reenviarWhatsappPDF('${r.id}')" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1 transition shadow-2xs cursor-pointer">
+                            <button onclick="reenviarWhatsappPDF('${r.id}')" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 transition cursor-pointer">
                                 📲 WhatsApp
                             </button>
                         </div>
                     `;
+                } else if (r.status === 'Aprovada') {
+                    comprovanteHtml = `<button onclick="reenviarWhatsappPDF('${r.id}')" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 px-2 py-1 rounded-lg text-[10px] font-bold cursor-pointer">⚡ Gerar PDF</button>`;
                 } else {
-                    if (r.status === 'Aprovada') {
-                        comprovanteHtml = `<button onclick="reenviarWhatsappPDF('${r.id}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300 px-2 py-1 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1 transition cursor-pointer">⚠️ Gerar PDF</button>`;
-                    } else {
-                        comprovanteHtml = `<span class="text-[10px] text-gray-400 italic">Sem PDF</span>`;
-                    }
+                    comprovanteHtml = `<span class="text-[10px] text-gray-400 italic">Sem PDF</span>`;
                 }
+
+                const nomeHospedeEscapado = (r.hospede_nome || 'Hóspede').replace(/'/g, "\\'");
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-50 transition">
                         <td class="p-3 sm:p-4">
-                            <div class="font-bold text-gray-900">${r.hospede_nome || 'Não informado'}</div>
+                            <div class="font-bold text-gray-900 text-xs sm:text-sm">${r.hospede_nome || 'Não informado'}</div>
                             <div class="text-xs mt-0.5">${whatsAppHtml}</div>
                             <div class="text-[11px] text-gray-500">${r.email || 'Sem e-mail'}</div>
+                            ${badgeObservacaoHtml}
                         </td>
                         <td class="p-3 sm:p-4 text-xs">
-                            <div><strong class="text-gray-500">CPF:</strong> ${r.cpf || '-'}</div>
-                            <div><strong class="text-gray-500">RG:</strong> ${r.rg || '-'}</div>
-                            ${documentoAnexoHtml}
+                            <div><span class="text-gray-500">CPF:</span> <strong>${r.cpf || '-'}</strong></div>
+                            <div><span class="text-gray-500">RG:</span> <strong>${r.rg || '-'}</strong></div>
+                            ${docHtml}
                         </td>
-
-
-              <td class="p-3 sm:p-4 text-xs">
+                        <td class="p-3 sm:p-4 text-xs">
                             <div class="font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg inline-block border border-blue-200">
                                 🏨 ${nomeSuite}
                             </div>
-
                             ${r.suite_origem_id ? `
                                 <div class="mt-1.5 p-2 rounded-xl bg-purple-50 border border-purple-200 text-purple-950 space-y-0.5 max-w-[220px]">
                                     <div class="font-extrabold text-[10px] text-purple-800 flex items-center gap-1">
@@ -545,34 +707,305 @@
                                 </div>
                             ` : ''}
                         </td>
-
                         <td class="p-3 sm:p-4 text-xs font-semibold">
                             <div>In: <span class="text-gray-900">${formatarDataSimples(r.checkin)}</span></div>
                             <div>Out: <span class="text-gray-900">${formatarDataSimples(r.checkout)}</span></div>
                         </td>
                         <td class="p-3 sm:p-4 text-xs">
-                            ${conteudoColunaFinanceiro}
+                            ${conteudoFinanceiro}
                         </td>
                         <td class="p-3 sm:p-4">
-                            <span class="px-2 py-0.5 rounded-full text-[10px] uppercase ${badgeStatus}">${r.status}</span>
-                        </td>
-                        <td class="p-3 sm:p-4 text-[11px] text-gray-500">
-                            ${formatarDataHora(r.criado_em)}
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] uppercase ${badgeStatus}">${r.status}</span>
+                            ${auditoriaCancelamentoHtml}
                         </td>
                         <td class="p-3 sm:p-4 text-center">
                             ${comprovanteHtml}
+                        </td>
+                        <td class="p-3 sm:p-4 text-center">
+                            <div class="inline-flex items-center gap-1.5">
+                                <button onclick="abrirModalFicha('${r.id}')" title="Ver Ficha Completa / Dossiê" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 p-2 rounded-xl text-xs font-bold transition shadow-2xs cursor-pointer">
+                                    <i class="fa-solid fa-address-card"></i>
+                                </button>
+                                <button onclick="abrirModalEditarHospede('${r.id}')" title="Editar Dados Cadastrais" class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 p-2 rounded-xl text-xs font-bold transition shadow-2xs cursor-pointer">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button onclick="abrirModalExcluir('${r.id}', '${nomeHospedeEscapado}')" title="Excluir Registro de Reserva" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 p-2 rounded-xl text-xs font-bold transition shadow-2xs cursor-pointer">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 `;
             });
         }
 
+        // =========================================================================
+        // 1. MODAL DE FICHA COMPLETA (DOSSIÊ)
+        // =========================================================================
+        function abrirModalFicha(reservaId) {
+            const r = todasReservasCache.find(item => item.id === reservaId);
+            if (!r) return;
+
+            document.getElementById('ficha-nome').innerText = r.hospede_nome || 'Hóspede';
+            document.getElementById('ficha-protocolo').innerText = `ID da Reserva: #${r.id.substring(0, 8).toUpperCase()}`;
+
+            document.getElementById('ficha-whats').innerText = r.whatsapp_hospede || 'Não informado';
+            document.getElementById('ficha-email').innerText = r.email || 'Não informado';
+            document.getElementById('ficha-cpf').innerText = r.cpf || 'Não informado';
+            document.getElementById('ficha-rg').innerText = r.rg || 'Não informado';
+
+            const containerDoc = document.getElementById('ficha-doc-anexo-container');
+            const linkDoc = document.getElementById('ficha-link-doc');
+            if (r.documento_url && containerDoc && linkDoc) {
+                linkDoc.href = r.documento_url;
+                containerDoc.classList.remove('hidden');
+            } else if (containerDoc) {
+                containerDoc.classList.add('hidden');
+            }
+
+            document.getElementById('ficha-endereco').innerText = r.endereco || 'Não informado';
+            document.getElementById('ficha-numero').innerText = r.numero || '-';
+            document.getElementById('ficha-complemento').innerText = r.complemento || '-';
+            document.getElementById('ficha-bairro').innerText = r.bairro || '-';
+            document.getElementById('ficha-cidade-uf').innerText = (r.cidade ? `${r.cidade} / ${r.uf || ''}` : '-');
+            document.getElementById('ficha-cep').innerText = r.cep || '-';
+
+            const nomeSuite = mapaSuitesGlobal[r.suite_id] || 'Suíte';
+            document.getElementById('ficha-suite').innerText = nomeSuite;
+            document.getElementById('ficha-periodo').innerText = `${formatarDataSimples(r.checkin)} até ${formatarDataSimples(r.checkout)}`;
+            document.getElementById('ficha-adultos').innerText = `${r.qtd_adultos || 2} adulto(s)`;
+            document.getElementById('ficha-criancas').innerText = r.qtd_criancas ? `${r.qtd_criancas} criança(s) ${r.idades_criancas ? `(Idades: ${r.idades_criancas})` : ''}` : 'Nenhuma';
+            document.getElementById('ficha-pet').innerText = r.tem_pet ? 'Sim 🐶' : 'Não';
+
+            const badgeStatus = document.getElementById('ficha-status');
+            badgeStatus.innerText = r.status || '-';
+            badgeStatus.className = `px-2 py-0.5 rounded-full font-bold uppercase text-[10px] ${r.status === 'Aprovada' ? 'bg-green-100 text-green-800' : (r.status === 'Cancelada' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800')}`;
+
+            // Auditorias
+            const boxOcorrencias = document.getElementById('ficha-box-ocorrencias');
+            let ocorrenciasHtml = '';
+
+            if (r.suite_origem_id) {
+                ocorrenciasHtml += `
+                    <div class="bg-purple-50 border border-purple-200 text-purple-950 p-2.5 rounded-xl space-y-0.5">
+                        <strong class="font-extrabold text-purple-800 flex items-center gap-1"><i class="fa-solid fa-arrows-rotate text-purple-600"></i> Transferência Realizada</strong>
+                        <p>Quarto de Origem: <strong>${mapaSuitesGlobal[r.suite_origem_id] || 'Outra Suíte'}</strong></p>
+                        <p>Motivo: <strong>${r.motivo_transferencia || 'Não informado'}</strong></p>
+                        <p class="text-[10px] text-purple-700">🕒 Data: ${formatarDataHora(r.transferido_em)}</p>
+                    </div>
+                `;
+            }
+
+            if (r.status === 'Cancelada' || r.status === 'Recusada') {
+                ocorrenciasHtml += `
+                    <div class="bg-red-50 border border-red-200 text-red-950 p-2.5 rounded-xl space-y-0.5">
+                        <strong class="font-extrabold text-red-800 flex items-center gap-1"><i class="fa-solid fa-ban text-red-600"></i> Ocorrência de ${r.status}</strong>
+                        <p>Motivo: <strong>${r.motivo_cancelamento || r.motivo_recusa || 'Sem motivo'}</strong></p>
+                        <p class="text-[10px] text-red-700">🕒 Data: ${formatarDataHora(r.cancelado_em || r.recusado_em)}</p>
+                    </div>
+                `;
+            }
+
+            if (ocorrenciasHtml) {
+                boxOcorrencias.innerHTML = ocorrenciasHtml;
+                boxOcorrencias.classList.remove('hidden');
+            } else {
+                boxOcorrencias.classList.add('hidden');
+            }
+
+            // Observações
+            const boxObs = document.getElementById('ficha-box-observacao');
+            const textoObs = document.getElementById('ficha-observacao-texto');
+            if (r.observacao && r.observacao.trim() !== '') {
+                textoObs.innerText = r.observacao;
+                boxObs.classList.remove('hidden');
+            } else {
+                boxObs.classList.add('hidden');
+            }
+
+            document.getElementById('modal-ficha-hospede').classList.remove('hidden');
+        }
+
+        function fecharModalFicha() {
+            document.getElementById('modal-ficha-hospede').classList.add('hidden');
+        }
+
+        // =========================================================================
+        // 2. MODAL DE EDIÇÃO DE DADOS CADASTRAIS DO HÓSPEDE
+        // =========================================================================
+        function abrirModalEditarHospede(reservaId) {
+            const r = todasReservasCache.find(item => item.id === reservaId);
+            if (!r) return;
+
+            document.getElementById('edit-reserva-id').value = r.id;
+            document.getElementById('edit-nome').value = r.hospede_nome || '';
+            document.getElementById('edit-whatsapp').value = r.whatsapp_hospede || '';
+            document.getElementById('edit-email').value = r.email || '';
+            document.getElementById('edit-cpf').value = r.cpf || '';
+            document.getElementById('edit-rg').value = r.rg || '';
+            document.getElementById('edit-cep').value = r.cep || '';
+            document.getElementById('edit-endereco').value = r.endereco || '';
+            document.getElementById('edit-numero').value = r.numero || '';
+            document.getElementById('edit-complemento').value = r.complemento || '';
+            document.getElementById('edit-bairro').value = r.bairro || '';
+            document.getElementById('edit-cidade').value = r.cidade || '';
+            document.getElementById('edit-uf').value = r.uf || '';
+            document.getElementById('edit-observacao').value = r.observacao || '';
+
+            document.getElementById('modal-editar-hospede').classList.remove('hidden');
+        }
+
+        function fecharModalEditarHospede() {
+            document.getElementById('modal-editar-hospede').classList.add('hidden');
+        }
+
+        async function buscarCepEdicao() {
+            const cepInput = document.getElementById('edit-cep');
+            const limpo = (cepInput.value || '').replace(/\D/g, '');
+            if (limpo.length !== 8) return;
+
+            try {
+                const res = await fetch(`https://viacep.com.br/ws/${limpo}/json/`);
+                const data = await res.json();
+                if (!data.erro) {
+                    document.getElementById('edit-endereco').value = (data.logradouro || '').toUpperCase();
+                    document.getElementById('edit-bairro').value = (data.bairro || '').toUpperCase();
+                    document.getElementById('edit-cidade').value = (data.localidade || '').toUpperCase();
+                    document.getElementById('edit-uf').value = (data.uf || '').toUpperCase();
+                    document.getElementById('edit-numero').focus();
+                    mostrarToast("Endereço preenchido pelo CEP!", "sucesso");
+                }
+            } catch(e) {}
+        }
+
+        async function salvarEdicaoHospede(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-salvar-edicao');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
+
+            const id = document.getElementById('edit-reserva-id').value;
+            const nome = document.getElementById('edit-nome').value.trim().toUpperCase();
+            const whatsapp = document.getElementById('edit-whatsapp').value.trim();
+            const email = document.getElementById('edit-email').value.trim().toLowerCase();
+            const cpf = document.getElementById('edit-cpf').value.trim();
+            const rg = document.getElementById('edit-rg').value.trim().toUpperCase();
+            const cep = document.getElementById('edit-cep').value.trim();
+            const endereco = document.getElementById('edit-endereco').value.trim().toUpperCase();
+            const numero = document.getElementById('edit-numero').value.trim().toUpperCase();
+            const complemento = document.getElementById('edit-complemento').value.trim().toUpperCase();
+            const bairro = document.getElementById('edit-bairro').value.trim().toUpperCase();
+            const cidade = document.getElementById('edit-cidade').value.trim().toUpperCase();
+            const uf = document.getElementById('edit-uf').value.trim().toUpperCase();
+            const observacao = document.getElementById('edit-observacao').value.trim().toUpperCase();
+
+            try {
+                const { error: errReserva } = await supabaseClient
+                    .from('reservas')
+                    .update({
+                        hospede_nome: nome,
+                        whatsapp_hospede: whatsapp,
+                        email: email || null,
+                        cpf: cpf || null,
+                        rg: rg || null,
+                        cep: cep || null,
+                        endereco: endereco || null,
+                        numero: numero || null,
+                        complemento: complemento || null,
+                        bairro: bairro || null,
+                        cidade: cidade || null,
+                        uf: uf || null,
+                        observacao: observacao || null
+                    })
+                    .eq('id', id)
+                    .eq('pousada_id', usuarioIdAtual);
+
+                if (errReserva) throw errReserva;
+
+                // Sincroniza tabela hospedes se tiver CPF
+                if (cpf) {
+                    try {
+                        const { data: hExistente } = await supabaseClient
+                            .from('hospedes')
+                            .select('id')
+                            .eq('pousada_id', usuarioIdAtual)
+                            .eq('cpf', cpf)
+                            .maybeSingle();
+
+                        if (hExistente) {
+                            await supabaseClient.from('hospedes').update({ nome, telefone: whatsapp, email: email || null }).eq('id', hExistente.id);
+                        } else {
+                            await supabaseClient.from('hospedes').insert([{ pousada_id: usuarioIdAtual, nome, cpf, telefone: whatsapp, email: email || null }]);
+                        }
+                    } catch(e) {}
+                }
+
+                mostrarToast("Dados do hóspede atualizados com sucesso!", "sucesso");
+                fecharModalEditarHospede();
+                await carregarHistoricoHospedes();
+
+            } catch (err) {
+                mostrarToast("Erro ao salvar: " + err.message, "erro");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Salvar Alterações';
+            }
+        }
+
+        // =========================================================================
+        // 3. EXCLUSÃO SEGURA DE RESERVA / HÓSPEDE
+        // =========================================================================
+        function abrirModalExcluir(reservaId, nomeHospede) {
+            reservaIdParaExcluir = reservaId;
+            document.getElementById('nome-exclusao-alvo').innerText = nomeHospede;
+            document.getElementById('modal-confirmar-exclusao').classList.remove('hidden');
+        }
+
+        function fecharModalExcluir() {
+            reservaIdParaExcluir = null;
+            document.getElementById('modal-confirmar-exclusao').classList.add('hidden');
+        }
+
+        async function executarExclusaoReserva() {
+            if (!reservaIdParaExcluir) return;
+
+            const btn = document.getElementById('btn-confirmar-exclusao-final');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Excluindo...';
+
+            try {
+                // 1. Remove pagamentos vinculados
+                await supabaseClient.from('hospede_pagamentos').delete().eq('reserva_id', reservaIdParaExcluir);
+
+                // 2. Remove a reserva
+                const { error } = await supabaseClient
+                    .from('reservas')
+                    .delete()
+                    .eq('id', reservaIdParaExcluir)
+                    .eq('pousada_id', usuarioIdAtual);
+
+                if (error) throw error;
+
+                mostrarToast("Registro excluído com sucesso!", "sucesso");
+                fecharModalExcluir();
+                await carregarHistoricoHospedes();
+
+            } catch (err) {
+                mostrarToast("Erro ao excluir: " + err.message, "erro");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Sim, Excluir';
+            }
+        }
+
+        // =========================================================================
+        // REENVIO DE PDF / WHATSAPP
+        // =========================================================================
         async function reenviarWhatsappPDF(reservaId) {
             try {
-                mostrarToast("Processando comprovante PDF...");
-                let reserva = todasReservasCache.find(r => r.id === reservaId);
+                mostrarToast("Preparando comprovante PDF...");
+                let rData = todasReservasCache.find(r => r.id === reservaId);
 
-                let rData = reserva;
                 if (!rData) {
                     const { data } = await supabaseClient.from('reservas').select('*').eq('id', reservaId).single();
                     rData = data;
@@ -581,8 +1014,8 @@
 
                 let pdfPublicUrl = rData.pdf_url;
 
-                if (!pdfPublicUrl && rData.status === 'Aprovada') {
-                    mostrarToast("Gerando PDF...");
+                if (!pdfPublicUrl && rData.status === 'Aprovada' && window.jspdf) {
+                    mostrarToast("Gerando PDF oficial...");
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF();
                     doc.setFillColor(37, 99, 235);
@@ -590,81 +1023,54 @@
                     doc.setTextColor(255,255,255);
                     doc.setFontSize(16);
                     doc.setFont(undefined, 'bold');
-                    const nomePousadaEl = document.getElementById('titulo-pousada');
-                    const nomePousadaTxt = nomePousadaEl ? nomePousadaEl.innerText : 'Pousada';
-                    nomePousadaAtual = nomePousadaTxt;
-                    doc.text(nomePousadaTxt.toUpperCase(), 105, 15, { align: 'center' });
+                    doc.text(nomePousadaAtual.toUpperCase(), 105, 15, { align: 'center' });
                     doc.setTextColor(0,0,0);
                     doc.setFontSize(12);
-                    doc.setFont(undefined, 'bold');
-                    doc.text("COMPROVANTE DE RESERVA APROVADA", 105, 35, { align: 'center' });
+                    doc.text("COMPROVANTE DE RESERVA", 105, 35, { align: 'center' });
                     doc.setFont(undefined, 'normal');
                     doc.setFontSize(11);
                     let y = 50;
-                    const nomeHospede = rData.hospede_nome || 'Hóspede';
-                    const suiteNome = mapaSuitesGlobal[rData.suite_id] || 'Suíte';
-                    doc.text(`Hóspede: ${nomeHospede}`, 15, y); y+=8;
-                    doc.text(`Suíte: ${suiteNome}`, 15, y); y+=8;
+                    doc.text(`Hóspede: ${rData.hospede_nome || 'Hóspede'}`, 15, y); y+=8;
+                    doc.text(`Suíte: ${mapaSuitesGlobal[rData.suite_id] || 'Suíte'}`, 15, y); y+=8;
                     doc.text(`Check-in: ${formatarDataSimples(rData.checkin)}`, 15, y); y+=8;
                     doc.text(`Check-out: ${formatarDataSimples(rData.checkout)}`, 15, y); y+=8;
-                    
                     if (temPermissao('financeiro')) {
-                        doc.text(`Valor Total: R$ ${Number(rData.valor_total||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}`, 15, y); y+=8;
+                        doc.text(`Valor Total: ${formatarMoeda(rData.valor_total || 0)}`, 15, y); y+=8;
                     }
+                    doc.text(`Status: ${rData.status.toUpperCase()}`, 15, y); y+=15;
 
-                    doc.text(`WhatsApp: ${rData.whatsapp_hospede||''}`, 15, y); y+=8;
-                    doc.text(`Status: APROVADA`, 15, y); y+=15;
-                    doc.setFontSize(10);
-                    doc.setTextColor(100,100,100);
-                    doc.text(`Reserva ID: ${reservaId}`, 15, y); y+=6;
-                    doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 15, y); y+=6;
-                    doc.text(`Pousada ID: ${usuarioIdAtual}`, 15, y);
-                    doc.setFontSize(9);
-                    doc.text("Obrigado pela preferência!", 105, 280, { align: 'center' });
                     const pdfBlob = doc.output('blob');
                     const filePath = `aprovadas/${usuarioIdAtual}/${reservaId}.pdf`;
                     const { error: uploadError } = await supabaseClient.storage.from('comprovantes').upload(filePath, pdfBlob, { contentType: 'application/pdf', upsert: true });
-                    if (uploadError) throw uploadError;
-                    const { data: urlData } = supabaseClient.storage.from('comprovantes').getPublicUrl(filePath);
-                    pdfPublicUrl = urlData.publicUrl;
-                    await supabaseClient.from('reservas').update({ pdf_url: pdfPublicUrl }).eq('id', reservaId);
-                    if (reserva) reserva.pdf_url = pdfPublicUrl;
+                    if (!uploadError) {
+                        const { data: urlData } = supabaseClient.storage.from('comprovantes').getPublicUrl(filePath);
+                        pdfPublicUrl = urlData.publicUrl;
+                        await supabaseClient.from('reservas').update({ pdf_url: pdfPublicUrl }).eq('id', reservaId);
+                        rData.pdf_url = pdfPublicUrl;
+                    }
                 }
 
-                if (!pdfPublicUrl) { mostrarToast("Esta reserva não possui PDF", 'erro'); return; }
-
-                const nomeHospede = rData.hospede_nome || 'Hóspede';
-                const whatsappRaw = rData.whatsapp_hospede || '';
-                const valorTotal = Number(rData.valor_total || 0);
-                const suiteNome = mapaSuitesGlobal[rData.suite_id] || 'Suíte';
-                const tituloPousadaEl = document.getElementById('titulo-pousada');
-                const pousadaNome = tituloPousadaEl ? tituloPousadaEl.innerText : 'Pousada';
-
-                let textoMensagem = `Olá ${nomeHospede}, estamos reenviando o comprovante da sua reserva na ${pousadaNome} 😊\n\n`;
-                textoMensagem += `Reserva efetuada:\n`;
-                textoMensagem += `Check-in: ${formatarDataSimples(rData.checkin)} | Check-out: ${formatarDataSimples(rData.checkout)}\n`;
-                textoMensagem += `Suíte: ${suiteNome}\n`;
-                
+                const nomeH = rData.hospede_nome || 'Hóspede';
+                const whats = rData.whatsapp_hospede || '';
+                let msg = `Olá *${nomeH}*, segue o comprovante atualizado da sua reserva na *${nomePousadaAtual}*:\n\n`;
+                msg += `🏨 *Suíte:* ${mapaSuitesGlobal[rData.suite_id] || 'Acomodação'}\n`;
+                msg += `📅 *Período:* ${formatarDataSimples(rData.checkin)} até ${formatarDataSimples(rData.checkout)}\n`;
                 if (temPermissao('financeiro')) {
-                    textoMensagem += `Valor: R$ ${valorTotal.toLocaleString('pt-BR',{minimumFractionDigits:2})}\n\n`;
-                } else {
-                    textoMensagem += `\n`;
+                    msg += `💰 *Valor Total:* ${formatarMoeda(rData.valor_total || 0)}\n`;
                 }
+                if (pdfPublicUrl) {
+                    msg += `\n📄 *Comprovante em PDF:* ${pdfPublicUrl}\n`;
+                }
+                msg += `\nAgradecemos a preferência! 🌿`;
 
-                textoMensagem += `Acesse o comprovante completo no link abaixo:\n${pdfPublicUrl}\n\n`;
-                textoMensagem += `Qualquer dúvida estamos à disposição!`;
-
-                let apenasNumeros = whatsappRaw.replace(/\D/g, '');
+                let apenasNumeros = whats.replace(/\D/g, '');
                 if (apenasNumeros.length <= 11 && !apenasNumeros.startsWith('55')) apenasNumeros = '55' + apenasNumeros;
 
-                const urlWhatsapp = `https://wa.me/${apenasNumeros}?text=${encodeURIComponent(textoMensagem)}`;
-                mostrarToast("Abrindo WhatsApp...");
-                window.open(urlWhatsapp, '_blank');
+                window.open(`https://wa.me/${apenasNumeros}?text=${encodeURIComponent(msg)}`, '_blank');
                 setTimeout(() => carregarHistoricoHospedes(), 1500);
 
             } catch (err) {
-                console.error("Erro reenvio PDF:", err);
-                mostrarToast("Falha: " + err.message, 'erro');
+                mostrarToast("Erro ao processar: " + err.message, 'erro');
             }
         }
 
