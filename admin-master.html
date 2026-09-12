@@ -13,7 +13,7 @@
     <!-- CONTAINER DE NOTIFICAÇÕES (TOASTS INTERNOS) -->
     <div id="toast-container" class="fixed top-5 right-5 z-[9999] flex flex-col gap-2 pointer-events-none"></div>
 
-    <!-- MODAL DE CONFIRMAÇÃO CUSTOMIZADO -->
+    <!-- MODAL DE CONFIRMAÇÃO GENÉRICO CUSTOMIZADO -->
     <div id="modal-confirmacao" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4 z-[9998] transition-opacity">
         <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl border border-slate-100 text-center transform transition-all">
             <div id="modal-confirm-icon-bg" class="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center text-2xl mb-4 bg-emerald-100 text-emerald-600">
@@ -24,6 +24,140 @@
             <div class="grid grid-cols-2 gap-3">
                 <button type="button" id="btn-confirm-cancelar" class="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">Cancelar</button>
                 <button type="button" id="btn-confirm-ok" class="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md transition">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ESPECÍFICO: RESET OPERACIONAL (ZERAR RESERVAS E LIBERAR SUÍTES) -->
+    <div id="modal-reset-operacional" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4 z-[9998] transition-opacity">
+        <div class="bg-white rounded-3xl p-6 sm:p-7 max-w-lg w-full shadow-2xl border border-amber-200">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl shrink-0">
+                    <i class="fa-solid fa-broom"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-extrabold text-slate-900">Reset Operacional da Pousada</h3>
+                    <p class="text-xs text-slate-500">Limpeza de testes e liberação de todas as acomodações.</p>
+                </div>
+            </div>
+
+            <!-- CARD DE IDENTIFICAÇÃO -->
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 mb-4 text-xs">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-slate-500 font-bold uppercase text-[10px]">Pousada:</span>
+                    <span id="reset-pousada-nome" class="font-extrabold text-slate-900"></span>
+                </div>
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-slate-500 font-bold uppercase text-[10px]">Gestor Responsável:</span>
+                    <span id="reset-pousada-gestor" class="font-bold text-slate-700"></span>
+                </div>
+                <div class="flex justify-between items-center text-[10px] text-slate-400">
+                    <span>ID do Sistema:</span>
+                    <span id="reset-pousada-id" class="font-mono"></span>
+                </div>
+            </div>
+
+            <!-- DETALHAMENTO DE CAUSAS E CONSEQUÊNCIAS -->
+            <div class="space-y-2.5 mb-5 text-xs">
+                <div class="bg-red-50/80 border border-red-200 rounded-xl p-3">
+                    <p class="font-bold text-red-800 text-[11px] uppercase mb-1.5 flex items-center gap-1.5">
+                        <i class="fa-solid fa-circle-xmark"></i> O que será ZERADO e EXCLUÍDO:
+                    </p>
+                    <ul class="text-red-700 space-y-1 text-[11px] list-disc list-inside">
+                        <li>Todas as <strong>Reservas</strong> (ativas, pendentes, concluídas ou canceladas).</li>
+                        <li>Todo o histórico de <strong>Pagamentos de Hóspedes</strong> vinculados a reservas.</li>
+                        <li>Cadastro de <strong>Hóspedes</strong> registrados durante os testes.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-emerald-50/80 border border-emerald-200 rounded-xl p-3">
+                    <p class="font-bold text-emerald-800 text-[11px] uppercase mb-1.5 flex items-center gap-1.5">
+                        <i class="fa-solid fa-circle-check"></i> O que será PRESERVADO (100% Intacto):
+                    </p>
+                    <ul class="text-emerald-700 space-y-1 text-[11px] list-disc list-inside">
+                        <li>Configurações gerais, logotipo, horários e políticas da pousada.</li>
+                        <li>Todas as <strong>Suítes Cadastradas</strong> (fotos, descrições e diárias).</li>
+                        <li>Todas as <strong>Tarifas Especiais</strong> e regras de feriados.</li>
+                        <li>O <strong>Gestor da Pousada e Colaboradores</strong> (acessos inalterados).</li>
+                    </ul>
+                </div>
+
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-2.5 text-[11px] text-blue-900 flex items-center gap-2">
+                    <i class="fa-solid fa-rotate text-blue-600 text-sm"></i>
+                    <span><strong>Status das Suítes:</strong> Todas voltarão para <span class="font-bold text-emerald-700 uppercase">"Disponível"</span> imediatamente.</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <button type="button" onclick="fecharModalReset()" class="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">Cancelar</button>
+                <button type="button" id="btn-confirmar-reset-exec" onclick="confirmarExecucaoReset()" class="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 shadow-md transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-broom"></i> Confirmar Reset
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ESPECÍFICO: EXCLUSÃO DEFINITIVA DA POUSADA (EXPURGO TOTAL) -->
+    <div id="modal-excluir-pousada" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4 z-[9998] transition-opacity">
+        <div class="bg-white rounded-3xl p-6 sm:p-7 max-w-lg w-full shadow-2xl border border-red-300">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center text-xl shrink-0">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-extrabold text-red-900">Exclusão Definitiva de Pousada</h3>
+                    <p class="text-xs text-red-600 font-semibold">Ação destrutiva irreversível no banco de dados.</p>
+                </div>
+            </div>
+
+            <!-- CARD DE IDENTIFICAÇÃO DA POUSADA A SER DELETADA -->
+            <div class="bg-red-50/50 border border-red-200 rounded-2xl p-3.5 mb-4 text-xs space-y-1">
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-500 font-bold uppercase text-[10px]">Pousada:</span>
+                    <span id="excluir-pousada-nome" class="font-extrabold text-red-700 text-sm"></span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-500 font-bold uppercase text-[10px]">Gestor Responsável:</span>
+                    <span id="excluir-pousada-gestor" class="font-bold text-slate-800"></span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-500 font-bold uppercase text-[10px]">Login / E-mail:</span>
+                    <span id="excluir-pousada-email" class="font-bold text-slate-800"></span>
+                </div>
+                <div class="flex justify-between items-center text-[10px] text-slate-400 pt-1 border-t border-red-100">
+                    <span>UUID do Registro:</span>
+                    <span id="excluir-pousada-id" class="font-mono text-slate-600"></span>
+                </div>
+            </div>
+
+            <!-- ALERTA DO QUE SERÁ DELETADO -->
+            <div class="bg-red-100/60 border border-red-200 rounded-xl p-3 mb-4 text-xs text-red-900">
+                <p class="font-extrabold uppercase text-[11px] mb-1.5 flex items-center gap-1.5 text-red-700">
+                    <i class="fa-solid fa-trash-can"></i> Os seguintes dados serão destruídos permanentemente:
+                </p>
+                <ul class="space-y-1 text-[11px] list-disc list-inside text-red-800 font-medium">
+                    <li>O <strong>Gestor da Pousada e todos os Colaboradores</strong> vinculados.</li>
+                    <li>Todas as <strong>Suítes</strong> cadastradas e suas fotos.</li>
+                    <li>Todas as <strong>Reservas</strong> e registros de Hóspedes.</li>
+                    <li>Todo o histórico <strong>Financeiro</strong> de pagamentos.</li>
+                    <li>Todas as <strong>Tarifas Especiais</strong>.</li>
+                    <li>O cadastro completo da <strong>Pousada</strong>.</li>
+                </ul>
+            </div>
+
+            <!-- TRAVA DE SEGURANÇA: DIGITAR A PALAVRA 'EXCLUIR' -->
+            <div class="mb-5">
+                <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                    Para confirmar, digite exatamente a palavra <span class="text-red-600 font-black">EXCLUIR</span> abaixo:
+                </label>
+                <input type="text" id="input-confirmar-exclusao" oninput="validarTextoExclusao()" placeholder="Digite EXCLUIR" class="w-full p-2.5 border-2 border-red-200 rounded-xl text-xs font-black text-center uppercase tracking-wider bg-slate-50 outline-none focus:border-red-600">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <button type="button" onclick="fecharModalExclusao()" class="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">Cancelar</button>
+                <button type="button" id="btn-confirmar-exclusao-exec" onclick="confirmarExecucaoExclusao()" disabled class="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-red-300 cursor-not-allowed shadow-md transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-trash-can"></i> Excluir Tudo
+                </button>
             </div>
         </div>
     </div>
@@ -136,7 +270,7 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse min-w-[1000px]">
+                    <table class="w-full text-left border-collapse min-w-[1050px]">
                         <thead>
                             <tr class="bg-slate-50 text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b">
                                 <th class="p-4">Pousada, Gestor & Login</th>
@@ -246,6 +380,7 @@
 
         let pousadasCache = [];
         let faixasPreco = [];
+        let pousadaAlvoId = null; // ID temporário para as ações de Reset e Exclusão
 
         function mostrarToast(mensagem, tipo = 'success') {
             const container = document.getElementById('toast-container');
@@ -505,7 +640,7 @@
 
             let usuarios = [];
             try {
-                const { data: uData } = await supabaseClient.from('usuarios').select('user_id, nome_completo, whatsapp');
+                const { data: uData } = await supabaseClient.from('usuarios').select('user_id, pousada_id, nome_completo, whatsapp');
                 if(uData) usuarios = uData;
             } catch(e){}
 
@@ -517,7 +652,9 @@
                 
                 const ehPersonalizado = (p.plano_valor !== null && p.plano_valor !== undefined && p.plano_valor !== '');
                 const valorFinal = ehPersonalizado ? Number(p.plano_valor) : (faixaCalculada ? Number(faixaCalculada.valor_mensal) : 149.90);
-                const gestor = usuarios.find(u => u.user_id === p.id);
+                
+                // Busca gestor associado por user_id ou por pousada_id
+                const gestor = usuarios.find(u => u.user_id === p.id || u.pousada_id === p.id);
 
                 return { 
                     ...p, 
@@ -646,19 +783,35 @@
                         </td>
                         <td class="p-4">${statusHtml}</td>
                         <td class="p-4 text-center">
-                            <div class="inline-flex items-center gap-1.5">
+                            <div class="inline-flex items-center gap-1.5 flex-wrap justify-center">
+                                <!-- ACESSAR PAINEL -->
                                 <button onclick="acessarComoMaster('${p.id}', '${p.nome.replace(/'/g, "\\'")}')" title="Acessar painel desta pousada como Master" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-xs cursor-pointer">
                                     <i class="fa-solid fa-arrow-up-right-from-square"></i> Acessar
                                 </button>
 
+                                <!-- RENOVAR 30 DIAS -->
                                 <button onclick="renovar30Dias('${p.id}', '${p.data_vencimento}', '${p.nome.replace(/'/g, "\\'")}')" title="Confirmar Pagamento (+30 dias)" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-xs">
                                     <i class="fa-solid fa-plus"></i> 30d
                                 </button>
+
+                                <!-- BLOQUEAR / ATIVAR -->
                                 <button onclick="alternarStatus('${p.id}', '${p.status === 'active' ? 'blocked' : 'active'}', '${p.nome.replace(/'/g, "\\'")}')" title="${p.status === 'active' ? 'Bloquear Pousada' : 'Ativar Pousada'}" class="${p.status === 'active' ? 'bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border border-red-200' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white border border-emerald-200'} px-2.5 py-1.5 rounded-lg text-xs font-bold transition">
                                     <i class="fa-solid ${p.status === 'active' ? 'fa-ban' : 'fa-check'}"></i>
                                 </button>
+
+                                <!-- EDITAR DADOS / GESTOR -->
                                 <button onclick="abrirModalEdicao('${p.id}')" title="Ajustar Dados, Gestor ou Assinatura" class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">
                                     <i class="fa-solid fa-pen"></i>
+                                </button>
+
+                                <!-- RESET OPERACIONAL (NOVO) -->
+                                <button onclick="abrirModalReset('${p.id}')" title="Reset Operacional: Zerar Reservas e Liberar Suítes (Modo Teste)" class="bg-amber-50 hover:bg-amber-600 text-amber-600 hover:text-white border border-amber-300 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">
+                                    <i class="fa-solid fa-broom"></i>
+                                </button>
+
+                                <!-- EXCLUIR DEFINITIVO (NOVO) -->
+                                <button onclick="abrirModalExclusao('${p.id}')" title="Excluir Pousada e Dados Definitivamente" class="bg-red-50 hover:bg-red-600 text-red-600 hover:text-white border border-red-300 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">
+                                    <i class="fa-solid fa-trash-can"></i>
                                 </button>
                             </div>
                         </td>
@@ -772,11 +925,11 @@
 
             if(nome_gestor){
                 try {
-                    const { data: existU } = await supabaseClient.from('usuarios').select('id').eq('user_id', id).maybeSingle();
+                    const { data: existU } = await supabaseClient.from('usuarios').select('id').eq('pousada_id', id).maybeSingle();
                     if(existU){
-                        await supabaseClient.from('usuarios').update({ nome_completo: nome_gestor }).eq('user_id', id);
+                        await supabaseClient.from('usuarios').update({ nome_completo: nome_gestor }).eq('pousada_id', id);
                     } else {
-                        await supabaseClient.from('usuarios').insert({ user_id: id, nome_completo: nome_gestor });
+                        await supabaseClient.from('usuarios').insert({ user_id: id, pousada_id: id, nome_completo: nome_gestor });
                     }
                 } catch(uErr){
                     console.warn("Aviso tabela usuarios:", uErr);
@@ -786,6 +939,124 @@
             fecharModalEdicao();
             mostrarToast("Dados atualizados com sucesso!", "success");
             carregarDados();
+        }
+
+        // =========================================================================
+        // FUNÇÃO DE AUDITORIA E CONFIRMAÇÃO: RESET OPERACIONAL
+        // =========================================================================
+        function abrirModalReset(id){
+            const p = pousadasCache.find(item => item.id === id);
+            if(!p) return;
+
+            pousadaAlvoId = id;
+            document.getElementById('reset-pousada-nome').innerText = p.nome;
+            document.getElementById('reset-pousada-gestor').innerText = p.nomeGestor || 'Não informado';
+            document.getElementById('reset-pousada-id').innerText = p.id;
+
+            const modal = document.getElementById('modal-reset-operacional');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function fecharModalReset(){
+            const modal = document.getElementById('modal-reset-operacional');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            pousadaAlvoId = null;
+        }
+
+        async function confirmarExecucaoReset(){
+            if(!pousadaAlvoId) return;
+
+            const p = pousadasCache.find(item => item.id === pousadaAlvoId);
+            const btn = document.getElementById('btn-confirmar-reset-exec');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Executando Reset...';
+
+            try {
+                const { error } = await supabaseClient.rpc('resetar_operacao_pousada', {
+                    p_pousada_id: pousadaAlvoId
+                });
+
+                if(error) throw error;
+
+                fecharModalReset();
+                mostrarToast(`Reset concluído! A pousada "${p ? p.nome : ''}" está pronta para operar.`, 'success');
+                await carregarDados();
+            } catch(e){
+                mostrarToast("Erro ao executar reset: " + e.message, "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-broom"></i> Confirmar Reset';
+            }
+        }
+
+        // =========================================================================
+        // FUNÇÃO DE AUDITORIA E CONFIRMAÇÃO: EXCLUSÃO DEFINITIVA
+        // =========================================================================
+        function abrirModalExclusao(id){
+            const p = pousadasCache.find(item => item.id === id);
+            if(!p) return;
+
+            pousadaAlvoId = id;
+            document.getElementById('excluir-pousada-nome').innerText = p.nome;
+            document.getElementById('excluir-pousada-gestor').innerText = p.nomeGestor || 'Não informado';
+            document.getElementById('excluir-pousada-email').innerText = p.loginAdmin || 'Não informado';
+            document.getElementById('excluir-pousada-id').innerText = p.id;
+
+            const inputTxt = document.getElementById('input-confirmar-exclusao');
+            inputTxt.value = '';
+            validarTextoExclusao();
+
+            const modal = document.getElementById('modal-excluir-pousada');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function fecharModalExclusao(){
+            const modal = document.getElementById('modal-excluir-pousada');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            pousadaAlvoId = null;
+        }
+
+        function validarTextoExclusao(){
+            const valor = document.getElementById('input-confirmar-exclusao').value.trim();
+            const btn = document.getElementById('btn-confirmar-exclusao-exec');
+            
+            if(valor.toUpperCase() === 'EXCLUIR'){
+                btn.disabled = false;
+                btn.className = "w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-red-600 hover:bg-red-700 shadow-md transition flex items-center justify-center gap-2 cursor-pointer";
+            } else {
+                btn.disabled = true;
+                btn.className = "w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-red-300 cursor-not-allowed shadow-md transition flex items-center justify-center gap-2";
+            }
+        }
+
+        async function confirmarExecucaoExclusao(){
+            if(!pousadaAlvoId) return;
+
+            const p = pousadasCache.find(item => item.id === pousadaAlvoId);
+            const btn = document.getElementById('btn-confirmar-exclusao-exec');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Excluindo permanentemente...';
+
+            try {
+                const { error } = await supabaseClient.rpc('excluir_pousada_definitiva', {
+                    p_pousada_id: pousadaAlvoId
+                });
+
+                if(error) throw error;
+
+                fecharModalExclusao();
+                mostrarToast(`Pousada "${p ? p.nome : ''}" e todos os registros foram excluídos com sucesso.`, 'success');
+                await carregarDados();
+            } catch(e){
+                mostrarToast("Erro ao excluir pousada: " + e.message, "error");
+            } finally {
+                btn.disabled = false;
+                validarTextoExclusao();
+            }
         }
 
         function filtrarTabela(){
