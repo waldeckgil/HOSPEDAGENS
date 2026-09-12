@@ -38,10 +38,11 @@
                     <span>👥</span> <span>Hóspedes</span>
                 </a>
         
-                <!-- LINK DE LIMPEZA (GOVERNANÇA & LIMPEZA) -->
+<!-- LINK DE LIMPEZA (GOVERNANÇA & LIMPEZA) -->
                 <a id="link-menu-limpeza" href="limpeza.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-pink-900/40 text-pink-300 hover:text-pink-200 transition font-medium text-xs sm:text-sm border border-pink-500/20">
                     <span>🧹</span> <span>Governança & Limpeza</span>
                 </a>
+
 
                 <a id="link-menu-config" href="configurar-pousada.html" class="flex items-center gap-2.5 px-3 sm:px-4 py-2 rounded-xl hover:bg-slate-800 transition font-medium text-xs sm:text-sm">
                     <span>⚙️</span> <span>Configuração de Suítes</span>
@@ -80,6 +81,7 @@
                 <div id="kpi-mes-container" class="hidden bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-full text-indigo-900 text-xs font-bold flex items-center gap-1.5">
                     <span>📊</span> <span id="kpi-texto-mes">Reservas no mês: 0</span>
                 </div>
+                <!-- NOME DO USUÁRIO LOGADO -->
                 <span id="badge-usuario-logado" class="text-xs font-bold text-slate-800 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-300 flex items-center gap-1.5 shadow-2xs">
                     <i class="fa-solid fa-user text-blue-600"></i>
                     <strong id="texto-nome-usuario">Carregando...</strong>
@@ -92,7 +94,7 @@
         <!-- CORPO DA PÁGINA -->
         <main class="p-4 sm:p-6 md:p-8 flex-1 overflow-y-auto">
             
-            <!-- FAIXA DE MODO SUPER ADMINISTRADOR -->
+            <!-- FAIXA DE MODO SUPER ADMINISTRADOR (MASTER INSPECIONANDO CLIENTE) -->
             <div id="banner-modo-master" class="hidden mb-6 bg-slate-950 text-amber-300 p-3.5 sm:p-4 rounded-2xl shadow-md border border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div class="flex items-center gap-3">
                     <span class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-sm border border-amber-500/30">👑</span>
@@ -190,36 +192,6 @@
         </main>
     </div>
 
-    <!-- MODAL DE COMUNICADO / BROADCAST DO SISTEMA (NOVO) -->
-    <div id="modal-comunicado-sistema" class="hidden fixed inset-0 bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-4 z-[99]">
-        <div class="bg-white p-6 sm:p-7 rounded-3xl w-full max-w-md shadow-2xl border border-slate-200 transform transition-all space-y-4">
-            <div class="flex items-center gap-3">
-                <div id="comunicado-icone-bg" class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-xl shrink-0 shadow-2xs">
-                    <i id="comunicado-icone" class="fa-solid fa-bullhorn"></i>
-                </div>
-                <div>
-                    <span id="comunicado-badge-origem" class="px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider bg-blue-100 text-blue-800 border border-blue-200">
-                        Comunicado da Plataforma
-                    </span>
-                    <h3 id="comunicado-titulo" class="text-base font-extrabold text-slate-900 mt-1 leading-tight"></h3>
-                </div>
-            </div>
-
-            <div id="comunicado-corpo-box" class="bg-slate-50 border border-slate-200 p-4 rounded-2xl text-xs text-slate-700 leading-relaxed max-h-60 overflow-y-auto whitespace-pre-line font-medium">
-                <!-- Conteúdo do comunicado -->
-            </div>
-
-            <div class="flex justify-between items-center text-[10px] text-slate-400 pt-1">
-                <span>Emitido em: <strong id="comunicado-data-emissao" class="text-slate-600"></strong></span>
-                <span class="font-bold text-slate-500">Master SaaS</span>
-            </div>
-
-            <button type="button" onclick="fecharModalComunicado()" class="w-full bg-slate-900 hover:bg-black text-white font-extrabold py-3 px-4 rounded-xl transition text-xs sm:text-sm shadow-md flex items-center justify-center gap-1.5 cursor-pointer">
-                <i class="fa-solid fa-check"></i> Entendido / Fechar Comunicado
-            </button>
-        </div>
-    </div>
-
     <!-- TOAST COM SUPORTE A TEMPO CUSTOMIZADO -->
     <div id="toast-notificacao" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
         <div id="toast-content" class="bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-800">
@@ -299,6 +271,7 @@
                 </div>
             </div>
 
+            <!-- QUADRO FINANCEIRO DE AUDITORIA DO CHECKOUT -->
             <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-2 text-xs text-slate-800">
                 <div class="flex justify-between items-center pb-1.5 border-b border-slate-200">
                     <span class="text-gray-500 font-bold uppercase text-[10px]">Hóspede:</span>
@@ -325,6 +298,7 @@
                     <strong id="conf-checkout-total-pago" class="text-emerald-700 font-extrabold">-</strong>
                 </div>
 
+                <!-- DESTAQUE DO SALDO / CRÉDITO -->
                 <div id="box-destaque-resultado-checkout" class="p-2.5 rounded-xl text-center mt-2 border">
                     <span id="lbl-destaque-resultado-checkout" class="block uppercase text-[10px] font-extrabold"></span>
                     <strong id="val-destaque-resultado-checkout" class="text-base font-extrabold block"></strong>
@@ -420,6 +394,7 @@
                 </div>
             </div>
 
+            <!-- PAINEL FINANCEIRO DE ESTADIA INTERROMPIDA -->
             <div id="box-financeiro-cancelamento-estadia" class="hidden mt-3.5 bg-amber-50 border border-amber-200 p-3 rounded-xl space-y-1 text-xs text-amber-950">
                 <div class="flex justify-between items-center">
                     <span class="text-gray-600">Diárias consumidas até hoje:</span>
@@ -488,6 +463,7 @@
                 <input type="hidden" id="edit-status-original">
                 <input type="hidden" id="edit-reserva-id">
                 
+                <!-- SELETOR DE SUÍTE COM BOTÃO DE VER CALENDÁRIO / DISPONIBILIDADE -->
                 <div>
                     <label class="block text-xs font-bold text-gray-700 uppercase mb-1 flex items-center justify-between">
                         <span>Acomodação / Suíte</span>
@@ -502,6 +478,7 @@
                     </select>
                 </div>
 
+                <!-- PAINEL DE TRANSFERÊNCIA -->
                 <div id="container-transferencia-suite" class="hidden bg-purple-50 border-2 border-purple-300 p-3.5 rounded-xl space-y-2 text-xs text-purple-950">
                     <div class="flex items-center gap-2 font-bold text-purple-900">
                         <i class="fa-solid fa-arrows-rotate text-sm"></i>
@@ -543,6 +520,7 @@
                     <p class="text-[11px] text-red-700 leading-tight">O saldo devedor foi preenchido automaticamente como valor mínimo para quitar a estadia.</p>
                 </div>
 
+                <!-- RESUMO DINÂMICO -->
                 <div id="resumo-dinamico-container" class="bg-blue-50 border border-blue-200 p-3 rounded-xl space-y-1 text-xs text-blue-900">
                     <div class="flex justify-between">
                         <span>Qtd. Diárias Calculadas:</span>
@@ -560,8 +538,11 @@
                     </div>
                 </div>
 
+                <!-- CAMPOS DE DADOS DO HÓSPEDE E ENDEREÇO -->
                 <div id="campos-hospede-container" class="space-y-3 transition-all">
                     <div class="grid grid-cols-1 gap-2.5">
+                        
+                        <!-- BUSCA POR CPF -->
                         <div>
                             <label id="lbl-cpf-hospede" class="block text-xs font-bold text-gray-700 mb-1">
                                 CPF <span id="tag-obrigatorio-cpf" class="text-red-600 hidden">* (Obrigatório)</span>
@@ -577,6 +558,7 @@
                             </span>
                         </div>
 
+                        <!-- NOME E WHATSAPP -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <div>
                                 <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1">Nome do Hóspede *</label>
@@ -588,6 +570,7 @@
                             </div>
                         </div>
 
+                        <!-- E-MAIL E RG -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <div>
                                 <label class="block text-[11px] font-bold text-gray-600 uppercase mb-1">E-mail</label>
@@ -599,6 +582,7 @@
                             </div>
                         </div>
 
+                        <!-- BLOCO ESTRUTURADO DE ENDEREÇO -->
                         <div class="bg-gray-50/90 p-3.5 rounded-2xl border border-gray-200 space-y-2.5">
                             <div class="flex items-center justify-between">
                                 <span class="text-[11px] font-extrabold text-blue-900 uppercase tracking-wider flex items-center gap-1.5">
@@ -650,6 +634,7 @@
                             </div>
                         </div>
 
+                        <!-- ANEXAR DOCUMENTO / CNH / RG (OPCIONAL) -->
                         <div class="bg-blue-50/70 p-3.5 rounded-2xl border border-blue-200 space-y-1.5">
                             <label class="block text-[11px] font-extrabold text-blue-900 uppercase flex items-center justify-between">
                                 <span class="flex items-center gap-1.5">
@@ -662,8 +647,10 @@
                             <input type="file" id="edit-arquivo-documento" accept="image/*,.pdf" class="w-full text-xs text-gray-600 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
                             <p class="text-[10px] text-gray-500">Facilita a conferência e agiliza seu check-in na chegada.</p>
                         </div>
+
                     </div>
 
+                    <!-- OCUPANTES E PET -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Adultos</label>
@@ -687,6 +674,7 @@
                         <div id="lista-idades-criancas" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
                     </div>
 
+                    <!-- DATAS DE CHECK-IN E CHECK-OUT -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1">Data de Check-in</label>
@@ -703,6 +691,7 @@
                         <span id="texto-diaria-minima-modal">A pousada exige um período mínimo de diárias.</span>
                     </div>
 
+                    <!-- BLOCO DE PAGAMENTO -->
                     <div id="bloco-pagamento-modal" class="pt-2 space-y-2">
                         <div>
                             <label id="lbl-valor-sinal" class="block text-xs font-bold text-emerald-700 mb-1">Registrar Novo Pagamento / Sinal (R$)</label>
@@ -832,14 +821,14 @@
         const pousadaIdUrl = paramsUrl.get('pousada_id');
         const temSessaoMaster = localStorage.getItem('supabase_master_admin_session');
 
-        let supabaseClient;
-        if (temSessaoMaster) {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-                auth: { storageKey: 'supabase_master_admin_session' }
-            });
-        } else {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        }
+    let supabaseClient;
+    if (temSessaoMaster) {
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+            auth: { storageKey: 'supabase_master_admin_session' }
+        });
+    } else {
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    }
 
         let usuarioIdAtual = null;
         let cargoUsuarioAtual = 'dono';
@@ -854,7 +843,6 @@
         let tarifasEspeciaisGlobaisCache = [];
         let camposLimposParaNovaReserva = false;
         let pousadaAceitaPetCache = false;
-        let comunicadoAtualExibidoId = null;
 
         const PALETA_SUITES = [
             { nome: 'indigo', border: 'border-indigo-300', borderHover: 'hover:border-indigo-500', borderActive: 'border-indigo-600', bgLight: 'bg-indigo-50/60', bgActive: 'bg-indigo-100', iconBg: 'bg-indigo-100', iconText: 'text-indigo-700', badgeBg: 'bg-indigo-600', textGroupHover: 'group-hover:text-indigo-700', barBg: 'bg-indigo-500' },
@@ -1041,8 +1029,7 @@
             if (chave === 'limpeza') return cargoUsuarioAtual === 'limpeza';
             return false;
         }
-
-        async function protegerPagina() {
+async function protegerPagina() {
             const { data: { session }, error } = await supabaseClient.auth.getSession();
             if (error || !session) {
                 window.location.href = 'index.html';
@@ -1609,75 +1596,6 @@
             });
         }
 
-        // =========================================================================
-        // RECEPTOR DE COMUNICADOS & BROADCAST DO SISTEMA (NOVO & ISOLADO)
-        // =========================================================================
-        async function verificarComunicadosSistema() {
-            if (!usuarioIdAtual) return;
-            try {
-                const { data: comunicados, error } = await supabaseClient
-                    .from('avisos_sistema')
-                    .select('*')
-                    .eq('ativo', true)
-                    .or(`pousada_id.is.null,pousada_id.eq.${usuarioIdAtual}`)
-                    .order('criado_em', { ascending: false })
-                    .limit(1);
-
-                if (error || !comunicados || comunicados.length === 0) return;
-
-                const aviso = comunicados[0];
-                const jaVisto = sessionStorage.getItem('comunicado_visto_' + aviso.id);
-                if (jaVisto) return;
-
-                comunicadoAtualExibidoId = aviso.id;
-
-                const modal = document.getElementById('modal-comunicado-sistema');
-                const titEl = document.getElementById('comunicado-titulo');
-                const corpoEl = document.getElementById('comunicado-corpo-box');
-                const dataEl = document.getElementById('comunicado-data-emissao');
-                const badgeOrigem = document.getElementById('comunicado-badge-origem');
-                const iconeBg = document.getElementById('comunicado-icone-bg');
-                const icone = document.getElementById('comunicado-icone');
-
-                titEl.innerText = aviso.titulo;
-                corpoEl.innerText = aviso.mensagem;
-                dataEl.innerText = new Date(aviso.criado_em).toLocaleDateString('pt-BR');
-
-                if (aviso.pousada_id) {
-                    badgeOrigem.className = "px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider bg-purple-100 text-purple-800 border border-purple-200";
-                    badgeOrigem.innerText = "Mensagem Exclusiva da Administração";
-                } else {
-                    badgeOrigem.className = "px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider bg-blue-100 text-blue-800 border border-blue-200";
-                    badgeOrigem.innerText = "Comunicado Geral da Plataforma";
-                }
-
-                if (aviso.tipo === 'urgente') {
-                    iconeBg.className = "w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center text-xl shrink-0 shadow-2xs";
-                    icone.className = "fa-solid fa-screwdriver-wrench";
-                } else if (aviso.tipo === 'alerta') {
-                    iconeBg.className = "w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-xl shrink-0 shadow-2xs";
-                    icone.className = "fa-solid fa-triangle-exclamation";
-                } else if (aviso.tipo === 'sucesso') {
-                    iconeBg.className = "w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-xl shrink-0 shadow-2xs";
-                    icone.className = "fa-solid fa-star";
-                } else {
-                    iconeBg.className = "w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-xl shrink-0 shadow-2xs";
-                    icone.className = "fa-solid fa-bullhorn";
-                }
-
-                modal.classList.remove('hidden');
-            } catch(e) {
-                console.warn("Aviso comunicado não impeditivo:", e);
-            }
-        }
-
-        function fecharModalComunicado() {
-            if (comunicadoAtualExibidoId) {
-                sessionStorage.setItem('comunicado_visto_' + comunicadoAtualExibidoId, 'true');
-            }
-            document.getElementById('modal-comunicado-sistema')?.classList.add('hidden');
-        }
-
         function atualizarRadarEKPIs() {
             const hojeStr = new Date().toLocaleDateString('sv-SE');
             const [anoAtual, mesAtual] = hojeStr.split('-');
@@ -1952,7 +1870,6 @@
             }
 
             await verificarReservasPendentesDashboard();
-            await verificarComunicadosSistema(); // DISPARO SEGURO DO COMUNICADO
             atualizarRadarEKPIs();
             renderizarSeletorSuitesTopo();
 
@@ -3046,7 +2963,8 @@
 
             let valorTotalCalculado = 0;
             try {
-                const { data: valorCalculado } = await supabaseClient.rpc('calcular_total_reserva', { 
+                const { data: valorCalculado } = await supabase
+Client.rpc('calcular_total_reserva', { 
                     p_suite_id: suiteId, 
                     p_checkin: checkinVal, 
                     p_checkout: checkoutVal,
@@ -3123,6 +3041,7 @@
             });
             const idadesStr = idadesArr.join(',');
 
+            // SE NÃO HOUVER DATAS, MANTÉM ZERADO
             if (!checkinStr || !checkoutStr) {
                 document.getElementById('modal-qtd-diarias').innerText = `0 diária(s)`;
                 if (temPermissao('financeiro')) {
@@ -3147,6 +3066,7 @@
             const avisoDiariaMinEl = document.getElementById('aviso-diaria-minima-modal');
             const textoDiariaMinEl = document.getElementById('texto-diaria-minima-modal');
             if (avisoDiariaMinEl && textoDiariaMinEl) {
+                // Em checkout antecipado não se bloqueia por diária mínima
                 if (statusAtualModal !== 'Checkout' && diariaMinimaPousadaCache > 1 && qtdDiarias < diariaMinimaPousadaCache) {
                     textoDiariaMinEl.innerHTML = `A pousada exige no mínimo <strong>${diariaMinimaPousadaCache} diária(s)</strong>. Selecionado: <strong>${qtdDiarias} diária(s)</strong>.`;
                     avisoDiariaMinEl.className = "bg-red-50 border border-red-300 p-2.5 rounded-xl text-xs text-red-900 font-bold flex items-center gap-2";
@@ -3185,6 +3105,7 @@
                     totalPago = pags.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
                 }
 
+                // APURAÇÃO DE CRÉDITO OU SALDO DEVEDOR
                 const saldo = valorTotal - totalPago;
                 const elSaldo = document.getElementById('modal-saldo-restante');
                 if (elSaldo) {
@@ -3200,12 +3121,14 @@
                     }
                 }
 
+                // ADAPTAÇÃO DA CAIXA DE CHECKOUT (SALDO OU CRÉDITO)
                 if (statusAtualModal === 'Checkout') {
                     const containerCheckout = document.getElementById('container-checkout-financeiro');
                     const lblValorSinal = document.getElementById('lbl-valor-sinal');
                     const elSinal = document.getElementById('edit-valor-sinal');
 
                     if (saldo < 0) {
+                        // CRÉDITO / REEMBOLSO AO HÓSPEDE
                         const credito = Math.abs(saldo);
                         if (containerCheckout) {
                             containerCheckout.className = "bg-emerald-50 border-2 border-emerald-300 p-4 rounded-xl space-y-2";
@@ -3225,6 +3148,7 @@
                         }
                         if (elSinal) elSinal.value = '0.00';
                     } else if (saldo > 0) {
+                        // SALDO DEVEDOR A COBRAR
                         if (containerCheckout) {
                             containerCheckout.className = "bg-red-50 border-2 border-red-300 p-4 rounded-xl space-y-2";
                             containerCheckout.innerHTML = `
@@ -3241,6 +3165,7 @@
                         }
                         if (elSinal) elSinal.value = saldo.toFixed(2);
                     } else {
+                        // ESTADIA QUITADA
                         if (containerCheckout) {
                             containerCheckout.className = "bg-blue-50 border border-blue-200 p-4 rounded-xl space-y-1";
                             containerCheckout.innerHTML = `
@@ -3342,11 +3267,13 @@
                 containerCampos.classList.remove('opacity-50');
             }
 
+            // AJUSTE AUTOMÁTICO DE DATA AO FAZER CHECKOUT
             if (status === 'Checkout') {
                 const hojeStr = new Date().toLocaleDateString('sv-SE');
                 const checkinInput = document.getElementById('edit-checkin');
                 const checkoutInput = document.getElementById('edit-checkout');
 
+                // Se a saída contratada for futura, antecipa para hoje (com no mínimo 1 diária)
                 if (checkoutInput.value > hojeStr) {
                     if (checkinInput.value >= hojeStr) {
                         checkoutInput.value = somarDiasData(checkinInput.value, 1);
@@ -3477,6 +3404,7 @@
                 }
             }
 
+            // Em Checkout, só obriga pagamento se de fato houver saldo devedor
             if (status === 'Checkout' && temPermissao('financeiro')) {
                 const saldoDevedorMinimo = await calcularSaldoDevedorReservaAtual();
                 if (saldoDevedorMinimo > 0 && (campoSinalStr === '' || isNaN(valorSinalInformado) || valorSinalInformado < saldoDevedorMinimo)) {
@@ -3542,8 +3470,10 @@
             if (urlDocumentoAnexo) {
                 dadosReserva.documento_url = urlDocumentoAnexo;
             }
+ 
 
-            const houveTransferencia = (reservaIdEditada && suiteIdOriginal && suiteId !== suiteIdOriginal);
+
+const houveTransferencia = (reservaIdEditada && suiteIdOriginal && suiteId !== suiteIdOriginal);
             if (houveTransferencia) {
                 const motivoTexto = (document.getElementById('edit-motivo-transferencia')?.value || 'TRANSFERÊNCIA DE ACOMODAÇÃO').trim().toUpperCase();
                 const suiteOrigemObj = suitesGlobaisCache.find(s => s.id === suiteIdOriginal);
@@ -3557,11 +3487,14 @@
                 dadosReserva.motivo_transferencia = motivoTexto;
                 dadosReserva.transferido_por = usuarioSessaoRealId;
 
+                // Registra o log cumulativo na observação para nunca perder trocas anteriores:
                 const logLinha = `[TRANSFERÊNCIA em ${carimboDataHora}]: ${nomeOrigem} ➔ ${nomeDestino} (Motivo: ${motivoTexto})`;
                 dadosReserva.observacao = dadosReserva.observacao && dadosReserva.observacao.trim() !== ''
                     ? `${dadosReserva.observacao} | ${logLinha}`
                     : logLinha;
             }
+
+
 
             let valorTotalCalculado = 0;
             try {
@@ -3582,6 +3515,7 @@
                 console.error("Erro RPC cálculo salvamento:", err);
             }
 
+            // REGISTRO DETALHADO DO CHECKOUT ANTECIPADO E CRÉDITO PARA O RELATÓRIO
             if (status === 'Checkout') {
                 const pags = pagamentosGlobaisCache.filter(p => p.reserva_id === reservaIdEditada);
                 const totalPago = pags.reduce((acc, curr) => acc + Number(curr.valor_pago || 0), 0);
@@ -3649,6 +3583,7 @@
                 }
             }
 
+            // PERSISTÊNCIA NO CRM DE HÓSPEDES (TABELA HOSPEDES)
             if (cpfLimpo.length === 11 && dadosReserva.hospede_nome) {
                 try {
                     const dadosHospede = {
@@ -3853,6 +3788,7 @@
                 return;
             }
 
+            // SE FOR CHECKOUT (FINALIZAR ESTADIA), EXIBE CONFERÊNCIA DETALHADA
             if (status === 'Checkout') {
                 const rAtual = reservasGlobaisCache.find(r => r.id === reservaIdEditada);
                 const checkinConsumido = document.getElementById('edit-checkin').value;
@@ -4037,8 +3973,7 @@
                 'modal-recusa-profissional',
                 'modal-tarifa-especial',
                 'modal-calendario-suite',
-                'modal-confirmacao-nova-reserva',
-                'modal-comunicado-sistema'
+                'modal-confirmacao-nova-reserva'
             ];
             return modais.some(id => {
                 const el = document.getElementById(id);
