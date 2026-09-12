@@ -3470,14 +3470,31 @@ Client.rpc('calcular_total_reserva', {
             if (urlDocumentoAnexo) {
                 dadosReserva.documento_url = urlDocumentoAnexo;
             }
+ 
 
-            const houveTransferencia = (reservaIdEditada && suiteIdOriginal && suiteId !== suiteIdOriginal);
+
+const houveTransferencia = (reservaIdEditada && suiteIdOriginal && suiteId !== suiteIdOriginal);
             if (houveTransferencia) {
+                const motivoTexto = (document.getElementById('edit-motivo-transferencia')?.value || 'TRANSFERÊNCIA DE ACOMODAÇÃO').trim().toUpperCase();
+                const suiteOrigemObj = suitesGlobaisCache.find(s => s.id === suiteIdOriginal);
+                const suiteDestinoObj = suitesGlobaisCache.find(s => s.id === suiteId);
+                const nomeOrigem = suiteOrigemObj ? suiteOrigemObj.nome : 'QUARTO ANTERIOR';
+                const nomeDestino = suiteDestinoObj ? suiteDestinoObj.nome : 'NOVO QUARTO';
+                const carimboDataHora = new Date().toLocaleString('pt-BR');
+
                 dadosReserva.suite_origem_id = suiteIdOriginal;
                 dadosReserva.transferido_em = new Date().toISOString();
-                dadosReserva.motivo_transferencia = (document.getElementById('edit-motivo-transferencia')?.value || 'TRANSFERÊNCIA DE ACOMODAÇÃO').trim().toUpperCase();
+                dadosReserva.motivo_transferencia = motivoTexto;
                 dadosReserva.transferido_por = usuarioSessaoRealId;
+
+                // Registra o log cumulativo na observação para nunca perder trocas anteriores:
+                const logLinha = `[TRANSFERÊNCIA em ${carimboDataHora}]: ${nomeOrigem} ➔ ${nomeDestino} (Motivo: ${motivoTexto})`;
+                dadosReserva.observacao = dadosReserva.observacao && dadosReserva.observacao.trim() !== ''
+                    ? `${dadosReserva.observacao} | ${logLinha}`
+                    : logLinha;
             }
+
+
 
             let valorTotalCalculado = 0;
             try {
